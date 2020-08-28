@@ -1,0 +1,2560 @@
+openapi: 3.0.1
+info:
+  title: Limits
+  description: |
+    # Limits presentation API Documentation
+  license:
+    name: Copyright Backbase 2020
+    url: https://www.backbase.com
+  version: 3.2.46
+servers:
+- url: /limits-presentation-service/service-api/v2
+  description: The server
+tags:
+- name: limits
+paths:
+  /limits:
+    summary: LimitsService
+    description: Limits related to the particular context
+    post:
+      tags:
+      - limits
+      summary: Create a new limit.
+      description: Create a new limit
+      operationId: postLimits
+      requestBody:
+        description: Create a new limit
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLimitRequest'
+      responses:
+        "201":
+          description: New limit created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateLimitResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitsServicePostResponseBody'
+        "422":
+          description: UnprocessableEntity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitsServicePostResponseBody'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+      x-BbAccessControl-resource: Limits
+      x-BbAccessControl-function: Manage Limits, Manage Shadow Limits
+      x-BbAccessControl-privilege: create
+  /limits/{uuid}:
+    summary: limitByUuid
+    description: Limits by its uuid
+    put:
+      tags:
+      - limits
+      summary: Update a specific limit.
+      description: Update a specific limit
+      operationId: putUuidByUuid
+      requestBody:
+        description: Update a specific limit
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLimitRequest'
+      responses:
+        "200":
+          description: Limit updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateLimitResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+        "404":
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+              examples:
+                example:
+                  value:
+                    message: Resource not found.
+                    errors:
+                    - message: 'Unable to find the resource requested resource: {resource}.'
+                      key: common.api.resource
+                      context:
+                        resource: aResource
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "422":
+          description: UnprocessableEntity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitByUuidPutResponseBody'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+      x-BbAccessControl-resource: Limits
+      x-BbAccessControl-function: Manage Limits, Manage Shadow Limits
+      x-BbAccessControl-privilege: edit
+    parameters:
+    - name: uuid
+      in: path
+      description: No description available
+      required: true
+      schema:
+        type: string
+      examples:
+        example:
+          summary: example
+  /limits/periodic/periodic-check:
+    summary: PeriodicLimitsCheck
+    description: Periodic limits check api endpoint
+    post:
+      tags:
+      - limits
+      summary: Periodic limits check request.
+      description: |-
+        Periodic limits check request
+        ## Deprecated
+        * **Deprecated from:** DBS 2.17.1
+        * **Removed from:** DBS 2.19.0
+        * **Reason:** Endpoints is redundant.
+
+        ### Migration Information
+         Remove check periodic limit endpoint. No replacement planned.
+      operationId: postPeriodiccheck
+      requestBody:
+        description: Periodic limits check request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckPeriodicPayload'
+      responses:
+        "200":
+          description: CheckResponse
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeriodicBreachReport'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "422":
+          description: UnprocessableEntity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeriodicLimitsCheckPostResponseBody'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+      deprecated: true
+      x-BbApiDeprecation-deprecatedFromVersion: DBS 2.17.1
+      x-BbApiDeprecation-removedFromVersion: DBS 2.19.0
+      x-BbApiDeprecation-reason: Endpoints is redundant.
+      x-BbApiDeprecation-description: Remove check periodic limit endpoint. No replacement
+        planned.
+  /limits/periodic/soft-check:
+    summary: PeriodicLimitSoftCheck
+    description: Check whether limits can be created or updated
+    post:
+      tags:
+      - limits
+      summary: Periodic limit soft check request.
+      description: Periodic limit soft check request
+      operationId: postSoftcheck
+      requestBody:
+        description: Periodic limit soft check request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePeriodicLimitRequest'
+      responses:
+        "200":
+          description: Periodic limit pass all soft checks
+          content: {}
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "422":
+          description: UnprocessableEntity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PeriodicLimitSoftCheckPostResponseBody'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+  /limits/transactional/transactional-check:
+    summary: TransactionalLimitsCheck
+    description: Transactional limits check api endpoint
+    post:
+      tags:
+      - limits
+      summary: Transactional limits check request.
+      description: |-
+        Transactional limits check request
+        ## Deprecated
+        * **Deprecated from:** DBS 2.17.1
+        * **Removed from:** DBS 2.19.0
+        * **Reason:** Endpoints is redundant.
+
+        ### Migration Information
+         Remove check transactional limit endpoint. No replacement planned.
+      operationId: postTransactionalcheck
+      requestBody:
+        description: Transactional limits check request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckTransactionalPayload'
+      responses:
+        "200":
+          description: CheckResponse
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionalBreachReport'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "422":
+          description: UnprocessableEntity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionalLimitsCheckPostResponseBody'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+      deprecated: true
+      x-BbApiDeprecation-deprecatedFromVersion: DBS 2.17.1
+      x-BbApiDeprecation-removedFromVersion: DBS 2.19.0
+      x-BbApiDeprecation-reason: Endpoints is redundant.
+      x-BbApiDeprecation-description: Remove check transactional limit endpoint. No
+        replacement planned.
+  /limits/transactional/soft-check:
+    summary: TransactionalLimitSoftCheck
+    description: Check whether limits can be created or updated
+    post:
+      tags:
+      - limits
+      summary: Transactional limit soft check request.
+      description: Transactional limit soft check request
+      operationId: postSoftcheckWithCreateTransactionalLimitRequestpostTransactionalLimitSoftCheck
+      requestBody:
+        description: Transactional limit soft check request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransactionalLimitRequest'
+      responses:
+        "200":
+          description: Transactional limit pass all soft checks
+          content: {}
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "422":
+          description: UnprocessableEntity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionalLimitSoftCheckPostResponseBody'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+  /limits/check:
+    summary: LimitsCheck
+    description: Limits check api endpoint
+    post:
+      tags:
+      - limits
+      summary: Limits check request.
+      description: Limits check request
+      operationId: postCheck
+      requestBody:
+        description: Limits check request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckPayload'
+      responses:
+        "200":
+          description: CheckResponse
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckBreachReport'
+        "400":
+          description: |
+            BadRequest.
+            This exception can be thrown in case of Error while retrieving function or function group
+            due to exception in entitlements service, if service cannot get list of legal entities for arrangement.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitsCheckPostResponseBody'
+              examples:
+                example:
+                  value:
+                    message: Error while retrieving Function.
+        "404":
+          description: |
+            NotFound.
+            This exception can be thrown in case of function or funсtion group not found in entitlements,
+            if no suitable user data group related to the arrangement.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitsCheckPostResponseBody'
+              examples:
+                example:
+                  value:
+                    message: Function Group not found
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitsCheckPostResponseBody'
+        "422":
+          description: UnprocessableEntity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitsCheckPostResponseBody'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+  /limits/retrieval:
+    summary: LimitsRetrieval
+    description: Filtered list of limits related to the particular context
+    post:
+      tags:
+      - limits
+      summary: Get Limit constraints for a given context(s).
+      description: Get Limit constraints for a given context(s)
+      operationId: postRetrieval
+      requestBody:
+        description: Get Limit constraints for a given context(s)
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListLimitsRequest'
+      responses:
+        "200":
+          description: No description available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListLimitsResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "422":
+          description: UnprocessableEntity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LimitsRetrievalPostResponseBody'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+      x-BbAccessControl-resource: Limits
+      x-BbAccessControl-function: Manage Limits, Manage Shadow Limits
+      x-BbAccessControl-privilege: view
+  /limits/limitablePrivileges:
+    summary: LimitablePrivileges
+    description: Deprecated. List of Privileges on which Limit can set
+    get:
+      tags:
+      - limits
+      summary: Get List of Privileges on which Limit can set.
+      description: |-
+        Get List of Privileges on which Limit can set
+        ## Deprecated
+        * **Deprecated from:** DBS 2.14.0
+        * **Removed from:** DBS 2.16.0
+        * **Reason:** Removing configuration of limitable privileges (see DBSK-2546). Endpoint is not used
+
+        ### Migration Information
+         No replacement planned. This endpoint is not used.
+      operationId: getLimitablePrivileges
+      responses:
+        "200":
+          description: No description available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListLimitablePrivilegesResponse'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+      deprecated: true
+      x-BbApiDeprecation-deprecatedFromVersion: DBS 2.14.0
+      x-BbApiDeprecation-removedFromVersion: DBS 2.16.0
+      x-BbApiDeprecation-reason: Removing configuration of limitable privileges (see
+        DBSK-2546). Endpoint is not used
+      x-BbApiDeprecation-description: No replacement planned. This endpoint is not
+        used.
+  /limits/periods:
+    summary: SupportedPeriods
+    description: List of configured periods for setting up periodic limits
+    get:
+      tags:
+      - limits
+      summary: List of configured periods for setting up periodic limits.
+      description: List of configured periods for setting up periodic limits
+      operationId: getPeriods
+      responses:
+        "200":
+          description: No description available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSupportedPeriodsResponse'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+  /limits/rollback:
+    summary: ConsumptionRollback
+    description: Rollback of the particular consumption
+    post:
+      tags:
+      - limits
+      summary: Rollback the consumption.
+      description: Rollback the consumption
+      operationId: postRollback
+      requestBody:
+        description: Rollback the consumption
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsumptionRollback'
+      responses:
+        "200":
+          description: The consumption has been rolled back successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RollbackReport'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "404":
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+              examples:
+                example:
+                  value:
+                    message: Resource not found.
+                    errors:
+                    - message: 'Unable to find the resource requested resource: {resource}.'
+                      key: common.api.resource
+                      context:
+                        resource: aResource
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsumptionRollbackPostResponseBody'
+        "422":
+          description: UnprocessableEntity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsumptionRollbackPostResponseBody'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+  /limits/{paymentRef}/breachreport:
+    summary: breachableOperationByPaymentRef
+    description: Get breach report by payment reference
+    get:
+      tags:
+      - limits
+      summary: Get breach reports by payment reference.
+      description: Get breach reports by payment reference
+      operationId: getBreachreportByPaymentRef
+      responses:
+        "200":
+          description: No description available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetBreachReportResponse'
+        "404":
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+              examples:
+                example:
+                  value:
+                    message: Resource not found.
+                    errors:
+                    - message: 'Unable to find the resource requested resource: {resource}.'
+                      key: common.api.resource
+                      context:
+                        resource: aResource
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+    parameters:
+    - name: paymentRef
+      in: path
+      description: No description available
+      required: true
+      schema:
+        type: string
+      examples:
+        example:
+          summary: example
+  /limits/currency:
+    summary: Currency
+    description: Get supported currencies list
+    get:
+      tags:
+      - limits
+      summary: Get supported currencies list.
+      description: Get supported currencies list
+      operationId: getCurrency
+      responses:
+        "200":
+          description: No description available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSupportedCurrenciesResponse'
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+  /limits/consumptions:
+    summary: Current Limits Consumptions Retrieval
+    description: Get current limit consumptions by a logical key list
+    post:
+      tags:
+      - limits
+      summary: Get Limit consumptions for each period.
+      description: Get Limit consumptions for each period
+      operationId: postConsumptions
+      requestBody:
+        description: Get Limit consumptions for each period
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListLimitsConsumptionsRequest'
+      responses:
+        "200":
+          description: No description available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListLimitsConsumptionsResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              examples:
+                example:
+                  value:
+                    message: Bad Request
+                    errors:
+                    - message: Value Exceeded. Must be between {min} and {max}.
+                      key: common.api.shoesize
+                      context:
+                        max: "50"
+                        min: "1"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenError'
+              examples:
+                example:
+                  value:
+                    message: Access to requested resource denied.
+                    errors:
+                    - message: Resource access denied due to an insufficient user
+                        quota of {quota}.
+                      key: common.api.quota
+                      context:
+                        quota: someQuota
+        "422":
+          description: UnprocessableEntity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentLimitsConsumptionsRetrievalPostResponseBody'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+              examples:
+                example:
+                  value:
+                    message: Description of error
+      x-BbAccessControl-resource: Limits
+      x-BbAccessControl-function: Manage Limits, Manage Shadow Limits
+      x-BbAccessControl-privilege: view
+components:
+  schemas:
+    Amount:
+      type: string
+      x-java-type: java.math.BigDecimal
+    AmountRequiredTransactionalLimitsBound:
+      allOf:
+      - $ref: '#/components/schemas/TransactionalLimitsBound'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.AmountRequiredTransactionalLimitsBound
+    ApprovalId:
+      type: string
+      description: ID of an approval entry. Has value for limits that are under approval
+        and in PENDING state. Null for any other state or when approval integration
+        disabled.
+    ApprovalStatus:
+      type: string
+      description: Approval status of created limit. If `EFFECTIVE` then limit does
+        not need to be approved and is immediately effective.
+      enum:
+      - EFFECTIVE
+      - PENDING
+      - APPROVED
+      - REJECTED
+      - CANCELLED
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.approval.ApprovalStatus
+    BadRequestError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+      example:
+        message: Error while retrieving Function.
+      x-java-type: com.backbase.buildingblocks.presentation.errors.BadRequestException
+    BaseLimitsCheckPostRequestBody:
+      required:
+      - arrangementId
+      properties:
+        arrangementId:
+          minLength: 1
+          type: string
+          description: Arrangement ID
+        serviceAgreementId:
+          minLength: 1
+          type: string
+          description: Service Agreement ID, in which the operation has been performed
+        intraCompanyPayment:
+          type: boolean
+          description: Indicates that this is a intra-company payment and limits consumption
+            should be skipped
+      allOf:
+      - $ref: '#/components/schemas/Payment'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.BaseLimitsCheckPostRequestBody
+    BaseLimitsRetrievalPostRequestBody:
+      required:
+      - limitsRetrievalOptions
+      type: object
+      properties:
+        limitsRetrievalOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/LimitKey'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.BaseLimitsRetrievalPostRequestBody
+    BbAccessControl:
+      required:
+      - function
+      - privilege
+      - resource
+      type: object
+      properties:
+        resource:
+          type: string
+          description: Resource being protected, e.g. 'User'
+        function:
+          type: string
+          description: Business function, e.g. 'Manage Users'
+        privilege:
+          type: string
+          description: The privilege required, e.g. 'view'
+    BbApiDeprecation:
+      required:
+      - deprecatedFromVersion
+      - description
+      - reason
+      - removedFromVersion
+      type: object
+      properties:
+        deprecatedFromVersion:
+          type: string
+          description: Version of the product from which the endpoint has been deprecated
+            and should no longer be used
+          deprecated: true
+        removedFromVersion:
+          type: string
+          description: Version of the product from which the API endpoint will be
+            removed
+        reason:
+          type: string
+          description: The reason the API endpoint was deprecated
+          deprecated: true
+        description:
+          type: string
+          description: Any further information, e.g. migration information
+    BoundedLimitItem:
+      required:
+      - uuid
+      properties:
+        uuid:
+          type: string
+          description: Limit business identifier
+        alias:
+          $ref: '#/components/schemas/LimitAlias'
+        periodic-limits-bounds:
+          $ref: '#/components/schemas/PeriodicLimitsBounds'
+        transactional-limits-bound:
+          $ref: '#/components/schemas/TransactionalLimitsBound'
+      allOf:
+      - $ref: '#/components/schemas/LimitData'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.BoundedLimitItem
+    BreachableOperationResponse:
+      required:
+      - breachReport
+      - checkTime
+      - consumption
+      - matchedLimits
+      - payment
+      type: object
+      properties:
+        payment:
+          $ref: '#/components/schemas/Payment'
+        checkTime:
+          type: string
+          format: date-time
+        matchedLimits:
+          type: integer
+          description: number of limits applicable for incoming payment
+          format: int32
+        consumption:
+          type: array
+          items:
+            type: object
+            properties:
+              limitId:
+                type: string
+                description: Identifier of consumed limit
+              limitCcy:
+                type: string
+                description: Currency of a consumed limit
+              consumedAmount:
+                $ref: '#/components/schemas/Amount'
+              consumedOn:
+                type: string
+                description: Consumption time
+                format: date-time
+              state:
+                type: string
+                description: Type of consumption. Can be either actual consumption
+                  (positive amount), or rollback (negative amount)
+                enum:
+                - CONSUMED
+                - ROLLED_BACK
+        breachReport:
+          type: array
+          items:
+            required:
+            - breachInfo
+            type: object
+            properties:
+              alias:
+                $ref: '#/components/schemas/LimitAlias'
+              limitedEntity:
+                type: array
+                description: When not set, user-BBID must be set
+                items:
+                  $ref: '#/components/schemas/EntityDescription'
+              shadow:
+                type: boolean
+                description: Shadow limit flag. Applicable for certain entity-types
+              currency:
+                type: string
+                description: Currency code
+              user-BBID:
+                type: string
+                description: BBID of the user for whom the personal limit is assigned
+              breachInfo:
+                type: array
+                description: List of breached periodic limits related to a particular
+                  limitable entity
+                items:
+                  $ref: '#/components/schemas/BreachInfo'
+        globalBreachReport:
+          type: array
+          items:
+            required:
+            - breachInfo
+            - limitedEntity
+            type: object
+            properties:
+              alias:
+                type: string
+                description: Period unique code
+              currency:
+                type: string
+                description: Currency code
+              limitedEntity:
+                type: array
+                description: When not set, user-BBID must be set
+                items:
+                  $ref: '#/components/schemas/EntityDescription'
+              breachInfo:
+                type: array
+                description: List of breached periodic limits related to a particular
+                  limitable entity
+                items:
+                  $ref: '#/components/schemas/BreachInfo'
+            x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.GlobalBreachReport
+        consumptionUuid:
+          type: string
+          description: Uuid for executing partial rollback
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.BreachableOperationResponse
+    BreachInfo:
+      required:
+      - breachType
+      - breachedLimitType
+      - currentThreshold
+      type: object
+      properties:
+        breachType:
+          type: string
+          enum:
+          - THRESHOLD
+          - CONSUMPTION
+        breachedLimitType:
+          type: string
+          enum:
+          - PERIODIC
+          - TRANSACTIONAL
+        timeframe:
+          $ref: '#/components/schemas/Timeframe'
+        currentConsumption:
+          $ref: '#/components/schemas/Amount'
+        currentThreshold:
+          $ref: '#/components/schemas/Amount'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.BreachInfo
+    CheckBreachReport:
+      example:
+        payment:
+          refNo: 4563-3474-34553-24556
+          user-BBID: 550e8400-e29b-41d4-a716-446655440000
+          amount: "599.99"
+          effectiveDate: 2017-01-31T12:12:12Z
+          currency: EUR
+          paymentType: Domestic Payments
+          state: NEW
+        matchedLimits: 1
+        consumption:
+        - limitId: 4563-3474-34553-24556
+          limitCcy: EUR
+          consumedAmount: "599.99"
+          consumedOn: 2017-01-31T12:12:12Z
+          state: CONSUMED
+        checkTime: 2017-01-31T12:12:12Z
+        breachReport:
+        - alias: Personal Service Agreement Limit
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Service Agreement
+            description: Kuhic, Gislason and Kemmer. SERVICE AGREEMENT
+          shadow: false
+          currency: EUR
+          user-BBID: oleksii
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: monthly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "9950.0"
+            currentThreshold: "10000.0"
+        - user-BBID: oleksii
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "500.0"
+            currentThreshold: "1000.0"
+        - alias: Common Job Profile Limit
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Function Access Group
+            description: Payments approvers
+          - ref: 1234567-12312-123123
+            type: Function
+            description: Domestic payments
+          - ref: Approve
+            type: Privilege
+            description: Approve
+          - ref: 1234567-12312-123123
+            type: Service Agreement
+            description: Kuhic, Gislason and Kemmer. SERVICE AGREEMENT
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+        - alias: ""
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Legal Entity
+            description: Kuhic, Gislason and Kemmer
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: quarterly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-03-31T23:59:59Z
+            currentConsumption: "99950.0"
+            currentThreshold: "100000.0"
+          - breachType: THRESHOLD
+            breachedLimitType: TRANSACTIONAL
+            currentThreshold: "499.9"
+        globalBreachReport:
+        - alias: Personal Global Limit
+          limitedEntity:
+          - type: USER
+          currency: EUR
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: monthly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "9950.0"
+            currentThreshold: "10000.0"
+        consumptionUuid: 1234-5678-9012-qwer
+      allOf:
+      - $ref: '#/components/schemas/BreachableOperationResponse'
+    CheckPayload:
+      example:
+        refNo: 4563-3474-34553-24556
+        arrangementId: 550e8400-e29b-41d4-a716-446655440000
+        serviceAgreementId: 23423423-74e4-4532-a716-534534513f54
+        user-BBID: 550e8400-e29b-41d4-a716-446655440000
+        amount: "599.99"
+        effectiveDate: 2017-01-31T12:12:12Z
+        currency: EUR
+        paymentType: Domestic Payments
+        state: NEW
+      allOf:
+      - $ref: '#/components/schemas/BaseLimitsCheckPostRequestBody'
+    CheckPeriodicPayload:
+      example:
+        refNo: 4563-3474-34553-24556
+        arrangementId: 550e8400-e29b-41d4-a716-446655440000
+        serviceAgreementId: 23423423-74e4-4532-a716-534534513f54
+        user-BBID: 550e8400-e29b-41d4-a716-446655440000
+        amount: "599.99"
+        effectiveDate: 2017-01-31T12:12:12Z
+        currency: EUR
+        paymentType: Domestic Payments
+        state: NEW
+      allOf:
+      - $ref: '#/components/schemas/BaseLimitsCheckPostRequestBody'
+    CheckTransactionalPayload:
+      example:
+        refNo: 4563-3474-34553-24556
+        arrangementId: 550e8400-e29b-41d4-a716-446655440000
+        serviceAgreementId: 23423423-74e4-4532-a716-534534513f54
+        user-BBID: 550e8400-e29b-41d4-a716-446655440000
+        amount: "599.99"
+        effectiveDate: 2017-01-31T12:12:12Z
+        currency: EUR
+        paymentType: Domestic Payments
+        state: NEW
+      allOf:
+      - $ref: '#/components/schemas/BaseLimitsCheckPostRequestBody'
+    ConsumptionRollback:
+      required:
+      - paymentRef
+      type: object
+      properties:
+        paymentRef:
+          type: string
+          description: The ref of the payment that is to be rolled back
+        consumptionUuid:
+          type: string
+          description: Uuid for executing partial rollback. Is mutually exclusive
+            with correctingAmount property
+        correctingAmount:
+          type: number
+          description: Correcting amount to rollback. Is mutually exclusive with consumption
+            UUID property
+      example:
+        paymentRef: PAYM-AAA-001
+        consumptionUuid: 1234-5678-9012-qwer
+        correctingAmount: 2.0
+    ConsumptionRollbackPostResponseBody:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+    CreateLimitRequest:
+      properties:
+        periodic-limits-bounds:
+          $ref: '#/components/schemas/PeriodicLimitsBounds'
+        transactional-limits-bound:
+          $ref: '#/components/schemas/TransactionalLimitsBound'
+      example:
+        user-BBID: uuid-user-id
+        entities:
+        - etype: LE
+          eref: 550e8400-e29b-41d4-a716-446655440000
+        currency: EUR
+        periodic-limits-bounds:
+          daily: "100.0"
+          weekly: "120.0"
+          monthly: "300.0"
+          quarterly: "600.0"
+          customPeriods:
+          - period: biweekly
+            amount: "100"
+        transactional-limits-bound:
+          amount: "100.0"
+        shadow: true
+      allOf:
+      - $ref: '#/components/schemas/LimitData'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.CreateLimitRequestBody
+    CreateLimitResponse:
+      required:
+      - uuid
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Identifier of created limit
+        approvalStatus:
+          $ref: '#/components/schemas/ApprovalStatus'
+      example:
+        uuid: 1234-1234-1312-5434
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.LimitsPostResponseBody
+    CreatePeriodicLimitRequest:
+      description: This object extends limit.json and not adds any custom fields.
+        This prevents the generation of the duplicate Java classes with underscore
+        (_) suffix
+      example:
+        entities:
+        - etype: LE
+          eref: 550e8400-e29b-41d4-a716-446655440000
+        - etype: SA
+          eref: e29b-41d4-a716-446655440000-550e8400
+        user-BBID: uuid-oleksii
+        currency: USD
+        periodic-limits-bounds:
+          daily: "100.0"
+          weekly: "120.0"
+          monthly: "300.0"
+          quarterly: "600.0"
+          customPeriods:
+          - period: biweekly
+            amount: "100"
+        shadow: false
+      allOf:
+      - $ref: '#/components/schemas/PeriodicLimitData'
+    CreateTransactionalLimitRequest:
+      description: This object extends limit.json and not adds any custom fields.
+        This prevents the generation of the duplicate Java classes with underscore
+        (_) suffix
+      example:
+        entities:
+        - etype: SA
+          eref: "42"
+        - etype: LE
+          eref: "27"
+        user-BBID: uuid-buistov
+        currency: EUR
+        transactional-limits-bound:
+          amount: "100"
+        shadow: false
+      allOf:
+      - $ref: '#/components/schemas/TransactionalLimitData'
+    CurrencyRegistryResponse:
+      type: object
+      properties:
+        defaultCurrency:
+          type: string
+          description: Default currency
+        allowedCurrencyList:
+          type: array
+          description: Supported Currency List
+          items:
+            type: string
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.CurrencyRegistryResponse
+    CurrentLimitsConsumptionsRetrievalPostResponseBody:
+      required:
+      - errorDetails
+      type: object
+      properties:
+        errorDetails:
+          $ref: '#/components/schemas/ErrorMessage'
+    CustomPeriod:
+      required:
+      - period
+      type: object
+      properties:
+        period:
+          type: string
+          description: Unique period name
+        amount:
+          $ref: '#/components/schemas/Amount'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.CustomPeriod
+    Entities:
+      type: array
+      items:
+        $ref: '#/components/schemas/Entity'
+    Entity:
+      required:
+      - eref
+      - etype
+      type: object
+      properties:
+        eref:
+          maxLength: 40
+          type: string
+          description: UUID of the referenced object for which the limit is assigned
+        etype:
+          maxLength: 16
+          minLength: 2
+          type: string
+          description: Type of the referenced object for which the limit is assigned
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.Entity
+    EntityDescription:
+      required:
+      - type
+      type: object
+      properties:
+        ref:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.EntityDescription
+    ErrorItem:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Default Message. Any further information.
+        key:
+          type: string
+          description: '{capability-name}.api.{api-key-name}. For generated validation
+            errors this is the path in the document the error resolves to. e.g. object
+            name + ''.'' + field'
+        context:
+          type: object
+          description: Context can be anything used to construct localised messages.
+          x-java-type: java.util.Map<String,String>
+      description: A validation error
+    ErrorMessage:
+      required:
+      - errorFields
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Description of the exception
+        errorFields:
+          type: array
+          description: Description of the error and the field that caused the error
+          items:
+            required:
+            - fieldName
+            - message
+            type: object
+            properties:
+              fieldName:
+                type: string
+                description: The name of the field that caused the error
+              message:
+                type: string
+                description: Description of the error in the field
+    Example:
+      type: string
+    ForbiddenError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+      x-java-type: com.backbase.buildingblocks.presentation.errors.ForbiddenException
+    GetBreachReportResponse:
+      type: array
+      example:
+      - payment:
+          refNo: 4563-3474-34553-24556
+          user-BBID: 550e8400-e29b-41d4-a716-446655440000
+          amount: "599.99"
+          effectiveDate: 2017-01-31T12:12:12Z
+          currency: EUR
+          paymentType: Domestic Payments
+          state: NEW
+        matchedLimits: 1
+        consumption:
+        - limitId: 4563-3474-34553-24556
+          limitCcy: EUR
+          consumedAmount: "599.99"
+          consumedOn: 2017-01-31T12:12:12Z
+          state: CONSUMED
+        checkTime: 2017-01-31T12:12:12Z
+        breachReport:
+        - alias: Personal Service Agreement Limit
+          user-BBID: oleksii
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Service Agreement
+            description: Kuhic, Gislason and Kemmer. SERVICE AGREEMENT
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: monthly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "9950.0"
+            currentThreshold: "10000.0"
+        - alias: Personal Limit
+          user-BBID: oleksii
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "500.0"
+            currentThreshold: "1000.0"
+        - alias: Common Job Profile Limit
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Function Access Group
+            description: Payments approvers
+          - ref: 1234567-12312-123123
+            type: Function
+            description: Domestic payments
+          - ref: Approve
+            type: Privilege
+            description: Approve
+          - ref: 1234567-12312-123123
+            type: Service Agreement
+            description: Kuhic, Gislason and Kemmer. SERVICE AGREEMENT
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+        - alias: ""
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Legal Entity
+            description: Kuhic, Gislason and Kemmer
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: quarterly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-03-31T23:59:59Z
+            currentConsumption: "99950.0"
+            currentThreshold: "100000.0"
+          - breachType: THRESHOLD
+            breachedLimitType: TRANSACTIONAL
+            currentThreshold: "499.9"
+        globalBreachReport:
+        - alias: Service Agreement Limit
+          currency: EUR
+          limitedEntity:
+          - type: Service Agreement
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: monthly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "9950.0"
+            currentThreshold: "10000.0"
+      items:
+        $ref: '#/components/schemas/BreachableOperationResponse'
+    InternalServerError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Further Information
+      description: Represents HTTP 500 Internal Server Error
+      x-java-type: com.backbase.buildingblocks.presentation.errors.InternalServerErrorException
+    LimitAlias:
+      maxLength: 42
+      type: string
+      description: Optional alias for a limit type. E.g. `Personal Service Agreement
+        Limit` for User+SA limit
+    LimitByUuidPutResponseBody:
+      required:
+      - errorDetails
+      type: object
+      properties:
+        errorDetails:
+          $ref: '#/components/schemas/ErrorMessage'
+    LimitConsumption:
+      required:
+      - checkTime
+      - consumptions
+      - limit
+      type: object
+      properties:
+        limit:
+          $ref: '#/components/schemas/BoundedLimitItem'
+        consumptions:
+          $ref: '#/components/schemas/PeriodicLimitsConsumptions'
+        checkTime:
+          type: string
+          format: date-time
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.LimitConsumption
+    LimitCurrency:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: Currency code
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.LimitCurrency
+    LimitData:
+      properties:
+        user-BBID:
+          maxLength: 36
+          type: string
+          description: BBID of the user for whom the personal limit is assigned
+        entities:
+          $ref: '#/components/schemas/Entities'
+        shadow:
+          type: boolean
+          description: Shadow limit flag. Applicable for certain entity-types
+      allOf:
+      - $ref: '#/components/schemas/LimitCurrency'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.LimitData
+    LimitKey:
+      type: object
+      properties:
+        user-BBID:
+          type: string
+          description: BBID of the user for whom the personal limit is assigned
+        shadow:
+          type: boolean
+          description: Shadow limit flag. Applicable for certain entity-types
+        lookupKeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entity'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.LimitKey
+    LimitsCheckPostResponseBody:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+      example:
+        message: Error while retrieving Function.
+      x-java-type: com.backbase.buildingblocks.presentation.errors.BadRequestException
+    LimitsRetrievalPostResponseBody:
+      required:
+      - errorDetails
+      type: object
+      properties:
+        errorDetails:
+          $ref: '#/components/schemas/ErrorMessage'
+    LimitsServicePostResponseBody:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+    ListLimitablePrivilegesResponse:
+      type: array
+      example:
+      - name: Create
+      - name: Approve
+      items:
+        required:
+        - name
+        type: object
+        properties:
+          name:
+            type: string
+    ListLimitsConsumptionsRequest:
+      example:
+        limitsRetrievalOptions:
+        - user-BBID: marvin-1
+          shadow: false
+          lookupKeys:
+          - etype: LE
+            eref: 550e8400-e29b-41d4-a716-446655440000
+        - user-BBID: marvin-2
+          shadow: true
+          lookupKeys:
+          - etype: SA
+            eref: 23423423-74e4-4532-a716-534534513f54
+        - user-BBID: marvin-3
+          shadow: false
+          lookupKeys:
+          - etype: PRIV
+            eref: 584_SEPA
+          - etype: FUN
+            eref: 001_ENTER
+          - etype: FAG
+            eref: reference000001
+      allOf:
+      - $ref: '#/components/schemas/BaseLimitsRetrievalPostRequestBody'
+    ListLimitsConsumptionsResponse:
+      type: array
+      example:
+      - limit:
+          alias: ""
+          uuid: 1234-5678-9101-1121
+          user-BBID: uuid-user-id
+          entities:
+          - etype: LE
+            eref: 550e8400-e29b-41d4-a716-446655440000
+          currency: EUR
+          periodic-limits-bounds:
+            daily: "100.0"
+            weekly: "120.0"
+            monthly: "300.0"
+            quarterly: "600.0"
+            customPeriods:
+            - period: biweekly
+              amount: "100"
+          shadow: true
+        consumptions:
+          daily: "0.0"
+          weekly: "50.0"
+          monthly: "60.0"
+          quarterly: "160.0"
+          customPeriods:
+          - period: biweekly
+            amount: "50"
+        checkTime: 2017-01-31T12:12:12Z
+      items:
+        $ref: '#/components/schemas/LimitConsumption'
+    ListLimitsRequest:
+      example:
+        limitsRetrievalOptions:
+        - user-BBID: marvin-1
+          shadow: false
+          lookupKeys:
+          - etype: LE
+            eref: 550e8400-e29b-41d4-a716-446655440000
+        - user-BBID: marvin-2
+          shadow: true
+          lookupKeys:
+          - etype: SA
+            eref: 23423423-74e4-4532-a716-534534513f54
+        - user-BBID: marvin-3
+          shadow: false
+          lookupKeys:
+          - etype: PRIV
+            eref: 584_SEPA
+          - etype: FUN
+            eref: 001_ENTER
+          - etype: FAG
+            eref: reference000001
+      allOf:
+      - $ref: '#/components/schemas/BaseLimitsRetrievalPostRequestBody'
+    ListLimitsResponse:
+      type: array
+      example:
+      - alias: Personal Service Agreement Limit
+        uuid: 1234-5678-9101-1121
+        user-BBID: uuid-user-id
+        entities:
+        - etype: SA
+          eref: 550e8400-e29b-41d4-a716-446655440000
+        approvalId: 710d559b-a922-424d-a21c-7e63b6351661
+        currency: EUR
+        periodic-limits-bounds:
+          daily: "100.0"
+          weekly: "120.0"
+          monthly: "300.0"
+          quarterly: "600.0"
+          customPeriods:
+          - period: biweekly
+            amount: "100"
+        shadow: true
+      items:
+        $ref: '#/components/schemas/RetrieveLimitsItem'
+    ListSupportedCurrenciesResponse:
+      type: object
+      properties:
+        currency-registry:
+          $ref: '#/components/schemas/CurrencyRegistryResponse'
+      description: This object contains all allowed data related to currency
+      example:
+        defaultCurrency: EUR
+        allowedCurrencyList:
+        - EUR
+        - USD
+        - AED
+    ListSupportedPeriodsResponse:
+      type: array
+      example:
+      - name: DAILY
+      - name: WEEKLY
+      - name: MONTHLY
+      - name: QUARTERLY
+      - name: YEARLY
+      items:
+        required:
+        - name
+        type: object
+        properties:
+          name:
+            type: string
+    NotAcceptableError:
+      type: object
+      properties:
+        message:
+          type: string
+        supportedMediaTypes:
+          type: array
+          description: List of supported media types for this endpoint
+          items:
+            type: string
+      x-java-type: com.backbase.buildingblocks.presentation.errors.NotAcceptableException
+    NotFoundError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+      x-java-type: com.backbase.buildingblocks.presentation.errors.NotFoundException
+    Payment:
+      required:
+      - amount
+      - currency
+      - effectiveDate
+      - paymentType
+      - refNo
+      - state
+      type: object
+      properties:
+        refNo:
+          minLength: 1
+          type: string
+        user-BBID:
+          minLength: 1
+          type: string
+          description: User ID, by who the operation has performed
+        amount:
+          $ref: '#/components/schemas/Amount'
+        currency:
+          minLength: 1
+          type: string
+        effectiveDate:
+          type: string
+          description: Date and time when this payment was entered (created)
+          format: date-time
+        paymentType:
+          minLength: 1
+          type: string
+        state:
+          type: string
+          enum:
+          - APPROVED
+          - NEW
+          - PARTIALLY_APPROVED
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.Payment
+    PeriodicBreachReport:
+      example:
+        payment:
+          refNo: 4563-3474-34553-24556
+          user-BBID: 550e8400-e29b-41d4-a716-446655440000
+          amount: "599.99"
+          effectiveDate: 2017-01-31T12:12:12Z
+          currency: EUR
+          paymentType: Domestic Payments
+          state: NEW
+        matchedLimits: 1
+        consumption:
+        - limitId: 4563-3474-34553-24556
+          limitCcy: EUR
+          consumedAmount: "599.99"
+          consumedOn: 2017-01-31T12:12:12Z
+          state: CONSUMED
+        checkTime: 2017-01-31T12:12:12Z
+        breachReport:
+        - alias: Personal Service Agreement Limit
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Service Agreement
+            description: Kuhic, Gislason and Kemmer. SERVICE AGREEMENT
+          shadow: false
+          currency: EUR
+          user-BBID: oleksii
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: monthly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "9950.0"
+            currentThreshold: "10000.0"
+        - user-BBID: oleksii
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "500.0"
+            currentThreshold: "1000.0"
+        - alias: Common Job Profile Limit
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Function Access Group
+            description: Payments approvers
+          - ref: 1234567-12312-123123
+            type: Function
+            description: Domestic payments
+          - ref: Approve
+            type: Privilege
+            description: Approve
+          - ref: 1234567-12312-123123
+            type: Service Agreement
+            description: Kuhic, Gislason and Kemmer. SERVICE AGREEMENT
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+        - alias: ""
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Legal Entity
+            description: Kuhic, Gislason and Kemmer
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: quarterly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-03-31T23:59:59Z
+            currentConsumption: "99950.0"
+            currentThreshold: "100000.0"
+          - breachType: THRESHOLD
+            breachedLimitType: TRANSACTIONAL
+            currentThreshold: "499.9"
+        globalBreachReport:
+        - alias: Personal Global Limit
+          limitedEntity:
+          - type: USER
+          currency: EUR
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: monthly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "9950.0"
+            currentThreshold: "10000.0"
+        consumptionUuid: 1234-5678-9012-qwer
+      allOf:
+      - $ref: '#/components/schemas/BreachableOperationResponse'
+    PeriodicLimitData:
+      required:
+      - periodic-limits-bounds
+      properties:
+        periodic-limits-bounds:
+          $ref: '#/components/schemas/PeriodicLimitsBounds'
+      description: This object extends limit.json and not adds any custom fields.
+        This prevents the generation of the duplicate Java classes with underscore
+        (_) suffix
+      allOf:
+      - $ref: '#/components/schemas/LimitData'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.PeriodicLimitData
+    PeriodicLimitsBounds:
+      type: object
+      properties:
+        daily:
+          $ref: '#/components/schemas/Amount'
+        weekly:
+          $ref: '#/components/schemas/Amount'
+        monthly:
+          $ref: '#/components/schemas/Amount'
+        quarterly:
+          $ref: '#/components/schemas/Amount'
+        yearly:
+          $ref: '#/components/schemas/Amount'
+        customPeriods:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomPeriod'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.PeriodicLimitsBounds
+    PeriodicLimitsCheckPostResponseBody:
+      required:
+      - errorDetails
+      type: object
+      properties:
+        errorDetails:
+          $ref: '#/components/schemas/ErrorMessage'
+    PeriodicLimitsConsumptions:
+      type: object
+      properties:
+        daily:
+          $ref: '#/components/schemas/Amount'
+        weekly:
+          $ref: '#/components/schemas/Amount'
+        monthly:
+          $ref: '#/components/schemas/Amount'
+        quarterly:
+          $ref: '#/components/schemas/Amount'
+        yearly:
+          $ref: '#/components/schemas/Amount'
+        customPeriods:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomPeriod'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.PeriodicLimitsConsumptions
+    PeriodicLimitSoftCheckPostResponseBody:
+      required:
+      - errorDetails
+      type: object
+      properties:
+        errorDetails:
+          $ref: '#/components/schemas/ErrorMessage'
+    RetrieveLimitsItem:
+      properties:
+        approvalId:
+          $ref: '#/components/schemas/ApprovalId'
+      allOf:
+      - $ref: '#/components/schemas/BoundedLimitItem'
+    RollbackReport:
+      required:
+      - paymentInfo
+      - rollbackInfo
+      type: object
+      properties:
+        paymentInfo:
+          required:
+          - amount
+          - currency
+          - effectiveDate
+          - refNo
+          type: object
+          properties:
+            refNo:
+              type: string
+            amount:
+              $ref: '#/components/schemas/Amount'
+            currency:
+              type: string
+            effectiveDate:
+              type: string
+              description: Execution date and time of the payment
+              format: date-time
+        rollbackInfo:
+          type: array
+          items:
+            type: object
+            properties:
+              limitedEntities:
+                $ref: '#/components/schemas/Entities'
+              shadow:
+                type: boolean
+                description: Shadow limit flag. Applicable for certain entity-types
+              currency:
+                type: string
+                description: Currency code
+              user-BBID:
+                type: string
+                description: BBID of the user for whom the personal limit is assigned
+      example:
+        paymentInfo:
+          refNo: 4563-3474-34553-24556
+          amount: "599.99"
+          effectiveDate: 2017-01-31T12:12:12Z
+          currency: EUR
+          state: NEW
+        rollbackInfo:
+        - limitedEntities:
+          - etype: FAG
+            eref: 950e8400-e29b-41d4-a716-446655440000
+          - etype: FUN
+            eref: 750e8400-e29b-41d4-a716-446655440000
+          - etype: PRV
+            eref: 850e8400-e29b-41d4-a716-446655440000
+          currency: EUR
+          shadow: true
+        - limitedEntities: []
+          currency: USD
+          shadow: false
+          user-BBID: Johnny
+    Timeframe:
+      required:
+      - endTime
+      - period
+      - startTime
+      type: object
+      properties:
+        period:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.Timeframe
+    TransactionalBreachReport:
+      example:
+        payment:
+          refNo: 4563-3474-34553-24556
+          user-BBID: 550e8400-e29b-41d4-a716-446655440000
+          amount: "599.99"
+          effectiveDate: 2017-01-31T12:12:12Z
+          currency: EUR
+          paymentType: Domestic Payments
+          state: NEW
+        matchedLimits: 1
+        consumption:
+        - limitId: 4563-3474-34553-24556
+          limitCcy: EUR
+          consumedAmount: "599.99"
+          consumedOn: 2017-01-31T12:12:12Z
+          state: CONSUMED
+        checkTime: 2017-01-31T12:12:12Z
+        breachReport:
+        - alias: Personal Service Agreement Limit
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Service Agreement
+            description: Kuhic, Gislason and Kemmer. SERVICE AGREEMENT
+          shadow: false
+          currency: EUR
+          user-BBID: oleksii
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: monthly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "9950.0"
+            currentThreshold: "10000.0"
+        - user-BBID: oleksii
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "500.0"
+            currentThreshold: "1000.0"
+        - alias: Common Job Profile Limit
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Function Access Group
+            description: Payments approvers
+          - ref: 1234567-12312-123123
+            type: Function
+            description: Domestic payments
+          - ref: Approve
+            type: Privilege
+            description: Approve
+          - ref: 1234567-12312-123123
+            type: Service Agreement
+            description: Kuhic, Gislason and Kemmer. SERVICE AGREEMENT
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+        - alias: ""
+          limitedEntity:
+          - ref: 1234567-12312-123123
+            type: Legal Entity
+            description: Kuhic, Gislason and Kemmer
+          shadow: false
+          currency: EUR
+          breachInfo:
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: quarterly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-03-31T23:59:59Z
+            currentConsumption: "99950.0"
+            currentThreshold: "100000.0"
+          - breachType: THRESHOLD
+            breachedLimitType: TRANSACTIONAL
+            currentThreshold: "499.9"
+        globalBreachReport:
+        - alias: Personal Global Limit
+          limitedEntity:
+          - type: USER
+          currency: EUR
+          breachInfo:
+          - breachType: THRESHOLD
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: daily
+              startTime: 2017-01-31T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "250.0"
+            currentThreshold: "499.9"
+          - breachType: CONSUMPTION
+            breachedLimitType: PERIODIC
+            timeframe:
+              period: monthly
+              startTime: 2017-01-01T00:00:00Z
+              endTime: 2017-01-31T23:59:59Z
+            currentConsumption: "9950.0"
+            currentThreshold: "10000.0"
+        consumptionUuid: 1234-5678-9012-qwer
+      allOf:
+      - $ref: '#/components/schemas/BreachableOperationResponse'
+    TransactionalLimitData:
+      required:
+      - transactional-limits-bound
+      properties:
+        transactional-limits-bound:
+          $ref: '#/components/schemas/AmountRequiredTransactionalLimitsBound'
+      description: This object extends limit.json and not adds any custom fields.
+        This prevents the generation of the duplicate Java classes with underscore
+        (_) suffix
+      allOf:
+      - $ref: '#/components/schemas/LimitData'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.TransactionalLimitData
+    TransactionalLimitsBound:
+      type: object
+      properties:
+        amount:
+          $ref: '#/components/schemas/Amount'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.TransactionalLimitsBound
+    TransactionalLimitsCheckPostResponseBody:
+      required:
+      - errorDetails
+      type: object
+      properties:
+        errorDetails:
+          $ref: '#/components/schemas/ErrorMessage'
+    TransactionalLimitSoftCheckPostResponseBody:
+      required:
+      - errorDetails
+      type: object
+      properties:
+        errorDetails:
+          $ref: '#/components/schemas/ErrorMessage'
+    UnauthorizedAltError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+      x-java-type: com.backbase.buildingblocks.presentation.errors.UnauthorizedException
+    UnauthorizedError:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+    UnsupportedMediaTypeError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+      x-java-type: com.backbase.buildingblocks.presentation.errors.UnsupportedMediaTypeException
+    UpdateLimitRequest:
+      properties:
+        periodic-limits-bounds:
+          $ref: '#/components/schemas/PeriodicLimitsBounds'
+        transactional-limits-bound:
+          $ref: '#/components/schemas/TransactionalLimitsBound'
+      example:
+        currency: USD
+        periodic-limits-bounds:
+          daily: "100.0"
+          weekly: "120.0"
+          monthly: "300.0"
+          quarterly: "600.0"
+          customPeriods:
+          - period: biweekly
+            amount: "100"
+        transactional-limits-bound:
+          amount: "100.0"
+      allOf:
+      - $ref: '#/components/schemas/LimitCurrency'
+      x-java-type: com.backbase.presentation.limit.rest.spec.v2.limits.UpdateLimitRequestBody
+    UpdateLimitResponse:
+      properties:
+        approvalStatus:
+          $ref: '#/components/schemas/ApprovalStatus'
+        approvalId:
+          $ref: '#/components/schemas/ApprovalId'
+      allOf:
+      - $ref: '#/components/schemas/BoundedLimitItem'

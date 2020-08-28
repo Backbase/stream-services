@@ -1,0 +1,268 @@
+openapi: 3.0.1
+info:
+  title: Backbase Stream Ingestion Cursor  API
+  version: 1.0.0
+  x-logo:
+    url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
+    backgroundColor: "#FFFFFF"
+    altText: "Backbase logo"
+servers:
+  - url: http://stream-cursor-http.proto.backbasecloud.com/
+    description: The server
+paths:
+  ###############################################
+  ## Ingestion Cursors
+  ###############################################
+  /cursors:
+    summary: Ingestion Cursors
+    post:
+      tags:
+        - cursors
+      description: Creates a new Ingestion Cursor which is executed by the the executors
+      operationId: createNewIngestionCursor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestionCursor'
+      responses:
+        201:
+          description: Ingestion Cursor created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionCursor'
+    get:
+      tags:
+        - cursors
+      description: Retrieves a list in ingestion cursors which are used to start the ingestion process
+      operationId: getIngestionCursors
+      responses:
+        200:
+          description: |
+            # Ingestion Cursors
+            The ingestion cursors identify the cursor from which to ingest.
+            A cursor should contain all necessary information to query a core banking transaction provider to feed into DBS
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IngestionCursor'
+    delete:
+      summary: Deletes all ingestion cursors
+      tags:
+        - cursors
+      description: |
+        # Delete all ingestion cursors
+
+        This operation removes all ingestion cursors in the cursor database. This can not be undone.
+
+        **Use at your own risk**
+      operationId: deleteAllCursors
+      responses:
+        204:
+          description: All ingestiomn cursors are removed
+  /cursors/{cursorId}:
+    get:
+      tags:
+        - cursors
+      description: Get a cursor
+      operationId: getCursorById
+      parameters:
+        - name: cursorId
+          in: path
+          description: ID of cursor to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Ingestion Cursor created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestionCursor"
+        404:
+          description: "Cannot find ingestion cursor with ID"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - cursors
+      summary: Replace Cursor with new denition
+      operationId: updateCursorById
+      parameters:
+        - name: cursorId
+          in: path
+          description: ID of cursor to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestionCursor'
+      responses:
+        204:
+          description: Update successfull
+    delete:
+      tags:
+        - cursors
+      summary: Deletes a cursor
+      operationId: deleteCursorById
+      parameters:
+        - name: cursorId
+          in: path
+          description: ID of cursor to update
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Delete succesfull
+  /cursor-stream:
+    get:
+      tags:
+        - "cursor-stream"
+      description: Retrieves a list in ingestion cursors which are used to start the ingestion process
+      operationId: getIngestionCursorStream
+      parameters:
+        - name: source
+          in: query
+          description: "The source of events to listen to"
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: "The state of the cursor"
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            # Ingestion Cursors
+            The ingestion cursors identify the cursor from which to ingest.
+            A cursor should contain all necessary information to query a core banking transaction provider to feed into DBS
+          content:
+            text/event-stream:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IngestionCursor'
+
+
+components:
+  schemas:
+
+    ###############################################
+    ## Ingestion Cursor Schemas
+    ###############################################
+    IngestionCursor:
+      type: object
+      description: Ingestion Cursor
+      properties:
+        id:
+          type: string
+          description: "Unique Identifier of the Ingestion Cursor"
+          readOnly: true
+          format: uuid
+        cursor_created_at:
+          type: string
+          description: "Ingestion Cursor Creation Date"
+          format: 'date-time'
+          readOnly: true
+        cursor_modified_at:
+          type: string
+          description: "Ingestion Cursor Modified At"
+          format: 'date-time'
+        cursor_type:
+          type: string
+          description: "Type of the Ingestion Cursor. Real Time are generated from Events inside DBS, where as BATCH cursors are created from a scheduled process"
+          enum: ["BATCH", "REAL_TIME"]
+        cursor_state:
+          type: string
+          description: "State of the cursor.  Newly created cursors start with NOT_STARTED state."
+          enum: ["not_started",  "abandoned", "completed", "failed", "started", "starting", "stopped", "stopping", "unknown"]
+        cursor_source:
+          type: string
+          description: "Event which created the Ingestion Cursor"
+          enum: ["arrangement_added_event", "arrangement_updated_event", "login_event", "payment_created_event"]
+        record_uuid:
+          type: string
+          description: "Record UUID from which to start ingestion"
+        internal_legal_entity_id:
+          type: string
+          description: "Legal Entity ID of the user for which to ingest into"
+        external_legal_entity_id:
+          type: string
+          description: "Legal Entity ID of the user for which to ingest into"
+        external_user_id:
+          type: string
+          description: "External User ID"
+        internal_user_id:
+          type: string
+          description: "Internal User ID"
+        arrangement_id:
+          type: string
+          description: "The arrangement all transactions are added too"
+        external_arrangement_id:
+          type: string
+          description: "The external arrangement id used to query Core Bank"
+        bban:
+          type: string
+          description: "The Base Bank Account Number to query transactions"
+        iban:
+          type: string
+          description: "The International Bank Account Number to query transactions for"
+        date_from:
+          type: string
+          format: "date"
+        date_to:
+          type: string
+          format: "date"
+        date_time_from:
+          type: string
+          format: "date-time"
+        date_time_to:
+          type: string
+          format: "date-time"
+        additionalProperties:
+          type: object
+          additionalProperties: true
+
+
+    ###############################################
+    ## Generic Schemas
+    ###############################################
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Default Message. Any further information.
+              key:
+                type: string
+                description: '{capability-name}.api.{api-key-name}. For generated
+                  validation errors this is the path in the document the error resolves
+                  to. e.g. object name + ''.'' + field'
+              context:
+                type: object
+                description: Context can be anything used to construct localised messages.
+                x-java-type: java.util.Map<String,String>
+            description: A validation error

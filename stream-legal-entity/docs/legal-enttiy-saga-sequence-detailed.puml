@@ -1,0 +1,220 @@
+@startuml
+autonumber
+
+actor User
+box Backbase Stream
+  participant "LegalEntityController" as LEC
+  participant "LegalEntitySaga" as SAGA
+  participant "LegalEntityService" as LES
+  participant "UserService" as US
+  participant "ProductIngestionSaga" as PIS
+  participant "AccessGroupService" as AGS
+  participant "Ar rangementService" as AS
+end box
+
+  database "Job Profile Templates" as JBT
+
+box Backbase
+  collections DBS
+end box
+
+'note left of LEC
+'  Legal Entity Ingestion Model
+'  - Legal Entity
+'  - Administrator Users
+'  - Job Profile Users
+'  - Product Groups
+'  -- Job Profile Users
+'  -- Arrangements
+'  - Subsidiaries
+'end note
+
+User -> LEC : legalEntityList
+LEC -> SAGA: legalEntityFlux
+loop Legal Entity
+activate SAGA
+  group Legal Entity Upsert
+    SAGA -> SAGA: upsertLegalEntity
+    activate SAGA
+      SAGA -> LES: getLegalEntityByExternalId
+      LES -> DBS: getLegalEntityByExternalId
+      DBS -> LES: Legal Entity
+      LES -> SAGA: Legal Entity
+      alt Legal Entity Does not Exist
+        SAGA -> LES: createNewLegalEntity
+        LES -> DBS: createNewLegalEntity
+        DBS -> LES: legalEntityInternalId
+        LES -> SAGA: Legal Entity
+      end alt
+    deactivate SAGA
+  end group
+
+  group Setup Administrators
+    SAGA -> SAGA: setupAdministrators
+    activate SAGA
+    loop Administrators
+      SAGA -> US: upsertUser
+      US -> DBS: getUserByExternalId
+      DBS -> US: User
+      US -> SAGA: User
+      alt Create New User
+        US -> DBS: createUserWithLegalEntity
+        DBS -> US: userId;
+        US -> SAGA: User
+      end alt
+      alt Use Identity User Management
+        US -> US: getIdentityUserByExternalId
+        US -> DBS: getIdentityUserByExternalId
+        DBS -> US: Identity User
+        US -> SAGA: User
+        alt Create New Identity User
+          US -> DBS: postIdentities
+          DBS -> US: userId;
+          US -> SAGA: User
+        end alt
+      end alt
+    end loop
+    deactivate SAGA
+  end group
+
+  group Setup Service Agreement
+    SAGA -> SAGA: setupServiceAgreement
+    activate SAGA
+      SAGA -> LES: getMasterServiceAgreementForExternalLegalEntityId
+      LES -> SAGA: Service Agreement
+      SAGA -> SAGA: setServiceAgreementInLegalEntity
+      alt Create Service Agreement
+        SAGA -> SAGA: createMasterServiceAgreement
+        activate SAGA
+          SAGA -> SAGA: addAdministratorsAsAdmins
+          SAGA -> SAGA: addProductGroupUsersAsParticipant
+          SAGA -> LES: createMasterServiceAgreement
+          LES -> SAGA: Service Agreement
+        deactivate SAGA
+        SAGA -> SAGA: setServiceAgreementInLegalEntity
+      end alt
+    deactivate SAGA
+  end group
+
+  group Process Job Profiles
+    SAGA -> SAGA: processJobProfiles
+    activate SAGA
+    loop Job Profile Users
+      activate SAGA
+        SAGA -> SAGA: getBusinessFunctionGroupTemplates
+        SAGA -> JBT: getJobProfileTemplateById
+        JBT -> SAGA: Business Function Group Templates
+        alt Get Business Function Group Templates From Job Profile User
+          SAGA -> SAGA: getBusinessFunctionGroups
+        end alt
+        SAGA -> AGS: setupBusinessFunctionGroups
+        activate AGS
+          AGS -> DBS: getFunctionGroupsForServiceAgreement
+          DBS -> AGS: Existing Function Groups
+          AGS -> AGS: getNewBusinessGroups
+          activate AGS
+            AGS -> AGS: createBusinessFunctionGroup
+            AGS -> DBS: postIngestWithPresentationIngestFunctionGrouppostPresentationIngestFunctionGroup
+            DBS -> AGS: IDs of New Business Function Group
+            AGS -> AGS: Set ID in Newly created Business Function Groups
+          deactivate AGS
+        AGS -> SAGA: BusinessFunctionGroups
+        deactivate AGS
+        SAGA -> SAGA: Update Job Profile User
+      deactivate SAGA
+     end loop
+    deactivate SAGA
+  end group
+
+  group Process Products
+    SAGA -> SAGA: processProducts
+    activate SAGA
+      loop Product Group
+        SAGA -> SAGA: createProductGroupTask
+        SAGA -> PIS: process
+        activate PIS
+        PIS -> PIS: validateProductGroup
+        PIS -> PIS: upsertArrangements
+        loop Arrangements
+          activate PIS
+            PIS -> PIS: upsertArrangement
+            PIS -> AS: getInternalProductId
+            activate AS
+              alt Arrangement Already Exists
+                AS -> PIS: internal Arrangement ID
+                PIS -> PIS: set InternalID
+                PIS -> AS: updateArrangements
+                AS -> DBS: putArrangements
+                DBS -> AS: Updated Arrangement
+                AS -> PIS: Updated Arrangement
+              end alt
+              PIS -> PIS: createArrangement
+              PIS -> AS: createArrangement
+              AS -> DBS: postArrangements
+              DBS -> AS: Arrangement InternalID
+              AS -> AS: setInternalID
+              AS -> PIS: createdArrangements
+            deactivate AS
+          deactivate PIS
+        end loop
+        PIS -> AGS: setupProductGroups
+        activate AGS
+          AGS -> DBS: getExistingDataGroups
+          alt Data Group with Name already Exists
+            AGS -> AGS: updateAccessGroup
+            AGS -> DBS: updateAccessGroupWithArrangementIds
+            DBS -> AGS: Access Group ID
+            AGS -> PIS: Updated AccessGroup
+          end alt
+          AGS -> AGS: createArrangementDataAccessGroup
+          AGS -> DBS: postDatagroups
+          DBS -> AGS: Datagroup InternalID
+          AGS -> AGS: Set Data Group ID
+          deactivate AGS
+        PIS -> PIS: setupBusinessFunctionsAndPermissions
+        loop Job Profile Users
+        activate PIS
+          PIS -> PIS: getBusinessFunctionGroupTemplates
+          PIS -> JBT: getJobProfileTemplateById
+          JBT -> PIS: Business Function Group Templates
+          alt Get Business Function Group Templates From Job Profile User
+            PIS -> PIS: getBusinessFunctionGroups
+          end alt
+          PIS -> AGS: setupBusinessFunctionGroups
+          activate AGS
+            AGS -> DBS: getFunctionGroupsForServiceAgreement
+            DBS -> AGS: Existing Function Groups
+            AGS -> AGS: getNewBusinessGroups
+            activate AGS
+              AGS -> AGS: createBusinessFunctionGroup
+              AGS -> DBS: postIngestWithPresentationIngestFunctionGroup
+              DBS -> AGS: IDs of New Business Function Group
+              AGS -> AGS: Set ID in Newly created Business Function Groups
+            deactivate AGS
+            AGS -> PIS: Setup BusinessFunctionGroups
+            PIS -> AGS: assignPermissions
+            activate AGS
+              AGS -> DBS: putPermissionsByIdAndUserId
+              DBS -> AGS: (Optional) Approval Status
+              AGS -> AGS: processApprovalStatus
+              AGS -> PIS: Updated Job Profile User
+            deactivate AGS
+          deactivate AGS
+        deactivate PIS
+       end loop
+      deactivate PIS
+      end loop
+
+    SAGA -> SAGA: processSubsidiaries
+    activate SAGA
+      loop Subsidiaries
+        SAGA -> SAGA: setSubsidiaryParentLegalEntityId
+        SAGA -> SAGA: processSubsidiary
+        SAGA <- SAGA: Processed Legal Entity
+      end loop
+    deactivate SAGA
+    deactivate SAGA
+  end group
+end loop
+
+@enduml

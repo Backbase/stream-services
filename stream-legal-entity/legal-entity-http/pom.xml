@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.backbase.stream</groupId>
+        <artifactId>stream-http-starter-parent</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+        <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
+    </parent>
+
+    <artifactId>legal-entity-http</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+
+    <packaging>jar</packaging>
+    <name>Stream :: Legal Entity HTTP</name>
+
+    <properties>
+        <sonar.skip>true</sonar.skip>
+        <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
+        <raml2openapi-maven-plugin.output>${project.build.directory}/api/openapi.yaml</raml2openapi-maven-plugin.output>
+        <boat-maven-plugin.version>0.2.1</boat-maven-plugin.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>legal-entity-core</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.atlassian.oai/swagger-request-validator-core -->
+        <dependency>
+            <groupId>com.atlassian.oai</groupId>
+            <artifactId>swagger-request-validator-core</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+
+
+        <!--        <dependency>-->
+<!--            <groupId>io.github.cdimascio</groupId>-->
+<!--            <artifactId>openapi-spring-webflux-validator</artifactId>-->
+<!--            <version>3.0.0</version>-->
+<!--        </dependency>-->
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.8.2</version>
+                <executions>
+                    <execution>
+                        <id>default-site</id>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.backbase.oss</groupId>
+                <artifactId>boat-maven-plugin</artifactId>
+                <version>${boat-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApis>true</generateApis>
+                            <generateModels>false</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <output>${openapi-generator-maven-plugin.output}</output>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <reactive>true</reactive>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <modelPackage>com.backbase.stream.legalentity.model</modelPackage>
+                                <apiPackage>com.backbase.stream.legalentity.api</apiPackage>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                            <typeMappings>
+                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
+                            </typeMappings>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>docs</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>site</phase>
+                        <configuration>
+                            <generatorName>html2</generatorName>
+                            <inputSpec>${raml2openapi-maven-plugin.output}</inputSpec>
+                            <output>${project.build.directory}/site</output>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.backbase.oss</groupId>
+                <artifactId>scdf-maven-plugin</artifactId>
+                <configuration>
+                    <type>APP</type>
+                    <name>${project.artifactId}</name>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+
+
+</project>

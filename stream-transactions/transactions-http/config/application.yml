@@ -1,0 +1,41 @@
+logging:
+  level:
+    root: info
+    com.backnase: debug
+    org:
+      mongodb:
+        driver:
+          connection: off
+    sun: off
+
+management.metrics.export.prometheus.enabled: false
+spring.cloud.kubernetes.config.enabled: false
+
+spring:
+  data:
+    mongodb:
+      host: "localhost"
+      database: test
+  security:
+    oauth2:
+      client:
+        provider:
+          dbs:
+            token-uri: https://stream-demo.proto.backbasecloud.com/api/token-converter/oauth/token
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+
+backbase:
+  stream:
+    persistence: mongo
+    dbs:
+      access-control-pandp-base-url: https://stream-api.proto.backbasecloud.com/accesscontrol-pandp-service/service-api/v2
+      access-group-presentation-base-url: https://stream-api.proto.backbasecloud.com/accessgroup-presentation-service/service-api/v2
+      account-presentation-base-url: https://stream-api.proto.backbasecloud.com/account-presentation-service/service-api/v2
+      legal-entity-presentation-base-url:  https://stream-api.proto.backbasecloud.com/legalentity-presentation-service/service-api/v2
+      user-presentation-base-url: https://stream-api.proto.backbasecloud.com/user-presentation-service/service-api/v2
+      transaction-presentation-base-url: https://stream-api.proto.backbasecloud.com/transaction-presentation-service/service-api/v2

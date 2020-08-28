@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="206px" height="45px" viewBox="0 0 206 45" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.3 (67297) - http://www.bohemiancoding.com/sketch -->
+    <title>cloud</title>
+    <desc>Created with Sketch.</desc>
+    <g id="VD" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.495721726">
+        <g id="patterns/header/default" transform="translate(-33.000000, -128.000000)" fill="#C4EAF1">
+            <g id="Group" transform="translate(33.000000, 0.000000)">
+                <path d="M0,173 C0,173 7.35740367,164.372657 11.8667801,160.420009 C19.987309,153.300032 29.3018186,140.716319 59.085611,149.991271 C61.4005459,150.713318 63.6424545,151.669843 65.8734092,152.630091 C68.4987061,153.765268 76.6338403,153.795043 84.9661456,147.050977 C98.2021695,136.339375 103.376086,128.255428 121.512177,128.002339 C142.616789,127.712032 145.932185,154.524534 162.333901,161.387701 C172.769364,165.7572 200.303946,170.096925 206,172.032308 L0,173 Z" id="cloud"></path>
+            </g>
+        </g>
+    </g>
+</svg>

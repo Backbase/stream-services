@@ -1,0 +1,67 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title th:text="${title}">Backbase Stream Start</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="webjars/stream-web-start-ui/favicon.png">
+    <link rel="stylesheet" href="webjars/stream-web-start-ui/css/style.css">
+</head>
+<body>
+<nav class="navbar fixed-top navbar-expand-lg navbar-light">
+    <div class="navbar-container">
+        <div class="container">
+            <div class="row">
+                <div class="col"><a class="navbar-brand" href="/"><img alt="Backbase Logo"
+                                                                       class="navbar-brand-logo"
+                                                                       src="data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyOS40MiAxOS41Ij4KICAgIDxkZWZzPgogICAgICAgIDxzdHlsZT4uY2xzLTF7ZmlsbDojYzIyMzI3O308L3N0eWxlPgogICAgPC9kZWZzPgogICAgPHRpdGxlPmJhY2tiYXNlPC90aXRsZT4KICAgIDxwYXRoIGNsYXNzPSJjbHMtMSIKICAgICAgICAgIGQ9Ik00MCwxMC43SDIzTDI1LjQsMTVIMzcuOWMuMywwLDEsLjEsMSwxLjF2OC44YzAsMS0uNywxLjEtMSwxLjFIMjMuNVYyMi40SDM1LjN2LTRIMjMuMmwtNC42LTcuN0gxMy43bDUuNSw5LjZ2OS45SDQwLjFjMS45LDAsMy0xLjYsMy00LjlWMTVjLjItMi45LS45LTQuMy0zLjEtNC4zIgogICAgICAgICAgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTEzLjcgLTEwLjcpIi8+Cjwvc3ZnPg=="><img
+                        alt="Backbase Logo" class="navbar-brand-logo-full"
+                        src="webjars/stream-web-start-ui/images/backbase-logo.png"><span
+                        class="navbar-brand-spacer color-backbase-primary">/</span><span
+                        class="navbar-brand-text" th:text="${title}"></span></a></div>
+                <div class="col text-right">
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ml-auto">
+                            <li class="nav-item " th:each="link: ${navbarLinks}">
+                                <a class="nav-link"
+                                   th:href="${link.href}"
+                                   th:text="${link.name}"
+                                   target="_blank"></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="main-container">
+    <div class="generator-form">
+        <div class="generator-form-header landingspage">
+            <div class="container">
+                <div class="row">
+                    <div class="col-6 d-flex align-items-center">
+                        <div class="intro-text"><h1 th:utext="${subTitle}"></h1>
+                            <p th:utext="${description}"></p><br>
+                            <a class="btn btn-primary btn-large btn-toggle" th:href="${defaultAction.href}"
+                               th:text="${defaultAction.name}"><span
+                                    class="lnr lnr-chevron-right"></span></a>
+                        </div>
+                    </div>
+                    <div class="col-6 intro-image"><img alt="Intro"
+                                                        src="webjars/stream-web-start-ui/images/open-banking.png"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer d-flex justify-content-center"><span
+            class="navbar-brand"
+            tabindex="0"><img
+            alt="Backbase Logo" class="navbar-brand-logo-full"
+            src="webjars/stream-web-start-ui/images/backbase-logo.png"><span
+            class="navbar-brand-spacer">/</span><span
+            class="navbar-brand-text" th:text="${footer}"></span><span
+            style="font-size: 15px; padding-left: 5px;" th:text="${version}"></span></span>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.backbase.stream.micrometer.StreamMicrometerCommonTags
+org.springframework.boot.env.EnvironmentPostProcessor=com.backbase.stream.micrometer.StreamMicrometerEnvironmentPostProcessor
+

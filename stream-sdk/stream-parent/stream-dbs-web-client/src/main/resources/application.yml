@@ -1,0 +1,16 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: ${DBS_CLIENT_ID}
+            client-secret: ${DBS_CLIENT_SECRET}
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: ${DBS_TOKEN_URI}
+logging:
+  level:
+    io.netty.util.internal: off

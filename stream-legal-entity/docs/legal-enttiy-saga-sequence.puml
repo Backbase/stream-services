@@ -1,0 +1,116 @@
+@startuml
+autonumber
+
+actor User
+box Backbase Stream
+  participant "LegalEntitySaga" as SAGA
+  participant "ProductIngestionSaga" as PIS
+end box
+database "Job Profile Templates" as JBT
+box Backbase
+  collections DBS
+end box
+
+loop Legal Entity
+
+    SAGA -> SAGA: Process Legal Entity
+    activate SAGA
+      SAGA -> DBS: Check if Legal Entity exists
+      DBS -> SAGA: Existing Legal Entity
+      alt Legal Entity Does not Exist
+        SAGA -> DBS: Create new Legal Entity
+        DBS -> SAGA: Legal Entity ID
+      end alt
+      SAGA -> SAGA: Set Legal Entity
+    deactivate SAGA
+
+    SAGA -> SAGA: Process Administrators
+    loop Administrators
+      SAGA -> DBS: Check if User exists
+      DBS -> SAGA: Exiting User
+      alt User does not exists
+        SAGA -> DBS: Create User
+        DBS -> SAGA: Internal ID
+      end alt
+      SAGA -> SAGA: Set Administrators
+    end loop
+    deactivate SAGA
+
+    SAGA -> SAGA: Process Service Agreement
+    activate SAGA
+      SAGA -> DBS: Get Existing Service Agreement 
+      DBS -> SAGA: Service Agreement
+      alt Service Agreement Does not exist
+        SAGA -> DBS: Create Master Service Agreement with Administrators
+        DBS -> SAGA: Master Service Agreement ID
+      end alt
+      SAGA -> SAGA: Set Service Agreement
+    deactivate SAGA
+
+    SAGA -> SAGA: Process Job Profiles
+    activate SAGA
+    loop Job Profile Users
+      activate SAGA
+        SAGA -> JBT: Get Job Profile Templates
+        JBT -> SAGA: Job Profile Templates
+        alt Get Job Profile Job Profile User
+          SAGA -> SAGA: Job Profile Templates
+        end alt
+        SAGA -> DBS: Update Job Profiles
+        DBS -> SAGA: Updated Job Profiles
+        SAGA -> SAGA: Update Job Profile User
+      deactivate SAGA
+     end loop
+    deactivate SAGA
+
+    SAGA -> SAGA: Process Products
+    activate SAGA
+      loop Product Group
+        activate PIS
+        loop Arrangements
+          activate PIS
+            PIS -> DBS: Get Existing Arrangement ID
+            DBS -> PIS: Existing Arrangement ID
+            PIS -> DBS: Update Existing Arrangement
+            alt Arrangement does not exists
+              PIS -> DBS: Create Arrangement
+              DBS -> PIS: Arrangement ID
+            end alt
+            PIS -> PIS: Update Arrangement
+          deactivate PIS
+        end loop
+        PIS -> PIS: Setup Data Group
+        PIS -> DBS: Get Existing Data Group
+        PIS -> DBS: Update Access Group with Arrangement Ids
+        alt Data Group Does not exist
+          PIS -> DBS: Create Data Group With Arrangement Ids
+          DBS -> PIS: Access Group ID
+        end alt
+        PIS -> PIS: Process Job Profile Users
+        loop Job Profile Users
+          activate PIS
+            PIS -> JBT: Get Job Profile Templates
+            JBT -> PIS: Job Profile Templates
+            alt Get Job Profile Job Profile User
+              PIS -> PIS: Job Profile Templates
+            end alt
+            PIS -> DBS: Update Job Profiles
+            DBS -> PIS: Updated Job Profiles
+            PIS -> PIS: Update Job Profile User
+            PIS -> DBS: Assign Permissions For Data Group, Business Functions and Service Agreement
+            DBS -> PIS: Approval Status
+          deactivate PIS
+          PIS -> PIS: Update Job Profile Users
+         end loop
+
+    SAGA -> SAGA: Process Subsidiaries
+    activate SAGA
+      loop Subsidiaries
+        SAGA -> SAGA: Set Parent Legal Entity ID In Subsidiary
+        SAGA -> SAGA: Process Subsidiary Recursively
+        SAGA <- SAGA: Update Subsidiary
+      end loop
+    deactivate SAGA
+end loop
+
+@enduml
