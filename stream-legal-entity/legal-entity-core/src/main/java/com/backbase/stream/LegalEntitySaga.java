@@ -278,12 +278,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         LegalEntity legalEntity = streamTask.getData();
         ServiceAgreement masterServiceAgreement = legalEntity.getMasterServiceAgreement();
         return Flux.fromIterable(legalEntity.getReferenceJobRoles())
-            .flatMap(referenceJobRole -> accessGroupService
-                .setupFunctionGroups(streamTask, masterServiceAgreement, referenceJobRole.getFunctionGroups())
-                .map(businessFunctionGroups -> {
-                    referenceJobRole.setFunctionGroups(businessFunctionGroups);
-                    return referenceJobRole;
-                }))
             .flatMap(referenceJobRole ->
                 accessGroupService.setupReferenceJobRole(streamTask, masterServiceAgreement, referenceJobRole))
             .flatMap(referenceJobRole -> {
