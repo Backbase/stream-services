@@ -12,6 +12,7 @@ import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ReferenceJobRole;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +31,8 @@ public interface AccessGroupMapper {
     @Mapping(source = "participants", target = "participantsToIngest")
     ServicesAgreementIngest toPresentation(ServiceAgreement serviceAgreement);
 
+    // Initialize users list to workaround https://backbase.atlassian.net/browse/MAINT-10442
+    @Mapping(defaultExpression = "java( new ArrayList<>() )", source = "users", target = "users")
     ParticipantIngest toPresentation(LegalEntityParticipant legalEntityParticipant);
 
     @Mapping(target = "type", constant = "TEMPLATE")
