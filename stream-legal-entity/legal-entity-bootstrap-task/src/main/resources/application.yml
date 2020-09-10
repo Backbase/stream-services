@@ -21,6 +21,9 @@ spring:
             token-uri: http://token-converter:8080/oauth/token
 backbase:
   stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
     dbs:
       access-group-presentation-base-url: http://access-control:8080
       access-control-pandp-base-url: http://access-control:8080
