@@ -54,6 +54,11 @@ public class BackbaseStreamConfigurationProperties {
          * Location of Limits Presentation Service.
          */
         private String limitsPresentationBaseUrl;
+
+        /**
+         * Location of Product Summary Service"
+         */
+        private String productSummaryBaseUrl;
     }
 
 
