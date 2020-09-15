@@ -1,0 +1,180 @@
+# Stream config
+spring:
+  cloud:
+    kubernetes:
+      discovery:
+        # Set to false if using Eureka for service discovery
+        enabled: true
+  zipkin:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: http://token-converter:8080/oauth/token
+backbase:
+  stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+    dbs:
+      access-group-presentation-base-url: http://access-control:8080
+      access-control-pandp-base-url: http://access-control:8080
+      account-presentation-base-url: http://arrangement-manager:8080
+      legal-entity-presentation-base-url: http://access-control:8080
+      user-presentation-base-url: http://user-manager:8080
+      transaction-presentation-base-url: http://transaction-manager:8080
+logging:
+  level:
+    root: INFO
+
+# Legal Entity Structure Configuration
+bootstrap:
+  legalEntity:
+    name: "Moustache Bank"
+    realmName: "backbase"
+    externalId: "moustache-bank"
+    legalEntityType: "BANK"
+    referenceJobRoles:
+      - name: Entitlements - Manager
+        description: Full Entitlements administration.
+        functionGroups:
+          - name: "Manage Entitlements"
+            functions:
+              - functionId: "1019"
+                functionCode: "manage.data.groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+              - functionId: "1020"
+                functionCode: "manage.function.groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+      - name: Retail User - USA
+        description: Retail User Permissions for USA
+        functionGroups:
+          - name: "Products, payments, txn, contacts"
+            functions:
+              - functionId: "1006"
+                functionCode: "product.summary"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1003"
+                functionCode: "transactions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+              - functionId: "1017"
+                functionCode: "us.domestic.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1018"
+                functionCode: "us.foreign.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1005"
+                functionCode: "contacts"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+    administrators:
+      - externalId: "admin"
+        fullName: "Backbase Root Admin"
+        identityLinkStrategy: "CREATE_IN_IDENTITY"
+        emailAddress:
+          address: "bbadmin@email.com"
+        mobileNumber:
+          number: "1234567890"
+    users:
+      - user:
+          externalId: "admin"
+          identityLinkStrategy: "CREATE_IN_IDENTITY"
+        referenceJobRoleNames:
+          - "Entitlements - Manager"
+    subsidiaries:
+      - name: "Moustache Bank USA"
+        realmName: "backbase"
+        externalId: "moustache-bank-usa"
+        legalEntityType: "BANK"
+        subsidiaries:
+          - name: "Sara"
+            realmName: "backbase"
+            externalId: "sara"
+            legalEntityType: "CUSTOMER"
+            administrators:
+              - externalId: "sara"
+                fullName: "Sara Jones"
+                identityLinkStrategy: "CREATE_IN_IDENTITY"
+                emailAddress:
+                  address: "sara@email.com"
+                mobileNumber:
+                  number: "1234567890"
+            users:
+              - user:
+                  externalId: "sara"
+                  identityLinkStrategy: "CREATE_IN_IDENTITY"
+                referenceJobRoleNames:
+                  - "Retail User - USA"
+            productGroups:
+              - name: "sara-arrangements"
+                description: "Product group containing user arrangements"
+                currentAccounts:
+                  - externalId: "021000021"
+                    BBAN: "021000021"
+                    name: "Sara's Current Account 1"
+                    productTypeExternalId: "current-account"
+                    currency: "USD"
+                    externalTransferAllowed: true
+                    availableBalance:
+                      currencyCode: "USD"
+                      amount: 1055.5
+                    bookedBalance:
+                      currencyCode: "USD"
+                      amount: 1055.5
+                savingAccounts:
+                  - externalId: "021000022"
+                    BBAN: "021000022"
+                    name: "Sara's Savings Account 1"
+                    productTypeExternalId: "savings-account"
+                    currency: "USD"
+                    externalTransferAllowed: false
+                    availableBalance:
+                      currencyCode: "USD"
+                      amount: 3820.2
+                    bookedBalance:
+                      currencyCode: "USD"
+                      amount: 3820.2
+                    accountInterestRate: 0.05
+                    termUnit: "Quarterly"
+                  - externalId: "021000023"
+                    BBAN: "021000023"
+                    name: "Sara's Savings Account 2"
+                    productTypeExternalId: "savings-account"
+                    currency: "USD"
+                    externalTransferAllowed: false
+                    availableBalance:
+                      currencyCode: "USD"
+                      amount: 155.5
+                    bookedBalance:
+                      currencyCode: "USD"
+                      amount: 155.5
+                    accountInterestRate: 0.05
+                    termUnit: "Quarterly"

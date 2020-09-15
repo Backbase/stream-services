@@ -35,11 +35,6 @@ public class LegalEntityGeneratorConfigurationProperties {
     private Map<Integer, Double> distribution = Collections.singletonMap(1, 1d);
 
     /**
-     * Job Profile Template ID.
-     */
-    private String jobProfileTemplateId = "full-access-sepa";
-
-    /**
      * Generate Products for Legal Entity.
      */
     private boolean generateProducts = true;

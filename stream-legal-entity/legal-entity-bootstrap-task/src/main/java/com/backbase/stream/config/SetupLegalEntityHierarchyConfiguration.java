@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.task.configuration.EnableTask;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Flux;
@@ -24,7 +23,6 @@ import reactor.core.publisher.Flux;
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
 public class SetupLegalEntityHierarchyConfiguration {
 
-    private final ApplicationContext applicationContext;
     private final LegalEntitySaga legalEntitySaga;
     private BootstrapConfigurationProperties bootstrapConfigurationProperties;
 
