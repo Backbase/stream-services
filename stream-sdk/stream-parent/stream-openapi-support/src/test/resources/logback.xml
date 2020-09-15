@@ -18,10 +18,7 @@
     <logger name="io.netty.util" level="WARN"/>
     <logger name="reactor.netty.http.client" level="WARN"/>
     <logger name="reactor.netty.channel.FluxReceive" level="WARN"/>
-<!--    <logger name="org.mongodb.driver.protocol.command" level="OFF"/>-->
-<!--    <logger name="org.springframework.data" level="OFF"/>-->
 <!--    <logger name="org.springframework" level="WARN"/>-->
-<!--    <logger name="org.mongodb.driver" level="OFF"/>-->
 <!--    <logger name="reactor.netty.resources.PooledConnectionProvider" level="INFO"/>-->
 <!--    <logger name="org.springframework.web.reactive.function.client.ExchangeFunctions" level="WARN"/>-->
 <!--    <logger name="org.springframework.cloud.sleuth.annotation" level="debug"/>-->

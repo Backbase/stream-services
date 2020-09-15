@@ -1,0 +1,52 @@
+---
+id: "limits"
+name: "Limits"
+functions:
+- name: "Manage Global Limits"
+  functionId: "1040"
+  functionCode: "manage.global.limits"
+  resourceName: "Limits"
+  resourceCode: "limits"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false
+- name: "Manage Shadow Limits"
+  functionId: "1014"
+  functionCode: "manage.shadow.limits"
+  resourceName: "Limits"
+  resourceCode: "limits"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false
+- name: "Manage Limits"
+  functionId: "1012"
+  functionCode: "manage.limits"
+  resourceName: "Limits"
+  resourceCode: "limits"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false

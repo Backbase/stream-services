@@ -15,7 +15,6 @@
   <logger name="io.netty.util" level="OFF"/>
   <logger name="reactor.netty.http.client" level="DEBUG"/>
   <logger name="reactor.netty.channel.FluxReceive" level="INFO"/>
-  <logger name="org.mongodb.driver.protocol.command" level="WARN"/>
   <logger name="reactor.netty.resources.PooledConnectionProvider" level="INFO"/>
   <logger name="org.springframework.web.HttpLogging" level="DEBUG"/>
   <logger name="org.springframework.http.codec.json.Jackson2JsonDecoder" level="INFO"/>

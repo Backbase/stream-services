@@ -1,0 +1,32 @@
+---
+id: "personal.finance.management"
+name: "Personal Finance Management"
+functions:
+- name: "Manage Budgets"
+  functionId: "1047"
+  functionCode: "manage.budgets"
+  resourceName: "Personal Finance Management"
+  resourceCode: "personal.finance.management"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+- name: "Manage Saving Goals"
+  functionId: "1048"
+  functionCode: "manage.saving.goals"
+  resourceName: "Personal Finance Management"
+  resourceCode: "personal.finance.management"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false

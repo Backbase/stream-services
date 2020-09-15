@@ -1,0 +1,22 @@
+---
+id: "batch"
+name: "Batch"
+functions:
+- name: "Batch - SEPA CT"
+  functionId: "1037"
+  functionCode: "batch.sepa"
+  resourceName: "Batch"
+  resourceCode: "batch"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false
+  - privilege: "cancel"
+    supportsLimit: false

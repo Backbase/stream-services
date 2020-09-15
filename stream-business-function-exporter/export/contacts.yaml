@@ -1,0 +1,50 @@
+---
+id: "contacts"
+name: "Contacts"
+functions:
+- name: "Contacts"
+  functionId: "1005"
+  functionCode: "contacts"
+  resourceName: "Contacts"
+  resourceCode: "contacts"
+  privileges:
+  - privilege: "delete"
+    supportsLimit: false
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false
+- name: "US Billpay Payees-Search"
+  functionId: "1024"
+  functionCode: "us.billpay.payees.search"
+  resourceName: "Contacts"
+  resourceCode: "contacts"
+  privileges:
+  - privilege: "execute"
+    supportsLimit: false
+- name: "US Billpay Payees"
+  functionId: "1022"
+  functionCode: "us.billpay.payees"
+  resourceName: "Contacts"
+  resourceCode: "contacts"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+- name: "US Billpay Payees-Summary"
+  functionId: "1025"
+  functionCode: "us.billpay.payees.summary"
+  resourceName: "Contacts"
+  resourceCode: "contacts"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false

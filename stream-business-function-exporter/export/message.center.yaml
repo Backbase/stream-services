@@ -1,0 +1,52 @@
+---
+id: "message.center"
+name: "Message Center"
+functions:
+- name: "Manage Topics"
+  functionId: "1031"
+  functionCode: "manage.topics"
+  resourceName: "Message Center"
+  resourceCode: "message.center"
+  privileges:
+  - privilege: "execute"
+    supportsLimit: false
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+- name: "Supervise Messages"
+  functionId: "1039"
+  functionCode: "supervise.messages"
+  resourceName: "Message Center"
+  resourceCode: "message.center"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false
+- name: "Manage Messages"
+  functionId: "1038"
+  functionCode: "manage.messages"
+  resourceName: "Message Center"
+  resourceCode: "message.center"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false

@@ -1,0 +1,46 @@
+---
+id: "identities"
+name: "Identities"
+functions:
+- name: "Unlock User"
+  functionId: "1050"
+  functionCode: "unlock.user"
+  resourceName: "Identities"
+  resourceCode: "identities"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false
+- name: "Lock User"
+  functionId: "1049"
+  functionCode: "lock.user"
+  resourceName: "Identities"
+  resourceCode: "identities"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false
+- name: "Manage Identities"
+  functionId: "1034"
+  functionCode: "manage.identities"
+  resourceName: "Identities"
+  resourceCode: "identities"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false

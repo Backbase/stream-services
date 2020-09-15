@@ -1,0 +1,30 @@
+---
+id: "actions"
+name: "Actions"
+functions:
+- name: "Manage Action Recipes"
+  functionId: "1029"
+  functionCode: "manage.actions.recipes"
+  resourceName: "Actions"
+  resourceCode: "actions"
+  privileges:
+  - privilege: "execute"
+    supportsLimit: false
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+- name: "Access Actions History"
+  functionId: "1027"
+  functionCode: "access.actions.history"
+  resourceName: "Actions"
+  resourceCode: "actions"
+  privileges:
+  - privilege: "execute"
+    supportsLimit: false
+  - privilege: "view"
+    supportsLimit: false

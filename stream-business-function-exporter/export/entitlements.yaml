@@ -1,0 +1,36 @@
+---
+id: "entitlements"
+name: "Entitlements"
+functions:
+- name: "Manage Data Groups"
+  functionId: "1019"
+  functionCode: "manage.data.groups"
+  resourceName: "Entitlements"
+  resourceCode: "entitlements"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false
+- name: "Manage Function Groups"
+  functionId: "1020"
+  functionCode: "manage.function.groups"
+  resourceName: "Entitlements"
+  resourceCode: "entitlements"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false

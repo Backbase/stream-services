@@ -75,14 +75,7 @@ public class DbsWebClientConfigurationTest {
     @Test
     public void testWebClient() {
 
-//        stubFor(WireMock.post("/api/token-converter/oauth/token")
-//            .willReturn(
-//                okJson("{\"token_type\": \"Bearer\",\"access_token\":\"{{randomValue length=20 type='ALPHANUMERIC'}}\"}")));
-//
-//        stubFor(WireMock.get("/hello-world").willReturn(aResponse().withStatus(200)));
-
         String tokenUri = "http://localhost:" + PORT + "/api/token-converter/oauth/token";
-//        String tokenUri = "https://stream-demo.proto.backbasecloud.com/api/token-converter/oauth/token";
 
         ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("dbs")
             .clientAuthenticationMethod(ClientAuthenticationMethod.POST)
@@ -119,8 +112,6 @@ public class DbsWebClientConfigurationTest {
             builder);
 
         Assert.assertNotNull(webClient);
-
-//        String testUrl = "https://stream-api.proto.backbasecloud.com/legalentity-presentation-service/service-api/v2/legalentities/external/bank";
 
         String testUrl = "http://localhost:" + PORT + "/hello-world";
         Mono<ClientResponse> exchange = webClient.get().uri(testUrl)

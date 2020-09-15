@@ -1,0 +1,12 @@
+---
+id: "user"
+name: "User"
+functions:
+- name: "Manage Users"
+  functionId: "1010"
+  functionCode: "manage.users"
+  resourceName: "User"
+  resourceCode: "user"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false

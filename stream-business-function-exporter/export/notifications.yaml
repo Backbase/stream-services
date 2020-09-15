@@ -1,0 +1,20 @@
+---
+id: "notifications"
+name: "Notifications"
+functions:
+- name: "Manage Notifications"
+  functionId: "1030"
+  functionCode: "manage.notifications"
+  resourceName: "Notifications"
+  resourceCode: "notifications"
+  privileges:
+  - privilege: "approve"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false

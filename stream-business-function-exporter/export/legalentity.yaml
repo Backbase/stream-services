@@ -1,0 +1,20 @@
+---
+id: "legalentity"
+name: "Legal Entity"
+functions:
+- name: "Manage Legal Entities"
+  functionId: "1011"
+  functionCode: "manage.legalentities"
+  resourceName: "Legal Entity"
+  resourceCode: "legalentity"
+  privileges:
+  - privilege: "view"
+    supportsLimit: false
+  - privilege: "create"
+    supportsLimit: false
+  - privilege: "edit"
+    supportsLimit: false
+  - privilege: "delete"
+    supportsLimit: false
+  - privilege: "approve"
+    supportsLimit: false

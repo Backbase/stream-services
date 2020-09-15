@@ -58,7 +58,7 @@ spring:
       client:
         provider:
           dbs:
-            token-uri: https://stream-demo.proto.backbasecloud.com/api/token-converter/oauth/token
+            token-uri: https://token-converter:8080/oauth/token
         registration:
           dbs:
             authorization-grant-type: client_credentials
@@ -69,12 +69,12 @@ spring:
 backbase:
   stream:
     dbs:
-      access-control-pandp-base-url: https://stream-api.proto.backbasecloud.com/accesscontrol-pandp-service/service-api/v2
-      access-group-presentation-base-url: https://stream-api.proto.backbasecloud.com/accessgroup-presentation-service/service-api/v2
-      account-presentation-base-url: https://stream-api.proto.backbasecloud.com/account-presentation-service/service-api/v2
-      legal-entity-presentation-base-url:  https://stream-api.proto.backbasecloud.com/legalentity-presentation-service/service-api/v2
-      user-presentation-base-url: https://stream-api.proto.backbasecloud.com/user-presentation-service/service-api/v2
-      transaction-presentation-base-url: https://stream-api.proto.backbasecloud.com/transaction-presentation-service/service-api/v2
+      access-group-presentation-base-url: http://access-control:8080
+      access-control-pandp-base-url: http://access-control:8080
+      account-presentation-base-url: http://arrangement-manager:8080
+      legal-entity-presentation-base-url: http://access-control:8080
+      user-presentation-base-url: http://user-manager:8080
+      transaction-presentation-base-url: http://transaction-manager:8080
 ```
 
 When deploying in a Kubernetes environment the configuration should look something like this:
@@ -92,16 +92,16 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: https://stream-demo.proto.backbasecloud.com/api/token-converter/oauth/token
+            token-uri: https://token-converter:8080/oauth/token
 backbase:
   stream:
     dbs:
-      access-group-presentation-base-url: http://dbs-accessgrouppresentationservice.stream-demo.svc.cluster.local:8080/accessgroup-presentation-service/service-api/v2
-      access-control-pandp-base-url: http://dbs-accesscontrolpandpservice.stream-demo.svc.cluster.local:8080/accesscontrol-pandp-service/service-api/v2
-      account-presentation-base-url: http://dbs-accountpresentationservice.stream-demo.svc.cluster.local:8080/account-presentation-service/service-api/v2
-      legal-entity-presentation-base-url:  http://dbs-legalentitypresentationservice.stream-demo.svc.cluster.local:8080/legalentity-presentation-service/service-api/v2
-      user-presentation-base-url: http://dbs-userpresentationservice.stream-demo.svc.cluster.local:8080/user-presentation-service/service-api/v2
-      transaction-presentation-base-url: http://dbs-transactionpresentationservice.stream-demo.svc.cluster.local:8080/transaction-presentation-service/service-api/v2
+      access-group-presentation-base-url: http://access-control:8080
+      access-control-pandp-base-url: http://access-control:8080
+      account-presentation-base-url: http://arrangement-manager:8080
+      legal-entity-presentation-base-url: http://access-control:8080
+      user-presentation-base-url: http://user-manager:8080
+      transaction-presentation-base-url: http://transaction-manager:8080
 ```
 
 ## Legal Entity Bootstrap

@@ -37,6 +37,8 @@
         <module>stream-legal-entity</module>
         <module>stream-limits</module>
 
+        <module>stream-business-function-exporter</module>
+
     </modules>
 
     <properties>
