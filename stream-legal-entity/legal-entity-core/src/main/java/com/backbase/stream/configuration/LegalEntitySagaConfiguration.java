@@ -41,8 +41,7 @@ public class LegalEntitySagaConfiguration {
             userService,
             accessGroupService,
             productIngestionSaga,
-            sinkConfigurationProperties,
-            objectMapper
+            sinkConfigurationProperties
         );
     }
 

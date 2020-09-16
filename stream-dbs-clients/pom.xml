@@ -15,7 +15,7 @@
 
     <properties>
         <sonar.skip>true</sonar.skip>
-        <boat-maven-plugin.version>0.2.1</boat-maven-plugin.version>
+        <boat-maven-plugin.version>0.2.2</boat-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -186,49 +186,47 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>user-presentation-service</id>
+                        <id>user-manager-service</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/user/user-presentation-spec/service-api/service-api/openapi.yaml
+                                ${project.basedir}/api/com/backbase/dbs/user/user-manager-spec/service-api/service-api/openapi.yaml
                             </inputSpec>
-
                             <modelPackage>com.backbase.dbs.user.presentation.service.model</modelPackage>
                             <apiPackage>com.backbase.dbs.user.presentation.service.api</apiPackage>
-
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>user-pnp-command-service</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/user/user-pandp-command-spec/service-api/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.user.pandp.command.service.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.user.pandp.command.service.api</apiPackage>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>user-pnp-query-service</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/user/user-pandp-query-spec/service-api/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.user.pandp.query.service.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.user.pandp.query.service.api</apiPackage>
-                        </configuration>
-                    </execution>
+<!--                    <execution>-->
+<!--                        <id>user-pnp-command-service</id>-->
+<!--                        <phase>generate-sources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>generate-webclient-embedded</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <inputSpec>-->
+<!--                                ${project.basedir}/api/com/backbase/dbs/user/user-pandp-command-spec/service-api/service-api/openapi.yaml-->
+<!--                            </inputSpec>-->
+<!--                            <modelPackage>com.backbase.dbs.user.pandp.command.service.model</modelPackage>-->
+<!--                            <apiPackage>com.backbase.dbs.user.pandp.command.service.api</apiPackage>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>user-pnp-query-service</id>-->
+<!--                        <phase>generate-sources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>generate-webclient-embedded</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <inputSpec>-->
+<!--                                ${project.basedir}/api/com/backbase/dbs/user/user-pandp-query-spec/service-api/service-api/openapi.yaml-->
+<!--                            </inputSpec>-->
+<!--                            <modelPackage>com.backbase.dbs.user.pandp.query.service.model</modelPackage>-->
+<!--                            <apiPackage>com.backbase.dbs.user.pandp.query.service.api</apiPackage>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
                     <execution>
                         <id>transaction-presentation-service</id>
                         <phase>generate-sources</phase>
@@ -251,7 +249,7 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/audit/audit-presentation-spec/service-api/service-api/openapi.yaml
+                                ${project.basedir}/api/com/backbase/dbs/audit/audit-spec/service-api/service-api/openapi.yaml
                             </inputSpec>
                             <modelPackage>com.backbase.dbs.audit.service.model</modelPackage>
                             <apiPackage>com.backbase.dbs.audit.service.api</apiPackage>
@@ -265,7 +263,7 @@
                         </goals>
                         <configuration>
                             <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/limit/limits-presentation-spec/service-api/service-api/openapi.yaml
+                                ${project.basedir}/api/com/backbase/dbs/limit/limit-spec/service-api/service-api/openapi.yaml
                             </inputSpec>
                             <apiPackage>com.backbase.dbs.limit.service.api</apiPackage>
                             <modelPackage>com.backbase.dbs.limit.service.model</modelPackage>

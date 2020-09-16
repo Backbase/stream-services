@@ -1,25 +1,33 @@
 package com.backbase.stream.service;
 
 import com.backbase.dbs.user.presentation.service.api.UsersApi;
-import com.backbase.dbs.user.presentation.service.model.*;
+import com.backbase.dbs.user.presentation.service.model.AddRealm;
+import com.backbase.dbs.user.presentation.service.model.AssignRealm;
+import com.backbase.dbs.user.presentation.service.model.BatchUser;
+import com.backbase.dbs.user.presentation.service.model.CreateIdentityRequest;
+import com.backbase.dbs.user.presentation.service.model.CreateUser;
+import com.backbase.dbs.user.presentation.service.model.GetUserById;
+import com.backbase.dbs.user.presentation.service.model.GetUsersByLegalEntityIds;
+import com.backbase.dbs.user.presentation.service.model.GetUsersByLegalEntityIdsResponse;
+import com.backbase.dbs.user.presentation.service.model.Realm;
+import com.backbase.dbs.user.presentation.service.model.ReplaceIdentity;
+import com.backbase.dbs.user.presentation.service.model.UserCreated;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.mapper.RealmMapper;
 import com.backbase.stream.mapper.UserMapper;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
-import org.springframework.util.StringUtils;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
+import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
 /**
  * Stream User Management. Still needs to be adapted to use Identity correctly
@@ -41,7 +49,7 @@ public class UserService {
      * @return User if exists. Empty if not.
      */
     public Mono<User> getUserByExternalId(String externalId) {
-        return usersApi.getExternalIdByExternalId(externalId)
+        return usersApi.getExternalIdByExternalIdgetUserByExternalId(externalId)
                 .doOnNext(userItem -> log.info("Found user: {} for externalId: {}", userItem.getFullName(), userItem.getExternalId()))
                 .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
                         handleUserNotFound(externalId, notFound.getResponseBodyAsString()))
@@ -55,7 +63,7 @@ public class UserService {
      * @return Identity User
      */
     public Mono<User> getIdentityUserByExternalId(String externalId) {
-        return usersApi.getUserIdByUserId(externalId)
+        return usersApi.getExternalIdByExternalIdgetUserByExternalId(externalId)
                 .doOnNext(userItem -> log.info("Found user: {} for externalId: {}", userItem.getFullName(), userItem.getExternalId()))
                 .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
                         handleUserNotFound(externalId, notFound.getResponseBodyAsString()))
@@ -63,17 +71,18 @@ public class UserService {
     }
 
 
-    private Mono<? extends UserItem> handleUserNotFound(String externalId, String responseBodyAsString) {
+    private Mono<? extends GetUserById> handleUserNotFound(String externalId, String responseBodyAsString) {
         log.info("User with externalId: {} does not exist: {}", externalId, responseBodyAsString);
         return Mono.empty();
     }
 
     public Mono<User> createUser(User user, String legalEntityExternalId) {
-        UserCreateItem userCreateItem = mapper.toPresentation(user);
-        userCreateItem.setLegalEntityExternalId(legalEntityExternalId);
-        return usersApi.postUsers(userCreateItem)
+        CreateUser createUser = mapper.toPresentation(user);
+        createUser.setLegalEntityExternalId(legalEntityExternalId);
+
+        return usersApi.postUsers(createUser)
                 .doOnError(WebClientResponseException.class, e -> handleCreateUserError(user, e))
-                .map(idItem -> handleCreateUserResult(user, idItem));
+                .map(userCreated -> handleCreateUserResult(user, userCreated));
     }
 
     /**
@@ -82,9 +91,12 @@ public class UserService {
      * @param legalEntityInternalId legal  entity internal id.
      * @return flux of user  items.
      */
-    public Flux<SchemasUserItem> getUsersByLegalEntity(String legalEntityInternalId){
+    public Mono<GetUsersByLegalEntityIdsResponse> getUsersByLegalEntity(String legalEntityInternalId){
         log.debug("Retrieving users for Legal Entity '{}'", legalEntityInternalId);
-        return usersApi.getUsers(legalEntityInternalId, null, null, null, null);
+
+        GetUsersByLegalEntityIds getUsersByLegalEntityIds = new GetUsersByLegalEntityIds();
+        getUsersByLegalEntityIds.addLegalEntityIdsItem(legalEntityInternalId);
+        return usersApi.postLegalEntityIds(getUsersByLegalEntityIds);
     }
 
     /**
@@ -100,12 +112,14 @@ public class UserService {
         //  There is no way to remove user from DBS, so to bypass this we just archive DBS user representing member.
         return usersApi.putUsers(
                 userExternalIds.stream()
-                        .map(userExternalId -> new UserItemPut()
-                                .externalId(userExternalId)
-                                .userUpdate(new UserUpdate()
+                        .map(userExternalId -> {
+                            return new BatchUser()
+                                    .externalId(userExternalId)
+                                    .userUpdate(new com.backbase.dbs.user.presentation.service.model.User()
                                         .externalId("REMOVED_" + userExternalId + "_" + UUID.randomUUID().toString())
                                         .legalEntityId(legalEntityInternalId)
-                                        .fullName("archived_" + userExternalId)))
+                                        .fullName("archived_" + userExternalId));
+                        })
                         .collect(Collectors.toList()))
                 .map(r -> {
                     log.debug("Batch Archive User response: status {} for resource {}, errors: {}",r.getStatus(), r.getResourceId(), r.getErrors());
@@ -132,9 +146,9 @@ public class UserService {
      * @return
      */
     private Mono<Realm> createRealm(final String realmName) {
-        UsersIdentitiesRealmsPostResponse assignRealmRequest = new UsersIdentitiesRealmsPostResponse().realmName(realmName);
+        AddRealm assignRealmRequest = new AddRealm().realmName(realmName);
         return usersApi.postRealms(assignRealmRequest)
-                .doOnNext(realm -> log.info("Realm Created: '{}'", realmName))
+                .doOnNext(addRealmResponse -> log.info("Realm Created: '{}'", addRealmResponse.getId()))
                 .doOnError(WebClientResponseException.class, badRequest ->
                         log.error("Error creating Realm"))
                 .map(realmMapper::toStream);
@@ -179,8 +193,8 @@ public class UserService {
      */
     public Mono<LegalEntity> linkLegalEntityToRealm(LegalEntity legalEntity) {
         log.info("Linking Legal Entity with internal Id '{}' to Realm: '{}'", legalEntity.getInternalId(), legalEntity.getRealmName());
-        AssignRealmResponse assignRealmRequest = new AssignRealmResponse().legalEntityId(legalEntity.getInternalId());
-        return usersApi.postLegalentitiesByRealmName(legalEntity.getRealmName(), assignRealmRequest)
+        AssignRealm assignRealm = new AssignRealm().legalEntityId(legalEntity.getInternalId());
+        return usersApi.postLegalentitiesByRealmName(legalEntity.getRealmName(), assignRealm)
                 .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
                         log.error("Error Linking: {}", badRequest.getResponseBodyAsString()))
                 .then(Mono.just(legalEntity))
@@ -197,22 +211,21 @@ public class UserService {
      * @return the same User with updated internal and external id on success
      */
     public Mono<User> createOrImportIdentityUser(User user, String legalEntityInternalId) {
-
-        IdentityImportItem identityImportItem = new IdentityImportItem();
-        identityImportItem.setLegalEntityInternalId(legalEntityInternalId);
-        identityImportItem.setExternalId(user.getExternalId());
+        CreateIdentityRequest createIdentityRequest = new CreateIdentityRequest();
+        createIdentityRequest.setLegalEntityInternalId(legalEntityInternalId);
+        createIdentityRequest.setExternalId(user.getExternalId());
 
         if (IdentityUserLinkStrategy.CREATE_IN_IDENTITY.equals(user.getIdentityLinkStrategy())) {
             Objects.requireNonNull(user.getFullName(), "User Full Name is required");
             Objects.requireNonNull(user.getEmailAddress(), "User Email Address is required");
             Objects.requireNonNull(user.getMobileNumber(), "User Mobile Number is required");
 
-            identityImportItem.setFullName(user.getFullName());
-            identityImportItem.setEmailAddress(user.getEmailAddress().getAddress());
-            identityImportItem.setMobileNumber(user.getMobileNumber().getNumber());
+            createIdentityRequest.setFullName(user.getFullName());
+            createIdentityRequest.setEmailAddress(user.getEmailAddress().getAddress());
+            createIdentityRequest.setMobileNumber(user.getMobileNumber().getNumber());
         }
 
-        return usersApi.postIdentities(identityImportItem)
+        return usersApi.postIdentities(createIdentityRequest)
                 .map(identityCreatedItem -> {
                     user.setInternalId(identityCreatedItem.getInternalId());
                     user.setExternalId(identityCreatedItem.getExternalId());
@@ -227,16 +240,14 @@ public class UserService {
      * @return {@link Mono<Void>}
      */
     public Mono<Void> updateIdentityUserAttributes(User user) {
-
-        IdentityPutItem identityPutItem = new IdentityPutItem();
-        identityPutItem.attributes(user.getAttributes());
-
-        return usersApi.putInternalIdByInternalId(user.getInternalId(), identityPutItem);
+        ReplaceIdentity replaceIdentity = new ReplaceIdentity();
+        replaceIdentity.attributes(user.getAttributes());
+        return usersApi.putInternalIdByInternalId(user.getInternalId(), replaceIdentity);
     }
 
-    private User handleCreateUserResult(User user, IdItem idItem) {
-        log.info("Created user: {} with internalId: {}", user.getFullName(), idItem.getId());
-        user.setInternalId(idItem.getId());
+    private User handleCreateUserResult(User user, UserCreated userCreated) {
+        log.info("Created user: {} with internalId: {}", user.getFullName(), userCreated.getId());
+        user.setInternalId(userCreated.getId());
         return user;
     }
 

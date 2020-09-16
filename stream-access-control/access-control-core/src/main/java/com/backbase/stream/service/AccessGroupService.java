@@ -28,7 +28,7 @@ import com.backbase.dbs.accessgroup.presentation.service.model.PresentationServi
 import com.backbase.dbs.accessgroup.presentation.service.model.PresentationServiceAgreementUsersBatchUpdate;
 import com.backbase.dbs.accessgroup.presentation.service.model.ServicesAgreementIngest;
 import com.backbase.dbs.user.presentation.service.api.UsersApi;
-import com.backbase.dbs.user.presentation.service.model.UserItem;
+import com.backbase.dbs.user.presentation.service.model.GetUserById;
 import com.backbase.stream.legalentity.model.ApprovalStatus;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -94,7 +94,6 @@ public class AccessGroupService {
     private final AccesscontrolApi accessControlApi;
     private final AccessgroupsApi accessGroupServiceApi;
     private final UsersApi usersApi;
-
 
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
@@ -594,8 +593,8 @@ public class AccessGroupService {
         return accessControlApi.getAdminsByServiceAgreementId(serviceAgreement.getInternalId())
                 .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins()))
                 // get External  ID for each admin.
-                .flatMap(usersApi::getUserIdByUserId)
-                .map(UserItem::getExternalId)
+                .flatMap(usersApi::getExternalIdByExternalIdgetUserByExternalId)
+                .map(GetUserById::getExternalId)
                 .collectList()
                 .doOnNext(adminIds -> log.debug("Found  admins: {}", adminIds))
                 .map(adminsExternalIds -> adminsExternalIds.stream()

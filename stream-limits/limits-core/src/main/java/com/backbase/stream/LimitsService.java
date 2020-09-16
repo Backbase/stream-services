@@ -37,7 +37,7 @@ public class LimitsService {
     public Flux<CreateLimitResponse> createUserLimits(Flux<CreateLimitRequest> items) {
         Flux<CreateLimitRequest> cleanItems = items.map(item -> {
             if (isUUID(item.getUserBBID())) {
-                usersApi.getExternalIdByExternalId(item.getUserBBID()).subscribe(userItem -> {
+                usersApi.getExternalIdByExternalIdgetUserByExternalid(item.getUserBBID()).subscribe(userItem -> {
                     item.setUserBBID(userItem.getId());
                 });
             }

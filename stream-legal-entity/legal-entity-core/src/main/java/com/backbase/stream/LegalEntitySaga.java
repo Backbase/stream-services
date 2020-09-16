@@ -1,9 +1,7 @@
 package com.backbase.stream;
 
-import brave.SpanCustomizer;
-import brave.Tracer;
 import com.backbase.dbs.accesscontrol.query.service.model.SchemaFunctionGroupItem;
-import com.backbase.dbs.user.presentation.service.model.SchemasUserItem;
+import com.backbase.dbs.user.presentation.service.model.GetUserById;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.exceptions.AccessGroupException;
 import com.backbase.stream.exceptions.LegalEntityException;
@@ -30,7 +28,6 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +38,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
-import org.springframework.cloud.sleuth.annotation.NewSpan;
 import org.springframework.cloud.sleuth.annotation.SpanTag;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
@@ -86,20 +81,13 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private final AccessGroupService accessGroupService;
     private final ProductIngestionSaga productIngestionSaga;
 
-    @Autowired
-    Tracer tracer;
-
-    @Autowired
-    SpanCustomizer span;
-
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
 
     public LegalEntitySaga(LegalEntityService legalEntityService,
                            UserService userService,
                            AccessGroupService accessGroupService,
                            ProductIngestionSaga productIngestionSaga,
-                           LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties,
-                           ObjectMapper objectMapper) {
+                           LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
         this.accessGroupService = accessGroupService;
@@ -107,7 +95,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
     }
 
-    @NewSpan
     @Override
     public Mono<LegalEntityTask> executeTask(@SpanTag(value = "streamTask") LegalEntityTask streamTask) {
         return upsertLegalEntity(streamTask)
@@ -150,12 +137,14 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(data -> {
                 LegalEntity le = data.getT2();
                 return userService.getUsersByLegalEntity(le.getInternalId())
-                    .collectList()
-                    .map(users -> Tuples.of(data.getT1(), le, users));
+                    .map(usersByLegalEntityIdsResponse -> {
+                        List<GetUserById> users = usersByLegalEntityIdsResponse.getUsers();
+                        return Tuples.of(data.getT1(), le, users);
+                    });
             })
             .flatMap(data -> {
                 ServiceAgreement sa = data.getT1();
-                List<SchemasUserItem> users = data.getT3();
+                List<GetUserById> users = data.getT3();
                 return Flux.fromIterable(users)
                     .flatMap(user -> accessGroupService.removePermissionsForUser(sa.getInternalId(), user.getId())
                         .thenReturn(user.getExternalId()))
@@ -290,7 +279,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     @ContinueSpan(log = "processJobProfiles")
     private Mono<LegalEntityTask> processJobProfiles(LegalEntityTask streamTask) {
-        log.info("Processing Job Profiles...");
+        log.info("Processing Job Profiles for: {}", streamTask.getName());
         LegalEntity legalEntity = streamTask.getData();
         if (legalEntity.getUsers() == null) {
             streamTask.warn(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, REJECTED, legalEntity.getExternalId(), legalEntity.getInternalId(), "No Job Profile Users defined in Legal Entity. No Business Function Groups will be assigned between a User and Legal Entity. ");
@@ -478,7 +467,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 .doOnNext(existingUser -> streamTask.info(IDENTITY_USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId()));
         return getExistingIdentityUser.switchIfEmpty(createNewIdentityUser);
     }
-
 
     private Mono<LegalEntityTask> setupServiceAgreement(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
