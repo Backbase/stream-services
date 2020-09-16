@@ -37,7 +37,7 @@ public class ProductConfiguration {
         com.backbase.dbs.accounts.presentation.service.ApiClient apiClient =
             new com.backbase.dbs.accounts.presentation.service.ApiClient(
                 dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getAccountPresentationBaseUrl());
+        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getArrangementManagerBaseUrl());
         return apiClient;
     }
 

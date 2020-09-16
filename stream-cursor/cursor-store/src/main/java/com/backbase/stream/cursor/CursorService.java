@@ -1,24 +1,24 @@
 package com.backbase.stream.cursor;
 
+import com.backbase.stream.cursor.configuration.CursorRepository;
+import com.backbase.stream.cursor.mapper.CursorMapper;
 import com.backbase.stream.cursor.model.IngestionCursor;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.mapstruct.factory.Mappers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
-/**
- * Reactive Cursor Service that stores cursors in a MongoDB.
- */
 @SuppressWarnings("unused")
 @Slf4j
 @AllArgsConstructor
 public class CursorService {
 
-    private final ReactiveMongoTemplate reactiveMongoTemplate;
+    private final CursorRepository cursorRepository;
+    private final CursorMapper cursorMapper = Mappers.getMapper(CursorMapper.class);
 
     /**
      * Find by Unique Id.
@@ -27,7 +27,7 @@ public class CursorService {
      * @return Ingestion Cursor
      */
     public Mono<IngestionCursor> findById(UUID uuid) {
-        return reactiveMongoTemplate.findById(uuid, IngestionCursor.class);
+        return cursorRepository.findById(uuid.toString()).map(cursorMapper::toIngestionCursor);
     }
 
     /**
@@ -37,7 +37,9 @@ public class CursorService {
      * @return Ingestion Cursor
      */
     public Mono<IngestionCursor> create(Mono<IngestionCursor> ingestionCursor) {
-        return reactiveMongoTemplate.save(ingestionCursor);
+        return ingestionCursor.map(cursorMapper::toCursorItem)
+            .flatMap(cursorRepository::save)
+            .map(cursorMapper::toIngestionCursor);
     }
 
     /**
@@ -53,12 +55,10 @@ public class CursorService {
     }
 
     private Mono<IngestionCursor> updateCursorById(UUID cursorId, IngestionCursor cursor) {
-        return reactiveMongoTemplate.findById(cursorId, IngestionCursor.class)
-            .map(ingestionCursor ->
-                ingestionCursor
-                    .cursorModifiedAt(OffsetDateTime.now())
-                    .cursorState(cursor.getCursorState())
-            );
+        return Mono.just(cursor).map(ingestionCursor -> cursor.id(cursorId).cursorModifiedAt(OffsetDateTime.now()))
+            .map(cursorMapper::toCursorItem)
+            .flatMap(cursorRepository::save)
+            .map(cursorMapper::toIngestionCursor);
     }
 
     /**
@@ -67,7 +67,7 @@ public class CursorService {
      * @return Mono on completion
      */
     public Mono<Void> deleteAllCursors() {
-        return reactiveMongoTemplate.dropCollection(IngestionCursor.class);
+        return cursorRepository.deleteAll();
     }
 
     /**
@@ -76,6 +76,6 @@ public class CursorService {
      * @return List of Ingestion Cursors
      */
     public Flux<IngestionCursor> findAllCursors() {
-        return reactiveMongoTemplate.findAll(IngestionCursor.class);
+        return cursorRepository.findAll().map(cursorMapper::toIngestionCursor);
     }
 }
