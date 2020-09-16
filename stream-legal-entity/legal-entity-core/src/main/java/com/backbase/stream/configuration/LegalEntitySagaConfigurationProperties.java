@@ -13,6 +13,6 @@ public class LegalEntitySagaConfigurationProperties extends StreamWorkerConfigur
     /**
      * Enable identity integration
      */
-    private boolean useIdentityIntegration = false;
+    private boolean useIdentityIntegration = true;
 
 }

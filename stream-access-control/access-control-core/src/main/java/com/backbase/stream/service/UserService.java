@@ -50,10 +50,10 @@ public class UserService {
      */
     public Mono<User> getUserByExternalId(String externalId) {
         return usersApi.getExternalIdByExternalIdgetUserByExternalId(externalId)
-                .doOnNext(userItem -> log.info("Found user: {} for externalId: {}", userItem.getFullName(), userItem.getExternalId()))
-                .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
-                        handleUserNotFound(externalId, notFound.getResponseBodyAsString()))
-                .map(mapper::toStream);
+            .doOnNext(userItem -> log.info("Found user: {} for externalId: {}", userItem.getFullName(), userItem.getExternalId()))
+            .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
+                handleUserNotFound(externalId, notFound.getResponseBodyAsString()))
+            .map(mapper::toStream);
     }
 
     /**
@@ -64,10 +64,10 @@ public class UserService {
      */
     public Mono<User> getIdentityUserByExternalId(String externalId) {
         return usersApi.getExternalIdByExternalIdgetUserByExternalId(externalId)
-                .doOnNext(userItem -> log.info("Found user: {} for externalId: {}", userItem.getFullName(), userItem.getExternalId()))
-                .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
-                        handleUserNotFound(externalId, notFound.getResponseBodyAsString()))
-                .map(mapper::toStream);
+            .doOnNext(userItem -> log.info("Found user: {} for externalId: {}", userItem.getFullName(), userItem.getExternalId()))
+            .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
+                handleUserNotFound(externalId, notFound.getResponseBodyAsString()))
+            .map(mapper::toStream);
     }
 
 
@@ -81,8 +81,8 @@ public class UserService {
         createUser.setLegalEntityExternalId(legalEntityExternalId);
 
         return usersApi.postUsers(createUser)
-                .doOnError(WebClientResponseException.class, e -> handleCreateUserError(user, e))
-                .map(userCreated -> handleCreateUserResult(user, userCreated));
+            .doOnError(WebClientResponseException.class, e -> handleCreateUserError(user, e))
+            .map(userCreated -> handleCreateUserResult(user, userCreated));
     }
 
     /**
@@ -91,7 +91,7 @@ public class UserService {
      * @param legalEntityInternalId legal  entity internal id.
      * @return flux of user  items.
      */
-    public Mono<GetUsersByLegalEntityIdsResponse> getUsersByLegalEntity(String legalEntityInternalId){
+    public Mono<GetUsersByLegalEntityIdsResponse> getUsersByLegalEntity(String legalEntityInternalId) {
         log.debug("Retrieving users for Legal Entity '{}'", legalEntityInternalId);
 
         GetUsersByLegalEntityIds getUsersByLegalEntityIds = new GetUsersByLegalEntityIds();
@@ -111,32 +111,32 @@ public class UserService {
     public Mono<Void> archiveUsers(String legalEntityInternalId, List<String> userExternalIds) {
         //  There is no way to remove user from DBS, so to bypass this we just archive DBS user representing member.
         return usersApi.putUsers(
-                userExternalIds.stream()
-                        .map(userExternalId -> {
-                            return new BatchUser()
-                                    .externalId(userExternalId)
-                                    .userUpdate(new com.backbase.dbs.user.presentation.service.model.User()
-                                        .externalId("REMOVED_" + userExternalId + "_" + UUID.randomUUID().toString())
-                                        .legalEntityId(legalEntityInternalId)
-                                        .fullName("archived_" + userExternalId));
-                        })
-                        .collect(Collectors.toList()))
-                .map(r -> {
-                    log.debug("Batch Archive User response: status {} for resource {}, errors: {}",r.getStatus(), r.getResourceId(), r.getErrors());
-                    if (!r.getStatus().getValue().equals("200")) {
-                        throw new RuntimeException(
-                                MessageFormat.format("Failed item in the batch for User Update: status {0} for resource {1}, errors: {2}",
-                                        r.getStatus(), r.getResourceId(), r.getErrors())
-                        );
-                    }
-                    return r;
+            userExternalIds.stream()
+                .map(userExternalId -> {
+                    return new BatchUser()
+                        .externalId(userExternalId)
+                        .userUpdate(new com.backbase.dbs.user.presentation.service.model.User()
+                            .externalId("REMOVED_" + userExternalId + "_" + UUID.randomUUID().toString())
+                            .legalEntityId(legalEntityInternalId)
+                            .fullName("archived_" + userExternalId));
                 })
-                .collectList()
-                .onErrorResume(WebClientResponseException.class, e -> {
-                    log.error("Failed to delete user: {}", e.getResponseBodyAsString(), e);
-                    return Mono.error(e);
-                })
-                .then();
+                .collect(Collectors.toList()))
+            .map(r -> {
+                log.debug("Batch Archive User response: status {} for resource {}, errors: {}", r.getStatus(), r.getResourceId(), r.getErrors());
+                if (!r.getStatus().getValue().equals("200")) {
+                    throw new RuntimeException(
+                        MessageFormat.format("Failed item in the batch for User Update: status {0} for resource {1}, errors: {2}",
+                            r.getStatus(), r.getResourceId(), r.getErrors())
+                    );
+                }
+                return r;
+            })
+            .collectList()
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Failed to delete user: {}", e.getResponseBodyAsString(), e);
+                return Mono.error(e);
+            })
+            .then();
     }
 
     /**
@@ -148,40 +148,42 @@ public class UserService {
     private Mono<Realm> createRealm(final String realmName) {
         AddRealm assignRealmRequest = new AddRealm().realmName(realmName);
         return usersApi.postRealms(assignRealmRequest)
-                .doOnNext(addRealmResponse -> log.info("Realm Created: '{}'", addRealmResponse.getId()))
-                .doOnError(WebClientResponseException.class, badRequest ->
-                        log.error("Error creating Realm"))
-                .map(realmMapper::toStream);
+            .doOnNext(addRealmResponse -> log.info("Realm Created: '{}'", addRealmResponse.getId()))
+            .doOnError(WebClientResponseException.class, badRequest ->
+                log.error("Error creating Realm"))
+            .map(realmMapper::toStream);
     }
 
     /**
      * Checks for existing Realms and Returns if matching realm is found.
+     *
      * @param realmName
      * @return
      */
     private Mono<Realm> existingRealm(final String realmName) {
         log.info("Checking for existing Realm '{}'", realmName);
         return usersApi.getRealms(null)
-                .doOnError(WebClientResponseException.class, badRequest ->
-                        log.error("Error getting Realms"))
-                .collectList()
-                .map(realms -> realms.stream().filter(realm -> realmName.equals(realm.getRealmName())).findFirst())
-                .flatMap(Mono::justOrEmpty);
+            .doOnError(WebClientResponseException.class, badRequest ->
+                log.error("Error getting Realms"))
+            .collectList()
+            .map(realms -> realms.stream().filter(realm -> realmName.equals(realm.getRealmName())).findFirst())
+            .flatMap(Mono::justOrEmpty);
     }
 
     /**
      * Setup realm checks if realm exists otherwise creates
+     *
      * @param legalEntity
      * @return
      */
-    public Mono<Realm> setupRealm(LegalEntity legalEntity){
-        if(StringUtils.isEmpty(legalEntity.getRealmName())){
+    public Mono<Realm> setupRealm(LegalEntity legalEntity) {
+        if (StringUtils.isEmpty(legalEntity.getRealmName())) {
             return Mono.empty();
         }
         Mono<Realm> existingRealm = existingRealm(legalEntity.getRealmName());
         Mono<Realm> createNewRealm = createRealm(legalEntity.getRealmName());
         return existingRealm.switchIfEmpty(createNewRealm)
-                .map(actual -> actual);
+            .map(actual -> actual);
 
     }
 
@@ -195,17 +197,18 @@ public class UserService {
         log.info("Linking Legal Entity with internal Id '{}' to Realm: '{}'", legalEntity.getInternalId(), legalEntity.getRealmName());
         AssignRealm assignRealm = new AssignRealm().legalEntityId(legalEntity.getInternalId());
         return usersApi.postLegalentitiesByRealmName(legalEntity.getRealmName(), assignRealm)
-                .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
-                        log.error("Error Linking: {}", badRequest.getResponseBodyAsString()))
-                .then(Mono.just(legalEntity))
-                .map(actual -> {
-                    log.info("Legal Entity: {} linked to Realm: {}", actual.getInternalId(), legalEntity.getRealmName());
-                    return actual;
-                });
+            .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
+                log.error("Error Linking: {}", badRequest.getResponseBodyAsString()))
+            .then(Mono.just(legalEntity))
+            .map(actual -> {
+                log.info("Legal Entity: {} linked to Realm: {}", actual.getInternalId(), legalEntity.getRealmName());
+                return actual;
+            });
     }
 
     /**
      * Create or Import User from Identity base on {@link IdentityUserLinkStrategy property}
+     *
      * @param user
      * @param legalEntityInternalId
      * @return the same User with updated internal and external id on success
@@ -216,9 +219,9 @@ public class UserService {
         createIdentityRequest.setExternalId(user.getExternalId());
 
         if (IdentityUserLinkStrategy.CREATE_IN_IDENTITY.equals(user.getIdentityLinkStrategy())) {
-            Objects.requireNonNull(user.getFullName(), "User Full Name is required");
-            Objects.requireNonNull(user.getEmailAddress(), "User Email Address is required");
-            Objects.requireNonNull(user.getMobileNumber(), "User Mobile Number is required");
+            Objects.requireNonNull(user.getFullName(), "User Full Name is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
+            Objects.requireNonNull(user.getEmailAddress(), "User Email Address is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
+            Objects.requireNonNull(user.getMobileNumber(), "User Mobile Number is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
 
             createIdentityRequest.setFullName(user.getFullName());
             createIdentityRequest.setEmailAddress(user.getEmailAddress().getAddress());
@@ -226,16 +229,17 @@ public class UserService {
         }
 
         return usersApi.postIdentities(createIdentityRequest)
-                .map(identityCreatedItem -> {
-                    user.setInternalId(identityCreatedItem.getInternalId());
-                    user.setExternalId(identityCreatedItem.getExternalId());
-                    return user;
-                });
+            .map(identityCreatedItem -> {
+                user.setInternalId(identityCreatedItem.getInternalId());
+                user.setExternalId(identityCreatedItem.getExternalId());
+                return user;
+            });
     }
 
 
     /**
      * Update identity user attributes
+     *
      * @param user
      * @return {@link Mono<Void>}
      */
