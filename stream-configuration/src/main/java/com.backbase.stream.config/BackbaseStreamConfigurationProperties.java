@@ -9,57 +9,37 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 public class BackbaseStreamConfigurationProperties {
 
-
     private DbsConnectionProperties dbs;
 
     @Data
     @NoArgsConstructor
     public static class DbsConnectionProperties {
-        /**
-         * The location of DBS User Presentation Service.
-         */
-        private String userPresentationBaseUrl;
 
         /**
          * The location of Access Group Presentation Service.
          */
-        private String accessGroupPresentationBaseUrl;
-
-
-        /**
-         * The location of Access Control PandP Service.
-         */
-        private String accessControlPandpBaseUrl;
-
-        /**
-         * The location of Legal Entity Presentation Service.
-         */
-        private String legalEntityPresentationBaseUrl;
+        private String accessControlBaseUrl  = "http://access-control:8080";
 
         /**
          * The location of Accounts Presentation Service.
          */
-        private String accountPresentationBaseUrl;
-
-        /**
-         * The location of Arrangement PandP
-         */
-        private String arrangementPandpBaseUrl;
+        private String arrangementManagerBaseUrl = "http://arrangement-manager:8080";
 
         /**
          * Location of Transaction Presentation Service.
          */
-        private String transactionPresentationBaseUrl;
+        private String transactionManagerBaseUrl = "http://transaction-manager:8080";
+
         /**
          * Location of Limits Presentation Service.
          */
-        private String limitsPresentationBaseUrl;
+        private String limitsManagerBaseUrl = "http://limits-manager:8080";
 
         /**
-         * Location of Product Summary Service"
+         * The location of DBS User Presentation Service.
          */
-        private String productSummaryBaseUrl;
-    }
+        private String userManagerBaseUrl = "http://user-manager:8080";
 
+    }
 
 }

@@ -36,7 +36,7 @@ public class LimitsServiceConfiguration {
         WebClient dbsWebClient,
         BackbaseStreamConfigurationProperties configurationProperties
     ) {
-        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat).setBasePath(configurationProperties.getDbs().getLimitsPresentationBaseUrl());
+        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat).setBasePath(configurationProperties.getDbs().getLimitsManagerBaseUrl());
         return new LimitsApi(apiClient);
     }
 
@@ -48,7 +48,7 @@ public class LimitsServiceConfiguration {
         BackbaseStreamConfigurationProperties configurationProperties
     ) {
         com.backbase.dbs.user.presentation.service.ApiClient apiClient = new com.backbase.dbs.user.presentation.service.ApiClient(dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(configurationProperties.getDbs().getUserPresentationBaseUrl());
+        apiClient.setBasePath(configurationProperties.getDbs().getUserManagerBaseUrl());
         return new UsersApi(apiClient);
     }
 

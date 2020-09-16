@@ -73,7 +73,7 @@ public class AccessControlConfiguration {
         com.backbase.dbs.user.presentation.service.ApiClient apiClient =
             new com.backbase.dbs.user.presentation.service.ApiClient(
                 dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getUserPresentationBaseUrl());
+        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getUserManagerBaseUrl());
         return apiClient;
     }
 
@@ -86,7 +86,7 @@ public class AccessControlConfiguration {
         com.backbase.dbs.accesscontrol.query.service.ApiClient apiClient =
             new com.backbase.dbs.accesscontrol.query.service.ApiClient(
                 dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getAccessControlPandpBaseUrl());
+        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getAccessControlBaseUrl());
         return apiClient;
     }
 
@@ -98,7 +98,7 @@ public class AccessControlConfiguration {
         com.backbase.dbs.accessgroup.presentation.service.ApiClient apiClient =
             new com.backbase.dbs.accessgroup.presentation.service.ApiClient(
                 dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getAccessGroupPresentationBaseUrl());
+        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getAccessControlBaseUrl());
         return apiClient;
     }
 
@@ -110,7 +110,7 @@ public class AccessControlConfiguration {
         com.backbase.dbs.legalentity.presentation.service.ApiClient apiClient =
             new com.backbase.dbs.legalentity.presentation.service.ApiClient(
                 dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getLegalEntityPresentationBaseUrl());
+        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getAccessControlBaseUrl());
         return apiClient;
     }
 

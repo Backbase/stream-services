@@ -46,7 +46,7 @@ public class ProductCatalogServiceConfiguration {
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
         ApiClient apiClient = new ApiClient(dbsClient, objectMapper, dateFormat);
-        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getAccountPresentationBaseUrl());
+        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getArrangementManagerBaseUrl());
         return apiClient;
     }
 }
