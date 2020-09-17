@@ -17,7 +17,7 @@ import org.springframework.jms.annotation.JmsListener;
 public class AuditLoginEventListener extends AbstractLoginEventListener {
 
     private static final String VIRTUAL_TOPIC_BACKBASE_AUTH_LOGIN
-        = "VirtualTopic.com.backbase.audit.presentation.event.spec.v1.AuditMessagesCreatedEvent";
+        = "VirtualTopic.com.backbase.audit.persistence.event.spec.v1.AuditMessagesCreatedEvent";
 
     private final ObjectMapper objectMapper;
 
