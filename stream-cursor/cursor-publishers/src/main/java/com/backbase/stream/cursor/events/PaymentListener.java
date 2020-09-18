@@ -23,7 +23,7 @@ import reactor.core.publisher.FluxSink;
 public class PaymentListener {
 
     private static final String VIRTUAL_TOPIC_PAYMENT_CREATED_EVENT =
-        "VirtualTopic.com.backbase.paymentorder.persistence.event.spec.v1.PaymentOrderCreatedEvent";
+        "VirtualTopic.com.backbase.paymentorder.event.spec.v1.PaymentOrderCreatedEvent";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
