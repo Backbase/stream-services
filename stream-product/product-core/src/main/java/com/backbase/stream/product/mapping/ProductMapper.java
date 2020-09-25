@@ -98,6 +98,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_PRODUCT_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITY_IDS)
+    @InheritConfiguration
     ArrangementItemPost toPresentation(Loan loan);
 
     ArrangementItem toArrangementItem(ArrangementItemPost arrangementItemPost);
