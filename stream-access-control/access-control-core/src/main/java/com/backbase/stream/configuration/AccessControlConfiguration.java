@@ -4,6 +4,7 @@ import com.backbase.dbs.accesscontrol.query.service.api.AccesscontrolApi;
 import com.backbase.dbs.accessgroup.presentation.service.api.AccessgroupsApi;
 import com.backbase.dbs.legalentity.presentation.service.api.LegalentitiesApi;
 import com.backbase.dbs.user.presentation.service.api.UsersApi;
+import com.backbase.dbs.userprofile.api.UserProfileApi;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.product.service.ArrangementService;
@@ -55,6 +56,11 @@ public class AccessControlConfiguration {
     }
 
     @Bean
+    public UserProfileService userProfileService(com.backbase.dbs.userprofile.ApiClient usersApiClient) {
+        return new UserProfileService(new UserProfileApi(usersApiClient));
+    }
+
+    @Bean
     public AccessGroupService accessGroupService(
         com.backbase.dbs.accesscontrol.query.service.ApiClient accessControlQueryApiClient,
         com.backbase.dbs.accessgroup.presentation.service.ApiClient accessGroupsApiClient,
@@ -77,6 +83,17 @@ public class AccessControlConfiguration {
         return apiClient;
     }
 
+    @Bean
+    protected com.backbase.dbs.userprofile.ApiClient userProfileApiClient(
+        WebClient dbsWebClient,
+        ObjectMapper objectMapper,
+        DateFormat dateFormat) {
+        com.backbase.dbs.userprofile.ApiClient apiClient =
+            new com.backbase.dbs.userprofile.ApiClient(
+                dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getUserProfileManagerBaseUrl());
+        return apiClient;
+    }
 
     @Bean
     protected com.backbase.dbs.accesscontrol.query.service.ApiClient accessControlQueryApiClient(
