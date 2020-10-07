@@ -18,6 +18,12 @@ public class UserProfileService {
 
     private final UserProfileApi userProfileApi;
 
+    public Mono<GetUserProfile> upsertUserProfile(CreateUserProfile requestBody) {
+        Mono<GetUserProfile> getExistingUser = getUserProfileByUserID(requestBody.getUserId());
+        return getExistingUser != null ?
+            getExistingUser : createUserProfile(requestBody);
+    }
+
     public Mono<GetUserProfile> createUserProfile(CreateUserProfile requestBody) {
         return userProfileApi.postCreateUserProfile(requestBody)
             .doOnError(WebClientResponseException.class, throwable ->
@@ -38,7 +44,10 @@ public class UserProfileService {
                 log.error("Failed to delete User Profile: {}\n{}", userId, throwable.getResponseBodyAsString()));
     }
 
-    public Mono<GetUserProfile> getGetUserProfileByUserID(String userId) {
+    public Mono<GetUserProfile> getUserProfileByUserID(String userId) {
+        if (userId == null) {
+            return Mono.empty();
+        }
         return userProfileApi.getGetUserProfileByUserID(userId)
             .doOnNext(
                 userProfileItem -> log.info("Found User Profile for externalId: {}", userProfileItem.getExternalId()))
