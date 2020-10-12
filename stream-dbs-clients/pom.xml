@@ -81,6 +81,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.backbase.dbs.user</groupId>
+            <artifactId>user-profile-manager-spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.backbase.dbs.limit</groupId>
             <artifactId>limit-spec</artifactId>
             <scope>provided</scope>
@@ -197,6 +202,20 @@
                             </inputSpec>
                             <modelPackage>com.backbase.dbs.user.presentation.service.model</modelPackage>
                             <apiPackage>com.backbase.dbs.user.presentation.service.api</apiPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>user-profile-manager-service</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/api/com/backbase/dbs/user/user-profile-manager-spec/service-api/service-api/openapi.yaml
+                            </inputSpec>
+                            <modelPackage>com.backbase.dbs.userprofile.model</modelPackage>
+                            <apiPackage>com.backbase.dbs.userprofile.api</apiPackage>
                         </configuration>
                     </execution>
 <!--                    <execution>-->
