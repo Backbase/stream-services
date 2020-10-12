@@ -68,7 +68,7 @@ public class ArrangementService {
      * @return flux of response items.
      */
     public Flux<BatchResponseItemExtended> upsertBatchArrangements(List<ArrangementItemPost> arrangementItems) {
-        return arrangementsApi.postBatch(arrangementItems)
+        return arrangementsApi.postBatchUpsertArrangements(arrangementItems)
                 .map(r -> {
                     log.info("Batch Arrangement update result for arrangementId: {}, resourceId: {}, action: {}, result: {}", r.getArrangementId(), r.getResourceId(), r.getAction(), r.getStatus());
                     // Check if any failed, then fail everything.
@@ -88,7 +88,7 @@ public class ArrangementService {
      * @return Product
      */
     public Mono<ArrangementItem> getArrangement(String internalId) {
-        return arrangementsApi.getIdById(internalId)
+        return arrangementsApi.getArrangementById(internalId)
             .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
                 log.info("Arrangement: {} not found", internalId);
                 return Mono.empty();
@@ -108,7 +108,7 @@ public class ArrangementService {
 
     public Mono<String> getArrangementInternalId(String externalId) {
         log.info("Checking if arrangement exists with externalId: {}", externalId);
-        return arrangementsApi.getExternalIdByExternalId(externalId)
+        return arrangementsApi.getInternalId(externalId)
             .doOnNext(response ->
                 log.info("Found Arrangement internalId: {} for externalId: {}", response.getInternalId(), externalId))
             .onErrorResume(WebClientResponseException.NotFound.class, notFound -> {
@@ -132,7 +132,7 @@ public class ArrangementService {
     public Mono<String> deleteArrangementByInternalId(String arrangementInternalId) {
         log.debug("Retrieving Arrangement by internal id {}", arrangementInternalId);
         // get arrangement externalId by internal id.
-        return arrangementsApi.getIdById(arrangementInternalId)
+        return arrangementsApi.getArrangementById(arrangementInternalId)
                 .map(ArrangementItem::getExternalArrangementId)
                 .onErrorResume(WebClientResponseException.class, e -> {
                     log.warn("Failed to retrieve arrangement by internal id {}, {}", arrangementInternalId, e.getMessage());
@@ -151,7 +151,7 @@ public class ArrangementService {
      */
     public Mono<String> deleteArrangementByExternalId(String arrangementExternalId) {
         log.debug("Removing Arrangement with external id {}", arrangementExternalId);
-        return arrangementsApi.deleteExternalArrangementIdByExternalArrangementId(arrangementExternalId)
+        return arrangementsApi.deleteexternalArrangementId(arrangementExternalId)
                 .thenReturn(arrangementExternalId);
     }
 
@@ -164,7 +164,7 @@ public class ArrangementService {
      */
     public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, List<String> legalEntitiesExternalIds){
         log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, legalEntitiesExternalIds);
-        return arrangementsApi.postLegalentitiesByExternalArrangementId(arrangementExternalId, new ExternalLegalEntityIds().ids(legalEntitiesExternalIds));
+        return arrangementsApi.postArrangementLegalEntities(arrangementExternalId, new ExternalLegalEntityIds().ids(legalEntitiesExternalIds));
     }
 
     /**

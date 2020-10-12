@@ -77,7 +77,7 @@ public class LegalEntityService {
 
     private Mono<LegalEntityItemId> createLegalEntity(LegalEntityCreateItem legalEntity) {
         // Create Legal Entity with out master service agreement
-        return legalEntityApi.postCreate(legalEntity)
+        return legalEntityApi.postCreateLegalEntities(legalEntity)
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .onErrorResume(WebClientResponseException.class, exception ->
                 Mono.error(new LegalEntityException(legalEntity, "Failed to create Legal Entity",  exception)))
@@ -95,7 +95,7 @@ public class LegalEntityService {
         return getLegalEntityByExternalId(legalEntityExternalId)
             .flux()
             .flatMap(legalEntity ->
-                legalEntityApi.getSubentities(legalEntity.getInternalId(), null,
+                legalEntityApi.getsubEntities(legalEntity.getInternalId(), null,
                     Math.toIntExact(pageable.getOffset()), pageable.getPageSize(), null)
                     .map(mapper::toStream));
     }
@@ -107,7 +107,7 @@ public class LegalEntityService {
      * @return Service Agreement
      */
     public Mono<ServiceAgreement> getMasterServiceAgreementForExternalLegalEntityId(String legalEntityExternalId) {
-        return legalEntityApi.getMasterByExternalId(legalEntityExternalId)
+        return legalEntityApi.getMasterServiceAgreementByExternalLegalEntity(legalEntityExternalId)
                 .doOnNext(serviceAgreementItem -> log.info("Service Agreement: {} found for legal entity: {}", serviceAgreementItem.getExternalId(), legalEntityExternalId))
                 .onErrorResume(WebClientResponseException.NotFound.class, throwable -> {
                     log.info("Master Service Agreement not found for: {}. Request:[{}] {}  Response: {}", legalEntityExternalId,  throwable.getRequest().getMethod(), throwable.getRequest().getURI() , throwable.getResponseBodyAsString());
@@ -124,7 +124,7 @@ public class LegalEntityService {
      */
     public Mono<ServiceAgreement> getMasterServiceAgreementForInternalLegalEntityId(String legalEntityInternalId) {
         log.info("Getting Service Agreement for: {}", legalEntityInternalId);
-        return accessControlQueryApi.getMasterById(legalEntityInternalId)
+        return accessControlQueryApi.getMasterServiceAgreement(legalEntityInternalId)
             .doOnNext(serviceAgreementItem -> log.info("Service Agreement: {} found for legal entity: {}", serviceAgreementItem.getExternalId(), legalEntityInternalId))
             .onErrorResume(WebClientResponseException.NotFound.class, throwable -> {
                 log.info("Master Service Agreement not found for: {}. Request:[{}] {}  Response: {}", legalEntityInternalId,  throwable.getRequest().getMethod(), throwable.getRequest().getURI() , throwable.getResponseBodyAsString());
@@ -136,7 +136,7 @@ public class LegalEntityService {
     @ContinueSpan(log = "getLegalEntityByExternalId")
     public Mono<LegalEntity> getLegalEntityByExternalId(@SpanTag("externalId") String externalId) {
         try {
-            return legalEntityApi.getExternalIdByExternalId(externalId)
+            return legalEntityApi.getLegalEntityByExternalId(externalId)
                     .onErrorResume(WebClientResponseException.NotFound.class, notFound -> {
                         log.info("Legal Entity with externalId: {} does not exist: {}", externalId, notFound.getResponseBodyAsString());
                         return Mono.empty();
@@ -148,7 +148,7 @@ public class LegalEntityService {
     }
 
     public Mono<LegalEntity> getLegalEntityByInternalId(String internalId) {
-        return legalEntityApi.getLegalEntityIdByLegalEntityId(internalId)
+        return legalEntityApi.getLegalEntityById(internalId)
             .onErrorResume(WebClientResponseException.NotFound.class, notFound -> {
                 log.info("Legal Entity with internalId: {} does not exist: {}", internalId,
                     notFound.getResponseBodyAsString());
@@ -165,7 +165,7 @@ public class LegalEntityService {
      * @return Mono<Void>
      */
     public Mono<Void> deleteLegalEntity(String legalEntityExternalId) {
-        return legalEntityApi.postDelete(
+        return legalEntityApi.postLegalEntitiesBatchDelete(
                 new LegalEntitiesBatchDelete()
                         .accessToken(getLEAccessToken())
                         .externalIds(Collections.singletonList(legalEntityExternalId)))

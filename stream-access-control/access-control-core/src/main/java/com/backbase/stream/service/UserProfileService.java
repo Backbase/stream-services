@@ -25,21 +25,21 @@ public class UserProfileService {
     }
 
     public Mono<GetUserProfile> createUserProfile(CreateUserProfile requestBody) {
-        return userProfileApi.postCreateUserProfile(requestBody)
+        return userProfileApi.postUserProfile(requestBody)
             .doOnError(WebClientResponseException.class, throwable ->
                 log.error("Failed to create User Profile: {}\n{}", requestBody.getExternalId(),
                     throwable.getResponseBodyAsString()));
     }
 
     public Mono<GetUserProfile> updateUserProfile(String userId, ReplaceUserProfile requestBody) {
-        return userProfileApi.putReplaceUserProfileByUserID(userId, requestBody)
+        return userProfileApi.putUserProfile(userId, requestBody)
             .doOnError(WebClientResponseException.class, throwable ->
                 log.error("Failed to create User Profile: {}\n{}", requestBody.getExternalId(),
                     throwable.getResponseBodyAsString()));
     }
 
     public Mono<Void> deleteUserProfile(String userId) {
-        return userProfileApi.deleteDeleteUserProfileByUserID(userId)
+        return userProfileApi.deleteUserProfile(userId)
             .doOnError(WebClientResponseException.class, throwable ->
                 log.error("Failed to delete User Profile: {}\n{}", userId, throwable.getResponseBodyAsString()));
     }
@@ -48,7 +48,7 @@ public class UserProfileService {
         if (userId == null) {
             return Mono.empty();
         }
-        return userProfileApi.getGetUserProfileByUserID(userId)
+        return userProfileApi.getUserProfile(userId)
             .doOnNext(
                 userProfileItem -> log.info("Found User Profile for externalId: {}", userProfileItem.getExternalId()))
             .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
