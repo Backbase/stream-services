@@ -1,5 +1,8 @@
 package com.backbase.stream.service;
 
+import static java.util.Optional.ofNullable;
+
+
 import com.backbase.dbs.user.presentation.service.api.UsersApi;
 import com.backbase.dbs.user.presentation.service.model.AddRealm;
 import com.backbase.dbs.user.presentation.service.model.AssignRealm;
@@ -232,6 +235,7 @@ public class UserService {
             .map(identityCreatedItem -> {
                 user.setInternalId(identityCreatedItem.getInternalId());
                 user.setExternalId(identityCreatedItem.getExternalId());
+                ofNullable(user.getAttributes()).ifPresent(a -> updateIdentityUserAttributes(user));
                 return user;
             });
     }
