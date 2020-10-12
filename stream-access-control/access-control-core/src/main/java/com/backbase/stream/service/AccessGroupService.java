@@ -32,7 +32,6 @@ import com.backbase.dbs.user.presentation.service.model.GetUserById;
 import com.backbase.stream.legalentity.model.ApprovalStatus;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
-import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobProfileUser;
@@ -343,7 +342,7 @@ public class AccessGroupService {
         existingDataGroups.forEach(dbsDataGroup -> {
             // get group matching  DBS one.
             Optional<BaseProductGroup> pg = productGroups.stream()
-                    .filter(it -> isEquals(it, dbsDataGroup))
+                    .filter(it -> productGroupAndDataGrouItemEquals(it, dbsDataGroup))
                     .findFirst();
             List<String> arrangementsToAdd = new ArrayList<>();
             List<String> arrangementsToRemove = new ArrayList<>();
@@ -465,12 +464,12 @@ public class AccessGroupService {
         return getDataGroupItemIds(type, serviceAgreementIdentifier);
     }
 
-    public boolean isEquals(BaseProductGroup productGroup, DataGroupItem item) {
+    public boolean productGroupAndDataGrouItemEquals(BaseProductGroup productGroup, DataGroupItem item) {
         return item.getName().equals(productGroup.getName());
     }
 
-    private boolean isEquals(BusinessFunctionGroup businessFunctionGroup,
-                             SchemaFunctionGroupItem getFunctionGroupsFunctionGroupItem) {
+    private boolean productGroupAndDataGrouItemEquals(BusinessFunctionGroup businessFunctionGroup,
+                                                      SchemaFunctionGroupItem getFunctionGroupsFunctionGroupItem) {
         return getFunctionGroupsFunctionGroupItem.getName().equals(businessFunctionGroup.getName());
     }
 
@@ -656,13 +655,13 @@ public class AccessGroupService {
 
     private void enrich(List<SchemaFunctionGroupItem> functionGroups,
                         BusinessFunctionGroup businessFunctionGroup) {
-        functionGroups.stream().filter(item -> isEquals(businessFunctionGroup, item)).findFirst()
+        functionGroups.stream().filter(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item)).findFirst()
             .ifPresent(item -> businessFunctionGroup.setId(item.getId()));
     }
 
     private boolean filter(List<SchemaFunctionGroupItem> functionGroups, BusinessFunctionGroup businessFunctionGroup) {
         return functionGroups.stream()
-            .anyMatch(item -> isEquals(businessFunctionGroup, item));
+            .anyMatch(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item));
     }
 
     private List<BusinessFunctionGroup> getNewBusinessGroups(List<BusinessFunctionGroup> businessFunctionGroups,
@@ -674,7 +673,7 @@ public class AccessGroupService {
 
     private boolean isNewBusinessFunctionGroup(List<SchemaFunctionGroupItem> functionGroups,
                                                BusinessFunctionGroup businessFunctionGroup) {
-        return functionGroups.stream().noneMatch(item -> isEquals(businessFunctionGroup, item));
+        return functionGroups.stream().noneMatch(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item));
     }
 
     private Mono<BusinessFunctionGroup> createBusinessFunctionGroup(StreamTask streamTask, ServiceAgreement serviceAgreement,

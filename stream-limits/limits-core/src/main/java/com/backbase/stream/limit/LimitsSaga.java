@@ -28,7 +28,7 @@ public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
 
 
         log.info("Started ingestion of transactions for user {}", item.getUserBBID());
-        return limitsApi.postLimits(item)
+        return limitsApi.postLimitsService(item)
                 .map(createLimitResponse -> {
                     limitsTask.setResponse(createLimitResponse);
                     limitsTask.info(LIMIT, CREATE, SUCCESS, item.getUserBBID(), createLimitResponse.getUuid(), CREATED_SUCCESSFULLY);

@@ -34,10 +34,13 @@ public class LimitsService {
         this.limitsUnitOfWorkExecutor = limitsUnitOfWorkExecutor;
     }
 
+    /**
+     * This is very very wrong.
+     */
     public Flux<CreateLimitResponse> createUserLimits(Flux<CreateLimitRequest> items) {
         Flux<CreateLimitRequest> cleanItems = items.map(item -> {
             if (isUUID(item.getUserBBID())) {
-                usersApi.getExternalIdByExternalIdgetUserByExternalid(item.getUserBBID()).subscribe(userItem -> {
+                usersApi.getUserByExternalid(item.getUserBBID()).subscribe(userItem -> {
                     item.setUserBBID(userItem.getId());
                 });
             }

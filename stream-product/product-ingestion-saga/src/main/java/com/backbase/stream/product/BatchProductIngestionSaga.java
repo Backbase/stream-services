@@ -6,11 +6,13 @@ import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.configuration.ProductIngestionSagaConfigurationProperties;
 import com.backbase.stream.product.service.ArrangementService;
 import com.backbase.stream.product.task.BatchProductGroupTask;
+import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.UserService;
@@ -47,6 +49,23 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
     public BatchProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties) {
         super(arrangementService, accessGroupService, userService,  configurationProperties);
     }
+
+    public Mono<ProductGroupTask> process(ProductGroupTask streamTask) {
+
+        ProductGroup productGroup = streamTask.getProductGroup();
+
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup()
+            .serviceAgreement(productGroup.getServiceAgreement())
+            .addProductGroupsItem(productGroup));
+
+        return process(batchProductGroupTask)
+            .map(batchProductGroup -> {
+                streamTask.addHistory(batchProductGroup.getHistory());
+               return streamTask;
+            });
+    }
+
 
     /**
      * Setup entitlements and arrangements trying to utilize DBS batch APIs.
@@ -197,13 +216,13 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .flatMap(existingDataGroups -> {
                     // set IDs from DBS
                     productGroups.forEach(pg -> existingDataGroups.stream()
-                            .filter(eg -> accessGroupService.isEquals(pg, eg)).findFirst()
+                            .filter(eg -> accessGroupService.productGroupAndDataGrouItemEquals(pg, eg)).findFirst()
                             .ifPresent(g -> pg.setInternalId(g.getId())));
 
                     List<BaseProductGroup> toCreate =
                             productGroups.stream()
                                     .filter(pg -> existingDataGroups.stream()
-                                            .noneMatch(dgi -> accessGroupService.isEquals(pg, dgi)))
+                                            .noneMatch(dgi -> accessGroupService.productGroupAndDataGrouItemEquals(pg, dgi)))
                                     .collect(Collectors.toList());
                     // Create new groups.
                     return Flux.fromIterable(toCreate)
