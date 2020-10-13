@@ -1,5 +1,6 @@
 package com.backbase.stream.webclient;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
@@ -57,6 +58,7 @@ public class DbsWebClientConfiguration {
         mapper.setDateFormat(dateFormat);
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return mapper;
     }
 
