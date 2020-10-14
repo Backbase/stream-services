@@ -502,6 +502,8 @@ components:
           $ref: '#/components/schemas/AccruedInterest'
         IBAN:
           $ref: '#/components/schemas/IBAN'
+        BBAN:
+          $ref: '#/components/schemas/BBAN'
         urgentTransferAllowed:
           $ref: '#/components/schemas/UrgentTransfer'
         productNumber:
