@@ -32,6 +32,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
@@ -216,13 +217,13 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .flatMap(existingDataGroups -> {
                     // set IDs from DBS
                     productGroups.forEach(pg -> existingDataGroups.stream()
-                            .filter(eg -> accessGroupService.productGroupAndDataGrouItemEquals(pg, eg)).findFirst()
+                            .filter(eg -> accessGroupService.isEquals(pg, eg)).findFirst()
                             .ifPresent(g -> pg.setInternalId(g.getId())));
 
                     List<BaseProductGroup> toCreate =
                             productGroups.stream()
                                     .filter(pg -> existingDataGroups.stream()
-                                            .noneMatch(dgi -> accessGroupService.productGroupAndDataGrouItemEquals(pg, dgi)))
+                                            .noneMatch(dgi -> accessGroupService.isEquals(pg, dgi)))
                                     .collect(Collectors.toList());
                     // Create new groups.
                     return Flux.fromIterable(toCreate)
@@ -263,12 +264,13 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
 
     }
 
-    protected Mono<List<BusinessFunctionGroup>> setupBusinessFunctions(StreamTask streamTask, ServiceAgreement serviceAgreement, List<JobProfileUser> jobProfileUsers) {
-        streamTask.info(FUNCTION_GROUP, "setup-business-functions", "", "", null, "Setting up Business Functions Usesr: %s", jobProfileUsers.stream().map(j -> j.getUser().getExternalId()).collect(Collectors.toList()));
+    protected Mono<List<BusinessFunctionGroup>> setupBusinessFunctions(BatchProductGroupTask streamTask, ServiceAgreement serviceAgreement, List<JobProfileUser> jobProfileUsers) {
+        streamTask.info(FUNCTION_GROUP, "setup-business-functions", "", serviceAgreement.getExternalId(), null, "Setting up Business Functions for Users: %s", prettyPrintUsers(jobProfileUsers));
         return Flux.fromIterable(jobProfileUsers)
-                .flatMap(jpUser -> getBusinessFunctionGroups(jpUser, serviceAgreement)
+                .doOnNext(user -> log.info("Setup Business Function for: {} with Product Groups: {}",user.getUser().getExternalId(), prettyPrintProductGroups(streamTask)))
+                .flatMap(jobProfileUser -> getBusinessFunctionGroups(jobProfileUser, serviceAgreement)
                         .map(bfGroups -> {
-                            jpUser.setBusinessFunctionGroups(bfGroups);
+                            jobProfileUser.setBusinessFunctionGroups(bfGroups);
                             return bfGroups;
                         }))
                 .flatMap(Flux::fromIterable)
@@ -288,8 +290,26 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                                 .findFirst()
                                 .ifPresent(businessFunctionGroup -> userBfg.setId(businessFunctionGroup.getId()));
                     }));
+
+                    streamTask.info(FUNCTION_GROUP, "setup-business-functions", "success", serviceAgreement.getExternalId(), null, "Setting up Business Functions Groups: %s", prettyPrintBusinessGroups(businessFunctionGroups));
                     return businessFunctionGroups;
                 });
+    }
+
+    @NotNull
+    private String prettyPrintProductGroups(BatchProductGroupTask streamTask) {
+        return streamTask.getData().getProductGroups().stream().map(BaseProductGroup::getName).collect(Collectors.joining(","));
+    }
+
+
+    @NotNull
+    private String prettyPrintUsers(List<JobProfileUser> profileUsers) {
+        return profileUsers.stream().map(jobProfileUser -> jobProfileUser.getUser().getExternalId()).collect(Collectors.joining(","));
+    }
+
+    @NotNull
+    private String prettyPrintBusinessGroups(List<BusinessFunctionGroup> businessFunctionGroups) {
+        return businessFunctionGroups.stream().map(BusinessFunctionGroup::getName).collect(Collectors.joining(","));
     }
 
 

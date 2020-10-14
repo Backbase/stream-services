@@ -271,7 +271,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(referenceJobRole ->
                 accessGroupService.setupReferenceJobRole(streamTask, masterServiceAgreement, referenceJobRole))
             .flatMap(referenceJobRole -> {
-                log.debug("Reference Job Role: {}", referenceJobRole);
+                log.debug("Reference Job Role: {}", referenceJobRole.getName());
                 return Mono.just(streamTask);
             })
             .collectList()
