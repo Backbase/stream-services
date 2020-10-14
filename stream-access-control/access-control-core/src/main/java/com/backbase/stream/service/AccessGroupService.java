@@ -221,7 +221,11 @@ public class AccessGroupService {
 
 
         return Mono.just(request)
-            .flatMap(r -> {
+            .flatMap(userPermissionsRequest -> {
+                if (task.getIngestionMode().equals(BatchProductGroupTask.IngestionMode.REPLACE)) {
+                    task.info(ACCESS_GROUP, "assign-permissions", "", "", null, "Replacing assigned permissions for users: %s with: %s", prettyPrintExternalIds(userPermissionsRequest), prettyPrintDataGroups(userPermissionsRequest));
+                    return Mono.just(userPermissionsRequest);
+                }
                 // request each user permissions and add those to the request.
                 return Flux.fromIterable(usersPermissions.keySet())
                     .flatMap(user -> accessControlApi.getPersistenceApprovalPermissions(user.getInternalId(), task.getData().getServiceAgreement().getInternalId())
@@ -278,8 +282,8 @@ public class AccessGroupService {
                     .collectList()
                     .map(list -> {
                         log.info("Updated assigned permissions for users: {} with: {} ",
-                            prettyPrintExternalIds(r),
-                            prettyPrintDataGroups(r));
+                            prettyPrintExternalIds(userPermissionsRequest),
+                            prettyPrintDataGroups(userPermissionsRequest));
                         return list;
                     });
             })
