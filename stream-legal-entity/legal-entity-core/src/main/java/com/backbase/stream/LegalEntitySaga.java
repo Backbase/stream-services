@@ -519,11 +519,11 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             serviceAgreement.setName(legalEntity.getName());
             serviceAgreement.setDescription("Master Service Agreement for " + legalEntity.getName());
             serviceAgreement.setStatus(LegalEntityStatus.ENABLED);
-            serviceAgreement.setIsMaster(true);
         } else {
             serviceAgreement = legalEntity.getMasterServiceAgreement();
         }
 
+        serviceAgreement.setIsMaster(true); // The possibility of creating non-master SA is not implemented in Stream yet.
         serviceAgreement.addParticipantsItem(legalEntityParticipant);
 
         return serviceAgreement;
