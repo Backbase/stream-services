@@ -1,5 +1,8 @@
 package com.backbase.stream.service;
 
+import static java.util.Optional.ofNullable;
+
+
 import com.backbase.dbs.user.presentation.service.api.UsersApi;
 import com.backbase.dbs.user.presentation.service.model.AddRealm;
 import com.backbase.dbs.user.presentation.service.model.AssignRealm;
@@ -226,6 +229,7 @@ public class UserService {
             createIdentityRequest.setFullName(user.getFullName());
             createIdentityRequest.setEmailAddress(user.getEmailAddress().getAddress());
             createIdentityRequest.setMobileNumber(user.getMobileNumber().getNumber());
+            ofNullable(user.getAttributes()).ifPresent(createIdentityRequest::setAttributes);
         }
 
         return usersApi.postIdentities(createIdentityRequest)
@@ -233,7 +237,9 @@ public class UserService {
                 user.setInternalId(identityCreatedItem.getInternalId());
                 user.setExternalId(identityCreatedItem.getExternalId());
                 return user;
-            });
+            })
+            .filter(u -> IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(u.getIdentityLinkStrategy()))
+            .flatMap(this::updateIdentityUserAttributes);
     }
 
 
@@ -243,10 +249,16 @@ public class UserService {
      * @param user
      * @return {@link Mono<Void>}
      */
-    public Mono<Void> updateIdentityUserAttributes(User user) {
+    public Mono<User> updateIdentityUserAttributes(User user) {
+        if (user.getAttributes() == null)
+            Mono.just(user);
+
         ReplaceIdentity replaceIdentity = new ReplaceIdentity();
         replaceIdentity.attributes(user.getAttributes());
-        return usersApi.putInternalIdByInternalId(user.getInternalId(), replaceIdentity);
+        return usersApi.putInternalIdByInternalId(user.getInternalId(), replaceIdentity)
+            .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
+                log.error("Error adding user attributes: {}", badRequest.getResponseBodyAsString()))
+            .then(Mono.just(user));
     }
 
     private User handleCreateUserResult(User user, UserCreated userCreated) {
