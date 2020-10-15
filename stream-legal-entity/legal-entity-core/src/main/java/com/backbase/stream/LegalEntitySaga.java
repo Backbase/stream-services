@@ -41,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.cloud.sleuth.annotation.SpanTag;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -471,7 +472,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private Mono<LegalEntityTask> setupServiceAgreement(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
-        if (legalEntity.getMasterServiceAgreement() == null) {
+        if (legalEntity.getMasterServiceAgreement() == null || StringUtils.isEmpty(legalEntity.getMasterServiceAgreement().getInternalId())) {
 
             Mono<LegalEntityTask> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntity.getInternalId())
                 .flatMap(serviceAgreement -> {
@@ -511,12 +512,19 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         legalEntityParticipant.setAdmins(adminExternalIds);
         legalEntityParticipant.setUsers(Collections.emptyList());
 
-        ServiceAgreement serviceAgreement = new ServiceAgreement();
-        serviceAgreement.setExternalId("sa_" + legalEntity.getExternalId());
-        serviceAgreement.setName(legalEntity.getName());
-        serviceAgreement.setDescription("Master Service Agreement for " + legalEntity.getName());
-        serviceAgreement.setStatus(LegalEntityStatus.ENABLED);
-        serviceAgreement.setIsMaster(true);
+        ServiceAgreement serviceAgreement;
+
+        if(legalEntity.getMasterServiceAgreement() == null) {
+            serviceAgreement = new ServiceAgreement();
+            serviceAgreement.setExternalId("sa_" + legalEntity.getExternalId());
+            serviceAgreement.setName(legalEntity.getName());
+            serviceAgreement.setDescription("Master Service Agreement for " + legalEntity.getName());
+            serviceAgreement.setStatus(LegalEntityStatus.ENABLED);
+        } else {
+            serviceAgreement = legalEntity.getMasterServiceAgreement();
+        }
+
+        serviceAgreement.setIsMaster(true); // The possibility of creating non-master SA is not implemented in Stream yet.
         serviceAgreement.addParticipantsItem(legalEntityParticipant);
 
         return serviceAgreement;
