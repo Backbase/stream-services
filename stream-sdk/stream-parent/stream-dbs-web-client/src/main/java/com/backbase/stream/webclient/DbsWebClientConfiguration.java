@@ -1,18 +1,25 @@
 package com.backbase.stream.webclient;
 
+import com.backbase.stream.webclient.logging.CustomLogger;
+import com.backbase.stream.webclient.logging.LogFilters;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.TimeZone;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesRegistrationAdapter;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
@@ -31,18 +38,15 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.TimeZone;
+import reactor.netty.channel.BootstrapHandlers;
+import reactor.netty.http.client.HttpClient;
 
 
 /**
  * DBS Web Client Configuration to be used by Stream Services that communicate with DBS.
  */
 @Configuration
+@Slf4j
 public class DbsWebClientConfiguration {
 
     /**
@@ -57,6 +61,7 @@ public class DbsWebClientConfiguration {
         mapper.setDateFormat(dateFormat);
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return mapper;
     }
 
@@ -84,19 +89,13 @@ public class DbsWebClientConfiguration {
      * @return Preconfigured Web Client
      */
     @Bean
-    public WebClient dbsWebClient(
-        ObjectMapper objectMapper,
-        ReactiveOAuth2AuthorizedClientManager reactiveOAuth2AuthorizedClientManager,
-        WebClient.Builder builder
-        ) {
+    public WebClient dbsWebClient(ObjectMapper objectMapper,
+                                  ReactiveOAuth2AuthorizedClientManager reactiveOAuth2AuthorizedClientManager,
+                                  WebClient.Builder builder) {
 
         ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2ClientFilter = new ServerOAuth2AuthorizedClientExchangeFilterFunction(reactiveOAuth2AuthorizedClientManager);
         oauth2ClientFilter.setDefaultClientRegistrationId("dbs");
 
-//        if (serviceInstanceFactory != null) {
-//            ReactorLoadBalancerExchangeFilterFunction reactorLoadBalancerExchangeFilter = new ReactorLoadBalancerExchangeFilterFunction(serviceInstanceFactory);
-//            builder.filter(reactorLoadBalancerExchangeFilter);
-//        }
 
         builder
             .defaultHeader("Content-Type", MediaType.APPLICATION_JSON.toString())
@@ -104,16 +103,24 @@ public class DbsWebClientConfiguration {
             .filter(new CsrfClientExchangeFilterFunction())
             .filter(oauth2ClientFilter);
 
+        if(log.isDebugEnabled()) {
+            HttpClient httpClient = HttpClient
+                .create()
+                .tcpConfiguration(tcpClient -> tcpClient.bootstrap(b -> BootstrapHandlers.updateLogSupport(b, new CustomLogger(DbsWebClientConfiguration.class))));
+            builder.clientConnector(new ReactorClientHttpConnector(httpClient));
+        }
+
+
         // ensure correct exchange strategy is installed
-        ExchangeStrategies strategies = ExchangeStrategies
-            .builder()
+        ExchangeStrategies strategies = ExchangeStrategies.builder()
             .codecs(clientDefaultCodecsConfigurer -> {
                 Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(objectMapper, MediaType.APPLICATION_JSON);
                 Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON);
 
                 clientDefaultCodecsConfigurer.defaultCodecs().jackson2JsonEncoder(encoder);
                 clientDefaultCodecsConfigurer.defaultCodecs().jackson2JsonDecoder(decoder);
-            }).build();
+            })
+            .build();
 
         builder.exchangeStrategies(strategies);
 

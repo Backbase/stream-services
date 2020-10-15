@@ -1,6 +1,7 @@
 package com.backbase.stream.product.sink;
 
 import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.task.ProductGroupTask;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import org.springframework.cloud.stream.messaging.Sink;
 @AllArgsConstructor
 public class ProductSinkBinding {
 
-    private final ProductIngestionSaga productIngestionSaga;
+    private final BatchProductIngestionSaga productIngestionSaga;
 
     @StreamListener(Sink.INPUT)
     public void accept(ProductGroup productGroup) {

@@ -22,7 +22,7 @@ public class AuditTaskExecutor implements StreamTaskExecutor<AuditMessagesTask> 
         auditMessagesTask.info("audit-messages", "post", "", "", "", "Start Ingesting Audit Messages");
         AuditMessagesPostRequestBody auditMessagesPostRequestBody = new AuditMessagesPostRequestBody();
         auditMessagesPostRequestBody.setAuditMessages(auditMessagesTask.getAuditMessages());
-        return auditMessagesApi.postAuditmessages(auditMessagesPostRequestBody)
+        return auditMessagesApi.postAuditMessages(auditMessagesPostRequestBody)
             .map(auditMessagesPostResponseBody -> {
                 log.info("Finished processing {} messages", size);
                 auditMessagesTask.setResponseBody(auditMessagesPostResponseBody);

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BatchProductGroupTask extends StreamTask {
 
-    private IngestionMode ingestionMode = IngestionMode.REPLACE;
+    private IngestionMode ingestionMode = IngestionMode.UPDATE;
 
     private BatchProductGroup batchProductGroup;
 

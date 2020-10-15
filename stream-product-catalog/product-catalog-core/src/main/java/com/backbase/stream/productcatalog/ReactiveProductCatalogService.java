@@ -55,7 +55,7 @@ public class ReactiveProductCatalogService {
     }
 
     private Flux<ProductKind> getProductKindFlux() {
-        return productKindsApi.getProductkinds(null, null, null)
+        return productKindsApi.getProductKinds(null, null, null)
             .flux()
             .flatMap(productKindsWrapper -> Flux.fromIterable(productKindsWrapper.getProductKinds() != null
                 ? productKindsWrapper.getProductKinds()
@@ -142,7 +142,7 @@ public class ReactiveProductCatalogService {
 
     private Mono<ProductKindItemPut> updateProductKind(ProductKindItemPut productKind) {
         log.info("Updating Product Type2: {}", productKind.getKindName());
-        return productKindsApi.putProductkinds(productKind)
+        return productKindsApi.putProductKinds(productKind)
                 .doOnError(WebClientResponseException.BadRequest.class, e ->
                         log.error("Bad Request Storing Product Kind: {} \n[{}]: {}\nResponse: {}", productKind, Objects.requireNonNull(e.getRequest()).getMethod(), e.getRequest().getURI(), e.getResponseBodyAsString())
                 )
@@ -239,7 +239,7 @@ public class ReactiveProductCatalogService {
 
 
     private Mono<ProductKind> storeProductKind(ProductKindItem productKind) {
-        Mono<ProductKindId> productKindIdMono = productKindsApi.postProductkinds(productKind)
+        Mono<ProductKindId> productKindIdMono = productKindsApi.postProductKinds(productKind)
             .doOnError(WebClientResponseException.BadRequest.class, e ->
                 log.error("Bad Request Storing Product Kind: {} \n[{}]: {}\nResponse: {}", productKind, Objects.requireNonNull(e.getRequest()).getMethod(), e.getRequest().getURI(), e.getResponseBodyAsString())
             )
