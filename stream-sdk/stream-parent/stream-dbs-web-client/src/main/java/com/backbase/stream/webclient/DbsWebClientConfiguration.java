@@ -96,17 +96,19 @@ public class DbsWebClientConfiguration {
         ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2ClientFilter = new ServerOAuth2AuthorizedClientExchangeFilterFunction(reactiveOAuth2AuthorizedClientManager);
         oauth2ClientFilter.setDefaultClientRegistrationId("dbs");
 
-        boolean logRequestAndResponses = log.isDebugEnabled();
-        HttpClient httpClient = HttpClient
-            .create()
-            .tcpConfiguration(tcpClient -> tcpClient.bootstrap(b -> BootstrapHandlers.updateLogSupport(b, new CustomLogger(DbsWebClientConfiguration.class))));
 
         builder
-            .clientConnector(new ReactorClientHttpConnector(httpClient))
             .defaultHeader("Content-Type", MediaType.APPLICATION_JSON.toString())
             .defaultHeader("Accept", MediaType.APPLICATION_JSON.toString())
             .filter(new CsrfClientExchangeFilterFunction())
             .filter(oauth2ClientFilter);
+
+        if(log.isDebugEnabled()) {
+            HttpClient httpClient = HttpClient
+                .create()
+                .tcpConfiguration(tcpClient -> tcpClient.bootstrap(b -> BootstrapHandlers.updateLogSupport(b, new CustomLogger(DbsWebClientConfiguration.class))));
+            builder.clientConnector(new ReactorClientHttpConnector(httpClient));
+        }
 
 
         // ensure correct exchange strategy is installed
