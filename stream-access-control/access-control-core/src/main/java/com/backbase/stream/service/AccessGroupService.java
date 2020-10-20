@@ -198,7 +198,6 @@ public class AccessGroupService {
 
     public Mono<BatchProductGroupTask> assignPermissionsBatch(BatchProductGroupTask task, Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions) {
 
-        log.info("\n****************** ASSIGNING PERMISSSION!! *********************\n: {}", usersPermissions);
         List<PresentationAssignUserPermissions> request = usersPermissions.keySet().stream()
             .map(user -> new PresentationAssignUserPermissions()
                 .externalUserId(user.getExternalId())
