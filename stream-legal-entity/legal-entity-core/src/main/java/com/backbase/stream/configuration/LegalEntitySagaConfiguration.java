@@ -11,7 +11,6 @@ import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserService;
-import com.backbase.stream.worker.configuration.TraceConfiguration;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -24,8 +23,7 @@ import org.springframework.context.annotation.Import;
 @Import({
     ProductConfiguration.class,
     AccessControlConfiguration.class,
-    ProductIngestionSagaConfiguration.class,
-    TraceConfiguration.class
+    ProductIngestionSagaConfiguration.class
 })
 @EnableConfigurationProperties(
     {LegalEntitySagaConfigurationProperties.class}

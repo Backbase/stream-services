@@ -25,6 +25,8 @@ import reactor.core.publisher.Mono;
 @SpringBootTest(classes = LegalEntityHttpApplication.class)
 public class LegalEntityControllerIT {
 
+    private static String TRACE_ID_HEADER = "X-B3-TraceId";
+
     @MockBean
     private LegalEntitySaga legalEntityService;
 
@@ -42,10 +44,8 @@ public class LegalEntityControllerIT {
             .body(fromValue(legalEntity))
             .exchange()
             .expectStatus().isOk()
-            .expectHeader().exists("X-B3-TraceId")
-            .returnResult(String.class)
-            .getResponseBody()
-            .blockFirst();
+            .expectHeader().exists(TRACE_ID_HEADER)
+            .expectBody().jsonPath("$..externalId").isEqualTo("123456");
     }
 
     @Test
@@ -56,16 +56,13 @@ public class LegalEntityControllerIT {
             .body(fromValue(createLegalEntity()))
             .exchange()
             .expectStatus().is5xxServerError()
-            .expectHeader().exists("X-B3-TraceId")
-            .returnResult(String.class)
-            .getResponseBody()
-            .blockFirst();
+            .expectHeader().exists(TRACE_ID_HEADER);
     }
 
     private LegalEntity createLegalEntity(){
         return new LegalEntity()
             .name("name")
-            .externalId("externalId")
+            .externalId("123456")
             .legalEntityType(LegalEntityType.CUSTOMER);
     }
 

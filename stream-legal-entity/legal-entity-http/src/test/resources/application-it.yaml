@@ -20,6 +20,10 @@ spring:
 
 backbase:
   stream:
+    web:
+      trace:
+        response:
+          enabled: true
     dbs:
       user-manager-base-url: http://user-manager:8080
       access-control-base-url: http://access-control:8080
