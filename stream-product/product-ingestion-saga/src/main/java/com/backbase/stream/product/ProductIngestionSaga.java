@@ -236,8 +236,7 @@ public class ProductIngestionSaga {
             .zipWith(currentAccountsRequests, (actual, arrangements) -> {
                 List<CurrentAccount> collect = arrangements.stream().map(productMapper::mapCurrentAccount)
                     .collect(Collectors.toList());
-                return actual.currentAccounts(
-                    collect);
+                return actual.currentAccounts(collect);
             })
             .zipWith(savingAccountsRequests, (actual, arrangements) -> actual.savingAccounts(arrangements.stream().map(productMapper::mapSavingAccount).collect(Collectors.toList())))
             .zipWith(debitCardsRequests, (actual, arrangements) -> actual.debitCards(arrangements.stream().map(productMapper::mapDebitCard).collect(Collectors.toList())))
@@ -250,8 +249,10 @@ public class ProductIngestionSaga {
             .map(streamTask::data);
     }
 
-    private Mono<List<ArrangementItem>> upsertArrangements(ProductGroupTask streamTask, Flux<ArrangementItemPost> productFlux) {
+    private Mono<List<ArrangementItem>> upsertArrangements(ProductGroupTask streamTask,
+        Flux<ArrangementItemPost> productFlux) {
         ProductGroup productGroup = streamTask.getData();
+        productFlux.flatMapSequential()
         return productFlux.map(p -> ensureLegalEntityId(productGroup.getUsers(), p))
             .flatMap(arrangementItemPost -> upsertArrangement(streamTask, arrangementItemPost))
             .collectList();
