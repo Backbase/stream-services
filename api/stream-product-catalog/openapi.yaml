@@ -574,6 +574,10 @@ components:
           $ref: '#/components/schemas/ExternalIdentifier'
         startDate:
           $ref: '#/components/schemas/StartDate'
+        creditAccount:
+          $ref: '#/components/schemas/CreditAccount'
+        debitAccount:
+          $ref: '#/components/schemas/DebitAccount'
 
     DebitCardItem:
       type: object
