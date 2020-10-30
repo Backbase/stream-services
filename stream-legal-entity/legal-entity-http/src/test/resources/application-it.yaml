@@ -28,3 +28,7 @@ backbase:
       user-manager-base-url: http://user-manager:8080
       access-control-base-url: http://access-control:8080
       arrangement-manager-base-url: http://arrangement-manager-base:8080
+
+management:
+  endpoints:
+    enabled-by-default: true
