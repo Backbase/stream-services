@@ -32,6 +32,7 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,10 +42,16 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.GroupedFlux;
 import reactor.core.publisher.Mono;
 
+
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
@@ -252,8 +259,9 @@ public class ProductIngestionSaga {
     private Mono<List<ArrangementItem>> upsertArrangements(ProductGroupTask streamTask,
         Flux<ArrangementItemPost> productFlux) {
         ProductGroup productGroup = streamTask.getData();
-        productFlux.flatMapSequential()
-        return productFlux.map(p -> ensureLegalEntityId(productGroup.getUsers(), p))
+        return productFlux
+            .sort(comparing(ArrangementItemPost::getExternalProductId, nullsFirst(naturalOrder())))
+            .map(p -> ensureLegalEntityId(productGroup.getUsers(), p))
             .flatMap(arrangementItemPost -> upsertArrangement(streamTask, arrangementItemPost))
             .collectList();
     }
