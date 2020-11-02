@@ -7,7 +7,10 @@ import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.TaskHistory;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
@@ -34,8 +37,8 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
         StreamWorkerConfiguration streamWorkerConfiguration) {
         this.repository = repository;
         this.streamTaskExecutor = streamTaskExecutor;
-        this.workUnitExecutor = Schedulers.newParallel("unit-of-work", streamWorkerConfiguration.getWorkerUnitExecutors());
-        this.taskExecutor = Schedulers.newParallel("TaskScheduler", streamWorkerConfiguration.getTaskExecutors());
+        this.workUnitExecutor = Schedulers.newParallel("u-o-w", streamWorkerConfiguration.getWorkerUnitExecutors());
+        this.taskExecutor = Schedulers.newParallel("task", streamWorkerConfiguration.getTaskExecutors());
         this.streamWorkerConfiguration = streamWorkerConfiguration;
     }
 
@@ -45,6 +48,15 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
         unitOfWork.setNextAttemptAt(OffsetDateTime.now());
         unitOfWork.setState(UnitOfWork.State.ACCEPTED);
         return repository.save(unitOfWork);
+    }
+
+    @NewSpan
+    public Mono<UnitOfWork<T>> executeUnitOfWork(UnitOfWork<T> unitOfWork) {
+        return Mono.just(unitOfWork)
+            .publishOn(workUnitExecutor)
+            .flatMap(this::setLocked)
+            .flatMap(this::executeTasks)
+            .flatMap(this::complete);
     }
 
     public Mono<UnitOfWork<T>> retrieve(String unitOfWorkId) {
@@ -65,8 +77,7 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
         return this.scheduler;
     }
 
-    @SuppressWarnings("ComparatorMethodParameterNotUsed")
-    public Mono<UnitOfWork<T>> selectUnitOfWork() {
+    private Mono<UnitOfWork<T>> selectUnitOfWork() {
         return repository.findAllByNextAttemptAtBefore(OffsetDateTime.now())
             .filter(UnitOfWork::isUnLocked)
 //            .sort((o1, o2) -> new Random().nextInt(1))
@@ -103,36 +114,31 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
     }
 
 
-    @NewSpan
-    public Mono<UnitOfWork<T>> executeUnitOfWork(UnitOfWork<T> unitOfWork) {
-        return Mono.just(unitOfWork)
-            .flatMap(this::setLocked)
-            .flatMap(this::executeTasks)
-            .flatMap(this::complete);
-    }
+
 
     @ContinueSpan(log = "Locking Unit Of Work")
     private Mono<UnitOfWork<T>> setLocked(
         @SpanTag(value = "unit-of-work", expression = "${unitOfWork.unitOfOWorkId}") UnitOfWork<T> unitOfWork) {
-        log.info("Locking Unit Of Work: {}", unitOfWork.getUnitOfOWorkId());
+        log.debug("Locking Unit Of Work: {}", unitOfWork.getUnitOfOWorkId());
         unitOfWork.setLockedAt(OffsetDateTime.now());
         unitOfWork.setState(UnitOfWork.State.IN_PROGRESS);
         return repository.save(unitOfWork);
     }
 
 
-    public Mono<UnitOfWork<T>> executeTasks(UnitOfWork<T> unitOfWork) {
+    private Mono<UnitOfWork<T>> executeTasks(UnitOfWork<T> unitOfWork) {
         return Flux.fromIterable(unitOfWork.getStreamTasks())
-            .publishOn(taskExecutor)
+
             .name("task-executor")
             .tag("stream-unit-of-work-id", unitOfWork.getUnitOfOWorkId())
             .map(streamTask -> startTask(unitOfWork, streamTask))
             .flatMap(streamTask -> executeTask(unitOfWork, streamTask, streamTask.getId()))
             .map(streamTask -> endTask(unitOfWork, streamTask))
+            .delayElements(streamWorkerConfiguration.getDelayBetweenTasks())
             .collectList()
+            .subscribeOn(taskExecutor)
             .zipWith(Mono.just(unitOfWork), (tasks, actual) -> actual);
     }
-
 
     private Mono<T> executeTask(UnitOfWork<T> unitOfWork, T streamTask, @SpanTag("stream-task") String streamTaskId) {
         return streamTaskExecutor.executeTask(streamTask)
@@ -148,19 +154,18 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
                         .collect(Collectors.joining("\n")));
                 streamTask.setState(StreamTask.State.FAILED);
                 return Mono.error(throwable);
-//                return Mono.just(streamTask);
             });
     }
 
     private T startTask(UnitOfWork<T> unitOfWork, T streamTask) {
-        log.info("Starting Task: {} from Unit Of Work: {}", streamTask.getId(), unitOfWork.getUnitOfOWorkId());
+        log.debug("Starting Task: {} from Unit Of Work: {}", streamTask.getId(), unitOfWork.getUnitOfOWorkId());
         streamTask.setState(StreamTask.State.IN_PROGRESS);
         streamTask.setRegisteredAt(OffsetDateTime.now());
         return streamTask;
     }
 
     private T endTask(UnitOfWork<T> unitOfWork, T streamTask) {
-        log.info("Ending Task: {} from Unit Of Work: {}", streamTask.getId(), unitOfWork.getUnitOfOWorkId());
+        log.debug("Ending Task: {} from Unit Of Work: {}", streamTask.getId(), unitOfWork.getUnitOfOWorkId());
         streamTask.setFinishedAt(OffsetDateTime.now());
         streamTask.logSummary();
         return streamTask;
@@ -169,4 +174,5 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
     public StreamWorkerConfiguration getStreamWorkerConfiguration() {
         return streamWorkerConfiguration;
     }
+
 }

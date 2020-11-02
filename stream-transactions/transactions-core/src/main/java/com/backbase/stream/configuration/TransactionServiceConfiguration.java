@@ -31,9 +31,9 @@ public class TransactionServiceConfiguration {
 
 
     @Bean
-    public TransactionTaskExecutor transactionTaskExecutor(ApiClient transactionPresentationApiClient) {
+    public TransactionTaskExecutor transactionTaskExecutor(ApiClient transactionPresentationApiClient, ObjectMapper objectMapper) {
         TransactionsApi transactionsApi = new TransactionsApi(transactionPresentationApiClient);
-        return new TransactionTaskExecutor(transactionsApi);
+        return new TransactionTaskExecutor(transactionsApi, objectMapper);
     }
 
     @Bean

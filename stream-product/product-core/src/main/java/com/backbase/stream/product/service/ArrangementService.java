@@ -69,13 +69,19 @@ public class ArrangementService {
      */
     public Flux<BatchResponseItemExtended> upsertBatchArrangements(List<ArrangementItemPost> arrangementItems) {
         return arrangementsApi.postBatchUpsertArrangements(arrangementItems)
-                .map(r -> {
-                    log.info("Batch Arrangement update result for arrangementId: {}, resourceId: {}, action: {}, result: {}", r.getArrangementId(), r.getResourceId(), r.getAction(), r.getStatus());
+                .map(batchResponseItemExtended -> {
+                    log.info("Batch Arrangement update result for arrangementId: {}, resourceId: {}, action: {}, result: {}", batchResponseItemExtended.getArrangementId(), batchResponseItemExtended.getResourceId(), batchResponseItemExtended.getAction(), batchResponseItemExtended.getStatus());
                     // Check if any failed, then fail everything.
-                    if (!BatchResponseItemExtended.StatusEnum._200.equals(r.getStatus())) {
-                        throw new IllegalStateException("Batch arrangement update failed: " + r.getResourceId());
+                    if (!BatchResponseItemExtended.StatusEnum._200.equals(batchResponseItemExtended.getStatus())) {
+                        log.error("Failed to batch arrangements:  " + arrangementItems);
+                        batchResponseItemExtended.getErrors().forEach(error -> {
+                                log.error("\t[{}]: {}", error.getKey(), error.getMessage());
+                        });
+
+
+                        throw new IllegalStateException("Batch arrangement update failed: " + batchResponseItemExtended.getResourceId());
                     }
-                    return r;
+                    return batchResponseItemExtended;
                 })
                 .onErrorResume(WebClientResponseException.class, throwable ->
                         Mono.error(new ArrangementUpdateException(throwable, "Batch arrangement update failed: " + arrangementItems)));

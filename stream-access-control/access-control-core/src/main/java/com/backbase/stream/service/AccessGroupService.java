@@ -112,7 +112,7 @@ public class AccessGroupService {
             .onErrorResume(WebClientResponseException.class, throwable -> {
                 streamTask.error("service-agreement", "create", "failed", serviceAgreement.getExternalId(),
                     "", throwable, throwable.getResponseBodyAsString(), "Failed to create Service Agreement");
-                return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to create Service Agreement"));
+                return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to create Service Agreement: " + serviceAgreement + " Error: " + throwable.getResponseBodyAsString()));
             })
             .zipWith(Mono.just(serviceAgreement), storeIdInServiceAgreement());
     }
@@ -198,7 +198,7 @@ public class AccessGroupService {
 
     public Mono<BatchProductGroupTask> assignPermissionsBatch(BatchProductGroupTask task, Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions) {
 
-        log.info("\n****************** ASSIGNING PERMISSSION!! *********************\n: {}", usersPermissions);
+        log.debug("\n****************** ASSIGNING PERMISSSION!! *********************\n: {}", usersPermissions);
         List<PresentationAssignUserPermissions> request = usersPermissions.keySet().stream()
             .map(user -> new PresentationAssignUserPermissions()
                 .externalUserId(user.getExternalId())

@@ -29,10 +29,10 @@ public class TransactionsItemWriter implements ItemWriter<TransactionItemPost> {
     public void write(@NonNull List<? extends TransactionItemPost> items) throws Exception {
 
         List<TransactionItemPost> list = (List<TransactionItemPost>) items;
-        Flux<UnitOfWork<TransactionTask>> unitOfWorkFlux = transactionTaskUnitOfWorkExecutor.prepareUnitOfWork(list);
+        Flux<UnitOfWork<TransactionTask>> unitOfWorkFlux = transactionTaskUnitOfWorkExecutor.prepareUnitOfWork(Flux.fromIterable(list));
 
         try {
-            unitOfWorkFlux.flatMap(transactionTaskUnitOfWorkExecutor::executeTasks)
+            unitOfWorkFlux.flatMap(transactionTaskUnitOfWorkExecutor::executeUnitOfWork)
                 .doOnNext(UnitOfWork::logSummary)
                 .doOnError(throwable -> log
                     .error("Unexpected Exception while processing UnitOfWork: {}", throwable.getMessage()))

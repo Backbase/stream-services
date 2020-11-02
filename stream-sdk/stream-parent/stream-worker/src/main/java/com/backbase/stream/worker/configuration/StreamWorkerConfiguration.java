@@ -5,7 +5,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-public abstract class StreamWorkerConfiguration {
+public class StreamWorkerConfiguration {
 
     private int workerUnitExecutors = 1;
 
@@ -22,6 +22,8 @@ public abstract class StreamWorkerConfiguration {
     private Duration retryDuration = Duration.ofMinutes(1);
 
     private Duration delayBetweenTasks = Duration.ZERO;
+
+    private Duration delayBetweenUnits = Duration.ZERO;
 
     private int rateLimit = -1;
 

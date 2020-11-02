@@ -216,7 +216,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                         message = ((WebClientResponseException) throwable).getResponseBodyAsString();
                     }
                     streamTask.error(LEGAL_ENTITY, PROCESS_PRODUCTS, FAILED, legalEntity.getInternalId(), legalEntity.getExternalId(), throwable, message, "Unexpected error processing");
-                    log.error("Unexpected error processing product group {}: {}", productGroupStreamTask.getData().getName(), message);
+                    log.error("Unexpected error processing product group task {}: {}", productGroupStreamTask.getId(), message);
                     productGroupStreamTask.setState(StreamTask.State.FAILED);
                     return Mono.error(throwable);
                 }))
@@ -234,7 +234,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             });
     }
 
-    private ProductGroupTask createProductGroupTask(LegalEntityTask streamTask, ProductGroup productGroup) {
+    private BatchProductGroupTask createProductGroupTask(LegalEntityTask streamTask, ProductGroup productGroup) {
         LegalEntity legalEntity = streamTask.getData();
 
         if (productGroup.getUsers() == null) {
@@ -255,7 +255,21 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         }
         productGroup.setServiceAgreement(legalEntity.getMasterServiceAgreement());
 
-        return new ProductGroupTask(streamTask.getId() + "-" + productGroup.getName(), productGroup);
+
+
+
+
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup()
+            .serviceAgreement(productGroup.getServiceAgreement())
+            .addProductGroupsItem(productGroup));
+
+        batchProductGroupTask.setIngestionMode(legalEntitySagaConfigurationProperties.getIngestionMode());
+
+
+
+
+        return batchProductGroupTask;
     }
 
     @ContinueSpan(log = "createReferenceJobRoles")
@@ -510,7 +524,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         legalEntityParticipant.setSharingAccounts(true);
         legalEntityParticipant.setSharingUsers(true);
         legalEntityParticipant.setAdmins(adminExternalIds);
-        legalEntityParticipant.setUsers(Collections.emptyList());
 
         ServiceAgreement serviceAgreement;
 

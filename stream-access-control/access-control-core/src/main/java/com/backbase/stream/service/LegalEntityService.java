@@ -79,8 +79,10 @@ public class LegalEntityService {
         // Create Legal Entity with out master service agreement
         return legalEntityApi.postCreateLegalEntities(legalEntity)
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
-            .onErrorResume(WebClientResponseException.class, exception ->
-                Mono.error(new LegalEntityException(legalEntity, "Failed to create Legal Entity",  exception)))
+            .onErrorResume(WebClientResponseException.class, exception -> {
+                log.error("Failed to create Legal Entity: {}", legalEntity);
+                return Mono.error(new LegalEntityException(legalEntity, "Failed to create Legal Entity",  exception));
+            })
             .onErrorStop();
     }
 
