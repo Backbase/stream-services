@@ -546,6 +546,8 @@ components:
           $ref: '#/components/schemas/AccruedInterest'
         IBAN:
           $ref: '#/components/schemas/IBAN'
+        BBAN:
+          $ref: '#/components/schemas/BBAN'
         urgentTransferAllowed:
           $ref: '#/components/schemas/UrgentTransfer'
         productNumber:
@@ -1048,6 +1050,21 @@ components:
         isMaster:
           type: boolean
           description: Master flag
+        regularUserAps:
+          $ref: '#/components/schemas/ApsIdentifiers'
+        adminUserAps:
+          $ref: '#/components/schemas/ApsIdentifiers'
+    ApsIdentifiers:
+      type: object
+      properties:
+        nameIdentifiers:
+          type: array
+          items:
+            type: string
+        idIdentifiers:
+          type: array
+          items:
+            type: number
     LegalEntityParticipant:
       required:
         - externalId

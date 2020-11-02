@@ -4,6 +4,8 @@ import com.backbase.dbs.accesscontrol.query.service.model.SchemaFunctionGroupIte
 import com.backbase.dbs.accounts.presentation.service.model.ArrangemenItemBase;
 import com.backbase.dbs.accounts.presentation.service.model.ArrangementItem;
 import com.backbase.dbs.accounts.presentation.service.model.ArrangementItemPost;
+import com.backbase.stream.legalentity.model.BaseProductGroup;
+import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CreditCard;
 import com.backbase.stream.legalentity.model.CurrentAccount;
@@ -25,6 +27,7 @@ import com.backbase.stream.product.exception.ArrangementCreationException;
 import com.backbase.stream.product.exception.ArrangementUpdateException;
 import com.backbase.stream.product.mapping.ProductMapper;
 import com.backbase.stream.product.service.ArrangementService;
+import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
@@ -33,6 +36,8 @@ import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -174,6 +179,28 @@ public class ProductIngestionSaga {
         return Mono.justOrEmpty(businessFunctionGroups);
     }
 
+    /***********
+     * FIX ME
+     */
+//    private Mono<JobProfileUser> setupPermissions(ProductGroupTask streamTask, JobProfileUser jobProfileUser) {
+//        return processUser(streamTask, jobProfileUser)
+//            .map(jobProfileUser::user)
+//            .flatMap(actual -> {
+//                List<BusinessFunctionGroup> businessFunctionGroups = jobProfileUser.getBusinessFunctionGroups();
+//
+//                Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = new HashMap<>();
+//                request.put(jobProfileUser.getUser(),businessFunctionGroups.stream()
+//                    .collect(Collectors.toMap(
+//                        bfg -> bfg,
+//                        bfg -> Collections.emptyList()
+//                    )) );
+//
+//                return accessGroupService.assignPermissionsBatch(
+//                    new BatchProductGroupTask(streamTask.getId(), new BatchProductGroup()
+//                        .serviceAgreement(streamTask.getProductGroup().getServiceAgreement()), BatchProductGroupTask.IngestionMode.UPDATE), request)
+//                    .thenReturn(jobProfileUser);
+//            });
+//    }
 
     private Mono<JobProfileUser> setupPermissions(ProductGroupTask streamTask, JobProfileUser jobProfileUser) {
         return processUser(streamTask, jobProfileUser)

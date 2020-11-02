@@ -18,6 +18,7 @@ import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
 import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
@@ -40,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.cloud.sleuth.annotation.SpanTag;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -79,7 +81,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private final LegalEntityService legalEntityService;
     private final UserService userService;
     private final AccessGroupService accessGroupService;
-    private final ProductIngestionSaga productIngestionSaga;
+    private final BatchProductIngestionSaga batchProductIngestionSaga;
 
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
 
@@ -87,11 +89,11 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                            UserService userService,
                            AccessGroupService accessGroupService,
                            ProductIngestionSaga productIngestionSaga,
-                           LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
+                           BatchProductIngestionSaga batchProductIngestionSaga, LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
         this.accessGroupService = accessGroupService;
-        this.productIngestionSaga = productIngestionSaga;
+        this.batchProductIngestionSaga = batchProductIngestionSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
     }
 
@@ -207,7 +209,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
         return Flux.fromIterable(legalEntity.getProductGroups())
             .map(actual -> createProductGroupTask(streamTask, actual))
-            .flatMap(productGroupStreamTask -> productIngestionSaga.process(productGroupStreamTask)
+            .flatMap(productGroupStreamTask -> batchProductIngestionSaga.process(productGroupStreamTask)
                 .onErrorResume(throwable -> {
                     String message = throwable.getMessage();
                     if (throwable.getClass().isAssignableFrom(WebClientResponseException.class)) {
@@ -272,7 +274,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(referenceJobRole ->
                 accessGroupService.setupReferenceJobRole(streamTask, masterServiceAgreement, referenceJobRole))
             .flatMap(referenceJobRole -> {
-                log.debug("Reference Job Role: {}", referenceJobRole);
+                log.debug("Reference Job Role: {}", referenceJobRole.getName());
                 return Mono.just(streamTask);
             })
             .collectList()
@@ -472,7 +474,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private Mono<LegalEntityTask> setupServiceAgreement(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
-        if (legalEntity.getMasterServiceAgreement() == null) {
+        if (legalEntity.getMasterServiceAgreement() == null || StringUtils.isEmpty(legalEntity.getMasterServiceAgreement().getInternalId())) {
 
             Mono<LegalEntityTask> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntity.getInternalId())
                 .flatMap(serviceAgreement -> {
@@ -512,12 +514,19 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         legalEntityParticipant.setAdmins(adminExternalIds);
         legalEntityParticipant.setUsers(Collections.emptyList());
 
-        ServiceAgreement serviceAgreement = new ServiceAgreement();
-        serviceAgreement.setExternalId("sa_" + legalEntity.getExternalId());
-        serviceAgreement.setName(legalEntity.getName());
-        serviceAgreement.setDescription("Master Service Agreement for " + legalEntity.getName());
-        serviceAgreement.setStatus(LegalEntityStatus.ENABLED);
-        serviceAgreement.setIsMaster(true);
+        ServiceAgreement serviceAgreement;
+
+        if(legalEntity.getMasterServiceAgreement() == null) {
+            serviceAgreement = new ServiceAgreement();
+            serviceAgreement.setExternalId("sa_" + legalEntity.getExternalId());
+            serviceAgreement.setName(legalEntity.getName());
+            serviceAgreement.setDescription("Master Service Agreement for " + legalEntity.getName());
+            serviceAgreement.setStatus(LegalEntityStatus.ENABLED);
+        } else {
+            serviceAgreement = legalEntity.getMasterServiceAgreement();
+        }
+
+        serviceAgreement.setIsMaster(true); // The possibility of creating non-master SA is not implemented in Stream yet.
         serviceAgreement.addParticipantsItem(legalEntityParticipant);
 
         return serviceAgreement;

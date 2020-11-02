@@ -1,5 +1,8 @@
 package com.backbase.stream.service;
 
+import static java.util.Optional.ofNullable;
+
+
 import com.backbase.dbs.user.presentation.service.api.UsersApi;
 import com.backbase.dbs.user.presentation.service.model.AddRealm;
 import com.backbase.dbs.user.presentation.service.model.AssignRealm;
@@ -49,7 +52,7 @@ public class UserService {
      * @return User if exists. Empty if not.
      */
     public Mono<User> getUserByExternalId(String externalId) {
-        return usersApi.getExternalIdByExternalIdgetUserByExternalId(externalId)
+        return usersApi.getUserByExternalid(externalId)
             .doOnNext(userItem -> log.info("Found user: {} for externalId: {}", userItem.getFullName(), userItem.getExternalId()))
             .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
                 handleUserNotFound(externalId, notFound.getResponseBodyAsString()))
@@ -63,7 +66,7 @@ public class UserService {
      * @return Identity User
      */
     public Mono<User> getIdentityUserByExternalId(String externalId) {
-        return usersApi.getExternalIdByExternalIdgetUserByExternalId(externalId)
+        return usersApi.getUserByExternalIdgetUserByExternalId(externalId)
             .doOnNext(userItem -> log.info("Found user: {} for externalId: {}", userItem.getFullName(), userItem.getExternalId()))
             .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
                 handleUserNotFound(externalId, notFound.getResponseBodyAsString()))
@@ -96,7 +99,7 @@ public class UserService {
 
         GetUsersByLegalEntityIds getUsersByLegalEntityIds = new GetUsersByLegalEntityIds();
         getUsersByLegalEntityIds.addLegalEntityIdsItem(legalEntityInternalId);
-        return usersApi.postLegalEntityIds(getUsersByLegalEntityIds);
+        return usersApi.postUsersByLegalentityids(getUsersByLegalEntityIds);
     }
 
     /**
@@ -147,7 +150,7 @@ public class UserService {
      */
     private Mono<Realm> createRealm(final String realmName) {
         AddRealm assignRealmRequest = new AddRealm().realmName(realmName);
-        return usersApi.postRealms(assignRealmRequest)
+        return usersApi.postIdentityRealms(assignRealmRequest)
             .doOnNext(addRealmResponse -> log.info("Realm Created: '{}'", addRealmResponse.getId()))
             .doOnError(WebClientResponseException.class, badRequest ->
                 log.error("Error creating Realm"))
@@ -162,7 +165,7 @@ public class UserService {
      */
     private Mono<Realm> existingRealm(final String realmName) {
         log.info("Checking for existing Realm '{}'", realmName);
-        return usersApi.getRealms(null)
+        return usersApi.getIdentityRealms(null)
             .doOnError(WebClientResponseException.class, badRequest ->
                 log.error("Error getting Realms"))
             .collectList()
@@ -196,7 +199,7 @@ public class UserService {
     public Mono<LegalEntity> linkLegalEntityToRealm(LegalEntity legalEntity) {
         log.info("Linking Legal Entity with internal Id '{}' to Realm: '{}'", legalEntity.getInternalId(), legalEntity.getRealmName());
         AssignRealm assignRealm = new AssignRealm().legalEntityId(legalEntity.getInternalId());
-        return usersApi.postLegalentitiesByRealmName(legalEntity.getRealmName(), assignRealm)
+        return usersApi.postAssignIdentityRealm(legalEntity.getRealmName(), assignRealm)
             .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
                 log.error("Error Linking: {}", badRequest.getResponseBodyAsString()))
             .then(Mono.just(legalEntity))
@@ -226,6 +229,7 @@ public class UserService {
             createIdentityRequest.setFullName(user.getFullName());
             createIdentityRequest.setEmailAddress(user.getEmailAddress().getAddress());
             createIdentityRequest.setMobileNumber(user.getMobileNumber().getNumber());
+            ofNullable(user.getAttributes()).ifPresent(createIdentityRequest::setAttributes);
         }
 
         return usersApi.postIdentities(createIdentityRequest)
@@ -233,7 +237,9 @@ public class UserService {
                 user.setInternalId(identityCreatedItem.getInternalId());
                 user.setExternalId(identityCreatedItem.getExternalId());
                 return user;
-            });
+            })
+            .filter(u -> IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(u.getIdentityLinkStrategy()))
+            .flatMap(this::updateIdentityUserAttributes);
     }
 
 
@@ -243,10 +249,16 @@ public class UserService {
      * @param user
      * @return {@link Mono<Void>}
      */
-    public Mono<Void> updateIdentityUserAttributes(User user) {
+    public Mono<User> updateIdentityUserAttributes(User user) {
+        if (user.getAttributes() == null)
+            Mono.just(user);
+
         ReplaceIdentity replaceIdentity = new ReplaceIdentity();
         replaceIdentity.attributes(user.getAttributes());
-        return usersApi.putInternalIdByInternalId(user.getInternalId(), replaceIdentity);
+        return usersApi.putIdentityByInternalId(user.getInternalId(), replaceIdentity)
+            .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
+                log.error("Error adding user attributes: {}", badRequest.getResponseBodyAsString()))
+            .then(Mono.just(user));
     }
 
     private User handleCreateUserResult(User user, UserCreated userCreated) {
