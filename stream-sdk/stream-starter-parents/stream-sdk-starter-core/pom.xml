@@ -32,6 +32,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <boat-maven-plugin.version>0.2.6</boat-maven-plugin.version>
+
         <source.version>1.8</source.version>
         <spring-cloud.version>Hoxton.SR6</spring-cloud.version>
         <mapstruct-jdk8.version>1.3.1.Final</mapstruct-jdk8.version>
@@ -270,6 +272,11 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>com.backbase.oss</groupId>
+                    <artifactId>boat-maven-plugin</artifactId>
+                    <version>${boat-maven-plugin.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>

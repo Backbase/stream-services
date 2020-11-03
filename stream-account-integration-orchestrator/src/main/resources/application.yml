@@ -1,0 +1,47 @@
+
+logging:
+  level:
+    root: info
+    sun: off
+    javax: off
+    org.apache.activemq: off
+    jdk: off
+
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: http://token-converter:8080/oauth/token
+
+backbase:
+  stream:
+    account-integration:
+      default-account-integration-base-url: https://mambu-outbound.proto.backbasecloud.com
+      product-type-account-integration-base-url:
+        ins-120509-checking: http://localhost:8081
+        mock: http://localhost:8081
+
+    start:
+      title: Stream Account Integration <strong class="highlight">Orchestrator</strong>
+      subTitle: Where going to mutiple places
+      header: Stream Account Integration <strong class="highlight">Orchestrator</strong>
+      description: "Route Balance And Account Itegration Queries to different services based on Product Types"
+      footer: "Stream"
+      defaultAction:
+        name: Swagger
+        href: swagger-ui.html
+      navbarLinks:
+        - name: Communtiy
+          href: https://community.backbase.com
+
+
+

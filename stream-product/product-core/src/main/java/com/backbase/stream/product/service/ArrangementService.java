@@ -2,10 +2,18 @@ package com.backbase.stream.product.service;
 
 import com.backbase.dbs.accounts.presentation.service.ApiClient;
 import com.backbase.dbs.accounts.presentation.service.api.ArrangementsApi;
-import com.backbase.dbs.accounts.presentation.service.model.*;
+import com.backbase.dbs.accounts.presentation.service.model.ArrangemenItemBase;
+import com.backbase.dbs.accounts.presentation.service.model.ArrangementItem;
+import com.backbase.dbs.accounts.presentation.service.model.ArrangementItemPost;
+import com.backbase.dbs.accounts.presentation.service.model.ArrangementItems;
+import com.backbase.dbs.accounts.presentation.service.model.BatchResponseItemExtended;
+import com.backbase.dbs.accounts.presentation.service.model.ExternalLegalEntityIds;
+import com.backbase.dbs.accounts.presentation.service.model.InternalIdGetResponseBody;
 import com.backbase.stream.product.exception.ArrangementCreationException;
 import com.backbase.stream.product.exception.ArrangementUpdateException;
 import com.backbase.stream.product.mapping.ProductMapper;
+import java.util.Collections;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,9 +23,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Manage Products (In DBS Called Arrangements).
@@ -51,7 +56,7 @@ public class ArrangementService {
 
     public Mono<ArrangemenItemBase> updateArrangement(ArrangemenItemBase arrangemenItemBase) {
         log.info("Updating Arrangement: {}", arrangemenItemBase.getExternalArrangementId());
-        if(arrangemenItemBase.getDebitCards() == null)
+        if (arrangemenItemBase.getDebitCards() == null)
             arrangemenItemBase.setDebitCards(Collections.emptyList());
         return arrangementsApi.putArrangements(arrangemenItemBase)
             .doOnNext(aVoid -> log.info("Updated Arrangement: {}", arrangemenItemBase.getExternalArrangementId())).map(aVoid -> arrangemenItemBase)
@@ -69,22 +74,23 @@ public class ArrangementService {
      */
     public Flux<BatchResponseItemExtended> upsertBatchArrangements(List<ArrangementItemPost> arrangementItems) {
         return arrangementsApi.postBatchUpsertArrangements(arrangementItems)
-                .map(batchResponseItemExtended -> {
-                    log.info("Batch Arrangement update result for arrangementId: {}, resourceId: {}, action: {}, result: {}", batchResponseItemExtended.getArrangementId(), batchResponseItemExtended.getResourceId(), batchResponseItemExtended.getAction(), batchResponseItemExtended.getStatus());
-                    // Check if any failed, then fail everything.
-                    if (!BatchResponseItemExtended.StatusEnum._200.equals(batchResponseItemExtended.getStatus())) {
-                        log.error("Failed to batch arrangements:  " + arrangementItems);
-                        batchResponseItemExtended.getErrors().forEach(error -> {
-                                log.error("\t[{}]: {}", error.getKey(), error.getMessage());
-                        });
+            .map(batchResponseItemExtended -> {
+                log.info("Batch Arrangement update result for arrangementId: {}, resourceId: {}, action: {}, result: {}", batchResponseItemExtended.getArrangementId(), batchResponseItemExtended.getResourceId(), batchResponseItemExtended.getAction(), batchResponseItemExtended.getStatus());
+                // Check if any failed, then fail everything.
+                if (!BatchResponseItemExtended.StatusEnum._200.equals(batchResponseItemExtended.getStatus())) {
+                    log.error("Failed to batch arrangements:  " + arrangementItems);
+                    batchResponseItemExtended.getErrors().forEach(error -> {
+                        log.error("\t[{}]: {}", error.getKey(), error.getMessage());
+                    });
 
 
-                        throw new IllegalStateException("Batch arrangement update failed: " + batchResponseItemExtended.getResourceId());
-                    }
-                    return batchResponseItemExtended;
-                })
-                .onErrorResume(WebClientResponseException.class, throwable ->
-                        Mono.error(new ArrangementUpdateException(throwable, "Batch arrangement update failed: " + arrangementItems)));
+                    throw new IllegalStateException("Batch arrangement update failed: " + batchResponseItemExtended.getResourceId());
+                }
+                return batchResponseItemExtended;
+            })
+            .onErrorResume(WebClientResponseException.class, throwable ->
+
+                Mono.error(new ArrangementUpdateException(throwable, "Batch arrangement update failed: " + arrangementItems)));
     }
 
     /**
@@ -139,14 +145,14 @@ public class ArrangementService {
         log.debug("Retrieving Arrangement by internal id {}", arrangementInternalId);
         // get arrangement externalId by internal id.
         return arrangementsApi.getArrangementById(arrangementInternalId)
-                .map(ArrangementItem::getExternalArrangementId)
-                .onErrorResume(WebClientResponseException.class, e -> {
-                    log.warn("Failed to retrieve arrangement by internal id {}, {}", arrangementInternalId, e.getMessage());
-                    return Mono.empty();
-                })
-                // remove arrangement.
-                .flatMap(this::deleteArrangementByExternalId)
-                .thenReturn(arrangementInternalId);
+            .map(ArrangementItem::getExternalArrangementId)
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.warn("Failed to retrieve arrangement by internal id {}, {}", arrangementInternalId, e.getMessage());
+                return Mono.empty();
+            })
+            // remove arrangement.
+            .flatMap(this::deleteArrangementByExternalId)
+            .thenReturn(arrangementInternalId);
     }
 
     /**
@@ -158,17 +164,17 @@ public class ArrangementService {
     public Mono<String> deleteArrangementByExternalId(String arrangementExternalId) {
         log.debug("Removing Arrangement with external id {}", arrangementExternalId);
         return arrangementsApi.deleteexternalArrangementId(arrangementExternalId)
-                .thenReturn(arrangementExternalId);
+            .thenReturn(arrangementExternalId);
     }
 
     /**
      * Assign Arrangement with specified Legal Entities.
      *
-     * @param arrangementExternalId external id of Arrangement.
+     * @param arrangementExternalId    external id of Arrangement.
      * @param legalEntitiesExternalIds list of Legal Entities external identifiers.
      * @return Mono<Void>
      */
-    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, List<String> legalEntitiesExternalIds){
+    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, List<String> legalEntitiesExternalIds) {
         log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, legalEntitiesExternalIds);
         return arrangementsApi.postArrangementLegalEntities(arrangementExternalId, new ExternalLegalEntityIds().ids(legalEntitiesExternalIds));
     }
@@ -176,7 +182,7 @@ public class ArrangementService {
     /**
      * Detach specified Arrangement from Legal Entities.
      *
-     * @param arrangementExternalId arrangement external identifier.
+     * @param arrangementExternalId  arrangement external identifier.
      * @param legalEntityExternalIds List of Legal Entities identified by external identifier.
      * @return Mono<Void>
      */
@@ -185,20 +191,25 @@ public class ArrangementService {
         // TODO: Very ugly, but seems like BOAT doesn't generate body for DELETE requests. Not sure it is incorrect though..
         ApiClient apiClient = arrangementsApi.getApiClient();
         return apiClient.invokeAPI(
-                "/arrangements/{externalArrangementId}/legalentities",
-                HttpMethod.DELETE,
-                Collections.singletonMap("externalArrangementId", arrangementExternalId),
-                new LinkedMultiValueMap<>(),
-                Collections.singletonMap("ids", legalEntityExternalIds),
-                new HttpHeaders(),
-                new LinkedMultiValueMap<>(),
-                new LinkedMultiValueMap<>(),
-                apiClient.selectHeaderAccept(new String[]{"application/json"}),
-                apiClient.selectHeaderContentType(new String[]{}),
-                new String[]{},
-                new ParameterizedTypeReference<Void>() {
-                }
+            "/arrangements/{externalArrangementId}/legalentities",
+            HttpMethod.DELETE,
+            Collections.singletonMap("externalArrangementId", arrangementExternalId),
+            new LinkedMultiValueMap<>(),
+            Collections.singletonMap("ids", legalEntityExternalIds),
+            new HttpHeaders(),
+            new LinkedMultiValueMap<>(),
+            new LinkedMultiValueMap<>(),
+            apiClient.selectHeaderAccept(new String[]{"application/json"}),
+            apiClient.selectHeaderContentType(new String[]{}),
+            new String[]{},
+            new ParameterizedTypeReference<Void>() {
+            }
         );
     }
 
+
+    public Flux<ArrangementItem> getArrangements(List<String> arrangementIds) {
+        return arrangementsApi.getArrangements(null, null, arrangementIds)
+            .flatMapIterable(ArrangementItems::getArrangementElements);
+    }
 }
