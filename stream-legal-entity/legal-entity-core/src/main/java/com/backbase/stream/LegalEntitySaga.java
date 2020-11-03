@@ -242,7 +242,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         }
         productGroup.getUsers().forEach(jobProfileUser -> {
             if (jobProfileUser.getLegalEntityReference() == null) {
-                jobProfileUser.setLegalEntityReference(new LegalEntityReference().externalId(legalEntity.getExternalId()).internalId(legalEntity.getInternalId()));
+                jobProfileUser.setLegalEntityReference(new LegalEntityReference()
+                    .externalId(legalEntity.getExternalId())
+                    .internalId(legalEntity.getInternalId()));
             }
         });
 
