@@ -288,7 +288,7 @@ public class ProductIngestionSaga {
         ProductGroup productGroup = streamTask.getData();
         return productFlux
             .map(p -> ensureLegalEntityId(productGroup.getUsers(), p))
-            .sort(comparing(ArrangementItemPost::getExternalProductId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
+            .sort(comparing(ArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
             .flatMapSequential(arrangementItemPost -> upsertArrangement(streamTask, arrangementItemPost))
             .collectList();
     }
