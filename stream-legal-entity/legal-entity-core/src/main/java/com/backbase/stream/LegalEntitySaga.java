@@ -1,5 +1,8 @@
 package com.backbase.stream;
 
+import static org.springframework.util.CollectionUtils.isEmpty;
+
+
 import com.backbase.dbs.accesscontrol.query.service.model.SchemaFunctionGroupItem;
 import com.backbase.dbs.user.presentation.service.model.GetUserById;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
@@ -11,6 +14,7 @@ import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityReference;
@@ -36,6 +40,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
@@ -46,8 +51,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
-
-import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * Legal Entity Saga. This Service creates Legal Entities and their supporting objects from a {@link LegalEntity}
@@ -103,7 +106,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::setupAdministrators)
             .flatMap(this::setupUsers)
             .flatMap(this::setupServiceAgreement)
-            .flatMap(this::createReferenceJobRoles)
+            .flatMap(this::createJobRoles)
             .flatMap(this::processJobProfiles)
             .flatMap(this::setupAdministratorPermissions)
             .flatMap(this::processProducts)
@@ -260,21 +263,29 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         return new ProductGroupTask(streamTask.getId() + "-" + productGroup.getName(), productGroup);
     }
 
-    @ContinueSpan(log = "createReferenceJobRoles")
-    private Mono<LegalEntityTask> createReferenceJobRoles(LegalEntityTask streamTask) {
-        if (isEmpty(streamTask.getData().getReferenceJobRoles())) {
-            log.debug("Skipping creation of reference job roles.");
+    @ContinueSpan(log = "createJobRoles")
+    private Mono<LegalEntityTask> createJobRoles(LegalEntityTask streamTask) {
+        if (isEmpty(streamTask.getData().getReferenceJobRoles())
+            && isEmpty(streamTask.getData().getMasterServiceAgreement().getJobRoles())) {
+            log.debug("Skipping creation of job roles.");
             return Mono.just(streamTask);
         }
 
-        log.info("Creating Reference Job Roles...");
+        log.info("Creating Job Roles...");
         LegalEntity legalEntity = streamTask.getData();
-        ServiceAgreement masterServiceAgreement = legalEntity.getMasterServiceAgreement();
-        return Flux.fromIterable(legalEntity.getReferenceJobRoles())
-            .flatMap(referenceJobRole ->
-                accessGroupService.setupReferenceJobRole(streamTask, masterServiceAgreement, referenceJobRole))
-            .flatMap(referenceJobRole -> {
-                log.debug("Reference Job Role: {}", referenceJobRole.getName());
+        ServiceAgreement serviceAgreement = legalEntity.getMasterServiceAgreement();
+
+        Stream<JobRole> jobRoles = serviceAgreement.getJobRoles() == null
+            ? Stream.empty()
+            : serviceAgreement.getJobRoles().stream();
+        Stream<? extends JobRole> referenceJobRoles = legalEntity.getReferenceJobRoles() == null
+            ? Stream.empty()
+            : legalEntity.getReferenceJobRoles().stream();
+
+        return Flux.fromStream(Stream.concat(jobRoles, referenceJobRoles))
+            .flatMap(jobRole -> accessGroupService.setupJobRole(streamTask, serviceAgreement, jobRole))
+            .flatMap(jobRole -> {
+                log.debug("Job Role: {}", jobRole.getName());
                 return Mono.just(streamTask);
             })
             .collectList()
@@ -327,8 +338,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     Map<String, SchemaFunctionGroupItem> idByFunctionGroupName = functionGroups
                         .stream()
                         .filter(fg -> Objects.nonNull(fg.getId()))
-                        .collect(Collectors
-                            .toMap(SchemaFunctionGroupItem::getName, Function.identity()));
+                        .collect(Collectors.toMap(SchemaFunctionGroupItem::getName, Function.identity()));
                     return jobProfileUser.getReferenceJobRoleNames().stream()
                         .map(idByFunctionGroupName::get)
                         .filter(Objects::nonNull)
@@ -478,14 +488,15 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
             Mono<LegalEntityTask> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntity.getInternalId())
                 .flatMap(serviceAgreement -> {
+                    if(legalEntity.getMasterServiceAgreement() != null && legalEntity.getMasterServiceAgreement().getJobRoles() != null)
+                        serviceAgreement.setJobRoles(legalEntity.getMasterServiceAgreement().getJobRoles());
                     streamTask.getData().setMasterServiceAgreement(serviceAgreement);
                     streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Existing Service Agreement: %s found for Legal Entity: %s", serviceAgreement.getExternalId(), legalEntity.getExternalId());
                     return Mono.just(streamTask);
                 });
             ServiceAgreement newServiceAgreement = createMasterServiceAgreement(legalEntity, legalEntity.getAdministrators());
 
-            Mono<LegalEntityTask> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask,
-                newServiceAgreement)
+            Mono<LegalEntityTask> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask, newServiceAgreement)
                 .onErrorMap(AccessGroupException.class, accessGroupException -> {
                     streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, newServiceAgreement.getExternalId(), null, accessGroupException, accessGroupException.getMessage(), accessGroupException.getHttpResponse());
                     return new StreamTaskException(streamTask, accessGroupException);

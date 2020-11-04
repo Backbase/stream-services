@@ -8,11 +8,10 @@ import com.backbase.dbs.accessgroup.presentation.service.model.PresentationPermi
 import com.backbase.dbs.accessgroup.presentation.service.model.ServicesAgreementIngest;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
+import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Privilege;
-import com.backbase.stream.legalentity.model.ReferenceJobRole;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -35,9 +34,7 @@ public interface AccessGroupMapper {
     @Mapping(defaultExpression = "java( new ArrayList<>() )", source = "users", target = "users")
     ParticipantIngest toPresentation(LegalEntityParticipant legalEntityParticipant);
 
-    @Mapping(target = "type", constant = "TEMPLATE")
-    @Mapping(source = "apsId", target = "apsId", defaultValue = "1")
-    PresentationIngestFunctionGroup toPresentation(ReferenceJobRole referenceJobRole);
+    PresentationIngestFunctionGroup toPresentation(JobRole referenceJobRole);
 
     com.backbase.stream.legalentity.model.ApprovalStatus map(
         com.backbase.dbs.accessgroup.presentation.service.model.ApprovalStatus approvalStatus);
