@@ -33,6 +33,7 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -275,14 +276,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         LegalEntity legalEntity = streamTask.getData();
         ServiceAgreement serviceAgreement = legalEntity.getMasterServiceAgreement();
 
-        Stream<JobRole> jobRoles = serviceAgreement.getJobRoles() == null
-            ? Stream.empty()
-            : serviceAgreement.getJobRoles().stream();
-        Stream<? extends JobRole> referenceJobRoles = legalEntity.getReferenceJobRoles() == null
-            ? Stream.empty()
-            : legalEntity.getReferenceJobRoles().stream();
-
-        return Flux.fromStream(Stream.concat(jobRoles, referenceJobRoles))
+        return Flux.fromStream(Stream.of(serviceAgreement.getJobRoles(), legalEntity.getReferenceJobRoles())
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream))
             .flatMap(jobRole -> accessGroupService.setupJobRole(streamTask, serviceAgreement, jobRole))
             .flatMap(jobRole -> {
                 log.debug("Job Role: {}", jobRole.getName());
