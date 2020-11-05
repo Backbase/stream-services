@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Ingest Legal Entity API
   description: Ingestion Saga for Legal Entities and their products
-  version: 2.0.0
+  version: 2.0.1
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
     backgroundColor: "#FFFFFF"
@@ -1054,6 +1054,10 @@ components:
           $ref: '#/components/schemas/ApsIdentifiers'
         adminUserAps:
           $ref: '#/components/schemas/ApsIdentifiers'
+        jobRoles:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobRole'
     ApsIdentifiers:
       type: object
       properties:
@@ -1675,8 +1679,8 @@ components:
                 description: Context can be anything used to construct localised messages.
                 x-java-type: java.util.Map<String,String>
             description: A validation error
-    ReferenceJobRole:
-      title: "Reference job role"
+    JobRole:
+      title: "Job Role"
       properties:
         id:
           $ref: '#/components/schemas/InternalIdentifier'
@@ -1685,13 +1689,13 @@ components:
           minLength: 1
           pattern: ^\S(.*(\S))?$
           type: string
-          description: Reference job role name
+          description: Job role name
         description:
           maxLength: 255
           minLength: 1
           pattern: ^(\S|\n)((.|\n)*(\S|\n))?$
           type: string
-          description: Reference job role description
+          description: Job role description
         functionGroups:
           type: array
           items:
@@ -1718,6 +1722,10 @@ components:
       required:
         - name
         - description
+    ReferenceJobRole:
+      title: "Reference Job Role"
+      allOf:
+        - $ref: '#/components/schemas/JobRole'
 
   examples:
     RootLegalEntityHierarchyExample:

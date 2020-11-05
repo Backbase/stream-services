@@ -1,5 +1,8 @@
 package com.backbase.stream.service;
 
+import static org.springframework.util.StringUtils.isEmpty;
+
+
 import com.backbase.dbs.accesscontrol.query.service.api.AccesscontrolApi;
 import com.backbase.dbs.accesscontrol.query.service.model.DataGroupItem;
 import com.backbase.dbs.accesscontrol.query.service.model.PersistenceApprovalPermissions;
@@ -35,6 +38,7 @@ import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -48,6 +52,7 @@ import com.backbase.stream.product.utils.BatchResponseUtils;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -77,10 +82,10 @@ public class AccessGroupService {
     public static final String REJECTED = "rejected";
     public static final String CREATED = "created";
     public static final String FUNCTION_GROUP = "function-group";
-    public static final String REFERENCE_JOB_ROLE = "reference-job-role";
+    public static final String JOB_ROLE = "job-role";
     public static final String SETUP_FUNCTION_GROUP = "setup-function-group";
     public static final String CREATE_FUNCTION_GROUP = "create-function-group";
-    public static final String SETUP_REFERENCE_JOB_ROLE = "setup-reference-job-role";
+    public static final String SETUP_JOB_ROLE = "setup-job-role";
     private static final String FAILED = "failed";
 
     public AccessGroupService(
@@ -796,34 +801,40 @@ public class AccessGroupService {
 
     }
 
-    private Mono<ReferenceJobRole> createReferenceJobRole(StreamTask streamTask, ServiceAgreement serviceAgreement,
-                                                          ReferenceJobRole referenceJobRole) {
+    private Mono<JobRole> createJobRole(StreamTask streamTask, ServiceAgreement serviceAgreement, JobRole jobRole) {
 
-        streamTask.info(REFERENCE_JOB_ROLE, SETUP_REFERENCE_JOB_ROLE, "create", serviceAgreement.getExternalId(), null, "Create new Reference job role: %s for service agreement: %s", referenceJobRole.getName(), serviceAgreement.getName());
+        streamTask.info(JOB_ROLE, SETUP_JOB_ROLE, "create", serviceAgreement.getExternalId(), null, "Create new job role: %s for service agreement: %s", jobRole.getName(), serviceAgreement.getName());
 
-        if (referenceJobRole.getDescription() == null) {
-            referenceJobRole.setDescription(referenceJobRole.getName());
+        if (jobRole.getDescription() == null) {
+            jobRole.setDescription(jobRole.getName());
         }
 
-        PresentationIngestFunctionGroup presentationIngestFunctionGroup =
-            accessGroupMapper.toPresentation(referenceJobRole);
-        presentationIngestFunctionGroup
-            .setPermissions(accessGroupMapper.toPresentation(referenceJobRole.getFunctionGroups()));
-
+        PresentationIngestFunctionGroup presentationIngestFunctionGroup = accessGroupMapper.toPresentation(jobRole);
+        presentationIngestFunctionGroup.setPermissions(accessGroupMapper.toPresentation(jobRole.getFunctionGroups()));
         presentationIngestFunctionGroup.setExternalServiceAgreementId(serviceAgreement.getExternalId());
+        if(jobRole instanceof ReferenceJobRole) {
+            log.debug("Creating a Reference Job Role.");
+            presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
+        }
+
+        // Removing constant from mapper and adding default APS here to avoid issues with apsName.
+        if(jobRole.getApsId() == null && isEmpty(jobRole.getApsName())){
+            log.warn("Adding default APS '1 - User APS' to job role since it wasn't previously set.");
+            presentationIngestFunctionGroup.setApsId(BigDecimal.ONE);
+        }
 
         return accessGroupServiceApi.postPresentationIngestFunctionGroup(presentationIngestFunctionGroup)
             .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
-                handleError(referenceJobRole, badRequest))
+                handleError(jobRole, badRequest))
             .onErrorResume(WebClientResponseException.class, badRequest -> {
-                streamTask.error(REFERENCE_JOB_ROLE, "ingest-reference-job-role", FAILED, streamTask.getName(), null, badRequest, badRequest.getResponseBodyAsString(), "Failed to setup Reference Job Role");
-                return Mono.error(new StreamTaskException(streamTask, badRequest, "Failed to setup Reference Job Role: " + badRequest.getResponseBodyAsString()));
+                streamTask.error(JOB_ROLE, "ingest-reference-job-role", FAILED, streamTask.getName(), null, badRequest, badRequest.getResponseBodyAsString(), "Failed to setup Job Role");
+                return Mono.error(new StreamTaskException(streamTask, badRequest, "Failed to setup Job Role: " + badRequest.getResponseBodyAsString()));
             })
             .doOnNext(idItem -> log.info("Created Business Function Group: {} with id: {}",
-                referenceJobRole.getName(), idItem.getId()))
+                jobRole.getName(), idItem.getId()))
             .map(idItem -> {
-                referenceJobRole.setId(idItem.getId());
-                return referenceJobRole;
+                jobRole.setId(idItem.getId());
+                return jobRole;
             });
     }
 
@@ -835,8 +846,8 @@ public class AccessGroupService {
         log.warn("Failed to create function group: {} Response: {}", businessFunctionGroup, badRequest.getResponseBodyAsString());
     }
 
-    private void handleError(ReferenceJobRole referenceJobRole, WebClientResponseException badRequest) {
-        log.warn("Failed to create reference job role: {} Response: {}", referenceJobRole, badRequest.getResponseBodyAsString());
+    private void handleError(JobRole jobRole, WebClientResponseException badRequest) {
+        log.warn("Failed to create job role: {} Response: {}", jobRole, badRequest.getResponseBodyAsString());
     }
 
     private List<PresentationPermission> getPresentationPermissions(BusinessFunctionGroup businessFunctionGroup) {
@@ -905,12 +916,11 @@ public class AccessGroupService {
             .flatMap(dataGroupItem -> Flux.fromIterable(dataGroupItem.getItems()));
     }
 
-    public Mono<ReferenceJobRole> setupReferenceJobRole(StreamTask streamTask,
-                                                        ServiceAgreement masterServiceAgreement, ReferenceJobRole referenceJobRole) {
-        streamTask.info(REFERENCE_JOB_ROLE, SETUP_REFERENCE_JOB_ROLE, "", masterServiceAgreement.getExternalId(),
-            masterServiceAgreement.getInternalId(), "Setting up %s Reference Job Role for Service Agreement: %s",
-            referenceJobRole.getName(), masterServiceAgreement.getName());
-        log.info("Setup {} Reference job role for Service Agreement: {}", referenceJobRole.getName(),
+    public Mono<JobRole> setupJobRole(StreamTask streamTask, ServiceAgreement masterServiceAgreement, JobRole jobRole) {
+        streamTask.info(JOB_ROLE, SETUP_JOB_ROLE, "", masterServiceAgreement.getExternalId(),
+            masterServiceAgreement.getInternalId(), "Setting up %s Job Role for Service Agreement: %s",
+            jobRole.getName(), masterServiceAgreement.getName());
+        log.info("Setup {} job role for Service Agreement: {}", jobRole.getName(),
             masterServiceAgreement.getExternalId());
 
         return accessControlApi.getFunctionGroups(masterServiceAgreement.getInternalId())
@@ -925,11 +935,11 @@ public class AccessGroupService {
             })
             .collectList()
             .flatMap(functionGroups -> {
-                if (functionGroups.stream().noneMatch(fg -> fg.getName().equals(referenceJobRole.getName()))) {
-                    log.debug("Reference Job Role Already exist: {}", referenceJobRole.getName());
-                    return createReferenceJobRole(streamTask, masterServiceAgreement, referenceJobRole);
+                if (functionGroups.stream().noneMatch(fg -> fg.getName().equals(jobRole.getName()))) {
+                    log.debug("Job Role Already exists: {}", jobRole.getName());
+                    return createJobRole(streamTask, masterServiceAgreement, jobRole);
                 }
-                return Mono.just(referenceJobRole);
+                return Mono.just(jobRole);
             });
     }
 
