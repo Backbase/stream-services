@@ -1,5 +1,8 @@
 package com.backbase.stream.service;
 
+import static org.springframework.util.StringUtils.isEmpty;
+
+
 import com.backbase.dbs.accesscontrol.query.service.api.AccesscontrolApi;
 import com.backbase.dbs.accesscontrol.query.service.model.DataGroupItem;
 import com.backbase.dbs.accesscontrol.query.service.model.PersistenceApprovalPermissions;
@@ -49,6 +52,7 @@ import com.backbase.stream.product.utils.BatchResponseUtils;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -811,6 +815,12 @@ public class AccessGroupService {
         if(jobRole instanceof ReferenceJobRole) {
             log.debug("Creating a Reference Job Role.");
             presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
+        }
+
+        // Removing constant from mapper and adding default APS here to avoid issues with apsName.
+        if(jobRole.getApsId() == null && isEmpty(jobRole.getApsName())){
+            log.warn("Adding default APS '1 - User APS' to job role since it wasn't previously set.");
+            presentationIngestFunctionGroup.setApsId(BigDecimal.ONE);
         }
 
         return accessGroupServiceApi.postPresentationIngestFunctionGroup(presentationIngestFunctionGroup)
