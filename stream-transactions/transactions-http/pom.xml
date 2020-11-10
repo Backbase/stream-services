@@ -5,6 +5,8 @@
     <properties>
         <boat-maven-plugin.version>0.2.6</boat-maven-plugin.version>
         <banking-services-bom.version>2.18.2.1</banking-services-bom.version>
+        <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
+        <codegen.generated-openapi-sources-dir>${codegen.generated-sources-dir}/openapi/src/main/java</codegen.generated-openapi-sources-dir>
     </properties>
 
     <parent>
@@ -104,7 +106,26 @@
                     <name>${project.artifactId}</name>
                 </configuration>
             </plugin>
-
+            
+             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${codegen.generated-sources-dir}/annotations</source>
+                                <source>${codegen.generated-openapi-sources-dir}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

@@ -2,7 +2,6 @@ package com.backbase.stream;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-
 import com.backbase.dbs.accesscontrol.query.service.model.SchemaFunctionGroupItem;
 import com.backbase.dbs.user.presentation.service.model.GetUserById;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
@@ -14,7 +13,6 @@ import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.JobProfileUser;
-import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityReference;
