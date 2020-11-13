@@ -35,6 +35,7 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -46,10 +47,16 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.GroupedFlux;
 import reactor.core.publisher.Mono;
 
+
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
@@ -263,8 +270,7 @@ public class ProductIngestionSaga {
             .zipWith(currentAccountsRequests, (actual, arrangements) -> {
                 List<CurrentAccount> collect = arrangements.stream().map(productMapper::mapCurrentAccount)
                     .collect(Collectors.toList());
-                return actual.currentAccounts(
-                    collect);
+                return actual.currentAccounts(collect);
             })
             .zipWith(savingAccountsRequests, (actual, arrangements) -> actual.savingAccounts(arrangements.stream().map(productMapper::mapSavingAccount).collect(Collectors.toList())))
             .zipWith(debitCardsRequests, (actual, arrangements) -> actual.debitCards(arrangements.stream().map(productMapper::mapDebitCard).collect(Collectors.toList())))
@@ -277,10 +283,13 @@ public class ProductIngestionSaga {
             .map(streamTask::data);
     }
 
-    private Mono<List<ArrangementItem>> upsertArrangements(ProductGroupTask streamTask, Flux<ArrangementItemPost> productFlux) {
+    private Mono<List<ArrangementItem>> upsertArrangements(ProductGroupTask streamTask,
+        Flux<ArrangementItemPost> productFlux) {
         ProductGroup productGroup = streamTask.getData();
-        return productFlux.map(p -> ensureLegalEntityId(productGroup.getUsers(), p))
-            .flatMap(arrangementItemPost -> upsertArrangement(streamTask, arrangementItemPost))
+        return productFlux
+            .map(p -> ensureLegalEntityId(productGroup.getUsers(), p))
+            .sort(comparing(ArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
+            .flatMapSequential(arrangementItemPost -> upsertArrangement(streamTask, arrangementItemPost))
             .collectList();
     }
 

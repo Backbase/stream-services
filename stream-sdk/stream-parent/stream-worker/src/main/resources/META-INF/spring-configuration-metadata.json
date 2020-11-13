@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "backbase.stream.web.trace.response.enabled",
+      "type": "java.lang.Boolean"
+    }
+  ]
+}

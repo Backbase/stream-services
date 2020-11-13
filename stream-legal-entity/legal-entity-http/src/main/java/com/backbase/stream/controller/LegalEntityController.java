@@ -4,7 +4,6 @@ import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.legalentity.api.LegalEntityApi;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.worker.model.StreamTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,14 +24,12 @@ public class LegalEntityController implements LegalEntityApi {
     @Override
     public Mono<ResponseEntity<Flux<LegalEntity>>> createLegalEntity(Flux<LegalEntity> legalEntity,
                                                                      ServerWebExchange exchange) {
-        Flux<LegalEntity> publish = legalEntity
+        Flux<LegalEntity> flux = legalEntity
             .map(LegalEntityTask::new)
             .flatMap(legalEntityService::executeTask)
-            .cast(LegalEntityTask.class)
-            .map(LegalEntityTask::getData);
-
-        Flux<LegalEntity> result = publish
+            .map(LegalEntityTask::getData)
             .doOnNext(actual -> log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
-        return Mono.just(ResponseEntity.ok(result));
+
+        return Mono.just(ResponseEntity.ok(flux));
     }
 }
