@@ -2,9 +2,9 @@ package com.backbase.stream;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-
 import com.backbase.dbs.accesscontrol.query.service.model.SchemaFunctionGroupItem;
 import com.backbase.dbs.user.presentation.service.model.GetUserById;
+import com.backbase.dbs.userprofile.model.CreateUserProfile;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.exceptions.AccessGroupException;
 import com.backbase.stream.exceptions.LegalEntityException;
@@ -14,7 +14,6 @@ import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.JobProfileUser;
-import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityReference;
@@ -22,6 +21,8 @@ import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.legalentity.model.UserProfile;
+import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
 import com.backbase.stream.product.ProductIngestionSaga;
@@ -29,6 +30,7 @@ import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
+import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
@@ -81,9 +83,11 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private static final String BATCH_PRODUCT_GROUP_ID = "batch_product_group_task-";
 
     private final BusinessFunctionGroupMapper businessFunctionGroupMapper = Mappers.getMapper(BusinessFunctionGroupMapper.class);
+    private final UserProfileMapper userProfileMapper = Mappers.getMapper(UserProfileMapper.class);
 
     private final LegalEntityService legalEntityService;
     private final UserService userService;
+    private final UserProfileService userProfileService;
     private final AccessGroupService accessGroupService;
     private final BatchProductIngestionSaga batchProductIngestionSaga;
 
@@ -91,11 +95,13 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     public LegalEntitySaga(LegalEntityService legalEntityService,
                            UserService userService,
+                           UserProfileService userProfileService,
                            AccessGroupService accessGroupService,
                            ProductIngestionSaga productIngestionSaga,
                            BatchProductIngestionSaga batchProductIngestionSaga, LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
+        this.userProfileService = userProfileService;
         this.accessGroupService = accessGroupService;
         this.batchProductIngestionSaga = batchProductIngestionSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
@@ -371,6 +377,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         return jobProfileUsers
             .flatMap(jobProfileUser -> upsertUser(streamTask, jobProfileUser.getUser())
                 .map(user -> {
+                    Mono<UserProfile> userProfile = upsertUserProfile(user);
+                    user.setUserProfile(userProfile);
                     jobProfileUser.setUser(user);
                     log.trace("upsert user {}", jobProfileUser);
                     return jobProfileUser;
@@ -378,7 +386,17 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .collectList()
             .map(legalEntity::users)
             .map(streamTask::data);
+    }
 
+    private Mono<UserProfile> upsertUserProfile(User user) {
+        if (legalEntitySagaConfigurationProperties.isUserProfileEnabled()) {
+            CreateUserProfile mappedUserProfile = userProfileMapper.toCreate(user);
+            return userProfileService.upsertUserProfile(mappedUserProfile)
+                .map(userProfileMapper::toUserProfile);
+        } else {
+            log.debug("Skipping User Profile creation as config property is set to false");
+            return null;
+        }
     }
 
     public Mono<LegalEntityTask> setupUserPermissions(LegalEntityTask legalEntityTask, List<BusinessFunctionGroup> businessFunctionGroups) {

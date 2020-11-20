@@ -10,6 +10,7 @@ import com.backbase.stream.product.ProductIngestionSagaConfiguration;
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
+import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,6 +34,7 @@ public class LegalEntitySagaConfiguration {
     @Bean
     public LegalEntitySaga reactiveLegalEntitySaga(LegalEntityService legalEntityService,
         UserService userService,
+        UserProfileService userProfileService,
         AccessGroupService accessGroupService,
         ProductIngestionSaga productIngestionSaga,
         BatchProductIngestionSaga batchProductIngestionSaga,
@@ -41,6 +43,7 @@ public class LegalEntitySagaConfiguration {
         return new LegalEntitySaga(
             legalEntityService,
             userService,
+            userProfileService,
             accessGroupService,
             productIngestionSaga,
             batchProductIngestionSaga, sinkConfigurationProperties
