@@ -376,9 +376,14 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
         return jobProfileUsers
             .flatMap(jobProfileUser -> upsertUser(streamTask, jobProfileUser.getUser())
-                .map(user -> {
-                    upsertUserProfile(user).subscribe(user::setUserProfile);
-                    jobProfileUser.setUser(user);
+                .map(upsertedUser -> {
+                    User inputUser = legalEntity.getUsers().stream()
+                        .filter(jpu -> jpu.getUser().getExternalId().equalsIgnoreCase(
+                            upsertedUser.getExternalId()))
+                        .findFirst().get().getUser();
+                    inputUser.setInternalId(upsertedUser.getInternalId());
+                    upsertUserProfile(inputUser).subscribe(upsertedUser::setUserProfile);
+                    jobProfileUser.setUser(upsertedUser);
                     log.trace("upsert user {}", jobProfileUser);
                     return jobProfileUser;
                 }))
@@ -394,6 +399,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 return userProfileService.upsertUserProfile(mappedUserProfile)
                     .map(userProfileMapper::toUserProfile);
             } else {
+                log.debug("User Profile for {} is null. Skipping User Profile creation", user.getExternalId());
                 return Mono.empty();
             }
         } else {
