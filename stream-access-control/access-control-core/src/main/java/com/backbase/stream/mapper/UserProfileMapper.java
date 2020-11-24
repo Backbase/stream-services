@@ -2,10 +2,14 @@ package com.backbase.stream.mapper;
 
 import com.backbase.dbs.userprofile.model.CreateUserProfile;
 import com.backbase.dbs.userprofile.model.GetUserProfile;
+import com.backbase.dbs.userprofile.model.MultiValued;
 import com.backbase.dbs.userprofile.model.Name;
 import com.backbase.dbs.userprofile.model.ReplaceUserProfile;
+import com.backbase.stream.legalentity.model.Multivalued;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.legalentity.model.UserProfile;
+import java.util.ArrayList;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -27,8 +31,8 @@ public abstract class UserProfileMapper {
     @Mapping(source = "userProfile.locale", target = "locale")
     @Mapping(source = "userProfile.timezone", target = "timezone")
     @Mapping(source = "userProfile.active", target = "active")
-    @Mapping(source = "userProfile.additionalEmails", target = "emails")
-    @Mapping(source = "userProfile.additionalPhoneNumbers", target = "phoneNumbers")
+    @Mapping(source = "user", target = "emails", qualifiedByName = "mapEmails")
+    @Mapping(source = "user", target = "phoneNumbers", qualifiedByName = "mapPhones")
     @Mapping(source = "userProfile.ims", target = "ims")
     @Mapping(source = "userProfile.photos", target = "photos")
     @Mapping(source = "userProfile.addresses", target = "addresses")
@@ -53,6 +57,34 @@ public abstract class UserProfileMapper {
     }
 
     abstract Name map(com.backbase.stream.legalentity.model.Name name);
+
+    @Named("mapEmails")
+    protected List<MultiValued> mapEmails(User user) {
+
+        List<MultiValued> emails = new ArrayList<>();
+        MultiValued mainAddress = new MultiValued()
+            .primary(true)
+            .value(user.getEmailAddress().getAddress());
+        emails.add(mainAddress);
+        emails.addAll(mapAll(user.getUserProfile().getAdditionalEmails()));
+        return emails;
+    }
+
+    @Named("mapPhones")
+    protected List<MultiValued> mapPhones(User user) {
+
+        List<MultiValued> phones = new ArrayList<>();
+        MultiValued mainPhone = new MultiValued()
+            .primary(true)
+            .value(user.getMobileNumber().getNumber());
+        phones.add(mainPhone);
+        phones.addAll(mapAll(user.getUserProfile().getAdditionalPhoneNumbers()));
+        return phones;
+    }
+
+    abstract MultiValued map(Multivalued multivalued);
+
+    abstract List<MultiValued> mapAll(List<Multivalued> multivalued);
 
     public abstract ReplaceUserProfile toUpdate(CreateUserProfile userItem);
 
