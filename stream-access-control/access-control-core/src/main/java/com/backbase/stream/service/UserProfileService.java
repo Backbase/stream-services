@@ -26,9 +26,10 @@ public class UserProfileService {
     private final UserProfileMapper mapper = Mappers.getMapper(UserProfileMapper.class);
 
     public Mono<GetUserProfile> upsertUserProfile(CreateUserProfile requestBody) {
-
         Mono<GetUserProfile> getExistingUser = getUserProfileByUserID(requestBody.getUserId())
-            .flatMap(getUserProfile -> updateUserProfile(getUserProfile.getUserId(), mapper.toUpdate(requestBody)))
+            .flatMap(getUserProfile ->
+                updateUserProfile(getUserProfile.getUserId(), mapper.toUpdate(requestBody)
+                    .id(getUserProfile.getId())))
             .doOnNext(
                 existingUser -> log.info("User Profile updated for User with ID: {}", existingUser.getExternalId()));
         Mono<GetUserProfile> createNewUser = createUserProfile(requestBody)
@@ -67,8 +68,8 @@ public class UserProfileService {
                 handleUserNotFound(userId, notFound.getResponseBodyAsString()));
     }
 
-    private Mono<? extends GetUserProfile> handleUserNotFound(String externalId, String responseBodyAsString) {
-        log.info("User with externalId: {} does not exist: {}", externalId, responseBodyAsString);
+    private Mono<? extends GetUserProfile> handleUserNotFound(String id, String responseBodyAsString) {
+        log.info("User with id: {} does not exist: {}", id, responseBodyAsString);
         return Mono.empty();
     }
 
