@@ -32,7 +32,7 @@ public class UserProfileService {
             .doOnNext(
                 existingUser -> log.info("User Profile updated for User with ID: {}", existingUser.getExternalId()));
         Mono<GetUserProfile> createNewUser = createUserProfile(requestBody)
-            .doOnNext(createdUser -> log.info("User Profile updated for User with ID: {}", createdUser.getExternalId()));
+            .doOnNext(createdUser -> log.info("User Profile created for User with ID: {}", createdUser.getExternalId()));
         return getExistingUser.switchIfEmpty(createNewUser);
     }
 
@@ -46,7 +46,7 @@ public class UserProfileService {
     public Mono<GetUserProfile> updateUserProfile(String userId, ReplaceUserProfile requestBody) {
         return userProfileApi.putUserProfile(userId, requestBody)
             .doOnError(WebClientResponseException.class, throwable ->
-                log.error("Failed to create User Profile: {}\n{}", requestBody.getExternalId(),
+                log.error("Failed to update User Profile: {}\n{}", requestBody.getExternalId(),
                     throwable.getResponseBodyAsString()));
     }
 

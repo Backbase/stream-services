@@ -377,8 +377,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         return jobProfileUsers
             .flatMap(jobProfileUser -> upsertUser(streamTask, jobProfileUser.getUser())
                 .map(user -> {
-                    Mono<UserProfile> userProfile = upsertUserProfile(user);
-                    user.setUserProfile(userProfile);
+                    upsertUserProfile(user).subscribe(user::setUserProfile);
                     jobProfileUser.setUser(user);
                     log.trace("upsert user {}", jobProfileUser);
                     return jobProfileUser;
@@ -390,12 +389,16 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private Mono<UserProfile> upsertUserProfile(User user) {
         if (legalEntitySagaConfigurationProperties.isUserProfileEnabled()) {
-            CreateUserProfile mappedUserProfile = userProfileMapper.toCreate(user);
-            return userProfileService.upsertUserProfile(mappedUserProfile)
-                .map(userProfileMapper::toUserProfile);
+            if (user.getUserProfile() != null) {
+                CreateUserProfile mappedUserProfile = userProfileMapper.toCreate(user);
+                return userProfileService.upsertUserProfile(mappedUserProfile)
+                    .map(userProfileMapper::toUserProfile);
+            } else {
+                return Mono.empty();
+            }
         } else {
             log.debug("Skipping User Profile creation as config property is set to false");
-            return null;
+            return Mono.empty();
         }
     }
 
