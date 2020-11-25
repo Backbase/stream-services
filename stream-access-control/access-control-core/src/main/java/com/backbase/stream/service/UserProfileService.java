@@ -4,8 +4,12 @@ import com.backbase.dbs.userprofile.api.UserProfileApi;
 import com.backbase.dbs.userprofile.model.CreateUserProfile;
 import com.backbase.dbs.userprofile.model.GetUserProfile;
 import com.backbase.dbs.userprofile.model.ReplaceUserProfile;
+import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.mapper.UserProfileMapper;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
@@ -16,12 +20,21 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class UserProfileService {
 
+    @NonNull
     private final UserProfileApi userProfileApi;
 
+    private final UserProfileMapper mapper = Mappers.getMapper(UserProfileMapper.class);
+
     public Mono<GetUserProfile> upsertUserProfile(CreateUserProfile requestBody) {
-        Mono<GetUserProfile> getExistingUser = getUserProfileByUserID(requestBody.getUserId());
-        return getExistingUser != null ?
-            getExistingUser : createUserProfile(requestBody);
+        Mono<GetUserProfile> getExistingUser = getUserProfileByUserID(requestBody.getUserId())
+            .flatMap(getUserProfile ->
+                updateUserProfile(getUserProfile.getUserId(), mapper.toUpdate(requestBody)
+                    .id(getUserProfile.getId())))
+            .doOnNext(
+                existingUser -> log.info("User Profile updated for User with ID: {}", existingUser.getExternalId()));
+        Mono<GetUserProfile> createNewUser = createUserProfile(requestBody)
+            .doOnNext(createdUser -> log.info("User Profile created for User with ID: {}", createdUser.getExternalId()));
+        return getExistingUser.switchIfEmpty(createNewUser);
     }
 
     public Mono<GetUserProfile> createUserProfile(CreateUserProfile requestBody) {
@@ -34,7 +47,7 @@ public class UserProfileService {
     public Mono<GetUserProfile> updateUserProfile(String userId, ReplaceUserProfile requestBody) {
         return userProfileApi.putUserProfile(userId, requestBody)
             .doOnError(WebClientResponseException.class, throwable ->
-                log.error("Failed to create User Profile: {}\n{}", requestBody.getExternalId(),
+                log.error("Failed to update User Profile: {}\n{}", requestBody.getExternalId(),
                     throwable.getResponseBodyAsString()));
     }
 
@@ -55,8 +68,8 @@ public class UserProfileService {
                 handleUserNotFound(userId, notFound.getResponseBodyAsString()));
     }
 
-    private Mono<? extends GetUserProfile> handleUserNotFound(String externalId, String responseBodyAsString) {
-        log.info("User with externalId: {} does not exist: {}", externalId, responseBodyAsString);
+    private Mono<? extends GetUserProfile> handleUserNotFound(String id, String responseBodyAsString) {
+        log.info("User with id: {} does not exist: {}", id, responseBodyAsString);
         return Mono.empty();
     }
 
