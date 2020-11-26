@@ -66,7 +66,9 @@ public abstract class UserProfileMapper {
             .primary(true)
             .value(user.getEmailAddress().getAddress());
         emails.add(mainAddress);
-        emails.addAll(mapAll(user.getUserProfile().getAdditionalEmails()));
+        if (user.getUserProfile().getAdditionalEmails() != null) {
+            emails.addAll(mapAll(user.getUserProfile().getAdditionalEmails()));
+        }
         return emails;
     }
 
@@ -78,7 +80,9 @@ public abstract class UserProfileMapper {
             .primary(true)
             .value(user.getMobileNumber().getNumber());
         phones.add(mainPhone);
-        phones.addAll(mapAll(user.getUserProfile().getAdditionalPhoneNumbers()));
+        if (user.getUserProfile().getAdditionalPhoneNumbers() != null) {
+            phones.addAll(mapAll(user.getUserProfile().getAdditionalPhoneNumbers()));
+        }
         return phones;
     }
 

@@ -72,23 +72,30 @@ public class ReactiveProductCatalogService {
     public Mono<ProductCatalog> setupProductCatalog(ProductCatalog productCatalog) {
         return getProductCatalog().flatMap(existingProductCatalog -> {
 
-            List<ProductKind> newProductKinds = productCatalog.getProductKinds().stream()
-                .filter(newProductKind -> existingProductCatalog.getProductKinds().stream()
-                    .noneMatch(productKind ->
-                        productKind.getExternalKindId().equals(newProductKind.getExternalKindId())))
-                .collect(Collectors.toList());
-            List<ProductType> newProductTypes = productCatalog.getProductTypes().stream()
-                .filter(newProductType -> existingProductCatalog.getProductTypes().stream()
-                    .noneMatch(productType ->
-                        productType.getExternalProductId().equals(newProductType.getExternalProductId())))
-                .collect(Collectors.toList());
+            List<ProductKind> newProductKinds = new ArrayList<>();
+            if (productCatalog.getProductKinds() != null) {
+                newProductKinds = productCatalog.getProductKinds().stream()
+                    .filter(newProductKind -> existingProductCatalog.getProductKinds().stream()
+                        .noneMatch(productKind ->
+                            productKind.getExternalKindId().equals(newProductKind.getExternalKindId())))
+                    .collect(Collectors.toList());
+            }
+            List<ProductType> newProductTypes = new ArrayList<>();
+            if (productCatalog.getProductTypes() != null) {
+                newProductTypes = productCatalog.getProductTypes().stream()
+                    .filter(newProductType -> existingProductCatalog.getProductTypes().stream()
+                        .noneMatch(productType ->
+                            productType.getExternalProductId().equals(newProductType.getExternalProductId())))
+                    .collect(Collectors.toList());
+            }
 
             Flux<ProductKind> productKindFlux = storeProductKinds(newProductKinds)
                     .mergeWith(getProductKindFlux());
 
             // Ensure products kinds are created first
+            List<ProductType> finalNewProductTypes = newProductTypes;
             return productKindFlux.collectList().flatMap(productKinds -> {
-                return createProductTypes(newProductTypes, productKinds).collectList().flatMap(productTypes -> {
+                return createProductTypes(finalNewProductTypes, productKinds).collectList().flatMap(productTypes -> {
                     productCatalog.setProductTypes(productTypes);
                     return Mono.just(productCatalog);
                 });
