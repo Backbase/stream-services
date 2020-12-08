@@ -29,13 +29,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class ContactsServiceConfiguration {
 
     @Bean
-    public ContactsApi contactsApi(
-        ObjectMapper objectMapper,
-        DateFormat dateFormat,
-        WebClient dbsWebClient,
-        BackbaseStreamConfigurationProperties configurationProperties
-    ) {
-        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat).setBasePath(configurationProperties.getDbs().getLimitsManagerBaseUrl());
+    public ContactsApi contactsApi(ObjectMapper objectMapper,
+                                   DateFormat dateFormat,
+                                   WebClient dbsWebClient,
+                                   BackbaseStreamConfigurationProperties configurationProperties) {
+        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat).setBasePath(configurationProperties.getDbs().getContactManagerBaseUrl());
         return new ContactsApi(apiClient);
     }
 
@@ -49,14 +47,14 @@ public class ContactsServiceConfiguration {
 
     @Bean
     @ConditionalOnProperty(name = "backbase.stream.persistence", havingValue = "memory", matchIfMissing = true)
-    public ContactsUnitOfWorkRepository limitsUnitOfWorkRepository() {
+    public ContactsUnitOfWorkRepository contactsUnitOfWorkRepository() {
         return new InMemoryContactsUnitOfWorkRepository();
     }
 
     @Bean
-    public ContactsUnitOfWorkExecutor limitsUnitOfWorkExecutor(
-        ContactsUnitOfWorkRepository repository, ContactsSaga saga, ContactsWorkerConfigurationProperties configurationProperties
-    ) {
+    public ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor(ContactsUnitOfWorkRepository repository,
+                                                                 ContactsSaga saga,
+                                                                 ContactsWorkerConfigurationProperties configurationProperties) {
         return new ContactsUnitOfWorkExecutor(repository, saga, configurationProperties);
     }
 
