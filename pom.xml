@@ -37,13 +37,15 @@
         <module>stream-legal-entity</module>
         <module>stream-limits</module>
 
+        <module>stream-contacts</module>
+
         <module>stream-account-integration-orchestrator</module>
 
     </modules>
 
     <properties>
-        <banking-services-bom.version>2.19.2.1</banking-services-bom.version>
-        <boat-maven-plugin.version>0.2.6</boat-maven-plugin.version>
+        <banking-services-bom.version>2.19.3</banking-services-bom.version>
+        <boat-maven-plugin.version>0.10.0</boat-maven-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>

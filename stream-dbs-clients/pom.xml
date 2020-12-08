@@ -90,6 +90,14 @@
             <artifactId>limit-spec</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.backbase.dbs.contact</groupId>
+            <artifactId>contact-presentation-spec</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -218,34 +226,6 @@
                             <apiPackage>com.backbase.dbs.userprofile.api</apiPackage>
                         </configuration>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>user-pnp-command-service</id>-->
-<!--                        <phase>generate-sources</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>generate-webclient-embedded</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <inputSpec>-->
-<!--                                ${project.basedir}/api/com/backbase/dbs/user/user-pandp-command-spec/service-api/service-api/openapi.yaml-->
-<!--                            </inputSpec>-->
-<!--                            <modelPackage>com.backbase.dbs.user.pandp.command.service.model</modelPackage>-->
-<!--                            <apiPackage>com.backbase.dbs.user.pandp.command.service.api</apiPackage>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                    <execution>-->
-<!--                        <id>user-pnp-query-service</id>-->
-<!--                        <phase>generate-sources</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>generate-webclient-embedded</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <inputSpec>-->
-<!--                                ${project.basedir}/api/com/backbase/dbs/user/user-pandp-query-spec/service-api/service-api/openapi.yaml-->
-<!--                            </inputSpec>-->
-<!--                            <modelPackage>com.backbase.dbs.user.pandp.query.service.model</modelPackage>-->
-<!--                            <apiPackage>com.backbase.dbs.user.pandp.query.service.api</apiPackage>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
                     <execution>
                         <id>transaction-presentation-service</id>
                         <phase>generate-sources</phase>
@@ -300,6 +280,20 @@
                             </inputSpec>
                             <modelPackage>com.backbase.dbs.arrangement.pandp.query.service.model</modelPackage>
                             <apiPackage>com.backbase.dbs.arrangement.pandp.query.service.api</apiPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>contact-service-api</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>
+                                ${project.basedir}/api/com/backbase/dbs/contact/contact-presentation-spec/service-api/service-api/openapi.yaml
+                            </inputSpec>
+                            <modelPackage>com.backbase.dbs.contact.service.model</modelPackage>
+                            <apiPackage>com.backbase.dbs.contact.service.api</apiPackage>
                         </configuration>
                     </execution>
                 </executions>

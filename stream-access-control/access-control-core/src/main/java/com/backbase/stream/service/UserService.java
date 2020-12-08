@@ -1,8 +1,5 @@
 package com.backbase.stream.service;
 
-import static java.util.Optional.ofNullable;
-
-
 import com.backbase.dbs.user.presentation.service.api.UsersApi;
 import com.backbase.dbs.user.presentation.service.model.AddRealm;
 import com.backbase.dbs.user.presentation.service.model.AssignRealm;
@@ -31,6 +28,8 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * Stream User Management. Still needs to be adapted to use Identity correctly
@@ -233,6 +232,9 @@ public class UserService {
         }
 
         return usersApi.postIdentities(createIdentityRequest)
+            .doOnError(WebClientResponseException.class, e -> {
+                log.error("Failed to post entities: {}. Server Response: {}", createIdentityRequest, e.getResponseBodyAsString());
+            })
             .map(identityCreatedItem -> {
                 user.setInternalId(identityCreatedItem.getInternalId());
                 user.setExternalId(identityCreatedItem.getExternalId());
