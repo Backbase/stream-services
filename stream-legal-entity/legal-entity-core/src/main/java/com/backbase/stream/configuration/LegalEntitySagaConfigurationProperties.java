@@ -1,6 +1,7 @@
 package com.backbase.stream.configuration;
 
 import com.backbase.stream.product.task.BatchProductGroupTask;
+import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,9 +16,17 @@ public class LegalEntitySagaConfigurationProperties extends StreamWorkerConfigur
      * Enable identity integration
      */
     private boolean useIdentityIntegration = true;
+
+    /**
+     * Set Batch Product Group Ingestiomn Mode
+     */
     private BatchProductGroupTask.IngestionMode ingestionMode = BatchProductGroupTask.IngestionMode.REPLACE;
 
-    public BatchProductGroupTask.IngestionMode getIngestionMode() {
-        return ingestionMode;
-    }
+    /**
+     * Enable User Profile
+     */
+    private boolean userProfileEnabled = false;
+
+
+
 }
