@@ -32,7 +32,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <boat-maven-plugin.version>0.2.6</boat-maven-plugin.version>
+        <boat-maven-plugin.version>0.11.1</boat-maven-plugin.version>
 
         <source.version>1.8</source.version>
         <spring-cloud.version>Hoxton.SR6</spring-cloud.version>
