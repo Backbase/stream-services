@@ -45,6 +45,13 @@ public class BackbaseStreamConfigurationProperties {
          */
         private String userProfileManagerBaseUrl = "http://user-profile-manager:8080";
 
+        /**
+         * The location of DBS Contact Mnaager Service.
+         */
+        private String contactManagerBaseUrl = "http://contact-manager:8080";
+
+
+
     }
 
 }
