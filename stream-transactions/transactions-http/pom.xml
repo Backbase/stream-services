@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <properties>
         <boat-maven-plugin.version>0.11.1</boat-maven-plugin.version>
-        <banking-services-bom.version>2.18.2.1</banking-services-bom.version>
+        <banking-services-bom.version>2.19.3</banking-services-bom.version>
     </properties>
 
     <parent>

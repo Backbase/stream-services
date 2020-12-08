@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <properties>
-        <banking-services-bom.version>2.18.2.1</banking-services-bom.version>
+        <banking-services-bom.version>2.19.3</banking-services-bom.version>
         <boat-maven-plugin.version>0.11.1</boat-maven-plugin.version>
     </properties>
 
