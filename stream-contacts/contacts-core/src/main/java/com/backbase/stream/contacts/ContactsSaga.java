@@ -1,11 +1,16 @@
 package com.backbase.stream.contacts;
 
 import com.backbase.dbs.contact.service.api.ContactsApi;
+import com.backbase.dbs.contact.service.model.ContactsbulkdeleteRequest;
 import com.backbase.dbs.contact.service.model.ContactsbulkingestionRequest;
+import com.backbase.dbs.contact.service.model.ExternalContact;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 public class ContactsSaga implements StreamTaskExecutor<ContactsTask> {
@@ -26,18 +31,33 @@ public class ContactsSaga implements StreamTaskExecutor<ContactsTask> {
     public Mono<ContactsTask> executeTask(ContactsTask task) {
         ContactsbulkingestionRequest item = task.getData();
 
-        log.info("Started ingestion of contacts for user {}", item.getAccessContext());
+//        contactsApi.getContacts(null, item.getAccessContext().getExternalLegalEntityId(), null, 0, 100, null):
+        ContactsbulkdeleteRequest contactsbulkdeleteRequest = new ContactsbulkdeleteRequest();
+        contactsbulkdeleteRequest.setAccessContext(item.getAccessContext());
+        contactsbulkdeleteRequest.setExternalContactIds(item.getContacts().stream().map(ExternalContact::getExternalId).collect(Collectors.toList()));
 
-        return contactsApi.postContactsBulkIngestion(item)
-            .map(contactsbulkingestionPostResponseBody -> {
-                task.setResponse(contactsbulkingestionPostResponseBody);
-                task.info(CONTACTS, CREATE, SUCCESS, item.getAccessContext().toString(), contactsbulkingestionPostResponseBody.getSuccessCount().toString(), CREATED_SUCCESSFULLY);
-                return task;
-            })
-            .onErrorResume(throwable -> {
-                task.error(CONTACTS, CREATE, ERROR, item.getAccessContext().toString(), null, throwable, "Failed to ingest contacts: " + throwable.getMessage(), FAILED_TO_INGEST_CONTACTS);
-                return Mono.error(new StreamTaskException(task, throwable, FAILED_TO_INGEST_CONTACTS));
-            });
+        return
+            contactsApi.postContactsBulkDelete(contactsbulkdeleteRequest)
+                .publishOn(Schedulers.single())
+                .onErrorResume(WebClientResponseException.class, throwable -> {
+                    log.error("Failed to delete contacts: \n{} \nError: {}", item, throwable.getResponseBodyAsString());
+                    task.error(CONTACTS, CREATE, ERROR, item.getAccessContext().toString(), null, throwable, "Failed to delete contacts: " + throwable.getResponseBodyAsString(), FAILED_TO_INGEST_CONTACTS);
+                    return Mono.error(new StreamTaskException(task, throwable, FAILED_TO_INGEST_CONTACTS));
+                })
+                .doOnNext(v ->  log.info("Deleted all contacts for: {}",task.getName()))
+                .then(contactsApi.postContactsBulkIngestion(item)
+                    .map(contactsbulkingestionPostResponseBody -> {
+                        log.info("Finished ingesting {} for {}", contactsbulkingestionPostResponseBody.getSuccessCount(), task.getData().getAccessContext().getExternalUserId());
+                        task.setResponse(contactsbulkingestionPostResponseBody);
+                        assert contactsbulkingestionPostResponseBody.getSuccessCount() != null;
+                        task.info(CONTACTS, CREATE, SUCCESS, item.getAccessContext().toString(), contactsbulkingestionPostResponseBody.getSuccessCount().toString(), CREATED_SUCCESSFULLY);
+                        return task;
+                    })
+                    .onErrorResume(WebClientResponseException.class, throwable -> {
+                        log.error("Failed to ingest contacts: \n{} \nError: {}", item, throwable.getResponseBodyAsString());
+                        task.error(CONTACTS, CREATE, ERROR, item.getAccessContext().toString(), null, throwable, "Failed to ingest contacts: " + throwable.getResponseBodyAsString(), FAILED_TO_INGEST_CONTACTS);
+                        return Mono.error(new StreamTaskException(task, throwable, FAILED_TO_INGEST_CONTACTS));
+                    }));
 
     }
 

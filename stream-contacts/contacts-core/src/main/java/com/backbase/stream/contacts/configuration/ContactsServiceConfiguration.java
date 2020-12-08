@@ -4,6 +4,7 @@ import com.backbase.dbs.contact.service.ApiClient;
 import com.backbase.dbs.contact.service.api.ContactsApi;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.contacts.ContactsSaga;
+import com.backbase.stream.contacts.ContactsService;
 import com.backbase.stream.contacts.ContactsTask;
 import com.backbase.stream.contacts.ContactsUnitOfWorkExecutor;
 import com.backbase.stream.contacts.repository.ContactsUnitOfWorkRepository;
@@ -40,6 +41,11 @@ public class ContactsServiceConfiguration {
     @Bean
     public ContactsSaga contactsSaga(ContactsApi contactsApi) {
         return new ContactsSaga(contactsApi);
+    }
+
+    @Bean
+    public ContactsService contactsService(ContactsUnitOfWorkExecutor unitOfWorkExecutor, ContactsSaga contactsSaga) {
+        return new ContactsService(unitOfWorkExecutor, contactsSaga);
     }
 
     public static class InMemoryContactsUnitOfWorkRepository extends InMemoryReactiveUnitOfWorkRepository<ContactsTask> implements ContactsUnitOfWorkRepository {

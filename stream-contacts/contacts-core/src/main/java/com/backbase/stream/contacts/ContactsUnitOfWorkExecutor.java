@@ -7,8 +7,10 @@ import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
+@Slf4j
 public class ContactsUnitOfWorkExecutor extends UnitOfWorkExecutor<ContactsTask> {
 
     public ContactsUnitOfWorkExecutor(UnitOfWorkRepository<ContactsTask, String> repository, StreamTaskExecutor<ContactsTask> streamTaskExecutor, StreamWorkerConfiguration streamWorkerConfiguration) {
@@ -16,6 +18,7 @@ public class ContactsUnitOfWorkExecutor extends UnitOfWorkExecutor<ContactsTask>
     }
 
     public Flux<UnitOfWork<ContactsTask>> prepareUnitOfWork(List<ContactsbulkingestionRequest> items) {
+        log.info("Creating unit of work for {} items: ", items.size());
         String unitOfWorkId = "contacts-" + System.currentTimeMillis();
         Flux<UnitOfWork<ContactsTask>> toWorkOn = Flux.empty();
         items.forEach(item -> {
