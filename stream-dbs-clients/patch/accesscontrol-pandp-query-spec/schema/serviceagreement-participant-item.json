@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.serviceagreements.Participant",
+  "type": "object",
+  "description": "Legal Entity participant item",
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Legal Entity Id"
+    },
+    "externalId": {
+      "$ref": "definitions.json#/definitions/externalId",
+      "description": "External id of the Legal Entity",
+      "example": "BANK0001"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the Legal Entity",
+      "example": "Bank A"
+    },
+    "sharingUsers":{
+      "description": "Boolean value if the Participant is sharing users",
+      "type": "boolean"
+    },
+    "sharingAccounts":{
+      "description": "Boolean value if the participant is sharing accounts",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "id",
+    "externalId",
+    "name",
+    "sharingUsers",
+    "sharingAccounts"
+  ]
+}

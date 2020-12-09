@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "javaType" : "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.users.PersistenceDataItem",
+  "description": "Data item object",
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid"
+    },
+    "dataType": {
+      "type": "string",
+      "description": "Type of the data item",
+      "example": "CONTACTS"
+    }
+  }
+}

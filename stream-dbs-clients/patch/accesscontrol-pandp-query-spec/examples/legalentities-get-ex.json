@@ -1,0 +1,26 @@
+[
+  {
+    "id": "8a48e2685d787f78015d791ab69e0001",
+    "externalId": "C000001",
+    "name": "Bank",
+    "parentId": "8a48e2685d787f78015d791ab69e1111",
+    "type": "BANK",
+    "isParent": true
+  },
+  {
+    "id": "8a48e2685d787f78015d791abce70005",
+    "externalId": "C000002",
+    "name": "Company A",
+    "type": "CUSTOMER",
+    "parentId": "8a48e2685d787f78015d791ab69e1111",
+    "isParent": false
+  },
+  {
+    "id": "8a48e2685d787f78015d791abffb0009",
+    "externalId": "C000003",
+    "name": "Company B",
+    "type": "CUSTOMER",
+    "parentId": "8a48e2685d787f78015d791ab69e1111",
+    "isParent": true
+  }
+]

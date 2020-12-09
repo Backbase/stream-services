@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Legal entity item",
+  "extends": {
+    "$ref": "legalentity-item-get.json"
+  },
+  "properties": {
+    "parentId": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of the parent legal entity",
+      "example": "7813e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "isParent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Defines whether the legal entity is parent",
+      "example": false
+    }
+  }
+}
+

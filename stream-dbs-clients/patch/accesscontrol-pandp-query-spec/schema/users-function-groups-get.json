@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "description": "List of user/function groups",
+  "items": {
+    "type": "object",
+    "javaType" : "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.users.UserFunctionGroupsGetResponseBody",
+    "properties": {
+      "userId": {
+        "type": "string",
+        "description": "Internal id of the user."
+      },
+      "functionGroupIds": {
+        "type": "array",
+        "description": "List of internal function group ids.",
+        "items": {
+          "type": "string",
+          "description": "Internal id of the function group."
+        },
+        "uniqueItems": true
+      }
+    }
+  }
+}

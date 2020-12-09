@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Get root legal entity failed event",
+  "properties": {
+    "base_event": {
+      "$ref": "./base.json#/definitions/base_event"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Error message",
+      "example": "Some error message"
+    }
+  }
+}

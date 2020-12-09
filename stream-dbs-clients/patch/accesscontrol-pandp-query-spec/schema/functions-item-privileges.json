@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Privilege",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.function.PersistencePrivilege",
+  "properties": {
+    "privilege": {
+      "type": "string"
+    },
+    "supportsLimit": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "privilege",
+    "supportsLimit"
+  ]
+}

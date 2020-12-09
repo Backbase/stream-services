@@ -1,0 +1,19 @@
+{
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.approvals.DataGroupApprovalItem",
+  "type": "object",
+  "description": "Data Groups Id and Name.",
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of data group"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of data group"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of data group"
+    }
+  }
+}

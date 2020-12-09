@@ -1,0 +1,40 @@
+[
+  {
+    "serviceAgreementId": "01d70d09997b41cb83ea0e1db84626b3",
+    "dataGroups": [
+      {
+        "id": "01d70d09997b41cb83eb0e1db84626b3",
+        "items": [
+          "01d70d09997b41cb83eb0e1db84626b3",
+          "01d70d09997b41cb83eb0e1db84626b3"
+        ]
+      },
+      {
+        "id": "01d70d09997b41cb83eb0e1db84626b3",
+        "items": [
+          "01d70d09997b41cb83eb0e1db84626b3",
+          "01d70d09997b41cb83eb0e1db84626b3"
+        ]
+      }
+    ]
+  },
+  {
+    "serviceAgreementId": "01d70d09997b41cb83ea0e1db84626b3",
+    "dataGroups": [
+      {
+        "id": "01d70d09997b41cb83eb0e1db84626b3",
+        "items": [
+          "01d70d09997b41cb83eb0e1db84626b3",
+          "01d70d09997b41cb83eb0e1db84626b3"
+        ]
+      },
+      {
+        "id": "01d70d09997b41cb83eb0e1db84626b3",
+        "items": [
+          "01d70d09997b41cb83eb0e1db84626b3",
+          "01d70d09997b41cb83eb0e1db84626b3"
+        ]
+      }
+    ]
+  }
+]

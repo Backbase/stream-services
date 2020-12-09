@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.approvals.PersistencePendingApproval",
+  "type": "object",
+  "description": "Pending Approval item",
+  "properties": {
+    "approvalId": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Approval Id"
+    },
+    "action": {
+      "$ref": "definitions.json#/definitions/approvalAction",
+      "description": "Approval Action"
+    },
+    "category": {
+      "$ref": "definitions.json#/definitions/approvalCategory",
+      "description": "Approval Category"
+    }
+  },
+  "required": [
+    "approvalId",
+    "action",
+    "category"
+  ]
+}

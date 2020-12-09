@@ -1,0 +1,31 @@
+[
+  {
+    "functionId": "1001",
+    "resource": "Account",
+    "resourceCode": "account",
+    "functionCode": "list.accounts",
+    "name": "List",
+    "privileges": [
+      {
+        "privilege": "execute",
+        "supportsLimit": true
+      },
+      {
+        "privilege": "view",
+        "supportsLimit": false
+      }
+    ]
+  },
+  {
+    "functionId": "1002",
+    "functionCode": "domestic.payments",
+    "resource": "Payments",
+    "name": "Domestic Payments",
+    "privileges": [
+      {
+        "privilege": "create",
+        "supportsLimit": true
+      }
+    ]
+  }
+]

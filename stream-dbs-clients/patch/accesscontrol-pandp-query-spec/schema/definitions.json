@@ -1,0 +1,258 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "definitions": {
+    "uuid": {
+      "description": "Universally Unique Identifier.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$|^[0-9a-f-]{36}$"
+    },
+    "role": {
+      "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.serviceagreements.Role",
+      "type": "string",
+      "description": "Role into the service agreement for the given user",
+      "enum": [
+        "provider",
+        "consumer"
+      ]
+    },
+    "status": {
+      "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.serviceagreements.Status",
+      "type": "string",
+      "description": "Status of the entity",
+      "enum": [
+        "ENABLED",
+        "DISABLED"
+      ]
+    },
+    "type": {
+      "type": "string",
+      "description": "Data group type",
+      "minLength": 1,
+      "maxLength": 36,
+      "pattern": "^\\S+$"
+    },
+    "externalId": {
+      "description": "External Unique Identifier.",
+      "type": "string",
+      "pattern": "^[^\\r\\n]{1,64}$",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "accessResourceType": {
+      "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.users.AccessResourceType",
+      "type": "string",
+      "description": "Type of the resource",
+      "enum": [
+        "NONE",
+        "USER",
+        "ACCOUNT",
+        "USER_OR_ACCOUNT",
+        "USER_AND_ACCOUNT"
+      ]
+    },
+    "approvalAction": {
+      "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.approvals.PersistenceApprovalAction",
+      "type": "string",
+      "description": "Action for approval",
+      "enum": [
+        "CREATE",
+        "EDIT",
+        "DELETE"
+      ]
+    },
+    "approvalCategory": {
+      "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.approvals.PersistenceApprovalCategory",
+      "type": "string",
+      "description": "Category of approval",
+      "enum": [
+        "Assign Permissions"
+      ],
+      "javaEnumNames": [
+        "ASSIGN_PERMISSIONS"
+      ]
+    },
+    "serviceAgreementIdentifier": {
+      "type": "object",
+      "javaType": "com.backbase.pandp.accesscontrol.rest.spec.v2.accesscontrol.PersistenceServiceAgreementIdentifier",
+      "properties": {
+        "idIdentifier": {
+          "type": "string",
+          "description": "Entity ID.",
+          "minLength": 1,
+          "maxLength": 36,
+          "pattern": "^[0-9a-f]{32}$|^[0-9a-f-]{36}$"
+        },
+        "nameIdentifier": {
+          "type": "string",
+          "description": "Entity name.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^\\S(.*(\\S))?$"
+        },
+        "externalIdIdentifier": {
+          "type": "string",
+          "description": "External service agreement identifier.",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[^\\r\\n]{1,64}$"
+        }
+      }
+    },
+    "dataGroupType": {
+      "type": "string",
+      "description": "Data group type",
+      "minLength": 1,
+      "maxLength": 36,
+      "pattern": "^\\S+$"
+    },
+    "dataGroupState": {
+      "type": "object",
+      "description": "State of the name and description of the data group",
+      "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.approvals.PersistenceDataGroupState",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "functionGroupState": {
+      "type": "object",
+      "description": "State of the function group",
+      "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.approvals.PersistenceFunctionGroupState",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Job role name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Job role description"
+        },
+        "approvalTypeId": {
+          "type": "string",
+          "description": "Approval type id."
+        },
+        "validFromDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Start dateTime of the function group."
+        },
+        "validUntilDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "End dateTime of the function group."
+        }
+      }
+    },
+    "permissionMatrix": {
+      "type": "array",
+      "items":{
+        "$ref": "permission-matrix.json"
+      }
+    },
+    "permissionMatrixAction": {
+      "type": "string",
+      "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.approvals.PermissionMatrixAction",
+      "description": "Presentation action",
+      "enum": [
+        "added",
+        "removed",
+        "changed",
+        "unchanged"
+      ],
+      "javaEnumNames": [
+        "ADDED",
+        "REMOVED",
+        "CHANGED",
+        "UNCHANGED"
+      ]
+    },
+    "oldNewPrivileges": {
+      "type": "object",
+      "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.approvals.OldNewPrivileges",
+      "description": "Presentation action",
+      "properties": {
+        "view": {
+          "type": "object",
+          "properties": {
+            "old": {
+              "type": "boolean"
+            },
+            "new": {
+              "type": "boolean"
+            }
+          }
+        },
+        "create": {
+          "type": "object",
+          "properties": {
+            "old": {
+              "type": "boolean"
+            },
+            "new": {
+              "type": "boolean"
+            }
+          }
+        },
+        "edit": {
+          "type": "object",
+          "properties": {
+            "old": {
+              "type": "boolean"
+            },
+            "new": {
+              "type": "boolean"
+            }
+          }
+        },
+        "delete": {
+          "type": "object",
+          "properties": {
+            "old": {
+              "type": "boolean"
+            },
+            "new": {
+              "type": "boolean"
+            }
+          }
+        },
+        "approve": {
+          "type": "object",
+          "properties": {
+            "old": {
+              "type": "boolean"
+            },
+            "new": {
+              "type": "boolean"
+            }
+          }
+        },
+        "cancel": {
+          "type": "object",
+          "properties": {
+            "old": {
+              "type": "boolean"
+            },
+            "new": {
+              "type": "boolean"
+            }
+          }
+        },
+        "execute": {
+          "type": "object",
+          "properties": {
+            "old": {
+              "type": "boolean"
+            },
+            "new": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

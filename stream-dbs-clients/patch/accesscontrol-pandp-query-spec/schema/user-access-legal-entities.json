@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.users.LegalEntityResource",
+  "properties": {
+    "contextServiceAgreementId": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of the service agreement",
+      "example": "8946e686-d31e-4216-b3dd-5d66161d5253"
+    },
+    "userLegalEntityId":{
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Legal entity id of the logged in user.",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "accessResourceType": {
+      "$ref": "definitions.json#/definitions/accessResourceType"
+    }
+  },
+  "required": [
+    "userLegalEntityId",
+    "accessResourceType"
+  ]
+}

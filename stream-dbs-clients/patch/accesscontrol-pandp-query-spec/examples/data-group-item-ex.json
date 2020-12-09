@@ -1,0 +1,11 @@
+{
+  "id": "f57ed0ea-65ab-4620-a42a-d00a0521bbb9",
+  "name": "Account group 1",
+  "description": "Simple account group",
+  "serviceAgreementId": "29e1e665-e98e-479a-a167-cd8164f3627e",
+  "type": "CONTACTS",
+  "items": [
+    "000001",
+    "000002"
+  ]
+}

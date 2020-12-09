@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Check if the user has the specified privileges to perform a function on a given resource retrieved event",
+  "properties": {
+    "base_event": {
+      "$ref": "./base.json#/definitions/base_event"
+    }
+  }
+}

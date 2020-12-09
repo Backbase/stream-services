@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "description": "Permissions list",
+  "items": {
+    "$ref": "user-data-item-permission.json"
+  }
+}

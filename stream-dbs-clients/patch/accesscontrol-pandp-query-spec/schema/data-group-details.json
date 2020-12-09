@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "javaType": "com.backbase.pandp.accesscontrol.rest.spec.v2.accesscontrol.datagroups.PersistenceDataGroupDetails",
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  }
+}

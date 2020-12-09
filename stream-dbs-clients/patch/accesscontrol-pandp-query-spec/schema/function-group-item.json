@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Function group item",
+  "extends": {
+    "$ref": "function-group-base-item.json"
+  },
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of function group",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.serviceagreements.PersistenceExtendedParticipant",
+  "type": "object",
+  "description": "Legal Entity participant item",
+  "extends": {
+    "$ref": "serviceagreement-participant-item.json"
+  },
+  "properties": {
+    "externalServiceAgreementId": {
+      "$ref": "definitions.json#/definitions/externalId",
+      "description": "Service agreement external id"
+    }
+  },
+  "required": [
+    "externalServiceAgreementId"
+  ]
+}

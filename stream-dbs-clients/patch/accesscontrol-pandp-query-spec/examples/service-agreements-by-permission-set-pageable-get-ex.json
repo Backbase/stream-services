@@ -1,0 +1,18 @@
+[
+  {
+    "id": "a1198a20-5a40-4eb7-b47f-a553db920429",
+    "externalId": "external-id-1",
+    "name": "Broker deal 1",
+    "isMaster": true,
+    "regularUserAps": [1],
+    "adminUserAps": [2]
+  },
+  {
+    "id": "a4258a20-5a40-4eb7-b47f-a553db920429",
+    "externalId": "external-id-2",
+    "name": "extSA",
+    "isMaster": false,
+    "regularUserAps": [3, 4, 9],
+    "adminUserAps": [4, 7]
+  }
+]

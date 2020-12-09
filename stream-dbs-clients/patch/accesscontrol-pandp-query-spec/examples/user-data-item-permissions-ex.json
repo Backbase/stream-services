@@ -1,0 +1,29 @@
+[{
+  "dataItem": {
+    "id": "9fa0961eb3d04dd3a5e48748d27e7275",
+    "dataType": "ARRANGEMENTS"
+  },
+  "permissions": [{
+    "resource": "Payments",
+    "businessFunction": "SEPA CT",
+    "privileges": ["view"]
+  },
+    {
+      "resource": "Payments",
+      "businessFunction": "Domestic Payments",
+      "privileges": ["view", "create"]
+    }
+  ]
+},
+  {
+    "dataItem": {
+      "id": "9fa0961eb3d046d3a5e48748d27e7275",
+      "dataType": "ARRANGEMENTS"
+    },
+    "permissions": [{
+        "resource": "Payments",
+        "businessFunction": "Domestic Payments",
+        "privileges": ["approve"]
+      }
+    ]
+  }]

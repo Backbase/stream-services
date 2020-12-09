@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "List arrangements with privileges failed event",
+  "properties": {
+    "base_event": {
+      "$ref": "./base.json#/definitions/base_event"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Error message",
+      "example": "Some error message"
+    },
+    "userId": {
+      "type": "string",
+      "description": "Id of the user",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "serviceAgreementId": {
+      "type": "string",
+      "description": "Id of the service agreement",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "functionName": {
+      "type": "string",
+      "description": "Function name",
+      "example": "Contacts"
+    },
+    "resourceName": {
+      "type": "string",
+      "description": "Resource name",
+      "example": "Contacts"
+    }
+  }
+}

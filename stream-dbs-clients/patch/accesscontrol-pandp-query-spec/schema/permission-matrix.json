@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.approvals.PermissionMatrix",
+  "type": "object",
+  "description": "Permission matrix",
+  "properties": {
+    "functionId": {
+      "type": "string",
+      "description": "Id"
+    },
+    "functionCode": {
+      "type": "string",
+      "description": "Code"
+    },
+    "resource": {
+      "type": "string",
+      "description": "Resource"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name"
+    },
+    "action": {
+      "$ref": "definitions.json#/definitions/permissionMatrixAction"
+    },
+    "privileges": {
+      "$ref": "definitions.json#/definitions/oldNewPrivileges"
+    }
+  }
+}

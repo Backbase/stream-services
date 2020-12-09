@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "javaType": "com.backbase.pandp.accesscontrol.rest.spec.v2.accesscontrol.datagroups.PersistenceServiceAgreementWithDataGroups",
+  "properties": {
+    "serviceAgreement": {
+      "$ref": "service-agreement-modal.json"
+    },
+    "dataGroups": {
+      "type": "array",
+      "description": "List of data groups",
+      "items": {
+        "$ref": "data-group-details.json"
+      }
+    }
+  }
+}

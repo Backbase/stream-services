@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Validate user context command",
+  "properties": {
+    "base_event": {
+      "$ref": "./base.json#/definitions/base_event"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Error message",
+      "example": "Some error message"
+    },
+    "userId": {
+      "type": "string",
+      "description": "User id",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "serviceAgreementId": {
+      "type": "string",
+      "description": "Service agreement id.",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.legalentities.LegalEntityBase",
+  "description": "Legal entity item",
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Legal entity id",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "externalId": {
+      "$ref": "definitions.json#/definitions/externalId",
+      "description": "Legal entity external id",
+      "example": "Company_A"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the legal entity",
+      "minLength": 1,
+      "example": "Company A"
+    },
+    "type": {
+      "enum": [
+        "BANK",
+        "CUSTOMER"
+      ],
+      "description": "Legal entity type"
+    }
+  },
+  "required": [
+    "id",
+    "externalId",
+    "name",
+    "type"
+  ]
+}
+

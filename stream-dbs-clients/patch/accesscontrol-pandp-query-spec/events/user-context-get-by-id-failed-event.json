@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Get user context by user id command",
+  "properties": {
+    "base_event": {
+      "$ref": "./base.json#/definitions/base_event"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Error message",
+      "example": "Some error message"
+    },
+    "userId": {
+      "type": "string",
+      "description": "User id",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "query": {
+      "type": "string",
+      "description": "filter for the service name.",
+      "example": "back"
+    },
+    "from": {
+      "type": "integer",
+      "description": "Page Number. Skip over pages of elements by specifying a start value for the query",
+      "example": "1"
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Record UUID. As an alternative for specifying 'from' this allows to point to the record to start the selection from.",
+      "example": "ce0f9def-06e9-4057-8ab6-f9f0be32eae2"
+    },
+    "size": {
+      "type": "integer",
+      "description": "Limit the number of elements on the response.",
+      "example": "10"
+    }
+  }
+}

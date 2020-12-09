@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.datagroups.PersistenceDataGroupExtendedItem",
+  "type": "object",
+  "description": "Data group item",
+  "extends": {
+    "$ref": "data-group-item.json"
+  },
+  "properties": {
+    "externalServiceAgreementId": {
+      "$ref": "definitions.json#/definitions/externalId",
+      "description": "Id of the Service Agreement under which the Data Group is created"
+    }
+  },
+  "required": [
+    "externalServiceAgreementId"
+  ]
+}

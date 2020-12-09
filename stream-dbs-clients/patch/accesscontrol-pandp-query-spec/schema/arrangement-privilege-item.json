@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Arrangement with privileges",
+  "properties": {
+    "arrangementId": {
+      "type": "string"
+    },
+    "privileges": {
+      "type": "array",
+      "items": {
+        "$ref": "privilege-item.json"
+      }
+    }
+  },
+  "required": [
+    "arrangementId",
+    "privileges"
+  ]
+}

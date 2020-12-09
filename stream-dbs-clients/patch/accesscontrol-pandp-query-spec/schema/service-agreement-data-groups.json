@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.serviceagreements.PersistenceServiceAgreementDataGroups",
+  "description": "An object which contain service agreement id with data group ids and data item ids.",
+  "properties": {
+    "serviceAgreementId": {
+      "type": "string",
+      "description": "Service agreement id"
+    },
+    "dataGroups": {
+      "type": "array",
+      "description": "List of data group ids with data item ids",
+      "items": {
+        "$ref": "data-group-data-items.json"
+      }
+    }
+  }
+}

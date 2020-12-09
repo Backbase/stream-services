@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "javaType": "com.backbase.pandp.accesscontrol.rest.spec.v2.accesscontrol.serviceagreements.PersistenceServiceAgreementModal",
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Entity ID."
+    },
+    "name": {
+      "type": "string",
+      "description": "Entity name."
+    },
+    "externalId": {
+      "$ref": "definitions.json#/definitions/externalId",
+      "description": "External service agreement identifier."
+    }
+  }
+}

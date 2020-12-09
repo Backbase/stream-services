@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Arrangements with privileges list retrieved event",
+  "properties": {
+    "base_event": {
+      "$ref": "./base.json#/definitions/base_event"
+    },
+    "arrangements": {
+      "$ref": "../schema/arrangement-privileges.json"
+    }
+  }
+}

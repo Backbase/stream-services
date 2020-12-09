@@ -1,0 +1,21 @@
+[
+  {
+    "arrangementId": "A000001",
+    "privileges": [
+      {
+        "privilege":"view"
+      },
+      {
+        "privilege":"edit"
+      }
+    ]
+  },
+  {
+    "arrangementId": "A000002",
+    "privileges": [
+      {
+        "privilege":"view"
+      }
+    ]
+  }
+]

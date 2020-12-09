@@ -1,0 +1,26 @@
+[
+  {
+    "id": "8a48e2685d787f78015d791ab69e0001",
+    "name": "Data group 1",
+    "description": "Data group 1 description",
+    "serviceAgreementId": "0955e686-d31e-4216-b3dd-5d66161d536d",
+    "type": "ARRANGEMENTS",
+    "approvalId": "0955e686-d3ae-4216-b3dd-5d66161d5399",
+    "items": [
+      "I000001",
+      "I000002"
+    ]
+  },
+  {
+    "id": "8a48e2685d787f78015d791ab69e0001",
+    "name": "Data group 2",
+    "description": "Data group 2 description",
+    "serviceAgreementId": "0955e686-d31e-4216-b3dd-5d66161d536d",
+    "type": "CONTACTS",
+    "items": [
+      "I000001",
+      "I000002",
+      "I000003"
+    ]
+  }
+]

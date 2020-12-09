@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.aps.PersistencePermissionItem",
+  "type": "object",
+  "properties": {
+    "functionId": {
+      "type": "string",
+      "description": "Business function id."
+    },
+    "functionName": {
+      "type": "string",
+      "description": "Function name."
+    },
+    "resourceName": {
+      "type": "string",
+      "description": "Resource name."
+    },
+    "privileges": {
+      "type": "array",
+      "description": "Assignable permissions.",
+      "items": {
+        "type": "string",
+        "description": "privilege"
+      }
+    }
+  }
+}

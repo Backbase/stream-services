@@ -1,0 +1,30 @@
+{
+  "id": "8a48e2685d787f78015d793cbd300093",
+  "name": "Verifier",
+  "description": "Some description for Verifier",
+  "serviceAgreementId": "0955e686-d31e-4216-b3dd-5d66161d536d",
+  "type":"DEFAULT",
+  "permissions": [
+    {
+      "functionId": "1004",
+      "assignedPrivileges": [
+        {
+          "privilege": "execute"
+        }
+      ]
+    },
+    {
+      "functionId": "1008",
+      "assignedPrivileges": [
+        {
+          "privilege": "view"
+        },
+        {
+          "privilege": "execute"
+        }
+      ]
+    }
+  ],
+  "validFrom": "2018-08-31T07:48:23Z",
+  "validUntil": "2018-09-31T07:48:23Z"
+}

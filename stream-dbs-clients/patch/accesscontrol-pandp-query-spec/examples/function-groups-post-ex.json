@@ -1,0 +1,59 @@
+[
+  {
+    "id": "8a48e2685d787f78015d791b1c59002b",
+    "name": "Manage Entitlements - (1)",
+    "description": "Group for controlling entitlements only.",
+    "legalEntityId": "8a48e2685d787f78015d791abffb0009",
+    "serviceAgreementId": "8a48e2685d787f78015d791abffb2221",
+    "type":"DEFAULT",
+    "permissions": [
+      {
+        "functionId": "1004",
+        "assignedPrivileges": [
+          {
+            "privilege": "view"
+          },
+          {
+            "privilege": "execute"
+          }
+        ]
+      },
+      {
+        "functionId": "1006",
+        "assignedPrivileges": [
+          {
+            "privilege": "view"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "8a48e2685d787f78015d793cbd300093",
+    "name": "Verifier",
+    "description": "Some description for Verifier",
+    "serviceAgreementId": "8a48e2685d787f78015d791ac4e54511",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "1004",
+        "assignedPrivileges": [
+          {
+            "privilege": "execute"
+          }
+        ]
+      },
+      {
+        "functionId": "1008",
+        "assignedPrivileges": [
+          {
+            "privilege": "view"
+          },
+          {
+            "privilege": "execute"
+          }
+        ]
+      }
+    ]
+  }
+]

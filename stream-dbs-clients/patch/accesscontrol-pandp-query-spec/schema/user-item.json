@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "javaType" : "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.users.UserGetResponseBody",
+  "description": "User access object",
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of the user access (This field is deprecated from 2.18.0 version. It will be removed in 2.19.0.)",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "userId": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of the user access",
+      "example": "7813e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "serviceAgreementId": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of the service agreement",
+      "example": "8946e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "dataAccessGroupsByFunctionAccessGroup": {
+      "type": "array",
+      "items": {
+        "$ref": "dataaccessgroupsforfunctionaccessgroup-item.json"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "userId",
+    "serviceAgreementId",
+    "dataAccessGroupsByFunctionAccessGroup"
+  ]
+}

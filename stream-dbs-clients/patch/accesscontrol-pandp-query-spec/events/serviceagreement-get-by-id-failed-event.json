@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Get service agreement by id failed event",
+  "properties": {
+    "base_event": {
+      "$ref": "./base.json#/definitions/base_event"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Error message"
+    },
+    "serviceAgreementId": {
+      "type": "string",
+      "description": "Service agreement ID"
+    }
+  }
+}

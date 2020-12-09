@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "elements": {
+      "description": "List of user contexts",
+      "type": "array",
+      "items": {
+        "$ref": "user-context-item.json"
+      }
+    },
+    "totalElements": {
+      "type": "number",
+      "description": "total number of elements matching the query",
+      "javaType": "java.lang.Long"
+    }
+  },
+  "required": [
+    "elements",
+    "totalElements"
+  ]
+}

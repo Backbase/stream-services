@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.users.ContextLegalEntities",
+  "type": "object",
+  "description": "List of legal entity ids",
+  "properties": {
+    "legalEntities": {
+      "type": "array",
+      "items": {
+        "$ref": "definitions.json#/definitions/uuid"
+      }
+    }
+  }
+}

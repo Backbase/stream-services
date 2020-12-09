@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "javaType" : "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.serviceagreements.PersistenceServiceAgreement",
+  "description": "Service agreement",
+  "properties": {
+    "numberOfParticipants": {
+      "type": "number",
+      "description": "number of legal entities participating in the service agreement"
+    },
+    "creatorLegalEntityName": {
+      "type": "string",
+      "description": "Service agreement creator legal entity name"
+    }
+  },
+  "extends": {
+    "$ref": "service-agreement-item.json"
+  }
+}

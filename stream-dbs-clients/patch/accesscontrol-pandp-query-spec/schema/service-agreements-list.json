@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.serviceagreements.PersistenceServiceAgreements",
+  "description": "List of service agreements",
+  "properties": {
+    "totalElements": {
+      "type": "number",
+      "description": "total number of elements matching the query",
+      "javaType": "java.lang.Long"
+    },
+    "serviceAgreements": {
+      "type": "array",
+      "items": {
+        "$ref": "service-agreement.json"
+      }
+    }
+  },
+  "required": [
+    "totalElements",
+    "serviceAgreements"
+  ]
+}

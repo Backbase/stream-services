@@ -1,0 +1,7 @@
+{
+  "type": "array",
+  "description": "List of service agreement ids with data group ids and data item ids.",
+  "items": {
+    "$ref": "service-agreement-data-groups.json"
+  }
+}

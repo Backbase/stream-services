@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Privilege",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.function.Privilege",
+  "properties": {
+    "privilege": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "privilege"
+  ]
+}

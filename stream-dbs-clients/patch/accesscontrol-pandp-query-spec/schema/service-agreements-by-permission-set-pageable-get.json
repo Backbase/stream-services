@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.serviceagreements.ServiceAgreementByPermissionSet",
+    "properties": {
+      "id": {
+        "$ref": "definitions.json#/definitions/uuid",
+        "description": "Service agreement internal id"
+      },
+      "externalId": {
+        "type": "string",
+        "description": "Service agreement external id"
+      },
+      "name": {
+        "type": "string",
+        "description": "Service agreement name"
+      },
+      "isMaster": {
+        "type": "boolean",
+        "description": "Is Service agreement master"
+      },
+      "regularUserAps": {
+        "type": "array",
+        "description": "Set of assignable permission sets identified by ids, used for regular users.",
+        "items": {
+          "type": "number"
+        },
+        "uniqueItems": true
+      },
+      "adminUserAps": {
+        "type": "array",
+        "description": "Set of assignable permission sets identified by ids, used for admin users.",
+        "items": {
+          "type": "number"
+        },
+        "uniqueItems": true
+      }
+    }
+  }
+}

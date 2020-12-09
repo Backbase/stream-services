@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Get legal entity by id failed event",
+  "properties": {
+    "base_event": {
+      "$ref": "./base.json#/definitions/base_event"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Error message",
+      "example": "Some error message"
+    },
+    "id": {
+      "type": "string",
+      "description": "Id of the legal entity",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    }
+  }
+}

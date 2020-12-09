@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "javaType" : "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.users.PersistenceUserPermission",
+  "properties": {
+    "resource": {
+      "type": "string"
+    },
+    "businessFunction": {
+      "type": "string"
+    },
+    "privileges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

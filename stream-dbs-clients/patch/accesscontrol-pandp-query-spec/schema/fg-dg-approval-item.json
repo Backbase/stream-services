@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.approvals.FunctionGroupsDataGroupsPair",
+  "type": "object",
+  "description": "Function Groups and Data Groups Pairs.",
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of the function group"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of function group"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["DEFAULT", "SYSTEM", "TEMPLATE"],
+      "description": "Type of function group",
+      "example": "DEFAULT",
+      "default": "DEFAULT"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of function group"
+    },
+    "dataGroups": {
+      "type": "array",
+      "items": {
+        "$ref": "data-group-approval-item.json"
+      }
+    }
+  }
+}

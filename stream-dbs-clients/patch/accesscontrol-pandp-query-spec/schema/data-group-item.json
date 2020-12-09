@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.datagroups.DataGroupItemBase",
+  "type": "object",
+  "description": "Data group item",
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of data group",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of data group",
+      "example": "Data group 1"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of data group",
+      "example": "This is the first data group"
+    },
+    "serviceAgreementId": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of the service agreement",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "type": {
+      "$ref": "definitions.json#/definitions/type"
+    },
+    "approvalId": {
+      "type": "string",
+      "description": "Id of approval request."
+    },
+    "items": {
+      "type": "array",
+      "description": "Items that belong to the data group",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "description",
+    "serviceAgreementId",
+    "type",
+    "items"
+  ]
+}

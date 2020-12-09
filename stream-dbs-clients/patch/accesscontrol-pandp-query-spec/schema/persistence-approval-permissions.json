@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.serviceagreements.PersistenceApprovalPermissions",
+  "type": "object",
+  "properties": {
+    "approvalId":{
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of approval request."
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "function-group-with-data-groups.json"
+      },
+      "minItems": 0
+    }
+  },
+  "required": [
+    "items"
+  ]
+}

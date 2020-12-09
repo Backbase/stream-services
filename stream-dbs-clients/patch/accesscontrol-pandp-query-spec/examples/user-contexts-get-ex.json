@@ -1,0 +1,15 @@
+{
+ "elements" : [
+   {
+     "serviceAgreementName" : "SA Name 1",
+     "serviceAgreementId" : "8b4fc047-c98a-4e58-975a-6d3f2bde4ebe",
+     "serviceAgreementMaster" : true
+   },
+   {
+     "serviceAgreementName" : "SA Name 2",
+     "serviceAgreementId" : "2af85687-5ca0-4815-baf6-7e873413de49",
+     "serviceAgreementMaster" : false
+   }
+ ],
+  "totalElements" : 2
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "array",
+  "description": "List of service agreement participants with service agreement id and creator id.",
+  "items": {
+    "$ref": "serviceagreement-participant-item.json"
+  }
+}

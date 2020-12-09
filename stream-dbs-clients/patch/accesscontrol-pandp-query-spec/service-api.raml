@@ -1,0 +1,820 @@
+#%RAML 1.0
+---
+#===============================================================
+#  Access Control - RAML example http://raml.org/
+#  References:
+#    - RAML Specification - https://github.com/raml-org/raml-spec/blob/master/raml-0.8.md
+#===============================================================
+title: AccessControl
+version: v2
+baseUri: "service-api/{version}"
+mediaType:  application/json
+protocols: [ HTTP, HTTPS ]
+annotationTypes:
+  deprecated: nil
+types:
+  GetDataGroups:
+    type: !include schema/data-groups-get.json
+    example: !include examples/data-groups-get-ex.json
+  DataGroupItem:
+    type: !include schema/data-group-item.json
+    example: !include examples/data-group-item-ex.json
+  GetLegalEntities:
+    type: !include schema/legalentities-get.json
+    example: !include examples/legalentities-get-ex.json
+  LegalEntityItem:
+    type: !include schema/legalentity-item.json
+    example: !include examples/legalentities-item-ex.json
+  LegalEntityItemBase:
+    type: !include schema/legalentity-item-base.json
+    example: !include examples/legalentities-item-base-ex.json
+  GetFunctionGroups:
+    type: !include schema/function-groups-get.json
+    example: !include examples/function-groups-post-ex.json
+  FunctionGroupItem:
+    type: !include schema/function-group-item.json
+    example: !include examples/function-group-item-ex.json
+  GetFunctions:
+    type: !include schema/functions-get.json
+    example: !include examples/functions-get-ex.json
+  GetUsersFunctionGroups:
+    type: !include schema/users-function-groups-get.json
+    example: !include examples/users-function-groups-get-ex.json
+  UserDataItemPermissions:
+    type: !include schema/user-data-item-permissons-response.json
+    example: !include examples/user-data-item-permissions-ex.json
+  ArrangementPrivileges:
+    type: !include schema/arrangement-privileges.json
+    example: !include examples/arrangement-privileges.json
+  ListServiceAgreements:
+    type: !include schema/service-agreements-list.json
+    example: !include examples/service-agreements-list-ex.json
+  ServiceAgreementDataGroupsList:
+    type: !include schema/service-agreements-data-groups-list.json
+    example: !include examples/service-agreements-data-groups-list-ex.json
+  ServiceAgreementItem:
+    type: !include schema/service-agreement-item.json
+    example: !include examples/service-agreement-item-master-ex.json
+  GetContexts:
+    type: !include schema/user-contexts-get.json
+    example: !include examples/user-contexts-get-ex.json
+  DataGroupsIds:
+    type: !include schema/data-groups-ids.json
+    example: !include examples/data-groups-ids-ex.json
+  FunctionGroupsIds:
+    type: !include schema/function-groups-ids.json
+    example: !include examples/function-groups-ids-ex.json
+  ServiceAgreementAdmins:
+    type: !include schema/service-agreement-admins.json
+    example: !include examples/service-agreement-admins-ex.json
+  ServiceAgreementUsers:
+    type: !include schema/service-agreement-users.json
+    example: !include examples/service-agreement-users-ex.json
+  UserAccessEntitlementsResource:
+    type: !include schema/user-access-entitlements-resource.json
+    example: !include examples/user-access-entitlements-resource-ex.json
+  UserAccessServiceAgreement:
+    type: !include schema/user-access-service-agreement.json
+    example: !include examples/user-access-service-agreement-ex.json
+  UserAccessLegalEntities:
+    type: !include schema/user-access-legal-entities.json
+    example: !include examples/user-access-legal-entities-ex.json
+  ContextLegalEntities:
+    type: !include schema/context-legal-entities.json
+    example: !include examples/context-legal-entities-ex.json
+  PersistenceApprovalPermissions:
+    type: !include schema/persistence-approval-permissions.json
+    example: !include examples/persistence-approval-permissions-ex.json
+  ListServiceAgreementByPermissionSet:
+    type: !include schema/service-agreements-by-permission-set-pageable-get.json
+    example: !include examples/service-agreements-by-permission-set-pageable-get-ex.json
+  ServiceAgreementParticipants:
+    type: !include schema/serviceagreement-participants.json
+    example: !include examples/service-agreement-participants-ex.json
+uses:
+  traits: ../lib/traits/traits.raml
+  bb: ../lib/annotations/annotations.raml
+traits:
+  searchable:
+    queryParameters:
+      query:
+        type: string
+        description: The search term used to search.
+        required: false
+        example: backb
+#===============================================================
+#  API documentation - Overall documentation.
+#===============================================================
+documentation:
+  - title: AccessControl
+    content: !include docs/api.md
+#===============================================================
+# API resource definitions.
+#===============================================================
+/accesscontrol/accessgroups/data-groups:
+  displayName: DataGroups
+  description: "Calls for interaction with data groups."
+  get:
+    is: [traits.BadRequestError, traits.InternalServerError]
+    description: !include docs/data-groups-get.md
+    queryParameters:
+      serviceAgreementId:
+        type: string
+        description: Service Agreement Id
+        example: "8a48e0ce5d7eda6f015d7f12229a0001"
+        required: true
+      type:
+        type: string
+        description: Data group type
+        example: ARRANGEMENTS
+        required: false
+      includeItems:
+        type: boolean
+        description: "Defines if the items of the data groups will be returned in the response"
+        example: false
+        required: false
+        default: true
+    responses:
+      200:
+        description: "Data groups retrieved successfully."
+        body:
+          application/json:
+            type: GetDataGroups
+  /{id}:
+    displayName: DataGroupById
+    description: "Calls for interaction with single data group."
+    uriParameters:
+      id:
+        displayName: DataGroupID
+        type: string
+        description: "Data group ID"
+        example: "8a48e2685d787f78015d791abffb0009"
+    get:
+      is: [traits.BadRequestError, traits.NotFoundError, traits.InternalServerError]
+      description: !include docs/data-group-item.md
+      queryParameters:
+        includeItems:
+          type: boolean
+          description: "Indicates whether data group items should be returned or not."
+          required: false
+          default: true
+      responses:
+        200:
+          description: "Data group by id retrieved successfully."
+          body:
+            application/json:
+              type: DataGroupItem
+  /bulk/search:
+    displayName: BulkSearchDataGroups
+    description: "Bulk search for Data Groups."
+    post:
+      is: [traits.BadRequestError, traits.InternalServerError]
+      description: !include docs/data-groups-bulk-search-post.md
+      body:
+        application/json:
+          type: DataGroupsIds
+      responses:
+        200:
+          description: "Data Groups retrieved successfully."
+          body:
+            application/json:
+              type: GetDataGroups
+/accesscontrol/legalentities:
+  description: "Calls for interaction with legal entities."
+  displayName: LegalEntities
+  /root:
+    description: "Calls for interaction with root legal entity."
+    displayName: RootLegalEntity
+    get:
+      is: [traits.BadRequestError, traits.NotFoundError, traits.InternalServerError]
+      description: !include docs/legalentiteis-root-get.md
+      responses:
+        200:
+          description: "Root legal entity retrieved."
+          body:
+            application/json:
+              type: LegalEntityItemBase
+  /{id}:
+    description: "Calls for interaction with single legal entity."
+    displayName: LegalEntity
+    uriParameters:
+      id:
+        displayName: Legal Entity ID
+        type: string
+        description: "Legal entity internal id"
+        example: "8a48e2685d787f78015d791accef0019"
+    get:
+      is: [traits.BadRequestError, traits.NotFoundError, traits.InternalServerError]
+      description: !include docs/legalentity-by-id-get.md
+      responses:
+        200:
+          description: "Single legal entity retrieved"
+          body:
+            application/json:
+              type: LegalEntityItem
+    /serviceagreements/master:
+      description: "Calls for interaction with legal entity master service agreement."
+      displayName: MasterServiceAgreement
+      uriParameters:
+        id:
+          displayName: Legal Entity ID
+          type: string
+          description: "Legal entity internal id"
+          example: "8a48e2685d787f78015d791accef0019"
+      get:
+        is: [traits.BadRequestError, traits.NotFoundError, traits.InternalServerError]
+        description: !include docs/legalentity-masterserviceagreement-get.md
+        responses:
+          200:
+            description: "Master service agreement retrieved for given legal Entity."
+            body:
+              application/json:
+                type: ServiceAgreementItem
+  /segmentation:
+    description: "List customers that user has access to"
+    get:
+      is: [traits.BadRequestError, traits.InternalServerError, traits.NotFoundError, traits.pageable]
+      description: !include docs/legalentities-segmentation-list.md
+      queryParameters:
+        query:
+          displayName: Legal Entity Name/ External Id
+          type: string
+          description: "Search by name or external ID: partial term for name and whole term for external ID"
+          example: "Bank"
+          required: false
+        businessFunction:
+          type: string
+          description: "Name of the business function"
+          example: "Contacts"
+          required: true
+        serviceAgreementId:
+          type: string
+          description: "Service agreement id"
+          example: "8a48e2685d787f78015d791accef0099"
+          required: false
+        userId:
+          type: string
+          description: "User id"
+          example: "8a48e2685d787f78015d791accef0015"
+          required: true
+        legalEntityId:
+          type: string
+          description: "Legal Entity Id"
+          example: "8a48e2785d787f78015d791accef0015"
+          required: false
+        privilege:
+          type: string
+          description: "Name of the privilege"
+          example: "view"
+          required: false
+      responses:
+        200:
+          description: !include docs/legalentities-segmentation-list.md
+          headers:
+            X-Total-Count:
+              description: "Overall count of customers that user has access to"
+              displayName: Count
+              type: integer
+          body:
+            application/json:
+              type: GetLegalEntities
+        400:
+          description: !include docs/legalentities-segmentation-list-400.md
+        404:
+          description: !include docs/legalentities-segmentation-list-404.md
+/accesscontrol/accessgroups/function-groups:
+  description: "Calls for interaction with function groups."
+  displayName: FunctionGroups
+  get:
+    is: [traits.BadRequestError, traits.InternalServerError]
+    description: !include docs/function-groups-get.md
+    queryParameters:
+      serviceAgreementId:
+        type: string
+        description: "Service Agreement id"
+        example: "8a48e2685d787f78015d791accef0019"
+        required: true
+    responses:
+      200:
+        description: "List of function groups retrieved."
+        body:
+          application/json:
+            type: GetFunctionGroups
+  /{id}:
+    description: "Calls for interaction with single function group."
+    displayName: FunctionGroupById
+    uriParameters:
+      id:
+        displayName: Function Group by ID
+        type: string
+        description: "Function group id"
+        example: "8a48e2685d787f78015d793cbd300093"
+    get:
+      is: [traits.BadRequestError, traits.NotFoundError, traits.InternalServerError]
+      description: !include docs/function-group-item.md
+      responses:
+        200:
+          description: "Function group retrieved."
+          body:
+            application/json:
+              type: FunctionGroupItem
+  /bulk:
+    displayName: BulkFunctionGroups
+    description: "Bulk operation for Function Groups."
+    post:
+      is: [traits.BadRequestError, traits.InternalServerError]
+      description: !include docs/function-groups-post-bulk.md
+      body:
+        application/json:
+          type: FunctionGroupsIds
+      responses:
+        200:
+          description: "Function Groups retrieved successfully."
+          body:
+            application/json:
+              type: GetFunctionGroups
+        400:
+          description: !include docs/function-groups-post-bulk-400.md
+/accesscontrol/accessgroups/users:
+  description: "Calls for interaction with user access."
+  displayName: Users
+  /access:
+    /resources:
+      description: "Checks if user has access to entitlements resource"
+      displayName: UserAccessToEntitlementsResource
+      post:
+        is: [traits.BadRequestError, traits.ForbiddenError, traits.NotFoundError, traits.InternalServerError]
+        description: !include docs/users-access-entitlements-resource.md
+        body:
+          application/json:
+            type: UserAccessEntitlementsResource
+        responses:
+          200:
+            description: "Legal Entities that the user has access to"
+            body:
+              application/json:
+                type: ContextLegalEntities
+    /serviceagreement:
+      description: "Checks if user has access to service agreement"
+      displayName: UserAccessToServiceAgreement
+      post:
+        is: [traits.BadRequestError, traits.ForbiddenError, traits.NotFoundError, traits.InternalServerError]
+        description: !include docs/users-access-service-agreement.md
+        body:
+          application/json:
+            type: UserAccessServiceAgreement
+        responses:
+          204:
+            description: "User Access to Service Agreement check"
+    /legalentities:
+      description: "Get legal entities that user has access to"
+      displayName: LegalEntitiesInContext
+      post:
+        is: [traits.BadRequestError, traits.ForbiddenError, traits.NotFoundError, traits.InternalServerError]
+        description: !include docs/users-access-legal-entities.md
+        body:
+          application/json:
+            type: UserAccessLegalEntities
+        responses:
+          200:
+            description: "Legal Entities in context"
+            body:
+              application/json:
+                type: ContextLegalEntities
+  /{userId}/service-agreements/{serviceAgreementId}:
+    /permissions:
+      displayName: PersistenceApprovalPermissions
+      get:
+        is: [traits.BadRequestError, traits.InternalServerError, traits.ForbiddenError, traits.NotFoundError]
+        description: !include docs/user-permissions.md
+        responses:
+          200:
+            description: "Users permissions successfully retrieved."
+            body:
+              application/json:
+                type: PersistenceApprovalPermissions
+    /data-item-permissions:
+      displayName: DataItemPermissions
+      uriParameters:
+        userId:
+          displayName: UserId
+          type: string
+          required: true
+          description: "User id"
+          example: "8a48e2685d788166015d791b34e1001b"
+        serviceAgreementId:
+          displayName: ServiceAgreementId
+          type: string
+          required: true
+          description: "Service agreement id"
+          example: "8a48e2685d788166015d791b34c1001b"
+      get:
+        description: !include docs/user-permissions-data-item.md
+        is: [traits.BadRequestError, traits.NotFoundError]
+        queryParameters:
+          businessFunction:
+            type: string
+            description: "Name of the business function"
+            example: "Contacts"
+            required: false
+          resource:
+            type: string
+            description: "Name of resource"
+            example: "Contacts"
+            required: false
+          privilege:
+            type: string
+            description: "Name of the privilege"
+            example: "view"
+            required: false
+          dataGroupType:
+            type: string
+            description: "Name of the data group type"
+            example: "CONTACTS"
+            required: false
+          dataItemId:
+            type: string
+            description: "Id of the data item"
+            example: "8a48e2685d788166015d761b34c1001b"
+            required: false
+        responses:
+          200:
+            description: "List of privileges retrieved."
+            body:
+              application/json:
+                type: UserDataItemPermissions
+  /privileges:
+    /arrangements:
+      description: "Calls for interaction with user access privilege arrangements."
+      displayName: ArrangementPrivileges
+      get:
+        is: [traits.BadRequestError, traits.ForbiddenError, traits.InternalServerError]
+        description: !include docs/user-access-privilege-arrangments-get.md
+        queryParameters:
+          userId:
+            type: string
+            description: "User ID"
+            example: "8a48e2685d787f78015d791ac267000e"
+            required: false
+          serviceAgreementId:
+            type: string
+            description: "Service Agreement ID"
+            example: "8a48e2685d787f78015d791ac267111e"
+            required: false
+          functionName:
+            type: string
+            description: "Name of Function"
+            example: "Product Summary"
+            required: true
+          resourceName:
+            type: string
+            description: "Name of resource"
+            example: "Product Summary"
+            required: true
+          legalEntityId:
+            type: string
+            description: "Legal Entity ID"
+            example: "8a48e2685d787f78015d791ac2672222"
+            required: false
+          arrangementId:
+            type: string
+            description: "Arrangement ID"
+            example: "8a48e2685d788166015d791b34a1001b"
+            required: false
+          privilege:
+            type: string
+            description: "Privilege"
+            example: "view"
+            required: false
+        responses:
+          200:
+            description: "List of arrangements with privileges retrieved."
+            body:
+              application/json:
+                type: ArrangementPrivileges
+  /function-groups/by-permissions:
+    displayName: UsersFunctionGroups
+    get:
+      is: [traits.BadRequestError]
+      description: !include docs/users-function-groups.md
+      queryParameters:
+        serviceAgreementId:
+          type: string
+          description: "Service Agreement ID"
+          example: "8a48e2685d787f78015d791ac267111e"
+          required: true
+        functionName:
+          displayName: FunctionName
+          type: string
+          description: "Function name."
+          example: "Product Summary"
+          required: true
+        privilege:
+          type: string
+          description: "Name of the privilege"
+          example: "view"
+          required: false
+        dataGroupType:
+          type: string
+          description: "Name of the data group type"
+          example: "ARRANGEMENTS"
+          required: false
+        dataItemId:
+          type: string
+          description: "Id of the data item"
+          example: "8a48e2685d788166015d761b34c1001b"
+          required: false
+      responses:
+        200:
+          description: "List of users/function groups retrieved successfully."
+          body:
+            application/json:
+              type: GetUsersFunctionGroups
+        400:
+          description: !include docs/users-function-groups-400.md
+  /permissions:
+    displayName: UserPermissionCheck
+    get:
+      is: [traits.BadRequestError, traits.ForbiddenError]
+      description: !include docs/user-access-permissions.md
+      queryParameters:
+        userId:
+          type: string
+          description: "User ID"
+          example: "8a48e2685d787f78015d791ac267000e"
+          required: true
+        serviceAgreementId:
+          type: string
+          description: "Service Agreement ID"
+          example: "8a48e2685d787f78015d791ac267111e"
+          required: false
+        resource:
+          displayName: ResourceName
+          type: string
+          description: "Resource name."
+          example: "Product Summary"
+          required: true
+        function:
+          displayName: FunctionName
+          type: string
+          description: "function name."
+          example: "Product Summary"
+          required: true
+        privileges:
+          displayName: Privileges
+          type: string
+          description: "Comma-separated privileges."
+          example: "view,edit"
+          required: true
+      responses:
+        200:
+          description: "User is permitted to perform the function."
+/accesscontrol/accessgroups/serviceagreements:
+  description: "Calls for interaction with service agreements."
+  displayName: ServiceAgreements
+  /data-items:
+    description: "Calls for interaction with service agreements."
+    displayName: ServiceAgreementsDataGroups
+    get:
+      is: [traits.BadRequestError, traits.InternalServerError]
+      description: !include docs/service-agreements-data-groups.md
+      queryParameters:
+        userId:
+          displayName: userId
+          type: string
+          description: "User id."
+          required: true
+        dataGroupType:
+          displayName: dataGroupType
+          type: string
+          description: "Data group type."
+          example: "ARRANGEMENTS"
+          required: true
+        resourceName:
+          displayName: resourceName
+          type: string
+          description: "Resource name."
+          example: "Transactions"
+          required: false
+        functionName:
+          displayName: functionName
+          type: string
+          description: "Function name."
+          example: "Transactions"
+          required: false
+        privileges:
+          displayName: privileges
+          type: string
+          description: "List of comma separated privilege names."
+          example: "view,create"
+          required: false
+      responses:
+        200:
+          description: "Service agreement ids retrieved with data group ids and data item ids."
+          body:
+            application/json:
+              type: ServiceAgreementDataGroupsList
+        400:
+          description: !include docs/service-agreements-data-groups-400.md
+  /{serviceAgreementId}:
+    description: "Calls for interaction with single service agreement."
+    displayName: ServiceAgreement
+    uriParameters:
+      serviceAgreementId:
+        displayName: Service Agreement ID
+        description: "Service agreement internal id."
+        type: string
+        required: true
+        example: "8a48e2685d787f78015d791ac267111e"
+    get:
+      is: [traits.NotFoundError, traits.InternalServerError]
+      description: !include docs/service-agreement.md
+      responses:
+        200:
+          description: "Service agreement retrieved."
+          body:
+            application/json:
+              type: ServiceAgreementItem
+    /participants:
+      displayName: ServiceAgreementParticipants
+      get:
+        is: [traits.NotFoundError, traits.InternalServerError]
+        description: !include docs/service-agreement-participants.md
+        responses:
+          200:
+            description: "Service Agreement Participants retrieved successfully."
+            body:
+              application/json:
+                type: ServiceAgreementParticipants
+    /admins:
+      displayName: ServiceAgreementAdmins
+      get:
+        is: [traits.NotFoundError, traits.InternalServerError]
+        description: !include docs/service-agreement-admins.md
+        responses:
+          200:
+            description: "Service Agreement Admins retrieved successfully."
+            body:
+              application/json:
+                type: ServiceAgreementAdmins
+    /users:
+      displayName: ServiceAgreementUsers
+      get:
+        is: [traits.BadRequestError, traits.InternalServerError]
+        description: !include docs/service-agreement-users.md
+        responses:
+          200:
+            description: "Service agreement users."
+            body:
+              application/json:
+                type: ServiceAgreementUsers
+/accesscontrol/service-agreements:
+  description: "Calls for interaction with service agreements."
+  displayName: Agreements
+  get:
+    is: [traits.BadRequestError, traits.ForbiddenError, traits.InternalServerError, searchable, traits.pageable]
+    description: !include docs/list-service-agreements.md
+    queryParameters:
+      creatorId:
+        displayName: creatorId
+        type: string
+        description: "Legal entity ID that created the service agreement."
+        example: "8a48e2685d787f78015d791ac267000e"
+        required: true
+      userId:
+        displayName: userId
+        type: string
+        description: "Id of the user that is exposed (as regular or local admin) in the service agreement."
+        example: "8a48e2685d787f78015d791ac26700aa"
+        required: false
+      userLegalEntityId:
+        displayName: userLegalEntityId
+        type: string
+        description: "Legal entity Id of the user that is exposed (as regular or local admin) in the service agreement."
+        example: "8a48e2685d787f78015d791ac26700bb"
+        required: false
+    responses:
+      200:
+        description: "Service agreements retrieved."
+        body:
+          application/json:
+            type: ListServiceAgreements
+  /external/{externalId}/business-functions:
+    description: !include docs/get-bf-by-external-id.md
+    get:
+      is: [traits.BadRequestError, traits.NotFoundError, traits.InternalServerError]
+      responses:
+        200:
+          description: "Service agreement business functions by external id retrieved."
+          body:
+            application/json:
+              type: GetFunctions
+        404:
+          description: "SA with external ID not found"
+  /id/{internalId}/business-functions:
+    description: !include docs/get-bf-by-id.md
+    get:
+      is: [traits.BadRequestError, traits.NotFoundError, traits.InternalServerError]
+      responses:
+        200:
+          description: "Service agreement business functions by internal id retrieved."
+          body:
+            application/json:
+              type: GetFunctions
+        404:
+          description: "SA with internal ID not found"
+  /permission-sets:
+    /id/{id}:
+      description: "Retrieve all service agreements associate with permission set"
+      displayName: GetServiceAgremeentByPermissionSetId
+      uriParameters:
+        id:
+          displayName: "Permission set id"
+          type: integer
+          required: true
+          example: 13
+      get:
+        is: [traits.pageable, traits.BadRequestError, traits.InternalServerError, traits.NotFoundError]
+        description: !include docs/service-agreements-by-permission-set-get.md
+        responses:
+          200:
+            description: "List of all service agreement where provided permission set is assigned."
+            headers:
+              X-Total-Count:
+                description: "Overall count of service agreements assigned to permission set"
+                displayName: Count
+                type: integer
+            body:
+              application/json:
+                type: ListServiceAgreementByPermissionSet
+          400:
+            description: !include docs/get-service-agreements-by-permission-set-id-400.md
+          404:
+            description: !include docs/get-service-agreements-by-permission-set-404.md
+    /name/{name}:
+      description: "Retrieve all service agreements associate with permission set"
+      displayName: GetServiceAgremeentByPermissionSetName
+      uriParameters:
+        name:
+          displayName: "Permission set name"
+          type: string
+          required: true
+          example: "aps"
+      get:
+        is: [traits.pageable, traits.BadRequestError, traits.InternalServerError, traits.NotFoundError]
+        description: !include docs/service-agreements-by-permission-set-get.md
+        responses:
+          200:
+            description: "List of all service agreement where provided permission set is assigned."
+            headers:
+              X-Total-Count:
+                description: "Overall count of service agreements assigned to permission set"
+                displayName: Count
+                type: integer
+            body:
+              application/json:
+                type: ListServiceAgreementByPermissionSet
+          400:
+            description: !include docs/get-service-agreements-by-permission-set-name-400.md
+          404:
+            description: !include docs/get-service-agreements-by-permission-set-404.md
+/accesscontrol/accessgroups/usercontext:
+  displayName: UserContexts
+  description: "Calls for interaction with User Contexts"
+  /{userId}/serviceAgreements:
+    description: "Retrieve the list of service agreements by userId"
+    displayName: UserContexts
+    uriParameters:
+      userId:
+        displayName: Internal User Id
+        type: string
+        required: true
+        description: "Internal User Id"
+        example: "8a48e2685d787f78015d791ac267000e"
+    get:
+      is: [searchable, traits.pageable, traits.BadRequestError, traits.InternalServerError]
+      description: !include docs/user-contexts.md
+      displayName: ServiceAgreementsByUserId
+      queryParameters:
+        cursor:
+          description: |
+            Record UUID. As an alternative for specifying 'from' this allows to point to the record to start the selection from.
+          type: string
+          required: false
+          example: 76d5be8b-e80d-4842-8ce6-ea67519e8f74
+          default:
+      responses:
+        200:
+          description: "User Context Service Agreements GET response"
+          body:
+            application/json:
+              type: GetContexts
+    /{serviceAgreementId}/validation:
+      displayName: UserContextValidation
+      description: !include docs/user-contexts-validation.md
+      get:
+        is: [traits.BadRequestError, traits.ForbiddenError, traits.InternalServerError]
+        displayName: UserContextValidation
+        responses:
+          204:
+            description: "User Context Validation success response"

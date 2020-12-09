@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Check if the user has the specified privileges to perform a function on a given resource failed event",
+  "properties": {
+    "base_event": {
+      "$ref": "./base.json#/definitions/base_event"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Error message",
+      "example": "Some error message"
+    },
+    "userId": {
+      "type": "string",
+      "description": "Id of the user",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "serviceAgreementId": {
+      "type": "string",
+      "description": "Id of the service agreement",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "resource": {
+      "type": "string",
+      "description": "Resource name",
+      "example": "Contacts"
+    },
+    "function": {
+      "type": "string",
+      "description": "Function name",
+      "example": "Contacts"
+    },
+    "privileges": {
+      "type": "string",
+      "description": "Comma separated privileges",
+      "example": "execute"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "serviceAgreements": [
+    {
+      "id": "8a48e2685d787f78015d791ab6ad0002",
+      "name": "Company A SA",
+      "description": "Service Agreement description",
+      "creatorLegalEntity": "8a48e2685d787f78015d791ab69e0001",
+      "creatorLegalEntityName": "Backbase",
+      "isMaster": true,
+      "status": "ENABLED",
+      "numberOfParticipants": 1,
+      "validFrom": "2018-08-31T07:48:23Z",
+      "validUntil": "2018-09-31T07:48:23Z"
+    },
+    {
+      "id": "8a48e2685d787f78015d791b1c64002c",
+      "name": "First Service Agreement.",
+      "description": "Service Agreement description",
+      "creatorLegalEntity": "8a48e2685d787f78015d791b1c65002d",
+      "creatorLegalEntityName": "Endava",
+      "isMaster": false,
+      "status": "ENABLED",
+      "numberOfParticipants": 3,
+      "validFrom": "2018-01-01T07:48:23Z"
+    }
+  ],
+  "totalElements": 100
+}

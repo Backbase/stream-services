@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.config.functions.FunctionsGetResponseBody",
+  "properties": {
+    "functionId": {
+      "type": "string",
+      "description": "Internal id of business function"
+    },
+    "functionCode": {
+      "type": "string",
+      "description": "Code of business function"
+    },
+    "resource": {
+      "type": "string",
+      "description": "Name of resource"
+    },
+    "resourceCode": {
+      "type": "string",
+      "description": "Code of resource"
+    },
+    "name": {
+      "type": "string",
+      "description": "Business function name"
+    },
+    "privileges": {
+      "type": "array",
+      "description": "Applicable privileges for business function",
+      "items": {
+        "$ref": "functions-item-privileges.json"
+      }
+    }
+  },
+  "required": [
+    "functionId",
+    "functionCode",
+    "resource",
+    "name",
+    "privileges"
+  ]
+}

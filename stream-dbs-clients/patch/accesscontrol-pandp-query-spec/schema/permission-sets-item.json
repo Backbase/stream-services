@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.aps.PersistencePermissionSetItem",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Internal id of the assignable permission set."
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the assignable permission set."
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the assignable permission set."
+    },
+    "type": {
+      "type": "string",
+      "description": "Type of the assignable permission set."
+    },
+    "permissions": {
+      "type": "array",
+      "description": "Assignable permissions.",
+      "items": {
+        "$ref": "aps-permissions-item.json"
+      }
+    }
+  }
+}

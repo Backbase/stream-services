@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.serviceagreements.Participants",
+  "properties": {
+    "id": {
+      "$ref": "definitions.json#/definitions/uuid"
+    },
+    "admins": {
+      "type": "array",
+      "items": {
+        "$ref": "definitions.json#/definitions/uuid"
+      }
+    }
+  }
+}

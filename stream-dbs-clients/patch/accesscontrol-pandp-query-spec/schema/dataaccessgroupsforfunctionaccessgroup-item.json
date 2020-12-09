@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "description": "Data access groups for function access group",
+  "javaType": "com.backbase.pandp.accesscontrol.query.rest.spec.v2.accesscontrol.accessgroups.users.DataAccessGroupsForFunctionAccessGroup",
+  "properties": {
+    "functionAccessGroupId": {
+      "$ref": "definitions.json#/definitions/uuid",
+      "description": "Id of the function access group",
+      "example": "0955e686-d31e-4216-b3dd-5d66161d536d"
+    },
+    "dataAccessGroupIds": {
+      "type": "array",
+      "description": "List of data access group ids",
+      "items": {
+        "$ref": "definitions.json#/definitions/uuid"
+      }
+    }
+  },
+  "required": [
+    "functionAccessGroupId"
+  ]
+}
