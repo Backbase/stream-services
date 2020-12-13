@@ -1,0 +1,15 @@
+# Stream config
+spring:
+  r2dbc:
+    name: <dbname>
+    password: <dbpassword>
+    url: <dburl>
+    username: <dbusername>
+
+logging:
+  level:
+    root: info
+    sun: off
+    javax: off
+    org.apache.activemq: off
+    jdk: off
