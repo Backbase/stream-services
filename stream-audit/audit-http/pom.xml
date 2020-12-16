@@ -56,6 +56,7 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <skipValidateSpec>true</skipValidateSpec>
                             <generatorName>spring</generatorName>
                             <inputSpec>${project.basedir}/../../api/stream-audit/openapi.yaml</inputSpec>
                             <generateApiTests>false</generateApiTests>

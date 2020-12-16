@@ -12,10 +12,6 @@ info:
     name: Copyright Backbase 2020
     url: https://www.backbase.com
   version: 1.0.0
-servers:
-- url: /
-  description: The server
-  variables: {}
 tags:
 - name: transactions
 paths:
