@@ -2086,7 +2086,7 @@ components:
                     bankAlias: "Johns Current Account"
                     accountOpeningDate: "2016-02-10T15:49:55.459+01:00"
                     currency: "EUR"
-                    userPreferences:
+                    usersPreferences:
                       - userExternalId: john
                         alias: My Bank Account
                         visible: true
