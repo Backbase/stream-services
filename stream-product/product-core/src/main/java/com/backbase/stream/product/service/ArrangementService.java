@@ -81,6 +81,15 @@ public class ArrangementService {
                         Mono.error(new ArrangementUpdateException(throwable, "Batch arrangement update failed: " + arrangementItems)));
     }
 
+    public Mono<Void> updateUserPreferences(UserPreferencesItemPut userPreferencesItemPut){
+        return arrangementsApi.putUserPreferences(userPreferencesItemPut)
+            .doOnNext(arg -> log.info("Arrangement preferences created for User with ID: {}", userPreferencesItemPut.getUserId()))
+            .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
+                log.info("Arrangement: {} not found", userPreferencesItemPut.getArrangementId());
+                return Mono.empty();
+            });
+    }
+
     /**
      * Get Product by Internal ID.
      *

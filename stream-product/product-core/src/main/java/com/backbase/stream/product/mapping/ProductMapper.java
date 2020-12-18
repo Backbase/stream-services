@@ -4,6 +4,7 @@ import com.backbase.dbs.accounts.presentation.service.model.ArrangemenItemBase;
 import com.backbase.dbs.accounts.presentation.service.model.ArrangementItem;
 import com.backbase.dbs.accounts.presentation.service.model.ArrangementItemPost;
 import com.backbase.dbs.accounts.presentation.service.model.Unit;
+import com.backbase.dbs.accounts.presentation.service.model.UserPreferencesItemPut;
 import com.backbase.stream.legalentity.model.AvailableBalance;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BookedBalance;
@@ -21,6 +22,7 @@ import com.backbase.stream.legalentity.model.Product;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.TermUnit;
+import com.backbase.stream.legalentity.model.UserPreferences;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -321,5 +323,7 @@ public interface ProductMapper {
     })
     InterestPaymentFrequencyUnit mapInterestPayment(Unit unit);
 
+    @Mapping(source = "userExternalId", target = "userId")
+    UserPreferencesItemPut mapUserPreference(UserPreferences userPreferences);
 
 }

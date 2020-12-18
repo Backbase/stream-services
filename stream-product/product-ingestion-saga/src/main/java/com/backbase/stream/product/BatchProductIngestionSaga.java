@@ -6,6 +6,7 @@ import static java.util.Comparator.nullsFirst;
 
 
 import com.backbase.dbs.accounts.presentation.service.model.ArrangementItemPost;
+import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -22,7 +23,6 @@ import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
-import com.backbase.stream.worker.model.StreamTask;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -184,18 +185,21 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                         .collectList()
                 ).map(batchResponses -> {
                     // Update products with internal IDs.
-                    batchProductGroupTask.getData().getProductGroups().forEach(pg ->
-                            StreamUtils.getAllProducts(pg).forEach(product -> {
-                                batchResponses.forEach(result -> {
-                                    if (result.getResourceId().equalsIgnoreCase(product.getExternalId())) {
-                                        product.setInternalId(result.getArrangementId());
-                                        upsertedInternalIds.add(result.getArrangementId());
-                                    }
-                                });
-                            })
-                    );
-                    return batchResponses;
+                    return batchProductGroupTask.getData().getProductGroups().stream()
+                        .flatMap(pg -> StreamUtils.getAllProducts(pg).stream())
+                        .map(product -> {
+                            batchResponses.forEach(result -> {
+                                if (result.getResourceId().equalsIgnoreCase(product.getExternalId())) {
+                                    product.setInternalId(result.getArrangementId());
+                                    upsertedInternalIds.add(result.getArrangementId());
+                                }
+                            });
+                            return product;
+                        });
                 })
+                .flatMap(baseProductStream -> Flux.fromStream(baseProductStream)
+                    .filter(baseProduct -> !CollectionUtils.isEmpty(baseProduct.getUsersPreferences()))
+                    .flatMap(this::updateUsersPreferences))
                 .collectList()
                 .thenReturn(batchProductGroupTask)
                 .flatMap(task -> {
@@ -215,6 +219,26 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 });
     }
 
+    protected Mono<BaseProduct> updateUsersPreferences(BaseProduct product) {
+        return Flux.fromIterable(product.getUsersPreferences())
+            .map(productMapper::mapUserPreference)
+            .flatMap(userPreferencesItem ->
+                userService.getUserByExternalId(userPreferencesItem.getUserId())
+                    .flatMap(user -> arrangementService.updateUserPreferences(
+                        userPreferencesItem
+                            .userId(user.getInternalId())
+                            .arrangementId(product.getInternalId())))
+                    .onErrorResume(WebClientResponseException.NotFound.class, throwable -> {
+                        log.info("User Id not found for: {}. Request:[{}] {}  Response: {}",
+                            userPreferencesItem.getUserId(), throwable.getRequest().getMethod(),
+                            throwable.getRequest().getURI(), throwable.getResponseBodyAsString());
+                        return Mono.empty();
+                    })
+                    .thenReturn(userPreferencesItem)
+            )
+            .collectList()
+            .thenReturn(product);
+    }
 
     protected Mono<BatchProductGroupTask> setupProductGroupsBatch(BatchProductGroupTask task) {
         List<BaseProductGroup> productGroups = task.getData().getProductGroups();
