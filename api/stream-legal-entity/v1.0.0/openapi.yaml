@@ -450,6 +450,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        BBAN:
+          $ref: '#/components/schemas/BBAN'
         creditLimit:
           $ref: '#/components/schemas/CreditLimit'
         number:
