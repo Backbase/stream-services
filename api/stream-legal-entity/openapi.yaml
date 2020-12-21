@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Ingest Legal Entity API
   description: Ingestion Saga for Legal Entities and their products
-  version: 2.1.0
+  version: 2.1.1
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
     backgroundColor: "#FFFFFF"
@@ -279,6 +279,10 @@ components:
               description: Name that describes the specific product state.
         currency:
           $ref: '#/components/schemas/CurrencyCode'
+        usersPreferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPreferences'
         additions:
           type: object
           additionalProperties: true
@@ -1705,6 +1709,30 @@ components:
         permittedObjects:
           type: object
           additionalProperties: true
+    UserPreferences:
+      description: 'Users defined preferences for a specific arrangement.'
+      required:
+        - userExternalId
+      type: object
+      properties:
+        userExternalId:
+          maxLength: 50
+          type: string
+          description: The unique User identifier related to these user preferences
+        alias:
+          maxLength: 50
+          type: string
+          description: The name that can be assigned by the user to label the arrangement
+        visible:
+          type: boolean
+          description: User indicator whether to show or hide the arrangement on the
+            front end
+        favorite:
+          type: boolean
+          description: Indication whether an arrangement can be favorable for a user
+        additions:
+          type: object
+          additionalProperties: true
 
     ###############################################
     ## Additional Data Group Items
@@ -2060,6 +2088,11 @@ components:
                     bankAlias: "Johns Current Account"
                     accountOpeningDate: "2016-02-10T15:49:55.459+01:00"
                     currency: "EUR"
+                    usersPreferences:
+                      - userExternalId: john
+                        alias: My Bank Account
+                        visible: true
+                        favorite: false
                 savingAccounts:
                   - iban: "NL42INGB4416709382"
                     bookedBalance:
