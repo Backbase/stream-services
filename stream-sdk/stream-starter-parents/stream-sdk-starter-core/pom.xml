@@ -12,7 +12,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-sdk-starter-core</artifactId>
-    <version>2.15.0</version>
+    <version>2.19.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Starter Core</name>
     <description>Parent for all Stream SDK modules</description>
@@ -40,7 +40,7 @@
         <swagger-annotations-version>1.5.23</swagger-annotations-version>
 
         <!-- other config -->
-        <jacoco.version>0.8.4</jacoco.version>
+        <jacoco.version>0.8.5</jacoco.version>
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
@@ -262,7 +262,7 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-test-support</artifactId>
-            <version>2.15.0</version>
+            <version>2.19.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -327,7 +327,7 @@
                 <plugin>
                     <groupId>com.backbase.oss</groupId>
                     <artifactId>scdf-maven-plugin</artifactId>
-                    <version>0.0.1-SNAPSHOT</version>
+                    <version>0.1.0</version>
                     <configuration>
                         <name>${project.artifactId}</name>
                         <dataflowUrl>${scdf-maven-plugin.dataflowUrl}</dataflowUrl>
@@ -472,6 +472,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.0.0-M5</version>
                 <configuration>
                     <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                 </configuration>
@@ -540,6 +541,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
                 <configuration>
                     <!-- Sets the VM argument line used when unit tests are run. -->
                     <argLine>${surefireArgLine}</argLine>

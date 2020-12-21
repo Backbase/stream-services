@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Ingest Legal Entity API
   description: Ingestion Saga for Legal Entities and their products
-  version: 2.0.1
+  version: 2.1.1
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
     backgroundColor: "#FFFFFF"
@@ -279,6 +279,10 @@ components:
               description: Name that describes the specific product state.
         currency:
           $ref: '#/components/schemas/CurrencyCode'
+        usersPreferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserPreferences'
         additions:
           type: object
           additionalProperties: true
@@ -444,6 +448,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        BBAN:
+          $ref: '#/components/schemas/BBAN'
         creditLimit:
           $ref: '#/components/schemas/CreditLimit'
         number:
@@ -876,6 +882,8 @@ components:
           x-java-type: java.util.Map<String,String>
         identityLinkStrategy:
           $ref: '#/components/schemas/IdentityUserLinkStrategy'
+        userProfile:
+          $ref: '#/components/schemas/UserProfile'
       required:
         - externalId
         - fullName
@@ -1001,6 +1009,163 @@ components:
           $ref: '#/components/schemas/QuarterlyLimit'
         yearly:
           $ref: '#/components/schemas/YearlyLimit'
+    UserProfile:
+      title: UserProfile
+      description: |
+        User Data for User Profile Manager. Additional to Data included in User Model
+      type: object
+      properties:
+        userId:
+          type: string
+        externalId:
+          type: string
+        userName:
+          type: string
+        name:
+          $ref: '#/components/schemas/Name'
+        displayName:
+          type: string
+        nickName:
+          type: string
+        profileUrl:
+          type: string
+        personalInformation:
+          $ref: '#/components/schemas/PersonalInformation'
+        identificationDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentificationDetails'
+        title:
+          type: string
+        userType:
+          type: string
+        preferredLanguage:
+          type: string
+        locale:
+          type: string
+        timezone:
+          type: string
+        active:
+          type: boolean
+        additionalEmails:
+          type: array
+          items:
+            $ref: '#/components/schemas/Multivalued'
+        additionalPhoneNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Multivalued'
+        ims:
+          type: array
+          items:
+            $ref: '#/components/schemas/Multivalued'
+        photos:
+          type: array
+          items:
+            $ref: '#/components/schemas/Multivalued'
+        x509Certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Multivalued'
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        extended:
+          type: object
+      required:
+        - userId
+        - externalId
+        - userName
+    Name:
+      title: Name
+      type: object
+      properties:
+        formatted:
+          type: string
+        familyName:
+          type: string
+        givenName:
+          type: string
+        middleName:
+          type: string
+        honorificPrefix:
+          type: string
+        honorificSuffix:
+          type: string
+    PersonalInformation:
+      title: PersonalInformation
+      type: object
+      properties:
+        gender:
+          type: string
+        dateOfBirth:
+          type: string
+        countryOfBirth:
+          type: string
+        countryOfResidence:
+          type: string
+        nationalities:
+          type: array
+          items:
+            type: string
+        maritalStatus:
+          type: string
+        educationLevel:
+          type: string
+        employer:
+          type: string
+        employmentStatus:
+          type: string
+    IdentificationDetails:
+      title: IdentificationDetails
+      type: object
+      properties:
+        value:
+          type: string
+        type:
+          type: string
+        issueDate:
+          type: string
+          format: date
+        expiryDate:
+          type: string
+          format: date
+        issueCountryCode:
+          type: string
+    Multivalued:
+      title: Multivalued
+      type: object
+      properties:
+        value:
+          type: string
+        display:
+          type: string
+        type:
+          type: string
+        primary:
+          type: boolean
+    Address:
+      title: Address
+      type: object
+      properties:
+        formatted:
+          type: string
+        streetAddress:
+          type: string
+        locality:
+          type: string
+        region:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+        type:
+          type: string
+        primary:
+          type: boolean
+
     ServiceAgreement:
       title:  Service Agreement
       description: |
@@ -1544,6 +1709,30 @@ components:
         permittedObjects:
           type: object
           additionalProperties: true
+    UserPreferences:
+      description: 'Users defined preferences for a specific arrangement.'
+      required:
+        - userExternalId
+      type: object
+      properties:
+        userExternalId:
+          maxLength: 50
+          type: string
+          description: The unique User identifier related to these user preferences
+        alias:
+          maxLength: 50
+          type: string
+          description: The name that can be assigned by the user to label the arrangement
+        visible:
+          type: boolean
+          description: User indicator whether to show or hide the arrangement on the
+            front end
+        favorite:
+          type: boolean
+          description: Indication whether an arrangement can be favorable for a user
+        additions:
+          type: object
+          additionalProperties: true
 
     ###############################################
     ## Additional Data Group Items
@@ -1899,6 +2088,11 @@ components:
                     bankAlias: "Johns Current Account"
                     accountOpeningDate: "2016-02-10T15:49:55.459+01:00"
                     currency: "EUR"
+                    usersPreferences:
+                      - userExternalId: john
+                        alias: My Bank Account
+                        visible: true
+                        favorite: false
                 savingAccounts:
                   - iban: "NL42INGB4416709382"
                     bookedBalance:

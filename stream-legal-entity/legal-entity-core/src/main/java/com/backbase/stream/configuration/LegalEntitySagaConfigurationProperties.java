@@ -15,4 +15,9 @@ public class LegalEntitySagaConfigurationProperties extends StreamWorkerConfigur
      */
     private boolean useIdentityIntegration = true;
 
+    /**
+     * Enable User Profile
+     */
+    private boolean userProfileEnabled = false;
+
 }
