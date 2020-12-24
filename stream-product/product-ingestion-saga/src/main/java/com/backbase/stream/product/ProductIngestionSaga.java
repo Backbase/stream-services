@@ -241,7 +241,7 @@ public class ProductIngestionSaga {
     }
 
     @SuppressWarnings("DuplicatedCode")
-    private Mono<ProductGroupTask> upsertArrangements(ProductGroupTask streamTask) {
+    public Mono<ProductGroupTask> upsertArrangements(ProductGroupTask streamTask) {
         ProductGroup productGroup = streamTask.getData();
 
         streamTask.info(PRODUCT_GROUP, PROCESS, null, streamTask.getProductGroup().getName(), null, "Process Product Group Arrangements: %s", StreamUtils.getExternalProductIds(productGroup));
