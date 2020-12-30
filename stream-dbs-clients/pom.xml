@@ -121,6 +121,7 @@
                                 <schema>UserItemPut</schema>
                                 <schema>UserUpdate</schema>
                                 <schema>UserUpsert</schema>
+                                <schema>User</schema>      
 
                                 <!-- Transaction Service Additions -->
                                 <schema>TransactionItemPost</schema>
