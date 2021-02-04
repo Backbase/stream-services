@@ -36,59 +36,52 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-dbs-web-client</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.backbase.dbs.accesscontrol</groupId>
-            <artifactId>access-control-spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.backbase.dbs.account</groupId>
-            <artifactId>account-presentation-spec</artifactId>
-            <scope>provided</scope>
+            <artifactId>access-control-openapi-spec</artifactId>
+            <classifier>api</classifier>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.arrangement</groupId>
-            <artifactId>arrangement-pandp-query-spec</artifactId>
-            <scope>provided</scope>
+            <artifactId>arrangement-manager</artifactId>
+            <classifier>api</classifier>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.audit</groupId>
             <artifactId>audit-spec</artifactId>
-            <scope>provided</scope>
+            <classifier>api</classifier>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.transaction</groupId>
-            <artifactId>transaction-integration-external-inbound-spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.dbs.transaction</groupId>
-            <artifactId>transaction-presentation-spec</artifactId>
-            <scope>provided</scope>
+            <artifactId>transaction-manager</artifactId>
+            <type>zip</type>
+            <classifier>api</classifier>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.user</groupId>
-            <artifactId>user-manager-spec</artifactId>
-            <version>2.0.11</version>
-            <scope>provided</scope>
+            <artifactId>user-manager</artifactId>
+            <classifier>api</classifier>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.user</groupId>
-            <artifactId>user-profile-manager-spec</artifactId>
-            <scope>provided</scope>
+            <artifactId>user-profile-manager</artifactId>
+            <classifier>api</classifier>
+            <type>zip</type>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.limit</groupId>
-            <artifactId>limit-spec</artifactId>
-            <scope>provided</scope>
+            <artifactId>limit</artifactId>
+            <classifier>api</classifier>
+            <type>zip</type>
         </dependency>
     </dependencies>
 
