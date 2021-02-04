@@ -15,7 +15,7 @@
 
     <properties>
         <sonar.skip>true</sonar.skip>
-        <boat-maven-plugin.version>0.2.6</boat-maven-plugin.version>
+        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
