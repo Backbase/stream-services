@@ -203,30 +203,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-accessgroup-integration-client-api-code</id>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <inputSpec>${project.build.directory}/yaml/accessgroup-integration-service/accessgroup-integration-inbound-api-v*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.accessgroup.api.integration.v2</apiPackage>
-                            <modelPackage>com.backbase.dbs.accessgroup.api.integration.v2.model</modelPackage>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-legalentity-integration-client-api-code</id>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <inputSpec>${project.build.directory}/yaml/legalentity-integration-service/legalentity-integration-inbound-api-v*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.legalentity.api.integration.v2</apiPackage>
-                            <modelPackage>com.backbase.dbs.legalentity.api.integration.v2.model</modelPackage>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>generate-arrangement-manager-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
