@@ -1,10 +1,10 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.dbs.userprofile.model.CreateUserProfile;
-import com.backbase.dbs.userprofile.model.GetUserProfile;
-import com.backbase.dbs.userprofile.model.MultiValued;
-import com.backbase.dbs.userprofile.model.Name;
-import com.backbase.dbs.userprofile.model.ReplaceUserProfile;
+import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
+import com.backbase.dbs.user.profile.api.service.v2.model.GetUserProfile;
+import com.backbase.dbs.user.profile.api.service.v2.model.MultiValued;
+import com.backbase.dbs.user.profile.api.service.v2.model.Name;
+import com.backbase.dbs.user.profile.api.service.v2.model.ReplaceUserProfile;
 import com.backbase.stream.legalentity.model.Multivalued;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.legalentity.model.UserProfile;

@@ -1,6 +1,6 @@
 package com.backbase.stream.service;
 
-import com.backbase.dbs.accounts.presentation.service.model.ArrangementItem;
+import com.backbase.dbs.transaction.api.service.v2.model.ArrangementItem;
 import com.backbase.stream.exceptions.UserNotFoundException;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.LegalEntity;

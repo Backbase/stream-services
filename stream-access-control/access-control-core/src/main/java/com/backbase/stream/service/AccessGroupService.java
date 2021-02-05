@@ -2,36 +2,42 @@ package com.backbase.stream.service;
 
 import static org.springframework.util.StringUtils.isEmpty;
 
-
-import com.backbase.dbs.accesscontrol.query.service.api.AccesscontrolApi;
-import com.backbase.dbs.accesscontrol.query.service.model.DataGroupItem;
-import com.backbase.dbs.accesscontrol.query.service.model.PersistenceApprovalPermissions;
-import com.backbase.dbs.accesscontrol.query.service.model.SchemaFunctionGroupItem;
-import com.backbase.dbs.accessgroup.presentation.service.api.AccessgroupsApi;
-import com.backbase.dbs.accessgroup.presentation.service.model.ArrangementPrivilegesGetResponseBody;
-import com.backbase.dbs.accessgroup.presentation.service.model.BatchResponseItemExtended;
-import com.backbase.dbs.accessgroup.presentation.service.model.DataGroupItemSystemBase;
-import com.backbase.dbs.accessgroup.presentation.service.model.IdItem;
-import com.backbase.dbs.accessgroup.presentation.service.model.ListOfFunctionGroupsWithDataGroups;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationAction;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationApprovalStatus;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationAssignUserPermissions;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationDataGroupItemPutRequestBody;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationDataGroupUpdate;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationFunctionDataGroup;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationFunctionGroupDataGroup;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationGenericObjectId;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationIdentifier;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationIngestFunctionGroup;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationItemIdentifier;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationPermission;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationSearchDataGroupsRequest;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationServiceAgreementIdentifier;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationServiceAgreementUserPair;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationServiceAgreementUsersBatchUpdate;
-import com.backbase.dbs.accessgroup.presentation.service.model.ServicesAgreementIngest;
-import com.backbase.dbs.user.presentation.service.api.UsersApi;
-import com.backbase.dbs.user.presentation.service.model.GetUserById;
+import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupsApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ArrangementPrivilegesGetResponseBody;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.DataGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.DataGroupItemSystemBase;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.IdItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ListOfFunctionGroupsWithDataGroups;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPermissions;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationApprovalStatus;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAssignUserPermissions;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupItemPutRequestBody;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionDataGroup;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupDataGroup;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationGenericObjectId;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationItemIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationSearchDataGroupsRequest;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUserPair;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUsersBatchUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
+import com.backbase.dbs.user.api.service.v2.UserManagementApi;
+import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.legalentity.model.ApprovalStatus;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -63,6 +69,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
@@ -75,6 +83,7 @@ import reactor.core.publisher.Mono;
  * Access Group Service provide access to Access Control, Data Groups and Function Groups from a single service.
  */
 @Slf4j
+@RequiredArgsConstructor
 public class AccessGroupService {
 
     public static final String CREATE_ACCESS_GROUP = "create-access-group";
@@ -88,19 +97,26 @@ public class AccessGroupService {
     public static final String SETUP_JOB_ROLE = "setup-job-role";
     private static final String FAILED = "failed";
 
-    public AccessGroupService(
-        AccesscontrolApi accessControlApi,
-        AccessgroupsApi accessGroupServiceApi,
-        UsersApi usersApi) {
-        this.accessControlApi = accessControlApi;
-        this.accessGroupServiceApi = accessGroupServiceApi;
-        this.usersApi = usersApi;
-    }
-
-    private final AccesscontrolApi accessControlApi;
-    private final AccessgroupsApi accessGroupServiceApi;
-    private final UsersApi usersApi;
-
+    @NonNull
+    private final UserManagementApi usersApi;
+    @NonNull
+    private final UserQueryApi userQueryApi;
+    @NonNull
+    private final UsersApi accessControlUsersApi;
+    @NonNull
+    private final DataGroupApi dataGroupApi;
+    @NonNull
+    private final DataGroupsApi dataGroupsApi;
+    @NonNull
+    private final FunctionGroupApi functionGroupApi;
+    @NonNull
+    private final FunctionGroupsApi functionGroupsApi;
+    @NonNull
+    private final ServiceAgreementQueryApi serviceAgreementQueryApi;
+    @NonNull
+    private final ServiceAgreementApi serviceAgreementApi;
+    @NonNull
+    private final ServiceAgreementsApi serviceAgreementsApi;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
@@ -113,7 +129,7 @@ public class AccessGroupService {
      */
     public Mono<ServiceAgreement> createServiceAgreement(StreamTask streamTask, ServiceAgreement serviceAgreement) {
         ServicesAgreementIngest servicesAgreementIngest = accessGroupMapper.toPresentation(serviceAgreement);
-        return accessGroupServiceApi.postServiceAgreementIngest(servicesAgreementIngest)
+        return serviceAgreementApi.postServiceAgreementIngest(servicesAgreementIngest)
             .onErrorResume(WebClientResponseException.class, throwable -> {
                 streamTask.error("service-agreement", "create", "failed", serviceAgreement.getExternalId(),
                     "", throwable, throwable.getResponseBodyAsString(), "Failed to create Service Agreement");
@@ -143,7 +159,7 @@ public class AccessGroupService {
         presentationServiceAgreementUsersBatchUpdate.users(userPairs);
         presentationServiceAgreementUsersBatchUpdate.setAction(PresentationAction.ADD);
 
-        return accessGroupServiceApi.putPresentationServiceAgreementAdminsBatchUpdate(presentationServiceAgreementUsersBatchUpdate)
+        return serviceAgreementApi.putPresentationServiceAgreementAdminsBatchUpdate(presentationServiceAgreementUsersBatchUpdate)
             .doOnError(WebClientResponseException.BadRequest.class, this::handleError)
             .collectList()
             .map(batchResponseItemExtendeds -> {
@@ -189,7 +205,7 @@ public class AccessGroupService {
         String serviceAgreementId = serviceAgreement.getInternalId();
         String userId = jobProfileUser.getUser().getInternalId();
 
-        return accessGroupServiceApi.putAssignUsersPermissions(serviceAgreementId, userId, functionGroups)
+        return serviceAgreementsApi.putAssignUsersPermissions(serviceAgreementId, userId, functionGroups)
             .onErrorResume(WebClientResponseException.class, e -> {
                 streamTask.error(ACCESS_GROUP, "assign-permissions", "failed", serviceAgreement.getExternalId(),
                     serviceAgreementId, e, e.getResponseBodyAsString(), "Failed to to assign permissions");
@@ -232,7 +248,7 @@ public class AccessGroupService {
                 }
                 // request each user permissions and add those to the request.
                 return Flux.fromIterable(usersPermissions.keySet())
-                    .flatMap(user -> accessControlApi.getPersistenceApprovalPermissions(user.getInternalId(), task.getData().getServiceAgreement().getInternalId())
+                    .flatMap(user -> userQueryApi.getPersistenceApprovalPermissions(user.getInternalId(), task.getData().getServiceAgreement().getInternalId())
                         .onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
                         .map(PersistenceApprovalPermissions::getItems)
                         .map(existingUserPermissions -> {
@@ -269,7 +285,8 @@ public class AccessGroupService {
                                         PresentationFunctionGroupDataGroup requestedFunctionGroup = requestedFunctionGroupOptional.get();
 
                                         if (requestedFunctionGroup.getDataGroupIdentifiers() != null) {
-                                            dataGroupIds.addAll(requestedFunctionGroup.getDataGroupIdentifiers().stream().map(PresentationIdentifier::getIdIdentifier).collect(Collectors.toList()));
+                                            dataGroupIds.addAll(requestedFunctionGroup.getDataGroupIdentifiers().stream().map(
+                                                PresentationIdentifier::getIdIdentifier).collect(Collectors.toList()));
                                         }
                                     }
 
@@ -293,7 +310,7 @@ public class AccessGroupService {
             })
             .flatMap(mergedRequest -> {
                 task.info(ACCESS_GROUP, "assign-permissions", task.getName(), null, task.getId(), "Assigning permissions: %s", mergedRequest.stream().map(this::prettyPrintUserAssignedPermissions).collect(Collectors.joining(",")));
-                return accessGroupServiceApi.putAssignUserPermissions(mergedRequest)
+                return accessControlUsersApi.putAssignUserPermissions(mergedRequest)
                     .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Permissions Update", r.getStatus().toString(), r.getResourceId(), r.getErrors()))
                     .doOnNext(r -> {
                         task.info(ACCESS_GROUP, "assign-permissions", r.getExternalServiceAgreementId(), null, "Assigned permissions for: %s and Service Agreement: %s", r.getResourceId(), r.getExternalServiceAgreementId());
@@ -489,12 +506,12 @@ public class AccessGroupService {
     }
 
     public Flux<BatchResponseItemExtended> updateDataGroupItems(List<PresentationDataGroupItemPutRequestBody> request) {
-        return accessGroupServiceApi.putDataGroupItemsUpdate(request)
+        return dataGroupsApi.putDataGroupItemsUpdate(request)
             .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Product Groups Update", r.getStatus().toString(), r.getResourceId(), r.getErrors()));
     }
 
     public Flux<DataGroupItem> getExistingDataGroups(String serviceAgreementInternalId, String type) {
-        return accessControlApi.getDataGroups(serviceAgreementInternalId, type, true);
+        return dataGroupApi.getDataGroups(serviceAgreementInternalId, type, true);
     }
 
     /**
@@ -521,7 +538,7 @@ public class AccessGroupService {
     public Mono<List<BusinessFunctionGroup>> setupFunctionGroups(StreamTask streamTask, ServiceAgreement serviceAgreement, List<BusinessFunctionGroup> businessFunctionGroups) {
         streamTask.info(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "", serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Setting up %s Business Functions for Service Agreement: %s", businessFunctionGroups.size(), serviceAgreement.getName());
         log.info("Setup {} Business Function for Service Agreement: {}", businessFunctionGroups.size(), serviceAgreement.getExternalId());
-        return accessControlApi.getFunctionGroups(serviceAgreement.getInternalId())
+        return functionGroupApi.getFunctionGroups(serviceAgreement.getInternalId())
             .onErrorResume(WebClientResponseException.class, e -> {
                 log.error("Failed to get Function Groups for Service Agreement: {} Response: {}", serviceAgreement.getExternalId(), e.getResponseBodyAsString());
                 streamTask.error(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "failed", serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Failed to get function groups for Service Agreement: " + serviceAgreement.getInternalId());
@@ -562,7 +579,7 @@ public class AccessGroupService {
     }
 
     private boolean productGroupAndDataGrouItemEquals(BusinessFunctionGroup businessFunctionGroup,
-                                                      SchemaFunctionGroupItem getFunctionGroupsFunctionGroupItem) {
+                                                      FunctionGroupItem getFunctionGroupsFunctionGroupItem) {
         return getFunctionGroupsFunctionGroupItem.getName().equals(businessFunctionGroup.getName());
     }
 
@@ -584,7 +601,7 @@ public class AccessGroupService {
         presentationDataGroupUpdate.setName(dataGroupsDataGroupItem.getName());
         presentationDataGroupUpdate.setType(dataGroupsDataGroupItem.getType());
 
-        return accessGroupServiceApi.putDataGroups(presentationDataGroupUpdate)
+        return dataGroupsApi.putDataGroups(presentationDataGroupUpdate)
             .onErrorResume(WebClientResponseException.class, badRequest -> {
                 streamTask.error(ACCESS_GROUP, "update-access-group", "failed", productGroup.getName(), dataGroupsDataGroupItem.getId(), badRequest, badRequest.getResponseBodyAsString(), "Failed to update access group");
                 log.error("Error Updating data access group: {}", badRequest.getResponseBodyAsString());
@@ -619,7 +636,7 @@ public class AccessGroupService {
             throw new StreamTaskException(streamTask, "Data Group Items cannot have null items");
         }
 
-        return accessGroupServiceApi.postDataGroups(dataGroupItemSystemBase)
+        return dataGroupsApi.postDataGroups(dataGroupItemSystemBase)
             .onErrorResume(WebClientResponseException.class, badRequest -> {
                 streamTask.error(ACCESS_GROUP, CREATE_ACCESS_GROUP, REJECTED, productGroup.getName(), null, "Data group items cannot have null items");
                 return Mono.error(new StreamTaskException(streamTask, badRequest, "Data Group Items cannot have null items"));
@@ -642,7 +659,7 @@ public class AccessGroupService {
      */
     public Mono<Void> removePermissionsForUser(String serviceAgreementInternalId, String userInternalId) {
         log.debug("Removing permissions from all Data Groups for user: {} in service agreement {}", userInternalId, serviceAgreementInternalId);
-        return accessGroupServiceApi.putAssignUsersPermissions(
+        return serviceAgreementsApi.putAssignUsersPermissions(
             serviceAgreementInternalId,
             userInternalId,
             new ListOfFunctionGroupsWithDataGroups())
@@ -657,10 +674,10 @@ public class AccessGroupService {
      */
     public Mono<Void> deleteFunctionGroupsForServiceAgreement(String serviceAgreementInternalId) {
         log.debug("Retrieving Function Groups for Service Agreement {}", serviceAgreementInternalId);
-        return accessControlApi.getFunctionGroups(serviceAgreementInternalId)
+        return functionGroupApi.getFunctionGroups(serviceAgreementInternalId)
             .collectList()
             .flatMap(functionGroups ->
-                accessGroupServiceApi.postFunctionGroupsDelete(
+                functionGroupsApi.postFunctionGroupsDelete(
                     functionGroups.stream().map(fg -> mapId(fg.getId())).collect(Collectors.toList()))
                     .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
                     .collectList())
@@ -673,9 +690,9 @@ public class AccessGroupService {
      * @param serviceAgreementInternalId Sevice Agreement internal idenetifier.
      * @return Mono<List < GetFunctionGroupsFunctionGroupItem>>
      */
-    public Mono<List<SchemaFunctionGroupItem>> getFunctionGroupsForServiceAgreement(String serviceAgreementInternalId) {
+    public Mono<List<FunctionGroupItem>> getFunctionGroupsForServiceAgreement(String serviceAgreementInternalId) {
         log.debug("Retrieving Function Groups for Service Agreement {}", serviceAgreementInternalId);
-        return accessControlApi.getFunctionGroups(serviceAgreementInternalId)
+        return functionGroupApi.getFunctionGroups(serviceAgreementInternalId)
             .collectList();
     }
 
@@ -688,7 +705,7 @@ public class AccessGroupService {
      */
     public Mono<Void> deleteAdmins(ServiceAgreement serviceAgreement) {
         log.debug("Removing admins for Service Agreement {}", serviceAgreement.getName());
-        return accessControlApi.getServiceAgreementAdmins(serviceAgreement.getInternalId())
+        return serviceAgreementQueryApi.getServiceAgreementAdmins(serviceAgreement.getInternalId())
             .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins()))
             // get External  ID for each admin.
             .flatMap(usersApi::getUserByExternalIdgetUserByExternalId)
@@ -704,7 +721,7 @@ public class AccessGroupService {
                 if (CollectionUtils.isEmpty(admins)) {
                     return Mono.empty();
                 } else {
-                    return accessGroupServiceApi.putPresentationServiceAgreementAdminsBatchUpdate(
+                    return serviceAgreementApi.putPresentationServiceAgreementAdminsBatchUpdate(
                         new PresentationServiceAgreementUsersBatchUpdate()
                             .action(PresentationAction.REMOVE)
                             .users(admins))
@@ -725,7 +742,7 @@ public class AccessGroupService {
      * @return flux of arrangements internal ids.
      */
     public Flux<String> getArrangementInternalIdsForServiceAgreement(String serviceAgreementInternalId) {
-        return accessControlApi.getDataGroups(serviceAgreementInternalId, null, true)
+        return dataGroupApi.getDataGroups(serviceAgreementInternalId, null, true)
             .collectList()
             .map(dataGroupItems -> {
                 // get all internal arrangement IDs present in data groups.
@@ -738,7 +755,7 @@ public class AccessGroupService {
 
     private List<BusinessFunctionGroup> getExistingBusinessGroups(
         List<BusinessFunctionGroup> businessFunctionGroups,
-        List<SchemaFunctionGroupItem> functionGroups) {
+        List<FunctionGroupItem> functionGroups) {
 
         return businessFunctionGroups.stream()
             .filter(businessFunctionGroup -> filter(functionGroups, businessFunctionGroup))
@@ -746,25 +763,25 @@ public class AccessGroupService {
             .collect(Collectors.toList());
     }
 
-    private void enrich(List<SchemaFunctionGroupItem> functionGroups,
+    private void enrich(List<FunctionGroupItem> functionGroups,
                         BusinessFunctionGroup businessFunctionGroup) {
         functionGroups.stream().filter(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item)).findFirst()
             .ifPresent(item -> businessFunctionGroup.setId(item.getId()));
     }
 
-    private boolean filter(List<SchemaFunctionGroupItem> functionGroups, BusinessFunctionGroup businessFunctionGroup) {
+    private boolean filter(List<FunctionGroupItem> functionGroups, BusinessFunctionGroup businessFunctionGroup) {
         return functionGroups.stream()
             .anyMatch(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item));
     }
 
     private List<BusinessFunctionGroup> getNewBusinessGroups(List<BusinessFunctionGroup> businessFunctionGroups,
-                                                             List<SchemaFunctionGroupItem> functionGroups) {
+                                                             List<FunctionGroupItem> functionGroups) {
         return businessFunctionGroups.stream()
             .filter(businessFunctionGroup -> isNewBusinessFunctionGroup(functionGroups, businessFunctionGroup))
             .collect(Collectors.toList());
     }
 
-    private boolean isNewBusinessFunctionGroup(List<SchemaFunctionGroupItem> functionGroups,
+    private boolean isNewBusinessFunctionGroup(List<FunctionGroupItem> functionGroups,
                                                BusinessFunctionGroup businessFunctionGroup) {
         return functionGroups.stream().noneMatch(item -> productGroupAndDataGrouItemEquals(businessFunctionGroup, item));
     }
@@ -785,7 +802,7 @@ public class AccessGroupService {
         presentationIngestFunctionGroup.setPermissions(getPresentationPermissions(businessFunctionGroup));
         presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.REGULAR);
 
-        return accessGroupServiceApi.postPresentationIngestFunctionGroup(presentationIngestFunctionGroup)
+        return functionGroupsApi.postPresentationIngestFunctionGroup(presentationIngestFunctionGroup)
             .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
                 handleError(businessFunctionGroup, badRequest))
             .onErrorResume(WebClientResponseException.class, badRequest -> {
@@ -823,7 +840,7 @@ public class AccessGroupService {
             presentationIngestFunctionGroup.setApsId(BigDecimal.ONE);
         }
 
-        return accessGroupServiceApi.postPresentationIngestFunctionGroup(presentationIngestFunctionGroup)
+        return functionGroupsApi.postPresentationIngestFunctionGroup(presentationIngestFunctionGroup)
             .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
                 handleError(jobRole, badRequest))
             .onErrorResume(WebClientResponseException.class, badRequest -> {
@@ -875,7 +892,7 @@ public class AccessGroupService {
         resourceName, String functionName, String privilege) {
 
 
-        return accessGroupServiceApi.getArrangementPrivileges(user.getInternalId(), functionName, resourceName, serviceAgreement.getInternalId(), privilege)
+        return accessControlUsersApi.getArrangementPrivileges(user.getInternalId(), functionName, resourceName, serviceAgreement.getInternalId(), privilege)
             .doOnError(WebClientResponseException.InternalServerError.class, this::handleError)
             .map(arrangementPrivilege -> mapAssignedPermission(
                 resourceName,
@@ -903,7 +920,7 @@ public class AccessGroupService {
     @SuppressWarnings("ConstantConditions")
     private Flux<String> getDataGroupItemIds(String type,
                                              PresentationServiceAgreementIdentifier serviceAgreementIdentifier) {
-        return accessGroupServiceApi.postSearch(type,
+        return dataGroupsApi.postSearch(type,
             new PresentationSearchDataGroupsRequest().serviceAgreementIdentifier(serviceAgreementIdentifier))
             .flatMap(item -> {
                 if (item.getDataGroups() != null) {
@@ -923,7 +940,7 @@ public class AccessGroupService {
         log.info("Setup {} job role for Service Agreement: {}", jobRole.getName(),
             masterServiceAgreement.getExternalId());
 
-        return accessControlApi.getFunctionGroups(masterServiceAgreement.getInternalId())
+        return functionGroupApi.getFunctionGroups(masterServiceAgreement.getInternalId())
             .onErrorResume(WebClientResponseException.class, e -> {
                 log.error("Failed to get Function Groups for Service Agreement: {} Response: {}",
                     masterServiceAgreement.getExternalId(), e.getResponseBodyAsString());
