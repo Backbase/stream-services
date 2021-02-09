@@ -879,7 +879,8 @@ components:
         attributes:
           type: object
           description: Custom attributes to be added to the user.
-          x-java-type: java.util.Map<String,String>
+          additionalProperties:
+            type: string
         identityLinkStrategy:
           $ref: '#/components/schemas/IdentityUserLinkStrategy'
         userProfile:
