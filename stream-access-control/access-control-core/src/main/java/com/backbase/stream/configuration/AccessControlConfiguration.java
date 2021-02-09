@@ -11,6 +11,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
+import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
@@ -62,7 +63,9 @@ public class AccessControlConfiguration {
 
     @Bean
     public UserService userService(com.backbase.dbs.user.api.service.ApiClient usersApiClient) {
-        return new UserService(new UserManagementApi(usersApiClient));
+        UserManagementApi usersApi = new UserManagementApi(usersApiClient);
+        IdentityManagementApi identityManagementApi = new IdentityManagementApi(usersApiClient);
+        return new UserService(usersApi, identityManagementApi);
     }
 
     @Bean

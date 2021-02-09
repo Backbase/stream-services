@@ -233,7 +233,7 @@ public class ProductIngestionSaga {
     private Mono<User> upsertIdentityUser(StreamTask streamTask, JobProfileUser jobProfileUser) {
         User user = jobProfileUser.getUser();
         LegalEntityReference legalEntityReference = jobProfileUser.getLegalEntityReference();
-        Mono<User> getExistingIdentityUser = userService.getIdentityUserByExternalId(user.getExternalId())
+        Mono<User> getExistingIdentityUser = userService.getUserByExternalId(user.getExternalId())
             .doOnNext(existingUser -> streamTask.info(IDENTITY_USER, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId()));
         Mono<User> createNewIdentityUser = userService.createOrImportIdentityUser(user, legalEntityReference.getInternalId())
             .doOnNext(existingUser -> streamTask.info(IDENTITY_USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId()));
