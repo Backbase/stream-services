@@ -37,7 +37,6 @@ public abstract class UserProfileMapper {
     @Mapping(source = "userProfile.photos", target = "photos")
     @Mapping(source = "userProfile.addresses", target = "addresses")
     @Mapping(source = "userProfile.x509Certificates", target = "x509Certificates")
-    @Mapping(source = "userProfile.extended", target = "extended")
     public abstract CreateUserProfile toCreate(User user);
 
     @Named("mapName")
