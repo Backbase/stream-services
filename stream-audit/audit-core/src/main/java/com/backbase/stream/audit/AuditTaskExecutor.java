@@ -1,7 +1,7 @@
 package com.backbase.stream.audit;
 
-import com.backbase.dbs.audit.service.api.AuditMessagesApi;
-import com.backbase.dbs.audit.service.model.AuditMessagesPostRequestBody;
+import com.backbase.dbs.audit.api.service.v2.AuditServiceApi;
+import com.backbase.dbs.audit.api.service.v2.model.AuditMessagesPostRequest;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,15 +12,14 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class AuditTaskExecutor implements StreamTaskExecutor<AuditMessagesTask> {
 
-    private final AuditMessagesApi auditMessagesApi;
-
+    private final AuditServiceApi auditMessagesApi;
 
     @Override
     public Mono<AuditMessagesTask> executeTask(AuditMessagesTask auditMessagesTask) {
         int size = auditMessagesTask.getAuditMessages().size();
         log.info("Ingesting {} audit messages", size);
         auditMessagesTask.info("audit-messages", "post", "", "", "", "Start Ingesting Audit Messages");
-        AuditMessagesPostRequestBody auditMessagesPostRequestBody = new AuditMessagesPostRequestBody();
+        AuditMessagesPostRequest auditMessagesPostRequestBody = new AuditMessagesPostRequest();
         auditMessagesPostRequestBody.setAuditMessages(auditMessagesTask.getAuditMessages());
         return auditMessagesApi.postAuditMessages(auditMessagesPostRequestBody)
             .map(auditMessagesPostResponseBody -> {

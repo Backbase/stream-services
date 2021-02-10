@@ -1827,7 +1827,8 @@ components:
           type: object
           description: A collection of data objects to be persisted alongside its
             owning audit message, in the form of key-value pairs.
-          x-java-type: java.util.Map<java.lang.String, java.lang.String>
+          additionalProperties:
+            type: string
       x-java-type: com.backbase.audit.presentation.rest.spec.v2.model.AuditMessage
     AuditMessagesPostRequestBody:
       required:

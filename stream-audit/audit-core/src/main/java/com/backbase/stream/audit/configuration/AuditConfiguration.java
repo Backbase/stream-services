@@ -1,7 +1,7 @@
 package com.backbase.stream.audit.configuration;
 
-import com.backbase.dbs.audit.service.ApiClient;
-import com.backbase.dbs.audit.service.api.AuditMessagesApi;
+import com.backbase.dbs.audit.api.service.ApiClient;
+import com.backbase.dbs.audit.api.service.v2.AuditServiceApi;
 import com.backbase.stream.audit.AuditMessagesTask;
 import com.backbase.stream.audit.AuditTaskExecutor;
 import com.backbase.stream.audit.AuditUnitOfWorkExecutor;
@@ -33,17 +33,17 @@ public class AuditConfiguration {
     private Flux<UnitOfWork<AuditMessagesTask>> scheduler;
 
     @Bean
-    public AuditMessagesApi auditMessagesApi(WebClient dbsWebClient,
+    public AuditServiceApi auditMessagesApi(WebClient dbsWebClient,
                                              ObjectMapper mapper,
                                              DateFormat format,
                                              AuditConfigurationProperties auditConfigurationProperties) {
         ApiClient apiClient = new ApiClient(dbsWebClient, mapper, format);
         apiClient.setBasePath(auditConfigurationProperties.getAuditPresentationBaseUrl());
-        return new AuditMessagesApi(apiClient);
+        return new AuditServiceApi(apiClient);
     }
 
     @Bean
-    public AuditTaskExecutor auditTaskExecutor(AuditMessagesApi auditMessagesApi) {
+    public AuditTaskExecutor auditTaskExecutor(AuditServiceApi auditMessagesApi) {
         return new AuditTaskExecutor(auditMessagesApi);
     }
 
