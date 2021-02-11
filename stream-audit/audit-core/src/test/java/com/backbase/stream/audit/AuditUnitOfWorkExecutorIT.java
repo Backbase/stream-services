@@ -1,7 +1,8 @@
 package com.backbase.stream.audit;
 
-import com.backbase.dbs.audit.service.model.AuditMessage;
-import com.backbase.dbs.audit.service.model.AuditMessagesPostRequestBody;
+import com.backbase.dbs.audit.api.service.v2.model.AuditMessage;
+import com.backbase.dbs.audit.api.service.v2.model.AuditMessagesPostRequest;
+import com.backbase.dbs.audit.api.service.v2.model.Status;
 import com.backbase.stream.AbstractServiceIntegrationTests;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
+
 @Slf4j
 public class AuditUnitOfWorkExecutorIT extends AbstractServiceIntegrationTests {
 
@@ -30,7 +32,7 @@ public class AuditUnitOfWorkExecutorIT extends AbstractServiceIntegrationTests {
             .limit(86).collect(Collectors.toList());
         DateFormat dateFormat = new StdDateFormat();
         dateFormat.setTimeZone(TimeZone.getDefault());
-        AuditMessagesPostRequestBody requestBody = new AuditMessagesPostRequestBody();
+        AuditMessagesPostRequest requestBody = new AuditMessagesPostRequest();
         requestBody.setAuditMessages(collect);
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -54,7 +56,7 @@ public class AuditUnitOfWorkExecutorIT extends AbstractServiceIntegrationTests {
             .eventCategory(faker.app().name())
             .objectType("Audit")
             .eventAction("Generate")
-            .status(faker.bool().bool() ?  AuditMessage.StatusEnum.SUCCESSFUL : AuditMessage.StatusEnum.FAILED)
+            .status(faker.bool().bool() ?  Status.SUCCESSFUL : Status.FAILED)
             .username(faker.starTrek().character())
             .userId(faker.idNumber().ssnValid())
             .timestamp(OffsetDateTime.now())
