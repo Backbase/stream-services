@@ -708,8 +708,8 @@ public class AccessGroupService {
         return serviceAgreementQueryApi.getServiceAgreementAdmins(serviceAgreement.getInternalId())
             .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins()))
             // get External  ID for each admin.
-            .flatMap(usersApi::getUserByExternalIdgetUserByExternalId)
-            .map(GetUserById::getExternalId)
+            .flatMap(userId -> usersApi.getUserByExternalId(userId, true))
+            .map(GetUser::getExternalId)
             .collectList()
             .doOnNext(adminIds -> log.debug("Found  admins: {}", adminIds))
             .map(adminsExternalIds -> adminsExternalIds.stream()

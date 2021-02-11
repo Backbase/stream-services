@@ -3,8 +3,8 @@ package com.backbase.stream.transaction.generator;
 import static com.backbase.stream.transaction.utils.CommonHelpers.generateRandomNumberInRange;
 import static com.backbase.stream.transaction.utils.CommonHelpers.getRandomFromList;
 
-import com.backbase.dbs.transaction.presentation.service.model.CreditDebitIndicator;
-import com.backbase.dbs.transaction.presentation.service.model.TransactionItemPost;
+import com.backbase.dbs.transaction.api.service.v2.model.CreditDebitIndicator;
+import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody;
 import com.backbase.stream.cursor.model.IngestionCursor;
 import com.backbase.stream.transaction.generator.configuration.TransactionGeneratorOptions;
 import com.backbase.stream.transaction.utils.CommonHelpers;
@@ -42,16 +42,16 @@ public class TransactionGenerator {
      * @param max             Maximum number of Transactions to generate
      * @return List of generated transactions
      */
-    public List<TransactionItemPost> generate(IngestionCursor ingestionCursor, int min, int max) {
+    public List<TransactionsPostRequestBody> generate(IngestionCursor ingestionCursor, int min, int max) {
         int numberOfTxToGenerate = RandomUtils.nextInt(min, max);
-        List<TransactionItemPost> transactionItemPosts = new ArrayList<>();
+        List<TransactionsPostRequestBody> transactionItemPosts = new ArrayList<>();
         for (int i = 0; i < numberOfTxToGenerate; i++) {
             transactionItemPosts.add(generate(ingestionCursor));
         }
         return transactionItemPosts;
     }
 
-    public TransactionItemPost generate(IngestionCursor ingestionCursor) {
+    public TransactionsPostRequestBody generate(IngestionCursor ingestionCursor) {
         LocalDate bookingDate;
         if (ingestionCursor.getDateFrom() != null) {
             LocalDate lastDate = ingestionCursor.getDateFrom();
@@ -76,7 +76,7 @@ public class TransactionGenerator {
             ? getRandomFromList(transactionGeneratorOptions.getCreditRetailCategories())
             : getRandomFromList(transactionGeneratorOptions.getDebitRetailCategories());
 
-        TransactionItemPost transactionItemPost = new TransactionItemPost()
+        TransactionsPostRequestBody transactionItemPost = new TransactionsPostRequestBody()
             .externalId(UUID.randomUUID().toString())
             .arrangementId(ingestionCursor.getArrangementId())
             .externalArrangementId(ingestionCursor.getExternalArrangementId())
@@ -88,7 +88,8 @@ public class TransactionGenerator {
             .type(getRandomFromList(transactionGeneratorOptions.getTransactionTypes()))
             .category(randomCategory)
 
-            .transactionAmountCurrency(CommonHelpers.generateRandomAmountInRange(transactionGeneratorOptions.getCurrency(), 100L, 9999L))
+            .transactionAmountCurrency(
+                CommonHelpers.generateRandomAmountInRange(transactionGeneratorOptions.getCurrency(), 100L, 9999L))
             .creditDebitIndicator(isCredit)
             .counterPartyName(faker.name().fullName())
             .counterPartyAccountNumber(Iban.random().toString())

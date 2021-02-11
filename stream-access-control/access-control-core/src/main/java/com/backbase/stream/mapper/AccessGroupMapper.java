@@ -5,7 +5,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItemQuery;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -24,7 +24,7 @@ import org.mapstruct.Mapping;
 public interface AccessGroupMapper {
 
     @Mapping(source = "id", target = "internalId")
-    ServiceAgreement toStream(ServiceAgreementItem getServiceAgreement);
+    ServiceAgreement toStream(ServiceAgreementItemQuery getServiceAgreement);
 
     BusinessFunction toStream(FunctionGroupItem functionsGetResponseBody);
 

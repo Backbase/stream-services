@@ -1,7 +1,7 @@
 package com.backbase.stream.audit;
 
-import com.backbase.dbs.audit.service.model.AuditMessage;
-import com.backbase.dbs.audit.service.model.AuditMessagesPostResponseBody;
+import com.backbase.dbs.audit.api.service.v2.model.AuditMessage;
+import com.backbase.dbs.audit.api.service.v2.model.AuditMessagesPostResponse;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.List;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 public class AuditMessagesTask extends StreamTask {
 
     private List<AuditMessage> auditMessages;
-    private AuditMessagesPostResponseBody responseBody;
+    private AuditMessagesPostResponse responseBody;
 
     public AuditMessagesTask(String id, List<AuditMessage> auditMessages) {
         super(id);
@@ -21,11 +21,11 @@ public class AuditMessagesTask extends StreamTask {
         return auditMessages;
     }
 
-    public AuditMessagesPostResponseBody getResponseBody() {
+    public AuditMessagesPostResponse getResponseBody() {
         return responseBody;
     }
 
-    public void setResponseBody(AuditMessagesPostResponseBody responseBody) {
+    public void setResponseBody(AuditMessagesPostResponse responseBody) {
         this.responseBody = responseBody;
     }
 

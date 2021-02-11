@@ -1,6 +1,6 @@
 package com.backbase.stream.audit;
 
-import com.backbase.dbs.audit.service.model.AuditMessage;
+import com.backbase.dbs.audit.api.service.v2.model.AuditMessage;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.UnitOfWorkExecutor;
 import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AuditUnitOfWorkExecutor extends UnitOfWorkExecutor<AuditMessagesTask> {
-
 
     public AuditUnitOfWorkExecutor(
         UnitOfWorkRepository<AuditMessagesTask, String> repository,

@@ -1,6 +1,6 @@
 package com.backbase.stream.audit.http.controller;
 
-import com.backbase.dbs.audit.service.model.AuditMessage;
+import com.backbase.dbs.audit.api.service.v2.model.AuditMessage;
 import com.backbase.stream.audit.AuditMessagesTask;
 import com.backbase.stream.audit.AuditUnitOfWorkExecutor;
 import com.backbase.stream.audit.configuration.AuditConfiguration;
