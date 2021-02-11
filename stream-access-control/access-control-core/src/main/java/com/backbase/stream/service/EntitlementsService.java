@@ -1,6 +1,6 @@
 package com.backbase.stream.service;
 
-import com.backbase.dbs.transaction.api.service.v2.model.ArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.stream.exceptions.UserNotFoundException;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.LegalEntity;
@@ -29,15 +29,14 @@ public class EntitlementsService {
     private final AccessGroupService accessGroupService;
     private final LegalEntityService legalEntityService;
 
-
     /**
      * Get Assigned permissions for external user for resource and function name with a privilege. First retrieves
      * internal user id to then query master service agreement in order to query assigned permissions
      *
      * @param externalUserId External User ID
-     * @param resourceName   Business Resource Name (i.e. Transactions)
-     * @param functionName   The function name to access the resource (i.e.' Transactions)
-     * @param privilege      Which privilege to query (i.e. view)
+     * @param resourceName Business Resource Name (i.e. Transactions)
+     * @param functionName The function name to access the resource (i.e.' Transactions)
+     * @param privilege Which privilege to query (i.e. view)
      * @return List of assigned permissions
      */
     public Flux<AssignedPermission> getAssignedPermissions(
@@ -50,7 +49,8 @@ public class EntitlementsService {
             getAssignedPermissionsForUser(resourceName, functionName, privilege, user));
     }
 
-    public Flux<AssignedPermission> getAssignedPermissionsForUser(String resourceName, String functionName, String privilege, User user) {
+    public Flux<AssignedPermission> getAssignedPermissionsForUser(String resourceName, String functionName,
+        String privilege, User user) {
         return legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(user.getLegalEntityId())
             .flux()
             .flatMap(sa ->
@@ -77,7 +77,7 @@ public class EntitlementsService {
      * @param legalEntityId Internal Legal Entity Id
      * @return List of Products
      */
-    public Flux<ArrangementItem> getProductsForInternalLegalEntityId(String legalEntityId) {
+    public Flux<AccountArrangementItem> getProductsForInternalLegalEntityId(String legalEntityId) {
         return legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntityId)
             .flux()
             .flatMap(sa -> accessGroupService.getDataGroupItemIdsByServiceAgreementId(sa.getInternalId())
@@ -92,20 +92,23 @@ public class EntitlementsService {
      * @param legalEntityId External Legal Entity Id
      * @return List of Products
      */
-    public Flux<ArrangementItem> getProductsForExternalLegalEntityId(String legalEntityId) {
+    public Flux<AccountArrangementItem> getProductsForExternalLegalEntityId(String legalEntityId) {
         return legalEntityService.getLegalEntityByExternalId(legalEntityId).flux()
             .flatMap(legalEntity -> getProductsForInternalLegalEntityId(legalEntity.getInternalId()));
-
     }
 
-    private AssignedPermission setAssignedPermissionForJourneys(AssignedPermission permission, List<String> externalIds, ProductGroup.ProductGroupTypeEnum productGroupTypeEnum) {
+    private AssignedPermission setAssignedPermissionForJourneys(AssignedPermission permission, List<String> externalIds,
+        ProductGroup.ProductGroupTypeEnum productGroupTypeEnum) {
         permission.setPermittedObjectExternalIds(externalIds);
         return permission;
     }
 
-    private AssignedPermission setAssignedPermissionForArrangements(AssignedPermission permission, List<ArrangementItem> products) {
-        List<String> externalIds = products.stream().map(ArrangementItem::getExternalArrangementId).collect(Collectors.toList());
-        permission.setPermittedObjects(Collections.singletonMap(ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS.name(), products));
+    private AssignedPermission setAssignedPermissionForArrangements(AssignedPermission permission,
+        List<AccountArrangementItem> products) {
+        List<String> externalIds = products.stream().map(AccountArrangementItem::getExternalArrangementId)
+            .collect(Collectors.toList());
+        permission.setPermittedObjects(
+            Collections.singletonMap(ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS.name(), products));
         permission.setPermittedObjectExternalIds(externalIds);
         return permission;
     }
