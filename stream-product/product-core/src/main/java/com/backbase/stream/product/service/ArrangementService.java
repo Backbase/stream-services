@@ -1,11 +1,22 @@
 package com.backbase.stream.product.service;
 
-import com.backbase.dbs.accounts.presentation.service.ApiClient;
-import com.backbase.dbs.accounts.presentation.service.api.ArrangementsApi;
-import com.backbase.dbs.accounts.presentation.service.model.*;
+
+import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended.StatusEnum;
+import com.backbase.dbs.arrangement.api.service.ApiClient;
+import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPost;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountBatchResponseItemExtended;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountExternalLegalEntityIds;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountInternalIdGetResponseBody;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountUserPreferencesItemPut;
 import com.backbase.stream.product.exception.ArrangementCreationException;
 import com.backbase.stream.product.exception.ArrangementUpdateException;
 import com.backbase.stream.product.mapping.ProductMapper;
+import java.util.Collections;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,9 +26,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Manage Products (In DBS Called Arrangements).
@@ -33,7 +41,7 @@ public class ArrangementService {
         this.arrangementsApi = arrangementsApi;
     }
 
-    public Mono<ArrangementItem> createArrangement(ArrangementItemPost arrangementItemPost) {
+    public Mono<AccountArrangementItem> createArrangement(AccountArrangementItemPost arrangementItemPost) {
 
         return arrangementsApi.postArrangements(arrangementItemPost)
             .doOnError(WebClientResponseException.class, throwable ->
@@ -41,7 +49,7 @@ public class ArrangementService {
             .onErrorMap(WebClientResponseException.class, throwable -> new ArrangementCreationException(throwable, "Failed to post arrangements"))
             .map(arrangementAddedResponse -> {
 
-                ArrangementItem arrangementItem = productMapper.toArrangementItem(arrangementItemPost);
+                AccountArrangementItem arrangementItem = productMapper.toArrangementItem(arrangementItemPost);
                 arrangementItem.setId(arrangementAddedResponse.getId());
 
                 return arrangementItem;
@@ -49,15 +57,15 @@ public class ArrangementService {
 
     }
 
-    public Mono<ArrangemenItemBase> updateArrangement(ArrangemenItemBase arrangemenItemBase) {
-        log.info("Updating Arrangement: {}", arrangemenItemBase.getExternalArrangementId());
-        if(arrangemenItemBase.getDebitCards() == null)
-            arrangemenItemBase.setDebitCards(Collections.emptyList());
-        return arrangementsApi.putArrangements(arrangemenItemBase)
-            .doOnNext(aVoid -> log.info("Updated Arrangement: {}", arrangemenItemBase.getExternalArrangementId())).map(aVoid -> arrangemenItemBase)
-            .thenReturn(arrangemenItemBase)
+    public Mono<AccountArrangementItemPut> updateArrangement( AccountArrangementItemPut accountArrangementItemPut) {
+        log.info("Updating Arrangement: {}", accountArrangementItemPut.getExternalArrangementId());
+        if(accountArrangementItemPut.getDebitCards() == null)
+            accountArrangementItemPut.setDebitCards(Collections.emptyList());
+        return arrangementsApi.putArrangements(accountArrangementItemPut)
+            .doOnNext(aVoid -> log.info("Updated Arrangement: {}", accountArrangementItemPut.getExternalArrangementId())).map(aVoid -> accountArrangementItemPut)
+            .thenReturn(accountArrangementItemPut)
             .onErrorResume(WebClientResponseException.class, throwable ->
-                Mono.error(new ArrangementUpdateException(throwable, "Failed to update Arrangement: " + arrangemenItemBase.getExternalArrangementId())));
+                Mono.error(new ArrangementUpdateException(throwable, "Failed to update Arrangement: " + accountArrangementItemPut.getExternalArrangementId())));
 
     }
 
@@ -67,12 +75,12 @@ public class ArrangementService {
      * @param arrangementItems list of arrangements to be upserted.
      * @return flux of response items.
      */
-    public Flux<BatchResponseItemExtended> upsertBatchArrangements(List<ArrangementItemPost> arrangementItems) {
+    public Flux<AccountBatchResponseItemExtended> upsertBatchArrangements(List<AccountArrangementItemPost> arrangementItems) {
         return arrangementsApi.postBatchUpsertArrangements(arrangementItems)
                 .map(r -> {
                     log.info("Batch Arrangement update result for arrangementId: {}, resourceId: {}, action: {}, result: {}", r.getArrangementId(), r.getResourceId(), r.getAction(), r.getStatus());
                     // Check if any failed, then fail everything.
-                    if (!BatchResponseItemExtended.StatusEnum._200.equals(r.getStatus())) {
+                    if (!StatusEnum.HTTP_STATUS_OK.equals(r.getStatus())) {
                         throw new IllegalStateException("Batch arrangement update failed: " + r.getResourceId());
                     }
                     return r;
@@ -81,7 +89,7 @@ public class ArrangementService {
                         Mono.error(new ArrangementUpdateException(throwable, "Batch arrangement update failed: " + arrangementItems)));
     }
 
-    public Mono<Void> updateUserPreferences(UserPreferencesItemPut userPreferencesItemPut){
+    public Mono<Void> updateUserPreferences(AccountUserPreferencesItemPut userPreferencesItemPut){
         return arrangementsApi.putUserPreferences(userPreferencesItemPut)
             .doOnNext(arg -> log.info("Arrangement preferences created for User with ID: {}", userPreferencesItemPut.getUserId()))
             .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
@@ -96,7 +104,7 @@ public class ArrangementService {
      * @param internalId Internal ID
      * @return Product
      */
-    public Mono<ArrangementItem> getArrangement(String internalId) {
+    public Mono<AccountArrangementItem> getArrangement(String internalId) {
         return arrangementsApi.getArrangementById(internalId)
             .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
                 log.info("Arrangement: {} not found", internalId);
@@ -104,14 +112,14 @@ public class ArrangementService {
             });
     }
 
-    public Flux<ArrangementItem> getArrangementByExternalId(List<String> externalId) {
-        Flux<ArrangementItem> executeRequest = arrangementsApi.getArrangements(null, null, externalId)
-            .flatMapIterable(ArrangementItems::getArrangementElements);
+    public Flux<AccountArrangementItem> getArrangementByExternalId(List<String> externalId) {
+        Flux<AccountArrangementItem> executeRequest = arrangementsApi.getArrangements(null, null, externalId)
+            .flatMapIterable(AccountArrangementItems::getArrangementElements);
         return executeRequest;
     }
 
 
-    public Mono<ArrangementItem> getArrangementByExternalId(String externalId) {
+    public Mono<AccountArrangementItem> getArrangementByExternalId(String externalId) {
         return getArrangementByExternalId(Collections.singletonList(externalId)).next();
     }
 
@@ -129,7 +137,7 @@ public class ArrangementService {
                 return Mono.empty();
             })
 
-            .map(InternalIdGetResponseBody::getInternalId);
+            .map(AccountInternalIdGetResponseBody::getInternalId);
     }
 
     /**
@@ -142,7 +150,7 @@ public class ArrangementService {
         log.debug("Retrieving Arrangement by internal id {}", arrangementInternalId);
         // get arrangement externalId by internal id.
         return arrangementsApi.getArrangementById(arrangementInternalId)
-                .map(ArrangementItem::getExternalArrangementId)
+                .map(AccountArrangementItem::getExternalArrangementId)
                 .onErrorResume(WebClientResponseException.class, e -> {
                     log.warn("Failed to retrieve arrangement by internal id {}, {}", arrangementInternalId, e.getMessage());
                     return Mono.empty();
@@ -160,7 +168,7 @@ public class ArrangementService {
      */
     public Mono<String> deleteArrangementByExternalId(String arrangementExternalId) {
         log.debug("Removing Arrangement with external id {}", arrangementExternalId);
-        return arrangementsApi.deleteexternalArrangementId(arrangementExternalId)
+        return arrangementsApi.deleteExternalArrangementId(arrangementExternalId)
                 .thenReturn(arrangementExternalId);
     }
 
@@ -173,7 +181,7 @@ public class ArrangementService {
      */
     public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, List<String> legalEntitiesExternalIds){
         log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, legalEntitiesExternalIds);
-        return arrangementsApi.postArrangementLegalEntities(arrangementExternalId, new ExternalLegalEntityIds().ids(legalEntitiesExternalIds));
+        return arrangementsApi.postArrangementLegalEntities(arrangementExternalId, new AccountExternalLegalEntityIds().ids(legalEntitiesExternalIds));
     }
 
     /**

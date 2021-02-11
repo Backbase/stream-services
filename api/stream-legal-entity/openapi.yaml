@@ -284,8 +284,9 @@ components:
           items:
             $ref: '#/components/schemas/UserPreferences'
         additions:
-          type: object
-          additionalProperties: true
+          additionalProperties:
+            type: string
+
     CurrentAccount:
       properties:
         bookedBalance:

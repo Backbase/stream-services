@@ -5,7 +5,7 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
 
 
-import com.backbase.dbs.accounts.presentation.service.model.ArrangementItemPost;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPost;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
@@ -146,7 +146,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
     }
 
     protected Mono<BatchProductGroupTask> upsertArrangementsBatch(BatchProductGroupTask batchProductGroupTask) {
-        List<ArrangementItemPost> batchArrangements = new ArrayList<>();
+        List<AccountArrangementItemPost> batchArrangements = new ArrayList<>();
         batchProductGroupTask.getData().getProductGroups().forEach(pg -> batchArrangements.addAll(
                 Stream.of(
                         StreamUtils.nullableCollectionToStream(pg.getCurrentAccounts()).map(productMapper::toPresentation),
@@ -165,20 +165,20 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
         // Insert  without duplicates.
         // TODO: Revert this change when either OpenAPI generated methods can call super in equals
         // or if the product spec is modified to mitigate the issue
-        List<ArrangementItemPost> itemsToUpsert = batchArrangements.stream()
+        List<AccountArrangementItemPost> itemsToUpsert = batchArrangements.stream()
             .filter(distinctByKeys(
-                ArrangementItemPost::getExternalArrangementId,
-                ArrangementItemPost::getExternalLegalEntityIds,
-                ArrangementItemPost::getExternalProductId,
-                ArrangementItemPost::getExternalStateId,
-                ArrangementItemPost::getProductId,
-                ArrangementItemPost::getAlias,
-                ArrangementItemPost::getAdditions
+                AccountArrangementItemPost::getExternalArrangementId,
+                AccountArrangementItemPost::getExternalLegalEntityIds,
+                AccountArrangementItemPost::getExternalProductId,
+                AccountArrangementItemPost::getExternalStateId,
+                AccountArrangementItemPost::getProductId,
+               /* AccountArrangementItemPost::getAlias,*/
+                AccountArrangementItemPost::getAdditions
             )).collect(Collectors.toList());
 
         Set<String> upsertedInternalIds = new HashSet<>();
         return Flux.fromIterable(itemsToUpsert)
-                .sort(comparing(ArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
+                .sort(comparing(AccountArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
                 .buffer(50) // hardcoded to match DBS limitation
                 .concatMap(batch -> arrangementService.upsertBatchArrangements(batch)
                         .doOnNext(r -> batchProductGroupTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, UPDATED, r.getResourceId(), r.getArrangementId(), "Updated Arrangements (in batch)"))
