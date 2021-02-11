@@ -1,7 +1,7 @@
 package com.backbase.stream.transactions;
 
 
-import com.backbase.dbs.transaction.presentation.service.model.TransactionItemPost;
+import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody;
 import com.backbase.stream.cursor.model.IngestionCursor;
 import com.backbase.stream.transaction.generator.TransactionGenerator;
 import com.backbase.stream.transaction.generator.configuration.TransactionGeneratorConfiguration;
@@ -44,7 +44,7 @@ class MockTransactionProcessor {
      */
     @StreamListener(Processor.INPUT)
     @SendTo(Processor.OUTPUT)
-    public List<TransactionItemPost> retrieveTransactions(IngestionCursor ingestionCursor) {
+    public List<TransactionsPostRequestBody> retrieveTransactions(IngestionCursor ingestionCursor) {
         return transactionGenerator.generate(ingestionCursor, 1, 10);
     }
 

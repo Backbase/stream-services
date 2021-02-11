@@ -1,17 +1,16 @@
 package com.backbase.stream.transaction;
 
-import com.backbase.dbs.transaction.presentation.service.model.TransactionItemPost;
+import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody;
 import com.backbase.stream.configuration.TransactionWorkerConfigurationProperties;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.UnitOfWorkExecutor;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
-import reactor.core.publisher.Flux;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import reactor.core.publisher.Flux;
 
 public class TransactionUnitOfWorkExecutor extends UnitOfWorkExecutor<TransactionTask> {
 
@@ -21,11 +20,11 @@ public class TransactionUnitOfWorkExecutor extends UnitOfWorkExecutor<Transactio
         super(repository, streamTaskExecutor, properties);
     }
 
-    public Flux<UnitOfWork<TransactionTask>> prepareUnitOfWork(List<TransactionItemPost> items) {
+    public Flux<UnitOfWork<TransactionTask>> prepareUnitOfWork(List<TransactionsPostRequestBody> items) {
         Stream<UnitOfWork<TransactionTask>> unitOfWorkStream;
         if (((TransactionWorkerConfigurationProperties) streamWorkerConfiguration).isGroupPerArrangementId()) {
-            Map<String, List<TransactionItemPost>> transactionsGroupedByArrangement = items.stream()
-                .collect(Collectors.groupingBy(TransactionItemPost::getExternalArrangementId));
+            Map<String, List<TransactionsPostRequestBody>> transactionsGroupedByArrangement = items.stream()
+                .collect(Collectors.groupingBy(TransactionsPostRequestBody::getExternalArrangementId));
 
             unitOfWorkStream = transactionsGroupedByArrangement.entrySet().stream()
                 .map(entry -> {
@@ -42,7 +41,7 @@ public class TransactionUnitOfWorkExecutor extends UnitOfWorkExecutor<Transactio
         return Flux.fromStream(unitOfWorkStream);
     }
 
-    public Flux<UnitOfWork<TransactionTask>> prepareUnitOfWork(Flux<TransactionItemPost> items) {
+    public Flux<UnitOfWork<TransactionTask>> prepareUnitOfWork(Flux<TransactionsPostRequestBody> items) {
 
         return items
             .bufferTimeout(streamWorkerConfiguration.getBufferSize(), streamWorkerConfiguration.getBufferMaxTime())

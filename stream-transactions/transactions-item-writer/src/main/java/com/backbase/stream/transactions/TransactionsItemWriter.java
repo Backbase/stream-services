@@ -1,10 +1,8 @@
 package com.backbase.stream.transactions;
 
-import com.backbase.dbs.transaction.presentation.service.model.TransactionItemPost;
-import com.backbase.stream.transaction.TransactionTaskExecutor;
+import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionUnitOfWorkExecutor;
-import com.backbase.stream.worker.UnitOfWorkExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.UnitOfWork;
 import java.util.List;
@@ -16,7 +14,7 @@ import reactor.core.publisher.Flux;
 
 @AllArgsConstructor
 @Slf4j
-public class TransactionsItemWriter implements ItemWriter<TransactionItemPost> {
+public class TransactionsItemWriter implements ItemWriter<TransactionsPostRequestBody> {
 
     private final TransactionUnitOfWorkExecutor transactionTaskUnitOfWorkExecutor;
 
@@ -26,9 +24,9 @@ public class TransactionsItemWriter implements ItemWriter<TransactionItemPost> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void write(@NonNull List<? extends TransactionItemPost> items) throws Exception {
+    public void write(@NonNull List<? extends TransactionsPostRequestBody> items) throws Exception {
 
-        List<TransactionItemPost> list = (List<TransactionItemPost>) items;
+        List<TransactionsPostRequestBody> list = (List<TransactionsPostRequestBody>) items;
         Flux<UnitOfWork<TransactionTask>> unitOfWorkFlux = transactionTaskUnitOfWorkExecutor.prepareUnitOfWork(list);
 
         try {

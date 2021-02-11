@@ -1,7 +1,7 @@
 package com.backbase.stream.limit;
 
-import com.backbase.dbs.limit.service.api.LimitsApi;
-import com.backbase.dbs.limit.service.model.CreateLimitRequest;
+import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
+import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import lombok.extern.slf4j.Slf4j;
@@ -16,19 +16,19 @@ public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
     public static final String ERROR = "error";
     public static final String CREATED_SUCCESSFULLY = "Limit created successfully";
     public static final String FAILED_TO_INGEST_LIMITS = "Failed to ingest limits";
-    private LimitsApi limitsApi;
+    private LimitsServiceApi limitsApi;
 
-    public LimitsSaga(LimitsApi limitsApi) {
+    public LimitsSaga(LimitsServiceApi limitsApi) {
         this.limitsApi = limitsApi;
     }
 
     @Override
     public Mono<LimitsTask> executeTask(LimitsTask limitsTask) {
-        CreateLimitRequest item = limitsTask.getData();
+       CreateLimitRequestBody item = limitsTask.getData();
 
 
         log.info("Started ingestion of transactions for user {}", item.getUserBBID());
-        return limitsApi.postLimitsService(item)
+        return limitsApi.postLimits(item)
                 .map(createLimitResponse -> {
                     limitsTask.setResponse(createLimitResponse);
                     limitsTask.info(LIMIT, CREATE, SUCCESS, item.getUserBBID(), createLimitResponse.getUuid(), CREATED_SUCCESSFULLY);

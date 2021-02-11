@@ -1,7 +1,7 @@
 package com.backbase.stream.transaction.utils;
 
 
-import com.backbase.dbs.transaction.presentation.service.model.Currency;
+import com.backbase.dbs.transaction.api.service.v2.model.Currency;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
