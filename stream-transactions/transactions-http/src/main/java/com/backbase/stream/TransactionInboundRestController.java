@@ -36,21 +36,21 @@ public class TransactionInboundRestController implements TransactionsApi {
     @Override
     public Mono<ResponseEntity<TransactionsGet>> getTransactions(@Valid BigDecimal amountGreaterThan,
         @Valid BigDecimal amountLessThan, @Valid String bookingDateGreaterThan, @Valid String bookingDateLessThan,
-        @Valid String type,@Valid List<String> types, @Valid String description, @Valid String reference, @Valid String typeGroup, @Valid List<String> typeGroups,
+        @Valid String type, @Valid List<String> types, @Valid String description, @Valid String reference,
+        @Valid String typeGroup, @Valid List<String> typeGroups,
         @Valid String counterPartyName, @Valid String counterPartyAccountNumber, @Valid String creditDebitIndicator,
         @Valid String category, @Valid List<String> categories, @Valid String billingStatus, @Valid String currency,
         @Valid Integer notes, @Valid String id, @Valid String arrangementId, @Valid List<String> arrangementsIds,
-        @Valid BigDecimal fromCheckSerialNumber, @Valid BigDecimal toCheckSerialNumber,
-        @Valid List<BigDecimal> checkSerialNumbers, @Valid String query, @Valid Integer from, @Valid String cursor,
+        @Valid Long fromCheckSerialNumber, @Valid Long toCheckSerialNumber,
+        @Valid List<Long> checkSerialNumbers, @Valid String query, @Valid Integer from, @Valid String cursor,
         @Valid Integer size, @Valid String orderBy, @Valid String direction, @Valid String secDirection,
         ServerWebExchange exchange) {
 
-        String state = "";
         TransactionsQuery transactionsQuery = new TransactionsQuery(amountGreaterThan, amountLessThan,
-            bookingDateGreaterThan, bookingDateLessThan, type, types, description, reference, typeGroup, typeGroups, counterPartyName,
-            counterPartyAccountNumber, creditDebitIndicator, category, categories, billingStatus, state, currency, notes, id,null,
-            arrangementId, arrangementsIds, fromCheckSerialNumber, toCheckSerialNumber, checkSerialNumbers, query, from,
-            cursor, size, orderBy, direction, secDirection);
+            bookingDateGreaterThan, bookingDateLessThan, types, description, reference, typeGroups,
+            counterPartyName, counterPartyAccountNumber, creditDebitIndicator, categories, billingStatus, null,
+            currency, notes, id, null, arrangementId, arrangementsIds, fromCheckSerialNumber,
+            toCheckSerialNumber, checkSerialNumbers, query, from, cursor, size, orderBy, direction, secDirection);
         return transactionService.getTransactions(transactionsQuery)
             .map(mapper::toInbound)
             .collectList()

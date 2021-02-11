@@ -1,18 +1,16 @@
 package com.backbase.stream;
 
-import com.backbase.dbs.transaction.presentation.service.api.TransactionsApi;
-import com.backbase.dbs.transaction.presentation.service.model.ArrangementItem;
-import com.backbase.dbs.transaction.presentation.service.model.TransactionIds;
-import com.backbase.dbs.transaction.presentation.service.model.TransactionItem;
-import com.backbase.dbs.transaction.presentation.service.model.TransactionItemPatch;
-import com.backbase.dbs.transaction.presentation.service.model.TransactionItemPost;
-import com.backbase.dbs.transaction.presentation.service.model.TransactionsDeleteRequestBody;
+import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
+import com.backbase.dbs.transaction.api.service.v2.model.ArrangementItem;
+import com.backbase.dbs.transaction.api.service.v2.model.TransactionItem;
+import com.backbase.dbs.transaction.api.service.v2.model.TransactionsDeleteRequestBody;
+import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPatchRequestBody;
+import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody;
+import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionUnitOfWorkExecutor;
 import com.backbase.stream.transaction.TransactionsQuery;
 import com.backbase.stream.worker.model.UnitOfWork;
-
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -27,12 +25,13 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class TransactionService {
 
-    private final TransactionsApi transactionsApi;
+    private final TransactionPresentationServiceApi transactionPresentationServiceApi;
     private final TransactionUnitOfWorkExecutor transactionTaskExecutor;
 
-    public TransactionService(TransactionsApi transactionsApi, TransactionUnitOfWorkExecutor transactionTaskExecutor) {
+    public TransactionService(TransactionPresentationServiceApi transactionPresentationServiceApi,
+        TransactionUnitOfWorkExecutor transactionTaskExecutor) {
         this.transactionTaskExecutor = transactionTaskExecutor;
-        this.transactionsApi = transactionsApi;
+        this.transactionPresentationServiceApi = transactionPresentationServiceApi;
     }
 
     /**
@@ -41,14 +40,14 @@ public class TransactionService {
      * @param transactions Unbounded list of Transactions
      * @return Ingestion Transactions IDs
      */
-    public Flux<TransactionIds> processTransactions(Flux<TransactionItemPost> transactions) {
+    public Flux<TransactionsPostResponseBody> processTransactions(Flux<TransactionsPostRequestBody> transactions) {
         Flux<UnitOfWork<TransactionTask>> unitOfWorkFlux = transactionTaskExecutor.prepareUnitOfWork(transactions);
         return unitOfWorkFlux.flatMap(transactionTaskExecutor::executeUnitOfWork)
             .flatMap(this::getTransactionIdsFlux);
     }
 
-    private Flux<TransactionIds> getTransactionIdsFlux(UnitOfWork<TransactionTask> unitOfWork) {
-        Stream<TransactionIds> transactionIdsStream = unitOfWork.getStreamTasks().stream()
+    private Flux<TransactionsPostResponseBody> getTransactionIdsFlux(UnitOfWork<TransactionTask> unitOfWork) {
+        Stream<TransactionsPostResponseBody> transactionIdsStream = unitOfWork.getStreamTasks().stream()
             .map(TransactionTask::getResponse)
             .flatMap(Collection::stream);
         return Flux.fromStream(transactionIdsStream);
@@ -84,7 +83,7 @@ public class TransactionService {
     public Mono<Void> deleteTransactions(Flux<TransactionsDeleteRequestBody> transactionItemDelete) {
         return transactionItemDelete
             .collectList()
-            .flatMap(transactionsApi::postDelete);
+            .flatMap(transactionPresentationServiceApi::postDelete);
 
     }
 
@@ -95,7 +94,7 @@ public class TransactionService {
      * @return A list of transactions
      */
     public Flux<TransactionItem> getTransactions(TransactionsQuery transactionsQuery) {
-        return transactionsApi.getTransactions(
+        return transactionPresentationServiceApi.getTransactions(
             transactionsQuery.getAmountGreaterThan(),
             transactionsQuery.getAmountLessThan(),
             transactionsQuery.getBookingDateGreaterThan(),
@@ -107,7 +106,6 @@ public class TransactionService {
             transactionsQuery.getCounterPartyName(),
             transactionsQuery.getCounterPartyAccountNumber(),
             transactionsQuery.getCreditDebitIndicator(),
-            transactionsQuery.getCategory(),
             transactionsQuery.getCategories(),
             transactionsQuery.getBillingStatus(),
             transactionsQuery.getState(),
@@ -134,10 +132,10 @@ public class TransactionService {
      * @param transactionItems Updated category and billing status fields
      * @return empty mono on completion
      */
-    public Mono<Void> patchTransactions(Flux<TransactionItemPatch> transactionItems) {
+    public Mono<Void> patchTransactions(Flux<TransactionsPatchRequestBody> transactionItems) {
         return transactionItems
             .collectList()
-            .flatMap(transactionsApi::patchTransactions);
+            .flatMap(transactionPresentationServiceApi::patchTransactions);
     }
 
     /**
@@ -149,7 +147,7 @@ public class TransactionService {
     public Mono<Void> postRefresh(Flux<ArrangementItem> arrangementItems) {
         return arrangementItems
             .collectList()
-            .flatMap(transactionsApi::postRefresh);
+            .flatMap(transactionPresentationServiceApi::postRefresh);
     }
 
 }

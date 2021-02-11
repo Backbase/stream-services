@@ -1,8 +1,8 @@
 package com.backbase.stream.configuration;
 
-import com.backbase.dbs.limit.service.ApiClient;
-import com.backbase.dbs.limit.service.api.LimitsApi;
-import com.backbase.dbs.user.presentation.service.api.UsersApi;
+import com.backbase.dbs.limit.api.service.ApiClient;
+import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
+import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
@@ -30,34 +30,38 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class LimitsServiceConfiguration {
 
     @Bean
-    public LimitsApi limitsApi(
+    public LimitsServiceApi limitsApi(
         ObjectMapper objectMapper,
         DateFormat dateFormat,
         WebClient dbsWebClient,
         BackbaseStreamConfigurationProperties configurationProperties
     ) {
-        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat).setBasePath(configurationProperties.getDbs().getLimitsManagerBaseUrl());
-        return new LimitsApi(apiClient);
+        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat)
+            .setBasePath(configurationProperties.getDbs().getLimitsManagerBaseUrl());
+        return new LimitsServiceApi(apiClient);
     }
 
     @Bean
-    public UsersApi usersApi(
+    public UserManagementApi userManagementApi(
         ObjectMapper objectMapper,
         DateFormat dateFormat,
         WebClient dbsWebClient,
         BackbaseStreamConfigurationProperties configurationProperties
     ) {
-        com.backbase.dbs.user.presentation.service.ApiClient apiClient = new com.backbase.dbs.user.presentation.service.ApiClient(dbsWebClient, objectMapper, dateFormat);
+        com.backbase.dbs.user.api.service.ApiClient apiClient = new com.backbase.dbs.user.api.service.ApiClient(
+            dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(configurationProperties.getDbs().getUserManagerBaseUrl());
-        return new UsersApi(apiClient);
+        return new UserManagementApi(apiClient);
     }
 
     @Bean
-    public LimitsSaga limitsSaga(LimitsApi limitsApi) {
-        return new LimitsSaga(limitsApi);
+    public LimitsSaga limitsSaga(LimitsServiceApi limitsServiceApi) {
+        return new LimitsSaga(limitsServiceApi);
     }
 
-    public static class InMemoryLimitsUnitOfWorkRepository extends InMemoryReactiveUnitOfWorkRepository<LimitsTask> implements LimitsUnitOfWorkRepository {
+    public static class InMemoryLimitsUnitOfWorkRepository extends
+        InMemoryReactiveUnitOfWorkRepository<LimitsTask> implements LimitsUnitOfWorkRepository {
+
     }
 
     @Bean
@@ -68,7 +72,8 @@ public class LimitsServiceConfiguration {
 
     @Bean
     public LimitsUnitOfWorkExecutor limitsUnitOfWorkExecutor(
-        LimitsUnitOfWorkRepository repository, LimitsSaga saga, LimitsWorkerConfigurationProperties configurationProperties
+        LimitsUnitOfWorkRepository repository, LimitsSaga saga,
+        LimitsWorkerConfigurationProperties configurationProperties
     ) {
         return new LimitsUnitOfWorkExecutor(repository, saga, configurationProperties);
     }
