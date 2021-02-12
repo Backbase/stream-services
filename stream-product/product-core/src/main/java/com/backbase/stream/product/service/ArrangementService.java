@@ -12,6 +12,7 @@ import com.backbase.dbs.arrangement.api.service.v2.model.AccountBatchResponseIte
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountExternalLegalEntityIds;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountInternalIdGetResponseBody;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountUserPreferencesItemPut;
+import com.backbase.dbs.arrangement.api.service.v2.model.BatchResponseStatusCode;
 import com.backbase.stream.product.exception.ArrangementCreationException;
 import com.backbase.stream.product.exception.ArrangementUpdateException;
 import com.backbase.stream.product.mapping.ProductMapper;
@@ -80,7 +81,7 @@ public class ArrangementService {
                 .map(r -> {
                     log.info("Batch Arrangement update result for arrangementId: {}, resourceId: {}, action: {}, result: {}", r.getArrangementId(), r.getResourceId(), r.getAction(), r.getStatus());
                     // Check if any failed, then fail everything.
-                    if (!StatusEnum.HTTP_STATUS_OK.equals(r.getStatus())) {
+                    if (!BatchResponseStatusCode.HTTP_STATUS_OK.equals(r.getStatus())) {
                         throw new IllegalStateException("Batch arrangement update failed: " + r.getResourceId());
                     }
                     return r;
