@@ -45,42 +45,84 @@
             <artifactId>access-control-openapi-spec</artifactId>
             <classifier>api</classifier>
             <type>zip</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.arrangement</groupId>
             <artifactId>arrangement-manager</artifactId>
             <classifier>api</classifier>
             <type>zip</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.audit</groupId>
             <artifactId>audit-spec</artifactId>
             <classifier>api</classifier>
             <type>zip</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.transaction</groupId>
             <artifactId>transaction-manager</artifactId>
             <type>zip</type>
             <classifier>api</classifier>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.user</groupId>
             <artifactId>user-manager</artifactId>
             <classifier>api</classifier>
             <type>zip</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.user</groupId>
             <artifactId>user-profile-manager</artifactId>
             <classifier>api</classifier>
             <type>zip</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.backbase.dbs.limit</groupId>
             <artifactId>limit</artifactId>
             <classifier>api</classifier>
             <type>zip</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Swagger codegen dependencies -->
