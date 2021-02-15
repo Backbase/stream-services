@@ -70,7 +70,7 @@ jobs:
         if: contains(github.ref, 'master')
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.ACTIONS_ADMIN_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload to Repo
         if: contains(github.ref, 'master')
