@@ -1,10 +1,9 @@
 package com.backbase.stream.service;
 
-import com.backbase.dbs.userprofile.api.UserProfileApi;
-import com.backbase.dbs.userprofile.model.CreateUserProfile;
-import com.backbase.dbs.userprofile.model.GetUserProfile;
-import com.backbase.dbs.userprofile.model.ReplaceUserProfile;
-import com.backbase.stream.legalentity.model.User;
+import com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi;
+import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
+import com.backbase.dbs.user.profile.api.service.v2.model.GetUserProfile;
+import com.backbase.dbs.user.profile.api.service.v2.model.ReplaceUserProfile;
 import com.backbase.stream.mapper.UserProfileMapper;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -21,7 +20,7 @@ import reactor.core.publisher.Mono;
 public class UserProfileService {
 
     @NonNull
-    private final UserProfileApi userProfileApi;
+    private final UserProfileManagementApi userProfileApi;
 
     private final UserProfileMapper mapper = Mappers.getMapper(UserProfileMapper.class);
 
@@ -38,14 +37,14 @@ public class UserProfileService {
     }
 
     public Mono<GetUserProfile> createUserProfile(CreateUserProfile requestBody) {
-        return userProfileApi.postUserProfile(requestBody)
+        return userProfileApi.createUserProfile(requestBody)
             .doOnError(WebClientResponseException.class, throwable ->
                 log.error("Failed to create User Profile: {}\n{}", requestBody.getExternalId(),
                     throwable.getResponseBodyAsString()));
     }
 
     public Mono<GetUserProfile> updateUserProfile(String userId, ReplaceUserProfile requestBody) {
-        return userProfileApi.putUserProfile(userId, requestBody)
+        return userProfileApi.replaceUserProfile(userId, requestBody)
             .doOnError(WebClientResponseException.class, throwable ->
                 log.error("Failed to update User Profile: {}\n{}", requestBody.getExternalId(),
                     throwable.getResponseBodyAsString()));

@@ -285,7 +285,8 @@ components:
             $ref: '#/components/schemas/UserPreferences'
         additions:
           type: object
-          additionalProperties: true
+          additionalProperties:
+            type: string
     CurrentAccount:
       properties:
         bookedBalance:
@@ -875,11 +876,13 @@ components:
           $ref: '#/components/schemas/Limit'
         additions:
           type: object
-          additionalProperties: true
+          additionalProperties:
+            type: string
         attributes:
           type: object
           description: Custom attributes to be added to the user.
-          x-java-type: java.util.Map<String,String>
+          additionalProperties:
+            type: string
         identityLinkStrategy:
           $ref: '#/components/schemas/IdentityUserLinkStrategy'
         userProfile:
@@ -1732,8 +1735,8 @@ components:
           description: Indication whether an arrangement can be favorable for a user
         additions:
           type: object
-          additionalProperties: true
-
+          additionalProperties:
+            type: string
     ###############################################
     ## Additional Data Group Items
     ###############################################

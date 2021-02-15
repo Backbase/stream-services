@@ -1,6 +1,6 @@
 package com.backbase.stream.cursor.events;
 
-import com.backbase.dbs.accounts.presentation.service.model.ArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.stream.TransactionService;
 import com.backbase.stream.cursor.configuration.CursorServiceConfigurationProperties;
 import com.backbase.stream.cursor.model.IngestionCursor;
@@ -85,10 +85,10 @@ public class AbstractLoginEventListener {
         List<IngestionCursor> ingestionCursors = new ArrayList<>();
         ProductGroup.ProductGroupTypeEnum arrangements1 = ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS;
         Object arrangements = assignedPermission.getPermittedObjects().get(arrangements1.name());
-        if (arrangements instanceof List && (((List) arrangements).get(0) instanceof ArrangementItem)) {
-            List<ArrangementItem> products = (List<ArrangementItem>) arrangements;
+        if (arrangements instanceof List && (((List) arrangements).get(0) instanceof AccountArrangementItem)) {
+            List<AccountArrangementItem> products = (List<AccountArrangementItem>) arrangements;
 
-            for (ArrangementItem product : products) {
+            for (AccountArrangementItem product : products) {
 
                 IngestionCursor ingestionCursor = createLoginIngestionCursor(loginEvent, user, legalEntity);
 

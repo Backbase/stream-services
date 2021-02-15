@@ -2,9 +2,9 @@ package com.backbase.stream;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-import com.backbase.dbs.accesscontrol.query.service.model.SchemaFunctionGroupItem;
-import com.backbase.dbs.user.presentation.service.model.GetUserById;
-import com.backbase.dbs.userprofile.model.CreateUserProfile;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.exceptions.AccessGroupException;
 import com.backbase.stream.exceptions.LegalEntityException;
@@ -150,13 +150,13 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 LegalEntity le = data.getT2();
                 return userService.getUsersByLegalEntity(le.getInternalId())
                     .map(usersByLegalEntityIdsResponse -> {
-                        List<GetUserById> users = usersByLegalEntityIdsResponse.getUsers();
+                        List<GetUser> users = usersByLegalEntityIdsResponse.getUsers();
                         return Tuples.of(data.getT1(), le, users);
                     });
             })
             .flatMap(data -> {
                 ServiceAgreement sa = data.getT1();
-                List<GetUserById> users = data.getT3();
+                List<GetUser> users = data.getT3();
                 return Flux.fromIterable(users)
                     .flatMap(user -> accessGroupService.removePermissionsForUser(sa.getInternalId(), user.getId())
                         .thenReturn(user.getExternalId()))
@@ -337,10 +337,10 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         if (!isEmpty(jobProfileUser.getReferenceJobRoleNames())) {
             return accessGroupService.getFunctionGroupsForServiceAgreement(streamTask.getData().getMasterServiceAgreement().getInternalId())
                 .map(functionGroups -> {
-                    Map<String, SchemaFunctionGroupItem> idByFunctionGroupName = functionGroups
+                    Map<String, FunctionGroupItem> idByFunctionGroupName = functionGroups
                         .stream()
                         .filter(fg -> Objects.nonNull(fg.getId()))
-                        .collect(Collectors.toMap(SchemaFunctionGroupItem::getName, Function.identity()));
+                        .collect(Collectors.toMap(FunctionGroupItem::getName, Function.identity()));
                     return jobProfileUser.getReferenceJobRoleNames().stream()
                         .map(idByFunctionGroupName::get)
                         .filter(Objects::nonNull)

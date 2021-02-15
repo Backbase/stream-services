@@ -1,15 +1,13 @@
 package com.backbase.stream.limit;
 
-import com.backbase.dbs.limit.service.model.CreateLimitRequest;
+import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.UnitOfWorkExecutor;
 import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
-import reactor.core.publisher.Flux;
-
 import java.util.List;
-import java.util.stream.Stream;
+import reactor.core.publisher.Flux;
 
 public class LimitsUnitOfWorkExecutor extends UnitOfWorkExecutor<LimitsTask> {
 
@@ -17,7 +15,7 @@ public class LimitsUnitOfWorkExecutor extends UnitOfWorkExecutor<LimitsTask> {
         super(repository, streamTaskExecutor, streamWorkerConfiguration);
     }
 
-    public Flux<UnitOfWork<LimitsTask>> prepareUnitOfWork(List<CreateLimitRequest> items) {
+    public Flux<UnitOfWork<LimitsTask>> prepareUnitOfWork(List<CreateLimitRequestBody> items) {
         String unitOfWorkId = "limits-" + System.currentTimeMillis();
         Flux<UnitOfWork<LimitsTask>> toWorkOn = Flux.empty();
         items.forEach(item -> {
@@ -29,7 +27,7 @@ public class LimitsUnitOfWorkExecutor extends UnitOfWorkExecutor<LimitsTask> {
         return toWorkOn;
     }
 
-    public Flux<UnitOfWork<LimitsTask>> prepareUnitOfWork(Flux<CreateLimitRequest> items) {
+    public Flux<UnitOfWork<LimitsTask>> prepareUnitOfWork(Flux<CreateLimitRequestBody> items) {
         return items.buffer(streamWorkerConfiguration.getBufferSize()).flatMap(this::prepareUnitOfWork);
     }
 }

@@ -282,14 +282,16 @@ paths:
         description: value greater than or equal to
         required: false
         schema:
-          type: number
+          type: integer
+          format: int64
         example: 52444
       - name: toCheckSerialNumber
         in: query
         description: value less than or equal to
         required: false
         schema:
-          type: number
+          type: integer
+          format: int64
         example: 78543
       - name: checkSerialNumbers
         in: query
@@ -298,7 +300,8 @@ paths:
         schema:
           type: array
           items:
-            type: number
+            type: integer
+            format: int64
         example:
         - 32124234
         - 5423534

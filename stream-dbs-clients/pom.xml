@@ -15,7 +15,7 @@
 
     <properties>
         <sonar.skip>true</sonar.skip>
-        <boat-maven-plugin.version>0.2.6</boat-maven-plugin.version>
+        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -31,263 +31,209 @@
     </dependencyManagement>
 
     <dependencies>
-
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-dbs-web-client</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <!-- Swagger codegen dependencies -->
         <dependency>
-            <groupId>com.backbase.dbs.accesscontrol</groupId>
-            <artifactId>access-control-spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.backbase.dbs.account</groupId>
-            <artifactId>account-presentation-spec</artifactId>
-            <scope>provided</scope>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.6.0</version>
         </dependency>
         <dependency>
-            <groupId>com.backbase.dbs.arrangement</groupId>
-            <artifactId>arrangement-pandp-query-spec</artifactId>
-            <scope>provided</scope>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.1</version>
         </dependency>
         <dependency>
-            <groupId>com.backbase.dbs.audit</groupId>
-            <artifactId>audit-spec</artifactId>
-            <scope>provided</scope>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.backbase.dbs.transaction</groupId>
-            <artifactId>transaction-integration-external-inbound-spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.dbs.transaction</groupId>
-            <artifactId>transaction-presentation-spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.dbs.user</groupId>
-            <artifactId>user-manager-spec</artifactId>
-            <version>2.0.11</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.dbs.user</groupId>
-            <artifactId>user-profile-manager-spec</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.dbs.limit</groupId>
-            <artifactId>limit-spec</artifactId>
-            <scope>provided</scope>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-core</artifactId>
+            <version>3.0.0</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+
+            <!-- Unpack OpenAPI specs from zip dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.backbase.dbs.accesscontrol</groupId>
+                                    <artifactId>access-control-openapi-spec</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.dbs.arrangement</groupId>
+                                    <artifactId>arrangement-manager</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.dbs.audit</groupId>
+                                    <artifactId>audit-spec</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.dbs.transaction</groupId>
+                                    <artifactId>transaction-manager</artifactId>
+                                    <type>zip</type>
+                                    <classifier>api</classifier>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.dbs.user</groupId>
+                                    <artifactId>user-manager</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.dbs.user</groupId>
+                                    <artifactId>user-profile-manager</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.dbs.limit</groupId>
+                                    <artifactId>limit</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                            </artifactItems>
+                            <includes>**/*.yaml, **/*.json</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Generate models and clients from unpacked OpenAPI specs -->
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
                 <version>${boat-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>raml2openapi</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>export-dep</goal>
-                        </goals>
-                        <configuration>
-                            <includeVersionInOutputDirectory>false</includeVersionInOutputDirectory>
-                            <decompose>false</decompose>
-                            <removeDeprecated>false</removeDeprecated>
-                            <output>${project.basedir}/api</output>
-                            <licenseName>Copyright Backbase 2020</licenseName>
-                            <licenseUrl>https://www.backbase.com</licenseUrl>
-                            <additionalPropertiesType>object</additionalPropertiesType>
-                            <addAdditionalProperties>
-                                <!-- Access Control Additions -->
-                                <schema>UserItem</schema>
-                                <schema>UserCreateItem</schema>
-                                <schema>UserByExternalIdsItem</schema>
-                                <schema>UserItemPut</schema>
-                                <schema>UserUpdate</schema>
-                                <schema>UserUpsert</schema>
-                                <schema>User</schema>      
-
-                                <!-- Transaction Service Additions -->
-                                <schema>TransactionItemPost</schema>
-                                <schema>TransactionItem</schema>
-
-                                <!-- Accounts Service-->
-                                <schema>ArrangemenItemBase</schema>
-                                <schema>ArrangementBaseItem</schema>
-                                <schema>ArrangementItemPost</schema>
-                            </addAdditionalProperties>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>accesscontrol-pandp-query-spec</id>
-                        <phase>generate-sources</phase>
+                        <id>generate-accesscontrol-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
-                            <skipValidateSpec>true</skipValidateSpec>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/accesscontrol/access-control-spec/accesscontrol-pandp-query-spec/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.accesscontrol.query.service.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.accesscontrol.query.service.api</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.accesscontrol.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.accesscontrol.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>accessgroup-presentation-spec</id>
-                        <phase>generate-sources</phase>
+                        <id>generate-arrangement-manager-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
-                            <skipValidateSpec>true</skipValidateSpec>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/accesscontrol/access-control-spec/accessgroup-presentation-spec/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.accessgroup.presentation.service.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.accessgroup.presentation.service.api</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.arrangement.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.arrangement.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>legalentity-presentation-spec</id>
-                        <phase>generate-sources</phase>
+                        <id>generate-user-manager-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <configuration>
-                            <skipValidateSpec>true</skipValidateSpec>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/accesscontrol/access-control-spec/legalentity-presentation-spec/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.legalentity.presentation.service.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.legalentity.presentation.service.api</apiPackage>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>accounts-presentation-service</id>
                         <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
                         <configuration>
-                            <skipValidateSpec>true</skipValidateSpec>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/account/account-presentation-spec/service-api/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.accounts.presentation.service.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.accounts.presentation.service.api</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.user.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.user.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>user-manager-service</id>
-                        <phase>generate-sources</phase>
+                        <id>generate-user-profile-manager-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
-                            <skipValidateSpec>true</skipValidateSpec>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/user/user-manager-spec/service-api/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.user.presentation.service.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.user.presentation.service.api</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.user.profile.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.user.profile.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>user-profile-manager-service</id>
-                        <phase>generate-sources</phase>
+                        <id>generate-transaction-manager-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <configuration>
-                            <skipValidateSpec>true</skipValidateSpec>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/user/user-profile-manager-spec/service-api/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.userprofile.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.userprofile.api</apiPackage>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>transaction-presentation-service</id>
                         <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
                         <configuration>
-                            <skipValidateSpec>true</skipValidateSpec>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/transaction/transaction-presentation-spec/service-api/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.transaction.presentation.service.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.transaction.presentation.service.api</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.transaction.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>audit-presentation-service</id>
-                        <phase>generate-sources</phase>
+                        <id>generate-audit-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
-                            <skipValidateSpec>true</skipValidateSpec>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/audit/audit-spec/service-api/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.audit.service.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.audit.service.api</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/audit/audit-service-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.audit.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.audit.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>limits-presentation-service</id>
-                        <phase>generate-sources</phase>
+                        <id>generate-limit-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <configuration>
-                            <skipValidateSpec>true</skipValidateSpec>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/limit/limit-spec/service-api/service-api/openapi.yaml
-                            </inputSpec>
-                            <apiPackage>com.backbase.dbs.limit.service.api</apiPackage>
-                            <modelPackage>com.backbase.dbs.limit.service.model</modelPackage>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>arrangement-pandp-query</id>
                         <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
                         <configuration>
-                            <skipValidateSpec>true</skipValidateSpec>
-                            <inputSpec>
-                                ${project.basedir}/api/com/backbase/dbs/arrangement/arrangement-pandp-query-spec/service-api/service-api/openapi.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.dbs.arrangement.pandp.query.service.model</modelPackage>
-                            <apiPackage>com.backbase.dbs.arrangement.pandp.query.service.api</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/limit/limit-service-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.limit.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.limit.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>

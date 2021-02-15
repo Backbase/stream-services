@@ -1,6 +1,6 @@
 package com.backbase.stream.productcatalog.configuration;
 
-import com.backbase.dbs.accounts.presentation.service.ApiClient;
+import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.productcatalog.ProductCatalogService;
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
@@ -31,7 +31,8 @@ public class ProductCatalogServiceConfiguration {
     }
 
     @Bean
-    public ReactiveProductCatalogService reactiveProductCatalogService(ApiClient accountPresentationClient) {
+    public ReactiveProductCatalogService reactiveProductCatalogService(
+        ApiClient accountPresentationClient) {
         return new ReactiveProductCatalogService(accountPresentationClient);
     }
 

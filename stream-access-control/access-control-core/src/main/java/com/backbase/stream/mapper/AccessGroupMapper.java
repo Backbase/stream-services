@@ -1,11 +1,12 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.dbs.accesscontrol.query.service.model.SchemaFunctionGroupItem;
-import com.backbase.dbs.accesscontrol.query.service.model.ServiceAgreementItem;
-import com.backbase.dbs.accessgroup.presentation.service.model.ParticipantIngest;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationIngestFunctionGroup;
-import com.backbase.dbs.accessgroup.presentation.service.model.PresentationPermission;
-import com.backbase.dbs.accessgroup.presentation.service.model.ServicesAgreementIngest;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ApprovalStatus;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ParticipantIngest;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItemQuery;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobRole;
@@ -23,9 +24,9 @@ import org.mapstruct.Mapping;
 public interface AccessGroupMapper {
 
     @Mapping(source = "id", target = "internalId")
-    ServiceAgreement toStream(ServiceAgreementItem getServiceAgreement);
+    ServiceAgreement toStream(ServiceAgreementItemQuery getServiceAgreement);
 
-    BusinessFunction toStream(SchemaFunctionGroupItem functionsGetResponseBody);
+    BusinessFunction toStream(FunctionGroupItem functionsGetResponseBody);
 
     @Mapping(source = "participants", target = "participantsToIngest")
     ServicesAgreementIngest toPresentation(ServiceAgreement serviceAgreement);
@@ -37,8 +38,7 @@ public interface AccessGroupMapper {
     PresentationIngestFunctionGroup toPresentation(JobRole referenceJobRole);
 
     com.backbase.stream.legalentity.model.ApprovalStatus map(
-        com.backbase.dbs.accessgroup.presentation.service.model.ApprovalStatus approvalStatus);
-
+        ApprovalStatus approvalStatus);
 
     /**
      * Map {@link BusinessFunctionGroup} with privileges to {@link PresentationPermission}.
