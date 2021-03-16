@@ -5,7 +5,9 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItemQuery;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementPut;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -26,10 +28,15 @@ public interface AccessGroupMapper {
     @Mapping(source = "id", target = "internalId")
     ServiceAgreement toStream(ServiceAgreementItemQuery getServiceAgreement);
 
+    @Mapping(source = "id", target = "internalId")
+    ServiceAgreement toStream(ServiceAgreementItem serviceAgreementItem);
+
     BusinessFunction toStream(FunctionGroupItem functionsGetResponseBody);
 
     @Mapping(source = "participants", target = "participantsToIngest")
     ServicesAgreementIngest toPresentation(ServiceAgreement serviceAgreement);
+
+    ServiceAgreementPut toPresentationPut(ServiceAgreement serviceAgreement);
 
     // Initialize users list to workaround https://backbase.atlassian.net/browse/MAINT-10442
     @Mapping(defaultExpression = "java( new ArrayList<>() )", source = "users", target = "users")
