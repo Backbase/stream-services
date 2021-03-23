@@ -118,9 +118,9 @@ public class ProductIngestionSaga {
             streamTask.warn(PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group must have users assigned to it!");
             return Mono.error(new StreamTaskException(streamTask, "Product Group must have users assigned to it!"));
         }
-        if (StreamUtils.getInternalProductIds(productGroup).isEmpty()) {
-            streamTask.warn(PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product group must have products assigned to it!");
-            return Mono.error(new StreamTaskException(streamTask, "Product group must have products assigned to it!"));
+        if (StreamUtils.getInternalProductIds(productGroup).isEmpty() && customDataGroupItems.isEmpty()) {
+            streamTask.warn(PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product group must have products or Custom Data Group Items assigned to it!");
+            return Mono.error(new StreamTaskException(streamTask, "Product group must have products or Custom Data Group Items assigned to it!"));
         }
         if (customDataGroupItems != null && !customDataGroupItems.isEmpty() && productGroup.getProductGroupType() == null) {
             streamTask.warn(PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group with Custom Data Group Items must have a Product Group Defined!");
