@@ -224,7 +224,7 @@ public class UserService {
                 user.setExternalId(identityCreatedItem.getExternalId());
                 return user;
             })
-            .filter(u -> IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(u.getIdentityLinkStrategy()))
+            .filter(u -> IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(u.getIdentityLinkStrategy()))  //if not IMPORT_FROM_IDENTIY this will return Mono.empty()! this means for instance that user internalId will not be returned although user was created
             .flatMap(this::updateIdentityUserAttributes);
     }
 
