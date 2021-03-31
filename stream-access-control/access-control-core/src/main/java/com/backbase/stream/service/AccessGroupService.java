@@ -1,5 +1,8 @@
 package com.backbase.stream.service;
 
+import static com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_OK;
+import static com.backbase.stream.legalentity.model.ServiceAgreementUserAction.ActionEnum.ADD;
+import static com.backbase.stream.legalentity.model.ServiceAgreementUserAction.ActionEnum.REMOVE;
 import static org.springframework.util.StringUtils.isEmpty;
 
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
@@ -30,11 +33,14 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationGenericOb
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationItemIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantBatchUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationSearchDataGroupsRequest;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUserPair;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUsersBatchUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
@@ -47,12 +53,15 @@ import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ReferenceJobRole;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.mapper.AccessGroupMapper;
+import com.backbase.stream.mapper.ParticipantMapper;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.BatchResponseUtils;
@@ -60,8 +69,11 @@ import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +81,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.NonNull;
@@ -89,6 +103,7 @@ import reactor.core.publisher.Mono;
 public class AccessGroupService {
 
     public static final String CREATE_ACCESS_GROUP = "create-access-group";
+    private static final String SERVICE_AGREEMENT = "service-agreement";
     public static final String ACCESS_GROUP = "access-group";
     public static final String REJECTED = "rejected";
     public static final String CREATED = "created";
@@ -122,6 +137,8 @@ public class AccessGroupService {
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
+    private final ParticipantMapper participantMapper = Mappers.getMapper(ParticipantMapper.class);
+
     /**
      * Create Service Agreement.
      *
@@ -133,11 +150,287 @@ public class AccessGroupService {
         ServicesAgreementIngest servicesAgreementIngest = accessGroupMapper.toPresentation(serviceAgreement);
         return serviceAgreementApi.postServiceAgreementIngest(servicesAgreementIngest)
             .onErrorResume(WebClientResponseException.class, throwable -> {
-                streamTask.error("service-agreement", "create", "failed", serviceAgreement.getExternalId(),
+                streamTask.error(SERVICE_AGREEMENT, "create", "failed", serviceAgreement.getExternalId(),
                     "", throwable, throwable.getResponseBodyAsString(), "Failed to create Service Agreement");
                 return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to create Service Agreement"));
             })
             .zipWith(Mono.just(serviceAgreement), storeIdInServiceAgreement());
+    }
+
+    /**
+     * Get Service Agreement by external ID.
+     *
+     * @param externalId External Service Agreement ID
+     * @return Service Agreement
+     */
+    public Mono<ServiceAgreement> getServiceAgreementByExternalId(String externalId) {
+        log.info("setting up getting Service Agreement with external Id: {} flow", externalId);
+        return serviceAgreementApi.getServiceAgreementExternalId(externalId)
+            .doOnNext(serviceAgreementItem -> log
+                .info("Service Agreement: {} found", serviceAgreementItem.getExternalId()))
+            .onErrorResume(WebClientResponseException.NotFound.class, throwable -> {
+                log.info("Service Agreement with external Id {} not found. Request:[{}] {}  Response: {}",
+                    externalId, throwable.getRequest().getMethod(), throwable.getRequest().getURI(),
+                    throwable.getResponseBodyAsString());
+                return Mono.empty();
+            })
+            .map(accessGroupMapper::toStream);
+    }
+
+    /**
+     * Update Service Agreement.
+     *
+     * @param streamTask          Stream task
+     * @param serviceAgreement    Service agreement
+     * @param regularUsersActions Service Agreement regular users actions
+     * @return Service Agreement
+     */
+    public Mono<ServiceAgreement> updateServiceAgreementAssociations(StreamTask streamTask, ServiceAgreement serviceAgreement,
+                                                                     List<ServiceAgreementUserAction> regularUsersActions) {
+        log.info("setting up Service Agreement with external Id: {}, associations update flow", serviceAgreement.getExternalId());
+
+        Mono<Map<LegalEntityParticipant.ActionEnum, Mono<ServiceAgreement>>> updateParticipantsByActionMono =
+            updateParticipants(streamTask, serviceAgreement);
+        return updateParticipantsByActionMono.flatMap(updateParticipantsByAction ->
+                updateParticipantsByAction.get(LegalEntityParticipant.ActionEnum.ADD)
+                    .then(updateServiceAgreementRegularUsers(streamTask, serviceAgreement, regularUsersActions))
+                    .then(updateParticipantsByAction.get(LegalEntityParticipant.ActionEnum.REMOVE))
+            );
+    }
+
+    /**
+     * Update regular users of service agreement.
+     *
+     * @param streamTask          Stream task
+     * @param serviceAgreement    Service agreement
+     * @param actions Service Agreement regular users actions
+     * @return Service Agreement
+     */
+    public Mono<ServiceAgreement> updateServiceAgreementRegularUsers(StreamTask streamTask,
+                                                                      ServiceAgreement serviceAgreement,
+                                                                      List<ServiceAgreementUserAction> actions) {
+        if (CollectionUtils.isEmpty(actions)) {
+            return Mono.just(serviceAgreement);
+        }
+
+        log.debug("setting up Service Agreement's regular users association flow.");
+
+        return enrichUsersWithInternalUserId(streamTask, actions.stream()
+                .map(ServiceAgreementUserAction::getUserProfile).map(JobProfileUser::getUser)
+                .collect(Collectors.toList()))
+            .flatMap(task -> getServiceAgreementUsers(serviceAgreement))
+            .flatMapMany(existingUsers -> {
+
+                Map<String, String> existingMap = existingUsers.getUserIds().stream()
+                    .collect(Collectors.toMap(Function.identity(), Function.identity()));
+
+                Predicate<ServiceAgreementUserAction> existing = ac ->
+                    ac.getUserProfile().getUser().getInternalId() != null
+                    && existingMap.get(ac.getUserProfile().getUser().getInternalId()) != null;
+
+                Predicate<ServiceAgreementUserAction> notExistingToAdd = existing.negate()
+                    .and(ac -> ac.getAction() == ADD);
+
+                Predicate<ServiceAgreementUserAction> existingToRemove = existing
+                    .and(ac -> ac.getAction() == REMOVE);
+
+                List<ServiceAgreementUserAction> toAffect = actions.stream()
+                    .filter(notExistingToAdd.or(existingToRemove))
+                    .collect(Collectors.toList());
+
+                List<PresentationServiceAgreementUsersBatchUpdate> actionsGroups =
+                    buildServiceAgreementUserActionGroups(serviceAgreement, toAffect);
+
+                log.debug("associating users to service agreement {}, request: {}", serviceAgreement.getExternalId(),
+                    Arrays.toString(actionsGroups.toArray()));
+
+                return Flux.fromIterable(actionsGroups);
+            })
+            .flatMap(actionGroup -> {
+                log.info("Update regular users of Service Agreement with external Id: {}",
+                    serviceAgreement.getExternalId());
+                return serviceAgreementApi.putPresentationServiceAgreementUsersBatchUpdate(actionGroup)
+                    .onErrorResume(WebClientResponseException.class,
+                        e -> Mono.error(new StreamTaskException(streamTask, e,
+                            MessageFormat
+                                .format("Failed to update user for Service Agreement with external id: {0}",
+                                    serviceAgreement.getExternalId()))))
+                    .collectList();
+            })
+            .collectList()
+            .flatMap(lists -> Mono.just(lists.stream().flatMap(List::stream).collect(Collectors.toList())))
+            .flatMap(list -> {
+                list.stream().filter(r -> r.getStatus() != HTTP_STATUS_OK).forEach(r -> {
+                    String errorMessage = "error associating user to Service Agreement" + r.toString();
+                    log.error(errorMessage);
+                    streamTask.error(SERVICE_AGREEMENT, "update-regular-users", "failed",
+                        serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), errorMessage);
+                    streamTask.setState(StreamTask.State.FAILED);
+                });
+                if (streamTask.isFailed()) {
+                    return Mono.error(
+                        new StreamTaskException(streamTask, "failed to associate regular users to Service Agreement"));
+                }
+                return Mono.just(serviceAgreement);
+            });
+    }
+
+    private <T extends StreamTask> Mono<T> enrichUsersWithInternalUserId(T task, List<User> users) {
+        List<User> usersMissingInternalId = users.stream().filter(u -> u.getInternalId() == null)
+            .collect(Collectors.toList());
+        return Flux.fromIterable(usersMissingInternalId)
+            .flatMap(u -> getUserByExternalId(u.getExternalId(), true).doOnNext(gu -> u.setInternalId(gu.getId())))
+            .collectList()
+            .thenReturn(task);
+    }
+
+    private Mono<ServiceAgreementUsersQuery> getServiceAgreementUsers(ServiceAgreement serviceAgreement) {
+        return serviceAgreementQueryApi.getServiceAgreementUsers(serviceAgreement.getInternalId())
+            .onErrorResume(WebClientResponseException.NotFound.class, e -> {
+                log.info("users not found");
+                return Mono.just(new ServiceAgreementUsersQuery());
+            });
+    }
+
+    @NotNull
+    private List<PresentationServiceAgreementUsersBatchUpdate> buildServiceAgreementUserActionGroups(
+        ServiceAgreement serviceAgreement, List<ServiceAgreementUserAction> actions) {
+        return actions.stream()
+                .filter(saUa -> saUa.getAction() != null)
+                .collect(Collectors.groupingBy(ServiceAgreementUserAction::getAction))
+                .entrySet().stream().map(actionGroup ->
+                    new PresentationServiceAgreementUsersBatchUpdate()
+                        .action(PresentationAction.valueOf(actionGroup.getKey().getValue()))
+                        .users(actionGroup.getValue().stream().map(ServiceAgreementUserAction::getUserProfile)
+                            .map(JobProfileUser::getUser).map(User::getExternalId)
+                            .map(id -> new PresentationServiceAgreementUserPair()
+                                .externalServiceAgreementId(serviceAgreement.getExternalId())
+                                .externalUserId(id)).collect(Collectors.toList())))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Update Service Agreement's participants.
+     *
+     * @param streamTask       Stream task
+     * @param serviceAgreement Service agreement
+     * @return Service Agreement
+     */
+    public Mono<Map<LegalEntityParticipant.ActionEnum, Mono<ServiceAgreement>>> updateParticipants(
+            StreamTask streamTask, ServiceAgreement serviceAgreement) {
+
+        Map<LegalEntityParticipant.ActionEnum, Mono<ServiceAgreement>> monoMap =
+            new EnumMap<>(LegalEntityParticipant.ActionEnum.class);
+        if (CollectionUtils.isEmpty(serviceAgreement.getParticipants())) {
+            monoMap.put(LegalEntityParticipant.ActionEnum.REMOVE, Mono.just(serviceAgreement));
+            monoMap.put(LegalEntityParticipant.ActionEnum.ADD, Mono.just(serviceAgreement));
+            return Mono.just(monoMap);
+        }
+        serviceAgreement.getParticipants().stream().forEach(p -> {
+            if (p.getAction() == null) {
+                p.setAction(LegalEntityParticipant.ActionEnum.ADD);
+            }
+        });
+
+        return Mono.fromCallable(() -> {
+            log.info("Updating participants of Service Agreement with external Id: {}",
+                serviceAgreement.getExternalId());
+            return serviceAgreement;
+        })
+            .flatMap(sa -> getServiceAgreementParticipants(streamTask, serviceAgreement)
+                .collectMap(ServiceAgreementParticipantsGetResponseBody::getExternalId, Function.identity()))
+            .flatMap(existingMap -> {
+
+                log.debug("existing participants:" + Arrays.asList(existingMap.values().toArray()));
+
+                List<LegalEntityParticipant> toRemove = serviceAgreement.getParticipants().stream()
+                    .filter(p -> existingMap.get(p.getExternalId()) != null
+                        && p.getAction() == LegalEntityParticipant.ActionEnum.REMOVE)
+                    .collect(Collectors.toList());
+
+                List<LegalEntityParticipant> toAdd = serviceAgreement.getParticipants().stream()
+                    .filter(p -> existingMap.get(p.getExternalId()) == null
+                        && p.getAction() == LegalEntityParticipant.ActionEnum.ADD)
+                    .collect(Collectors.toList());
+
+                PresentationParticipantBatchUpdate removeRequest =
+                    participantMapper.toPresentation(new ServiceAgreement()
+                        .externalId(serviceAgreement.getExternalId()).participants(toRemove));
+
+                PresentationParticipantBatchUpdate addRequest = participantMapper.toPresentation(new ServiceAgreement()
+                    .externalId(serviceAgreement.getExternalId()).participants(toAdd));
+
+                monoMap.put(LegalEntityParticipant.ActionEnum.ADD, putServiceAgreementParticipants(streamTask,
+                    serviceAgreement, addRequest));
+                monoMap.put(LegalEntityParticipant.ActionEnum.REMOVE, putServiceAgreementParticipants(streamTask,
+                    serviceAgreement, removeRequest));
+
+                return Mono.just(monoMap);
+            });
+    }
+
+    private Flux<ServiceAgreementParticipantsGetResponseBody> getServiceAgreementParticipants(
+        StreamTask streamTask, ServiceAgreement serviceAgreement) {
+        return serviceAgreementsApi.getServiceAgreementParticipants(serviceAgreement.getInternalId())
+            .onErrorResume(WebClientResponseException.NotFound.class, e -> Flux.empty())
+            .onErrorResume(WebClientResponseException.class, e -> {
+                streamTask.error("participant", "update-participant", "failed",
+                    serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), e, e.getMessage(),
+                    "error retrieving participants for Service Agreement %s", serviceAgreement.getExternalId());
+                return Mono.error(new StreamTaskException(streamTask, MessageFormat
+                    .format("error retrieving participants for Service Agreement {0}",
+                        serviceAgreement.getExternalId())));
+            });
+    }
+
+    private Mono<ServiceAgreement> putServiceAgreementParticipants(StreamTask streamTask,
+                                                                   ServiceAgreement serviceAgreement,
+                                                                   PresentationParticipantBatchUpdate request) {
+        if (CollectionUtils.isEmpty(request.getParticipants())) {
+            return Mono.just(serviceAgreement);
+        }
+
+        log.debug("updating participants: " + request.toString());
+
+        return serviceAgreementApi.putPresentationIngestServiceAgreementParticipants(request)
+            .onErrorResume(WebClientResponseException.class, e -> {
+                streamTask.error("participant", "update-participants", "failed",
+                    serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), e, e.getResponseBodyAsString(),
+                    "Failed to update participants");
+                return Mono.error(new StreamTaskException(streamTask, e,
+                    MessageFormat
+                        .format("Failed to update participants for Service Agreement with external id: {0}",
+                            serviceAgreement.getExternalId())));
+            })
+            .collectList()
+            .flatMap(resultList -> {
+                resultList.stream().forEach(r -> {
+                    if (r.getStatus() != HTTP_STATUS_OK) {
+                        streamTask.error("participant", "update-participant", "failed", r.getResourceId(),
+                            null, "Error updating Participant {} for Service Agreement: {}", r.getResourceId(),
+                            serviceAgreement.getExternalId());
+                        log.error("Error updating Participant {} for Service Agreement: {}", r.getResourceId(),
+                            serviceAgreement.getExternalId());
+                        streamTask.setState(StreamTask.State.FAILED);
+                    }
+                });
+                if (streamTask.isFailed()) {
+                    return Mono.error(new StreamTaskException(streamTask, "Failed to update participant"));
+                }
+                return Mono.just(serviceAgreement);
+            });
+    }
+
+    /**
+     * Retrieve user by external id.
+     *
+     * @param externalId user external id
+     * @param skipHierarchyCheck skip hierarchy check
+     * @return User
+     */
+    public Mono<GetUser> getUserByExternalId(String externalId, boolean skipHierarchyCheck) {
+        return usersApi.getUserByExternalId(externalId, skipHierarchyCheck)
+            .onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty());
     }
 
     private BiFunction<IdItem, ServiceAgreement, ServiceAgreement> storeIdInServiceAgreement() {
