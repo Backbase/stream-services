@@ -123,7 +123,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                     streamTask.warn(BATCH_PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group with Custom Data Group Items must have a Product Group Defined!");
                     throw new StreamTaskException(streamTask, "Product Group with Custom Data Group Items must have a Product Group Defined!");
                 }
-                if (productGroup.getProductGroupType() == null && !StreamUtils.getAllProducts(productGroup).isEmpty()) {
+                if (productGroup.getProductGroupType() == null && StreamUtils.getAllProducts(productGroup).count() > 0) {
                     streamTask.warn(BATCH_PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group: {} does not have type setup. As Product Group contains products setting type to ARRANGEMENTS");
                     productGroup.setProductGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS);
                 }
@@ -186,7 +186,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 ).map(batchResponses -> {
                     // Update products with internal IDs.
                     return batchProductGroupTask.getData().getProductGroups().stream()
-                        .flatMap(pg -> StreamUtils.getAllProducts(pg).stream())
+                        .flatMap(pg -> StreamUtils.getAllProducts(pg))
                         .map(product -> {
                             batchResponses.forEach(result -> {
                                 if (result.getResourceId().equalsIgnoreCase(product.getExternalId())) {

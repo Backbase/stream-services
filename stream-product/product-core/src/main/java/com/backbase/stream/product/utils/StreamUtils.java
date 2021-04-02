@@ -3,14 +3,12 @@ package com.backbase.stream.product.utils;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.ProductGroup;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.experimental.UtilityClass;
 
 /**
@@ -27,7 +25,7 @@ public class StreamUtils {
      * @return List of Internal Ids
      */
     public static List<String> getExternalProductIds(ProductGroup productGroup) {
-        return getAllProducts(productGroup).stream().map(BaseProduct::getExternalId).collect(Collectors.toList());
+        return getAllProducts(productGroup).map(BaseProduct::getExternalId).collect(Collectors.toList());
     }
 
     /**
@@ -37,42 +35,32 @@ public class StreamUtils {
      * @return List of Internal Ids
      */
     public static List<String> getInternalProductIds(BaseProductGroup productGroup) {
-        return getAllProducts(productGroup).stream().map(BaseProduct::getInternalId).collect(Collectors.toList());
+        return getAllProducts(productGroup).map(BaseProduct::getInternalId).collect(Collectors.toList());
     }
 
-    public static List<BaseProduct> getAllProducts(BaseProductGroup productGroup) {
-        List<BaseProduct> products = new ArrayList<>();
-        if (productGroup.getCurrentAccounts() != null) {
-            products.addAll(productGroup.getCurrentAccounts());
-        }
-        if (productGroup.getSavingAccounts() != null) {
-            products.addAll(productGroup.getSavingAccounts());
-        }
-        if (productGroup.getDebitCards() != null) {
-            products.addAll(productGroup.getDebitCards());
-        }
-        if (productGroup.getCreditCards() != null) {
-            products.addAll(productGroup.getCreditCards());
-        }
-        if (productGroup.getLoans() != null) {
-            products.addAll(productGroup.getLoans());
-        }
-        if (productGroup.getTermDeposits() != null) {
-            products.addAll(productGroup.getTermDeposits());
-        }
-        if (productGroup.getInvestmentAccounts() != null) {
-            products.addAll(productGroup.getInvestmentAccounts());
-        }
-        if (productGroup.getCustomProducts() != null) {
-            products.addAll(productGroup.getCustomProducts());
-        }
-        return products;
+    /**
+     * Maps all products from each type of product into a flat list of products.
+     * @param productGroup Product group
+     * @return Stream of the BaseProduct's
+     */
+    public static Stream<BaseProduct> getAllProducts(BaseProductGroup productGroup) {
+        return Stream.of(
+            productGroup.getCurrentAccounts(),
+            productGroup.getSavingAccounts(),
+            productGroup.getDebitCards(),
+            productGroup.getCreditCards(),
+            productGroup.getLoans(),
+            productGroup.getTermDeposits(),
+            productGroup.getInvestmentAccounts(),
+            productGroup.getCustomProducts())
+            .filter(Objects::nonNull)
+            .flatMap(List::stream);
     }
 
     public static <T> Stream<T> nullableCollectionToStream(Collection<T> collection) {
-        return Optional.ofNullable(collection).map(
-                Collection::stream)
-                .orElseGet(Stream::empty);
+        return Optional.ofNullable(collection)
+            .map(Collection::stream)
+            .orElseGet(Stream::empty);
     }
 
 }
