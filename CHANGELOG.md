@@ -11,8 +11,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.25.0]
 ### Added
-- Custom Service Agreement to legal entity upsert
-- Updated Service Agreement endpoint
+- Included possibility to use Custom Service Agreements. From now on, if a custom service agreement is declared, and a master service agreement is not explicitly declared, that legal entity will have a custom service agreement only. If none are declared a default master service agreement is created. e.g.:
+```yaml
+bootstrap:
+  legalEntity:
+    name: "Backbase Bank"
+    realmName: "backbase"
+    externalId: "backbase-bank"
+    legalEntityType: "BANK"
+    customServiceAgreement:
+      name: "backbase-bank"
+      description: "backbase bank custom service agreement"
+      externalId: "sa_backbase-bank"
+      jobRoles:
+        - name: SUUS
+          description: Manager of the online helpdesk and processing teams, able to set up/edit contracts, add accounts etc. Also able to set up Broadcast messages
+          functionGroups:
+            - name: "Manage Entitlements"
+              functions:
+                - functionId: "1019"
+                  functionCode: "manage.data.groups"
+                  privileges:
+                    - privilege: "view"
+                    - privilege: "create"
+                    - privilege: "edit"
+                    - privilege: "delete"
+                    - privilege: "approve"
+```
+- Created Service Agreement endpoint do updated an existing service agreement. e.g. add more participants to it.
+> - PUT <legal-entity-http>/service-agreement
+> - PUT <legal-entity-http>/async/service-agreement
+> - GET <legal-entity-http>/async/service-agreement/{unitOfWorkId}
 
 ## [2.17.0]
 ### Fixed
