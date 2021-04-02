@@ -126,7 +126,7 @@ public class ProductIngestionSaga {
             streamTask.warn(PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group with Custom Data Group Items must have a Product Group Defined!");
             return Mono.error(new StreamTaskException(streamTask, "Product Group with Custom Data Group Items must have a Product Group Defined!"));
         }
-        if (productGroup.getProductGroupType() == null && !StreamUtils.getAllProducts(productGroup).isEmpty()) {
+        if (productGroup.getProductGroupType() == null && StreamUtils.getAllProducts(productGroup).count() > 0) {
             streamTask.warn(PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group: {} does not have type setup. As Product Group contains products setting type to ARRANGEMENTS");
             productGroup.setProductGroupType(ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS);
         }

@@ -1,6 +1,8 @@
 package com.backbase.stream;
 
+import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
 import static org.springframework.util.CollectionUtils.isEmpty;
+
 
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
@@ -30,6 +32,7 @@ import com.backbase.stream.product.BusinessFunctionGroupMapper;
 import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
+import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
@@ -37,7 +40,6 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -254,13 +256,14 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         if (productGroup.getUsers() == null) {
             productGroup.setUsers(streamTask.getData().getUsers());
         }
-        productGroup.getUsers().forEach(jobProfileUser -> {
-            if (jobProfileUser.getLegalEntityReference() == null) {
-                jobProfileUser.setLegalEntityReference(new LegalEntityReference()
-                    .externalId(legalEntity.getExternalId())
-                    .internalId(legalEntity.getInternalId()));
-            }
-        });
+        StreamUtils.nullableCollectionToStream(productGroup.getUsers())
+            .forEach(jobProfileUser -> {
+                if (jobProfileUser.getLegalEntityReference() == null) {
+                    jobProfileUser.setLegalEntityReference(new LegalEntityReference()
+                        .externalId(legalEntity.getExternalId())
+                        .internalId(legalEntity.getInternalId()));
+                }
+            });
 
         log.info("Setting up process data access groups");
         if (productGroup.getName() == null) {
@@ -271,17 +274,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         }
         productGroup.setServiceAgreement(retrieveServiceAgreement(legalEntity));
 
-        Stream.of(
-                productGroup.getLoans(),
-                productGroup.getCreditCards(),
-                productGroup.getCurrentAccounts(),
-                productGroup.getCustomProducts(),
-                productGroup.getDebitCards(),
-                productGroup.getInvestmentAccounts(),
-                productGroup.getSavingAccounts(),
-                productGroup.getTermDeposits())
-            .filter(Objects::nonNull)
-            .flatMap(List::stream)
+        StreamUtils.getAllProducts(productGroup)
             .forEach((BaseProduct bp) -> {
                 if(CollectionUtils.isEmpty(bp.getLegalEntities())
                 || bp.getLegalEntities().stream().map(LegalEntityReference::getExternalId).filter(Objects::nonNull)
@@ -332,7 +325,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             streamTask.warn(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, REJECTED, legalEntity.getExternalId(), legalEntity.getInternalId(), "No Users defined in Job Profiles");
             return Mono.just(streamTask);
         }
-        return Flux.fromIterable(legalEntity.getUsers())
+        return Flux.fromStream(nullableCollectionToStream(legalEntity.getUsers()))
             .flatMap(jobProfileUser -> {
                 ServiceAgreement serviceAgreement = retrieveServiceAgreement(legalEntity);
                 return getBusinessFunctionGroupTemplates(streamTask, jobProfileUser)
@@ -384,9 +377,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private Mono<LegalEntityTask> setupAdministrators(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
-        Flux<User> administrators = legalEntity.getAdministrators() == null
-            ? Flux.empty()
-            : Flux.fromIterable(legalEntity.getAdministrators());
+        Flux<User> administrators = Flux.fromStream(nullableCollectionToStream(legalEntity.getAdministrators()));
 
         return administrators.flatMap(user -> upsertUser(streamTask, user))
             .collectList()
@@ -396,14 +387,12 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private Mono<LegalEntityTask> setupUsers(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
-        Flux<JobProfileUser> jobProfileUsers = legalEntity.getUsers() == null
-            ? Flux.empty()
-            : Flux.fromIterable(legalEntity.getUsers());
+        Flux<JobProfileUser> jobProfileUsers = Flux.fromStream(nullableCollectionToStream(legalEntity.getUsers()));
 
         return jobProfileUsers
             .flatMap(jobProfileUser -> upsertUser(streamTask, jobProfileUser.getUser())
                 .map(upsertedUser -> {
-                    User inputUser = legalEntity.getUsers().stream()
+                    User inputUser = nullableCollectionToStream(legalEntity.getUsers())
                         .filter(jpu -> jpu.getUser().getExternalId().equalsIgnoreCase(
                             upsertedUser.getExternalId()))
                         .findFirst().get().getUser();
@@ -435,7 +424,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     public Mono<LegalEntityTask> setupUserPermissions(LegalEntityTask legalEntityTask, List<BusinessFunctionGroup> businessFunctionGroups) {
         LegalEntity legalEntity = legalEntityTask.getData();
-        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = legalEntity.getUsers().stream()
+        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = nullableCollectionToStream(legalEntity.getUsers())
             // Ensure internal Id present.
             .filter(jobProfileUser -> Objects.nonNull(jobProfileUser.getUser().getInternalId()))
             .collect(Collectors.toMap(
@@ -457,7 +446,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     public Mono<LegalEntityTask> setupAdministratorPermissions(LegalEntityTask legalEntityTask) {
         // Assign permissions for the user for all business function groups.
         LegalEntity legalEntity = legalEntityTask.getData();
-        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = legalEntity.getUsers().stream()
+        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = nullableCollectionToStream(legalEntity.getUsers())
             .filter(jobProfileUser -> !isEmpty(jobProfileUser.getBusinessFunctionGroups()))
             .collect(Collectors.toMap(
                 jobProfileUser -> setupAdminInternalId(legalEntity, jobProfileUser),
@@ -583,7 +572,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             return Mono.error(new StreamTaskException(streamTask, "Defined service agreement contains no external Id"));
         }
 
-        List<ServiceAgreementUserAction> userActions = Stream.of(legalEntity.getUsers()).filter(Objects::nonNull).flatMap(List::stream)
+        List<ServiceAgreementUserAction> userActions = nullableCollectionToStream(legalEntity.getUsers())
             .map(JobProfileUser::getUser).map(User::getExternalId)
             .map(id -> new ServiceAgreementUserAction().action(ServiceAgreementUserAction.ActionEnum.ADD)
                 .userProfile(new JobProfileUser().user(new User().externalId(id)))).collect(Collectors.toList());

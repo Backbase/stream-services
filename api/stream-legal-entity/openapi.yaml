@@ -56,8 +56,8 @@ paths:
     put:
       tags:
         - service-agreement
-      summary: Update service agreement
-      description: Asynchronously service agreement
+      summary: Update Service Agreement
+      description: Update a service agreement
       operationId: updateServiceAgreement
       requestBody:
         content:
@@ -126,8 +126,8 @@ paths:
     put:
       tags:
         - service-agreement
-      summary: Update service agreement
-      description: Asynchronously service agreement
+      summary: Process Service Agreement
+      description: Asynchronously update a service agreement
       operationId: updateServiceAgreementAsync
       requestBody:
         content:
