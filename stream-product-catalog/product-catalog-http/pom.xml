@@ -19,8 +19,6 @@
     <properties>
         <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-product-catalog/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
-        <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
-        <codegen.generated-openapi-sources-dir>${codegen.generated-sources-dir}/openapi/src/main/java</codegen.generated-openapi-sources-dir>
     </properties>
 
     <dependencies>
@@ -75,21 +73,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>add-sources</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${codegen.generated-sources-dir}/annotations</source>
-                                <source>${codegen.generated-openapi-sources-dir}</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>

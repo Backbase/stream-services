@@ -46,10 +46,10 @@
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
         <openapi-generator-maven-plugin.library>spring-boot</openapi-generator-maven-plugin.library>
-        <openapi-generator-maven-plugin.output>${project.build.directory}/generated-sources/
-        </openapi-generator-maven-plugin.output>
-        <openapi-generator-maven-plugin.templateDirectory>src/main/templates/openapi-generator/JavaSpring
-        </openapi-generator-maven-plugin.templateDirectory>
+        <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
+        <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
+        <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
+        <openapi-generator-maven-plugin.templateDirectory>src/main/templates/openapi-generator/JavaSpring</openapi-generator-maven-plugin.templateDirectory>
     </properties>
 
     <build>
@@ -65,6 +65,25 @@
                     <artifactId>maven-assembly-plugin</artifactId>
                     <version>${maven-assembly-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>add-sources</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>${annotations.generated-sources-dir}</source>
+                                    <source>${openapi-generator-maven-plugin.output}/src/main/java</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -79,7 +98,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
-                <version>2.7</version>
                 <configuration>
                     <generateBackupPoms>false</generateBackupPoms>
                     <skip>false</skip>
@@ -88,7 +106,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.0</version>
+                <!-- <version>3.2.0</version> -->
                 <executions>
                     <execution>
                         <id>attach-sources</id>
