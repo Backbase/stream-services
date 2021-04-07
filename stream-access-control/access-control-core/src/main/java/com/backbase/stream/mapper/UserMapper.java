@@ -1,18 +1,16 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.dbs.user.presentation.service.model.CreateUser;
-import com.backbase.dbs.user.presentation.service.model.GetUserById;
-import com.backbase.stream.legalentity.model.User;
+import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.dbs.user.api.service.v2.model.UserExternal;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper
 public interface UserMapper {
 
-
     @Mapping(source = "id", target = "internalId")
-    User toStream(GetUserById userItem);
+    com.backbase.stream.legalentity.model.User toStream(GetUser userItem);
 
     @Mapping(source = "legalEntityId", target = "legalEntityExternalId")
-    CreateUser toPresentation(User user);
+    UserExternal toPresentation(com.backbase.stream.legalentity.model.User user);
 }

@@ -1,11 +1,14 @@
 package com.backbase.stream.product;
 
-import com.backbase.dbs.accesscontrol.query.service.model.SchemaFunctionGroupItem;
-import com.backbase.dbs.accounts.presentation.service.model.ArrangemenItemBase;
-import com.backbase.dbs.accounts.presentation.service.model.ArrangementItem;
-import com.backbase.dbs.accounts.presentation.service.model.ArrangementItemPost;
-import com.backbase.stream.legalentity.model.BaseProductGroup;
-import com.backbase.stream.legalentity.model.BatchProductGroup;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
+import static org.springframework.util.CollectionUtils.isEmpty;
+
+import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPost;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CreditCard;
 import com.backbase.stream.legalentity.model.CurrentAccount;
@@ -27,7 +30,6 @@ import com.backbase.stream.product.exception.ArrangementCreationException;
 import com.backbase.stream.product.exception.ArrangementUpdateException;
 import com.backbase.stream.product.mapping.ProductMapper;
 import com.backbase.stream.product.service.ArrangementService;
-import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
@@ -35,9 +37,6 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,17 +46,9 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
-import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.GroupedFlux;
 import reactor.core.publisher.Mono;
-
-
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
-import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * Manage Products (In DBS Called Arrangements).
@@ -135,7 +126,7 @@ public class ProductIngestionSaga {
             streamTask.warn(PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group with Custom Data Group Items must have a Product Group Defined!");
             return Mono.error(new StreamTaskException(streamTask, "Product Group with Custom Data Group Items must have a Product Group Defined!"));
         }
-        if (productGroup.getProductGroupType() == null && !StreamUtils.getAllProducts(productGroup).isEmpty()) {
+        if (productGroup.getProductGroupType() == null && StreamUtils.getAllProducts(productGroup).count() > 0) {
             streamTask.warn(PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group: {} does not have type setup. As Product Group contains products setting type to ARRANGEMENTS");
             productGroup.setProductGroupType(ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS);
         }
@@ -159,11 +150,11 @@ public class ProductIngestionSaga {
         if (!isEmpty(jobProfileUser.getReferenceJobRoleNames())) {
             return accessGroupService.getFunctionGroupsForServiceAgreement(serviceAgreement.getInternalId())
                 .map(functionGroups -> {
-                    Map<String, SchemaFunctionGroupItem> idByFunctionGroupName = functionGroups
+                    Map<String, FunctionGroupItem> idByFunctionGroupName = functionGroups
                         .stream()
                         .filter(fg -> Objects.nonNull(fg.getId()))
                         .collect(Collectors
-                            .toMap(SchemaFunctionGroupItem::getName, Function.identity()));
+                            .toMap(FunctionGroupItem::getName, Function.identity()));
                     return jobProfileUser.getReferenceJobRoleNames().stream()
                         .map(idByFunctionGroupName::get)
                         .filter(Objects::nonNull)
@@ -233,7 +224,7 @@ public class ProductIngestionSaga {
     private Mono<User> upsertIdentityUser(StreamTask streamTask, JobProfileUser jobProfileUser) {
         User user = jobProfileUser.getUser();
         LegalEntityReference legalEntityReference = jobProfileUser.getLegalEntityReference();
-        Mono<User> getExistingIdentityUser = userService.getIdentityUserByExternalId(user.getExternalId())
+        Mono<User> getExistingIdentityUser = userService.getUserByExternalId(user.getExternalId())
             .doOnNext(existingUser -> streamTask.info(IDENTITY_USER, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId()));
         Mono<User> createNewIdentityUser = userService.createOrImportIdentityUser(user, legalEntityReference.getInternalId())
             .doOnNext(existingUser -> streamTask.info(IDENTITY_USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId()));
@@ -241,7 +232,7 @@ public class ProductIngestionSaga {
     }
 
     @SuppressWarnings("DuplicatedCode")
-    private Mono<ProductGroupTask> upsertArrangements(ProductGroupTask streamTask) {
+    public Mono<ProductGroupTask> upsertArrangements(ProductGroupTask streamTask) {
         ProductGroup productGroup = streamTask.getData();
 
         streamTask.info(PRODUCT_GROUP, PROCESS, null, streamTask.getProductGroup().getName(), null, "Process Product Group Arrangements: %s", StreamUtils.getExternalProductIds(productGroup));
@@ -257,14 +248,14 @@ public class ProductIngestionSaga {
         Flux<Product> productFlux = getProductFlux(productGroup);
 
 
-        Mono<List<ArrangementItem>> currentAccountsRequests = upsertArrangements(streamTask, currentAccountFlux.map(productMapper::toPresentation));
-        Mono<List<ArrangementItem>> savingAccountsRequests = upsertArrangements(streamTask, savingsAccountFlux.map(productMapper::toPresentation));
-        Mono<List<ArrangementItem>> debitCardsRequests = upsertArrangements(streamTask, debitCardFlux.map(productMapper::toPresentation));
-        Mono<List<ArrangementItem>> creditCardsRequests = upsertArrangements(streamTask, creditCardFlux.map(productMapper::toPresentation));
-        Mono<List<ArrangementItem>> loansRequests = upsertArrangements(streamTask, loanFlux.map(productMapper::toPresentation));
-        Mono<List<ArrangementItem>> termDepositsRequests = upsertArrangements(streamTask, termDepositFlux.map(productMapper::toPresentation));
-        Mono<List<ArrangementItem>> investmentAccountsRequests = upsertArrangements(streamTask, investmentAccountFlux.map(productMapper::toPresentation));
-        Mono<List<ArrangementItem>> customProductsRequests = upsertArrangements(streamTask, productFlux.map(productMapper::toPresentation));
+        Mono<List<AccountArrangementItem>> currentAccountsRequests = upsertArrangements(streamTask, currentAccountFlux.map(productMapper::toPresentation));
+        Mono<List<AccountArrangementItem>> savingAccountsRequests = upsertArrangements(streamTask, savingsAccountFlux.map(productMapper::toPresentation));
+        Mono<List<AccountArrangementItem>> debitCardsRequests = upsertArrangements(streamTask, debitCardFlux.map(productMapper::toPresentation));
+        Mono<List<AccountArrangementItem>> creditCardsRequests = upsertArrangements(streamTask, creditCardFlux.map(productMapper::toPresentation));
+        Mono<List<AccountArrangementItem>> loansRequests = upsertArrangements(streamTask, loanFlux.map(productMapper::toPresentation));
+        Mono<List<AccountArrangementItem>> termDepositsRequests = upsertArrangements(streamTask, termDepositFlux.map(productMapper::toPresentation));
+        Mono<List<AccountArrangementItem>> investmentAccountsRequests = upsertArrangements(streamTask, investmentAccountFlux.map(productMapper::toPresentation));
+        Mono<List<AccountArrangementItem>> customProductsRequests = upsertArrangements(streamTask, productFlux.map(productMapper::toPresentation));
 
         return Mono.just(productGroup)
             .zipWith(currentAccountsRequests, (actual, arrangements) -> {
@@ -283,12 +274,12 @@ public class ProductIngestionSaga {
             .map(streamTask::data);
     }
 
-    private Mono<List<ArrangementItem>> upsertArrangements(ProductGroupTask streamTask,
-        Flux<ArrangementItemPost> productFlux) {
+    private Mono<List<AccountArrangementItem>> upsertArrangements(ProductGroupTask streamTask,
+        Flux<AccountArrangementItemPost> productFlux) {
         ProductGroup productGroup = streamTask.getData();
         return productFlux
             .map(p -> ensureLegalEntityId(productGroup.getUsers(), p))
-            .sort(comparing(ArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
+            .sort(comparing(AccountArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
             .flatMapSequential(arrangementItemPost -> upsertArrangement(streamTask, arrangementItemPost))
             .collectList();
     }
@@ -299,15 +290,15 @@ public class ProductIngestionSaga {
      * @param arrangementItemPost Product to create
      * @return Created or Existing Product
      */
-    public Mono<ArrangementItem> upsertArrangement(ProductGroupTask streamTask, ArrangementItemPost arrangementItemPost) {
+    public Mono<AccountArrangementItem> upsertArrangement(ProductGroupTask streamTask, AccountArrangementItemPost arrangementItemPost) {
         streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, "", arrangementItemPost.getExternalArrangementId(), null, "Inserting or updating arrangement: %s", arrangementItemPost.getExternalArrangementId());
         log.info("Upsert Arrangement: {} in Product Group: {}", arrangementItemPost.getExternalArrangementId(), streamTask.getData().getName());
-        Mono<ArrangementItem> updateArrangement = arrangementService.getArrangementInternalId(arrangementItemPost.getExternalArrangementId())
+        Mono<AccountArrangementItem> updateArrangement = arrangementService.getArrangementInternalId(arrangementItemPost.getExternalArrangementId())
 
             .flatMap(internalId -> {
                 log.info("Arrangement already exists: {}", internalId);
                 streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, EXISTS, arrangementItemPost.getExternalArrangementId(), internalId, "Arrangement %s already exists", arrangementItemPost.getExternalArrangementId());
-                ArrangemenItemBase arrangemenItemBase = productMapper.toArrangementItemBase(arrangementItemPost);
+                AccountArrangementItemPut arrangemenItemBase = productMapper.toArrangementItemPut(arrangementItemPost);
                 return arrangementService.updateArrangement(arrangemenItemBase)
                     .onErrorResume(ArrangementUpdateException.class, e -> {
                         streamTask.error(ARRANGEMENT, UPDATE_ARRANGEMENT, FAILED, arrangementItemPost.getExternalArrangementId(), internalId, e, e.getHttpResponse(), "Failed to update arrangement: %s", arrangementItemPost.getExternalArrangementId());
@@ -316,12 +307,12 @@ public class ProductIngestionSaga {
                     .map(actual -> {
                         log.info("Updated arrangement: {}", actual.getExternalArrangementId());
                         streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, UPDATED, arrangementItemPost.getExternalArrangementId(), internalId, "Updated Arrangement");
-                        ArrangementItem arrangementItem = productMapper.toArrangementItem(actual);
+                        AccountArrangementItem arrangementItem = productMapper.toArrangementItem(actual);
                         arrangementItem.setId(internalId);
                         return arrangementItem;
                     });
             });
-        Mono<ArrangementItem> createNewArrangement = createArrangement(arrangementItemPost)
+        Mono<AccountArrangementItem> createNewArrangement = createArrangement(arrangementItemPost)
             .map(arrangementItem -> {
                 streamTask.info(ARRANGEMENT, "insert-arrangement", "created", arrangementItemPost.getExternalArrangementId(), arrangementItem.getId(), "Created Arrangement");
                 log.info("Created arrangement: {} with internalId: {} ", arrangementItem.getExternalArrangementId(), arrangementItem.getId());
@@ -335,14 +326,14 @@ public class ProductIngestionSaga {
         return updateArrangement.switchIfEmpty(createNewArrangement);
     }
 
-    private Mono<ArrangementItem> createArrangement(ArrangementItemPost arrangementItemPost) {
+    private Mono<AccountArrangementItem> createArrangement(AccountArrangementItemPost arrangementItemPost) {
 
         return arrangementService.createArrangement(arrangementItemPost)
             .doOnError(WebClientResponseException.class, throwable ->
                 log.error("Failed to create product: {}\n{}", arrangementItemPost.getExternalArrangementId(), throwable.getResponseBodyAsString()))
             .map(arrangementAddedResponse -> {
 
-                ArrangementItem arrangementItem = productMapper.toArrangementItem(arrangementItemPost);
+                AccountArrangementItem arrangementItem = productMapper.toArrangementItem(arrangementItemPost);
                 arrangementItem.setId(arrangementAddedResponse.getId());
 
                 return arrangementItem;
@@ -398,7 +389,7 @@ public class ProductIngestionSaga {
             : Flux.fromIterable(productGroup.getCurrentAccounts());
     }
 
-    protected ArrangementItemPost ensureLegalEntityId(List<JobProfileUser> users, ArrangementItemPost product) {
+    protected AccountArrangementItemPost ensureLegalEntityId(List<JobProfileUser> users, AccountArrangementItemPost product) {
         Set<String> legalEntityExternalIds = users.stream()
             .map(jobProfileUser -> jobProfileUser.getLegalEntityReference().getExternalId())
             .collect(Collectors.toSet());

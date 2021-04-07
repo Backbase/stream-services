@@ -1,13 +1,13 @@
 package com.backbase.stream.productcatalog;
 
-import com.backbase.dbs.accounts.presentation.service.ApiClient;
-import com.backbase.dbs.accounts.presentation.service.api.ProductKindsApi;
-import com.backbase.dbs.accounts.presentation.service.api.ProductsApi;
-import com.backbase.dbs.accounts.presentation.service.model.ProductId;
-import com.backbase.dbs.accounts.presentation.service.model.ProductKindId;
-import com.backbase.dbs.accounts.presentation.service.model.ProductKindItem;
-import com.backbase.dbs.accounts.presentation.service.model.ProductKindItemPut;
-import com.backbase.dbs.accounts.presentation.service.model.SchemasProductItem;
+import com.backbase.dbs.arrangement.api.service.ApiClient;
+import com.backbase.dbs.arrangement.api.service.v2.ProductKindsApi;
+import com.backbase.dbs.arrangement.api.service.v2.ProductsApi;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountProductId;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountProductKindId;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountSchemasProductItem;
+import com.backbase.dbs.arrangement.api.service.v2.model.ExternalProductKindItemExtended;
+import com.backbase.dbs.arrangement.api.service.v2.model.ExternalProductKindItemPut;
 import com.backbase.stream.productcatalog.mapper.ProductCatalogMapper;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
 import com.backbase.stream.productcatalog.model.ProductKind;
@@ -46,7 +46,7 @@ public class ReactiveProductCatalogService {
     public Mono<ProductCatalog> getProductCatalog() {
         Flux<ProductKind> productKindsFlux = getProductKindFlux();
 
-        Flux<SchemasProductItem> products = productsApi.getProducts(null, null);
+        Flux<AccountSchemasProductItem> products = productsApi.getProducts(null, null);
         Flux<ProductType> productTypesFlux = products.map(productCatalogMapper::toStream);
 
         return Mono.zip(productKindsFlux.collectList(), productTypesFlux.collectList())
@@ -139,7 +139,7 @@ public class ReactiveProductCatalogService {
     }
 
 
-    private Flux<ProductKindItemPut> updateProductKind(List<ProductKind> productKinds) {
+    private Flux<ExternalProductKindItemPut> updateProductKind(List<ProductKind> productKinds) {
         log.info("Updating Product Type1: {}", productKinds);
         return Flux.fromIterable(productKinds)
                 .map(productCatalogMapper::toPresentation)
@@ -147,7 +147,7 @@ public class ReactiveProductCatalogService {
                 .flatMap(this::updateProductKind);
     }
 
-    private Mono<ProductKindItemPut> updateProductKind(ProductKindItemPut productKind) {
+    private Mono<ExternalProductKindItemPut> updateProductKind(ExternalProductKindItemPut productKind) {
         log.info("Updating Product Type2: {}", productKind.getKindName());
         return productKindsApi.putProductKinds(productKind)
                 .doOnError(WebClientResponseException.BadRequest.class, e ->
@@ -172,7 +172,7 @@ public class ReactiveProductCatalogService {
         Mono<Void> productIdMono = Mono.just(productType)
                 .map(productCatalogMapper::toPresentation)
                 .map(productItem -> {
-                    log.info("Updating Product Type: {}", productItem.getProductTypeName());
+                    log.info("Updating Product Type: {}", productItem.getTypeName());
                     ProductKind productKind;
                     if (productItem.getProductKind() != null) {
                         productKind = productType.getProductKind();
@@ -200,7 +200,7 @@ public class ReactiveProductCatalogService {
 
     public Mono<ProductType> createProductType(ProductType productType, List<ProductKind> productKinds) {
 
-        Mono<ProductId> productIdMono = Mono.just(productType)
+        Mono<AccountProductId> productIdMono = Mono.just(productType)
             .map(productCatalogMapper::toPresentation)
             .map(productItem -> {
                 log.info("Creating Product Type: {}", productItem.getProductTypeName());
@@ -229,7 +229,7 @@ public class ReactiveProductCatalogService {
     }
 
 
-    private ProductType handelStoreProductTypeResult(ProductType productType, ProductId productId) {
+    private ProductType handelStoreProductTypeResult(ProductType productType, AccountProductId productId) {
         log.info("Product Type: {} created with: {}", productType.getProductTypeName(), productId.getId());
         return productType;
     }
@@ -245,8 +245,8 @@ public class ReactiveProductCatalogService {
     }
 
 
-    private Mono<ProductKind> storeProductKind(ProductKindItem productKind) {
-        Mono<ProductKindId> productKindIdMono = productKindsApi.postProductKinds(productKind)
+    private Mono<ProductKind> storeProductKind(ExternalProductKindItemExtended productKind) {
+        Mono<AccountProductKindId> productKindIdMono = productKindsApi.postProductKinds(productKind)
             .doOnError(WebClientResponseException.BadRequest.class, e ->
                 log.error("Bad Request Storing Product Kind: {} \n[{}]: {}\nResponse: {}", productKind, Objects.requireNonNull(e.getRequest()).getMethod(), e.getRequest().getURI(), e.getResponseBodyAsString())
             )
@@ -257,7 +257,7 @@ public class ReactiveProductCatalogService {
             this::handleStoreResult).map(productCatalogMapper::toStream);
     }
 
-    private ProductKindItem handleStoreResult(ProductKindItem productKindItem, ProductKindId productKindId) {
+    private ExternalProductKindItemExtended handleStoreResult(ExternalProductKindItemExtended productKindItem, AccountProductKindId productKindId) {
         log.info("Product Kind: {} created with: {}", productKindItem.getKindName(), productKindId);
         return productKindItem;
     }

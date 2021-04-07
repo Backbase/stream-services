@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Ingest Legal Entity API
   description: Ingestion Saga for Legal Entities and their products
-  version: 2.1.1
+  version: 2.2.0
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
     backgroundColor: "#FFFFFF"
@@ -52,6 +52,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /service-agreement:
+    put:
+      tags:
+        - service-agreement
+      summary: Update Service Agreement
+      description: Update a service agreement
+      operationId: updateServiceAgreement
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/UpdatedServiceAgreement'
+            examples:
+              updateCustomServiceAgreement:
+                $ref: '#/components/examples/CustomServiceAgreement'
+      responses:
+        200:
+          description: Service Agreement successfully updated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UpdatedServiceAgreement'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /async/legal-entity:
     post:
       tags:
@@ -90,6 +122,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /async/service-agreement:
+    put:
+      tags:
+        - service-agreement
+      summary: Process Service Agreement
+      description: Asynchronously update a service agreement
+      operationId: updateServiceAgreementAsync
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/UpdatedServiceAgreement'
+            examples:
+              updateCustomServiceAgreement:
+                $ref: '#/components/examples/CustomServiceAgreement'
+      responses:
+        200:
+          description: Service Agreement successfully updated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UpdatedServiceAgreementResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /async/legal-entity/{unitOfWorkId}:
     get:
       tags:
@@ -111,6 +175,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LegalEntityResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /async/service-agreement/{unitOfWorkId}:
+    get:
+      tags:
+        - service-agreement
+      summary: Process Service Agreement
+      description: Asynchronously update a Service Agreement and their supporting objects
+      operationId: getUpdateServiceAgreementUnitOfWork
+      parameters:
+        - name: unitOfWorkId
+          in: path
+          description: ID of Work Unit
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: The Service Agreement update job status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdatedServiceAgreementResponse'
         default:
           description: Error
           content:
@@ -285,7 +376,8 @@ components:
             $ref: '#/components/schemas/UserPreferences'
         additions:
           type: object
-          additionalProperties: true
+          additionalProperties:
+            type: string
     CurrentAccount:
       properties:
         bookedBalance:
@@ -808,6 +900,8 @@ components:
             $ref: '#/components/schemas/User'
         masterServiceAgreement:
           $ref: '#/components/schemas/ServiceAgreement'
+        customServiceAgreement:
+          $ref: '#/components/schemas/ServiceAgreement'
       required:
         - name
         - external
@@ -875,11 +969,13 @@ components:
           $ref: '#/components/schemas/Limit'
         additions:
           type: object
-          additionalProperties: true
+          additionalProperties:
+            type: string
         attributes:
           type: object
           description: Custom attributes to be added to the user.
-          x-java-type: java.util.Map<String,String>
+          additionalProperties:
+            type: string
         identityLinkStrategy:
           $ref: '#/components/schemas/IdentityUserLinkStrategy'
         userProfile:
@@ -1258,6 +1354,12 @@ components:
           description: User external ids
           items:
             $ref: '#/components/schemas/ExternalIdentifier'
+        action:
+          type: string
+          description: the action to perform for this participant. Required for participant update flow
+          enum:
+            - "ADD"
+            - "REMOVE"
     LegalEntityStatus:
       type: string
       description: Status of the entity
@@ -1732,8 +1834,8 @@ components:
           description: Indication whether an arrangement can be favorable for a user
         additions:
           type: object
-          additionalProperties: true
-
+          additionalProperties:
+            type: string
     ###############################################
     ## Additional Data Group Items
     ###############################################
@@ -1840,6 +1942,95 @@ components:
                       type: string
       readOnly: true
 
+    UpdatedServiceAgreementResponse:
+      type: object
+      description: "Response on Update Service Agreement"
+      properties:
+        id:
+          type: string
+        state:
+          type: string
+          enum:
+            - NEW
+            - ACCEPTED
+            - IN_PROGRESS
+            - FAILED
+            - FAILED_RETRIES_EXHAUSTED
+            - COMPLETED
+            - COMPLETED_AFTER_RETRIES
+            - ROLLBACK_IN_PROGRESS
+            - ROLLBACK_COMPLETED
+            - ROLLBACK_FAILED
+        locked:
+          type: boolean
+        registeredAt:
+          type: string
+          format: date-time
+        lockedAt:
+          type: string
+          format: date-time
+        nextAttemptAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: string
+          format: date-time
+        retries:
+          type: integer
+        tasks:
+          type: array
+          description: Tasks belonging to the Unit Of Work. A Unit of Work is complete when all tasks are completed.
+          items:
+            description: Unit Of Work Task
+            type: object
+            properties:
+              externalId:
+                type: string
+                description: service agreement external id
+              state:
+                type: string
+                enum:
+                  - ACCEPTED
+                  - IN_PROGRESS
+                  - FAILED
+                  - COMPLETED
+              registeredAt:
+                type: string
+                format: date-time
+              finishedAt:
+                type: string
+                format: date-time
+              history:
+                type: array
+                description: Task Execution History
+                items:
+                  type: object
+                  properties:
+                    timestamp:
+                      type: string
+                      format: date-time
+                    entity:
+                      description: Entity Type Updated in DBS. (Such as Arrangement, User, Data Access Group etc)
+                      type: string
+                    internalId:
+                      description: DBS Internal ID
+                      type: string
+                    externalId:
+                      type: string
+                      description: Customer External ID
+                    state:
+                      description: Resulted Entity Action
+                      type: string
+                      enum:
+                        - CREATED
+                        - UDPATED
+                        - DELETED
+                        - REJECTED
+                        - FAILED
+                    message:
+                      description: Message describing operation performed on task
+                      type: string
+
     ###############################################
     ## Generic Schemas
     ###############################################
@@ -1915,6 +2106,35 @@ components:
       title: "Reference Job Role"
       allOf:
         - $ref: '#/components/schemas/JobRole'
+    UpdatedServiceAgreement:
+      title: "Updated Service Agreement"
+      allOf:
+        - $ref: '#/components/schemas/ServiceAgreement'
+      properties:
+        productGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseProductGroup'
+        saUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceAgreementUserAction'
+        saAdmins:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceAgreementUserAction'
+    ServiceAgreementUserAction:
+      title: "Service Agreement user update action"
+      properties:
+        userProfile:
+          $ref: '#/components/schemas/JobProfileUser'
+          description: User and job roles to associate under service agreement
+        action:
+          type: string
+          description: add or remove user from service agreement
+          enum:
+            - "ADD"
+            - "REMOVE"
 
   examples:
     RootLegalEntityHierarchyExample:
@@ -2737,3 +2957,44 @@ components:
           administrators:
             - externalId: "sam.carroll"
               fullName: "Sam Carroll"
+    CustomServiceAgreement:
+      description: "Custom Service Agreement"
+      value:
+        internalId: "serviceAgreement1"
+        externalId: "serviceAgreementEx1"
+        name: "service_agreement_1"
+        description: "service agreement 1"
+        participants:
+          - externalId: "participant1"
+            sharingUsers: true
+            sharingAccounts: true
+            action: "ADD"
+        validFromDate: "2021-03-10"
+        validFromTime: "01:00:00"
+        validUntilDate: "2024-03-10"
+        validUntilTime: "01:00:00"
+        status: "ENABLED"
+        productGroups:
+          - productGroupType: "ARRANGEMENTS"
+            name: "shared-data-group-with-123456789"
+            currentAccounts:
+              - externalId: "48900955"
+              - externalId: "50088189"
+        saUsers:
+          - userProfile:
+              user:
+                externalId: "user1"
+              referenceJobRoleNames:
+                - "jobRole1"
+            actions: "ADD"
+          - userProfile:
+              user:
+                externalId: "user2"
+            actions: "REMOVE"
+        saAdmin:
+          - userProfile:
+              user:
+                externalId: "admin1"
+              referenceJobRoleNames:
+                - "adminRole1"
+            actions: "ADD"

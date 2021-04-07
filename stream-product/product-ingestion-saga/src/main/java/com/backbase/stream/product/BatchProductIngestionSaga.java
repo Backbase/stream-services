@@ -5,7 +5,7 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
 
 
-import com.backbase.dbs.accounts.presentation.service.model.ArrangementItemPost;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPost;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
@@ -123,7 +123,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                     streamTask.warn(BATCH_PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group with Custom Data Group Items must have a Product Group Defined!");
                     throw new StreamTaskException(streamTask, "Product Group with Custom Data Group Items must have a Product Group Defined!");
                 }
-                if (productGroup.getProductGroupType() == null && !StreamUtils.getAllProducts(productGroup).isEmpty()) {
+                if (productGroup.getProductGroupType() == null && StreamUtils.getAllProducts(productGroup).count() > 0) {
                     streamTask.warn(BATCH_PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group: {} does not have type setup. As Product Group contains products setting type to ARRANGEMENTS");
                     productGroup.setProductGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS);
                 }
@@ -146,7 +146,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
     }
 
     protected Mono<BatchProductGroupTask> upsertArrangementsBatch(BatchProductGroupTask batchProductGroupTask) {
-        List<ArrangementItemPost> batchArrangements = new ArrayList<>();
+        List<AccountArrangementItemPost> batchArrangements = new ArrayList<>();
         batchProductGroupTask.getData().getProductGroups().forEach(pg -> batchArrangements.addAll(
                 Stream.of(
                         StreamUtils.nullableCollectionToStream(pg.getCurrentAccounts()).map(productMapper::toPresentation),
@@ -165,20 +165,20 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
         // Insert  without duplicates.
         // TODO: Revert this change when either OpenAPI generated methods can call super in equals
         // or if the product spec is modified to mitigate the issue
-        List<ArrangementItemPost> itemsToUpsert = batchArrangements.stream()
+        List<AccountArrangementItemPost> itemsToUpsert = batchArrangements.stream()
             .filter(distinctByKeys(
-                ArrangementItemPost::getExternalArrangementId,
-                ArrangementItemPost::getExternalLegalEntityIds,
-                ArrangementItemPost::getExternalProductId,
-                ArrangementItemPost::getExternalStateId,
-                ArrangementItemPost::getProductId,
-                ArrangementItemPost::getAlias,
-                ArrangementItemPost::getAdditions
+                AccountArrangementItemPost::getExternalArrangementId,
+                AccountArrangementItemPost::getExternalLegalEntityIds,
+                AccountArrangementItemPost::getExternalProductId,
+                AccountArrangementItemPost::getExternalStateId,
+                AccountArrangementItemPost::getProductId,
+               /* AccountArrangementItemPost::getAlias,*/
+                AccountArrangementItemPost::getAdditions
             )).collect(Collectors.toList());
 
         Set<String> upsertedInternalIds = new HashSet<>();
         return Flux.fromIterable(itemsToUpsert)
-                .sort(comparing(ArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
+                .sort(comparing(AccountArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
                 .buffer(50) // hardcoded to match DBS limitation
                 .concatMap(batch -> arrangementService.upsertBatchArrangements(batch)
                         .doOnNext(r -> batchProductGroupTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, UPDATED, r.getResourceId(), r.getArrangementId(), "Updated Arrangements (in batch)"))
@@ -186,7 +186,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 ).map(batchResponses -> {
                     // Update products with internal IDs.
                     return batchProductGroupTask.getData().getProductGroups().stream()
-                        .flatMap(pg -> StreamUtils.getAllProducts(pg).stream())
+                        .flatMap(pg -> StreamUtils.getAllProducts(pg))
                         .map(product -> {
                             batchResponses.forEach(result -> {
                                 if (result.getResourceId().equalsIgnoreCase(product.getExternalId())) {

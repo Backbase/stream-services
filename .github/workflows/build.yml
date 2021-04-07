@@ -58,10 +58,6 @@ jobs:
       - name: Build Stream Services
         run: mvn clean install -B
 
-      - name: Upload to Repo
-        if: contains(github.ref, 'master')
-        run: mvn deploy -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
-
       - name: Commit files
         if: contains(github.ref, 'master')
         run: |
@@ -75,3 +71,7 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to Repo
+        if: contains(github.ref, 'master')
+        run: mvn deploy -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
