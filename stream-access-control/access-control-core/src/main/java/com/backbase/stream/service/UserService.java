@@ -112,7 +112,7 @@ public class UserService {
                 .collect(Collectors.toList()))
             .map(r -> {
                 log.debug("Batch Archive User response: status {} for resource {}, errors: {}", r.getStatus(), r.getResourceId(), r.getErrors());
-                if (!r.getStatus().getValue().equals("200")) {
+                if (!(r.getStatus().getValue().equals("200") ||r.getStatus().getValue().equals("204")||r.getStatus().getValue().equals("201"))) {
                     throw new RuntimeException(
                         MessageFormat.format("Failed item in the batch for User Update: status {0} for resource {1}, errors: {2}",
                             r.getStatus(), r.getResourceId(), r.getErrors())
