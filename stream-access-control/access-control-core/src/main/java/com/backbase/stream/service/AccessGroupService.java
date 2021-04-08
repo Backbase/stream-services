@@ -1001,8 +1001,8 @@ public class AccessGroupService {
         return serviceAgreementQueryApi.getServiceAgreementAdmins(serviceAgreement.getInternalId())
             .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins()))
             // get External  ID for each admin.
-            .flatMap(userId -> usersApi.getUserByExternalId(userId, true))
-            .map(GetUser::getExternalId)
+            // We need to  get the user by using the internal id to facilitate the delete for issue #46
+            .flatMap(userId -> usersApi.getUserById(userId, true)).map(GetUser::getExternalId)
             .collectList()
             .doOnNext(adminIds -> log.debug("Found  admins: {}", adminIds))
             .map(adminsExternalIds -> adminsExternalIds.stream()
