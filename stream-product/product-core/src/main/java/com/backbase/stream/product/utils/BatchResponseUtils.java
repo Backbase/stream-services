@@ -1,6 +1,7 @@
 package com.backbase.stream.product.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.text.MessageFormat;
@@ -21,7 +22,7 @@ public class BatchResponseUtils {
      */
     public static <T> T checkBatchResponseItem(T response, String operation, String status, String resourceId, List<String> errors) {
         log.debug("Batch {} response: status {} for resource {}, errors: {}", operation, status, resourceId, errors);
-        if (!status.equals("200")) {
+        if (status != null && !HttpStatus.valueOf(Integer.parseInt(status)).is2xxSuccessful()) {
             throw new WebClientResponseException(Integer.parseInt(status),
                     MessageFormat.format("Failed item in the batch for {0}: status {1} for resource {2}, errors: {3}",
                             operation, status, resourceId, errors), null, null, null

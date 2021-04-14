@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.29.0]
+### Changed
+- Checking the response recieved from Legal entity api , user  api to is2xxSuccessful as it  returns 207 response for success.
+
 ## [2.28.0]
 ### Changed
 - Add "Custom Data Group Items" to Product Groups, require either Products or Custom Data Group Items (previously just Products)
@@ -300,6 +304,7 @@ backbase:
       transaction-manager-base-url: http://transaction-manager:8080
       limit-manager-base-url: http://limits-manager:8080
 ```
+[2.29.0]: https://github.com/Backbase/stream-services-2.0/compare/2.28.0...2.29.0
 [2.28.0]: https://github.com/Backbase/stream-services-2.0/compare/2.27.0...2.28.0
 [2.27.0]: https://github.com/Backbase/stream-services-2.0/compare/2.26.0...2.27.0
 [2.26.0]: https://github.com/Backbase/stream-services-2.0/compare/2.25.0...2.26.0
