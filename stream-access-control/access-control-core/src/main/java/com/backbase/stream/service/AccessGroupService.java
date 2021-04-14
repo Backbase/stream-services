@@ -49,6 +49,7 @@ import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
+import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
@@ -83,6 +84,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -884,8 +886,8 @@ public class AccessGroupService {
 
         log.info("Updating Data Access Group: {}", dataGroupsDataGroupItem.getId());
 
-        List<PresentationItemIdentifier> dataItems = StreamUtils.getInternalProductIds(productGroup)
-            .stream().map(id -> new PresentationItemIdentifier().internalIdIdentifier(id)).collect(Collectors.toList());
+        List<PresentationItemIdentifier> dataItems = Stream.concat(StreamUtils.getInternalProductIds(productGroup).stream(), StreamUtils.getCustomDataGroupItems(productGroup).stream())
+            .map(id -> new PresentationItemIdentifier().internalIdIdentifier(id)).collect(Collectors.toList());
 
         PresentationDataGroupUpdate presentationDataGroupUpdate = new PresentationDataGroupUpdate();
         presentationDataGroupUpdate.setDataGroupIdentifier(mapId(dataGroupsDataGroupItem.getId()));
@@ -916,13 +918,14 @@ public class AccessGroupService {
 
         log.info("Creating Data Access Group: {}", productGroup.getName());
 
-        List<String> productIds = StreamUtils.getInternalProductIds(productGroup);
+        List<String> dataItems = Stream.concat(StreamUtils.getInternalProductIds(productGroup).stream(), StreamUtils.getCustomDataGroupItems(productGroup).stream())
+            .collect(Collectors.toList());
         DataGroupItemSystemBase dataGroupItemSystemBase = new DataGroupItemSystemBase();
         dataGroupItemSystemBase.setName(productGroup.getName());
         dataGroupItemSystemBase.setDescription(productGroup.getDescription());
         dataGroupItemSystemBase.setServiceAgreementId(serviceAgreement.getInternalId());
         dataGroupItemSystemBase.setAreItemsInternalIds(true);
-        dataGroupItemSystemBase.setItems(productIds);
+        dataGroupItemSystemBase.setItems(dataItems);
         dataGroupItemSystemBase.setType(productGroup.getProductGroupType().name());
         if (dataGroupItemSystemBase.getItems().stream().anyMatch(Objects::isNull)) {
             streamTask.error(ACCESS_GROUP, CREATE_ACCESS_GROUP, REJECTED, productGroup.getName(), null, "Data group items cannot have null items");
@@ -1002,8 +1005,7 @@ public class AccessGroupService {
             .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins()))
             // get External  ID for each admin.
             // We need to  get the user by using the internal id to facilitate the delete for issue #46
-            .flatMap(userId -> usersApi.getUserById(userId, true))
-            .map(GetUser::getExternalId)
+            .flatMap(userId -> usersApi.getUserById(userId, true)).map(GetUser::getExternalId)
             .collectList()
             .doOnNext(adminIds -> log.debug("Found  admins: {}", adminIds))
             .map(adminsExternalIds -> adminsExternalIds.stream()
