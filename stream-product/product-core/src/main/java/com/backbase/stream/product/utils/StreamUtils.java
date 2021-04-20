@@ -65,7 +65,7 @@ public class StreamUtils {
     }
 
     public static List<String> getCustomDataGroupItems(BaseProductGroup productGroup) {
-        return productGroup.getCustomDataGroupItems().stream()
+        return nullableCollectionToStream(productGroup.getCustomDataGroupItems())
             .map(CustomDataGroupItem::getInternalId).collect(Collectors.toList());
     }
 
