@@ -974,9 +974,9 @@ public class AccessGroupService {
             .collectList()
             .flatMap(functionGroups ->
                 functionGroupsApi.postFunctionGroupsDelete(
-                    functionGroups.stream().map(fg -> mapId(fg.getId())).collect(Collectors.toList()))
-                    .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
-                    .collectList())
+                        functionGroups.stream().filter(f->!FunctionGroupItem.TypeEnum.TEMPLATE.equals(f.getType())).map(fg -> mapId(fg.getId())).collect(Collectors.toList()))
+                        .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
+                        .collectList())
             .then();
     }
 
