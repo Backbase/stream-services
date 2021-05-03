@@ -980,6 +980,9 @@ components:
           $ref: '#/components/schemas/IdentityUserLinkStrategy'
         userProfile:
           $ref: '#/components/schemas/UserProfile'
+        locked:
+          type: boolean
+          description: Identity status. If true identity will be locked.
       required:
         - externalId
         - fullName

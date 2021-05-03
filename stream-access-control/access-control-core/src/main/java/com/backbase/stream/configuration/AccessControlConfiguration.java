@@ -14,6 +14,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi;
+import com.backbase.identity.integration.api.service.v1.RealmApi;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.product.service.ArrangementService;
@@ -24,6 +25,9 @@ import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -62,10 +66,12 @@ public class AccessControlConfiguration {
     }
 
     @Bean
-    public UserService userService(com.backbase.dbs.user.api.service.ApiClient usersApiClient) {
+    public UserService userService(com.backbase.dbs.user.api.service.ApiClient usersApiClient,
+                                   Optional<com.backbase.identity.integration.api.service.ApiClient>
+                                       identityApiClient) {
         UserManagementApi usersApi = new UserManagementApi(usersApiClient);
         IdentityManagementApi identityManagementApi = new IdentityManagementApi(usersApiClient);
-        return new UserService(usersApi, identityManagementApi);
+        return new UserService(usersApi, identityManagementApi, identityApiClient.map(RealmApi::new));
     }
 
     @Bean
@@ -125,6 +131,19 @@ public class AccessControlConfiguration {
             new com.backbase.dbs.accesscontrol.api.service.ApiClient(
                 dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getAccessControlBaseUrl());
+        return apiClient;
+    }
+
+    @Bean
+    @ConditionalOnProperty(value = "backbase.stream.legalentity.sink.use-identity-integration")
+    protected com.backbase.identity.integration.api.service.ApiClient identityApiClient(
+        WebClient dbsWebClient,
+        ObjectMapper objectMapper,
+        DateFormat dateFormat) {
+        com.backbase.identity.integration.api.service.ApiClient apiClient =
+            new com.backbase.identity.integration.api.service.ApiClient(
+                dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(backbaseStreamConfigurationProperties.getIdentity().getBackbaseIdentityBaseUrl());
         return apiClient;
     }
 
