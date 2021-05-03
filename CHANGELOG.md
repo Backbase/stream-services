@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.32.0]
 ### Changed
 - added lock identity user on creation flag.
+> New optional property added in legal entity stream: `backbase.stream.identity.backbase-identity-base-url` to indicate BackBase Identity base URL for clients that integrate with it.
 
 ## [2.31.0]
 ### Changed
@@ -316,6 +317,9 @@ backbase:
       transaction-manager-base-url: http://transaction-manager:8080
       limit-manager-base-url: http://limits-manager:8080
 ```
+[2.32.0]: https://github.com/Backbase/stream-services-2.0/compare/2.31.0...2.32.0
+[2.31.0]: https://github.com/Backbase/stream-services-2.0/compare/2.30.0...2.31.0
+[2.30.0]: https://github.com/Backbase/stream-services-2.0/compare/2.29.0...2.30.0
 [2.29.0]: https://github.com/Backbase/stream-services-2.0/compare/2.28.0...2.29.0
 [2.28.0]: https://github.com/Backbase/stream-services-2.0/compare/2.27.0...2.28.0
 [2.27.0]: https://github.com/Backbase/stream-services-2.0/compare/2.26.0...2.27.0
