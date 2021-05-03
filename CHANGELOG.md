@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.32.0]
-### Changed
+### Added
 - Add 'build-helper-maven-plugin' for adding the generated sources (i.e. Openapi) as project's source directories.
 
 ## [2.31.0]
@@ -316,6 +316,9 @@ backbase:
       transaction-manager-base-url: http://transaction-manager:8080
       limit-manager-base-url: http://limits-manager:8080
 ```
+[2.32.0]: https://github.com/Backbase/stream-services-2.0/compare/2.31.0...2.32.0
+[2.31.0]: https://github.com/Backbase/stream-services-2.0/compare/2.30.0...2.31.0
+[2.30.0]: https://github.com/Backbase/stream-services-2.0/compare/2.29.0...2.30.0
 [2.29.0]: https://github.com/Backbase/stream-services-2.0/compare/2.28.0...2.29.0
 [2.28.0]: https://github.com/Backbase/stream-services-2.0/compare/2.27.0...2.28.0
 [2.27.0]: https://github.com/Backbase/stream-services-2.0/compare/2.26.0...2.27.0
