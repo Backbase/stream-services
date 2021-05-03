@@ -2,9 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
 ## [2.31.0]
 ### Changed
 - Fixing the function group delete to only happen when it is not template type (this is when using referenceJobRoles )
+- Update package names and build-helper-maven-plugin for adding the generated sources.
 
 ## [2.30.0]
 ### Changed
