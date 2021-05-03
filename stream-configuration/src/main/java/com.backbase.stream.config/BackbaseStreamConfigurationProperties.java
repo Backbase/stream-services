@@ -54,7 +54,7 @@ public class BackbaseStreamConfigurationProperties {
         /**
          * The location of Identity Service.
          */
-        private String backbaseIdentityBaseUrl = "http://backbase-identity:8080";
+        private String identityIntegrationBaseUrl = "http://identity-integration-service:8080";
     }
 
 }

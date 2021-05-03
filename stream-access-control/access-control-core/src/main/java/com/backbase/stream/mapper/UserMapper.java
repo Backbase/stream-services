@@ -3,7 +3,7 @@ package com.backbase.stream.mapper;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.api.service.v2.model.UserExternal;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
-import com.backbase.identity.integration.api.service.v1.model.UserRepresentation;
+import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -16,5 +16,5 @@ public interface UserMapper {
     @Mapping(source = "legalEntityId", target = "legalEntityExternalId")
     UserExternal toPresentation(com.backbase.stream.legalentity.model.User user);
 
-    UserRepresentation toPresentation(EnhancedUserRepresentation user);
+    UserRequestBody toPresentation(EnhancedUserRepresentation user);
 }

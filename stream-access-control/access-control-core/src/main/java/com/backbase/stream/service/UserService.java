@@ -15,9 +15,9 @@ import com.backbase.dbs.user.api.service.v2.model.Realm;
 import com.backbase.dbs.user.api.service.v2.model.UpdateIdentityRequest;
 import com.backbase.dbs.user.api.service.v2.model.UserCreated;
 import com.backbase.dbs.user.api.service.v2.model.UserExternal;
-import com.backbase.identity.integration.api.service.v1.RealmApi;
+import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
-import com.backbase.identity.integration.api.service.v1.model.UserRepresentation;
+import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.User;
@@ -50,7 +50,7 @@ public class UserService {
 
     private final UserManagementApi usersApi;
     private final IdentityManagementApi identityManagementApi;
-    private final Optional<RealmApi> realmApi;
+    private final Optional<IdentityIntegrationServiceApi> identityIntegrationApi;
 
     /**
      * Get User by external ID.
@@ -256,17 +256,21 @@ public class UserService {
     }
 
     /**
-     * Locks the user.
-     * @param user user to be locked.
+     * Locks/Unlocks the user is current status is different.
+     * @param user user to be locked/unlocked.
      * @param realm user's realm.
      * @return user.
      */
-    public Mono<User> lockUser(User user, String realm) {
-        return realmApi.map(api -> getIdentityUser(user, realm)
+    public Mono<User> changeEnableStatus(User user, String realm) {
+        return identityIntegrationApi.map(api -> getIdentityUser(user, realm)
             .flatMap(eur -> {
-                UserRepresentation presentationUser = mapper.toPresentation(eur);
-                presentationUser.setEnabled(false);
-                return api.putUser(user.getInternalId(), realm, presentationUser);
+                boolean shouldEnable = user.getLocked() != null ? !user.getLocked() : eur.getEnabled();
+                if (!eur.getEnabled().equals(shouldEnable)) {
+                    UserRequestBody presentationUser = mapper.toPresentation(eur);
+                    presentationUser.setEnabled(shouldEnable);
+                    return api.updateUserById(realm, user.getInternalId(), presentationUser);
+                }
+                return Mono.just(user);
             })
             .doOnNext(eur -> {
                 log.info("User {} locked successfully", user.getExternalId());
@@ -277,7 +281,7 @@ public class UserService {
     }
 
     private Mono<EnhancedUserRepresentation> getIdentityUser(User user, String realm) {
-        return realmApi.map(api -> api.getUser(user.getInternalId(), realm)
+        return identityIntegrationApi.map(api -> api.getUserById(realm, user.getInternalId())
             .doOnNext(eur -> {
                 log.info("Identity user found: {}", user.getExternalId());
             })

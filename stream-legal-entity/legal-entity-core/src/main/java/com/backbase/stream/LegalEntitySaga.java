@@ -533,12 +533,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     }
 
     private Mono<User> updateUserStatus(User user, String realm) {
-        if (Boolean.TRUE.equals(user.getLocked())) {
-            log.info("locking user {}", user.getInternalId());
-            return userService.lockUser(user, realm)
-                .thenReturn(user);
-        }
-        return Mono.just(user);
+        log.info("changing user {} status to locked {}", user.getInternalId(), user.getLocked());
+        return userService.changeEnableStatus(user, realm)
+            .thenReturn(user);
     }
 
     private Mono<LegalEntityTask> setupServiceAgreement(LegalEntityTask streamTask) {

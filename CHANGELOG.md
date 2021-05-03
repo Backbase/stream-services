@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.32.0]
 ### Changed
 - added lock identity user on creation flag.
-> New optional property added in legal entity stream: `backbase.stream.identity.backbase-identity-base-url` to indicate BackBase Identity base URL for clients that integrate with it.
+> New optional property added in legal entity stream: `backbase.stream.identity.identity-integration-base-url` to indicate BackBase Identity base URL for clients that integrate with it.
 
 ## [2.31.0]
 ### Changed

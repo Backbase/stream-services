@@ -27,6 +27,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>com.backbase.identity</groupId>
+                <artifactId>identity-bom</artifactId>
+                <version>${identity.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -59,11 +66,6 @@
             <groupId>io.springfox</groupId>
             <artifactId>springfox-core</artifactId>
             <version>3.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.identity</groupId>
-            <artifactId>identity-integration-spec</artifactId>
-            <version>1.0.59</version>
         </dependency>
     </dependencies>
 
@@ -141,13 +143,14 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.backbase.identity</groupId>
-                                    <artifactId>identity-integration-spec</artifactId>
-                                    <type>jar</type>
-                                    <outputDirectory>${project.build.directory}/raml/identity-integration</outputDirectory>
+                                    <artifactId>identity-integration-service</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                             </artifactItems>
-                            <includes>**/*.yaml, **/*.json, **/*.raml, **/*.md</includes>
+                            <includes>**/*.yaml, **/*.json</includes>
                         </configuration>
                     </execution>
                 </executions>
@@ -244,24 +247,13 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-identity-integration-open-api-spec</id>
-                        <goals>
-                            <goal>export</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <inputFile>${project.build.directory}/raml/identity-integration/service-api.raml</inputFile>
-                            <output>${project.build.directory}/yaml/identity-integration</output>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>generate-identity-integration-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/identity-integration/service-api/openapi.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/identity/identity-integration-outbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.identity.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.identity.integration.api.service.v1.model</modelPackage>
                         </configuration>
