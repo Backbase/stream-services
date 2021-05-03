@@ -524,11 +524,21 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 .switchIfEmpty(Mono.error(new StreamTaskException(streamTask, "Realm: " + legalEntity.getRealmName() + " not found!")))
                 .then(userService.linkLegalEntityToRealm(legalEntity))
                 .then(userService.createOrImportIdentityUser(user, legalEntity.getInternalId()))
+                .flatMap(u -> updateUserStatus(u, legalEntity.getRealmName()))
                 .doOnNext(existingUser -> {
                     user.setInternalId(existingUser.getInternalId());
                     streamTask.info(IDENTITY_USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId());
                 });
         return getExistingIdentityUser.switchIfEmpty(createNewIdentityUser);
+    }
+
+    private Mono<User> updateUserStatus(User user, String realm) {
+        if (Boolean.TRUE.equals(user.getLocked())) {
+            log.info("locking user {}", user.getInternalId());
+            return userService.lockUser(user, realm)
+                .thenReturn(user);
+        }
+        return Mono.just(user);
     }
 
     private Mono<LegalEntityTask> setupServiceAgreement(LegalEntityTask streamTask) {

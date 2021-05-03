@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+## [2.32.0]
+### Changed
+- added lock identity user on creation flag.
+
 ## [2.31.0]
 ### Changed
 - Fixing the function group delete to only happen when it is not template type (this is when using referenceJobRoles )

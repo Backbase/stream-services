@@ -15,6 +15,9 @@ import com.backbase.dbs.user.api.service.v2.model.Realm;
 import com.backbase.dbs.user.api.service.v2.model.UpdateIdentityRequest;
 import com.backbase.dbs.user.api.service.v2.model.UserCreated;
 import com.backbase.dbs.user.api.service.v2.model.UserExternal;
+import com.backbase.identity.integration.api.service.v1.RealmApi;
+import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
+import com.backbase.identity.integration.api.service.v1.model.UserRepresentation;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.User;
@@ -23,6 +26,7 @@ import com.backbase.stream.mapper.UserMapper;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -46,6 +50,7 @@ public class UserService {
 
     private final UserManagementApi usersApi;
     private final IdentityManagementApi identityManagementApi;
+    private final Optional<RealmApi> realmApi;
 
     /**
      * Get User by external ID.
@@ -225,7 +230,6 @@ public class UserService {
                 user.setExternalId(identityCreatedItem.getExternalId());
                 return user;
             })
-            .filter(u -> IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(u.getIdentityLinkStrategy()))  //if not IMPORT_FROM_IDENTIY this will return Mono.empty()! this means for instance that user internalId will not be returned although user was created
             .flatMap(this::updateIdentityUserAttributes);
     }
 
@@ -237,15 +241,49 @@ public class UserService {
      * @return {@link Mono<Void>}
      */
     public Mono<User> updateIdentityUserAttributes(User user) {
-        if (user.getAttributes() == null)
-            Mono.just(user);
+        if (IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())) {
+            if (user.getAttributes() == null)
+                Mono.just(user);
 
-        UpdateIdentityRequest replaceIdentity = new UpdateIdentityRequest();
-        replaceIdentity.attributes(user.getAttributes());
-        return identityManagementApi.updateIdentity(user.getInternalId(), replaceIdentity)
-            .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
-                log.error("Error adding user attributes: {}", badRequest.getResponseBodyAsString()))
-            .then(Mono.just(user));
+            UpdateIdentityRequest replaceIdentity = new UpdateIdentityRequest();
+            replaceIdentity.attributes(user.getAttributes());
+            return identityManagementApi.updateIdentity(user.getInternalId(), replaceIdentity)
+                .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
+                    log.error("Error adding user attributes: {}", badRequest.getResponseBodyAsString()))
+                .then(Mono.just(user));
+        }
+        return Mono.just(user);
+    }
+
+    /**
+     * Locks the user.
+     * @param user user to be locked.
+     * @param realm user's realm.
+     * @return user.
+     */
+    public Mono<User> lockUser(User user, String realm) {
+        return realmApi.map(api -> getIdentityUser(user, realm)
+            .flatMap(eur -> {
+                UserRepresentation presentationUser = mapper.toPresentation(eur);
+                presentationUser.setEnabled(false);
+                return api.putUser(user.getInternalId(), realm, presentationUser);
+            })
+            .doOnNext(eur -> {
+                log.info("User {} locked successfully", user.getExternalId());
+            })
+            .doOnError(WebClientResponseException.class, e ->
+                log.error("Error locking user {}: {}", user.getInternalId(), e.getResponseBodyAsString()))
+            .thenReturn(user)).orElse(Mono.just(user));
+    }
+
+    private Mono<EnhancedUserRepresentation> getIdentityUser(User user, String realm) {
+        return realmApi.map(api -> api.getUser(user.getInternalId(), realm)
+            .doOnNext(eur -> {
+                log.info("Identity user found: {}", user.getExternalId());
+            })
+            .doOnError(WebClientResponseException.class, e ->
+                log.error("Error retrieving identity user {}: {}", user.getInternalId(), e.getResponseBodyAsString())))
+            .orElse(Mono.empty());
     }
 
     private User handleCreateUserResult(User user, UserCreated userCreated) {
