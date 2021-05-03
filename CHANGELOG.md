@@ -2,6 +2,30 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [2.31.0]
+### Changed
+- Fixing the function group delete to only happen when it is not template type (this is when using referenceJobRoles )
+
+## [2.30.0]
+### Changed
+- Fixing NullPointerException while creating data group using products i.e. without custom data group id
+
+## [2.29.0]
+### Changed
+- Checking the response recieved from Legal entity api , user  api to is2xxSuccessful as it  returns 207 response for success.
+
+## [2.28.0]
+### Changed
+- Add "Custom Data Group Items" to Product Groups, require either Products or Custom Data Group Items (previously just Products)
+
+## [2.27.0]
+### Fixed
+- Fix for issue https://github.com/Backbase/stream-services-2.0/issues/46
+```
+While deleting a legal entity , we are trying to get user information by sending an internal id to
+service-api/v2/users/externalids/{externlaIId}?skipHierarchyCheck=true instead of /service-api/v2/users/{internalId}.
+The service-api/v2/users/externalids/{externlaIId}?skipHierarchyCheck=true returns 404 user not found as it is an internal ID and the deleting of the user fails.
+```
 
 ## [2.26.0]
 ### Changed
@@ -42,6 +66,36 @@ bootstrap:
 > - PUT <legal-entity-http>/service-agreement
 > - PUT <legal-entity-http>/async/service-agreement
 > - GET <legal-entity-http>/async/service-agreement/{unitOfWorkId}
+
+## [2.24.0]
+### Fixed
+- Add missing mapping for `accountHolderNames` in Product Ingestion SAGA
+
+## [2.23.0]
+### Changed
+- Replace DBS RAML specs (converted to OpenAPI with BOAT) to OOB OpenAPI specs for DBS 2.20.0
+- Fix all the mismatches and changes for generated code from new specs
+- Upgrade jib base image to distroless java 11
+- Upgrade to BOAT 0.14.0
+
+## [2.22.0]
+- Wrong commit that was reverted later
+
+## [2.21.0]
+### Fixed
+- Add missing 'User' schema to the 'additions' transformer in DBS clients
+
+## [2.20.0]
+### Fixed
+- Make `upsertArrangements(ProductGroupTask streamTask)` in `ProductIngestionSaga` public
+
+## [2.19.0]
+### Changed
+- Including user preferences in arrangements data
+
+## [2.18.0]
+### Changed
+- Upgrade plugins `maven-surefire-plugin` and `maven-failsafe-plugin`
 
 ## [2.17.0]
 ### Fixed
@@ -156,6 +210,18 @@ bootstrap:
               - "Entitlements - Manager"
 ```
 
+## [2.14.0]
+### Fixed
+- Fix ingestion of arrangements with child/parent relation by ordering and sequencing DBS requests
+
+## [2.13.0]
+### Added
+- Add debit and credit indicator for CustomProduct
+
+## [2.12.0]
+### Added
+- Enabling Sleuth trace ids to be propagated to the api response headers
+
 ## [2.11.0]
 ### Added
 - Packaging the Saga’s OpenAPI specs in a zip module:
@@ -184,6 +250,14 @@ bootstrap:
 ## [2.9.0]
 ### Changed
 - The master service agreement now can be manipulated during the creation of the Legal Entity, so we can add Assignable Permission Sets to it.
+
+## [2.8.0]
+### Added
+- Added BBAN to TermDeposit in LegalEntity spec
+
+## [2.7.0]
+### Fixed
+- Fixed configuration for Loan Mapping
 
 ## [2.6.0]
 ### Added
@@ -237,12 +311,27 @@ backbase:
       transaction-manager-base-url: http://transaction-manager:8080
       limit-manager-base-url: http://limits-manager:8080
 ```
+[2.29.0]: https://github.com/Backbase/stream-services-2.0/compare/2.28.0...2.29.0
+[2.28.0]: https://github.com/Backbase/stream-services-2.0/compare/2.27.0...2.28.0
+[2.27.0]: https://github.com/Backbase/stream-services-2.0/compare/2.26.0...2.27.0
 [2.26.0]: https://github.com/Backbase/stream-services-2.0/compare/2.25.0...2.26.0
-[2.25.0]: https://github.com/Backbase/stream-services-2.0/compare/2.17.0...2.25.0
+[2.25.0]: https://github.com/Backbase/stream-services-2.0/compare/2.24.0...2.25.0
+[2.24.0]: https://github.com/Backbase/stream-services-2.0/compare/2.23.0...2.24.0
+[2.23.0]: https://github.com/Backbase/stream-services-2.0/compare/2.22.0...2.23.0
+[2.22.0]: https://github.com/Backbase/stream-services-2.0/compare/2.21.0...2.22.0
+[2.21.0]: https://github.com/Backbase/stream-services-2.0/compare/2.20.0...2.21.0
+[2.20.0]: https://github.com/Backbase/stream-services-2.0/compare/2.19.0...2.20.0
+[2.19.0]: https://github.com/Backbase/stream-services-2.0/compare/2.18.0...2.19.0
+[2.18.0]: https://github.com/Backbase/stream-services-2.0/compare/2.17.0...2.18.0
 [2.17.0]: https://github.com/Backbase/stream-services-2.0/compare/2.16.0...2.17.0
 [2.16.0]: https://github.com/Backbase/stream-services-2.0/compare/2.15.0...2.16.0
-[2.15.0]: https://github.com/Backbase/stream-services-2.0/compare/2.11.0...2.15.0
+[2.15.0]: https://github.com/Backbase/stream-services-2.0/compare/2.14.0...2.15.0
+[2.14.0]: https://github.com/Backbase/stream-services-2.0/compare/2.13.0...2.14.0
+[2.13.0]: https://github.com/Backbase/stream-services-2.0/compare/2.12.0...2.13.0
+[2.12.0]: https://github.com/Backbase/stream-services-2.0/compare/2.11.0...2.12.0
 [2.11.0]: https://github.com/Backbase/stream-services-2.0/compare/2.10.0...2.11.0
 [2.10.0]: https://github.com/Backbase/stream-services-2.0/compare/2.9.0...2.10.0
-[2.9.0]: https://github.com/Backbase/stream-services-2.0/compare/2.6.0...2.9.0
+[2.9.0]: https://github.com/Backbase/stream-services-2.0/compare/2.8.0...2.9.0
+[2.8.0]: https://github.com/Backbase/stream-services-2.0/compare/2.7.0...2.8.0
+[2.7.0]: https://github.com/Backbase/stream-services-2.0/compare/2.6.0...2.7.0
 [2.6.0]: https://github.com/Backbase/stream-services-2.0/releases/tag/2.6.0

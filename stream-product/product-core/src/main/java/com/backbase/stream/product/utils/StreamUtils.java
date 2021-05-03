@@ -2,6 +2,7 @@ package com.backbase.stream.product.utils;
 
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
+import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import java.util.Collection;
 import java.util.List;
@@ -61,6 +62,11 @@ public class StreamUtils {
         return Optional.ofNullable(collection)
             .map(Collection::stream)
             .orElseGet(Stream::empty);
+    }
+
+    public static List<String> getCustomDataGroupItems(BaseProductGroup productGroup) {
+        return nullableCollectionToStream(productGroup.getCustomDataGroupItems())
+            .map(CustomDataGroupItem::getInternalId).collect(Collectors.toList());
     }
 
 }

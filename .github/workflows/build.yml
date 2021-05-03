@@ -8,7 +8,7 @@ on:
 
 jobs:
   main:
-    if: "!contains(github.event.head_commit.message, '[version bump]')"
+    if: "!contains(github.event.head_commit.message, '[version bump]') && !contains(github.event.head_commit.message, 'nobump/')"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
