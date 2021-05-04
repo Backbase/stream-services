@@ -142,7 +142,8 @@ public class AccessControlConfiguration {
         WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
-        if (backbaseStreamConfigurationProperties.getIdentity() == null) {
+        if (backbaseStreamConfigurationProperties.getIdentity() == null
+            || backbaseStreamConfigurationProperties.getIdentity().getIdentityIntegrationBaseUrl() == null) {
             log.error("missing identity url configuration");
             return null;
         }
