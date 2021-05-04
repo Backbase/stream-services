@@ -4,6 +4,7 @@ import static com.backbase.stream.test.LambdaAssertions.assertEqualsTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
@@ -82,5 +83,26 @@ class UserServiceTest {
         UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email).enabled(true)
             .credentials(Collections.emptyList());
         verify(identityIntegrationApi).updateUserById(eq(realm), eq(internalId), eq(expectedUser));
+    }
+
+    @Test
+    void changeEnableStatusDoesntChangeWhenUndefinedLocked() {
+        String internalId = "someInternalId";
+        String realm = "someRealm";
+        String email = "some@email.com";
+
+        EnhancedUserRepresentation eur = new EnhancedUserRepresentation().id(internalId).email(email).enabled(false);
+        when(identityIntegrationApi.getUserById(realm, internalId)).thenReturn(Mono.just(eur));
+
+
+        User user = new User().internalId(internalId).locked(null);
+        Mono<User> result = subject.changeEnableStatus(user, realm);
+
+
+        result.subscribe(assertEqualsTo(user));
+        verify(identityIntegrationApi).getUserById(eq(realm), eq(internalId));
+        UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email).enabled(true)
+            .credentials(Collections.emptyList());
+        verifyNoMoreInteractions(identityIntegrationApi);
     }
 }
