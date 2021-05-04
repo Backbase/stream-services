@@ -26,6 +26,7 @@ import com.backbase.stream.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +40,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 @EnableConfigurationProperties(BackbaseStreamConfigurationProperties.class)
 @Import(ProductConfiguration.class)
+@Slf4j
 public class AccessControlConfiguration {
 
     private final BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties;
@@ -140,6 +142,10 @@ public class AccessControlConfiguration {
         WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
+        if (backbaseStreamConfigurationProperties.getIdentity() == null) {
+            log.error("missing identity url configuration");
+            return null;
+        }
         com.backbase.identity.integration.api.service.ApiClient apiClient =
             new com.backbase.identity.integration.api.service.ApiClient(
                 dbsWebClient, objectMapper, dateFormat);
