@@ -68,6 +68,9 @@ class LegalEntityHttpApplicationTest {
     private com.backbase.dbs.arrangement.api.service.ApiClient accountsApiClient;
 
     @MockBean
+    private com.backbase.identity.integration.api.service.ApiClient identityApiClient;
+
+    @MockBean
     private AccessGroupService accessGroupService;
 
     @Autowired
