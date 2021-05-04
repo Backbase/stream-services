@@ -236,8 +236,6 @@ public class UserService {
     private Mono<User> updateIdentityUserAttributes(User user) {
         if (IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())
             && user.getAttributes() == null) {
-                Mono.just(user);
-
             UpdateIdentityRequest replaceIdentity = new UpdateIdentityRequest();
             replaceIdentity.attributes(user.getAttributes());
             return identityManagementApi.updateIdentity(user.getInternalId(), replaceIdentity)
