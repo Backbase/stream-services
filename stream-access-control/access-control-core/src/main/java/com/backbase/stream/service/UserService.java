@@ -233,16 +233,9 @@ public class UserService {
             .flatMap(this::updateIdentityUserAttributes);
     }
 
-
-    /**
-     * Update identity user attributes
-     *
-     * @param user
-     * @return {@link Mono<Void>}
-     */
-    public Mono<User> updateIdentityUserAttributes(User user) {
-        if (IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())) {
-            if (user.getAttributes() == null)
+    private Mono<User> updateIdentityUserAttributes(User user) {
+        if (IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())
+            && user.getAttributes() == null) {
                 Mono.just(user);
 
             UpdateIdentityRequest replaceIdentity = new UpdateIdentityRequest();
