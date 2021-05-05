@@ -14,10 +14,6 @@
     <name>Stream :: SDK :: Stream Micro Meter Support</name>
     <description>Autoconfigure Stream Micro Meter tags exposing correct information</description>
 
-    <properties>
-        <sonar.skip>true</sonar.skip>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>

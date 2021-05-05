@@ -15,10 +15,6 @@
     <packaging>jar</packaging>
     <name>Stream :: Product Sink</name>
 
-    <properties>
-        <sonar.skip>true</sonar.skip>
-    </properties>
-
     <dependencies>
 
         <dependency>

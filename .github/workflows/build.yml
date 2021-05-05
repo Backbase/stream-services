@@ -1,11 +1,10 @@
 name: Build Stream Services
-
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
-
+    types: [opened, synchronize, reopened]
 jobs:
   main:
     if: "!contains(github.event.head_commit.message, '[version bump]') && !contains(github.event.head_commit.message, 'nobump/')"

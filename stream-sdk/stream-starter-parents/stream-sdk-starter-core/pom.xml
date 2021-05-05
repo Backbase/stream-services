@@ -46,8 +46,7 @@
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
         <sonar.java.codeCoveragePlugin>jacoco</sonar.java.codeCoveragePlugin>
         <coverage.reports.dir>${project.build.directory}/coverage-reports</coverage.reports.dir>
-        <sonar.jacoco.reportPaths>${coverage.reports.dir}/jacoco.exec,${coverage.reports.dir}/jacoco-it.exec
-        </sonar.jacoco.reportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.reporting.outputDirectory}/jacoco-ut/jacoco.xml,${project.reporting.outputDirectory}/jacoco-it/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.sources>${project.basedir}/src/main/</sonar.sources>
         <sonar.tests>${project.basedir}/src/test/</sonar.tests>
         <sonar.java.binaries>target/classes/</sonar.java.binaries>
