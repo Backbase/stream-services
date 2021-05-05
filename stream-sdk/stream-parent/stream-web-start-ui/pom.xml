@@ -14,4 +14,8 @@
     <name>Stream :: SDK :: Web Start UI</name>
     <description>Shared Start Page for Web Apps based on Stream SDK</description>
 
+    <properties>
+        <sonar.skip>true</sonar.skip>
+    </properties>
+
 </project>

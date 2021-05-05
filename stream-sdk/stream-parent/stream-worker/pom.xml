@@ -13,7 +13,6 @@
     <name>Stream :: SDK :: Unit Of Worker Support</name>
 
     <properties>
-        <sonar.skip>true</sonar.skip>
         <swagger-api.version>2.1.0</swagger-api.version>
         <swagger-ui.version>3.24.3</swagger-ui.version>
         <webjars-locator.version>0.38</webjars-locator.version>
