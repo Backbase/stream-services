@@ -51,7 +51,6 @@
         </openapi-generator-maven-plugin.output>
         <openapi-generator-maven-plugin.templateDirectory>src/main/templates/openapi-generator/JavaSpring
         </openapi-generator-maven-plugin.templateDirectory>
-        <sonar.projectKey>Backbase_stream-services-2.0</sonar.projectKey>
         <sonar.organization>backbase-technology-prototyping</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
