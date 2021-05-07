@@ -1,0 +1,272 @@
+openapi: 3.0.1
+info:
+  title: Ingest Approval API
+  description: Ingestion Saga for Approvals
+  version: 0.0.1
+  x-logo:
+    url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
+    backgroundColor: "#FFFFFF"
+    altText: "Backbase logo"
+servers:
+  - url: http://legal-entity-http.proto.backbasecloud.com/
+    description: The server
+paths:
+  ###############################################
+  ## Legal Entity
+  ###############################################
+  /approval:
+    post:
+      tags:
+        - approval
+      summary: Create Approval
+#      description: Create a new Legal Entity and their supporting objects from Legal Entity
+      operationId: createApproval
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Approval'
+      responses:
+        200:
+          description: The created legal entity and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Approval'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Approval:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Approval configuration name
+        approvalTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalType'
+        policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Policy'
+        policyAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyAssignment'
+        externalServiceAgreementId:
+          $ref: '#/components/schemas/ExternalServiceAgreementId'
+        approvalTypeIdByName:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional properties
+        functionGroupIdByName:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional properties
+
+    ApprovalType:
+      type: object
+      title: "Approval Level Type"
+      properties:
+        internalId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        name:
+          type: string
+        description:
+          type: string
+        rank:
+          type: number
+    Policy:
+      type: object
+      title: "Approval Policy configuration"
+      properties:
+        internalId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        name:
+          type: string
+        description:
+          type: string
+        logicalItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyLogicalItem'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyItem'
+    PolicyItem:
+      type: object
+      title: "Policy Item Configuration"
+      properties:
+        approvalTypeId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        approvalTypeName:
+          type: string
+        numberOfApprovals:
+          type: number
+    PolicyLogicalItem:
+      type: object
+      title: "Policy Logical Item Configuration"
+      properties:
+        rank:
+          type: number
+        operator:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyItem'
+    PolicyAssignment:
+      required:
+        - policyAssignmentItems
+        - externalServiceAgreementId
+      type: object
+      properties:
+        externalServiceAgreementId:
+          $ref: '#/components/schemas/ExternalServiceAgreementId'
+        policyAssignmentItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyAssignmentItem'
+        approvalTypeAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalTypeAssignmentItem'
+      description: The policy assignment object.
+    ApprovalTypeAssignmentItem:
+      required:
+        - approvalTypeId
+        - jobProfileId
+      type: object
+      properties:
+        approvalTypeName:
+          type: string
+        jobProfileName:
+          type: string
+        approvalTypeId:
+          $ref: '#/components/schemas/Uuid'
+        jobProfileId:
+          $ref: '#/components/schemas/Id'
+      description: A single assignment of an approval type to a job profile.
+    PolicyAssignmentItem:
+      required:
+        - bounds
+        - externalServiceAgreementId
+      type: object
+      properties:
+        resource:
+          $ref: '#/components/schemas/ResourceName'
+        functions:
+          maxItems: 50
+          minItems: 1
+          type: array
+          description: Business functions to assign the policy to.
+          items:
+            $ref: '#/components/schemas/FunctionName'
+        bounds:
+          maxItems: 50
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/IntegrationPolicyAssignmentRequestBounds'
+      description: The policy assignment requesr object.
+
+    Currency:
+      title: Currency
+      required:
+        - amount
+        - currencyCode
+      type: object
+      properties:
+        amount:
+          maximum: 1.0E+18
+          minimum: -1.0E+18
+          type: string
+          description: The amount in the specified currency
+        currencyCode:
+          pattern: "^[A-Z]{3}$"
+          type: string
+          description: The alpha-3 code (complying with ISO 4217) of the currency
+            that qualifies the amount
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional properties
+    Id:
+      maxLength: 36
+      minLength: 1
+      type: string
+      description: A simple definition for an internal identifier. Can be UUID but
+        doesn't have to.
+    Uuid:
+      pattern: "^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[1-5][0-9a-fA-F]{3}-?[89abAB][0-9a-fA-F]{3}-?[0-9a-fA-F]{12}$"
+      type: string
+      description: "Universal Unique Identifier, "
+    IntegrationPolicyAssignmentRequestBounds:
+      required:
+        - policyId
+      type: object
+      properties:
+        policyName:
+          type: string
+        policyId:
+          $ref: '#/components/schemas/Uuid'
+        upperBound:
+          $ref: '#/components/schemas/Currency'
+    ResourceName:
+      maxLength: 32
+      type: string
+      description: This is the name of the resource.
+    FunctionName:
+      maxLength: 32
+      type: string
+      description: This is the name of the business function.
+    ExternalServiceAgreementId:
+      maxLength: 64
+      minLength: 1
+      type: string
+      description: A simple definition for an external service agreement identifier.
+    InternalIdentifier:
+      title: Interal Identifier
+      type: string
+      description: Internal Read Only Identifier
+      readOnly: true
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Default Message. Any further information.
+              key:
+                type: string
+                description: '{capability-name}.api.{api-key-name}. For generated
+                      validation errors this is the path in the document the error resolves
+                      to. e.g. object name + ''.'' + field'
+              context:
+                type: object
+                description: Context can be anything used to construct localised messages.
+                x-java-type: java.util.Map<String,String>
+            description: A validation error

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.backbase.stream</groupId>
+        <artifactId>stream-models</artifactId>
+        <version>2.31.0</version>
+    </parent>
+
+    <artifactId>approval-model</artifactId>
+
+    <packaging>jar</packaging>
+    <name>Stream :: Approval Model</name>
+
+    <properties>
+        <sonar.skip>true</sonar.skip>
+        <openapi-maven-plugin.input>${project.basedir}/../../api/stream-approvals/openapi.yaml</openapi-maven-plugin.input>
+        <openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</openapi-maven-plugin.output>
+        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>stream-dbs-web-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.backbase.oss</groupId>
+                <artifactId>boat-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>cursor</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${openapi-maven-plugin.input}</inputSpec>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApis>false</generateApis>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <output>${openapi-generator-maven-plugin.output}</output>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <reactive>true</reactive>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <modelPackage>com.backbase.stream.approval.model</modelPackage>
+                                <useBeanValidation>false</useBeanValidation>
+                                <useReflectionEqualsHashCode>false</useReflectionEqualsHashCode>
+                            </configOptions>
+                            <typeMappings>
+                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
+                            </typeMappings>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+
+</project>

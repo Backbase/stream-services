@@ -1,0 +1,37 @@
+# Stream config
+spring:
+  zipkin:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: http://token-converter:8080/oauth/token
+
+backbase:
+  stream:
+    dbs:
+      approvals-base-url: http://approval-service:8080
+      access-control-base-url: http://access-control:8080
+
+---
+spring:
+  profiles: moustache-bank
+  cloud:
+    kubernetes:
+      discovery:
+        # Set to false if using Eureka for service discovery
+        enabled: true
+  zipkin:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
