@@ -6,13 +6,13 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-sdk-starter-core</artifactId>
-        <version>2.31.0</version>
+        <version>2.32.0</version>
         <relativePath>stream-sdk/stream-starter-parents/stream-sdk-starter-core</relativePath>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>2.31.0</version>
+    <version>2.32.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
@@ -41,15 +41,18 @@
 
     <properties>
         <banking-services-bom.version>2.20.0</banking-services-bom.version>
+        <identity.version>1.8.3</identity.version>
         <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
         <openapi-generator-maven-plugin.library>spring-boot</openapi-generator-maven-plugin.library>
-        <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
-        <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
-        <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
-        <openapi-generator-maven-plugin.templateDirectory>src/main/templates/openapi-generator/JavaSpring</openapi-generator-maven-plugin.templateDirectory>
+        <openapi-generator-maven-plugin.output>${project.build.directory}/generated-sources/
+        </openapi-generator-maven-plugin.output>
+        <openapi-generator-maven-plugin.templateDirectory>src/main/templates/openapi-generator/JavaSpring
+        </openapi-generator-maven-plugin.templateDirectory>
+        <sonar.organization>backbase-technology-prototyping</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <build>
@@ -98,6 +101,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
+                <version>2.7</version>
                 <configuration>
                     <generateBackupPoms>false</generateBackupPoms>
                     <skip>false</skip>
@@ -106,6 +110,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>

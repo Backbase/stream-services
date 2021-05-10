@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.32.0]
 ### Added
+- added lock identity user on creation flag.
+> New conditionally mandatory property added in legal entity stream: `backbase.stream.identity.identity-integration-base-url` to indicate BackBase Identity base URL for clients that integrate with it. This property must be defined when: `backbase.stream.legalentity.sink.use-identity-integration=true`
 - Add 'build-helper-maven-plugin' for adding the generated sources (i.e. Openapi) as project's source directories.
 
 ## [2.31.0]
