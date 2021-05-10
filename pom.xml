@@ -47,10 +47,10 @@
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
         <openapi-generator-maven-plugin.library>spring-boot</openapi-generator-maven-plugin.library>
-        <openapi-generator-maven-plugin.output>${project.build.directory}/generated-sources/
-        </openapi-generator-maven-plugin.output>
-        <openapi-generator-maven-plugin.templateDirectory>src/main/templates/openapi-generator/JavaSpring
-        </openapi-generator-maven-plugin.templateDirectory>
+        <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
+        <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
+        <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
+        <openapi-generator-maven-plugin.templateDirectory>src/main/templates/openapi-generator/JavaSpring</openapi-generator-maven-plugin.templateDirectory>
         <sonar.organization>backbase-technology-prototyping</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
@@ -101,7 +101,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
-                <version>2.7</version>
                 <configuration>
                     <generateBackupPoms>false</generateBackupPoms>
                     <skip>false</skip>
@@ -110,7 +109,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>

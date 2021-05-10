@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class BackbaseStreamConfigurationProperties {
 
     private DbsConnectionProperties dbs;
+    private IdentityConnectionProperties identity;
 
     @Data
     @NoArgsConstructor
@@ -45,6 +46,15 @@ public class BackbaseStreamConfigurationProperties {
          */
         private String userProfileManagerBaseUrl = "http://user-profile-manager:8080";
 
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class IdentityConnectionProperties {
+        /**
+         * The location of Identity Service.
+         */
+        private String identityIntegrationBaseUrl = "http://identity-integration-service:8080";
     }
 
 }
