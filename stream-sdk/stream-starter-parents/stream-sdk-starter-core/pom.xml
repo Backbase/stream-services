@@ -80,6 +80,10 @@
         <!-- Stream Convention -->
         <jib-maven-plugin.image>${docker.repository.url}${project.artifactId}</jib-maven-plugin.image>
         <jib-maven-plugin.tag>${project.version}</jib-maven-plugin.tag>
+        
+        <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
+        <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
+        <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
     </properties>
 
     <dependencyManagement>
@@ -361,6 +365,25 @@
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>add-sources</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>${annotations.generated-sources-dir}</source>
+                                    <source>${openapi-generator-maven-plugin.output}/src/main/java</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
