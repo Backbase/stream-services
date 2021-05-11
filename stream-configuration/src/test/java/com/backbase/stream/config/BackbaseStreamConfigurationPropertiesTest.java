@@ -28,7 +28,15 @@ class BackbaseStreamConfigurationPropertiesTest {
         backbaseStreamConfigurationProperties2.setIdentity(identityConnectionProperties);
 
         Assertions.assertNotEquals(backbaseStreamConfigurationProperties1, backbaseStreamConfigurationProperties2);
+    }
+    
+    @Test
+    void shouldDoProperEquals_OneObject_Default() {
+        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
+                        new BackbaseStreamConfigurationProperties();
+        
         Assertions.assertNotEquals(null, backbaseStreamConfigurationProperties1);
+        Assertions.assertNotEquals("", backbaseStreamConfigurationProperties1);
         Assertions.assertEquals(backbaseStreamConfigurationProperties1, backbaseStreamConfigurationProperties1);
     }
 
@@ -40,6 +48,14 @@ class BackbaseStreamConfigurationPropertiesTest {
         backbaseStreamConfigurationProperties.setDbs(new DbsConnectionProperties());
         backbaseStreamConfigurationProperties.setIdentity(new IdentityConnectionProperties());
 
+        Assertions.assertNotEquals(0, backbaseStreamConfigurationProperties.hashCode());
+    }
+    
+    @Test
+    void shouldGetHashCode_Default() {
+        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties =
+                        new BackbaseStreamConfigurationProperties();
+        
         Assertions.assertNotEquals(0, backbaseStreamConfigurationProperties.hashCode());
     }
 
@@ -79,16 +95,133 @@ class BackbaseStreamConfigurationPropertiesTest {
     void shouldDoProperEqualsDbs() {
         DbsConnectionProperties dbs1 = new DbsConnectionProperties();
 
-        dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
-        dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
-        dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
-        dbs1.setLimitsManagerBaseUrl("http://test-limits-manager:8181");
-        dbs1.setUserManagerBaseUrl("http://test-user-manager:8181");
-        dbs1.setUserProfileManagerBaseUrl("http://test-user-profile-manager:8181");
+//        dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
+//        dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
+//        dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
+//        dbs1.setLimitsManagerBaseUrl("http://test-limits-manager:8181");
+//        dbs1.setUserManagerBaseUrl("http://test-user-manager:8181");
+//        dbs1.setUserProfileManagerBaseUrl("http://test-user-profile-manager:8181");
 
         DbsConnectionProperties dbs2 = new DbsConnectionProperties();
 
+        Assertions.assertEquals(dbs1, dbs2);
+    }
+    
+    @Test
+    void shouldDoProperEqualsDbs_TwoObjects_Different_AccessControl() {
+        DbsConnectionProperties dbs1 = new DbsConnectionProperties();
+        
+        dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
+//        dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
+//        dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
+//        dbs1.setLimitsManagerBaseUrl("http://test-limits-manager:8181");
+//        dbs1.setUserManagerBaseUrl("http://test-user-manager:8181");
+//        dbs1.setUserProfileManagerBaseUrl("http://test-user-profile-manager:8181");
+        
+        DbsConnectionProperties dbs2 = new DbsConnectionProperties();
+        
         Assertions.assertNotEquals(dbs1, dbs2);
+    }
+    
+    @Test
+    void shouldDoProperEqualsDbs_TwoObjects_Different_ArrangementManagerBaseUrl() {
+        DbsConnectionProperties dbs1 = new DbsConnectionProperties();
+        
+//        dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
+        dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
+//        dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
+//        dbs1.setLimitsManagerBaseUrl("http://test-limits-manager:8181");
+//        dbs1.setUserManagerBaseUrl("http://test-user-manager:8181");
+//        dbs1.setUserProfileManagerBaseUrl("http://test-user-profile-manager:8181");
+        
+        DbsConnectionProperties dbs2 = new DbsConnectionProperties();
+        
+        Assertions.assertNotEquals(dbs1, dbs2);
+    }
+    @Test
+    void shouldDoProperEqualsDbs_TwoObjects_Different_TransactionManagerBaseUrl() {
+        DbsConnectionProperties dbs1 = new DbsConnectionProperties();
+        
+//        dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
+//        dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
+        dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
+//        dbs1.setLimitsManagerBaseUrl("http://test-limits-manager:8181");
+//        dbs1.setUserManagerBaseUrl("http://test-user-manager:8181");
+//        dbs1.setUserProfileManagerBaseUrl("http://test-user-profile-manager:8181");
+        
+        DbsConnectionProperties dbs2 = new DbsConnectionProperties();
+        
+        Assertions.assertNotEquals(dbs1, dbs2);
+    }
+    
+    @Test
+    void shouldDoProperEqualsDbs_TwoObjects_Different_LimitsManagerBaseUrl() {
+        DbsConnectionProperties dbs1 = new DbsConnectionProperties();
+        
+//        dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
+//        dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
+//        dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
+        dbs1.setLimitsManagerBaseUrl("http://test-limits-manager:8181");
+//        dbs1.setUserManagerBaseUrl("http://test-user-manager:8181");
+//        dbs1.setUserProfileManagerBaseUrl("http://test-user-profile-manager:8181");
+        
+        DbsConnectionProperties dbs2 = new DbsConnectionProperties();
+        
+        Assertions.assertNotEquals(dbs1, dbs2);
+    }
+    
+    @Test
+    void shouldDoProperEqualsDbs_TwoObjects_Different_UserManagerBaseUrl() {
+        DbsConnectionProperties dbs1 = new DbsConnectionProperties();
+        
+//        dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
+//        dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
+//        dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
+//        dbs1.setLimitsManagerBaseUrl("http://test-limits-manager:8181");
+        dbs1.setUserManagerBaseUrl("http://test-user-manager:8181");
+//        dbs1.setUserProfileManagerBaseUrl("http://test-user-profile-manager:8181");
+        
+        DbsConnectionProperties dbs2 = new DbsConnectionProperties();
+        
+        Assertions.assertNotEquals(dbs1, dbs2);
+    }
+    
+    @Test
+    void shouldDoProperEqualsDbs_TwoObjects_Different_UserProfileManagerBaseUrl() {
+        DbsConnectionProperties dbs1 = new DbsConnectionProperties();
+        
+//        dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
+//        dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
+//        dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
+//        dbs1.setLimitsManagerBaseUrl("http://test-limits-manager:8181");
+//        dbs1.setUserManagerBaseUrl("http://test-user-manager:8181");
+        dbs1.setUserProfileManagerBaseUrl("http://test-user-profile-manager:8181");
+        
+        DbsConnectionProperties dbs2 = new DbsConnectionProperties();
+        
+        Assertions.assertNotEquals(dbs1, dbs2);
+    }
+    
+    @Test
+    void shouldDoProperEqualsDbs_TwoObjects_Nulls() {
+        DbsConnectionProperties dbs1 = new DbsConnectionProperties();
+        
+        dbs1.setAccessControlBaseUrl(null);
+        dbs1.setArrangementManagerBaseUrl(null);
+        dbs1.setTransactionManagerBaseUrl(null);
+        dbs1.setLimitsManagerBaseUrl(null);
+        dbs1.setUserManagerBaseUrl(null);
+        dbs1.setUserProfileManagerBaseUrl(null);
+        
+        DbsConnectionProperties dbs2 = new DbsConnectionProperties();
+        
+        Assertions.assertNotEquals(dbs1, dbs2);
+    }
+    
+    @Test
+    void shouldDoProperEqualsDbs_OneObject_Default() {
+        DbsConnectionProperties dbs1 = new DbsConnectionProperties();
+        
         Assertions.assertNotEquals("", dbs1);
         Assertions.assertNotEquals(null, dbs1);
         Assertions.assertEquals(dbs1, dbs1);
