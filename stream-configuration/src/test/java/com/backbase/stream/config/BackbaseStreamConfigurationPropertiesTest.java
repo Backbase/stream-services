@@ -31,6 +31,45 @@ class BackbaseStreamConfigurationPropertiesTest {
     }
     
     @Test
+    void shouldDoProperEquals_Default() {
+        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
+                        new BackbaseStreamConfigurationProperties();
+        
+        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties2 =
+                        new BackbaseStreamConfigurationProperties();
+        
+        
+        Assertions.assertEquals(backbaseStreamConfigurationProperties1, backbaseStreamConfigurationProperties2);
+    }
+    
+    @Test
+    void shouldDoProperEquals_DbsNotNull() {
+        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
+                        new BackbaseStreamConfigurationProperties();
+        
+        backbaseStreamConfigurationProperties1.setDbs(new DbsConnectionProperties());
+        
+        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties2 =
+                        new BackbaseStreamConfigurationProperties();
+        
+        
+        Assertions.assertNotEquals(backbaseStreamConfigurationProperties1, backbaseStreamConfigurationProperties2);
+    }
+    @Test
+    void shouldDoProperEquals_IdentityNotNull() {
+        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
+                        new BackbaseStreamConfigurationProperties();
+        
+        backbaseStreamConfigurationProperties1.setIdentity(new IdentityConnectionProperties());
+        
+        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties2 =
+                        new BackbaseStreamConfigurationProperties();
+        
+        
+        Assertions.assertNotEquals(backbaseStreamConfigurationProperties1, backbaseStreamConfigurationProperties2);
+    }
+    
+    @Test
     void shouldDoProperEquals_OneObject_Default() {
         BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
                         new BackbaseStreamConfigurationProperties();
