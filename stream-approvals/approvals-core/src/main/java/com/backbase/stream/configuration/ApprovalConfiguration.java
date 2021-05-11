@@ -1,6 +1,5 @@
 package com.backbase.stream.configuration;
 
-import com.backbase.dbs.approval.api.integration.ApiClient;
 import com.backbase.dbs.approval.api.integration.v2.ApprovalTypeAssignmentsApi;
 import com.backbase.dbs.approval.api.integration.v2.ApprovalTypesApi;
 import com.backbase.dbs.approval.api.integration.v2.PoliciesApi;
@@ -27,8 +26,11 @@ public class ApprovalConfiguration {
     private final BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties;
 
     @Bean
-    public ApprovalIntegrationService approvalIntegrationService(ApiClient approvalIntegrationApiClient) {
+    public ApprovalIntegrationService approvalIntegrationService(
+        com.backbase.dbs.approval.api.integration.ApiClient approvalIntegrationApiClient/*,
+        com.backbase.dbs.approval.api.service.ApiClient approvalServiceApiClient*/) {
 
+//        ApprovalsApi approvalsServiceApi = new ApprovalsApi(approvalServiceApiClient);
         ApprovalTypesApi approvalTypesApi = new ApprovalTypesApi(approvalIntegrationApiClient);
         ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi =
             new ApprovalTypeAssignmentsApi(approvalIntegrationApiClient);
@@ -48,5 +50,16 @@ public class ApprovalConfiguration {
         log.info("ApprovalsBaseUrl: {}", backbaseStreamConfigurationProperties.getDbs().getApprovalsBaseUrl());
         return apiClient;
     }
+
+    /*@Bean
+    protected com.backbase.dbs.approval.api.service.ApiClient approvalServiceApiClient(WebClient dbsWebClient,
+        ObjectMapper objectMapper, DateFormat dateFormat) {
+
+        com.backbase.dbs.approval.api.service.ApiClient apiClient =
+            new com.backbase.dbs.approval.api.service.ApiClient(dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getApprovalsBaseUrl());
+        log.info("ApprovalsBaseUrl: {}", backbaseStreamConfigurationProperties.getDbs().getApprovalsBaseUrl());
+        return apiClient;
+    }*/
 
 }

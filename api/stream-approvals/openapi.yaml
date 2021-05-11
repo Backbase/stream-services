@@ -71,6 +71,11 @@ components:
           additionalProperties:
             type: string
           description: Additional properties
+        policyIdByName:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional properties
         functionGroupIdByName:
           type: object
           additionalProperties:
@@ -130,9 +135,6 @@ components:
           items:
             $ref: '#/components/schemas/PolicyItem'
     PolicyAssignment:
-      required:
-        - policyAssignmentItems
-        - externalServiceAgreementId
       type: object
       properties:
         externalServiceAgreementId:
@@ -147,9 +149,6 @@ components:
             $ref: '#/components/schemas/ApprovalTypeAssignmentItem'
       description: The policy assignment object.
     ApprovalTypeAssignmentItem:
-      required:
-        - approvalTypeId
-        - jobProfileId
       type: object
       properties:
         approvalTypeName:
@@ -162,9 +161,6 @@ components:
           $ref: '#/components/schemas/Id'
       description: A single assignment of an approval type to a job profile.
     PolicyAssignmentItem:
-      required:
-        - bounds
-        - externalServiceAgreementId
       type: object
       properties:
         resource:

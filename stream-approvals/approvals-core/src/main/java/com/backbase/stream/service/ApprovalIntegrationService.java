@@ -14,16 +14,18 @@ import com.backbase.stream.exceptions.PolicyAssignmentException;
 import com.backbase.stream.exceptions.PolicyException;
 import com.backbase.stream.mapper.ApprovalMapper;
 import com.backbase.stream.mapper.PolicyMapper;
+import java.util.Collections;
 import java.util.Objects;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.graalvm.util.CollectionsUtil;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ApprovalIntegrationService {
 
     private final ApprovalMapper approvalMapper = Mappers.getMapper(ApprovalMapper.class);
@@ -75,6 +77,9 @@ public class ApprovalIntegrationService {
     }
 
     public Mono<PolicyAssignment> assignApprovalTypeLevels(PolicyAssignment policyAssignment) {
+        if (CollectionUtils.isEmpty(policyAssignment.getApprovalTypeAssignments())) {
+            return Mono.just(policyAssignment);
+        }
         return approvalTypeAssignmentsApi
             .postBulkAssignApprovalType(approvalMapper.mapApprovalTypeAssignment(policyAssignment))
             .map(o -> policyAssignment)
