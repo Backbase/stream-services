@@ -267,15 +267,15 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-approval-service-api-code</id>
+                        <id>generate-approval-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.approval.api.service.v2</apiPackage>
-                            <modelPackage>com.backbase.dbs.approval.api.service.v2.model</modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/approval/approval-client-api-v2.*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.approval.api.client.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.approval.api.client.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
