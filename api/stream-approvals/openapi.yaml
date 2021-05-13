@@ -64,8 +64,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PolicyAssignment'
-        externalServiceAgreementId:
-          $ref: '#/components/schemas/ExternalServiceAgreementId'
         approvalTypeIdByName:
           type: object
           additionalProperties:
@@ -97,6 +95,9 @@ components:
     Policy:
       type: object
       title: "Approval Policy configuration"
+      required:
+        - items
+        - logicalItems
       properties:
         internalId:
           $ref: '#/components/schemas/InternalIdentifier'
@@ -163,6 +164,8 @@ components:
     PolicyAssignmentItem:
       type: object
       properties:
+        externalServiceAgreementId:
+          $ref: '#/components/schemas/ExternalServiceAgreementId'
         resource:
           $ref: '#/components/schemas/ResourceName'
         functions:

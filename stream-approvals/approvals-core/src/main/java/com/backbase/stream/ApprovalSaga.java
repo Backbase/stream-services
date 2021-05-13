@@ -2,19 +2,16 @@ package com.backbase.stream;
 
 import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
 
-
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.stream.approval.model.Approval;
 import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.Policy;
-import com.backbase.stream.approval.model.PolicyAssignment;
 import com.backbase.stream.approval.model.PolicyAssignmentItem;
 import com.backbase.stream.approval.model.PolicyItem;
 import com.backbase.stream.exceptions.ApprovalTypeException;
 import com.backbase.stream.exceptions.PolicyAssignmentException;
 import com.backbase.stream.exceptions.PolicyException;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.ApprovalIntegrationService;
 import com.backbase.stream.worker.StreamTaskExecutor;
@@ -25,12 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.reactivestreams.Publisher;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.cloud.sleuth.annotation.SpanTag;
 import org.springframework.stereotype.Component;
@@ -56,8 +50,6 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
     public static final String UPSERT_POLICY_ASSIGNMENT = "upsert-policy-assignments";
     public static final String ASSIGNMENT_APPROVAL_TYPE_LEVELS = "assignment-approval-type-levels";
     public static final String FAILED = "failed";
-    public static final String EXISTS = "exists";
-    public static final String CREATED = "created";
     public static final String UPSERT = "upsert";
     public static final String UPSERT_APPROVAL_TYPE = "upsert-approval-type";
     public static final String ASSIGN_POLICY = "assign-policy";
@@ -139,12 +131,8 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
 
         return Flux.fromStream(nullableCollectionToStream(task.getData().getPolicyAssignments()))
             .map(pa -> {
-                if (Objects.isNull(pa.getExternalServiceAgreementId())) {
-                    pa.setExternalServiceAgreementId(task.getApproval().getExternalServiceAgreementId());
-                }
-                return pa;
-            })
-            .map(pa -> {
+                String externalServiceAgreementId = pa.getExternalServiceAgreementId();
+                log.debug("pa.getExternalServiceAgreementId(): {}", externalServiceAgreementId);
                 List<PolicyAssignmentItem> policyAssignmentItems = pa.getPolicyAssignmentItems();
                 policyAssignmentItems.stream()
                     .map(PolicyAssignmentItem::getBounds)
@@ -169,10 +157,10 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
     @ContinueSpan(log = ASSIGNMENT_APPROVAL_TYPE_LEVELS)
     private Mono<ApprovalTask> assignmentApprovalTypeLevels(@SpanTag(value = "streamTask") ApprovalTask task) {
         task.info(ASSIGN_APPROVAL_TYPE_LEVEL, UPSERT, null, null, null, "Assign Approval Type level");
-        return Mono.just(task.getData())
-            .filter(approval -> Objects.nonNull(approval.getExternalServiceAgreementId()))
-            .flatMap(approval -> {
-                String externalServiceAgreementId = approval.getExternalServiceAgreementId();
+        Approval approval = task.getData();
+        return Flux.fromStream(nullableCollectionToStream(task.getData().getPolicyAssignments()))
+            .flatMap(pa -> {
+                String externalServiceAgreementId = pa.getExternalServiceAgreementId();
                 return accessGroupService.getServiceAgreementByExternalId(externalServiceAgreementId)
                     .flatMap(sa -> accessGroupService.getFunctionGroupsForServiceAgreement(sa.getInternalId()))
                     .map(fgs -> fgs.stream()
@@ -199,11 +187,9 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
                                     ata.setJobProfileId(functionGroupId);
                                 }
                             });
-                        return approval;
+                        return pa;
                     });
             })
-            .map(a -> Optional.ofNullable(a.getPolicyAssignments()).orElse(Collections.emptyList()))
-            .flatMapMany(Flux::fromIterable)
             .flatMap(approvalIntegrationService::assignApprovalTypeLevels)
             .onErrorResume(PolicyAssignmentException.class, e -> {
                 task.error(ASSIGN_POLICY, UPSERT_POLICY_ASSIGNMENT, FAILED, null, null,
