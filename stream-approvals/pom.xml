@@ -15,7 +15,7 @@
 
     <modules>
         <module>approvals-core</module>
-        <module>approval-bootstrap-task</module>
+        <module>approvals-bootstrap-task</module>
     </modules>
 
 </project>
