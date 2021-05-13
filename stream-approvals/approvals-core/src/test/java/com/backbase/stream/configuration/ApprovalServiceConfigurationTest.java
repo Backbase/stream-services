@@ -1,9 +1,9 @@
 package com.backbase.stream.configuration;
 
-import com.backbase.dbs.approval.api.client.ApiClient;
+import com.backbase.dbs.approval.api.service.ApiClient;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties.DbsConnectionProperties;
-import com.backbase.stream.service.ApprovalClientService;
+import com.backbase.stream.service.ApprovalIntegrationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.junit.Test;
@@ -11,19 +11,19 @@ import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
 import org.springframework.web.reactive.function.client.WebClient;
 
-public class ApprovalClientConfigurationTest {
+public class ApprovalServiceConfigurationTest {
 
     @Test
     public void approvalIntegrationService() {
         BackbaseStreamConfigurationProperties properties = Mockito.mock(BackbaseStreamConfigurationProperties.class);
 
-        ApprovalClientConfiguration approvalClientConfiguration =
-            Mockito.spy(new ApprovalClientConfiguration(properties));
+        ApprovalServiceConfiguration approvalServiceConfiguration =
+            Mockito.spy(new ApprovalServiceConfiguration(properties));
 
-        ApprovalClientService approvalClientService =
-            approvalClientConfiguration.approvalClientService(Mockito.mock(ApiClient.class));
+        ApprovalIntegrationService approvalIntegrationService =
+            approvalServiceConfiguration.approvalIntegrationService(Mockito.mock(ApiClient.class));
 
-        Assertions.assertNotNull(approvalClientService);
+        Assertions.assertNotNull(approvalIntegrationService);
 
     }
 
@@ -31,8 +31,8 @@ public class ApprovalClientConfigurationTest {
     public void approvalIntegrationApiClient() {
         BackbaseStreamConfigurationProperties properties = Mockito.mock(BackbaseStreamConfigurationProperties.class);
 
-        ApprovalClientConfiguration approvalClientConfiguration =
-            Mockito.spy(new ApprovalClientConfiguration(properties));
+        ApprovalServiceConfiguration approvalServiceConfiguration =
+            Mockito.spy(new ApprovalServiceConfiguration(properties));
 
         String approvalBaseUrl = "http://approval";
         WebClient dbsWebClient = Mockito.mock(WebClient.class);
@@ -44,11 +44,11 @@ public class ApprovalClientConfigurationTest {
         Mockito.when(properties.getDbs()).thenReturn(dbsConnectionProperties);
         Mockito.when(dbsConnectionProperties.getApprovalsBaseUrl()).thenReturn(approvalBaseUrl);
 
-        Mockito.doReturn(apiClientReturned).when(approvalClientConfiguration)
+        Mockito.doReturn(apiClientReturned).when(approvalServiceConfiguration)
             .createApiClient(dbsWebClient, objectMapper, dateFormat);
 
         ApiClient apiClient =
-            approvalClientConfiguration.approvalClientApiClient(dbsWebClient, objectMapper, dateFormat);
+            approvalServiceConfiguration.approvalIntegrationApiClient(dbsWebClient, objectMapper, dateFormat);
 
         Assertions.assertNotNull(apiClient);
         Assertions.assertSame(apiClientReturned, apiClient);

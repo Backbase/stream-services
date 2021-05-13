@@ -1,11 +1,11 @@
 package com.backbase.stream.service;
 
-import com.backbase.dbs.approval.api.integration.v2.ApprovalTypeAssignmentsApi;
-import com.backbase.dbs.approval.api.integration.v2.ApprovalTypesApi;
-import com.backbase.dbs.approval.api.integration.v2.PoliciesApi;
-import com.backbase.dbs.approval.api.integration.v2.PolicyAssignmentsApi;
-import com.backbase.dbs.approval.api.integration.v2.model.PostApprovalTypeResponse;
-import com.backbase.dbs.approval.api.integration.v2.model.PostPolicyResponse;
+import com.backbase.dbs.approval.api.service.v2.ApprovalTypeAssignmentsApi;
+import com.backbase.dbs.approval.api.service.v2.ApprovalTypesApi;
+import com.backbase.dbs.approval.api.service.v2.PoliciesApi;
+import com.backbase.dbs.approval.api.service.v2.PolicyAssignmentsApi;
+import com.backbase.dbs.approval.api.service.v2.model.PostApprovalTypeResponse;
+import com.backbase.dbs.approval.api.service.v2.model.PostPolicyResponse;
 import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.Policy;
 import com.backbase.stream.approval.model.PolicyAssignment;
@@ -15,9 +15,11 @@ import com.backbase.stream.exceptions.PolicyException;
 import com.backbase.stream.mapper.ApprovalMapper;
 import com.backbase.stream.mapper.PolicyMapper;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import org.springframework.http.HttpRequest;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -79,7 +81,7 @@ public class ApprovalIntegrationService {
             return Mono.just(policyAssignment);
         }
         return approvalTypeAssignmentsApi
-            .postBulkAssignApprovalType(approvalMapper.mapApprovalTypeAssignment(policyAssignment))
+            .postBulk(approvalMapper.mapApprovalTypeAssignment(policyAssignment))
             .map(o -> policyAssignment)
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .onErrorResume(WebClientResponseException.class, exception ->
@@ -89,9 +91,11 @@ public class ApprovalIntegrationService {
     }
 
     private void handleWebClientResponseException(WebClientResponseException webclientResponseException) {
+        Objects.requireNonNull(webclientResponseException);
+        Optional<HttpRequest> responseExceptionRequest = Optional.ofNullable(webclientResponseException.getRequest());
         log.error("Bad Request: \n[{}]: {}\nResponse: {}",
-            Objects.requireNonNull(webclientResponseException.getRequest()).getMethod(),
-            webclientResponseException.getRequest().getURI(),
+            responseExceptionRequest.map(HttpRequest::getMethod).orElse(null),
+            responseExceptionRequest.map(HttpRequest::getURI).orElse(null),
             webclientResponseException.getResponseBodyAsString());
     }
 

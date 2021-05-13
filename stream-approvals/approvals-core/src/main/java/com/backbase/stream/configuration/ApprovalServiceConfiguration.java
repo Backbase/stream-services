@@ -1,10 +1,10 @@
 package com.backbase.stream.configuration;
 
-import com.backbase.dbs.approval.api.integration.ApiClient;
-import com.backbase.dbs.approval.api.integration.v2.ApprovalTypeAssignmentsApi;
-import com.backbase.dbs.approval.api.integration.v2.ApprovalTypesApi;
-import com.backbase.dbs.approval.api.integration.v2.PoliciesApi;
-import com.backbase.dbs.approval.api.integration.v2.PolicyAssignmentsApi;
+import com.backbase.dbs.approval.api.service.ApiClient;
+import com.backbase.dbs.approval.api.service.v2.ApprovalTypeAssignmentsApi;
+import com.backbase.dbs.approval.api.service.v2.ApprovalTypesApi;
+import com.backbase.dbs.approval.api.service.v2.PoliciesApi;
+import com.backbase.dbs.approval.api.service.v2.PolicyAssignmentsApi;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.service.ApprovalIntegrationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +23,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @EnableConfigurationProperties({BackbaseStreamConfigurationProperties.class})
 @RequiredArgsConstructor
 @Slf4j
-public class ApprovalIntegrationConfiguration {
+public class ApprovalServiceConfiguration {
 
     private final BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties;
 

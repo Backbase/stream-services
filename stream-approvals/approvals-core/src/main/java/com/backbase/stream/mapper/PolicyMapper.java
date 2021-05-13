@@ -1,7 +1,8 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.dbs.approval.api.integration.v2.model.IntegrationPostPolicyAssignmentBulkRequest;
-import com.backbase.dbs.approval.api.integration.v2.model.PostPolicyRequest;
+import com.backbase.dbs.approval.api.service.v2.model.PostPolicyAssignmentBulkRequest;
+import com.backbase.dbs.approval.api.service.v2.model.PostPolicyRequest;
+import com.backbase.dbs.approval.api.service.v2.model.PresentationPostPolicyAssignmentBulkRequest;
 import com.backbase.stream.approval.model.Policy;
 import com.backbase.stream.approval.model.PolicyAssignment;
 import java.util.Collections;
@@ -17,11 +18,11 @@ public interface PolicyMapper {
     PostPolicyRequest mapPolicy(Policy policy);
 
     @Mapping(source = "policyAssignmentItems", target = "policyAssignments")
-    IntegrationPostPolicyAssignmentBulkRequest mapPolicyAssignments(PolicyAssignment policyAssignment);
+    PresentationPostPolicyAssignmentBulkRequest mapPolicyAssignments(PolicyAssignment policyAssignment);
 
     @AfterMapping
     default void afterPolicyAssignmentsMapping(PolicyAssignment policyAssignment,
-        @MappingTarget IntegrationPostPolicyAssignmentBulkRequest bulkRequest) {
+        @MappingTarget PostPolicyAssignmentBulkRequest bulkRequest) {
         Optional.ofNullable(bulkRequest.getPolicyAssignments()).orElse(Collections.emptyList())
             .forEach(pa -> pa.setExternalServiceAgreementId(policyAssignment.getExternalServiceAgreementId()));
     }
