@@ -11,9 +11,8 @@ import com.backbase.stream.approval.model.PolicyItem;
 import com.backbase.stream.exceptions.ApprovalTypeException;
 import com.backbase.stream.exceptions.PolicyAssignmentException;
 import com.backbase.stream.exceptions.PolicyException;
-import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.service.AccessGroupService;
-import com.backbase.stream.service.ApprovalIntegrationService;
+import com.backbase.stream.service.ApprovalsIntegrationService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import java.util.Collection;
@@ -32,10 +31,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Legal Entity Saga. This Service creates Legal Entities and their supporting objects from a {@link LegalEntity}
- * aggregate object. For each Legal Entity object it will either retrieve the existing Legal Entity or create a new one.
- * Next it will either create of update the Administrator users which are used to create a Master Service agreement.
- * After the users are created / retrieved and enriched with their internal Ids we can setup the Master Service
+ * Approval Saga. This Service creates Approvals and their supporting objects from a {@link Approval}
+ * aggregate object. For each Approval object it will either create a new one.
+ * Next it will assign all defined policies
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -55,7 +53,7 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
     public static final String ASSIGN_POLICY = "assign-policy";
 
     private final AccessGroupService accessGroupService;
-    private final ApprovalIntegrationService approvalIntegrationService;
+    private final ApprovalsIntegrationService approvalsIntegrationService;
 
     @Override
     public Mono<ApprovalTask> executeTask(@SpanTag(value = "streamTask") ApprovalTask streamTask) {
@@ -76,7 +74,7 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
     private Mono<ApprovalTask> upsertApprovalTypes(@SpanTag(value = "streamTask") ApprovalTask task) {
         task.info(APPROVAL_TYPE_ENTITY, UPSERT, null, null, null, "Upsert Approval Types");
         return Flux.fromStream(nullableCollectionToStream(task.getData().getApprovalTypes()))
-            .flatMap(approvalIntegrationService::createApprovalType)
+            .flatMap(approvalsIntegrationService::createApprovalType)
             .onErrorResume(ApprovalTypeException.class, approvalTypeException -> {
                 task.error(APPROVAL_TYPE_ENTITY, UPSERT_APPROVAL_TYPE, FAILED, null, null,
                     approvalTypeException, approvalTypeException.getHttpResponse(),
@@ -106,7 +104,7 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
                     .forEach(li -> propagateCreatedApprovalTypeId(approvalTypeIdByName, li.getItems()));
                 return p;
             })
-            .flatMap(approvalIntegrationService::createPolicy)
+            .flatMap(approvalsIntegrationService::createPolicy)
             .onErrorResume(PolicyException.class, policyException -> {
                 task.error(POLICY_ENTITY, UPSERT_POLICY, FAILED, null, null,
                     policyException, policyException.getHttpResponse(),
@@ -144,7 +142,7 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
                     });
                 return pa;
             })
-            .flatMap(approvalIntegrationService::assignPolicies)
+            .flatMap(approvalsIntegrationService::assignPolicies)
             .onErrorResume(PolicyAssignmentException.class, e -> {
                 task.error(ASSIGN_POLICY, UPSERT_POLICY_ASSIGNMENT, FAILED, null, null, e,
                     e.getHttpResponse(), e.getMessage());
@@ -190,7 +188,7 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
                         return pa;
                     });
             })
-            .flatMap(approvalIntegrationService::assignApprovalTypeLevels)
+            .flatMap(approvalsIntegrationService::assignApprovalTypeLevels)
             .onErrorResume(PolicyAssignmentException.class, e -> {
                 task.error(ASSIGN_POLICY, UPSERT_POLICY_ASSIGNMENT, FAILED, null, null,
                     e, e.getHttpResponse(), e.getMessage());

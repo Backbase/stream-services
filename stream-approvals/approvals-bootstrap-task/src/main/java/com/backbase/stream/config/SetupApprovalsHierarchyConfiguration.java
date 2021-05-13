@@ -20,7 +20,7 @@ import reactor.core.publisher.Flux;
 @AllArgsConstructor
 @Slf4j
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
-public class SetupLegalEntityHierarchyConfiguration {
+public class SetupApprovalsHierarchyConfiguration {
 
     private final ApprovalSaga approvalSaga;
     private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
@@ -46,7 +46,7 @@ public class SetupLegalEntityHierarchyConfiguration {
                 .doOnNext(StreamTask::logSummary)
                 .collectList()
                 .block();
-            log.info("Finished bootstrapping Legal Entity Structure");
+            log.info("Finished bootstrapping Approval Structure");
             System.exit(0);
         }
     }

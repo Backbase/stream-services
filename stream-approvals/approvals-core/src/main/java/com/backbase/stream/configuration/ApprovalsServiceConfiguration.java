@@ -6,7 +6,7 @@ import com.backbase.dbs.approval.api.service.v2.ApprovalTypesApi;
 import com.backbase.dbs.approval.api.service.v2.PoliciesApi;
 import com.backbase.dbs.approval.api.service.v2.PolicyAssignmentsApi;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
-import com.backbase.stream.service.ApprovalIntegrationService;
+import com.backbase.stream.service.ApprovalsIntegrationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import lombok.RequiredArgsConstructor;
@@ -23,19 +23,19 @@ import org.springframework.web.reactive.function.client.WebClient;
 @EnableConfigurationProperties({BackbaseStreamConfigurationProperties.class})
 @RequiredArgsConstructor
 @Slf4j
-public class ApprovalServiceConfiguration {
+public class ApprovalsServiceConfiguration {
 
     private final BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties;
 
     @Bean
-    public ApprovalIntegrationService approvalIntegrationService(ApiClient approvalIntegrationApiClient) {
+    public ApprovalsIntegrationService approvalIntegrationService(ApiClient approvalIntegrationApiClient) {
 
         ApprovalTypesApi approvalTypesApi = new ApprovalTypesApi(approvalIntegrationApiClient);
         ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi =
             new ApprovalTypeAssignmentsApi(approvalIntegrationApiClient);
         PoliciesApi policiesApi = new PoliciesApi(approvalIntegrationApiClient);
         PolicyAssignmentsApi policyAssignmentsApi = new PolicyAssignmentsApi(approvalIntegrationApiClient);
-        return new ApprovalIntegrationService(approvalTypesApi, approvalTypeAssignmentsApi,
+        return new ApprovalsIntegrationService(approvalTypesApi, approvalTypeAssignmentsApi,
             policiesApi, policyAssignmentsApi);
     }
 

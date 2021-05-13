@@ -9,11 +9,11 @@
         <relativePath>../../stream-sdk/stream-starter-parents/stream-task-starter-parent</relativePath>
     </parent>
 
-    <artifactId>approval-bootstrap-task</artifactId>
+    <artifactId>approvals-bootstrap-task</artifactId>
     <version>2.33.0</version>
 
     <packaging>jar</packaging>
-    <name>Stream :: Approval Bootstrap Task</name>
+    <name>Stream :: Approvals Bootstrap Task</name>
 
     <dependencies>
 
@@ -27,12 +27,6 @@
             <artifactId>approvals-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <!--<dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>approval-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

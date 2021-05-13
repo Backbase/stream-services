@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @RequiredArgsConstructor
-public class ApprovalIntegrationService {
+public class ApprovalsIntegrationService {
 
     private final ApprovalMapper approvalMapper = Mappers.getMapper(ApprovalMapper.class);
     private final PolicyMapper policyMapper = Mappers.getMapper(PolicyMapper.class);
