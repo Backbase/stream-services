@@ -1,5 +1,6 @@
 package com.backbase.stream.webclient;
 
+import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
@@ -109,7 +110,8 @@ public class DbsWebClientConfigurationTest {
         WebClient webClient = dbsWebClientConfiguration.dbsWebClient(
             objectMapper,
             oAuth2AuthorizedClientManager,
-            builder);
+            builder,
+            new DbsWebClientConfigurationProperties());
 
         Assert.assertNotNull(webClient);
 
