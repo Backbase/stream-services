@@ -12,15 +12,14 @@ servers:
     description: The server
 paths:
   ###############################################
-  ## Legal Entity
+  ## Approval
   ###############################################
-  /approval:
+  /approvals:
     post:
       tags:
         - approval
-      summary: Create Approval
-#      description: Create a new Legal Entity and their supporting objects from Legal Entity
-      operationId: createApproval
+      summary: Create Approvals
+      operationId: createApprovals
       requestBody:
         content:
           application/json:

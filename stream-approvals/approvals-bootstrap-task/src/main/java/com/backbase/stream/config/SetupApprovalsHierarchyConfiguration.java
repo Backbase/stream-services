@@ -31,22 +31,21 @@ public class SetupApprovalsHierarchyConfiguration {
     }
 
     private void run(String... args) {
-        log.debug("Approval: {}", bootstrapConfigurationProperties.getApproval());
-        Approval approval = bootstrapConfigurationProperties.getApproval();
-        if (approval == null) {
-            log.error("Failed to load Approval Structure");
+        log.debug("Approvals: {}", bootstrapConfigurationProperties.getApprovals());
+        List<Approval> approvals = bootstrapConfigurationProperties.getApprovals();
+        if (approvals == null) {
+            log.error("Failed to load Approvals Structure");
             System.exit(1);
         } else {
-            log.info("Bootstrapping Root Approval Structure");
-            List<Approval> aggregates = Collections.singletonList(bootstrapConfigurationProperties.getApproval());
+            log.info("Bootstrapping Root Approvals Structure");
 
-            Flux.fromIterable(aggregates)
+            Flux.fromIterable(bootstrapConfigurationProperties.getApprovals())
                 .map(ApprovalTask::new)
                 .flatMap(approvalSaga::executeTask)
                 .doOnNext(StreamTask::logSummary)
                 .collectList()
                 .block();
-            log.info("Finished bootstrapping Approval Structure");
+            log.info("Finished bootstrapping Approvals Structure");
             System.exit(0);
         }
     }
