@@ -46,6 +46,11 @@ public class BackbaseStreamConfigurationProperties {
          */
         private String userProfileManagerBaseUrl = "http://user-profile-manager:8080";
 
+        /**
+         * The location of DBS User Profile Manager Service.
+         */
+        private String approvalsBaseUrl = "http://approval-service:8080";
+
     }
 
     @Data

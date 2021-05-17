@@ -3,6 +3,55 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.34.0]
+### Added
+- Included a new approvals saga implemented by the Approvals Bootstrap Task.
+ > Please be aware that this saga is not idempotent due to some product limitations.
+ > Mor information in the wiki page
+ > an example on how to configure it is found below
+
+    ```yaml
+    bootstrap:
+      approvals:
+        - name: 4 eye approval policy
+            approvalTypes:
+              - name: Supervisor
+                description: Supervisor approval level
+                rank: 1
+              - name: HelpDesk
+                description: Digital helpdesk and Operations User
+                rank: 2
+            policies:
+              - name: 4 eye policy
+                description: Policy that requires approval from supervisor
+                logicalItems:
+                  - rank: 1
+                    items:
+                      - approvalTypeName: Supervisor
+                        numberOfApprovals: 1
+                  - rank: 2
+                    operator: OR
+                    items:
+                      - approvalTypeName: HelpDesk
+                        numberOfApprovals: 2
+            policyAssignments:
+              - externalServiceAgreementId: sa_coutts-bank
+                policyAssignmentItems:
+                  - functions:
+                      - Assign Permissions
+                    bounds:
+                      - policyName: 4 eye policy
+                  - functions:
+                      - Manage Data Groups
+                    bounds:
+                      - policyName: 4 eye policy
+                approvalTypeAssignments:
+                  - approvalTypeName: Supervisor
+                    jobProfileName: SUUS
+                  - approvalTypeName: HelpDesk
+                    jobProfileName: Digital helpdesk and Operations User
+    ```
+
 ## [2.32.0]
 ### Added
 - added lock identity user on creation flag.
@@ -318,6 +367,8 @@ backbase:
       transaction-manager-base-url: http://transaction-manager:8080
       limit-manager-base-url: http://limits-manager:8080
 ```
+
+[2.34.0]: https://github.com/Backbase/stream-services-2.0/compare/2.33.0...2.34.0
 [2.32.0]: https://github.com/Backbase/stream-services-2.0/compare/2.31.0...2.32.0
 [2.31.0]: https://github.com/Backbase/stream-services-2.0/compare/2.30.0...2.31.0
 [2.30.0]: https://github.com/Backbase/stream-services-2.0/compare/2.29.0...2.30.0

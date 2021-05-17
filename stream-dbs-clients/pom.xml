@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -149,6 +149,14 @@
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.dbs.approval</groupId>
+                                    <artifactId>approval-service</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
                             </artifactItems>
                             <includes>**/*.yaml, **/*.json</includes>
                         </configuration>
@@ -241,9 +249,21 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/limit/limit-service-api-v*.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/limit/limit-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.limit.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.limit.api.service.v2.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-approval-service-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.approval.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.approval.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
