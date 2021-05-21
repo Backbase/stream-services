@@ -372,6 +372,7 @@ backbase:
 ```
 
 [2.34.0]: https://github.com/Backbase/stream-services-2.0/compare/2.33.0...2.34.0
+[2.33.0]: https://github.com/Backbase/stream-services-2.0/compare/2.32.0...2.33.0
 [2.32.0]: https://github.com/Backbase/stream-services-2.0/compare/2.31.0...2.32.0
 [2.31.0]: https://github.com/Backbase/stream-services-2.0/compare/2.30.0...2.31.0
 [2.30.0]: https://github.com/Backbase/stream-services-2.0/compare/2.29.0...2.30.0
