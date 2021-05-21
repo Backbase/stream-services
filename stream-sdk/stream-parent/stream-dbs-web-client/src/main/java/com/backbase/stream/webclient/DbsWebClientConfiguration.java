@@ -1,20 +1,16 @@
 package com.backbase.stream.webclient;
 
+import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
 import com.backbase.stream.webclient.logging.CustomLogger;
-import com.backbase.stream.webclient.logging.LogFilters;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.TimeZone;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesRegistrationAdapter;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -22,30 +18,26 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
-import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.ClientCredentialsReactiveOAuth2AuthorizedClientProvider;
-import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientProvider;
+import org.springframework.security.oauth2.client.*;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.InMemoryReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.ExchangeFunction;
-import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.client.*;
 import reactor.core.publisher.Mono;
 import reactor.netty.channel.BootstrapHandlers;
 import reactor.netty.http.client.HttpClient;
+
+import java.text.DateFormat;
+import java.util.*;
 
 
 /**
  * DBS Web Client Configuration to be used by Stream Services that communicate with DBS.
  */
 @Configuration
+@EnableConfigurationProperties(DbsWebClientConfigurationProperties.class)
 @Slf4j
 public class DbsWebClientConfiguration {
 
@@ -91,19 +83,43 @@ public class DbsWebClientConfiguration {
     @Bean
     public WebClient dbsWebClient(ObjectMapper objectMapper,
                                   ReactiveOAuth2AuthorizedClientManager reactiveOAuth2AuthorizedClientManager,
-                                  WebClient.Builder builder) {
+                                  WebClient.Builder builder,
+                                  DbsWebClientConfigurationProperties dbsWebClientConfigurationProperties) {
 
         ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2ClientFilter = new ServerOAuth2AuthorizedClientExchangeFilterFunction(reactiveOAuth2AuthorizedClientManager);
-        oauth2ClientFilter.setDefaultClientRegistrationId("dbs");
-
+        oauth2ClientFilter.setDefaultClientRegistrationId(dbsWebClientConfigurationProperties.getDefaultClientRegistrationId());
 
         builder
             .defaultHeader("Content-Type", MediaType.APPLICATION_JSON.toString())
             .defaultHeader("Accept", MediaType.APPLICATION_JSON.toString())
+            .filter((clientRequest, exchangeFunction) -> {
+
+                final ClientRequest newRequest = Optional.ofNullable(dbsWebClientConfigurationProperties.getAdditionalHeaders())
+                    .map(additionalHeaders -> {
+                        log.debug("Adding additional headers: {} from configuration  Request: {}", additionalHeaders, clientRequest.url());
+                        return ClientRequest.from(clientRequest)
+                            .headers(httpHeaders -> httpHeaders.addAll(additionalHeaders))
+                            .build();
+                    })
+                    .orElse(clientRequest);
+
+                return Mono.subscriberContext().flatMap(context -> {
+                    ClientRequest contextRequest = context.<MultiValueMap<String, String>>getOrEmpty("headers")
+                        .map(headers -> {
+                            log.debug("Adding additional headers: {} from Reactive subscriber context to Request: {}", headers, clientRequest.url());
+                            return ClientRequest.from(clientRequest)
+                                .headers(httpHeaders -> httpHeaders.addAll(headers))
+                                .build();
+                        })
+                        .orElse(newRequest);
+
+                    return exchangeFunction.exchange(contextRequest);
+                });
+            })
             .filter(new CsrfClientExchangeFilterFunction())
             .filter(oauth2ClientFilter);
 
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             HttpClient httpClient = HttpClient
                 .create()
                 .tcpConfiguration(tcpClient -> tcpClient.bootstrap(b -> BootstrapHandlers.updateLogSupport(b, new CustomLogger(DbsWebClientConfiguration.class))));

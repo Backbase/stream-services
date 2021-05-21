@@ -1,6 +1,7 @@
 package com.backbase.stream;
 
 import com.backbase.stream.webclient.DbsWebClientConfiguration;
+import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -73,7 +74,7 @@ public class AbstractServiceIntegrationTests {
         oAuth2AuthorizedClientManager.setAuthorizedClientProvider(new ClientCredentialsReactiveOAuth2AuthorizedClientProvider());
 
 
-        return dbsWebClientConfiguration.dbsWebClient(objectMapper, oAuth2AuthorizedClientManager, builder);
+        return dbsWebClientConfiguration.dbsWebClient(objectMapper, oAuth2AuthorizedClientManager, builder, new DbsWebClientConfigurationProperties());
     }
 
     protected ObjectMapper getObjectMapper() {

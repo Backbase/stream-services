@@ -40,7 +40,7 @@
         <swagger-annotations-version>1.5.23</swagger-annotations-version>
 
         <!-- other config -->
-        <jacoco.version>0.8.5</jacoco.version>
+        <jacoco.version>0.8.7</jacoco.version>
         <skip.integration.tests>false</skip.integration.tests>
         <skip.unit.tests>false</skip.unit.tests>
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
