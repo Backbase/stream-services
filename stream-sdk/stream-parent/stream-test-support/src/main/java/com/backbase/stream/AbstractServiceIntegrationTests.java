@@ -7,12 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.internal.PlatformDependent;
-import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.util.Collections;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.ClientCredentialsReactiveOAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService;
@@ -22,8 +17,11 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Hooks;
-import reactor.netty.channel.BootstrapHandlers;
-import reactor.netty.http.client.HttpClient;
+
+import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -54,12 +52,6 @@ public class AbstractServiceIntegrationTests {
 
         WebClient.Builder builder = WebClient.builder();
 
-        HttpClient httpClient = HttpClient.create()
-            .wiretap(true)
-            .tcpConfiguration(tcpClient ->
-                tcpClient.bootstrap(bootstrap ->
-                    BootstrapHandlers.updateLogSupport(bootstrap, new CustomLogger(HttpClient.class))));
-        builder.clientConnector(new ReactorClientHttpConnector(httpClient));
 
         List<ClientRegistration> registrations = Collections.singletonList(clientRegistration);
         InMemoryReactiveClientRegistrationRepository registrationRepository = new InMemoryReactiveClientRegistrationRepository(registrations);

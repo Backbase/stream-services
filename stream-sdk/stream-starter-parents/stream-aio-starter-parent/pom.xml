@@ -49,7 +49,7 @@
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-kubernetes-config</artifactId>
+            <artifactId>spring-cloud-starter-kubernetes-client</artifactId>
         </dependency>
 
 

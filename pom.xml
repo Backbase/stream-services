@@ -32,12 +32,12 @@
 
         <module>stream-audit</module>
         <module>stream-product-catalog</module>
-        <module>stream-config-server</module>
 
         <module>stream-legal-entity</module>
         <module>stream-limits</module>
 
         <module>stream-approvals</module>
+
 
     </modules>
 

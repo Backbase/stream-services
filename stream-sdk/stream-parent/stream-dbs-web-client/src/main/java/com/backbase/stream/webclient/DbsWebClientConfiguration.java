@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.netty.handler.logging.LogLevel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesRegistrationAdapter;
@@ -26,8 +27,8 @@ import org.springframework.security.oauth2.client.web.reactive.function.client.S
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.*;
 import reactor.core.publisher.Mono;
-import reactor.netty.channel.BootstrapHandlers;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.transport.logging.AdvancedByteBufFormat;
 
 import java.text.DateFormat;
 import java.util.*;
@@ -122,7 +123,9 @@ public class DbsWebClientConfiguration {
         if (log.isDebugEnabled()) {
             HttpClient httpClient = HttpClient
                 .create()
-                .tcpConfiguration(tcpClient -> tcpClient.bootstrap(b -> BootstrapHandlers.updateLogSupport(b, new CustomLogger(DbsWebClientConfiguration.class))));
+                .wiretap("reactor.netty.http.client.HttpClient",
+                    LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL);
+
             builder.clientConnector(new ReactorClientHttpConnector(httpClient));
         }
 
