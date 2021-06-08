@@ -113,6 +113,13 @@ public class InMemoryReactiveUnitOfWorkRepository<T extends StreamTask> implemen
     }
 
     @Override
+    public Mono<Void> deleteAllById(Iterable<? extends String> iterable) {
+        return Flux.fromIterable(iterable)
+            .map(this::deleteById)
+            .then();
+    }
+
+    @Override
     public Mono<Void> deleteAll(Iterable<? extends UnitOfWork<T>> entities) {
         return Flux.fromIterable(entities).map(this::delete).then();
     }

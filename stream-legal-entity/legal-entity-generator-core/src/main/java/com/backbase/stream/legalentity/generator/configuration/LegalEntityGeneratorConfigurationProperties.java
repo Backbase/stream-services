@@ -40,7 +40,7 @@ public class LegalEntityGeneratorConfigurationProperties {
     private boolean generateProducts = true;
 
     /**
-     * Percentage of legal entites created with deliberate errors
+     * Percentage of legal entities created with deliberate errors
      */
     private Double errorRate = 0d;
 

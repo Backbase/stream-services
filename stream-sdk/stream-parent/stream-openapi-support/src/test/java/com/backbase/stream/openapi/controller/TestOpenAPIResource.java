@@ -4,7 +4,7 @@ import com.backbase.stream.openapi.controller.OpenApiResource;
 import io.swagger.v3.oas.models.OpenAPI;
 import java.io.FileNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @Slf4j
 public class TestOpenAPIResource {

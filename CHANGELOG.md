@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.35.0]
+### Removed
+- Spring Config Server. Superseded by standardized Spring Kubernetes Configuration
+### Upgraded
+- Spring Boot from 2.3.3.RELEASE to 2.5.0
+- Spring Cloud 2020.0.2
+
+
 ## [2.34.0]
 ### Added
 - Included a new approvals saga implemented by the Approvals Bootstrap Task.

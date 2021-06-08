@@ -4,23 +4,10 @@ import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProp
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import java.text.DateFormat;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.reactivestreams.Publisher;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer;
-import org.springframework.cloud.client.loadbalancer.reactive.Request;
-import org.springframework.cloud.client.loadbalancer.reactive.Response;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.ClientCredentialsReactiveOAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService;
@@ -34,21 +21,25 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Collections;
+import java.util.List;
+
 
 @Slf4j
-@Ignore
+@Disabled
 public class DbsWebClientConfigurationTest {
 
     private static final int PORT = 12378;
-
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(PORT);
 
     @Test
     public void testDateFormat() {
         DbsWebClientConfiguration dbsWebClientConfiguration = new DbsWebClientConfiguration();
         DateFormat dateFormat = dbsWebClientConfiguration.dateFormat();
-        Assert.assertEquals("Date Format is not StdDateFormat", dateFormat.getClass(), StdDateFormat.class);
+        Assertions.assertEquals( dateFormat.getClass(), StdDateFormat.class);
     }
 
     @Test
@@ -57,12 +48,12 @@ public class DbsWebClientConfigurationTest {
         DateFormat dateFormat = dbsWebClientConfiguration.dateFormat();
         ObjectMapper objectMapper = dbsWebClientConfiguration.objectMapper(dateFormat);
         String o = "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule";
-        Assert.assertTrue("Missing Time Module", objectMapper.getRegisteredModuleIds().contains(o));
+        Assertions.assertTrue(objectMapper.getRegisteredModuleIds().contains(o));
 
         LocalDateTime localDateTime = LocalDateTime.of(1980, 6, 11, 12, 32);
         String expected = "\"1980-06-11T12:32:00\"";
         String actual = objectMapper.writeValueAsString(localDateTime);
-        Assert.assertEquals("Date Format is Wrong", expected, actual);
+        Assertions.assertEquals("Date Format is Wrong", expected, actual);
 
         ZoneOffset zoneOffset = ZoneOffset.of("-02:00");
         OffsetDateTime offsetDateTime = OffsetDateTime.of(localDateTime, zoneOffset);
@@ -70,7 +61,7 @@ public class DbsWebClientConfigurationTest {
         actual = objectMapper.writeValueAsString(offsetDateTime);
 
         System.out.println(offsetDateTime);
-        Assert.assertEquals("Date Format is Wrong", expected, actual);
+        Assertions.assertEquals( expected, actual);
     }
 
     @Test
@@ -113,7 +104,7 @@ public class DbsWebClientConfigurationTest {
             builder,
             new DbsWebClientConfigurationProperties());
 
-        Assert.assertNotNull(webClient);
+        Assertions.assertNotNull(webClient);
 
         String testUrl = "http://localhost:" + PORT + "/hello-world";
         Mono<ClientResponse> exchange = webClient.get().uri(testUrl)
