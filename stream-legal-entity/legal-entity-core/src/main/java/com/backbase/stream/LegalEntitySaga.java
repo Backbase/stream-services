@@ -123,8 +123,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::processJobProfiles)
             .flatMap(this::setupAdministratorPermissions)
             .flatMap(this::processProducts)
-            .flatMap(this::processSubsidiaries)
-            .flatMap(this::linkLegalEntityToRealm);
+            .flatMap(this::linkLegalEntityToRealm)
+            .flatMap(this::processSubsidiaries);
     }
 
     @Override
@@ -649,8 +649,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         return serviceAgreement;
     }
 
-
-    @ContinueSpan(log = "processSubsidiaries")
     private Mono<LegalEntityTask> processSubsidiaries(LegalEntityTask streamTask) {
 
         LegalEntity parentLegalEntity = streamTask.getData();
