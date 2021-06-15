@@ -678,7 +678,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 userService.setupRealm(task.getLegalEntity())
                     .then(userService.linkLegalEntityToRealm(task.getLegalEntity()))
                     .map(legalEntity -> streamTask)
-            );
+            ).switchIfEmpty(Mono.just(streamTask));
     }
 
     private ServiceAgreement retrieveServiceAgreement(LegalEntity legalEntity) {
