@@ -3,6 +3,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.39.0]
+### Fixed
+- Fix upset exist Business function
+    - Note: function `name` is required for an updating  
+ 
+```yaml
+jobRoles:
+- name: SUUS
+  description: Manager of the online helpdesk and processing teams, able to set up/edit contracts, add accounts etc. Also able to set up Broadcast messages
+  functionGroups:
+    - name: Manage Product Summary
+      functions:
+        - functionId: 1006
+          name: Product Summary
+          privileges:
+            - privilege: view
+            - privilege: create
+            - privilege: edit
+```
+
 ## [2.38.0]
 ### Fixed
 - For *legal-entity-bootstrap-task* fix case when link le to realm task could end the flow because empty returned instead of chaining stream task

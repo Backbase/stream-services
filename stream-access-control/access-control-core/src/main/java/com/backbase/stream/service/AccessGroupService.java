@@ -19,6 +19,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExte
 import com.backbase.dbs.accesscontrol.api.service.v2.model.DataGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.DataGroupItemSystemBase;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.Functiongroupupdate;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.IdItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ListOfFunctionGroupsWithDataGroups;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPermissions;
@@ -29,12 +30,14 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroup
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionDataGroup;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupDataGroup;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupPutRequestBody;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationGenericObjectId;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationItemIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantBatchUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermissionFunctionGroupUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationSearchDataGroupsRequest;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUserPair;
@@ -49,7 +52,6 @@ import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
-import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
@@ -830,28 +832,35 @@ public class AccessGroupService {
      * @param businessFunctionGroups Business function groups to connect to service agreement.
      * @return Job Profile User with updated Function Groups
      */
-    public Mono<List<BusinessFunctionGroup>> setupFunctionGroups(StreamTask streamTask, ServiceAgreement serviceAgreement, List<BusinessFunctionGroup> businessFunctionGroups) {
-        streamTask.info(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "", serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Setting up %s Business Functions for Service Agreement: %s", businessFunctionGroups.size(), serviceAgreement.getName());
-        log.info("Setup {} Business Function for Service Agreement: {}", businessFunctionGroups.size(), serviceAgreement.getExternalId());
-        return functionGroupApi.getFunctionGroups(serviceAgreement.getInternalId())
-            .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Failed to get Function Groups for Service Agreement: {} Response: {}", serviceAgreement.getExternalId(), e.getResponseBodyAsString());
-                streamTask.error(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "failed", serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Failed to get function groups for Service Agreement: " + serviceAgreement.getInternalId());
-                return Mono.error(new StreamTaskException(streamTask, e, "Failed to get function groups for Service Agreement: " + serviceAgreement.getInternalId()));
-            })
+    public Mono<List<BusinessFunctionGroup>> setupFunctionGroups(StreamTask streamTask,
+        ServiceAgreement serviceAgreement, List<BusinessFunctionGroup> businessFunctionGroups) {
+
+        streamTask.info(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "", serviceAgreement.getExternalId(),
+            serviceAgreement.getInternalId(), "Setting up %s Business Functions for Service Agreement: %s",
+            businessFunctionGroups.size(), serviceAgreement.getName());
+        log.info("Setup {} Business Function for Service Agreement: {}", businessFunctionGroups.size(),
+            serviceAgreement.getExternalId());
+        return getFunctionGroups(streamTask, serviceAgreement)
             .collectList()
             .flatMap(functionGroups -> {
-                    List<BusinessFunctionGroup> newBusinessGroups = getNewBusinessGroups(businessFunctionGroups, functionGroups);
+                    log.debug("functionGroups: {}", functionGroups);
+                    List<BusinessFunctionGroup> newBusinessGroups =
+                        getNewBusinessGroups(businessFunctionGroups, functionGroups);
                     return Flux.fromIterable(newBusinessGroups)
                         .flatMap(bfg -> createBusinessFunctionGroup(streamTask, serviceAgreement, bfg))
                         .collectList()
-                        .map(bfg -> {
-                            bfg.addAll(getExistingBusinessGroups(businessFunctionGroups, functionGroups));
-                            return bfg;
+                        .flatMap(bfg -> {
+                            List<BusinessFunctionGroup> existingBusinessGroups =
+                                getExistingBusinessGroups(businessFunctionGroups, functionGroups);
+                            log.debug("existingBusinessGroups: {}", existingBusinessGroups);
+                            return updateBatchBusinessFunctionGroup(streamTask, serviceAgreement, existingBusinessGroups)
+                                .flatMap(updated -> {
+                                    bfg.addAll(existingBusinessGroups);
+                                    return Mono.just(bfg);
+                                });
                         });
                 }
             );
-
     }
 
     /**
@@ -1055,7 +1064,10 @@ public class AccessGroupService {
 
         return businessFunctionGroups.stream()
             .filter(businessFunctionGroup -> filter(functionGroups, businessFunctionGroup))
-            .peek(businessFunctionGroup -> enrich(functionGroups, businessFunctionGroup))
+            .map(businessFunctionGroup -> {
+                enrich(functionGroups, businessFunctionGroup);
+                return businessFunctionGroup;
+            })
             .collect(Collectors.toList());
     }
 
@@ -1151,18 +1163,6 @@ public class AccessGroupService {
             });
     }
 
-    private void handleError(WebClientResponseException badRequest) {
-        log.warn("Error executing request: [{}] {}", badRequest.getRawStatusCode(), badRequest.getResponseBodyAsString());
-    }
-
-    private void handleError(BusinessFunctionGroup businessFunctionGroup, WebClientResponseException badRequest) {
-        log.warn("Failed to create function group: {} Response: {}", businessFunctionGroup, badRequest.getResponseBodyAsString());
-    }
-
-    private void handleError(JobRole jobRole, WebClientResponseException badRequest) {
-        log.warn("Failed to create job role: {} Response: {}", jobRole, badRequest.getResponseBodyAsString());
-    }
-
     private List<PresentationPermission> getPresentationPermissions(BusinessFunctionGroup businessFunctionGroup) {
         return businessFunctionGroup.getFunctions().stream()
             .map(this::mapPresentationBusinessFunction)
@@ -1180,6 +1180,18 @@ public class AccessGroupService {
         return new PresentationPermission()
             .functionId(businessFunction.getFunctionId())
             .privileges(privileges);
+    }
+
+    private PresentationPermissionFunctionGroupUpdate mapUpdateBusinessFunction(BusinessFunction businessFunction) {
+
+        List<String> privileges;
+        privileges = businessFunction.getPrivileges().stream()
+            .map(Privilege::getPrivilege)
+            .collect(Collectors.toList());
+
+        return new PresentationPermissionFunctionGroupUpdate()
+            .privileges(privileges)
+            .functionName(businessFunction.getName());
     }
 
 
@@ -1236,24 +1248,133 @@ public class AccessGroupService {
         log.info("Setup {} job role for Service Agreement: {}", jobRole.getName(),
             masterServiceAgreement.getExternalId());
 
-        return functionGroupApi.getFunctionGroups(masterServiceAgreement.getInternalId())
-            .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Failed to get Function Groups for Service Agreement: {} Response: {}",
-                    masterServiceAgreement.getExternalId(), e.getResponseBodyAsString());
-                streamTask.error(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "failed", masterServiceAgreement.getExternalId(),
-                    masterServiceAgreement.getInternalId(),
-                    "Failed to get function groups for Service Agreement: " + masterServiceAgreement.getInternalId());
-                return Mono.error(new StreamTaskException(streamTask, e,
-                    "Failed to get function groups for Service Agreement: " + masterServiceAgreement.getInternalId()));
-            })
+        return getFunctionGroups(streamTask, masterServiceAgreement)
             .collectList()
             .flatMap(functionGroups -> {
+                log.debug("Job Role functionGroups: {}", functionGroups);
                 if (functionGroups.stream().noneMatch(fg -> fg.getName().equals(jobRole.getName()))) {
                     log.debug("Job Role Already exists: {}", jobRole.getName());
                     return createJobRole(streamTask, masterServiceAgreement, jobRole);
+                } else {
+                    List<FunctionGroupItem> collect =
+                        functionGroups.stream().filter(fg -> fg.getName().equals(jobRole.getName()))
+                            .collect(Collectors.toList());
+                    if (collect.isEmpty()) {
+                        return Mono.just(jobRole);
+                    }
+                    if (collect.size() > 1) {
+                        return Mono.error(new RuntimeException("More than one same job role"));
+                    }
+                    FunctionGroupItem functionGroupItem = collect.get(0);
+                    log.warn("Update Job Role functionGroup: {}", functionGroupItem);
+                    return updateJobRole(streamTask, masterServiceAgreement, jobRole, functionGroupItem);
                 }
-                return Mono.just(jobRole);
             });
+    }
+
+    private Mono<? extends JobRole> updateJobRole(StreamTask streamTask, ServiceAgreement serviceAgreement,
+        JobRole jobRole, FunctionGroupItem functionGroupItem) {
+
+        streamTask.info(JOB_ROLE, SETUP_JOB_ROLE, "update", serviceAgreement.getExternalId(), null,
+            "Update job role: %s for service agreement: %s", jobRole.getName(), serviceAgreement.getName());
+
+        if (jobRole.getDescription() == null) {
+            jobRole.setDescription(jobRole.getName());
+        }
+
+        PresentationFunctionGroupPutRequestBody putRequestBody = new PresentationFunctionGroupPutRequestBody();
+        putRequestBody.functionGroup(new Functiongroupupdate()
+            .name(jobRole.getName())
+            .description(jobRole.getDescription())
+            .validFromDate(jobRole.getValidFromDate())
+            .validFromTime(jobRole.getValidFromTime())
+            .validUntilDate(jobRole.getValidUntilDate())
+            .validUntilTime(jobRole.getValidUntilTime())
+            .permissions(accessGroupMapper.toUpdate(jobRole.getFunctionGroups()))
+        );
+        putRequestBody.setIdentifier(new PresentationIdentifier().idIdentifier(functionGroupItem.getId()));
+
+        log.debug("Function to Update: {}", Collections.singletonList(putRequestBody));
+
+        return functionGroupsApi.putFunctionGroupsUpdate(Collections.singletonList(putRequestBody))
+            .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
+                handleError(jobRole, badRequest))
+            .onErrorResume(WebClientResponseException.class, badRequest -> {
+                streamTask.error(JOB_ROLE, "ingest-reference-job-role", FAILED, streamTask.getName(), null, badRequest,
+                    badRequest.getResponseBodyAsString(), "Failed to setup Job Role");
+                return Mono.error(new StreamTaskException(streamTask, badRequest,
+                    "Failed to setup Job Role: " + badRequest.getResponseBodyAsString()));
+            })
+            .collectList()
+            .map(idItems -> jobRole);
+    }
+
+    private Mono<List<BatchResponseItemExtended>> updateBatchBusinessFunctionGroup(StreamTask streamTask,
+        ServiceAgreement serviceAgreement,
+        List<BusinessFunctionGroup> existingBusinessGroups) {
+
+        streamTask.info(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "update", serviceAgreement.getExternalId(), null,
+            "Update business function groups for service agreement: %s",
+            serviceAgreement.getName());
+
+        List<PresentationFunctionGroupPutRequestBody> presentationFunctionGroupPutRequestBody =
+            existingBusinessGroups.stream()
+                .map(bfg -> {
+                    PresentationFunctionGroupPutRequestBody putRequestBody =
+                        new PresentationFunctionGroupPutRequestBody();
+
+                    putRequestBody.setFunctionGroup(new Functiongroupupdate()
+                        .description(Optional.ofNullable(bfg.getDescription()).orElse(bfg.getName()))
+                        .permissions(getUpdatePermissions(bfg))
+                        .name(bfg.getName())
+                    );
+                    putRequestBody.setIdentifier(new PresentationIdentifier().idIdentifier(bfg.getId()));
+                    return putRequestBody;
+                })
+                .collect(Collectors.toList());
+
+        return functionGroupsApi.putFunctionGroupsUpdate(presentationFunctionGroupPutRequestBody)
+            .doOnError(WebClientResponseException.BadRequest.class, this::handleError)
+            .onErrorResume(WebClientResponseException.class, badRequest -> {
+                streamTask
+                    .error(FUNCTION_GROUP, "update-function-groups", FAILED, streamTask.getName(), null, badRequest,
+                        badRequest.getResponseBodyAsString(), "Failed to update Business Function Group");
+                return Mono.error(new StreamTaskException(streamTask, badRequest,
+                    "Failed to update Business Function Group: " + badRequest.getResponseBodyAsString()));
+            })
+            .collectList();
+    }
+
+    private List<PresentationPermissionFunctionGroupUpdate> getUpdatePermissions(BusinessFunctionGroup bfg) {
+        return bfg.getFunctions().stream()
+            .map(this::mapUpdateBusinessFunction)
+            .collect(Collectors.toList());
+    }
+
+    @NotNull
+    private Flux<FunctionGroupItem> getFunctionGroups(StreamTask streamTask, ServiceAgreement serviceAgreement) {
+        return functionGroupApi.getFunctionGroups(serviceAgreement.getInternalId())
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Failed to get Function Groups for Service Agreement: {} Response: {}",
+                    serviceAgreement.getExternalId(), e.getResponseBodyAsString());
+                streamTask.error(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "failed", serviceAgreement.getExternalId(),
+                    serviceAgreement.getInternalId(),
+                    "Failed to get function groups for Service Agreement: " + serviceAgreement.getInternalId());
+                return Mono.error(new StreamTaskException(streamTask, e,
+                    "Failed to get function groups for Service Agreement: " + serviceAgreement.getInternalId()));
+            });
+    }
+
+    private void handleError(WebClientResponseException badRequest) {
+        log.warn("Error executing request: [{}] {}", badRequest.getRawStatusCode(), badRequest.getResponseBodyAsString());
+    }
+
+    private void handleError(BusinessFunctionGroup businessFunctionGroup, WebClientResponseException badRequest) {
+        log.warn("Failed to create function group: {} Response: {}", businessFunctionGroup, badRequest.getResponseBodyAsString());
+    }
+
+    private void handleError(JobRole jobRole, WebClientResponseException badRequest) {
+        log.warn("Failed to create job role: {} Response: {}", jobRole, badRequest.getResponseBodyAsString());
     }
 
 }
