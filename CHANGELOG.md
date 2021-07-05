@@ -4,14 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.40.0]
-### Changed
-- For *access-control-core* exclusion of system function group was added in order to avoid DB constraint triggering during permissions PUT
-
-## [2.39.0]
 ### Fixed
-- Fix upset exist Business function
-    - Note: function `name` is required for an updating  
- 
+- Fix upserting existing Business function
+> Note: The field `name` is mandatory for the object `function` is required for the update - alongside the `functionId`.
+
+e.g.
 ```yaml
 jobRoles:
 - name: SUUS
@@ -26,6 +23,10 @@ jobRoles:
             - privilege: create
             - privilege: edit
 ```
+
+## [2.39.0]
+### Changed
+- For *access-control-core* exclusion of system function group was added in order to avoid DB constraint triggering during permissions PUT
 
 ## [2.38.0]
 ### Fixed
