@@ -74,6 +74,7 @@ import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -543,83 +544,113 @@ public class AccessGroupService {
                     task.info(ACCESS_GROUP, "assign-permissions", "", "", null, "Replacing assigned permissions for users: %s with: %s", prettyPrintExternalIds(userPermissionsRequest), prettyPrintDataGroups(userPermissionsRequest));
                     return Mono.just(userPermissionsRequest);
                 }
-                // request each user permissions and add those to the request.
-                return Flux.fromIterable(usersPermissions.keySet())
-                    .flatMap(user -> userQueryApi.getPersistenceApprovalPermissions(user.getInternalId(), task.getData().getServiceAgreement().getInternalId())
-                        .onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
-                        .map(PersistenceApprovalPermissions::getItems)
-                        .map(existingUserPermissions -> {
-                            log.info("Retrieved permissions for user with externalId {} : {}", user.getExternalId(), existingUserPermissions.stream().map(p -> p.getFunctionGroupId() + " : [" + p.getDataGroupIds() + "] ").collect(Collectors.toList()));
 
-                            PresentationAssignUserPermissions requestUserPermissions = request.stream()
-                                .filter(up -> up.getExternalUserId().equalsIgnoreCase(user.getExternalId()))
-                                .findFirst()
-                                .orElseThrow(() -> new IllegalStateException("Permissions for user not present in request?"));
-
-                            PresentationAssignUserPermissions mergedUserPermissions = new PresentationAssignUserPermissions();
-                            mergedUserPermissions.setExternalServiceAgreementId(requestUserPermissions.getExternalServiceAgreementId());
-                            mergedUserPermissions.setExternalUserId(requestUserPermissions.getExternalUserId());
-
-                            if(existingUserPermissions.isEmpty()) {
-                                mergedUserPermissions.setFunctionGroupDataGroups(requestUserPermissions.getFunctionGroupDataGroups());
-                            } else {
-
-                                // merge user permissions in  DBS with the ones already  in request.
-                                existingUserPermissions.forEach(userPermission -> {
-
-                                    String functionGroupId = userPermission.getFunctionGroupId();
-                                    Set<String> dataGroupIds = new HashSet<>();
-                                    if (userPermission.getDataGroupIds() != null) {
-                                        dataGroupIds.addAll(userPermission.getDataGroupIds());
-                                    }
-
-                                    Optional<PresentationFunctionGroupDataGroup> requestedFunctionGroupOptional = requestUserPermissions.getFunctionGroupDataGroups().stream()
-                                        .filter(requestFunctionGroup -> hasTheSameFunctionGroupId(functionGroupId, requestFunctionGroup))
-                                        .findFirst();
-
-                                    // If requested function group is already ingested, merge the request and existing function group
-                                    if (requestedFunctionGroupOptional.isPresent()) {
-                                        PresentationFunctionGroupDataGroup requestedFunctionGroup = requestedFunctionGroupOptional.get();
-
-                                        if (requestedFunctionGroup.getDataGroupIdentifiers() != null) {
-                                            dataGroupIds.addAll(requestedFunctionGroup.getDataGroupIdentifiers().stream().map(
-                                                PresentationIdentifier::getIdIdentifier).collect(Collectors.toList()));
-                                        }
-                                    }
-
-                                    // Transform existing permissions to PresentationFunctionGroupDataGroup
-                                    PresentationFunctionGroupDataGroup functionGroup = new PresentationFunctionGroupDataGroup();
-                                    functionGroup.setFunctionGroupIdentifier(mapId(functionGroupId));
-                                    functionGroup.setDataGroupIdentifiers(dataGroupIds.stream().map(this::mapId).collect(Collectors.toList()));
-
-                                    mergedUserPermissions.addFunctionGroupDataGroupsItem(functionGroup);
-                                });
-                            }
-                            return mergedUserPermissions;
-                        }))
-                    .collectList()
-                    .map(list -> {
-                        log.info("Updated assigned permissions for users: {} with: {} ",
-                            prettyPrintExternalIds(userPermissionsRequest),
-                            prettyPrintDataGroups(userPermissionsRequest));
-                        return list;
+                return getAssociatedSystemFunctionsIds(task)
+                    .flatMap(systemFunctionGroupIds -> mergeUserPermissions(task, usersPermissions.keySet(), request, systemFunctionGroupIds))
+                    .map(userPermissionsList -> {
+                        log.info("Updated assigned permissions for users: {} with: {}", prettyPrintExternalIds(userPermissionsList), prettyPrintDataGroups(userPermissionsList));
+                        return userPermissionsList;
                     });
             })
-            .flatMap(mergedRequest -> {
-                task.info(ACCESS_GROUP, "assign-permissions", task.getName(), null, task.getId(), "Assigning permissions: %s", mergedRequest.stream().map(this::prettyPrintUserAssignedPermissions).collect(Collectors.joining(",")));
-                return accessControlUsersApi.putAssignUserPermissions(mergedRequest)
+            .flatMap(userPermissionsList -> {
+                task.info(ACCESS_GROUP, "assign-permissions", task.getName(), null, task.getId(), "Assigning permissions: %s", userPermissionsList.stream().map(this::prettyPrintUserAssignedPermissions).collect(Collectors.joining(",")));
+                return accessControlUsersApi.putAssignUserPermissions(userPermissionsList)
                     .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Permissions Update", r.getStatus().toString(), r.getResourceId(), r.getErrors()))
-                    .doOnNext(r -> {
-                        task.info(ACCESS_GROUP, "assign-permissions", r.getExternalServiceAgreementId(), null, "Assigned permissions for: %s and Service Agreement: %s", r.getResourceId(), r.getExternalServiceAgreementId());
-                    })
+                    .doOnNext(r -> task.info(ACCESS_GROUP, "assign-permissions", r.getExternalServiceAgreementId(), null, "Assigned permissions for: %s and Service Agreement: %s", r.getResourceId(), r.getExternalServiceAgreementId()))
                     .onErrorResume(WebClientResponseException.class, e -> {
-                        task.error(ACCESS_GROUP, "assign-permissions", "failed", task.getData().getServiceAgreement().getExternalId(),
-                            task.getData().getServiceAgreement().getInternalId(), e, e.getResponseBodyAsString(), "Failed to execute Batch Permissions assignment request.");
+                        task.error(ACCESS_GROUP, "assign-permissions", "failed", task.getData().getServiceAgreement().getExternalId(), task.getData().getServiceAgreement().getInternalId(), e, e.getResponseBodyAsString(), "Failed to execute Batch Permissions assignment request.");
                         return Mono.error(new StreamTaskException(task, e, "Failed  to assign permissions: " + e.getResponseBodyAsString()));
                     })
                     .collectList();
             })
             .thenReturn(task);
+    }
+
+    /**
+     * Retrieves function groups by service agreement id, filter any non-system and convert resulting list into a set of ids.
+     */
+    private Mono<Set<String>> getAssociatedSystemFunctionsIds(BatchProductGroupTask task) {
+        return functionGroupApi.getFunctionGroups(task.getData().getServiceAgreement().getInternalId())
+            .onErrorResume(WebClientResponseException.class, e -> {
+                task.error(ACCESS_GROUP, "assign-permissions", "failed", task.getData().getServiceAgreement().getExternalId(), task.getData().getServiceAgreement().getInternalId(), e, e.getResponseBodyAsString(), "Failed to fetch function groups");
+                return Mono.error(new StreamTaskException(task, e, "Failed to fetch function groups: " + e.getResponseBodyAsString()));
+            })
+            .collectList()
+            .switchIfEmpty(Mono.just(Collections.emptyList()))
+            .map(functionGroups  -> functionGroups.stream()
+                .filter(functionGroup -> FunctionGroupItem.TypeEnum.SYSTEM.equals(functionGroup.getType()))
+                .map(FunctionGroupItem::getId)
+                .collect(Collectors.toSet())
+            );
+    }
+
+    /**
+     * Request each user permissions and add those to the request.
+     *
+     * @param task - Current task
+     * @param users - All users mentioned in permissions update
+     * @param request - Input user permissions list
+     * @param systemFunctionGroupIds - A set of system function group ids that belong to service agreement
+     */
+    private Mono<List<PresentationAssignUserPermissions>> mergeUserPermissions(BatchProductGroupTask task,
+                                                                               Collection<User> users,
+                                                                               List<PresentationAssignUserPermissions> request,
+                                                                               Set<String> systemFunctionGroupIds) {
+        return Flux.fromIterable(users)
+            .flatMap(user -> userQueryApi.getPersistenceApprovalPermissions(user.getInternalId(), task.getData().getServiceAgreement().getInternalId())
+                .onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
+                .map(PersistenceApprovalPermissions::getItems)
+                .map(existingUserPermissions -> {
+                    log.info("Retrieved permissions for user with externalId {} : {}", user.getExternalId(), existingUserPermissions.stream().map(p -> p.getFunctionGroupId() + " : [" + p.getDataGroupIds() + "] ").collect(Collectors.toList()));
+
+                    PresentationAssignUserPermissions requestUserPermissions = request.stream()
+                        .filter(up -> up.getExternalUserId().equalsIgnoreCase(user.getExternalId()))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalStateException("Permissions for user not present in request?"));
+
+                    PresentationAssignUserPermissions mergedUserPermissions = new PresentationAssignUserPermissions();
+                    mergedUserPermissions.setExternalServiceAgreementId(requestUserPermissions.getExternalServiceAgreementId());
+                    mergedUserPermissions.setExternalUserId(requestUserPermissions.getExternalUserId());
+
+                    if (existingUserPermissions.isEmpty()) {
+                        mergedUserPermissions.setFunctionGroupDataGroups(requestUserPermissions.getFunctionGroupDataGroups());
+                    } else {
+                        // merge user permissions in  DBS with the ones already  in request.
+                        existingUserPermissions.stream()
+                            .filter(userPermission -> !systemFunctionGroupIds.contains(userPermission.getFunctionGroupId()))
+                            .forEach(userPermission -> {
+                                String functionGroupId = userPermission.getFunctionGroupId();
+                                Set<String> dataGroupIds = new HashSet<>();
+
+                                if (userPermission.getDataGroupIds() != null) {
+                                    dataGroupIds.addAll(userPermission.getDataGroupIds());
+                                }
+
+                                Optional<PresentationFunctionGroupDataGroup> requestedFunctionGroupOptional = requestUserPermissions.getFunctionGroupDataGroups().stream()
+                                    .filter(requestFunctionGroup -> hasTheSameFunctionGroupId(functionGroupId, requestFunctionGroup))
+                                    .findFirst();
+
+                                // If requested function group is already ingested, merge the request and existing function group
+                                if (requestedFunctionGroupOptional.isPresent()) {
+                                    PresentationFunctionGroupDataGroup requestedFunctionGroup = requestedFunctionGroupOptional.get();
+
+                                    if (requestedFunctionGroup.getDataGroupIdentifiers() != null) {
+                                        dataGroupIds.addAll(requestedFunctionGroup.getDataGroupIdentifiers().stream().map(
+                                            PresentationIdentifier::getIdIdentifier).collect(Collectors.toList()));
+                                    }
+                                }
+
+                                // Transform existing permissions to PresentationFunctionGroupDataGroup
+                                PresentationFunctionGroupDataGroup functionGroup = new PresentationFunctionGroupDataGroup();
+                                functionGroup.setFunctionGroupIdentifier(mapId(functionGroupId));
+                                functionGroup.setDataGroupIdentifiers(dataGroupIds.stream().map(this::mapId).collect(Collectors.toList()));
+
+                                mergedUserPermissions.addFunctionGroupDataGroupsItem(functionGroup);
+                            });
+                    }
+                    return mergedUserPermissions;
+                }))
+            .collectList();
     }
 
     private boolean hasTheSameFunctionGroupId(String functionGroupId, PresentationFunctionGroupDataGroup requestFunctionGroup) {
