@@ -45,6 +45,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAg
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
+import com.backbase.dbs.user.api.service.StringUtil;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.legalentity.model.ApprovalStatus;
@@ -94,6 +95,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -1282,11 +1284,11 @@ public class AccessGroupService {
         return getFunctionGroups(streamTask, masterServiceAgreement)
             .collectList()
             .flatMap(functionGroups -> {
-                log.debug("Job Role functionGroups: {}", functionGroups);
                 if (functionGroups.stream().noneMatch(fg -> fg.getName().equals(jobRole.getName()))) {
-                    log.debug("Job Role Already exists: {}", jobRole.getName());
+                    log.debug("New Job Role to create: {}", jobRole.getName());
                     return createJobRole(streamTask, masterServiceAgreement, jobRole);
                 } else {
+                    log.debug("Job Role Already exists: {}; Should be updated", jobRole.getName());
                     List<FunctionGroupItem> collect =
                         functionGroups.stream().filter(fg -> fg.getName().equals(jobRole.getName()))
                             .collect(Collectors.toList());
@@ -1296,9 +1298,7 @@ public class AccessGroupService {
                     if (collect.size() > 1) {
                         return Mono.error(new RuntimeException("More than one same job role"));
                     }
-                    FunctionGroupItem functionGroupItem = collect.get(0);
-                    log.warn("Update Job Role functionGroup: {}", functionGroupItem);
-                    return updateJobRole(streamTask, masterServiceAgreement, jobRole, functionGroupItem);
+                    return updateJobRole(streamTask, masterServiceAgreement, jobRole, collect.get(0));
                 }
             });
     }
@@ -1306,6 +1306,7 @@ public class AccessGroupService {
     private Mono<? extends JobRole> updateJobRole(StreamTask streamTask, ServiceAgreement serviceAgreement,
         JobRole jobRole, FunctionGroupItem functionGroupItem) {
 
+        log.warn("Start Job Role updating: {}", functionGroupItem);
         streamTask.info(JOB_ROLE, SETUP_JOB_ROLE, "update", serviceAgreement.getExternalId(), null,
             "Update job role: %s for service agreement: %s", jobRole.getName(), serviceAgreement.getName());
 
@@ -1325,11 +1326,15 @@ public class AccessGroupService {
         );
         putRequestBody.setIdentifier(new PresentationIdentifier().idIdentifier(functionGroupItem.getId()));
 
+        if (isEmptyFunctionName(Collections.singletonList(putRequestBody))) {
+            log.warn("Functions to Update doesn't contain functionName(it's required): {}",
+                Collections.singletonList(putRequestBody));
+            return Mono.just(jobRole);
+        }
         log.debug("Function to Update: {}", Collections.singletonList(putRequestBody));
 
         return functionGroupsApi.putFunctionGroupsUpdate(Collections.singletonList(putRequestBody))
-            .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
-                handleError(jobRole, badRequest))
+            .doOnError(WebClientResponseException.BadRequest.class, badRequest -> handleError(jobRole, badRequest))
             .onErrorResume(WebClientResponseException.class, badRequest -> {
                 streamTask.error(JOB_ROLE, "ingest-reference-job-role", FAILED, streamTask.getName(), null, badRequest,
                     badRequest.getResponseBodyAsString(), "Failed to setup Job Role");
@@ -1343,6 +1348,8 @@ public class AccessGroupService {
     private Mono<List<BatchResponseItemExtended>> updateBatchBusinessFunctionGroup(StreamTask streamTask,
         ServiceAgreement serviceAgreement,
         List<BusinessFunctionGroup> existingBusinessGroups) {
+
+        log.warn("Start Job Role updating: {}", existingBusinessGroups);
 
         streamTask.info(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "update", serviceAgreement.getExternalId(), null,
             "Update business function groups for service agreement: %s",
@@ -1364,6 +1371,13 @@ public class AccessGroupService {
                 })
                 .collect(Collectors.toList());
 
+        if (isEmptyFunctionName(presentationFunctionGroupPutRequestBody)) {
+            log.warn("Functions to Update doesn't contain functionName(it's required): {}",
+                presentationFunctionGroupPutRequestBody);
+            return Mono.just(Collections.emptyList());
+        }
+        log.debug("Functions to Update: {}", presentationFunctionGroupPutRequestBody);
+
         return functionGroupsApi.putFunctionGroupsUpdate(presentationFunctionGroupPutRequestBody)
             .doOnError(WebClientResponseException.BadRequest.class, this::handleError)
             .onErrorResume(WebClientResponseException.class, badRequest -> {
@@ -1374,6 +1388,17 @@ public class AccessGroupService {
                     "Failed to update Business Function Group: " + badRequest.getResponseBodyAsString()));
             })
             .collectList();
+    }
+
+    private boolean isEmptyFunctionName(List<PresentationFunctionGroupPutRequestBody> putRequestBodies) {
+        return putRequestBodies.stream()
+            .map(PresentationFunctionGroupPutRequestBody::getFunctionGroup)
+            .filter(Objects::nonNull)
+            .map(Functiongroupupdate::getPermissions)
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .map(PresentationPermissionFunctionGroupUpdate::getFunctionName)
+            .anyMatch(Predicate.not(StringUtils::hasText));
     }
 
     private List<PresentationPermissionFunctionGroupUpdate> getUpdatePermissions(BusinessFunctionGroup bfg) {
