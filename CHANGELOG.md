@@ -23,6 +23,8 @@ jobRoles:
             - privilege: create
             - privilege: edit
 ```
+### Changed
+- Add filter to forward `X-TID` headers
 
 ## [2.39.0]
 ### Changed
