@@ -3,10 +3,30 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.40.0]
+### Fixed
+- Fix upserting existing Business function
+> Note: The field `name` is mandatory for the object `function` is required for the update - alongside the `functionId`.
+
+e.g.
+```yaml
+jobRoles:
+- name: SUUS
+  description: Manager of the online helpdesk and processing teams, able to set up/edit contracts, add accounts etc. Also able to set up Broadcast messages
+  functionGroups:
+    - name: Manage Product Summary
+      functions:
+        - functionId: 1006
+          name: Product Summary
+          privileges:
+            - privilege: view
+            - privilege: create
+            - privilege: edit
+```
+
 ## [2.39.0]
 ### Changed
 - For *access-control-core* exclusion of system function group was added in order to avoid DB constraint triggering during permissions PUT
-
 
 ## [2.38.0]
 ### Fixed
