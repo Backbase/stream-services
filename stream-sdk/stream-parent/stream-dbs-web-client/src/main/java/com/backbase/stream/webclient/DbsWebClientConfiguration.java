@@ -114,7 +114,7 @@ public class DbsWebClientConfiguration {
                     ClientRequest contextRequest = context.<MultiValueMap<String, String>>getOrEmpty("headers")
                         .map(headers -> {
                             log.debug("Adding additional headers: {} from Reactive subscriber context to Request: {}", headers, clientRequest.url());
-                            return ClientRequest.from(clientRequest)
+                            return ClientRequest.from(newRequest)
                                 .headers(httpHeaders -> httpHeaders.addAll(headers))
                                 .build();
                         })
