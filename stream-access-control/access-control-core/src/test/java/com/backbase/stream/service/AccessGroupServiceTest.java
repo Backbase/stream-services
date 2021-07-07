@@ -386,8 +386,8 @@ class AccessGroupServiceTest {
 
     /*
        Request contains business-function-group-id-1
-       Existing permissions are system-group-id-1 and business-function-group-id-1
-       Expectation is to have all these two function groups in PUT permissions request together with data group ids specified in request
+       Existing permissions are: system-group-id-1, function-group-id-1 and business-function-group-id-1
+       Expectation is to have function-group-id-1 and business-function-group-id-1 in PUT permissions request together with data group ids specified in request
      */
     @Test
     void assignPermissionsBatchNoExistingFunctionGroups() {
@@ -415,7 +415,7 @@ class AccessGroupServiceTest {
                 .externalServiceAgreementId("sa_benedict")
                 .functionGroupDataGroups(Arrays.asList(
                     new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
-                        new PresentationIdentifier().idIdentifier("system-group-id-1")
+                        new PresentationIdentifier().idIdentifier("function-group-id-1")
                     ).dataGroupIdentifiers(Collections.emptyList()),
                     new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
                         new PresentationIdentifier().idIdentifier("business-function-group-id-1")
@@ -427,11 +427,14 @@ class AccessGroupServiceTest {
         );
 
         when(functionGroupApi.getFunctionGroups("sa-internal-id"))
-            .thenReturn(Flux.just());
+            .thenReturn(Flux.just(
+                new FunctionGroupItem().id("system-group-id-1").name("SFG").type(FunctionGroupItem.TypeEnum.SYSTEM),
+                new FunctionGroupItem().id("function-group-id-1").name("Full access").type(FunctionGroupItem.TypeEnum.TEMPLATE)
+            ));
 
         when(userQueryApi.getPersistenceApprovalPermissions("user-internal-id", "sa-internal-id"))
             .thenReturn(Mono.just(new PersistenceApprovalPermissions().items(Arrays.asList(
-                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("system-group-id-1").dataGroupIds(Collections.emptyList()),
+                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("function-group-id-1").dataGroupIds(Collections.emptyList()),
                 new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("business-function-group-id-1").dataGroupIds(Collections.singletonList("data-group-1"))
             ))));
 
