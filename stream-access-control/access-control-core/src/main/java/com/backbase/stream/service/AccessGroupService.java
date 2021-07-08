@@ -1200,7 +1200,9 @@ public class AccessGroupService {
     }
 
     private List<PresentationPermission> getPresentationPermissions(BusinessFunctionGroup businessFunctionGroup) {
-        return businessFunctionGroup.getFunctions().stream()
+        List<BusinessFunction> functions =
+            Objects.requireNonNullElse(businessFunctionGroup.getFunctions(), Collections.emptyList());
+        return functions.stream()
             .map(this::mapPresentationBusinessFunction)
             .collect(Collectors.toList());
 
@@ -1405,7 +1407,8 @@ public class AccessGroupService {
     }
 
     private List<PresentationPermissionFunctionGroupUpdate> getUpdatePermissions(BusinessFunctionGroup bfg) {
-        return bfg.getFunctions().stream()
+        List<BusinessFunction> functions = Objects.requireNonNullElse(bfg.getFunctions(), Collections.emptyList());
+        return functions.stream()
             .map(this::mapUpdateBusinessFunction)
             .collect(Collectors.toList());
     }

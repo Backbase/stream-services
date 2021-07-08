@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.43.0]
+### Fixed
+- bugfix NPE for AccessGroupService.getUpdatePermissions  
+
 ## [2.42.0]
 ### Fixed
 - Permissions assignment for user marked as admin was working incorrectly due to fact that System Function Group was returned when no assigned groups expected
