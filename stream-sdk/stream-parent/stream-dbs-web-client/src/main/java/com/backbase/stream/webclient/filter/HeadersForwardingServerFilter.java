@@ -26,14 +26,14 @@ public class HeadersForwardingServerFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        log.debug("forwarding request headers for: " + Optional.ofNullable(exchange.getRequest())
+        log.trace("forwarding request headers for: " + Optional.ofNullable(exchange.getRequest())
             .map(ServerHttpRequest::getPath).map(RequestPath::toString).orElse("null"));
         LinkedMultiValueMap<String, String> forwardedHeaders = new LinkedMultiValueMap<>();
         ServerHttpRequest request = exchange.getRequest();
         properties.getHeadersToForward().forEach(headerKey -> {
             List<String> headerValues = request.getHeaders().get(headerKey);
-            log.debug("forwarding header: {}={}", headerKey, headerValues);
             if (headerValues != null) {
+                log.debug("forwarding header: {}={}", headerKey, headerValues);
                 forwardedHeaders.addAll(headerKey, headerValues);
             }
         });
