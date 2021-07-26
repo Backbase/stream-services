@@ -4,36 +4,26 @@
 
     <parent>
         <groupId>com.backbase.stream</groupId>
-        <artifactId>stream-http-starter-parent</artifactId>
+        <artifactId>stream-models</artifactId>
         <version>2.44.0</version>
-        <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
     </parent>
 
-    <artifactId>cursor-http</artifactId>
-    <version>2.44.0</version>
+    <artifactId>product-catalog-model</artifactId>
 
     <packaging>jar</packaging>
-    <name>Stream :: Cursor HTTP</name>
+    <name>Stream :: Product Catalog Model</name>
 
     <properties>
-        <raml2openapi-maven-plugin.input>${project.basedir}/../api/openapi.yaml</raml2openapi-maven-plugin.input>
+        <sonar.skip>true</sonar.skip>
+        <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-product-catalog/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
     </properties>
 
     <dependencies>
-
         <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>cursor-publishers</artifactId>
-            <version>2.44.0</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>cursor-store</artifactId>
-            <version>2.44.0</version>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -52,9 +42,8 @@
                             <generatorName>spring</generatorName>
                             <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
                             <generateApiTests>false</generateApiTests>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                            <generateModels>false</generateModels>
-                            <generateApis>true</generateApis>
+                            <generateApis>false</generateApis>
+                            <generateModels>true</generateModels>
                             <output>${openapi-generator-maven-plugin.output}</output>
                             <configOptions>
                                 <library>spring-boot</library>
@@ -62,9 +51,9 @@
                                 <java8>true</java8>
                                 <dateLibrary>java8</dateLibrary>
                                 <openapiDocketConfig>true</openapiDocketConfig>
-                                <interfaceOnly>true</interfaceOnly>
-                                <modelPackage>com.backbase.stream.cursor.model</modelPackage>
-                                <apiPackage>com.backbase.stream.cursor.api</apiPackage>
+                                <interfaceOnly>false</interfaceOnly>
+                                <modelPackage>com.backbase.stream.productcatalog.model</modelPackage>
+                                <apiPackage>com.backbase.stream.productcatalog.api</apiPackage>
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <performBeanValidation>true</performBeanValidation>
                                 <apis/>
@@ -75,11 +64,12 @@
 
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
+
         </plugins>
     </build>
 

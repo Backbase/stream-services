@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-legal-entity</artifactId>
-        <version>2.43.0</version>
+        <version>2.44.0</version>
     </parent>
 
     <artifactId>legal-entity-core</artifactId>
@@ -16,7 +16,6 @@
     <properties>
         <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
-        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -36,19 +35,19 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>access-control-core</artifactId>
-            <version>2.43.0</version>
+            <version>2.44.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-ingestion-saga</artifactId>
-            <version>2.43.0</version>
+            <version>2.44.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-catalog-core</artifactId>
-            <version>2.43.0</version>
+            <version>2.44.0</version>
         </dependency>
 
         <dependency>
@@ -66,13 +65,13 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-generator-core</artifactId>
-            <version>2.43.0</version>
+            <version>2.44.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-core</artifactId>
-            <version>2.43.0</version>
+            <version>2.44.0</version>
         </dependency>
 
     </dependencies>
@@ -82,7 +81,6 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>${boat-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>generate</id>

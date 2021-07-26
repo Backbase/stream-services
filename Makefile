@@ -1,11 +1,9 @@
-export DATAFLOW_URL=<dataflowBaseUrl>
 export DOCKER_REGISTRY=<dockerRegistry>
 export MAVEN_REPO=<targetRepositoryForMetaData>
 export CRED_HELPER=<dockerRegisteryCredentialHelper>
 
-export MVN_CMD = mvn package jib:build deploy stream:register \
+export MVN_CMD = mvn package jib:build deploy  \
 	-B -Ddocker.repository.url=$(DOCKER_REGISTRY) \
-	-Dscdf-maven-plugin.dataflowUrl=$(DATAFLOW_URL) \
 	-DaltDeploymentRepository=stream::default::$(MAVEN_REPO)
 
 install:

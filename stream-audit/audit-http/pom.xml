@@ -2,19 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <properties>
-        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
-    </properties>
 
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-http-starter-parent</artifactId>
-        <version>2.43.0</version>
+        <version>2.44.0</version>
         <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
     </parent>
 
     <artifactId>audit-http</artifactId>
-    <version>2.43.0</version>
+    <version>2.44.0</version>
 
     <packaging>jar</packaging>
     <name>Stream :: Audit HTTP</name>
@@ -23,7 +20,7 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>audit-core</artifactId>
-            <version>2.43.0</version>
+            <version>2.44.0</version>
         </dependency>
     </dependencies>
 
@@ -32,7 +29,6 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>${boat-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>audit</id>
@@ -65,15 +61,6 @@
                     </execution>
 
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.backbase.oss</groupId>
-                <artifactId>scdf-maven-plugin</artifactId>
-                <configuration>
-                    <type>APP</type>
-                    <name>${project.artifactId}</name>
-                </configuration>
             </plugin>
 
             <plugin>

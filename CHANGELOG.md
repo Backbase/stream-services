@@ -13,6 +13,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.patchTransactions.
   - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postDelete.
   - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postRefresh.
+### Maintenance 
+- Cleaned up versions for boat-maven-plugin
+- Added spring-boot-configuration-processors to modules that have configuration classes
+- Moved Product Catalog Model to own package to prevent deep transitive dependencies
+- Removed scdf-maven-plugin. This is now a configuration per project if required
 
 ## [2.43.0]
 ### Fixed

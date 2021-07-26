@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-sdk-starter-core</artifactId>
-        <version>2.43.0</version>
+        <version>2.44.0</version>
         <relativePath>../stream-sdk-starter-core</relativePath>
     </parent>
 
     <artifactId>stream-http-starter-parent</artifactId>
-    <version>2.43.0</version>
+    <version>2.44.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: HTTP Services Starter</name>
     <description>Parent for Stream HTTP Services</description>
@@ -80,13 +80,6 @@
                 </executions>
                 <configuration>
                     <mainClass>${start-class}</mainClass>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.backbase.oss</groupId>
-                <artifactId>scdf-maven-plugin</artifactId>
-                <configuration>
-                    <type>APP</type>
                 </configuration>
             </plugin>
             <plugin>
