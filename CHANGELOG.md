@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.44.0]
+### Maintenance 
+- Cleaned up versions for boat-maven-plugin
+- Added spring-boot-configuration-processors to modules that have configuration classes
+- Moved Product Catalog Model to own package to prevent deep transitive dependencies
+- Removed scdf-maven-plugin. This is now a configuration per project if required
+
 ## [2.43.0]
 ### Fixed
 - bugfix NPE for AccessGroupService.getUpdatePermissions  
