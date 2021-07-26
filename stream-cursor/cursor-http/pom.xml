@@ -18,7 +18,6 @@
     <properties>
         <raml2openapi-maven-plugin.input>${project.basedir}/../api/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
-        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -42,7 +41,6 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>${boat-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>cursor</id>

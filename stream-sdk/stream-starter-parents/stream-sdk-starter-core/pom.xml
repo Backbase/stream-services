@@ -32,12 +32,14 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <source.version>1.8</source.version>
-        <spring-boot.version>2.5.0</spring-boot.version>
-        <spring-cloud.version>2020.0.2</spring-cloud.version>
+        <source.version>11</source.version>
+        <spring-boot.version>2.5.2</spring-boot.version>
+        <spring-cloud.version>2020.0.3</spring-cloud.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
         <swagger-annotations-version>1.5.23</swagger-annotations-version>
+
+        <boat-maven-plugin.version>0.14.4</boat-maven-plugin.version>
 
         <!-- other config -->
         <jacoco.version>0.8.7</jacoco.version>
@@ -269,11 +271,25 @@
             <version>2.43.0</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-stream</artifactId>
+            <type>test-jar</type>
+            <classifier>test-binder</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>com.backbase.oss</groupId>
+                    <artifactId>boat-maven-plugin</artifactId>
+                    <version>${boat-maven-plugin.version}</version>
+                </plugin>
+
                 <plugin>
                     <groupId>com.google.cloud.tools</groupId>
                     <artifactId>jib-maven-plugin</artifactId>
@@ -291,7 +307,7 @@
                         </to>
                     </configuration>
                 </plugin>
-                <!-- Generate SCDF app metadata from 'ConfigurationProperties' classes -->
+                <!-- Generate App metadata from 'ConfigurationProperties' classes -->
                 <plugin>
                     <groupId>org.springframework.cloud</groupId>
                     <artifactId>spring-cloud-app-starter-metadata-maven-plugin</artifactId>
@@ -330,17 +346,6 @@
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
-                <plugin>
-                    <groupId>com.backbase.oss</groupId>
-                    <artifactId>scdf-maven-plugin</artifactId>
-                    <version>0.1.0</version>
-                    <configuration>
-                        <name>${project.artifactId}</name>
-                        <dataflowUrl>${scdf-maven-plugin.dataflowUrl}</dataflowUrl>
-                        <force>true</force>
-                        <appUri>docker:${jib-maven-plugin.image}:${jib-maven-plugin.tag}</appUri>
-                    </configuration>
                 </plugin>
                 <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
                 <plugin>

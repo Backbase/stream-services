@@ -17,15 +17,13 @@
         <sonar.skip>true</sonar.skip>
         <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
-        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
     </properties>
 
     <dependencies>
 
         <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-dbs-web-client</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
     </dependencies>

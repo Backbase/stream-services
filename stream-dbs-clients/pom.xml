@@ -15,7 +15,6 @@
 
     <properties>
         <sonar.skip>true</sonar.skip>
-        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -168,7 +167,6 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>${boat-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>generate-accesscontrol-client-api-code</id>
