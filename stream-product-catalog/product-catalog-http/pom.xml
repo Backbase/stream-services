@@ -36,7 +36,6 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>0.1.4</version>
                 <executions>
                     <execution>
                         <id>cursor</id>

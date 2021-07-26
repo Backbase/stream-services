@@ -44,7 +44,6 @@
     <properties>
         <banking-services-bom.version>2.20.0</banking-services-bom.version>
         <identity.version>1.8.3</identity.version>
-        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>

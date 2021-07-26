@@ -13,10 +13,6 @@
     <packaging>jar</packaging>
     <name>Stream :: Approval Core</name>
 
-    <properties>
-        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
-    </properties>
-
     <dependencies>
 
         <dependency>

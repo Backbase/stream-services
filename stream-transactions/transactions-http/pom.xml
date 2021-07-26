@@ -2,9 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <properties>
-        <boat-maven-plugin.version>0.14.0</boat-maven-plugin.version>
-    </properties>
 
     <parent>
         <groupId>com.backbase.stream</groupId>
@@ -34,7 +31,6 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>${boat-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>raml2openapi</id>
@@ -79,15 +75,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>com.backbase.oss</groupId>
-                <artifactId>scdf-maven-plugin</artifactId>
-                <configuration>
-                    <type>APP</type>
-                    <name>${project.artifactId}</name>
-                </configuration>
-            </plugin>
-            
              <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
