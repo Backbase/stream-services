@@ -40,6 +40,7 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +51,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.validation.Valid;
+
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
@@ -103,7 +105,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                            UserService userService,
                            UserProfileService userProfileService,
                            AccessGroupService accessGroupService,
-                           ProductIngestionSaga productIngestionSaga,
                            BatchProductIngestionSaga batchProductIngestionSaga, LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
@@ -151,8 +152,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
      */
     public Mono<Void> deleteLegalEntity(String legalEntityExternalId) {
         return Mono.zip(
-            legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(legalEntityExternalId),
-            legalEntityService.getLegalEntityByExternalId(legalEntityExternalId))
+                legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(legalEntityExternalId),
+                legalEntityService.getLegalEntityByExternalId(legalEntityExternalId))
             .flatMap(data -> {
                 LegalEntity le = data.getT2();
                 return userService.getUsersByLegalEntity(le.getInternalId())
@@ -277,9 +278,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
         StreamUtils.getAllProducts(productGroup)
             .forEach((BaseProduct bp) -> {
-                if(CollectionUtils.isEmpty(bp.getLegalEntities())
-                || bp.getLegalEntities().stream().map(LegalEntityReference::getExternalId).filter(Objects::nonNull)
-                    .noneMatch(le->le.equals(legalEntity.getExternalId()))) {
+                if (CollectionUtils.isEmpty(bp.getLegalEntities())
+                    || bp.getLegalEntities().stream().map(LegalEntityReference::getExternalId).filter(Objects::nonNull)
+                    .noneMatch(le -> le.equals(legalEntity.getExternalId()))) {
                     bp.addLegalEntitiesItem(new LegalEntityReference().externalId(legalEntity.getExternalId())
                         .internalId(legalEntity.getInternalId()));
                 }
@@ -303,8 +304,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         log.info("Creating Job Roles...");
 
         return Flux.fromStream(Stream.of(serviceAgreement.getJobRoles(), legalEntity.getReferenceJobRoles())
-            .filter(Objects::nonNull)
-            .flatMap(Collection::stream))
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream))
             .flatMap(jobRole -> accessGroupService.setupJobRole(streamTask, serviceAgreement, jobRole))
             .flatMap(jobRole -> {
                 log.debug("Job Role: {}", jobRole.getName());
@@ -392,16 +393,18 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
         return jobProfileUsers
             .flatMap(jobProfileUser -> upsertUser(streamTask, jobProfileUser.getUser())
-                .map(upsertedUser -> {
+                .flatMap(upsertedUser -> {
                     User inputUser = nullableCollectionToStream(legalEntity.getUsers())
                         .filter(jpu -> jpu.getUser().getExternalId().equalsIgnoreCase(
                             upsertedUser.getExternalId()))
                         .findFirst().get().getUser();
                     inputUser.setInternalId(upsertedUser.getInternalId());
-                    upsertUserProfile(inputUser).subscribe(upsertedUser::setUserProfile);
-                    jobProfileUser.setUser(upsertedUser);
-                    log.trace("upsert user {}", jobProfileUser);
-                    return jobProfileUser;
+                    return upsertUserProfile(inputUser)
+                        .map(userProfile -> {
+                            log.info("User Profile upserted: {}", userProfile);
+                            inputUser.setUserProfile(userProfile);
+                            return userProfile;
+                        });
                 }))
             .collectList()
             .thenReturn(streamTask);
@@ -438,8 +441,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             ));
         log.trace("Permissions {}", request);
         return accessGroupService.assignPermissionsBatch(
-            new BatchProductGroupTask(BATCH_PRODUCT_GROUP_ID + System.currentTimeMillis(), new BatchProductGroup()
-                .serviceAgreement(retrieveServiceAgreement(legalEntity)), BatchProductGroupTask.IngestionMode.UPDATE), request)
+                new BatchProductGroupTask(BATCH_PRODUCT_GROUP_ID + System.currentTimeMillis(), new BatchProductGroup()
+                    .serviceAgreement(retrieveServiceAgreement(legalEntity)), BatchProductGroupTask.IngestionMode.UPDATE), request)
             .thenReturn(legalEntityTask);
 
     }
@@ -467,9 +470,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         }
 
         return accessGroupService.assignPermissionsBatch(
-            new BatchProductGroupTask(BATCH_PRODUCT_GROUP_ID + System.currentTimeMillis(), new BatchProductGroup()
-                .serviceAgreement(retrieveServiceAgreement(legalEntity)), BatchProductGroupTask.IngestionMode.UPDATE),
-            request)
+                new BatchProductGroupTask(BATCH_PRODUCT_GROUP_ID + System.currentTimeMillis(), new BatchProductGroup()
+                    .serviceAgreement(retrieveServiceAgreement(legalEntity)), BatchProductGroupTask.IngestionMode.UPDATE),
+                request)
             .thenReturn(legalEntityTask);
     }
 
@@ -499,15 +502,17 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         LegalEntity legalEntity = streamTask.getData();
         streamTask.info(USER, UPSERT, "", user.getExternalId(), "Upsert User with External ID: %s", user.getExternalId());
 
-        Mono<User> getExistingUser = userService.getUserByExternalId(user.getExternalId())
-            .doOnNext(existingUser -> {
-                user.setInternalId(existingUser.getInternalId());
-                streamTask.info(USER, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId());
-            });
-        Mono<User> createNewUser = userService.createUser(user, legalEntity.getExternalId())
-            .doOnNext(existingUser -> {
-                user.setInternalId(existingUser.getInternalId());
-                streamTask.info(USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId());
+        Mono<User> getExistingUser = Mono.zip(Mono.just(user), userService.getUserByExternalId(user.getExternalId()), (u, existingUser) -> {
+            u.setInternalId(existingUser.getInternalId());
+            streamTask.info(USER, EXISTS, u.getExternalId(), u.getInternalId(), "User %s already exists", existingUser.getExternalId());
+            return u;
+        });
+
+        Mono<User> createNewUser = Mono.zip(Mono.just(user), userService.createUser(user, legalEntity.getExternalId()),
+            (u, newUser) -> {
+                u.setInternalId(newUser.getInternalId());
+                streamTask.info(USER, CREATED, u.getExternalId(), user.getInternalId(), "User %s created", newUser.getExternalId());
+                return user;
             });
         return getExistingUser.switchIfEmpty(createNewUser);
     }
@@ -516,19 +521,22 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         streamTask.info(IDENTITY_USER, UPSERT, "", user.getExternalId(), "Upsert User to Identity with External ID: %s", user.getExternalId());
         LegalEntity legalEntity = streamTask.getData();
         Mono<User> getExistingIdentityUser = userService.getUserByExternalId(user.getExternalId())
-            .doOnNext(existingUser -> {
+            .map(existingUser -> {
                 user.setInternalId(existingUser.getInternalId());
                 streamTask.info(IDENTITY_USER, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId());
-            });
+                return user;
+            })
+            ;
         Mono<User> createNewIdentityUser =
             userService.setupRealm(legalEntity)
                 .switchIfEmpty(Mono.error(new StreamTaskException(streamTask, "Realm: " + legalEntity.getRealmName() + " not found!")))
                 .then(userService.linkLegalEntityToRealm(legalEntity))
                 .then(userService.createOrImportIdentityUser(user, legalEntity.getInternalId()))
                 .flatMap(u -> updateUserStatus(u, legalEntity.getRealmName()))
-                .doOnNext(existingUser -> {
+                .map(existingUser -> {
                     user.setInternalId(existingUser.getInternalId());
                     streamTask.info(IDENTITY_USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId());
+                    return user;
                 });
         return getExistingIdentityUser.switchIfEmpty(createNewIdentityUser);
     }
@@ -549,7 +557,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
             Mono<LegalEntityTask> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntity.getInternalId())
                 .flatMap(serviceAgreement -> {
-                    if(legalEntity.getMasterServiceAgreement() != null && legalEntity.getMasterServiceAgreement().getJobRoles() != null)
+                    if (legalEntity.getMasterServiceAgreement() != null && legalEntity.getMasterServiceAgreement().getJobRoles() != null)
                         serviceAgreement.setJobRoles(legalEntity.getMasterServiceAgreement().getJobRoles());
                     streamTask.getData().setMasterServiceAgreement(serviceAgreement);
                     streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Existing Service Agreement: %s found for Legal Entity: %s", serviceAgreement.getExternalId(), legalEntity.getExternalId());
@@ -597,23 +605,23 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             });
 
         Mono<LegalEntityTask> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask, newSa)
-                .onErrorMap(AccessGroupException.class, accessGroupException -> {
-                    streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, newSa.getExternalId(), null,
-                        accessGroupException, accessGroupException.getMessage(),
-                        accessGroupException.getHttpResponse());
-                    return new StreamTaskException(streamTask, accessGroupException);
-                })
-                .flatMap(createdSa -> {
-                    newSa.setInternalId(createdSa.getInternalId());
-                    streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, createdSa.getExternalId(),
-                        createdSa.getInternalId(),
-                        "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s",
-                        createdSa.getExternalId(), legalEntity.getAdministrators().stream().map(
-                            User::getExternalId).collect(Collectors.joining(", ")), legalEntity.getExternalId());
-                    return Mono.just(streamTask);
-                })
-                .then(accessGroupService.updateServiceAgreementRegularUsers(streamTask, newSa, userActions)
-                    .thenReturn(streamTask));
+            .onErrorMap(AccessGroupException.class, accessGroupException -> {
+                streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, newSa.getExternalId(), null,
+                    accessGroupException, accessGroupException.getMessage(),
+                    accessGroupException.getHttpResponse());
+                return new StreamTaskException(streamTask, accessGroupException);
+            })
+            .flatMap(createdSa -> {
+                newSa.setInternalId(createdSa.getInternalId());
+                streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, createdSa.getExternalId(),
+                    createdSa.getInternalId(),
+                    "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s",
+                    createdSa.getExternalId(), legalEntity.getAdministrators().stream().map(
+                        User::getExternalId).collect(Collectors.joining(", ")), legalEntity.getExternalId());
+                return Mono.just(streamTask);
+            })
+            .then(accessGroupService.updateServiceAgreementRegularUsers(streamTask, newSa, userActions)
+                .thenReturn(streamTask));
 
         return existingServiceAgreement.switchIfEmpty(createServiceAgreement);
     }
