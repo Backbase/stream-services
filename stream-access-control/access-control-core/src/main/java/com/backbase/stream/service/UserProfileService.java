@@ -38,7 +38,7 @@ public class UserProfileService {
 
     public Mono<GetUserProfile> createUserProfile(CreateUserProfile requestBody) {
         return userProfileApi.createUserProfile(requestBody)
-            .onErrorResume(WebClientResponseException.class, (throwable) -> {
+            .onErrorResume(WebClientResponseException.class, throwable -> {
                 log.error("Failed to create User Profile: {}\n{}", requestBody.getExternalId(),throwable.getResponseBodyAsString());
                 return Mono.empty();
             })
