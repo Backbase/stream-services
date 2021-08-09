@@ -42,7 +42,7 @@
     <properties>
         <source.version>1.8</source.version>
         <spring-cloud.version>2020.0.3</spring-cloud.version>
-        <spring-boot.version>2.5.2</spring-boot.version>
+        <spring-boot.version>2.5.3</spring-boot.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
 
