@@ -5,6 +5,7 @@ import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.LegalEntityUnitOfWorkExecutor;
 import com.backbase.stream.legalentity.repository.LegalEntityUnitOfWorkRepository;
 import com.backbase.stream.product.BatchProductIngestionSaga;
+import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.ProductIngestionSagaConfiguration;
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.service.AccessGroupService;
@@ -32,17 +33,19 @@ public class LegalEntitySagaConfiguration {
 
     @Bean
     public LegalEntitySaga reactiveLegalEntitySaga(LegalEntityService legalEntityService,
-                                                   UserService userService,
-                                                   UserProfileService userProfileService,
-                                                   AccessGroupService accessGroupService,
-                                                   BatchProductIngestionSaga batchProductIngestionSaga,
-                                                   LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
-                                                   ObjectMapper objectMapper) {
+        UserService userService,
+        UserProfileService userProfileService,
+        AccessGroupService accessGroupService,
+        ProductIngestionSaga productIngestionSaga,
+        BatchProductIngestionSaga batchProductIngestionSaga,
+        LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
+        ObjectMapper objectMapper) {
         return new LegalEntitySaga(
             legalEntityService,
             userService,
             userProfileService,
             accessGroupService,
+            productIngestionSaga,
             batchProductIngestionSaga, sinkConfigurationProperties
         );
     }

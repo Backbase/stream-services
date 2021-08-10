@@ -105,6 +105,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                            UserService userService,
                            UserProfileService userProfileService,
                            AccessGroupService accessGroupService,
+                           ProductIngestionSaga productIngestionSaga,
                            BatchProductIngestionSaga batchProductIngestionSaga, LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
