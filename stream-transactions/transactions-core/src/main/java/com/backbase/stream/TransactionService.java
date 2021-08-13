@@ -40,10 +40,9 @@ public class TransactionService {
      * @param transactions Unbounded list of Transactions
      * @return Ingestion Transactions IDs
      */
-    public Flux<TransactionsPostResponseBody> processTransactions(Flux<TransactionsPostRequestBody> transactions) {
+    public Flux<UnitOfWork<TransactionTask>> processTransactions(Flux<TransactionsPostRequestBody> transactions) {
         Flux<UnitOfWork<TransactionTask>> unitOfWorkFlux = transactionTaskExecutor.prepareUnitOfWork(transactions);
-        return unitOfWorkFlux.flatMap(transactionTaskExecutor::executeUnitOfWork)
-            .flatMap(this::getTransactionIdsFlux);
+        return unitOfWorkFlux.flatMap(transactionTaskExecutor::executeUnitOfWork);
     }
 
     private Flux<TransactionsPostResponseBody> getTransactionIdsFlux(UnitOfWork<TransactionTask> unitOfWork) {

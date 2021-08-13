@@ -4,33 +4,27 @@ import static java.util.Optional.ofNullable;
 
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
-import com.backbase.dbs.user.api.service.v2.model.AddRealmRequest;
-import com.backbase.dbs.user.api.service.v2.model.AssignRealm;
-import com.backbase.dbs.user.api.service.v2.model.BatchUser;
-import com.backbase.dbs.user.api.service.v2.model.CreateIdentityRequest;
-import com.backbase.dbs.user.api.service.v2.model.GetUser;
-import com.backbase.dbs.user.api.service.v2.model.GetUsersByLegalEntityIdsRequest;
-import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
-import com.backbase.dbs.user.api.service.v2.model.Realm;
-import com.backbase.dbs.user.api.service.v2.model.UpdateIdentityRequest;
-import com.backbase.dbs.user.api.service.v2.model.UserCreated;
-import com.backbase.dbs.user.api.service.v2.model.UserExternal;
+import com.backbase.dbs.user.api.service.v2.model.*;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
+import com.backbase.stream.exceptions.UserUpsertException;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.mapper.RealmMapper;
 import com.backbase.stream.mapper.UserMapper;
+
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -106,19 +100,19 @@ public class UserService {
     public Mono<Void> archiveUsers(String legalEntityInternalId, List<String> userExternalIds) {
         //  There is no way to remove user from DBS, so to bypass this we just archive DBS user representing member.
         return usersApi.updateUserInBatch(
-            userExternalIds.stream()
-                .map(userExternalId -> {
-                    return new BatchUser()
-                        .externalId(userExternalId)
-                        .userUpdate(new com.backbase.dbs.user.api.service.v2.model.User()
-                            .externalId("REMOVED_" + userExternalId + "_" + UUID.randomUUID().toString())
-                            .legalEntityId(legalEntityInternalId)
-                            .fullName("archived_" + userExternalId));
-                })
-                .collect(Collectors.toList()))
+                userExternalIds.stream()
+                    .map(userExternalId -> {
+                        return new BatchUser()
+                            .externalId(userExternalId)
+                            .userUpdate(new com.backbase.dbs.user.api.service.v2.model.User()
+                                .externalId("REMOVED_" + userExternalId + "_" + UUID.randomUUID().toString())
+                                .legalEntityId(legalEntityInternalId)
+                                .fullName("archived_" + userExternalId));
+                    })
+                    .collect(Collectors.toList()))
             .map(r -> {
                 log.debug("Batch Archive User response: status {} for resource {}, errors: {}", r.getStatus(), r.getResourceId(), r.getErrors());
-                if (r.getStatus().getValue()!= null && !HttpStatus.valueOf(Integer.parseInt(r.getStatus().getValue())).is2xxSuccessful()) {
+                if (r.getStatus().getValue() != null && !HttpStatus.valueOf(Integer.parseInt(r.getStatus().getValue())).is2xxSuccessful()) {
                     throw new RuntimeException(
                         MessageFormat.format("Failed item in the batch for User Update: status {0} for resource {1}, errors: {2}",
                             r.getStatus(), r.getResourceId(), r.getErrors())
@@ -132,6 +126,40 @@ public class UserService {
                 return Mono.error(e);
             })
             .then();
+    }
+
+    public Mono<List<User>> ingestUsers(List<User> users) {
+        List<com.backbase.dbs.user.api.service.v2.model.User> userList = users.stream().map(mapper::toService).collect(Collectors.toList());
+        return Mono.zip(Mono.just(users),
+            usersApi.ingestUsers(userList)
+                .onErrorContinue(WebClientResponseException.class, (throwable, o) -> {
+                    log.error("Failed to bulk ingest users: {}", userList);
+                })
+                .collectList(), this::mergeBatchResults);
+
+
+    }
+
+    @NotNull
+    private List<User> mergeBatchResults(List<User> users, List<BatchResponseItem> batchResponseItems) throws UserUpsertException {
+        // current and batchResponseItems lists must be the same size;
+        if (users.size() != batchResponseItems.size()) {
+            throw new UserUpsertException("Batch Results response does not match request", users, batchResponseItems);
+        } else {
+            for (int i = 0; i < users.size(); i++) {
+
+                User user = users.get(i);
+                BatchResponseItem batchResponseItem = batchResponseItems.get(i);
+
+                if (batchResponseItem.getErrors().isEmpty()) {
+                    user.setInternalId(batchResponseItem.getResourceId());
+                } else {
+                    throw new UserUpsertException("Failed to upsert user", users, batchResponseItems);
+                }
+            }
+
+            return users;
+        }
     }
 
     /**
@@ -248,7 +276,8 @@ public class UserService {
 
     /**
      * Locks/Unlocks the user is current status is different.
-     * @param user user to be locked/unlocked.
+     *
+     * @param user  user to be locked/unlocked.
      * @param realm user's realm.
      * @return user.
      */
@@ -273,11 +302,11 @@ public class UserService {
 
     private Mono<EnhancedUserRepresentation> getIdentityUser(User user, String realm) {
         return identityIntegrationApi.map(api -> api.getUserById(realm, user.getInternalId())
-            .doOnNext(eur -> {
-                log.info("Identity user found: {}", user.getExternalId());
-            })
-            .doOnError(WebClientResponseException.class, e ->
-                log.error("Error retrieving identity user {}: {}", user.getInternalId(), e.getResponseBodyAsString())))
+                .doOnNext(eur -> {
+                    log.info("Identity user found: {}", user.getExternalId());
+                })
+                .doOnError(WebClientResponseException.class, e ->
+                    log.error("Error retrieving identity user {}: {}", user.getInternalId(), e.getResponseBodyAsString())))
             .orElse(Mono.empty());
     }
 

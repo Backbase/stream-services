@@ -15,10 +15,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -175,6 +173,30 @@ public class LegalEntityService {
                     return Mono.error(e);
                 }).then();
     }
+
+
+//    public Mono<List<LegalEntity>> batchUpdateLegalEntities(List<LegalEntity> legalEntities) {
+//
+//        return Mono.zip(
+//            Mono.just(legalEntities),
+//            legalEntitiesApi.putLegalEntities(legalEntities.stream().map(mapper::toService).collect(Collectors.toList()))
+//                .collectList()
+//                , (current, batchResponseItems) -> {
+//
+//                if(current.size() == batchResponseItems.size()) {
+//                    for (int i = 0; i < current.size(); i++) {
+//                        current.get(0).
+//
+//                    }
+//                } else {
+//                    throw new IllegalStateException("INvalid batch respoinse");
+//                }
+//
+//
+//                return current;
+//        });
+//
+//    }
 
     private void handleWebClientResponseException(WebClientResponseException webclientResponseException) {
         log.error("Bad Request: \n[{}]: {}\nResponse: {}",

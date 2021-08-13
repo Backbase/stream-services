@@ -1,10 +1,6 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.model.GetServiceAgreement;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityCreateItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityItemBase;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityType;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.*;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import org.mapstruct.Mapper;
@@ -16,6 +12,10 @@ public interface LegalEntityMapper {
 
     @Mapping(source = "legalEntityType", target = "type")
     LegalEntityCreateItem toPresentation(LegalEntity legalEntity);
+
+//
+//    @Mapping(source = "legalEntityType", target = "type")
+//    LegalEntityPut toService(LegalEntity legalEntity);
 
 
     @Mapping(source = "type", target = "legalEntityType")

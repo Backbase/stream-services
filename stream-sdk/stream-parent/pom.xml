@@ -103,14 +103,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-            <dependency>
-                <groupId>io.micrometer.prometheus</groupId>
-                <artifactId>prometheus-rsocket-spring</artifactId>
-                <version>${prometheus-rsocket.version}</version>
-            </dependency>
-
-
         </dependencies>
     </dependencyManagement>
 
