@@ -1311,7 +1311,7 @@ public class AccessGroupService {
     private Mono<? extends JobRole> updateJobRole(StreamTask streamTask, ServiceAgreement serviceAgreement,
         JobRole jobRole, FunctionGroupItem functionGroupItem) {
 
-        log.warn("Start Job Role updating: {}", functionGroupItem);
+        log.info("Start Job Role updating: {}", functionGroupItem.getName());
         streamTask.info(JOB_ROLE, SETUP_JOB_ROLE, "update", serviceAgreement.getExternalId(), null,
             "Update job role: %s for service agreement: %s", jobRole.getName(), serviceAgreement.getName());
 
@@ -1354,7 +1354,8 @@ public class AccessGroupService {
         ServiceAgreement serviceAgreement,
         List<BusinessFunctionGroup> existingBusinessGroups) {
 
-        log.warn("Start Job Role updating: {}", existingBusinessGroups);
+        log.info("Start Job Role updating: {}",
+            existingBusinessGroups.stream().map(BusinessFunctionGroup::getName).collect(Collectors.toList()));
 
         streamTask.info(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "update", serviceAgreement.getExternalId(), null,
             "Update business function groups for service agreement: %s",
