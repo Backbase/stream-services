@@ -402,7 +402,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     inputUser.setInternalId(upsertedUser.getInternalId());
                     return upsertUserProfile(inputUser)
                         .map(userProfile -> {
-                            log.info("User Profile upserted: {}", userProfile);
+                            log.info("User Profile upserted for: {}", userProfile.getUserName());
                             inputUser.setUserProfile(userProfile);
                             return userProfile;
                         });
