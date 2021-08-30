@@ -174,30 +174,6 @@ public class LegalEntityService {
                 }).then();
     }
 
-
-//    public Mono<List<LegalEntity>> batchUpdateLegalEntities(List<LegalEntity> legalEntities) {
-//
-//        return Mono.zip(
-//            Mono.just(legalEntities),
-//            legalEntitiesApi.putLegalEntities(legalEntities.stream().map(mapper::toService).collect(Collectors.toList()))
-//                .collectList()
-//                , (current, batchResponseItems) -> {
-//
-//                if(current.size() == batchResponseItems.size()) {
-//                    for (int i = 0; i < current.size(); i++) {
-//                        current.get(0).
-//
-//                    }
-//                } else {
-//                    throw new IllegalStateException("INvalid batch respoinse");
-//                }
-//
-//
-//                return current;
-//        });
-//
-//    }
-
     private void handleWebClientResponseException(WebClientResponseException webclientResponseException) {
         log.error("Bad Request: \n[{}]: {}\nResponse: {}",
             Objects.requireNonNull(webclientResponseException.getRequest()).getMethod(),

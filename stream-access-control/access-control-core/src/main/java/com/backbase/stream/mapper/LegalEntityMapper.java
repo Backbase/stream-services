@@ -13,11 +13,6 @@ public interface LegalEntityMapper {
     @Mapping(source = "legalEntityType", target = "type")
     LegalEntityCreateItem toPresentation(LegalEntity legalEntity);
 
-//
-//    @Mapping(source = "legalEntityType", target = "type")
-//    LegalEntityPut toService(LegalEntity legalEntity);
-
-
     @Mapping(source = "type", target = "legalEntityType")
     @Mapping(source = "id", target = "internalId")
     LegalEntity toStream(LegalEntityItemBase legalEntityItemBase);
