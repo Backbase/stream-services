@@ -70,7 +70,10 @@ public class UserService {
         createUser.setLegalEntityExternalId(legalEntityExternalId);
 
         return usersApi.createUser(createUser)
-            .doOnError(WebClientResponseException.class, e -> handleCreateUserError(user, e))
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Error creating user: {} Response: {}", user, e.getResponseBodyAsString());
+                return Mono.error(e);
+            })
             .map(userCreated -> handleCreateUserResult(user, userCreated));
     }
 
@@ -172,8 +175,10 @@ public class UserService {
         AddRealmRequest assignRealmRequest = new AddRealmRequest().realmName(realmName);
         return identityManagementApi.createRealm(assignRealmRequest)
             .doOnNext(addRealmResponse -> log.info("Realm Created: '{}'", addRealmResponse.getId()))
-            .doOnError(WebClientResponseException.class, badRequest ->
-                log.error("Error creating Realm"))
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Error creating realm: {} Response: {}", realmName, e.getResponseBodyAsString());
+                return Mono.error(e);
+            })
             .map(realmMapper::toStream);
     }
 
@@ -186,8 +191,10 @@ public class UserService {
     private Mono<Realm> existingRealm(final String realmName) {
         log.info("Checking for existing Realm '{}'", realmName);
         return identityManagementApi.getRealms(null)
-            .doOnError(WebClientResponseException.class, badRequest ->
-                log.error("Error getting Realms"))
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Error getting realm: {} Response: {}", realmName, e.getResponseBodyAsString());
+                return Mono.error(e);
+            })
             .collectList()
             .map(realms -> realms.stream().filter(realm -> realmName.equals(realm.getRealmName())).findFirst())
             .flatMap(Mono::justOrEmpty);
@@ -220,8 +227,10 @@ public class UserService {
         log.info("Linking Legal Entity with internal Id '{}' to Realm: '{}'", legalEntity.getInternalId(), legalEntity.getRealmName());
         AssignRealm assignRealm = new AssignRealm().legalEntityId(legalEntity.getInternalId());
         return identityManagementApi.assignRealm(legalEntity.getRealmName(), assignRealm)
-            .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
-                log.error("Error Linking: {}", badRequest.getResponseBodyAsString()))
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Error Linking: {}", e.getResponseBodyAsString());
+                return Mono.error(e);
+            })
             .then(Mono.just(legalEntity))
             .map(actual -> {
                 log.info("Legal Entity: {} linked to Realm: {}", actual.getInternalId(), legalEntity.getRealmName());
@@ -267,8 +276,10 @@ public class UserService {
             UpdateIdentityRequest replaceIdentity = new UpdateIdentityRequest();
             replaceIdentity.attributes(user.getAttributes());
             return identityManagementApi.updateIdentity(user.getInternalId(), replaceIdentity)
-                .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
-                    log.error("Error adding user attributes: {}", badRequest.getResponseBodyAsString()))
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    log.error("Error adding user attributes: {}", e.getResponseBodyAsString());
+                    return Mono.error(e);
+                })
                 .then(Mono.just(user));
         }
         return Mono.just(user);
@@ -295,18 +306,22 @@ public class UserService {
             .doOnNext(eur -> {
                 log.info("User {} locked successfully", user.getExternalId());
             })
-            .doOnError(WebClientResponseException.class, e ->
-                log.error("Error locking user {}: {}", user.getInternalId(), e.getResponseBodyAsString()))
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Error locking user {}: {}", user.getInternalId(), e.getResponseBodyAsString());
+                return Mono.error(e);
+            })
             .thenReturn(user)).orElse(Mono.just(user));
     }
 
     private Mono<EnhancedUserRepresentation> getIdentityUser(User user, String realm) {
         return identityIntegrationApi.map(api -> api.getUserById(realm, user.getInternalId())
-                .doOnNext(eur -> {
-                    log.info("Identity user found: {}", user.getExternalId());
-                })
-                .doOnError(WebClientResponseException.class, e ->
-                    log.error("Error retrieving identity user {}: {}", user.getInternalId(), e.getResponseBodyAsString())))
+            .doOnNext(eur -> {
+                log.info("Identity user found: {}", user.getExternalId());
+            })
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Error retrieving identity user {}: {}", user.getInternalId(), e.getResponseBodyAsString());
+                return Mono.error(e);
+            }))
             .orElse(Mono.empty());
     }
 
@@ -316,7 +331,4 @@ public class UserService {
         return user;
     }
 
-    private void handleCreateUserError(User user, WebClientResponseException response) {
-        log.error("Created user: {} with internalId: {}", user, response.getResponseBodyAsString());
-    }
 }
