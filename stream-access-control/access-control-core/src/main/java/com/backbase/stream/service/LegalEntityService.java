@@ -49,12 +49,12 @@ public class LegalEntityService {
     private final LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
     private final AccessGroupMapper serviceAgreementMapper = Mappers.getMapper(AccessGroupMapper.class);
 
-    // configured at accesscontrol-pandp
-    @Value("${backbase.accesscontrol.token.key:16b_secret_value}")
-    private String legalEntityApiTokenKey = "16b_secret_value";
+    // Configured at access-control service
+    @Value("${backbase.accesscontrol.token.key:Bar12345Bar12345}")
+    private final String accessControlApiTokenKey = "Bar12345Bar12345";
 
-    @Value("${backbase.accesscontrol.token.initPhrase:16b_secret_value}")
-    private String legalEntityApiTokenInitPhrase = "16b_secret_value";
+    @Value("${backbase.accesscontrol.token.initPhrase:RandomInitVecto2}")
+    private final String accessControlApiTokenInitPhrase = "RandomInitVecto2";
 
     /**
      * Create Legal Entity in Access Control.
@@ -164,7 +164,7 @@ public class LegalEntityService {
     public Mono<Void> deleteLegalEntity(String legalEntityExternalId) {
         return legalEntitiesApi.postLegalEntitiesBatchDelete(
                 new LegalEntitiesBatchDelete()
-                        .accessToken(getLEAccessToken())
+                        .accessToken(getAccessControlAccessToken())
                         .externalIds(Collections.singletonList(legalEntityExternalId)))
                 .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Remove Legal Entity", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
                 .collectList()
@@ -182,14 +182,16 @@ public class LegalEntityService {
     }
 
     /**
-     * Generate access token which is then verified by legal entity APIs.
+     * Generate access token which is usually verified by Access Control APIs during delete action.
+     *
+     * This implementation is brought here to avoid calling the
      *
      * @return access token.
      */
-    private String getLEAccessToken() {
+    private String getAccessControlAccessToken() {
         try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(legalEntityApiTokenKey.getBytes(StandardCharsets.UTF_8), "AES");
-            IvParameterSpec iv = new IvParameterSpec(legalEntityApiTokenInitPhrase.getBytes(StandardCharsets.UTF_8));
+            SecretKeySpec secretKeySpec = new SecretKeySpec(accessControlApiTokenKey.getBytes(StandardCharsets.UTF_8), "AES");
+            IvParameterSpec iv = new IvParameterSpec(accessControlApiTokenInitPhrase.getBytes(StandardCharsets.UTF_8));
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
             cipher.init(1, secretKeySpec, iv);
 
