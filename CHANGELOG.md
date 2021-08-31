@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - Fix for issue https://github.com/Backbase/stream-services-2.0/issues/74 : Reference Job Roles updated in LegalEntitySaga
 with empty functions.
+- Exclude old snakeyaml dependency
+- UserService: improved Exception management
+## Added
+- SCDF plugin to Transactions Sink
+- Functional programming for Transaction Sink
 
 ## [2.45.0]
 ### Fixed
