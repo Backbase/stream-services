@@ -35,19 +35,19 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>access-control-core</artifactId>
-            <version>2.45.0</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-ingestion-saga</artifactId>
-            <version>2.45.0</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-catalog-core</artifactId>
-            <version>2.45.0</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -65,13 +65,14 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-generator-core</artifactId>
-            <version>2.45.0</version>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-core</artifactId>
-            <version>2.45.0</version>
+            <version>${project.version}</version>
         </dependency>
 
 

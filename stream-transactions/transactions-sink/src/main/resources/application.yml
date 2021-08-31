@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    function:
+      definition: createHistoryRequestMessage
+    stream:
+      function:
+        bindings:
+          createHistoryRequestMessage-in-0: input
+          createHistoryRequestMessage-out-0: output

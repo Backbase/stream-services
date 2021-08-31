@@ -14,7 +14,9 @@ import org.springframework.test.context.junit4.SpringRunner;
  * Tests to verify the default configuration is set for SCS services.
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = Application.class)
+@SpringBootTest(classes = Application.class, properties = {
+    "spring.cloud.config.enabled=false",
+})
 public class DefaultSpringCloudStreamPropertiesTest {
 
     @Autowired
