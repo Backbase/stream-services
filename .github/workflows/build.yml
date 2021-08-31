@@ -39,7 +39,7 @@ jobs:
           repositories: '[{ "id": "backbase", "url": "https://repo.backbase.com/repo" }]'
           plugin_repositories: '[{ "id": "backbase-plugins", "url": "https://repo.backbase.com/repo" }]'
           servers: '[{ "id": "backbase", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" },{ "id": "backbase-plugins", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" }]'
-      
+
       - name: Get version from POM
         run: |
           VERSION_PARTS=($(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | tr "." "\n"))
@@ -47,8 +47,14 @@ jobs:
           echo "MINOR=${VERSION_PARTS[1]}" >> $GITHUB_ENV
           echo "PATCH=${VERSION_PARTS[2]}" >> $GITHUB_ENV
 
+      - name: Setup patch version
+        if: "contains(github.ref, 'master') && contains(github.event.head_commit.message, 'hotfix/')"
+        run: |
+          NEW_VERSION="$((MAJOR)).$((MINOR)).$((PATCH+1))"
+          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+
       - name: Setup release version
-        if: contains(github.ref, 'master')
+        if: "contains(github.ref, 'master') && !contains(github.event.head_commit.message, 'hotfix/')"
         run: |
           NEW_VERSION="$((MAJOR)).$((MINOR+1)).0"
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
