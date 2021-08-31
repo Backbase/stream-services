@@ -15,6 +15,12 @@
     <packaging>jar</packaging>
     <name>Stream :: Transactions Sink</name>
 
+    <properties>
+        <docker.repo/>
+        <jib-maven-plugin.image>${docker.repo}/${project.artifactId}</jib-maven-plugin.image>
+    </properties>
+
+
     <dependencies>
         <dependency>
             <groupId>com.backbase.stream</groupId>
@@ -22,4 +28,32 @@
             <version>2.45.0</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.backbase.oss</groupId>
+                <artifactId>scdf-maven-plugin</artifactId>
+                <version>0.2.0</version>
+                <configuration>
+                    <type>sink</type>
+                    <name>transactions</name>
+                    <appUri>docker:${jib-maven-plugin.image}:${jib-maven-plugin.tag}</appUri>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dataflow-apps-docs-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dataflow-apps-metadata-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

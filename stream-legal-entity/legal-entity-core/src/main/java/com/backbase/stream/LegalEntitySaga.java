@@ -402,7 +402,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     inputUser.setInternalId(upsertedUser.getInternalId());
                     return upsertUserProfile(inputUser)
                         .map(userProfile -> {
-                            log.info("User Profile upserted: {}", userProfile);
+                            log.info("User Profile upserted for: {}", userProfile.getUserName());
                             inputUser.setUserProfile(userProfile);
                             return userProfile;
                         });
@@ -497,6 +497,25 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             log.debug("Fallback to Identity Agnostic identityLinkStrategy. Either identity integration is disabled or User identityLinkStrategy is not set to identity.");
             return upsertUser(user, streamTask);
         }
+    }
+
+    private Mono<User> upsertUserBulk(User user, LegalEntityTask streamTask) {
+        LegalEntity legalEntity = streamTask.getData();
+        streamTask.info(USER, UPSERT, "", user.getExternalId(), "Upsert User with External ID: %s", user.getExternalId());
+
+        Mono<User> getExistingUser = Mono.zip(Mono.just(user), userService.getUserByExternalId(user.getExternalId()), (u, existingUser) -> {
+            u.setInternalId(existingUser.getInternalId());
+            streamTask.info(USER, EXISTS, u.getExternalId(), u.getInternalId(), "User %s already exists", existingUser.getExternalId());
+            return u;
+        });
+
+        Mono<User> createNewUser = Mono.zip(Mono.just(user), userService.createUser(user, legalEntity.getExternalId()),
+            (u, newUser) -> {
+                u.setInternalId(newUser.getInternalId());
+                streamTask.info(USER, CREATED, u.getExternalId(), user.getInternalId(), "User %s created", newUser.getExternalId());
+                return user;
+            });
+        return getExistingUser.switchIfEmpty(createNewUser);
     }
 
     private Mono<User> upsertUser(User user, LegalEntityTask streamTask) {

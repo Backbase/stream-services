@@ -49,8 +49,8 @@
         <jacoco.version>0.8.7</jacoco.version>
 
         <!-- other config -->
-        <skip.integration.tests>false</skip.integration.tests>
-        <skip.unit.tests>false</skip.unit.tests>
+        <skip.integration.tests>${skipTests}</skip.integration.tests>
+        <skip.unit.tests>${skipTests}</skip.unit.tests>
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
         <sonar.java.codeCoveragePlugin>jacoco</sonar.java.codeCoveragePlugin>
         <coverage.reports.dir>${project.build.directory}/coverage-reports</coverage.reports.dir>
@@ -103,14 +103,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-            <dependency>
-                <groupId>io.micrometer.prometheus</groupId>
-                <artifactId>prometheus-rsocket-spring</artifactId>
-                <version>${prometheus-rsocket.version}</version>
-            </dependency>
-
-
         </dependencies>
     </dependencyManagement>
 
