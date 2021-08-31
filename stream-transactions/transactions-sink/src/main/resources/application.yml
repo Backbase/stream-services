@@ -1,9 +1,8 @@
 spring:
   cloud:
-    function:
-      definition: createHistoryRequestMessage
     stream:
       function:
+        definition: transactionConsumer
         bindings:
-          createHistoryRequestMessage-in-0: input
-          createHistoryRequestMessage-out-0: output
+          transactionConsumer-in-0: input
+          transactionConsumer-out-0: output

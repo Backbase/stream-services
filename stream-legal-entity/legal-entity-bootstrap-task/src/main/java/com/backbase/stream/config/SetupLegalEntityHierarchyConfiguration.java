@@ -44,7 +44,6 @@ public class SetupLegalEntityHierarchyConfiguration {
             Flux.fromIterable(aggregates)
                 .map(LegalEntityTask::new)
                 .flatMap(legalEntitySaga::executeTask)
-                .doOnNext(StreamTask::logSummary)
                 .collectList()
                 .block();
             log.info("Finished bootstrapping Legal Entity Structure");
