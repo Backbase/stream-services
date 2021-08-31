@@ -53,6 +53,7 @@ import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
+import com.backbase.stream.legalentity.model.BusinessFunctionGroup.TypeEnum;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
@@ -1363,6 +1364,7 @@ public class AccessGroupService {
 
         List<PresentationFunctionGroupPutRequestBody> presentationFunctionGroupPutRequestBody =
             existingBusinessGroups.stream()
+                .filter(businessFunctionGroup -> !businessFunctionGroup.getType().equals(TypeEnum.TEMPLATE))
                 .map(bfg -> {
                     PresentationFunctionGroupPutRequestBody putRequestBody =
                         new PresentationFunctionGroupPutRequestBody();
