@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 with empty functions.
 - Exclude old snakeyaml dependency
 - UserService: improved Exception management
-## Added
+### Added
 - SCDF plugin to Transactions Sink
 - Functional programming for Transaction Sink
 
@@ -460,6 +460,18 @@ backbase:
       limit-manager-base-url: http://limits-manager:8080
 ```
 
+[2.46.0]: https://github.com/Backbase/stream-services-2.0/compare/2.45.0...2.46.0
+[2.45.0]: https://github.com/Backbase/stream-services-2.0/compare/2.44.0...2.45.0
+[2.44.0]: https://github.com/Backbase/stream-services-2.0/compare/2.43.0...2.44.0
+[2.43.0]: https://github.com/Backbase/stream-services-2.0/compare/2.42.0...2.43.0
+[2.42.0]: https://github.com/Backbase/stream-services-2.0/compare/2.41.0...2.42.0
+[2.41.0]: https://github.com/Backbase/stream-services-2.0/compare/2.40.0...2.41.0
+[2.40.0]: https://github.com/Backbase/stream-services-2.0/compare/2.39.0...2.40.0
+[2.39.0]: https://github.com/Backbase/stream-services-2.0/compare/2.38.0...2.39.0
+[2.38.0]: https://github.com/Backbase/stream-services-2.0/compare/2.37.0...2.38.0
+[2.37.0]: https://github.com/Backbase/stream-services-2.0/compare/2.36.0...2.37.0
+[2.36.0]: https://github.com/Backbase/stream-services-2.0/compare/2.35.0...2.36.0
+[2.35.0]: https://github.com/Backbase/stream-services-2.0/compare/2.34.0...2.35.0
 [2.34.0]: https://github.com/Backbase/stream-services-2.0/compare/2.33.0...2.34.0
 [2.33.0]: https://github.com/Backbase/stream-services-2.0/compare/2.32.0...2.33.0
 [2.32.0]: https://github.com/Backbase/stream-services-2.0/compare/2.31.0...2.32.0
