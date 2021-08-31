@@ -3,7 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.44.0]
+## [2.46.0]
+### Fixed
+- Fix for issue https://github.com/Backbase/stream-services-2.0/issues/74 : Reference Job Roles updated in LegalEntitySaga
+with empty functions.
+
+## [2.45.0]
 ### Fixed
 - Legal Entity Saga 
   - Errors happening in the user profile manager must now correctly be dealt with.
@@ -19,10 +24,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postRefresh.
 ### Maintenance 
 - Upgrade Spring Boot 2.5.3
+
+## [2.44.0]
+### Maintenance 
 - Cleaned up versions for boat-maven-plugin
 - Added spring-boot-configuration-processors to modules that have configuration classes
 - Moved Product Catalog Model to own package to prevent deep transitive dependencies
-- Removed scdf-maven-plugin. This is now a configuration per project if required 
+- Removed scdf-maven-plugin. This is now a configuration per project if required
 
 ## [2.43.0]
 ### Fixed
