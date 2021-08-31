@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.46.1]
+### Changed
+- Setting consistent DBS default values for access control token used by delete operations.
+
 ## [2.46.0]
 ### Fixed
 - Fix for issue https://github.com/Backbase/stream-services-2.0/issues/74 : Reference Job Roles updated in LegalEntitySaga
@@ -459,7 +463,7 @@ backbase:
       transaction-manager-base-url: http://transaction-manager:8080
       limit-manager-base-url: http://limits-manager:8080
 ```
-
+[2.46.1]: https://github.com/Backbase/stream-services-2.0/compare/2.46.0...2.46.1
 [2.46.0]: https://github.com/Backbase/stream-services-2.0/compare/2.45.0...2.46.0
 [2.45.0]: https://github.com/Backbase/stream-services-2.0/compare/2.44.0...2.45.0
 [2.44.0]: https://github.com/Backbase/stream-services-2.0/compare/2.43.0...2.44.0
