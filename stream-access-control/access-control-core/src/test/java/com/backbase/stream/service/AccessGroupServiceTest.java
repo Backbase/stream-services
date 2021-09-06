@@ -389,8 +389,8 @@ class AccessGroupServiceTest {
 
     /*
        Request contains business-function-group-id-1, business-function-group-id-2
-       Existing permissions are: system-group-id-1, function-group-id-1 and business-function-group-id-1
-       Expectation is to have function-group-id-1 and business-function-group-id-1 in PUT permissions request together with data group ids specified in request
+       Existing permissions are: system-group-id-1, function-group-id-1, business-function-group-id-1 and business-function-group-id-2
+       Expectation is to have function-group-id-1, business-function-group-id-1 and business-function-group-id-2 in PUT permissions request together with data group ids specified in request
      */
     @Test
     void assignPermissionsBatchNoExistingFunctionGroups() {

@@ -623,7 +623,7 @@ public class AccessGroupService {
                     if (existingUserPermissions.isEmpty()) {
                         mergedUserPermissions.setFunctionGroupDataGroups(requestUserPermissions.getFunctionGroupDataGroups());
                     } else {
-                        //convert all persisted existing permissions to final merged list
+                        //Convert all persisted permissions and adding them to final merged list
                         existingUserPermissions.forEach(userPermission -> {
                             Set<String> dataGroupIds = new HashSet<>();
                             if (userPermission.getDataGroupIds() != null) {
