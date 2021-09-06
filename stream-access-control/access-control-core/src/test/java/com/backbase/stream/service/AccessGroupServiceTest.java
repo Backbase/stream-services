@@ -352,6 +352,9 @@ class AccessGroupServiceTest {
                     ).dataGroupIdentifiers(Collections.emptyList()),
                     new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
                         new PresentationIdentifier().idIdentifier("system-group-id-3")
+                    ).dataGroupIdentifiers(Collections.emptyList()),
+                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
+                        new PresentationIdentifier().idIdentifier("business-function-group-id-1")
                     ).dataGroupIdentifiers(Collections.emptyList())
                 ))
         );
@@ -385,9 +388,9 @@ class AccessGroupServiceTest {
     }
 
     /*
-       Request contains business-function-group-id-1
-       Existing permissions are: system-group-id-1, function-group-id-1 and business-function-group-id-1
-       Expectation is to have function-group-id-1 and business-function-group-id-1 in PUT permissions request together with data group ids specified in request
+       Request contains business-function-group-id-1, business-function-group-id-2
+       Existing permissions are: system-group-id-1, function-group-id-1, business-function-group-id-1 and business-function-group-id-2
+       Expectation is to have function-group-id-1, business-function-group-id-1 and business-function-group-id-2 in PUT permissions request together with data group ids specified in request
      */
     @Test
     void assignPermissionsBatchNoExistingFunctionGroups() {
@@ -401,6 +404,10 @@ class AccessGroupServiceTest {
         baseProductGroupMap.put(
             new BusinessFunctionGroup().id("business-function-group-id-1"),
             Collections.singletonList(new BaseProductGroup().internalId("data-group-0"))
+        );
+        baseProductGroupMap.put(
+             new BusinessFunctionGroup().id("business-function-group-id-2"),
+             Collections.singletonList(new BaseProductGroup().internalId("data-group-2"))
         );
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
@@ -421,10 +428,14 @@ class AccessGroupServiceTest {
                         new PresentationIdentifier().idIdentifier("business-function-group-id-1")
                     ).dataGroupIdentifiers(Arrays.asList(
                         new PresentationIdentifier().idIdentifier("data-group-1"),
-                        new PresentationIdentifier().idIdentifier("data-group-0")
-                    ))
+                        new PresentationIdentifier().idIdentifier("data-group-0"))),
+                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
+                        new PresentationIdentifier().idIdentifier("business-function-group-id-2")
+                    ).dataGroupIdentifiers(Arrays.asList(
+                        new PresentationIdentifier().idIdentifier("data-group-2")
+                    )
                 ))
-        );
+        ));
 
         when(functionGroupApi.getFunctionGroups("sa-internal-id"))
             .thenReturn(Flux.just(
