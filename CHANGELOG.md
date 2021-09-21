@@ -3,6 +3,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+
+
+## [2.46.3]
+### Changed
+- Added support for Spring Configuration Server in Tasks and Batch starters
+- Added support for Distributed Tracing (sleuth, micrometer) in Task and Batch starters
+- Improved exception management on Identity operations
+- Fixed Spring Cloud Function definition in Transactions Sink
+
+
 ## [2.46.2]
 ### Changed
 - Non existing Business function groups from the request should be persisted.  
