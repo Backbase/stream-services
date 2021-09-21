@@ -42,7 +42,6 @@ public class SetupApprovalsHierarchyConfiguration {
             Flux.fromIterable(bootstrapConfigurationProperties.getApprovals())
                 .map(ApprovalTask::new)
                 .flatMap(approvalSaga::executeTask)
-                .doOnNext(StreamTask::logSummary)
                 .collectList()
                 .block();
             log.info("Finished bootstrapping Approvals Structure");

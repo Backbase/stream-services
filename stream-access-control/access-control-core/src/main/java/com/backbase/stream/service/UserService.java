@@ -262,6 +262,10 @@ public class UserService {
         }
 
         return identityManagementApi.createIdentity(createIdentityRequest)
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Error create identity: {}", e.getResponseBodyAsString());
+                return Mono.error(e);
+            })
             .map(identityCreatedItem -> {
                 user.setInternalId(identityCreatedItem.getInternalId());
                 user.setExternalId(identityCreatedItem.getExternalId());

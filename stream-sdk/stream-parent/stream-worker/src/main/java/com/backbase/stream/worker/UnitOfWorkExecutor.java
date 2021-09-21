@@ -162,7 +162,6 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
     private T endTask(UnitOfWork<T> unitOfWork, T streamTask) {
         log.info("Ending Task: {} from Unit Of Work: {}", streamTask.getId(), unitOfWork.getUnitOfOWorkId());
         streamTask.setFinishedAt(OffsetDateTime.now());
-        streamTask.logSummary();
         return streamTask;
     }
 

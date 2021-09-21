@@ -34,7 +34,6 @@ public class LegalEntitySinkBinding {
                 } else {
                     log.error("Failed Stream Task: {}", streamTask.getName());
                 }
-                streamTask.logSummary();
             });
 
     }
