@@ -38,6 +38,7 @@
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
         <swagger-annotations-version>1.5.23</swagger-annotations-version>
+        <logstash-logback-encoder-version>6.6</logstash-logback-encoder-version>
 
         <boat-maven-plugin.version>0.14.4</boat-maven-plugin.version>
 
@@ -148,6 +149,13 @@
                 <version>2.1.2</version>
             </dependency>
 
+            <!--For json logging support-->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback-encoder-version}</version>
+            </dependency>
+
             <!-- Jackson Nullable -->
             <dependency>
                 <groupId>org.openapitools</groupId>
@@ -251,6 +259,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
         </dependency>
 
         <dependency>
