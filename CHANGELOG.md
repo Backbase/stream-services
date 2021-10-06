@@ -3,7 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-
+## [2.47.0]
+### Added
+- Added support for json logging via logstash-logback-encoder. (could be replaced by service-sdk-starter-logging later on)
+In order to have logging in json format it's possible to provide logback.xml config from the external app 
+via jvm option `-Dlogging.config=file:logback.xml` or specify in the `application.yml` like `logging.config=file:logback.xml`
 
 ## [2.46.3]
 ### Changed
