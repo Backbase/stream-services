@@ -19,9 +19,10 @@ Currently the following DBS services are exposed as Stream Components:
 
 | DBS version | Stream [version](https://github.com/Backbase/stream-services-2.0/releases) |
 |-------------|-------------------------------------------------------------------------|
-| 2021.07 (2.21.x) | 2.44.0 to latest                                                   |
-| 2.20.x           | 2.23.0 to 2.43.0                                                   |
-| 2.19.x           | 2.1.0 to 2.22.0                                                    |
+| 2021.09 (2.21.2.x) | 2.48.0 to latest                                                   |
+| 2021.07 (2.21.0.x) | 2.44.0 to 2.48.0                                                   |
+| 2.20.x             | 2.23.0 to 2.43.0                                                   |
+| 2.19.x             | 2.1.0 to 2.22.0                                                    |
 
 For previous DBS version please check [Stream v1 GitHub repository](https://github.com/Backbase/stream-services).
 
