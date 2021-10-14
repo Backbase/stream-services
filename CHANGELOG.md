@@ -5,14 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.48.0]
 ### Changed
-- Update to 2021.09 release (DBS 2.21.2 and Identity 1.9.2)
+- Update to `2021.09` release (DBS `2.21.2` and Identity `1.9.2`)
   - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.postTransactions.
   - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.getTransactions.
   - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.patchTransactions.
   - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.postDelete.
   - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.postRefresh.
 ### Maintenance
-- updated boat-maven-plugin to 0.15.0
+- Updated boat-maven-plugin to `0.15.0`
 
 ## [2.47.0]
 ### Added
