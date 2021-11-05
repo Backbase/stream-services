@@ -1,23 +1,12 @@
 package com.backbase.stream.product.service;
 
 
-import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended.StatusEnum;
 import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPost;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountBatchResponseItemExtended;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountExternalLegalEntityIds;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountInternalIdGetResponseBody;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountUserPreferencesItemPut;
-import com.backbase.dbs.arrangement.api.service.v2.model.BatchResponseStatusCode;
+import com.backbase.dbs.arrangement.api.service.v2.model.*;
 import com.backbase.stream.product.exception.ArrangementCreationException;
 import com.backbase.stream.product.exception.ArrangementUpdateException;
 import com.backbase.stream.product.mapping.ProductMapper;
-import java.util.Collections;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.core.ParameterizedTypeReference;
@@ -27,6 +16,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Manage Products (In DBS Called Arrangements).
