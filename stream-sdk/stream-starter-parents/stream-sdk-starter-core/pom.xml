@@ -12,7 +12,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-sdk-starter-core</artifactId>
-    <version>2.71.0</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Starter Core</name>
     <description>Parent for all Stream SDK modules</description>
@@ -187,6 +187,18 @@
             </dependency>
 
             <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>2.12.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>2.12.3</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>3.0.2</version>
@@ -299,7 +311,7 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-test-support</artifactId>
-            <version>2.71.0</version>
+            <version>3.0.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
