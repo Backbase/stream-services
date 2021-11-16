@@ -69,6 +69,7 @@ jobs:
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
       - name: Update POM Version
+        if: env.NEW_VERSION != null
         run: |
           echo "New version  is: $NEW_VERSION"
           mvn versions:set versions:update-child-modules -DnewVersion=${NEW_VERSION} -DprocessAllModules -DgenerateBackupPoms=false
