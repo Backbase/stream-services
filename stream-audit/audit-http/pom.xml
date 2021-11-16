@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -10,20 +10,18 @@
         <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
     </parent>
 
-    <artifactId>transactions-http</artifactId>
+    <artifactId>audit-http</artifactId>
     <version>3.0.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
-    <name>Stream :: Transaction HTTP</name>
+    <name>Stream :: Audit HTTP</name>
 
     <dependencies>
-
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>transactions-core</artifactId>
+            <artifactId>audit-core</artifactId>
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -33,28 +31,18 @@
                 <artifactId>boat-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>raml2openapi</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>export-dep</goal>
-                        </goals>
-                        <configuration>
-                            <includeVersionInOutputDirectory>false</includeVersionInOutputDirectory>
-                            <decompose>true</decompose>
-                            <removeDeprecated>true</removeDeprecated>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>cursor</id>
+                        <id>audit</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <skipValidateSpec>true</skipValidateSpec>
                             <generatorName>spring</generatorName>
-                            <inputSpec>${project.basedir}/../../api/stream-transactions/openapi.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/../../api/stream-audit/openapi.yaml</inputSpec>
                             <generateApiTests>false</generateApiTests>
                             <output>${openapi-generator-maven-plugin.output}</output>
+                            <copyTo>${project.build.outputDirectory}/META-INF/openapi/openapi.yaml</copyTo>
                             <configOptions>
                                 <library>spring-boot</library>
                                 <reactive>true</reactive>
@@ -62,8 +50,8 @@
                                 <dateLibrary>java8</dateLibrary>
                                 <openapiDocketConfig>true</openapiDocketConfig>
                                 <interfaceOnly>true</interfaceOnly>
-                                <modelPackage>com.backbase.stream.transaction.inbound.model</modelPackage>
-                                <apiPackage>com.backbase.stream.transaction.inbound.api</apiPackage>
+                                <modelPackage>com.backbase.stream.audit.http.model</modelPackage>
+                                <apiPackage>com.backbase.stream.audit.http.api</apiPackage>
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <performBeanValidation>true</performBeanValidation>
                                 <apis/>
@@ -75,10 +63,11 @@
                 </executions>
             </plugin>
 
-             <plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
+
         </plugins>
     </build>
 
