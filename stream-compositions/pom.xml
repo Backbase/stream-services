@@ -11,6 +11,7 @@
 
     <artifactId>stream-compositions</artifactId>
     <packaging>pom</packaging>
+    <name>Stream :: Stream Compositions</name>
 
     <modules>
         <module>services</module>
