@@ -1,0 +1,114 @@
+openapi: 3.0.3
+info:
+  title: Message Service API Spec
+  description: Specs for Message Service API
+  version: 1.1.0
+  x-icon: credit_card
+
+servers:
+  - description: local test
+    url: http://localhost:8080/api/v1
+
+tags:
+  - name: Retail
+
+paths:
+
+  /service-api/v1/users/{userId}/messages:
+    description: No description available
+    parameters:
+      - $ref: 'message-common.yaml#/components/parameters/userIdPathParam'
+    get:
+      summary: Returns available items, optionally filtered by name.
+      description: Returns available items, optionally filtered by name
+      operationId: getMessage
+      parameters:
+        - $ref: 'message-common.yaml#/components/parameters/messageIdQuery'
+      responses:
+        "200":
+          $ref: 'message-common.yaml#/components/responses/MessageItemResponse'
+        "400":
+          $ref: 'lib/common-types.yaml#/components/responses/400BadRequest'
+        "500":
+          $ref: 'lib/common-types.yaml#/components/responses/500InternalServerError'
+      tags:
+        - message
+
+    delete:
+      summary: Delete message.
+      description: Deletes a message
+      operationId: deleteMessage
+      parameters:
+        - $ref: 'message-common.yaml#/components/parameters/messageIdQuery'
+      responses:
+        '204':
+          description: request to delete completed
+        '400':
+          $ref: 'lib/common-types.yaml#/components/responses/400BadRequest'
+        '500':
+          $ref: 'lib/common-types.yaml#/components/responses/500InternalServerError'
+      tags:
+        - message
+
+    post:
+      summary: Adds or updates a message.
+      description: Adds or updates a message
+      operationId: postMessage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'message-common.yaml#/components/schemas/MessageItem'
+            example:
+              $ref: 'examples/example-message.json'
+        description: Adds or updates a message
+      responses:
+        "201":
+          $ref: 'message-common.yaml#/components/responses/MessageIdResponse'
+        "400":
+          $ref: 'lib/common-types.yaml#/components/responses/400BadRequest'
+        "500":
+          $ref: 'lib/common-types.yaml#/components/responses/500InternalServerError'
+      tags:
+        - message
+
+    put:
+      summary: Adds or updates a message.
+      description: Adds or updates a message
+      operationId: putMessage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: 'message-common.yaml#/components/schemas/MessageItem'
+            example:
+              $ref: 'examples/example-message.json'
+        description: Adds or updates a message
+      responses:
+        '204':
+          description: request to update item completed
+        '400':
+          $ref: 'lib/common-types.yaml#/components/responses/400BadRequest'
+        '500':
+          $ref: 'lib/common-types.yaml#/components/responses/500InternalServerError'
+      tags:
+        - message
+
+  /service-api/v1/users/{userId}/all-messages:
+    summary: messages
+    description: No description available
+    parameters:
+      - $ref: 'message-common.yaml#/components/parameters/userIdPathParam'
+    get:
+      summary: Returns all available messages.
+      description: Returns all available messages
+      operationId: getMessages
+      responses:
+        "200":
+          $ref: 'message-common.yaml#/components/responses/MessagesResponse'
+        "400":
+          $ref: 'lib/common-types.yaml#/components/responses/400BadRequest'
+        "500":
+          $ref: 'lib/common-types.yaml#/components/responses/500InternalServerError'
+      tags:
+        - message

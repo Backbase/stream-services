@@ -1,0 +1,12 @@
+title: MessageItem
+type: object
+properties:
+  id:
+    type: string
+  message:
+    type: string
+  additions:
+    $ref: '../lib/schemas/additions.yaml'
+required:
+  - id
+  - message

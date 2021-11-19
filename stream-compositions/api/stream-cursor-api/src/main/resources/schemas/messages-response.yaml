@@ -1,0 +1,4 @@
+title: Messages
+type: array
+items:
+  $ref: '../message-common.yaml#/components/schemas/MessageItem'

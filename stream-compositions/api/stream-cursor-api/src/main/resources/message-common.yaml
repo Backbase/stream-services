@@ -1,0 +1,76 @@
+openapi: 3.0.3
+
+info:
+  title: OpenAPI Message Common
+  description: Common items to use in schemas.
+  version: 3.0.3
+
+paths: {}
+
+components:
+
+  parameters:
+    messageIdQuery:
+      name: id
+      description: Id of the message record
+      in: query
+      required: true
+      schema:
+        type: string
+
+    userIdPathParam:
+      name: userId
+      description: user id
+      in: path
+      required: true
+      schema:
+        type: string
+
+
+  requestBodies:
+    MessageItemRequest:
+      description: payment card details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageItem'
+          example:
+            $ref: 'examples/example-message.json'
+
+  responses:
+    MessageIdResponse:
+      description: Successful message ID api response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageId'
+          example:
+            $ref: 'examples/example-message-created.json'
+
+    MessageItemResponse:
+      description: Successful message api response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessageItem'
+          example:
+            $ref: 'examples/example-message.json'
+
+    MessagesResponse:
+      description: Successful messages list api response
+      content:
+        application/json:
+          schema:
+            $ref: 'schemas/messages-response.yaml'
+          example:
+            $ref: 'examples/example-messages-get.json'
+
+  schemas:
+    MessageItem:
+      $ref: 'schemas/message-item.yaml'
+
+    MessageId:
+      type: object
+      properties:
+        id:
+          type: string
