@@ -1,8 +1,8 @@
 openapi: 3.0.3
 
 info:
-  title: Stream Cursor Client API Spec
-  description: Specs for Stream Cursor Service API
+  title: Stream Composition Service API Spec
+  description: Specs for Stream Composition Service API
   version: 1.1.0
 
 servers:
