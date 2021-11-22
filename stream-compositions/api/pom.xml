@@ -11,10 +11,5 @@
   <artifactId>api</artifactId>
   <packaging>pom</packaging>
   <name>Stream Compositions :: API</name>
-
-  <modules>
-    <module>stream-compositions-api</module>
-    <module>stream-cursor-api</module>
-  </modules>
   
 </project>
