@@ -1,0 +1,7 @@
+title: DirectionDefaultAsc
+type: string
+description: Direction type with a default value of ASC
+enum:
+  - ASC
+  - DESC
+default: ASC

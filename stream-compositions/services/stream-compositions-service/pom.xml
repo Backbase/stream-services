@@ -3,9 +3,9 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- The simplest way to build a service with service-sdk-starter-core 
-        is to use it as a parent in your project’s POM file, alternatively if you 
-        don’t want to use service-sdk-starter-core as your project’s parent, you 
+    <!-- The simplest way to build a service with service-sdk-starter-core
+        is to use it as a parent in your project’s POM file, alternatively if you
+        don’t want to use service-sdk-starter-core as your project’s parent, you
         can declare it as a dependency instead, see pom-as-dependency.xml -->
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
@@ -31,7 +31,7 @@
                 <artifactId>service-sdk-starter-test</artifactId>
                 <scope>test</scope>
             </dependency>
-            
+
            <!-- Add dependencies for your services, e.g. API Specs, integration clients -->
 
            <!-- Uncomment the following dependency if DBS inter-service communication is needed -->
@@ -70,49 +70,5 @@
             </dependency>
 
         </dependencies>
-
-    <build>
-        <plugins>
-<!--            <plugin>-->
-<!--                <groupId>org.openapitools</groupId>-->
-<!--                <artifactId>openapi-generator-maven-plugin</artifactId>-->
-<!--                <version>${openapi-generator-maven-plugin.version}</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>generate</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <output>${project.build.directory}/generated-stream-composition-spec/</output>-->
-<!--                            <generateSupportingFiles>true</generateSupportingFiles>-->
-<!--                            <generatorName>spring</generatorName>-->
-<!--                            <strictSpec>true</strictSpec>-->
-<!--                            <generateApiTests>false</generateApiTests>-->
-<!--                            <generateModelTests>false</generateModelTests>-->
-<!--                            <inputSpec>${project.basedir}../stream-compositions/api/stream-compositions-api/src/main/resources/stream-composition-client-api-v1.yaml-->
-<!--                            </inputSpec>-->
-<!--                            <configOptions>-->
-<!--                                <library>spring-mvc</library>-->
-<!--                                <dateLibrary>java8</dateLibrary>-->
-<!--                                <interfaceOnly>true</interfaceOnly>-->
-<!--                                <skipDefaultInterface>true</skipDefaultInterface>-->
-<!--                                <useBeanValidation>true</useBeanValidation>-->
-<!--                                <useClassLevelBeanValidation>false</useClassLevelBeanValidation>-->
-<!--                                <useTags>true</useTags>-->
-<!--                                <java8>true</java8>-->
-<!--                                <useJavaTime>true</useJavaTime>-->
-<!--                                <useOptional>false</useOptional>-->
-<!--                                <sourceFolder>.</sourceFolder>-->
-<!--                                <apiPackage>com.backbase.stream-->
-<!--                                </apiPackage>-->
-<!--                                <modelPackage>com.backbase.stream-->
-<!--                                </modelPackage>-->
-<!--                            </configOptions>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-        </plugins>
-    </build>
 
 </project>

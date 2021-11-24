@@ -11,11 +11,11 @@
 
     <artifactId>stream-compositions</artifactId>
     <packaging>pom</packaging>
-    <name>Stream :: Stream Compositions</name>
+    <name>Stream :: Compositions</name>
 
     <modules>
-        <module>services</module>
-        <module>api</module>
+<!--        <module>services</module>-->
+        <module>compositions-api</module>
     </modules>
 
 </project>

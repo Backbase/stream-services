@@ -1,0 +1,5 @@
+title: Additions
+type: object
+description: Additional properties
+additionalProperties:
+  type: string
