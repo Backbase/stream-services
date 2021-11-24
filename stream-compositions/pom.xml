@@ -9,13 +9,16 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
+
     <packaging>pom</packaging>
     <name>Stream :: Compositions</name>
 
     <modules>
-<!--        <module>services</module>-->
-        <module>compositions-api</module>
+        <module>api</module>
+        <module>events</module>
+        <module>services</module>
     </modules>
 
 </project>
