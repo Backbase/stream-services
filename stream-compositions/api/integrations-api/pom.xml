@@ -11,6 +11,6 @@
     <artifactId>integrations-api</artifactId>
     <packaging>pom</packaging>
 
-    <name>Stream :: Compositions :: API :: Integrations</name>
+    <name>Stream :: Compositions :: Integrations API</name>
 
 </project>

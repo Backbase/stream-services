@@ -10,12 +10,13 @@
 
     <groupId>com.backbase.stream.compositions</groupId>
     <artifactId>api</artifactId>
+
     <packaging>pom</packaging>
 
     <name>Stream :: Compositions :: API</name>
 
     <modules>
-        <module>core-api</module>
+        <module>service-api</module>
         <module>cursors-api</module>
         <module>integrations-api</module>
     </modules>

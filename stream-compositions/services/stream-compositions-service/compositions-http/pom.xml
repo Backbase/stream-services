@@ -3,21 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>services</artifactId>
+        <artifactId>compositions-service</artifactId>
         <groupId>com.backbase.stream.compositions</groupId>
         <version>3.0.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.backbase.stream.compositions</groupId>
-    <artifactId>compositions-service</artifactId>
-
+    <artifactId>compositions-http</artifactId>
     <packaging>pom</packaging>
 
-    <name>Stream :: Compositions :: Services :: Compositions Service</name>
+    <name>Stream :: Compositions :: Services :: Compositions Service :: HTTP</name>
 
-    <modules>
-        <module>compositions-core</module>
-        <module>compositions-http</module>
-        <module>compositions-listeners</module>
-    </modules>
 </project>
