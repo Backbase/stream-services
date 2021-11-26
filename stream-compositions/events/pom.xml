@@ -17,7 +17,6 @@
 
     <modules>
         <module>legal-entity-events</module>
-        <module>product-catalog-events</module>
         <module>product-events</module>
         <module>transaction-events</module>
     </modules>

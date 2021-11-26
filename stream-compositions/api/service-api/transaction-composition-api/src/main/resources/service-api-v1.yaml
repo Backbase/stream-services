@@ -1,19 +1,19 @@
 openapi: 3.0.3
 info:
-  title: Legal entity composition API
+  title: Transaction composition API
   version: 1.0.0
 servers:
   - url: http://localhost:8080/service-api/v1
     description: The server
 tags:
-  - name: LegalEntityComposition
+  - name: TransactionComposition
 paths:
   /service-api/v2/composition:
     post:
       tags:
-        - LegalEntityComposition
-      summary: Initializes/Creates legal entity composition
-      description: Initializes/Creates legal entity composition
+        - TransactionComposition
+      summary: Initializes/Creates transaction composition
+      description: Initializes/Creates transaction composition
       operationId: initializeComposition
       requestBody:
         description: Initialize Composition Request
@@ -24,7 +24,7 @@ paths:
 
       responses:
         "201":
-          description: Legal Entity composition initialized.
+          description: Transaction composition initialized.
           content:
             application/json:
               schema:
