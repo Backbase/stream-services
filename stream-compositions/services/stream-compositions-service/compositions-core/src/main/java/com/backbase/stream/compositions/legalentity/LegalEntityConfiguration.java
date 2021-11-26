@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.configuration;
+package com.backbase.stream.compositions.legalentity;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;

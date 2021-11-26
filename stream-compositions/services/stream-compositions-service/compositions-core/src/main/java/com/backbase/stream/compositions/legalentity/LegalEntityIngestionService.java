@@ -5,7 +5,13 @@ import com.backbase.stream.compositions.legalentity.model.LegalEntityIngestPullR
 import org.springframework.stereotype.Service;
 
 @Service
-public class LegalEntityIngestion {
+public class LegalEntityIngestionService {
+    private LegalEntityConfiguration legalEntityConfiguration;
+
+    public LegalEntityIngestionService(LegalEntityConfiguration legalEntityConfiguration) {
+        this.legalEntityConfiguration = legalEntityConfiguration;
+    }
+
     public LegalEntityIngestPullResponse ingest(LegalEntityIngestPullRequest ingestPullRequest) {
         return null;
     }

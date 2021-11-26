@@ -8,6 +8,11 @@
         <version>3.0.0-SNAPSHOT</version>
     </parent>
 
+    <artifactId>compositions-core</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Stream :: Compositions :: Services :: Compositions Service :: Core</name>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -28,6 +33,12 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- Service SDK dependencies -->
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>events</artifactId>
+        </dependency>
+
         <!-- Streams dependencies -->
         <dependency>
             <groupId>com.backbase.stream</groupId>
@@ -40,10 +51,5 @@
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
-    <artifactId>compositions-core</artifactId>
-    <packaging>pom</packaging>
-
-    <name>Stream :: Compositions :: Services :: Compositions Service :: Core</name>
 
 </project>

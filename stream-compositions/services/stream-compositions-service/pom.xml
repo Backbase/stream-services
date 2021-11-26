@@ -18,6 +18,6 @@
     <modules>
         <module>compositions-core</module>
         <module>compositions-http</module>
-        <module>compositions-listeners</module>
+        <module>compositions-events</module>
     </modules>
 </project>
