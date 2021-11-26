@@ -11,6 +11,6 @@
     <artifactId>compositions-http</artifactId>
     <packaging>pom</packaging>
 
-    <name>Stream :: Compositions :: Services :: Compositions Service :: HTTP</name>
+    <name>Compositions :: HTTP Adapter</name>
 
 </project>

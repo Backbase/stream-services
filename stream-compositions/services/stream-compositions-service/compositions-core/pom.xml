@@ -11,7 +11,7 @@
     <artifactId>compositions-core</artifactId>
     <packaging>jar</packaging>
 
-    <name>Stream :: Compositions :: Services :: Compositions Service :: Core</name>
+    <name>Compositions :: Core</name>
 
     <dependencyManagement>
         <dependencies>

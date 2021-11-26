@@ -11,7 +11,7 @@
   <artifactId>service-api</artifactId>
   <packaging>pom</packaging>
 
-  <name>Stream :: Compositions :: Service API</name>
+  <name>Compositions :: Service API</name>
 
   <modules>
       <module>legal-entity-composition-api</module>

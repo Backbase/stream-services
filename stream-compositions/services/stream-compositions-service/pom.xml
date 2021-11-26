@@ -13,11 +13,12 @@
 
     <packaging>pom</packaging>
 
-    <name>Stream :: Compositions :: Services :: Compositions Service</name>
+    <name>Compositions :: Service</name>
 
     <modules>
         <module>compositions-core</module>
         <module>compositions-http</module>
         <module>compositions-events</module>
+        <module>integration-clients</module>
     </modules>
 </project>

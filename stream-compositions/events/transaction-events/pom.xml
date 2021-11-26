@@ -10,7 +10,7 @@
 
     <artifactId>transaction-events</artifactId>
 
-    <name>Stream :: Compositions :: Events :: Transaction</name>
+    <name>Compositions :: Transaction Events</name>
 
     <dependencyManagement>
         <dependencies>

@@ -13,7 +13,7 @@
     <artifactId>transaction-integration-api</artifactId>
     <version>3.0.0-SNAPSHOT</version>
 
-    <name>Stream :: Compositions :: API :: Transaction Integration</name>
+    <name>Compositions :: Transaction Integration API</name>
 
     <properties>
         <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>
