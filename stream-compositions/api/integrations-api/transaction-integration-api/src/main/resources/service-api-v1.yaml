@@ -56,12 +56,12 @@ components:
     GetTransactionsRequest:
       type: array
       items:
-        $ref: '#/components/schemas/Product'
+        $ref: '#/components/schemas/Transaction'
 
     GetTransactionsResponse:
       type: array
       items:
-        $ref: '#/components/schemas/Product'
+        $ref: '#/components/schemas/Transaction'
 
     Transaction:
       type: object

@@ -28,8 +28,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                nullable: true
+                $ref: '#/components/schemas/GetLegalEntityResponse'
         "400":
           description: BadRequest
           content:
@@ -52,13 +51,19 @@ components:
       properties:
         message:
           type: string
+
     GetLegalEntityRequest:
       type: object
       properties:
-        id:
-          type: string
-        value:
-          type: string
+        legalEntity:
+          $ref: '../../../../../../../api/stream-legal-entity/v1.1.0/openapi.yaml#/components/schemas/LegalEntity'
+
+    GetLegalEntityResponse:
+      type: object
+      properties:
+        legalEntity:
+          $ref: '../../../../../../../api/stream-legal-entity/v1.1.0/openapi.yaml#/components/schemas/LegalEntity'
+
     InternalServerError:
       required:
         - message
