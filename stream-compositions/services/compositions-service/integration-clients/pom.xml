@@ -11,7 +11,7 @@
     <artifactId>integration-clients</artifactId>
     <packaging>jar</packaging>
 
-    <name>Compositions :: Integration Clients</name>
+    <name>Compositions :: Service :: Integration Clients</name>
 
     <dependencyManagement>
         <dependencies>

@@ -15,7 +15,7 @@
     </parent>
 
     <groupId>com.backbase.stream</groupId>
-    <artifactId>stream-cursor-service</artifactId>
+    <artifactId>cursor-service</artifactId>
     <version>3.0.0-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Compositions :: Cursor Service</name>

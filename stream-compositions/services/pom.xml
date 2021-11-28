@@ -16,7 +16,7 @@
     <name>Compositions :: Services</name>
 
     <modules>
-        <module>stream-compositions-service</module>
-        <module>stream-cursor-service</module>
+        <module>compositions-service</module>
+        <module>cursor-service</module>
     </modules>
 </project>

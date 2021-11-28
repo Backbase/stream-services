@@ -12,7 +12,7 @@
     <artifactId>compositions-events</artifactId>
     <packaging>pom</packaging>
 
-    <name>Compositions :: Events Adapter</name>
+    <name>Compositions :: Service :: Events Adapter</name>
 
     <dependencies>
         <!-- Service SDK dependencies -->
