@@ -10,6 +10,7 @@
         <relativePath/>
     </parent>
 
+    <groupId>com.backbase.stream.compositions.api</groupId>
     <artifactId>legal-entity-composition-api</artifactId>
     <version>3.0.0-SNAPSHOT</version>
 

@@ -46,6 +46,11 @@
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>legal-entity-composition-api</artifactId>
+            <version>3.0.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-core</artifactId>
             <version>3.0.0-SNAPSHOT</version>
@@ -61,5 +66,62 @@
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Unpack OpenAPI specs from zip dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.backbase.stream.compositions.api</groupId>
+                                    <artifactId>legal-entity-composition-api</artifactId>
+                                    <version>3.0.0-SNAPSHOT</version>
+                                    <classifier>api</classifier>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <type>zip</type>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                            </artifactItems>
+                            <includes>**/*.yaml, **/*.json</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Generate models and clients from unpacked OpenAPI specs -->
+            <plugin>
+                <groupId>com.backbase.oss</groupId>
+                <artifactId>boat-maven-plugin</artifactId>
+                <version>${boat-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-config-service-api-code</id>
+                        <goals>
+                            <goal>generate-spring-boot-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <generatorName>java</generatorName>
+                            <inputSpec>${project.build.directory}/yaml/legal-entity-composition-api/service-api-v1.0.0.yaml</inputSpec>
+                            <modelPackage>com.backbase.stream.compositions.legalentity.model</modelPackage>
+                            <apiPackage>com.backbase.stream.compositions.legalentity.api</apiPackage>
+                            <additionalProperties>useWithModifiers=true</additionalProperties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
 
 </project>
