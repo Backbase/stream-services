@@ -55,8 +55,8 @@ components:
     GetLegalEntityRequest:
       type: object
       properties:
-        legalEntity:
-          $ref: '../../../../../../../api/stream-legal-entity/v1.1.0/openapi.yaml#/components/schemas/LegalEntity'
+        externalId:
+          type: string
 
     GetLegalEntityResponse:
       type: object

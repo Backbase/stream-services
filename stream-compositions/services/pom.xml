@@ -16,7 +16,7 @@
     <name>Compositions :: Services</name>
 
     <modules>
-        <module>compositions-service</module>
+        <module>legal-entity-composition-service</module>
         <module>cursor-service</module>
     </modules>
 </project>
