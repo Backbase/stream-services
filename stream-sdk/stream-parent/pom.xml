@@ -31,12 +31,7 @@
     <modules>
         <module>stream-dbs-web-client</module>
         <module>stream-test-support</module>
-        <module>stream-scs-starter-config</module>
-        <module>stream-openapi-support</module>
         <module>stream-worker</module>
-        <module>stream-micrometer-support</module>
-        <module>stream-web-start-ui</module>
-        <module>stream-web-start-mvc</module>
     </modules>
 
     <properties>
