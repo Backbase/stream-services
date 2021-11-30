@@ -38,9 +38,6 @@
         <module>stream-http-starter-parent</module>
         <module>stream-aio-starter-parent</module>
         <module>stream-task-starter-parent</module>
-        <module>stream-processor-starter-parent</module>
-        <module>stream-sink-starter-parent</module>
-        <module>stream-source-starter-parent</module>
         <module>stream-batch-starter-parent</module>
     </modules>
 

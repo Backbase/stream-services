@@ -22,13 +22,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
  ``` 
     
 
+## [3.0.0] 
+### Removed
+- Sources, Processors and Sinks for Stream Components
+- Removed obsolete Stream SDK modules in preparation to support ServiceSDK
+- Removed generators. Test data generation to be done using `space-generator`
 
 ## [2.51.0]
 ### Maintenance
 - Update to 2021.10
 - Update Spring Boot to 2.5.5
 - Update Spring Cloud to 2020.0.4
-- Aligned versions accross project
+- Aligned versions across project
 
 ## [2.48.0]
 ### Changed

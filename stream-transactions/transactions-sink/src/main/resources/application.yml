@@ -1,7 +1,0 @@
-spring:
-  cloud:
-    stream:
-      function:
-        definition: transactionConsumer
-        bindings:
-          transactionConsumer-in-0: input
