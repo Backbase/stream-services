@@ -11,7 +11,7 @@
     <groupId>com.backbase.stream.compositions.events</groupId>
     <artifactId>product-events</artifactId>
 
-    <name>Compositions :: Product Events</name>
+    <name>Stream :: Compositions :: Product Events</name>
 
     <dependencyManagement>
         <dependencies>

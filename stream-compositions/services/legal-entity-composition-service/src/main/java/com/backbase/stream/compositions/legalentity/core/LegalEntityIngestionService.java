@@ -16,7 +16,6 @@ import reactor.core.publisher.Mono;
 @Service
 @AllArgsConstructor
 public class LegalEntityIngestionService {
-    private final LegalEntityConfiguration configuration;
     private final LegalEntityEventEmitter eventEmitter;
     private final LegalEntitySaga legalEntitySaga;
     private final LegalEntityIntegrationService legalEntityIntegrationService;

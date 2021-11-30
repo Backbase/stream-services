@@ -2,7 +2,7 @@ package com.backbase.stream.compositions.legalentity.core;
 
 import com.backbase.compositions.integration.legalentity.api.service.ApiClient;
 import com.backbase.compositions.integration.legalentity.api.service.v1.LegalEntityIntegrationApi;
-import com.backbase.stream.compositions.configuration.IntegrationConfigurationProperties;
+import com.backbase.stream.compositions.legalentity.configuration.IntegrationConfigurationProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

@@ -12,7 +12,7 @@
     <artifactId>stream-compositions</artifactId>
 
     <packaging>pom</packaging>
-    <name>Compositions</name>
+    <name>Stream :: Compositions</name>
 
     <modules>
         <module>api</module>

@@ -13,7 +13,7 @@
 
     <packaging>pom</packaging>
 
-    <name>Compositions :: API</name>
+    <name>Stream :: Compositions :: API</name>
 
     <modules>
         <module>service-api</module>

@@ -6,6 +6,10 @@
     "eventId": {
       "description": "Unique identifier of the event.",
       "type": "string"
+    },
+    "externalLegalEntityId": {
+      "description": "Legal entity external id.",
+      "type": "string"
     }
   },
   "required": [

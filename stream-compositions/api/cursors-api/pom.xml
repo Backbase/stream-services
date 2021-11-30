@@ -11,5 +11,5 @@
     <artifactId>cursors-api</artifactId>
     <packaging>pom</packaging>
 
-    <name>Compositions :: Cursors API</name>
+    <name>Stream :: Compositions :: Cursor API</name>
 </project>

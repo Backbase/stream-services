@@ -11,7 +11,7 @@
     <artifactId>legal-entity-composition-service</artifactId>
     <packaging>jar</packaging>
 
-    <name>Compositions :: Service :: Core</name>
+    <name>Stream :: Compositions :: Legal Entity Service</name>
 
     <dependencyManagement>
         <dependencies>
