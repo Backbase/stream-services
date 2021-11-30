@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.51.0]
+### Maintenance
+- Update to 2021.10
+- Update Spring Boot to 2.5.5
+- Update Spring Cloud to 2020.0.4
+- Aligned versions accross project
+
 ## [2.48.0]
 ### Changed
 - Update to `2021.09` release (DBS `2.21.2` and Identity `1.9.2`)
