@@ -2,12 +2,12 @@ package com.backbase.stream.compositions.legalentity.core;
 
 import com.backbase.stream.compositions.integration.legalentity.ApiClient;
 import com.backbase.stream.compositions.integration.legalentity.api.LegalEntityIntegrationApi;
-import com.backbase.stream.compositions.legalentity.configuration.IntegrationConfigurationProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.text.DateFormat;
@@ -19,6 +19,7 @@ public class LegalEntityIntegrationConfiguration {
     private final IntegrationConfigurationProperties integrationConfigurationProperties;
 
     @Bean
+    @Primary
     public LegalEntityIntegrationApi arrangementService(ApiClient legalEntityClient) {
         return new LegalEntityIntegrationApi(legalEntityClient);
     }

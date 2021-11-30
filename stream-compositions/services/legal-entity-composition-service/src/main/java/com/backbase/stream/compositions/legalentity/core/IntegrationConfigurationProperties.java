@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.configuration;
+package com.backbase.stream.compositions.legalentity.core;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
