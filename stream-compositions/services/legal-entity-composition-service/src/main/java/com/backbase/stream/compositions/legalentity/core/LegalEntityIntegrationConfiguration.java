@@ -20,7 +20,7 @@ public class LegalEntityIntegrationConfiguration {
 
     @Bean
     @Primary
-    public LegalEntityIntegrationApi arrangementService(ApiClient legalEntityClient) {
+    public LegalEntityIntegrationApi legalEntityIntegrationApi(ApiClient legalEntityClient) {
         return new LegalEntityIntegrationApi(legalEntityClient);
     }
 

@@ -21,9 +21,10 @@ public class LegalEntityController implements LegalEntityCompositionApi {
     @Override
     public ResponseEntity<IngestionResponse> pullIngestLegalEntity(@Valid PullIngestionRequest pullIngestionRequest) {
 
-        LegalEntityIngestPullResponse response = legalEntityIngestionService.ingest(LegalEntityIngestPullRequest.builder()
-                .legalEntityExternalId(pullIngestionRequest.getLegalEntityExternalId())
-                .build());
+        LegalEntityIngestPullResponse response = legalEntityIngestionService.ingest(
+                LegalEntityIngestPullRequest.builder()
+                        .legalEntityExternalId(pullIngestionRequest.getLegalEntityExternalId())
+                        .build());
 
         return ResponseEntity.ok(ingestionResponse(response));
     }
