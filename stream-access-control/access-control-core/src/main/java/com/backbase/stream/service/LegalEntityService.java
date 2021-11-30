@@ -25,8 +25,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.sleuth.annotation.ContinueSpan;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -130,8 +128,7 @@ public class LegalEntityService {
             .map(serviceAgreementMapper::toStream);
     }
 
-    @ContinueSpan(log = "getLegalEntityByExternalId")
-    public Mono<LegalEntity> getLegalEntityByExternalId(@SpanTag("externalId") String externalId) {
+    public Mono<LegalEntity> getLegalEntityByExternalId(String externalId) {
         try {
             return legalEntitiesApi.getLegalEntityByExternalId(externalId)
                     .onErrorResume(WebClientResponseException.NotFound.class, notFound -> {

@@ -13,7 +13,6 @@
     <name>Stream :: SDK :: Open API Support</name>
 
     <properties>
-        <swagger-api.version>2.1.0</swagger-api.version>
         <swagger-ui.version>3.24.3</swagger-ui.version>
         <webjars-locator.version>0.38</webjars-locator.version>
         <jackson.version>2.10.3</jackson.version>
@@ -71,7 +70,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
