@@ -1,8 +1,8 @@
 package com.backbase.stream.compositions.legalentity.core;
 
-import com.backbase.compositions.integration.legalentity.api.service.v1.LegalEntityIntegrationApi;
-import com.backbase.compositions.integration.legalentity.api.service.v1.model.GetLegalEntityRequest;
-import com.backbase.compositions.integration.legalentity.api.service.v1.model.GetLegalEntityResponse;
+import com.backbase.stream.compositions.integration.legalentity.api.LegalEntityIntegrationApi;
+import com.backbase.stream.compositions.integration.legalentity.model.GetLegalEntityRequest;
+import com.backbase.stream.compositions.integration.legalentity.model.GetLegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.legalentity.model.LegalEntity;
@@ -21,7 +21,7 @@ public class LegalEntityIntegrationService {
         GetLegalEntityRequest request = prepareRequest(ingestPullRequest);
         GetLegalEntityResponse response = executeRequest(request);
 
-        return mapper.reMap(response.getLegalEntity());
+        return mapper.mapToStreamLegalEntity(response.getLegalEntity());
     }
 
     private GetLegalEntityRequest prepareRequest(LegalEntityIngestPullRequest ingestPullRequest) {

@@ -87,7 +87,7 @@ components:
     PullIngestionRequest:
       type: object
       properties:
-        externalLegalEntityId:
+        legalEntityExternalId:
           type: string
 
     PushIngestionRequest:

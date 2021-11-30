@@ -60,11 +60,6 @@
             <artifactId>legal-entity-bootstrap-task</artifactId>
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.backbase.stream.compositions</groupId>
-            <artifactId>integration-clients</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -89,6 +84,15 @@
                                     <classifier>api</classifier>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <type>zip</type>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.stream.compositions</groupId>
+                                    <artifactId>legal-entity-integration-api</artifactId>
+                                    <version>3.0.0-SNAPSHOT</version>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                             </artifactItems>
@@ -116,6 +120,18 @@
                             <modelPackage>com.backbase.stream.compositions.legalentity.model</modelPackage>
                             <apiPackage>com.backbase.stream.compositions.legalentity.api</apiPackage>
                             <additionalProperties>useWithModifiers=true</additionalProperties>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-legale-entity-integration-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/service-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.stream.compositions.integration.legalentity.api</apiPackage>
+                            <modelPackage>com.backbase.stream.compositions.integration.legalentity.model</modelPackage>
                         </configuration>
                     </execution>
                 </executions>

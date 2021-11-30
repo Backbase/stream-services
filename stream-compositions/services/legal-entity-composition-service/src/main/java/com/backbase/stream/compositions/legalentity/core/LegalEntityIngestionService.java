@@ -5,6 +5,7 @@ import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullResponse;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
+import com.backbase.stream.compositions.legalentity.events.LegalEntityEventEmitter;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.worker.model.StreamTask;
 import lombok.AllArgsConstructor;
