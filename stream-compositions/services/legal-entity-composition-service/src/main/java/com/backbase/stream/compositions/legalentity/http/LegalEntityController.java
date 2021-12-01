@@ -10,9 +10,11 @@ import com.backbase.stream.compositions.legalentity.model.PullIngestionRequest;
 import com.backbase.stream.compositions.legalentity.model.PushIngestionRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
+@RestController
 @AllArgsConstructor
 public class LegalEntityController implements LegalEntityCompositionApi {
     private final LegalEntityIngestionService legalEntityIngestionService;

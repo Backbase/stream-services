@@ -24,6 +24,7 @@ backbase:
       access-control-base-url: http://access-control:8080
       arrangementManagerBaseUrl: http://arrangement-manager:8080
 
+
 ---
 spring:
   config:

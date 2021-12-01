@@ -10,14 +10,14 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class LegalEntityEventEmitter {
-    private final EventBus eventBus;
+    //private final EventBus eventBus;
 
     public void emitCompletedEvent() {
         LegalEntityIngestCompletedEvent event = new LegalEntityIngestCompletedEvent();
 
         EnvelopedEvent<LegalEntityIngestCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);
-        eventBus.emitEvent(envelopedEvent);
+        //eventBus.emitEvent(envelopedEvent);
     }
 
     public void emitFailedEvent() {
@@ -25,6 +25,6 @@ public class LegalEntityEventEmitter {
 
         EnvelopedEvent<LegalEntityIngestFailedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);
-        eventBus.emitEvent(envelopedEvent);
+        //eventBus.emitEvent(envelopedEvent);
     }
 }
