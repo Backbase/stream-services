@@ -5,9 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 @AllArgsConstructor
-public class LegalEntityIngestPullResponse {
-    private final LegalEntity legalEntity;
+public class LegalEntityIngestResponse {
+    private final List<LegalEntity> legalEntities;
 }

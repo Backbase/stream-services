@@ -14,7 +14,7 @@ paths:
         - LegalEntityIntegration
       summary: Gets legal entity.
       description: Gets legal entity.
-      operationId: getlegalEntity
+      operationId: getLegalEntities
       requestBody:
         description: Gets legal entity request.
         content:
@@ -28,7 +28,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetLegalEntityResponse'
+                $ref: '#/components/schemas/GetLegalEntityListResponse'
         "400":
           description: BadRequest
           content:
@@ -58,11 +58,10 @@ components:
         externalId:
           type: string
 
-    GetLegalEntityResponse:
-      type: object
-      properties:
-        legalEntity:
-          $ref: '../../../../../../../api/stream-legal-entity/v1.1.0/openapi.yaml#/components/schemas/LegalEntity'
+    GetLegalEntityListResponse:
+      type: array
+      items:
+        $ref: '../../../../../../../api/stream-legal-entity/v1.1.0/openapi.yaml#/components/schemas/LegalEntity'
 
     InternalServerError:
       required:

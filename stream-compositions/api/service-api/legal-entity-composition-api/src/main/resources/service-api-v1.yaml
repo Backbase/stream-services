@@ -99,8 +99,10 @@ components:
     IngestionResponse:
       type: object
       properties:
-        legalEntity:
-          $ref: '../../../../../../../api/stream-legal-entity/v1.1.0/openapi.yaml#/components/schemas/LegalEntity'
+        legalEntities:
+          type: array
+          items:
+            $ref: '../../../../../../../api/stream-legal-entity/v1.1.0/openapi.yaml#/components/schemas/LegalEntity'
 
     InternalServerError:
       required:
