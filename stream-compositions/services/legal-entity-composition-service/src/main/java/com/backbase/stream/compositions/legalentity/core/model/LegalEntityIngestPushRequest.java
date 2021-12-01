@@ -1,6 +1,7 @@
 package com.backbase.stream.compositions.legalentity.core.model;
 
 
+import com.backbase.stream.compositions.legalentity.core.RequestSource;
 import com.backbase.stream.compositions.legalentity.model.LegalEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class LegalEntityIngestPushRequest {
+    private RequestSource soure;
     private String eventId;
     private List<LegalEntity> legalEntities;
 }

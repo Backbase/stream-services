@@ -3,6 +3,15 @@ package com.backbase.stream.compositions.legalentity.core.mapper;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
+/**
+ * This is a mapper for LegalEntity objects used in:
+ * - stream-models/legal-entity-model
+ * - legal-entity-composition-api
+ * - legal-entity-integration-api
+ *
+ * All LegalEntity objects used in above modules have exactly same structureas they are built
+ * from the common /api folder.
+ */
 @Mapper
 @Component
 public interface LegalEntityMapper {

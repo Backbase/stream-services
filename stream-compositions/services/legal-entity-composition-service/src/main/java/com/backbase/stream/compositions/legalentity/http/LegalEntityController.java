@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.legalentity.http;
 
 import com.backbase.stream.compositions.legalentity.api.LegalEntityCompositionApi;
 import com.backbase.stream.compositions.legalentity.core.LegalEntityIngestionService;
+import com.backbase.stream.compositions.legalentity.core.RequestSource;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
@@ -21,23 +22,43 @@ public class LegalEntityController implements LegalEntityCompositionApi {
     private final LegalEntityIngestionService legalEntityIngestionService;
     private final LegalEntityMapper mapper;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ResponseEntity<IngestionResponse> pullIngestLegalEntity(@Valid PullIngestionRequest pullIngestionRequest) {
-
-        LegalEntityIngestResponse response = legalEntityIngestionService.ingestPull(
-                LegalEntityIngestPullRequest.builder()
-                        .legalEntityExternalId(pullIngestionRequest.getLegalEntityExternalId())
-                        .build());
-
-        return ResponseEntity.ok(ingestionResponse(response));
+        LegalEntityIngestResponse response = legalEntityIngestionService.ingestPull(buildRequest(pullIngestionRequest));
+        return ResponseEntity.ok(buildResponse(response));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ResponseEntity<IngestionResponse> pushIngestLegalEntity(@Valid PushIngestionRequest pushIngestionRequest) {
         throw new UnsupportedOperationException();
     }
 
-    private IngestionResponse ingestionResponse(LegalEntityIngestResponse response) {
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param pullIngestionRequest PullIngestionRequest
+     * @return LegalEntityIngestPullRequest
+     */
+    private LegalEntityIngestPullRequest buildRequest(PullIngestionRequest pullIngestionRequest) {
+        return LegalEntityIngestPullRequest.builder()
+                .soure(RequestSource.HTTP)
+                .legalEntityExternalId(pullIngestionRequest.getLegalEntityExternalId())
+                .build();
+    }
+
+    /**
+     * Builds ingestion response for API endpoint.
+     *
+     * @param response LegalEntityIngestResponse
+     * @return IngestionResponse
+     */
+    private IngestionResponse buildResponse(LegalEntityIngestResponse response) {
         return new IngestionResponse()
                 .withLegalEntities(response.getLegalEntities().stream()
                         .map(item -> mapper.mapStreamToComposition(item))

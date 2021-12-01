@@ -67,7 +67,7 @@ public class LegalEntityIngestionService {
     }
 
     /**
-     * Ingests legal entity to DBS.
+     * Ingests single legal entity to DBS.
      *
      * @param legalEntity Legal entity
      * @return Ingested legal entities
@@ -88,10 +88,12 @@ public class LegalEntityIngestionService {
     }
 
     private void emitFailedEvent(Throwable a) {
+        // TODO: implement
         eventEmitter.emitFailedEvent();
     }
 
     private void emitCompletedEvent(List<LegalEntity> legalEnityList) {
+        // TODO: implement
         eventEmitter.emitCompletedEvent();
     }
 }
