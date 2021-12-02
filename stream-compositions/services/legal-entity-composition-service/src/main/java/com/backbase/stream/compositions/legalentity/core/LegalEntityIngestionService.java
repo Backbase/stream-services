@@ -45,8 +45,7 @@ public class LegalEntityIngestionService {
      * @return LegalEntityIngestResponse
      */
     public LegalEntityIngestResponse ingestPush(LegalEntityIngestPushRequest ingestPushRequest) {
-        return ingest(Flux
-                .fromIterable(ingestPushRequest.getLegalEntities()));
+        return ingest(Flux.fromIterable(ingestPushRequest.getLegalEntities()));
     }
 
     /**

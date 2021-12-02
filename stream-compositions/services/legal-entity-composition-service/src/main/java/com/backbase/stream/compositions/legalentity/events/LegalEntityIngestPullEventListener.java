@@ -33,6 +33,7 @@ public class LegalEntityIngestPullEventListener implements EventHandler<LegalEnt
     private LegalEntityIngestPullRequest buildRequest(LegalEntityIngestPullEvent legalEntityIngestPullEvent) {
         return LegalEntityIngestPullRequest.builder()
                 .soure(RequestSource.EVENT)
+                .sourceId(legalEntityIngestPullEvent.getEventId())
                 .legalEntityExternalId(legalEntityIngestPullEvent.getLegalEntityExternalId())
                 .build();
     }

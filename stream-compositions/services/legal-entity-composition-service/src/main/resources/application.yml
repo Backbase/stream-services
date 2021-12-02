@@ -16,9 +16,6 @@ spring:
 
 backbase:
   stream:
-    legalentity:
-    sink:
-      useIdentityIntegration: true
     dbs:
       user-manager-base-url: http://user-manager:8080
       access-control-base-url: http://access-control:8080

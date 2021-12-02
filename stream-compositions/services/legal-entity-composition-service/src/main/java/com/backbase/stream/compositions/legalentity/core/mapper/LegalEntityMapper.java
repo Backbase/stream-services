@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
  * - stream-models/legal-entity-model
  * - legal-entity-composition-api
  * - legal-entity-integration-api
- * <p>
+ * - legal-entity-evens
+ *
  * All LegalEntity objects used in above modules have exactly same structureas they are built
  * from the common /api folder.
  */
