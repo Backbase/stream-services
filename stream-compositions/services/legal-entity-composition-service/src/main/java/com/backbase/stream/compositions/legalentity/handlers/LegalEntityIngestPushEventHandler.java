@@ -1,10 +1,9 @@
-package com.backbase.stream.compositions.legalentity.events;
+package com.backbase.stream.compositions.legalentity.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityIngestPushEvent;
 import com.backbase.stream.compositions.legalentity.core.LegalEntityIngestionService;
-import com.backbase.stream.compositions.legalentity.core.RequestSource;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
 import lombok.AllArgsConstructor;

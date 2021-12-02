@@ -2,7 +2,6 @@ package com.backbase.stream.compositions.legalentity.http;
 
 import com.backbase.stream.compositions.legalentity.api.LegalEntityCompositionApi;
 import com.backbase.stream.compositions.legalentity.core.LegalEntityIngestionService;
-import com.backbase.stream.compositions.legalentity.core.RequestSource;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
@@ -61,10 +60,9 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      */
     private LegalEntityIngestPushRequest buildRequest(PushIngestionRequest request) {
         return LegalEntityIngestPushRequest.builder()
-                .legalEntities(
-                        request.getLegalEntities()
-                                .stream()
-                                .map(item -> mapper.mapCompostionToStream(item)).collect(Collectors.toList()))
+                .legalEntities(request.getLegalEntities()
+                        .stream()
+                        .map(mapper::mapCompostionToStream).collect(Collectors.toList()))
                 .build();
     }
 
@@ -76,10 +74,9 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      */
     private IngestionResponse buildResponse(LegalEntityIngestResponse response) {
         return new IngestionResponse()
-                .withLegalEntities(
-                        response.getLegalEntities()
-                                .stream()
-                                .map(item -> mapper.mapStreamToComposition(item))
-                                .collect(Collectors.toList()));
+                .withLegalEntities(response.getLegalEntities()
+                        .stream()
+                        .map(mapper::mapStreamToComposition)
+                        .collect(Collectors.toList()));
     }
 }

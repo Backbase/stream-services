@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.events;
+package com.backbase.stream.compositions.legalentity.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
@@ -59,7 +59,7 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
                 .withLegalEntities(
                         response.getLegalEntities()
                                 .stream()
-                                .map(item -> mapper.mapStreamToEvent(item))
+                                .map(mapper::mapStreamToEvent)
                                 .collect(Collectors.toList())
                 );
 
