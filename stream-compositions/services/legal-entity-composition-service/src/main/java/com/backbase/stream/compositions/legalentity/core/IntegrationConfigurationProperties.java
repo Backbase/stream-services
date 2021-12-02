@@ -11,5 +11,5 @@ public class IntegrationConfigurationProperties {
     /**
      * Location of legal-entity-integration service.
      */
-    private String legalEntityIngestionUrl = "http://legal-entity-ingestion-integration:8080";
+    private String legalEntityIntegrationUrl = "http://legal-entity-ingestion-integration:8080";
 }

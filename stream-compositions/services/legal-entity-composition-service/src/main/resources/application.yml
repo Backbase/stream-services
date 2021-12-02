@@ -19,8 +19,10 @@ backbase:
     dbs:
       user-manager-base-url: http://user-manager:8080
       access-control-base-url: http://access-control:8080
-      arrangementManagerBaseUrl: http://arrangement-manager:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
 
+    compositions:
+      legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
 
 ---
 spring:
