@@ -9,7 +9,7 @@
     "legalEntities": {
       "type": "array",
       "items": {
-        "$ref": "legal-entity.json"
+        "$ref": "../legal-entity.json"
       }
     }
   },

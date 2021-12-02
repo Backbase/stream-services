@@ -28,7 +28,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      */
     @Override
     public ResponseEntity<IngestionResponse> pullIngestLegalEntity(@Valid PullIngestionRequest pullIngestionRequest) {
-        LegalEntityIngestResponse response = legalEntityIngestionService.ingestPull(buildRequest(pullIngestionRequest));
+        LegalEntityIngestResponse response = legalEntityIngestionService.ingestPull(buildRequest(pullIngestionRequest)).block();
         return ResponseEntity.ok(buildResponse(response));
     }
 
@@ -37,7 +37,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      */
     @Override
     public ResponseEntity<IngestionResponse> pushIngestLegalEntity(@Valid PushIngestionRequest pushIngestionRequest) {
-        LegalEntityIngestResponse response = legalEntityIngestionService.ingestPush(buildRequest(pushIngestionRequest));
+        LegalEntityIngestResponse response = legalEntityIngestionService.ingestPush(buildRequest(pushIngestionRequest)).block();
         return ResponseEntity.ok(buildResponse(response));
     }
 
@@ -49,7 +49,6 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      */
     private LegalEntityIngestPullRequest buildRequest(PullIngestionRequest request) {
         return LegalEntityIngestPullRequest.builder()
-                .soure(RequestSource.HTTP)
                 .legalEntityExternalId(request.getLegalEntityExternalId())
                 .build();
     }
@@ -62,7 +61,6 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      */
     private LegalEntityIngestPushRequest buildRequest(PushIngestionRequest request) {
         return LegalEntityIngestPushRequest.builder()
-                .soure(RequestSource.HTTP)
                 .legalEntities(
                         request.getLegalEntities()
                                 .stream()

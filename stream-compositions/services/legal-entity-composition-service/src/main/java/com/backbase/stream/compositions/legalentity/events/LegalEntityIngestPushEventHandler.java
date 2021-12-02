@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
-public class LegalEntityIngestPushEventListener implements EventHandler<LegalEntityIngestPushEvent> {
+public class LegalEntityIngestPushEventHandler implements EventHandler<LegalEntityIngestPushEvent> {
     private final LegalEntityIngestionService legalEntityIngestionService;
     private final LegalEntityMapper mapper;
 
@@ -32,7 +32,6 @@ public class LegalEntityIngestPushEventListener implements EventHandler<LegalEnt
     private LegalEntityIngestPushRequest buildRequest(EnvelopedEvent<LegalEntityIngestPushEvent> envelopedEvent) {
 
         return LegalEntityIngestPushRequest.builder()
-                .soure(RequestSource.EVENT)
                 .legalEntities(envelopedEvent.getEvent().getLegalEntities()
                         .stream()
                         .map(mapper::mapEventToStream)

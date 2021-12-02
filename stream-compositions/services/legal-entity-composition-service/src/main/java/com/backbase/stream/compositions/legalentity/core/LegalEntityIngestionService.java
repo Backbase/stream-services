@@ -6,7 +6,6 @@ import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMappe
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
-import com.backbase.stream.compositions.legalentity.events.LegalEntityEventEmitter;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.worker.model.StreamTask;
 import lombok.AllArgsConstructor;
@@ -22,7 +21,6 @@ import java.util.List;
 @AllArgsConstructor
 public class LegalEntityIngestionService {
     private final LegalEntityMapper mapper;
-    private final LegalEntityEventEmitter eventEmitter;
     private final LegalEntitySaga legalEntitySaga;
     private final LegalEntityIntegrationService legalEntityIntegrationService;
 
@@ -32,7 +30,7 @@ public class LegalEntityIngestionService {
      * @param ingestPullRequest Ingest pull request
      * @return LegalEntityIngestResponse
      */
-    public LegalEntityIngestResponse ingestPull(LegalEntityIngestPullRequest ingestPullRequest) {
+    public Mono<LegalEntityIngestResponse> ingestPull(LegalEntityIngestPullRequest ingestPullRequest) {
         return ingest(legalEntityIntegrationService
                 .retrieveLegalEntities(ingestPullRequest)
                 .map(mapper::mapIntegrationToStream));
@@ -44,7 +42,7 @@ public class LegalEntityIngestionService {
      * @param ingestPushRequest Ingest push request
      * @return LegalEntityIngestResponse
      */
-    public LegalEntityIngestResponse ingestPush(LegalEntityIngestPushRequest ingestPushRequest) {
+    public Mono<LegalEntityIngestResponse> ingestPush(LegalEntityIngestPushRequest ingestPushRequest) {
         return ingest(Flux.fromIterable(ingestPushRequest.getLegalEntities()));
     }
 
@@ -54,14 +52,12 @@ public class LegalEntityIngestionService {
      * @param legalEnities List of legal entities
      * @return Ingested legal entities
      */
-    private LegalEntityIngestResponse ingest(Flux<LegalEntity> legalEnities) {
+    private Mono<LegalEntityIngestResponse> ingest(Flux<LegalEntity> legalEnities) {
         return legalEnities
                 .map(this::sendLegalEntityToDbs)
+                .doOnError(this::handleError)
                 .collectList()
-                .doOnSuccess(this::emitCompletedEvent)
-                .doOnError(this::emitFailedEvent)
-                .map(this::buildResponse)
-                .block();
+                .map(this::buildResponse);
     }
 
     /**
@@ -85,13 +81,7 @@ public class LegalEntityIngestionService {
                 .build();
     }
 
-    private void emitFailedEvent(Throwable a) {
-        // TODO: implement
-        eventEmitter.emitFailedEvent();
-    }
-
-    private void emitCompletedEvent(List<LegalEntity> legalEnityList) {
-        // TODO: implement
-        eventEmitter.emitCompletedEvent();
+    private void handleError(Throwable ex) {
+        log.error("Legal entity ingestion failed", ex);
     }
 }
