@@ -11,7 +11,7 @@
     <artifactId>integrations-api</artifactId>
     <packaging>pom</packaging>
 
-    <name>Stream :: Compositions :: Integrations API</name>
+    <name>Stream :: Compositions :: API :: Integrations</name>
 
     <modules>
         <module>legal-entity-integration-api</module>

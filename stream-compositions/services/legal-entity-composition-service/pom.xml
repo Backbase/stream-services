@@ -13,7 +13,7 @@
     <version>3.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>Stream :: Compositions :: Legal Entity Service</name>
+    <name>Stream :: Compositions :: Services :: Legal Entity</name>
 
     <properties>
         <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>

@@ -14,7 +14,7 @@
     <artifactId>transaction-integration-api</artifactId>
     <version>3.0.0-SNAPSHOT</version>
 
-    <name>Stream :: Compositions :: Transaction Integration API</name>
+    <name>Stream :: Compositions :: API :: Transaction Integration</name>
 
     <properties>
         <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>

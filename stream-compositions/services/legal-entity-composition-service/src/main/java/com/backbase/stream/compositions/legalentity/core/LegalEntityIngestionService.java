@@ -46,8 +46,7 @@ public class LegalEntityIngestionService {
      */
     public LegalEntityIngestResponse ingestPush(LegalEntityIngestPushRequest ingestPushRequest) {
         return ingest(Flux
-                .fromIterable(ingestPushRequest.getLegalEntities())
-                .map(mapper::mapCompostionToStream));
+                .fromIterable(ingestPushRequest.getLegalEntities()));
     }
 
     /**

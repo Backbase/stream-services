@@ -16,14 +16,11 @@ public class LegalEntityIntegrationService {
     private final LegalEntityIntegrationApi legalEntityIntegrationApi;
 
     public Flux<LegalEntity> retrieveLegalEntities(LegalEntityIngestPullRequest ingestPullRequest) {
-        GetLegalEntityRequest request = prepareRequest(ingestPullRequest);
-
-        return legalEntityIntegrationApi
-                .getLegalEntities(request);
-
+        return legalEntityIntegrationApi.getLegalEntities(prepareRequest(ingestPullRequest));
     }
 
     private GetLegalEntityRequest prepareRequest(LegalEntityIngestPullRequest ingestPullRequest) {
-        return null;
+        return new GetLegalEntityRequest()
+                .externalId(ingestPullRequest.getLegalEntityExternalId());
     }
 }

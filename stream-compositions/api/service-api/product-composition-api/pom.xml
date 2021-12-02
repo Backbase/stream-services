@@ -14,7 +14,7 @@
     <artifactId>product-composition-api</artifactId>
     <version>3.0.0-SNAPSHOT</version>
 
-    <name>Stream :: Compositions :: Product Composition API</name>
+    <name>Stream :: Compositions :: API :: Product</name>
 
     <properties>
         <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>

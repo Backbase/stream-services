@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
  * - stream-models/legal-entity-model
  * - legal-entity-composition-api
  * - legal-entity-integration-api
- *
+ * <p>
  * All LegalEntity objects used in above modules have exactly same structureas they are built
  * from the common /api folder.
  */
@@ -50,4 +50,15 @@ public interface LegalEntityMapper {
      */
     com.backbase.stream.compositions.legalentity.model.LegalEntity mapStreamToComposition(
             com.backbase.stream.legalentity.model.LegalEntity legalEntity);
+
+    /**
+     * Maps event LegalEntity to stream LegalEntity model.
+     *
+     * @param legalEntity Event legal entity
+     * @return Stream legal entity
+     */
+    com.backbase.stream.legalentity.model.LegalEntity mapEventToStream(
+            com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntity legalEntity);
+
+
 }
