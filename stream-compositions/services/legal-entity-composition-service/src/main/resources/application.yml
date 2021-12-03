@@ -36,7 +36,10 @@ backbase:
       identity-integration-base-url: http://identity-integration-service:8080
 
     compositions:
-      legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
+      legal-entity:
+        enable-completed-events: true
+        enable-failed-events: true
+        legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
 
 bootstrap:
   # This is just na example. Replace it with data corresponding to your bank

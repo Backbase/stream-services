@@ -6,10 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
 @NoArgsConstructor
-@ConfigurationProperties("backbase.stream.compositions.integration")
-public class IntegrationConfigurationProperties {
-    /**
-     * Location of legal-entity-integration service.
-     */
+@ConfigurationProperties("backbase.stream.compositions.legal-entity")
+public class LegalEntityConfigurationProperties {
+    private Boolean enableCompletedEvents;
+    private Boolean enableFailedEvents;
     private String legalEntityIntegrationUrl = "http://legal-entity-ingestion-integration:8080";
 }
