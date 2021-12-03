@@ -30,7 +30,7 @@ public class LegalEntityIntegrationConfiguration {
             ObjectMapper objectMapper,
             DateFormat dateFormat) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(integrationConfigurationProperties.getLegalEntityIngestionUrl());
+        apiClient.setBasePath(integrationConfigurationProperties.getLegalEntityIntegrationUrl());
 
         return apiClient;
     }

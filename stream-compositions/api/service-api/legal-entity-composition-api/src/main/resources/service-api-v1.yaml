@@ -96,7 +96,7 @@ components:
         legalEntities:
           type: array
           items:
-            $ref: '../../../../../../../api/stream-legal-entity/v1.1.0/openapi.yaml#/components/schemas/LegalEntity'
+            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
 
     IngestionResponse:
       type: object
@@ -104,7 +104,7 @@ components:
         legalEntities:
           type: array
           items:
-            $ref: '../../../../../../../api/stream-legal-entity/v1.1.0/openapi.yaml#/components/schemas/LegalEntity'
+            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
 
     InternalServerError:
       required:

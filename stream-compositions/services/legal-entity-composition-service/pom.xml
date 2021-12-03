@@ -20,15 +20,14 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-
         <!-- Service SDK dependencies -->
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>events</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>auth-security</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -49,11 +48,6 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-core</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>legal-entity-bootstrap-task</artifactId>
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

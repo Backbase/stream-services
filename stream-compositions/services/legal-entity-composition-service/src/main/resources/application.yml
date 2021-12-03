@@ -14,21 +14,29 @@ spring:
           dbs:
             token-uri: http://token-converter:8080/oauth/token
 
+
 backbase:
+  mtls:
+    enabled: false
+  security:
+    http:
+      enabled: true
+    service-api:
+      authentication:
+        required-scope: api:service
   stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
     dbs:
       user-manager-base-url: http://user-manager:8080
       access-control-base-url: http://access-control:8080
       arrangement-manager-base-url: http://arrangement-manager:8080
+    identity:
+      identity-integration-base-url: http://identity-integration-service:8080
 
     compositions:
       legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
-
----
-spring:
-  config:
-    activate:
-      on-profile: moustache-bank
 
 bootstrap:
   # This is just na example. Replace it with data corresponding to your bank
@@ -93,7 +101,7 @@ bootstrap:
     administrators:
       - externalId: "admin"
         fullName: "Backbase Root Admin"
-        identityLinkStrategy: "CREATE_IN_IDENTITY"
+        identityLinkStrategy: "IDENTITY_AGNOSTIC"
         emailAddress:
           address: "bbadmin@email.com"
         mobileNumber:
@@ -101,6 +109,10 @@ bootstrap:
     users:
       - user:
           externalId: "admin"
-          identityLinkStrategy: "CREATE_IN_IDENTITY"
+          identityLinkStrategy: "IDENTITY_AGNOSTIC"
         referenceJobRoleNames:
           - "Entitlements - Manager"
+
+logging:
+  level:
+    root: INFO

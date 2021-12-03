@@ -54,9 +54,9 @@ public class LegalEntityIngestionService {
      */
     private Mono<LegalEntityIngestResponse> ingest(Flux<LegalEntity> legalEnities) {
         return legalEnities
-                .map(this::sendLegalEntityToDbs)
-                .doOnError(this::handleError)
+                .flatMap(this::sendLegalEntityToDbs)
                 .collectList()
+                .doOnError(this::handleError)
                 .map(this::buildResponse);
     }
 
@@ -66,13 +66,11 @@ public class LegalEntityIngestionService {
      * @param legalEntity Legal entity
      * @return Ingested legal entities
      */
-    private LegalEntity sendLegalEntityToDbs(LegalEntity legalEntity) {
+    private Mono<LegalEntity> sendLegalEntityToDbs(LegalEntity legalEntity) {
         return Mono.just(legalEntity)
                 .map(LegalEntityTask::new)
                 .flatMap(legalEntitySaga::executeTask)
-                .doOnNext(StreamTask::logSummary)
-                .block()
-                .getData();
+                .map(item -> item.getData());
     }
 
     private LegalEntityIngestResponse buildResponse(List<LegalEntity> legalEnityList) {
