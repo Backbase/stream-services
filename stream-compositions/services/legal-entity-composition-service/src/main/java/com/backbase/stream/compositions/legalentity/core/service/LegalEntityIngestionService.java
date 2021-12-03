@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.core;
+package com.backbase.stream.compositions.legalentity.core.service;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
@@ -7,7 +7,6 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngest
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.worker.model.StreamTask;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.core;
+package com.backbase.stream.compositions.legalentity.core.config;
 
 import com.backbase.stream.legalentity.model.LegalEntity;
 import lombok.Data;

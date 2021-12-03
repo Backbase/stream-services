@@ -1,7 +1,7 @@
 package com.backbase.stream.compositions.legalentity.http;
 
 import com.backbase.stream.compositions.legalentity.api.LegalEntityCompositionApi;
-import com.backbase.stream.compositions.legalentity.core.LegalEntityIngestionService;
+import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;

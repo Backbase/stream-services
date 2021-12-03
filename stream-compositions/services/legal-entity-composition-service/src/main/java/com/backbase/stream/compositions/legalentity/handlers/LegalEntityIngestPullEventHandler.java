@@ -6,7 +6,7 @@ import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.LegalEntityIngestCompletedEvent;
 import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.LegalEntityIngestFailedEvent;
 import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityIngestPullEvent;
-import com.backbase.stream.compositions.legalentity.core.LegalEntityIngestionService;
+import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
