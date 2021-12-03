@@ -6,11 +6,13 @@ import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.LegalEntityIngestCompletedEvent;
 import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.LegalEntityIngestFailedEvent;
 import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityIngestPullEvent;
-import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
+import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
+import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import lombok.AllArgsConstructor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -18,7 +20,9 @@ import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
+@EnableConfigurationProperties(LegalEntityConfigurationProperties.class)
 public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEntityIngestPullEvent> {
+    private final LegalEntityConfigurationProperties configProperties;
     private final LegalEntityIngestionService legalEntityIngestionService;
     private final LegalEntityMapper mapper;
     private final EventBus eventBus;
@@ -54,6 +58,9 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
      * @param response LegalEntityIngestResponse
      */
     private void handleResponse(LegalEntityIngestResponse response) {
+        if (configProperties.getEnableCompletedEvents() == false) {
+            return;
+        }
         LegalEntityIngestCompletedEvent event = new LegalEntityIngestCompletedEvent()
                 .withEventId(UUID.randomUUID().toString())
                 .withLegalEntities(
@@ -74,6 +81,9 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
      * @param ex Throwable
      */
     private void handleError(Throwable ex) {
+        if (configProperties.getEnableFailedEvents() == false) {
+            return;
+        }
         LegalEntityIngestFailedEvent event = new LegalEntityIngestFailedEvent()
                 .withEventId(UUID.randomUUID().toString())
                 .withMessage(ex.getMessage());

@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @ConfigurationProperties("backbase.stream.compositions.legal-entity")
 public class LegalEntityConfigurationProperties {
-    private Boolean enableCompletedEvents;
-    private Boolean enableFailedEvents;
+    private Boolean enableCompletedEvents = true;
+    private Boolean enableFailedEvents = true;
     private String legalEntityIntegrationUrl = "http://legal-entity-ingestion-integration:8080";
 }

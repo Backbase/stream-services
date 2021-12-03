@@ -55,6 +55,7 @@ public class LegalEntityIngestionService {
         return legalEnities
                 .flatMap(this::sendLegalEntityToDbs)
                 .collectList()
+                .doOnSuccess(this::handleSuccess)
                 .doOnError(this::handleError)
                 .map(this::buildResponse);
     }
@@ -76,6 +77,13 @@ public class LegalEntityIngestionService {
         return LegalEntityIngestResponse.builder()
                 .legalEntities(legalEnityList)
                 .build();
+    }
+
+    private void handleSuccess(List<LegalEntity> legalEntities) {
+        log.error("Legal entities ingestion completed (count: {})", legalEntities.size());
+        if (log.isDebugEnabled()) {
+            log.debug("Ingested legal entities: {}", legalEntities);
+        }
     }
 
     private void handleError(Throwable ex) {

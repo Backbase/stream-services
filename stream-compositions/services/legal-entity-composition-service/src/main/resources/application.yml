@@ -37,7 +37,7 @@ backbase:
 
     compositions:
       legal-entity:
-        enable-completed-events: true
+        enable-completed-events: false
         enable-failed-events: true
         legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
 
@@ -118,4 +118,4 @@ bootstrap:
 
 logging:
   level:
-    root: INFO
+    com.backbase.stream.compositions: DEBUG
