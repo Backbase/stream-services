@@ -6,11 +6,12 @@
         <groupId>com.backbase.buildingblocks</groupId>
         <version>13.4.0</version>
         <artifactId>service-sdk-starter-core</artifactId>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>legal-entity-composition-service</artifactId>
     <version>3.0.0-SNAPSHOT</version>
+
     <packaging>jar</packaging>
 
     <name>Stream :: Compositions :: Services :: Legal Entity</name>
@@ -38,17 +39,17 @@
         <dependency>
             <groupId>com.backbase.stream.compositions.events</groupId>
             <artifactId>legal-entity-events</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.backbase.stream.compositions.api</groupId>
             <artifactId>legal-entity-composition-api</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-core</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -86,7 +87,7 @@
                                 <artifactItem>
                                     <groupId>com.backbase.stream.compositions.api</groupId>
                                     <artifactId>legal-entity-composition-api</artifactId>
-                                    <version>3.0.0-SNAPSHOT</version>
+                                    <version>${project.version}</version>
                                     <classifier>api</classifier>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <type>zip</type>
@@ -95,7 +96,7 @@
                                 <artifactItem>
                                     <groupId>com.backbase.stream.compositions</groupId>
                                     <artifactId>legal-entity-integration-api</artifactId>
-                                    <version>3.0.0-SNAPSHOT</version>
+                                    <version>${project.version}</version>
                                     <classifier>api</classifier>
                                     <type>zip</type>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
