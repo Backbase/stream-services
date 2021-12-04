@@ -1,0 +1,45 @@
+spring:
+  zipkin:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: http://token-converter:8080/oauth/token
+
+backbase:
+  mtls:
+    enabled: false
+  security:
+    http:
+      enabled: true
+    service-api:
+      authentication:
+        required-scope: api:service
+  stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+    dbs:
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
+    identity:
+      identity-integration-base-url: http://identity-integration-service:8080
+
+    compositions:
+      legal-entity:
+        enable-completed-events: false
+        enable-failed-events: true
+        legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG

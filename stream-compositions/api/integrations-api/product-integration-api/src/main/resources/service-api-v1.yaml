@@ -8,27 +8,27 @@ servers:
 tags:
   - name: ProductIntegration
 paths:
-  /service-api/v2/products:
+  /service-api/v2/product-group:
     post:
       tags:
         - ProductIntegration
-      summary: Gets product.
-      description: Gets product.
-      operationId: getProducts
+      summary: Gets product group.
+      description: Gets product group.
+      operationId: getProductGroup
       requestBody:
-        description: Gets products request.
+        description: Gets product group request.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GetProductsRequest'
+              $ref: '#/components/schemas/GetProductGroupRequest'
 
       responses:
         "200":
-          description: Products sucessfully returned.
+          description: Product group sucessfully returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetProductsResponse'
+                $ref: '#/components/schemas/GetProductGroupResponse'
 
         "400":
           description: BadRequest
@@ -53,15 +53,17 @@ components:
         message:
           type: string
 
-    GetProductsRequest:
-      type: array
-      items:
-        $ref: '#/components/schemas/Product'
+    GetProductGroupRequest:
+      type: object
+      properties:
+        legalEntityExternalId:
+          type: string
 
-    GetProductsResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/Product'
+    GetProductGroupResponse:
+      type: object
+      properties:
+        productGroup:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
 
     Product:
       type: object

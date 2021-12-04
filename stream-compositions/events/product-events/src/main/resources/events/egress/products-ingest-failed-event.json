@@ -3,7 +3,11 @@
   "type": "object",
   "properties": {
     "eventId": {
-      "description": "Unique identifier of the event.",
+      "description": "Unique identifier of the event",
+      "type": "string"
+    },
+    "message": {
+      "description": "Error message.",
       "type": "string"
     }
   },

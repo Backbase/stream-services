@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "internalId": {
+      "description": "Product internal id",
+      "type": "string"
+    },
+    "externalId": {
+      "description": "Product external id",
+      "type": "string"
+    },
+    "BIC": {
+      "description": "Bank Indentifier Number",
+      "type": "string"
+    }
+  },
+  "required": [
+    "internalId",
+    "externalId",
+    "BIC"
+  ]
+}

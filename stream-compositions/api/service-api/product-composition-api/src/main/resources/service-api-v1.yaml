@@ -8,28 +8,59 @@ servers:
 tags:
   - name: ProductComposition
 paths:
-  /service-api/v2/composition:
+  /service-api/v2/pull-ingestion:
     post:
       tags:
         - ProductComposition
-      summary: Initializes/Creates product composition
-      description: Initializes/Creates product composition
-      operationId: initializeComposition
+      summary: Ingests product group (in pull mode).
+      description: Ingests product group (in pull mode).
+      operationId: pullIngestProductGroup
       requestBody:
-        description: Initialize Composition Request
+        description: Pull Ingestion Request
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InitializeCompositionRequest'
-
+              $ref: '#/components/schemas/PullIngestionRequest'
       responses:
         "201":
-          description: Product composition initialized.
+          description: Product group ingested.
           content:
             application/json:
               schema:
-                type: string
-                nullable: true
+                $ref: '#/components/schemas/IngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+  /service-api/v2/push-ingestion:
+    post:
+      tags:
+        - ProductComposition
+      summary: Ingests product group (in push mode).
+      description: Ingests poduct group (in push mode).
+      operationId: pushIngestProductGroup
+      requestBody:
+        description: Push Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushIngestionRequest'
+      responses:
+        "201":
+          description: Product group ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionResponse'
         "400":
           description: BadRequest
           content:
@@ -52,13 +83,25 @@ components:
       properties:
         message:
           type: string
-    InitializeCompositionRequest:
+
+    PullIngestionRequest:
       type: object
       properties:
-        id:
+        legalEntityExternalId:
           type: string
-        value:
-          type: string
+
+    PushIngestionRequest:
+      type: object
+      properties:
+        productGgroup:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+
+    IngestionResponse:
+      type: object
+      properties:
+        productGgroup:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+
     InternalServerError:
       required:
         - message
