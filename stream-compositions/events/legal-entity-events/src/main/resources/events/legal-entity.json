@@ -2,12 +2,17 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "legalEntityExternalId": {
-      "description": "Legal entity external id.",
+    "internalId": {
+      "description": "Legal entity internal id",
+      "type": "string"
+    },
+    "externalId": {
+      "description": "Legal entity external id",
       "type": "string"
     }
   },
   "required": [
-    "legalEntityExternalId"
+    "internalId",
+    "externalId"
   ]
 }
