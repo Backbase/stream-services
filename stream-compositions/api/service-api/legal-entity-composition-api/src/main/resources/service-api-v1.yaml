@@ -74,6 +74,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/InternalServerError'
 
+  /service-api/v2/root-ingestion:
+    post:
+      tags:
+        - LegalEntityComposition
+      summary: Ingests root legal entity.
+      description: Ingests root legal entity.
+      operationId: ingestRootLegalEntity
+      responses:
+        "201":
+          description: Root Legal Entity ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
 components:
   schemas:
     BadRequest:

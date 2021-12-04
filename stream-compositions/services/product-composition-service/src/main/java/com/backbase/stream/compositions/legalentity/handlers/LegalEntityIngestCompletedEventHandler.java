@@ -54,7 +54,7 @@ public class LegalEntityIngestCompletedEventHandler implements EventHandler<Lega
      */
     private ProductIngestPullRequest buildRequest(LegalEntity legalEntity) {
         return ProductIngestPullRequest.builder()
-                .legalEntityExternalId(legalEntity.getLegalEntityExternalId())
+                .legalEntityExternalId(legalEntity.getExternalId())
                 .build();
     }
 

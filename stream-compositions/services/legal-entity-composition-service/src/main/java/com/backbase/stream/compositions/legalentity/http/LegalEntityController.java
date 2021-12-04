@@ -1,11 +1,11 @@
 package com.backbase.stream.compositions.legalentity.http;
 
 import com.backbase.stream.compositions.legalentity.api.LegalEntityCompositionApi;
-import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
+import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.model.IngestionResponse;
 import com.backbase.stream.compositions.legalentity.model.PullIngestionRequest;
 import com.backbase.stream.compositions.legalentity.model.PushIngestionRequest;
@@ -38,6 +38,15 @@ public class LegalEntityController implements LegalEntityCompositionApi {
     public ResponseEntity<IngestionResponse> pushIngestLegalEntity(@Valid PushIngestionRequest pushIngestionRequest) {
         LegalEntityIngestResponse response = legalEntityIngestionService.ingestPush(buildRequest(pushIngestionRequest)).block();
         return ResponseEntity.ok(buildResponse(response));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ResponseEntity<IngestionResponse> ingestRootLegalEntity() {
+        legalEntityIngestionService.ingestRoot();
+        return ResponseEntity.ok().build();
     }
 
     /**

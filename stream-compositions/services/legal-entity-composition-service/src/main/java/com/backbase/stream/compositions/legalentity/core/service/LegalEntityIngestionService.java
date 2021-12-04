@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.legalentity.core.service;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
+import com.backbase.stream.compositions.legalentity.core.config.BootstrapConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
@@ -9,6 +10,7 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngest
 import com.backbase.stream.legalentity.model.LegalEntity;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -18,10 +20,12 @@ import java.util.List;
 @Slf4j
 @Service
 @AllArgsConstructor
+@EnableConfigurationProperties(BootstrapConfigurationProperties.class)
 public class LegalEntityIngestionService {
     private final LegalEntityMapper mapper;
     private final LegalEntitySaga legalEntitySaga;
     private final LegalEntityIntegrationService legalEntityIntegrationService;
+    private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
 
     /**
      * Ingests legal Entities in pull mode.
@@ -43,6 +47,19 @@ public class LegalEntityIngestionService {
      */
     public Mono<LegalEntityIngestResponse> ingestPush(LegalEntityIngestPushRequest ingestPushRequest) {
         return ingest(Flux.fromIterable(ingestPushRequest.getLegalEntities()));
+    }
+
+    /**
+     * Ingests root legal entity.
+     *
+     * @return LegalEntityIngestResponse
+     */
+    public Mono<LegalEntityIngestResponse> ingestRoot() {
+        LegalEntity rootLegalEntity = bootstrapConfigurationProperties.getLegalEntity();
+        log.info("Bootstrapping root legal entity: {}.", rootLegalEntity.getName());
+        return ingest(Flux.just(rootLegalEntity))
+                .doOnError(ex -> log.warn("Failed to load root legal entity", ex))
+                .doOnSuccess(result -> log.info("Root legal entity bootstrapping complete. Internal ID: {}.", result));
     }
 
     /**

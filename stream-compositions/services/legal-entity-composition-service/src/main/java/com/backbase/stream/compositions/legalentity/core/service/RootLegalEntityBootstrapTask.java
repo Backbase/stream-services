@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -17,6 +18,7 @@ import java.util.Objects;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "bootstrap.enabled", matchIfMissing = false)
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
 public class RootLegalEntityBootstrapTask implements ApplicationRunner {
     private final LegalEntitySaga legalEntitySaga;
@@ -25,11 +27,11 @@ public class RootLegalEntityBootstrapTask implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         LegalEntity rootLegalEntity = bootstrapConfigurationProperties.getLegalEntity();
-        bootstrapTcuRootLegalEntity(rootLegalEntity)
+        bootstrapRootLegalEntity(rootLegalEntity)
                 .subscribe();
     }
 
-    private Mono<String> bootstrapTcuRootLegalEntity(LegalEntity rootLegalEntity) {
+    private Mono<String> bootstrapRootLegalEntity(LegalEntity rootLegalEntity) {
         if (Objects.isNull(rootLegalEntity)) {
             log.warn("Failed to load root legal entity.");
             return Mono.empty();

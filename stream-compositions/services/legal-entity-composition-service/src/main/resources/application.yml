@@ -14,7 +14,6 @@ spring:
           dbs:
             token-uri: http://token-converter:8080/oauth/token
 
-
 backbase:
   mtls:
     enabled: false
@@ -42,6 +41,7 @@ backbase:
         legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
 
 bootstrap:
+  enabled: false
   # This is just na example. Replace it with data corresponding to your bank
   legalEntity:
     name: "Moustache Bank"
