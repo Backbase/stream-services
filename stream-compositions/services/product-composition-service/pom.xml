@@ -38,6 +38,11 @@
         <!-- Streams dependencies -->
         <dependency>
             <groupId>com.backbase.stream.compositions.events</groupId>
+            <artifactId>legal-entity-events</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.events</groupId>
             <artifactId>product-events</artifactId>
             <version>${project.version}</version>
         </dependency>
