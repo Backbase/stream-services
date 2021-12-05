@@ -40,6 +40,41 @@ backbase:
         enable-failed-events: true
         legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
 
+bootstrap:
+  enabled: true
+  product-catalog:
+    productKinds:
+      - externalKindId: kind20
+        kindName: 'Special Account'
+        kinduri: 'special-account'
+
+    productTypes:
+      - externalProductId: Money Market
+        externalProductKindId: kind1
+        productKindName: Current Account
+        externalProductTypeId: Money Market
+        productTypeName: Money Market
+        externalId: Money Market
+        externalTypeId: Money Market
+        typeName: Money Market
+      - externalProductId: Checking
+        externalProductKindId: kind1
+        productKindName: Checking
+        externalProductTypeId: Checking
+        productTypeName: Checking
+        externalId: Checking
+        externalTypeId: Checking
+        typeName: Checking
+      - externalProductId: Savings
+        externalProductKindId: kind2
+        productKindName: Savings
+        externalProductTypeId: Savings
+        productTypeName: Savings
+        externalId: Savings
+        externalTypeId: Savings
+        typeName: Savings
+
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
+

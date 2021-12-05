@@ -17,7 +17,7 @@ import java.text.DateFormat;
 @Configuration
 @AllArgsConstructor
 @EnableConfigurationProperties(ProductConfigurationProperties.class)
-public class ProductConfiguration {
+public class ProductCompositionConfiguration {
     private final ProductConfigurationProperties productConfigurationProperties;
 
     @Bean
