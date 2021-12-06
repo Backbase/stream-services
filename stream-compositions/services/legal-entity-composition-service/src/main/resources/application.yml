@@ -37,7 +37,7 @@ backbase:
 
     compositions:
       legal-entity:
-        enable-completed-events: false
+        enable-completed-events: true
         enable-failed-events: true
         legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
 

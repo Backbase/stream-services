@@ -1,17 +1,13 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- The simplest way to build a service with service-sdk-starter-core
-        is to use it as a parent in your project’s POM file, alternatively if you
-        don’t want to use service-sdk-starter-core as your project’s parent, you
-        can declare it as a dependency instead, see pom-as-dependency.xml -->
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <version>13.4.0</version>
         <artifactId>service-sdk-starter-core</artifactId>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
@@ -24,22 +20,12 @@
         <java.version>11</java.version>
     </properties>
 
-        <dependencies>
-            <dependency>
-                <groupId>com.backbase.buildingblocks</groupId>
-                <artifactId>service-sdk-starter-test</artifactId>
-                <scope>test</scope>
-            </dependency>
-
-           <!-- Add dependencies for your services, e.g. API Specs, integration clients -->
-
-           <!-- Uncomment the following dependency if DBS inter-service communication is needed -->
-           <!--
-             <dependency>
-                <groupId>com.backbase.buildingblocks</groupId>
-                <artifactId>communication</artifactId>
-             </dependency>
-           -->
-        </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>service-sdk-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>
