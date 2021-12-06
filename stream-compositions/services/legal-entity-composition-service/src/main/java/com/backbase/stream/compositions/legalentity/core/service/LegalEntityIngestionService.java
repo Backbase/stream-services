@@ -80,7 +80,7 @@ public class LegalEntityIngestionService {
     }
 
     private void handleSuccess(List<LegalEntity> legalEntities) {
-        log.error("Legal entities ingestion completed (count: {})", legalEntities.size());
+        log.info("Legal entities ingestion completed (count: {})", legalEntities.size());
         if (log.isDebugEnabled()) {
             log.debug("Ingested legal entities: {}", legalEntities);
         }
