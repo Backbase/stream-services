@@ -47,7 +47,7 @@ services:
 
   legal-entity-ingestion-integration:
     container_name: wsecu_bb_legal_entity_integration
-    image: harbor.backbase.eu/development/wsecu-legal-entity-integration-service
+    image: harbor.backbase.eu/development/wsecu-legal-entity-ingestion-integration-service
     ports:
       - "9092:8080"
     networks:
@@ -63,6 +63,26 @@ services:
       - EXTERNAL_ENC_SECRET_KEY=JWTEncKeyDontUseInProduction666!
       - EUREKA_INSTANCE_PREFER-IP-ADDRESS=true
       - EUREKA_INSTANCE_INSTANCE_HOSTNAME=legal-entity-composition-service
+      - EUREKA_INSTANCE_NON-SECURE-PORT=8080
+
+  product-ingestion-integration:
+    container_name: wsecu_bb_product_integration
+    image: harbor.backbase.eu/development/wsecu-product-ingestion-integration-service
+    ports:
+      - "9093:8080"
+    networks:
+      - wsecu_bb_local
+    environment:
+      - JAVA_TOOL_OPTIONS= -Deureka.client.serviceUrl.defaultZone=http://registry:8080/eureka/
+      - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
+      - SPRING_ACTIVEMQ_USER=admin
+      - SPRING_ACTIVEMQ_PASSWORD=admin
+      - USERCTX_KEY=JWTSecretKeyDontUseInProduction!
+      - SIG_SECRET_KEY=JWTSecretKeyDontUseInProduction!
+      - EXTERNAL_SIG_SECRET_KEY=JWTSecretKeyDontUseInProduction!
+      - EXTERNAL_ENC_SECRET_KEY=JWTEncKeyDontUseInProduction666!
+      - EUREKA_INSTANCE_PREFER-IP-ADDRESS=true
+      - EUREKA_INSTANCE_INSTANCE_HOSTNAME=product-composition-service
       - EUREKA_INSTANCE_NON-SECURE-PORT=8080
 
 networks:

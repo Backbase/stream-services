@@ -73,6 +73,14 @@ bootstrap:
         externalId: Savings
         externalTypeId: Savings
         typeName: Savings
+      - externalProductId: Savings
+        externalProductKindId: kind2
+        productKindName: Savings
+        externalProductTypeId: Savings
+        productTypeName: Savings
+        externalId: Savings
+        externalTypeId: Savings
+        typeName: Savings
 
 logging:
   level:
