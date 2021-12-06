@@ -25,11 +25,11 @@ public class RootLegalEntityBootstrapTask implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         LegalEntity rootLegalEntity = bootstrapConfigurationProperties.getLegalEntity();
-        bootstrapTcuRootLegalEntity(rootLegalEntity)
+        bootstrapRootLegalEntity(rootLegalEntity)
                 .subscribe();
     }
 
-    private Mono<String> bootstrapTcuRootLegalEntity(LegalEntity rootLegalEntity) {
+    private Mono<String> bootstrapRootLegalEntity(LegalEntity rootLegalEntity) {
         if (Objects.isNull(rootLegalEntity)) {
             log.warn("Failed to load root legal entity.");
             return Mono.empty();
