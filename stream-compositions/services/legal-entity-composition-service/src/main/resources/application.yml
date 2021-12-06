@@ -14,7 +14,6 @@ spring:
           dbs:
             token-uri: http://token-converter:8080/oauth/token
 
-
 backbase:
   mtls:
     enabled: false
