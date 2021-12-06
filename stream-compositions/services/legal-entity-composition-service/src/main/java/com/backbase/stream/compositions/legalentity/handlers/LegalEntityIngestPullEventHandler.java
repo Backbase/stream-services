@@ -58,7 +58,7 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
      * @param response LegalEntityIngestResponse
      */
     private void handleResponse(LegalEntityIngestResponse response) {
-        if (configProperties.getEnableCompletedEvents() == false) {
+        if (!configProperties.getEnableCompletedEvents()) {
             return;
         }
         LegalEntityIngestCompletedEvent event = new LegalEntityIngestCompletedEvent()

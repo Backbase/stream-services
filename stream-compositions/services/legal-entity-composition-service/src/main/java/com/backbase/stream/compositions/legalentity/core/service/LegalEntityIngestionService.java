@@ -70,7 +70,7 @@ public class LegalEntityIngestionService {
         return Mono.just(legalEntity)
                 .map(LegalEntityTask::new)
                 .flatMap(legalEntitySaga::executeTask)
-                .map(item -> item.getData());
+                .map(LegalEntityTask::getData);
     }
 
     private LegalEntityIngestResponse buildResponse(List<LegalEntity> legalEnityList) {
