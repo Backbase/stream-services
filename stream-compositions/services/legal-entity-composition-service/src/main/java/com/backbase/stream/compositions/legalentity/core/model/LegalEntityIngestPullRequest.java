@@ -11,6 +11,5 @@ import java.util.Map;
 @AllArgsConstructor
 public class LegalEntityIngestPullRequest {
     private String legalEntityExternalId;
-    private Map<String, String> parameters;
 }
 

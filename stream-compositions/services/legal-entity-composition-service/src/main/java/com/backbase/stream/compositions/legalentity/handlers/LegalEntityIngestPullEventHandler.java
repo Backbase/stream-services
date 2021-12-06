@@ -58,7 +58,7 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
      * @param response LegalEntityIngestResponse
      */
     private void handleResponse(LegalEntityIngestResponse response) {
-        if (!configProperties.getEnableCompletedEvents()) {
+        if (Boolean.FALSE.equals(configProperties.getEnableCompletedEvents())) {
             return;
         }
         LegalEntityIngestCompletedEvent event = new LegalEntityIngestCompletedEvent()
@@ -81,7 +81,7 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
      * @param ex Throwable
      */
     private void handleError(Throwable ex) {
-        if (configProperties.getEnableFailedEvents() == false) {
+        if (Boolean.FALSE.equals(configProperties.getEnableFailedEvents())) {
             return;
         }
         LegalEntityIngestFailedEvent event = new LegalEntityIngestFailedEvent()

@@ -51,6 +51,14 @@
             <artifactId>legal-entity-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>service-sdk-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
