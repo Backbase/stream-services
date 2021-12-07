@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.5.0</version>
+        <version>2.5.5</version>
         <relativePath />
     </parent>
 
@@ -31,18 +31,13 @@
     <modules>
         <module>stream-dbs-web-client</module>
         <module>stream-test-support</module>
-        <module>stream-scs-starter-config</module>
-        <module>stream-openapi-support</module>
         <module>stream-worker</module>
-        <module>stream-micrometer-support</module>
-        <module>stream-web-start-ui</module>
-        <module>stream-web-start-mvc</module>
     </modules>
 
     <properties>
         <source.version>1.8</source.version>
-        <spring-cloud.version>2020.0.3</spring-cloud.version>
-        <spring-boot.version>2.5.3</spring-boot.version>
+        <spring-cloud.version>2020.0.4</spring-cloud.version>
+        <spring-boot.version>2.5.5</spring-boot.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
 

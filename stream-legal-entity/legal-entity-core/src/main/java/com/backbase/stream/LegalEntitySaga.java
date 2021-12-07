@@ -184,8 +184,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             });
     }
 
-    @ContinueSpan(log = UPSERT_LEGAL_ENTITY)
-    private Mono<LegalEntityTask> upsertLegalEntity(@SpanTag(value = "streamTask") LegalEntityTask task) {
+    private Mono<LegalEntityTask> upsertLegalEntity(LegalEntityTask task) {
         task.info(LEGAL_ENTITY, UPSERT, "", task.getData().getExternalId(), null, "Upsert Legal Entity with External ID: %s", task.getData().getExternalId());
         LegalEntity legalEntity = task.getData();
         // Pipeline for Existing Legal Entity
@@ -218,7 +217,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         return existingLegalEntity.switchIfEmpty(createNewLegalEntity);
     }
 
-    @ContinueSpan(log = "processProducts")
     private Mono<LegalEntityTask> processProducts(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
         if (legalEntity.getProductGroups() == null || legalEntity.getProductGroups().isEmpty()) {
@@ -290,7 +288,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         return new ProductGroupTask(streamTask.getId() + "-" + productGroup.getName(), productGroup);
     }
 
-    @ContinueSpan(log = "createJobRoles")
     private Mono<LegalEntityTask> createJobRoles(LegalEntityTask streamTask) {
 
         LegalEntity legalEntity = streamTask.getData();
@@ -316,7 +313,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .map(actual -> streamTask);
     }
 
-    @ContinueSpan(log = "processJobProfiles")
     private Mono<LegalEntityTask> processJobProfiles(LegalEntityTask streamTask) {
         log.info("Processing Job Profiles for: {}", streamTask.getName());
         LegalEntity legalEntity = streamTask.getData();

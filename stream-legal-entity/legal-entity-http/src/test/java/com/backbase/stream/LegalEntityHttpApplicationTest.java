@@ -36,6 +36,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -45,6 +46,7 @@ import reactor.core.publisher.Mono;
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(LegalEntityAsyncController.class)
 @AutoConfigureWebTestClient
+@TestPropertySource(properties = "spring.cloud.kubernetes.enabled=false")
 @Import({LegalEntityHttpConfiguration.class, LegalEntitySagaConfiguration.class,
     UpdatedServiceAgreementSagaConfiguration.class})
 class LegalEntityHttpApplicationTest {

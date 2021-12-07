@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.5.3</version>
+        <version>2.5.5</version>
         <relativePath/>
     </parent>
 
@@ -31,10 +31,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
+        <skipTests>false</skipTests>
         <source.version>11</source.version>
-        <spring-boot.version>2.5.3</spring-boot.version>
-        <spring-cloud.version>2020.0.3</spring-cloud.version>
+        <spring-boot.version>2.5.5</spring-boot.version>
+        <spring-cloud.version>2020.0.4</spring-cloud.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
         <swagger-annotations-version>1.5.23</swagger-annotations-version>
@@ -175,18 +175,6 @@
             </dependency>
 
             <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>2.12.3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>2.12.3</version>
-            </dependency>
-
-            <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>3.0.2</version>
@@ -277,7 +265,6 @@
             <scope>compile</scope>
         </dependency>
 
-
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-processor</artifactId>
@@ -309,7 +296,6 @@
             <classifier>test-binder</classifier>
             <scope>test</scope>
         </dependency>
-
 
         <dependency>
             <groupId>org.springframework.integration</groupId>
@@ -353,45 +339,7 @@
                     </configuration>
                 </plugin>
                 <!-- Generate App metadata from 'ConfigurationProperties' classes -->
-                <plugin>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-app-starter-metadata-maven-plugin</artifactId>
-                    <version>2.0.0.RELEASE</version>
-                    <configuration>
-                        <storeFilteredMetadata>true</storeFilteredMetadata>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>aggregate-metadata</id>
-                            <phase>compile</phase>
-                            <goals>
-                                <goal>aggregate-metadata</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <!-- Load the properties from app metadata json as maven property -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>properties-maven-plugin</artifactId>
-                    <version>1.0.0</version>
-                    <executions>
-                        <execution>
-                            <id>apps-metadata</id>
-                            <phase>process-classes</phase>
-                            <goals>
-                                <goal>read-project-properties</goal>
-                            </goals>
-                            <configuration>
-                                <files>
-                                    <file>
-                                        ${project.build.outputDirectory}/META-INF/spring-configuration-metadata-encoded.properties
-                                    </file>
-                                </files>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
+
                 <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
@@ -693,28 +641,4 @@
 
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>include-metadata</id>
-            <activation>
-                <property>
-                    <name>package.properties.metadata</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>properties-maven-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.springframework.cloud</groupId>
-                        <artifactId>spring-cloud-app-starter-metadata-maven-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
