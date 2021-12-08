@@ -74,7 +74,7 @@ public class UserService {
 
         return usersApi.createUser(createUser)
             .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error creating user: {} Response: {}", user, e.getResponseBodyAsString());
+                log.error("Error creating user: {} Response: {}", user.getExternalId(), e.getResponseBodyAsString());
                 String message = "Failed to create user: " + user.getExternalId();
                 streamTask.error("user", "create-user", "failed",
                     legalEntityExternalId, user.getExternalId(), e, e.getMessage(), message);
