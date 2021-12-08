@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [2.52.0]
+### Removed 
+- Audit Core & Http Service. Created as a demo, never to be used.
+### Changed
+- UserService
+  - Failed operations in User Service now generally return StreamTaskExceptions allowing for better control and handling of failures.
+- Stream Task
+  - Added last error message for easier logging down stream
+- Stream Unit Of Work Executor. 
+  - UnitOfWork Executor now process uses with correct configurable concurrency. Ingesting a Flux of Customers / Transaction will not cause a thread mayhem and can be controlled through configuration.
+
+
 
 ## [2.51.0]
 ### Maintenance
