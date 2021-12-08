@@ -8,7 +8,7 @@ servers:
 tags:
   - name: LegalEntityIntegration
 paths:
-  /service-api/v2/legal-entity:
+  /integration-api/v2/legal-entity:
     post:
       tags:
         - LegalEntityIntegration

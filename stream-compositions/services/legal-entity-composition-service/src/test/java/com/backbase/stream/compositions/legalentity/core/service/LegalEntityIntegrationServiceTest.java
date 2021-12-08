@@ -1,10 +1,9 @@
-package com.backbase.stream.compositions.legalentity.core;
+package com.backbase.stream.compositions.legalentity.core.service;
 
 import com.backbase.stream.compositions.integration.legalentity.api.LegalEntityIntegrationApi;
 import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
-import org.junit.jupiter.api.Assertions;
+import com.backbase.stream.compositions.legalentity.core.service.impl.LegalEntityIntegrationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,19 +16,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class LegalEntityIntegrationServiceTest {
+class LegalEntityIntegrationServiceTest {
     @Mock
     private LegalEntityIntegrationApi legalEntityIntegrationApi;
 
-    private LegalEntityIntegrationService legalEntityIntegrationService;
+    private LegalEntityIntegrationServiceImpl legalEntityIntegrationService;
 
     @BeforeEach
-    public void setUp() {
-        legalEntityIntegrationService = new LegalEntityIntegrationService(legalEntityIntegrationApi);
+    void setUp() {
+        legalEntityIntegrationService = new LegalEntityIntegrationServiceImpl(legalEntityIntegrationApi);
     }
 
     @Test
-    public void callIntegrationService_LegalEntitiesFound() throws UnsupportedOperationException {
+    void callIntegrationService_LegalEntitiesFound() throws UnsupportedOperationException {
         LegalEntity legalEntity1 = new LegalEntity().name("Legal Enity 1");
         LegalEntity legalEntity2 = new LegalEntity().name("Legal Enity 2");
         when(legalEntityIntegrationApi.getLegalEntities(any()))
@@ -42,7 +41,7 @@ public class LegalEntityIntegrationServiceTest {
     }
 
     @Test
-    public void callIntegrationService_EmptyLegalEntityList() throws UnsupportedOperationException {
+    void callIntegrationService_EmptyLegalEntityList() throws UnsupportedOperationException {
         when(legalEntityIntegrationApi.getLegalEntities(any()))
                 .thenReturn(Flux.just());
 

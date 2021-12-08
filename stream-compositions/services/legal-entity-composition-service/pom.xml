@@ -4,8 +4,8 @@
 
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
+        <artifactId>service-sdk-starter-reactive</artifactId>
         <version>13.4.0</version>
-        <artifactId>service-sdk-starter-core</artifactId>
         <relativePath/>
     </parent>
 
@@ -39,11 +39,6 @@
         <dependency>
             <groupId>com.backbase.stream.compositions.events</groupId>
             <artifactId>legal-entity-events</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.stream.compositions.api</groupId>
-            <artifactId>legal-entity-composition-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -144,7 +139,7 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.stream.compositions.integration.legalentity.api</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.integration.legalentity.model</modelPackage>
                         </configuration>

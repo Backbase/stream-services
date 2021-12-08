@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.core;
+package com.backbase.stream.compositions.legalentity.core.service;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
@@ -6,8 +6,8 @@ import com.backbase.stream.compositions.integration.legalentity.model.LegalEntit
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
-import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
-import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
+import com.backbase.stream.compositions.legalentity.core.service.impl.LegalEntityIngestionServiceImpl;
+import com.backbase.stream.compositions.legalentity.core.service.impl.LegalEntityIntegrationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,15 +18,14 @@ import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class LegalEntityIngestionServiceTest {
-    private LegalEntityIngestionService legalEntityIngestionService;
+class LegalEntityIngestionServiceImplTest {
+    private LegalEntityIngestionServiceImpl legalEntityIngestionServiceImpl;
 
     @Mock
-    private LegalEntityIntegrationService legalEntityIntegrationService;
+    private LegalEntityIntegrationServiceImpl legalEntityIntegrationService;
 
     @Mock
     LegalEntityMapperImpl mapper;
@@ -35,23 +34,23 @@ public class LegalEntityIngestionServiceTest {
     LegalEntitySaga legalEntitySaga;
 
     @BeforeEach
-    public void setUp() {
-        legalEntityIngestionService = new LegalEntityIngestionService(
+    void setUp() {
+        legalEntityIngestionServiceImpl = new LegalEntityIngestionServiceImpl(
                 mapper,
                 legalEntitySaga,
                 legalEntityIntegrationService);
     }
 
     @Test
-    public void ingestiInPullMode_Success() {
+    void ingestiInPullMode_Success() {
         LegalEntityIngestPullRequest legalEntityIngestPullRequest = LegalEntityIngestPullRequest.builder()
                 .legalEntityExternalId("externa lId")
                 .build();
         LegalEntity legalEntity = new LegalEntity().name("legalEntityName");
-        when(legalEntityIntegrationService.retrieveLegalEntities(eq(legalEntityIngestPullRequest)))
+        when(legalEntityIntegrationService.retrieveLegalEntities(legalEntityIngestPullRequest))
                 .thenReturn(Flux.just(legalEntity));
 
-        when(mapper.mapIntegrationToStream(eq(legalEntity)))
+        when(mapper.mapIntegrationToStream(legalEntity))
                 .thenReturn(new com.backbase.stream.legalentity.model.LegalEntity().name(legalEntity.getName()));
 
         LegalEntityTask legalEntityTask = new LegalEntityTask();
@@ -60,7 +59,7 @@ public class LegalEntityIngestionServiceTest {
         when(legalEntitySaga.executeTask(any()))
                 .thenReturn(Mono.just(legalEntityTask));
 
-        Mono<LegalEntityIngestResponse> legalEntityIngestResponseMono = legalEntityIngestionService.ingestPull(legalEntityIngestPullRequest);
+        Mono<LegalEntityIngestResponse> legalEntityIngestResponseMono = legalEntityIngestionServiceImpl.ingestPull(legalEntityIngestPullRequest);
         assertEquals(1, legalEntityIngestResponseMono.block().getLegalEntities().size());
         assertEquals("legalEntityName", legalEntityIngestResponseMono.block().getLegalEntities().get(0).getName());
     }
