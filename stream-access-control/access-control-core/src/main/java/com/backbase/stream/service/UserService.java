@@ -270,7 +270,7 @@ public class UserService {
 
         return identityManagementApi.createIdentity(createIdentityRequest)
             .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error creating identity: {} Response: {}", user, e.getResponseBodyAsString());
+                log.error("Error creating identity: {} Response: {}", user.getExternalId(), e.getResponseBodyAsString());
                 String message = "Failed to create user: " + user.getExternalId();
                 streamTask.error("user", "create-identity", "failed",
                     user.getExternalId(), legalEntityInternalId, e, e.getMessage(), message);
@@ -291,7 +291,7 @@ public class UserService {
             replaceIdentity.attributes(user.getAttributes());
             return identityManagementApi.updateIdentity(user.getInternalId(), replaceIdentity)
                 .onErrorResume(WebClientResponseException.class, e -> {
-                    log.error("Error updating identity: {} Response: {}", user, e.getResponseBodyAsString());
+                    log.error("Error updating identity: {} Response: {}", user.getExternalId(), e.getResponseBodyAsString());
                     String message = "Failed to update identity: " + user.getExternalId();
                     streamTask.error("user", "update-identity-attributes", "failed",
                         user.getExternalId(), user.getInternalId(), e, e.getMessage(), message);
