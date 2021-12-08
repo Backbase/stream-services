@@ -24,6 +24,8 @@ import com.backbase.stream.legalentity.model.User;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+
+import com.backbase.stream.product.task.ProductGroupTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -132,7 +134,7 @@ class UserServiceTest {
             .identityLinkStrategy(strategy);
 
 
-        Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId);
+        Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask());
 
 
         result.subscribe(assertEqualsTo(user));
@@ -156,7 +158,7 @@ class UserServiceTest {
         User user = new User().externalId(externalId).identityLinkStrategy(strategy);
 
 
-        Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId);
+        Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask());
 
 
         result.subscribe(assertEqualsTo(user));
@@ -186,7 +188,7 @@ class UserServiceTest {
             .mobileNumber(new PhoneNumber().number(mobileNumber));
 
 
-        Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId);
+        Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask());
 
 
         result.subscribe(assertEqualsTo(user));

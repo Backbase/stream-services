@@ -547,13 +547,13 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             userService.setupRealm(legalEntity)
                 .switchIfEmpty(Mono.error(new StreamTaskException(streamTask, "Realm: " + legalEntity.getRealmName() + " not found!")))
                 .then(userService.linkLegalEntityToRealm(legalEntity))
-                .then(userService.createOrImportIdentityUser(user, legalEntity.getInternalId()))
+                .then(userService.createOrImportIdentityUser(user, legalEntity.getInternalId(), streamTask)
                 .flatMap(u -> updateUserStatus(u, legalEntity.getRealmName()))
                 .map(existingUser -> {
                     user.setInternalId(existingUser.getInternalId());
                     streamTask.info(IDENTITY_USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId());
                     return user;
-                });
+                }));
         return getExistingIdentityUser.switchIfEmpty(createNewIdentityUser);
     }
 
