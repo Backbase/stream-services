@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.52.0]
 ### Removed 
 - Audit Core & Http Service. Created as a demo, never to be used.
+- Erroneous log message removed when assigning permissiosn without datagroups which is not an exception anymore. 
 ### Changed
 - UserService
   - Failed operations in User Service now generally return StreamTaskExceptions allowing for better control and handling of failures.
