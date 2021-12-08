@@ -505,7 +505,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             return u;
         });
 
-        Mono<User> createNewUser = Mono.zip(Mono.just(user), userService.createUser(user, legalEntity.getExternalId()),
+        Mono<User> createNewUser = Mono.zip(Mono.just(user), userService.createUser(user, legalEntity.getExternalId(), streamTask),
             (u, newUser) -> {
                 u.setInternalId(newUser.getInternalId());
                 streamTask.info(USER, CREATED, u.getExternalId(), user.getInternalId(), "User %s created", newUser.getExternalId());
@@ -524,7 +524,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             return u;
         });
 
-        Mono<User> createNewUser = Mono.zip(Mono.just(user), userService.createUser(user, legalEntity.getExternalId()),
+        Mono<User> createNewUser = Mono.zip(Mono.just(user), userService.createUser(user, legalEntity.getExternalId(), streamTask),
             (u, newUser) -> {
                 u.setInternalId(newUser.getInternalId());
                 streamTask.info(USER, CREATED, u.getExternalId(), user.getInternalId(), "User %s created", newUser.getExternalId());

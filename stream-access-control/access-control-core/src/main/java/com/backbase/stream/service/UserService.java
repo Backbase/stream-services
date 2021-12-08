@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.backbase.stream.worker.exception.StreamTaskException;
+import com.backbase.stream.worker.model.StreamTask;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -65,14 +67,18 @@ public class UserService {
         return Mono.empty();
     }
 
-    public Mono<User> createUser(User user, String legalEntityExternalId) {
+    public Mono<User> createUser(User user, String legalEntityExternalId, StreamTask streamTask) {
         UserExternal createUser = mapper.toPresentation(user);
         createUser.setLegalEntityExternalId(legalEntityExternalId);
 
         return usersApi.createUser(createUser)
             .onErrorResume(WebClientResponseException.class, e -> {
                 log.error("Error creating user: {} Response: {}", user, e.getResponseBodyAsString());
-                return Mono.error(e);
+                String message = "Failed to create user: " + user.getExternalId();
+                streamTask.error("user", "create-user", "failed",
+                    legalEntityExternalId, user.getExternalId(), e, e.getMessage(), message);
+
+                return Mono.error(new StreamTaskException(streamTask, message));
             })
             .map(userCreated -> handleCreateUserResult(user, userCreated));
     }
@@ -319,13 +325,13 @@ public class UserService {
 
     private Mono<EnhancedUserRepresentation> getIdentityUser(User user, String realm) {
         return identityIntegrationApi.map(api -> api.getUserById(realm, user.getInternalId())
-            .doOnNext(eur -> {
-                log.info("Identity user found: {}", user.getExternalId());
-            })
-            .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error retrieving identity user {}: {}", user.getInternalId(), e.getResponseBodyAsString());
-                return Mono.error(e);
-            }))
+                .doOnNext(eur -> {
+                    log.info("Identity user found: {}", user.getExternalId());
+                })
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    log.error("Error retrieving identity user {}: {}", user.getInternalId(), e.getResponseBodyAsString());
+                    return Mono.error(e);
+                }))
             .orElse(Mono.empty());
     }
 
