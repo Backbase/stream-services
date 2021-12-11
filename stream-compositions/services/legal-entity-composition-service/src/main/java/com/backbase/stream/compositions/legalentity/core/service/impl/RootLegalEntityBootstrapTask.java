@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -18,6 +19,7 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
+@ConditionalOnProperty(name = "bootstrap.enabled", matchIfMissing = false)
 public class RootLegalEntityBootstrapTask implements ApplicationRunner {
     private final LegalEntitySaga legalEntitySaga;
     private final BootstrapConfigurationProperties bootstrapConfigurationProperties;

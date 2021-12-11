@@ -1,9 +1,9 @@
 openapi: 3.0.3
 info:
   title: Legal Entity Integration API
-  version: 1.0.0
+  version: 2.0.0
 servers:
-  - url: http://localhost:8080/service-api/v1
+  - url: http://localhost:8080/service-api/v2
     description: The server
 tags:
   - name: LegalEntityIntegration

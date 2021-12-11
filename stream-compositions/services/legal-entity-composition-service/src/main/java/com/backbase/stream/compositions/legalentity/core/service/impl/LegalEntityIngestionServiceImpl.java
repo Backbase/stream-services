@@ -7,6 +7,7 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngest
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
+import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ import java.util.List;
 public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionService {
     private final LegalEntityMapper mapper;
     private final LegalEntitySaga legalEntitySaga;
-    private final LegalEntityIntegrationServiceImpl legalEntityIntegrationService;
+    private final LegalEntityIntegrationService legalEntityIntegrationService;
 
     /**
      * {@inheritDoc}

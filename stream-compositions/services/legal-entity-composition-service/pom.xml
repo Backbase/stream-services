@@ -4,7 +4,7 @@
 
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
-        <artifactId>service-sdk-starter-reactive</artifactId>
+        <artifactId>service-sdk-starter-core</artifactId>
         <version>13.4.0</version>
         <relativePath/>
     </parent>
@@ -53,27 +53,34 @@
             <artifactId>service-sdk-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
     <build>
         <plugins>
+
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>repackage</id>
-                        <goals>
-                            <goal>build-info</goal>
-                            <goal>repackage</goal>
-                        </goals>
-                        <configuration combine.self="override">
-                            <attach>false</attach>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Sets the VM argument line used when unit tests are run. -->
+                    <skipTests>${skip.unit.tests}</skipTests>
+                    <!-- Excludes integration tests when unit tests are run. -->
+                    <environmentVariables>
+                        <SIG_SECRET_KEY>JWTSecretKeyDontUseInProduction!</SIG_SECRET_KEY>
+                    </environmentVariables>
+                    <excludes>
+                        <exclude>**/*IT.java</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
+
             <!-- Unpack OpenAPI specs from zip dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -139,7 +146,7 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v2.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.stream.compositions.integration.legalentity.api</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.integration.legalentity.model</modelPackage>
                         </configuration>

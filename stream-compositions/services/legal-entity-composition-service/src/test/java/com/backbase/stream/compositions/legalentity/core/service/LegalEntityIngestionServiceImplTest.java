@@ -7,7 +7,6 @@ import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMappe
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
 import com.backbase.stream.compositions.legalentity.core.service.impl.LegalEntityIngestionServiceImpl;
-import com.backbase.stream.compositions.legalentity.core.service.impl.LegalEntityIntegrationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,10 +21,10 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LegalEntityIngestionServiceImplTest {
-    private LegalEntityIngestionServiceImpl legalEntityIngestionServiceImpl;
+    private LegalEntityIngestionService legalEntityIngestionService;
 
     @Mock
-    private LegalEntityIntegrationServiceImpl legalEntityIntegrationService;
+    private LegalEntityIntegrationService legalEntityIntegrationService;
 
     @Mock
     LegalEntityMapperImpl mapper;
@@ -35,7 +34,7 @@ class LegalEntityIngestionServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        legalEntityIngestionServiceImpl = new LegalEntityIngestionServiceImpl(
+        legalEntityIngestionService = new LegalEntityIngestionServiceImpl(
                 mapper,
                 legalEntitySaga,
                 legalEntityIntegrationService);
@@ -59,7 +58,7 @@ class LegalEntityIngestionServiceImplTest {
         when(legalEntitySaga.executeTask(any()))
                 .thenReturn(Mono.just(legalEntityTask));
 
-        Mono<LegalEntityIngestResponse> legalEntityIngestResponseMono = legalEntityIngestionServiceImpl.ingestPull(legalEntityIngestPullRequest);
+        Mono<LegalEntityIngestResponse> legalEntityIngestResponseMono = legalEntityIngestionService.ingestPull(legalEntityIngestPullRequest);
         assertEquals(1, legalEntityIngestResponseMono.block().getLegalEntities().size());
         assertEquals("legalEntityName", legalEntityIngestResponseMono.block().getLegalEntities().get(0).getName());
     }

@@ -28,7 +28,10 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      */
     @Override
     public ResponseEntity<IngestionResponse> pullIngestLegalEntity(@Valid PullIngestionRequest pullIngestionRequest) {
-        LegalEntityIngestResponse response = legalEntityIngestionService.ingestPull(buildRequest(pullIngestionRequest)).block();
+        LegalEntityIngestResponse response = legalEntityIngestionService
+                .ingestPull(buildRequest(pullIngestionRequest))
+                .block();
+
         return ResponseEntity.ok(buildResponse(response));
     }
 
@@ -37,7 +40,10 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      */
     @Override
     public ResponseEntity<IngestionResponse> pushIngestLegalEntity(@Valid PushIngestionRequest pushIngestionRequest) {
-        LegalEntityIngestResponse response = legalEntityIngestionService.ingestPush(buildRequest(pushIngestionRequest)).block();
+        LegalEntityIngestResponse response = legalEntityIngestionService
+                .ingestPush(buildRequest(pushIngestionRequest))
+                .block();
+
         return ResponseEntity.ok(buildResponse(response));
     }
 

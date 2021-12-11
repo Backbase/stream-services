@@ -12,9 +12,13 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://token-converter:8080/oauth/token
+            token-uri: http://localhost:10000/oauth/token
   main:
     allow-bean-definition-overriding: true
+
+eureka:
+  client:
+    enabled: false
 
 backbase:
   security:
@@ -39,8 +43,8 @@ backbase:
     compositions:
       legal-entity:
         enable-completed-events: true
-        enable-failed-events: true
-        legal-entity-integration-url: http://legal-entity-ingestion-integration:8080
+        e nable-failed-events: true
+        legal-entity-integration-url: http://localhost:18000
 
 bootstrap:
   enabled: false
@@ -121,4 +125,6 @@ bootstrap:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
+    org.mockserver: WARN
+
 
