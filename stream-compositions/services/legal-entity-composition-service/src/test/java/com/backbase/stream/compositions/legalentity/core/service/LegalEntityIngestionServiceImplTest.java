@@ -42,11 +42,11 @@ class LegalEntityIngestionServiceImplTest {
 
     @Test
     void ingestiInPullMode_Success() {
-        LegalEntityIngestPullRequest legalEntityIngestPullRequest = LegalEntityIngestPullRequest.builder()
+        Mono<LegalEntityIngestPullRequest> legalEntityIngestPullRequest = Mono.just(LegalEntityIngestPullRequest.builder()
                 .legalEntityExternalId("externa lId")
-                .build();
+                .build());
         LegalEntity legalEntity = new LegalEntity().name("legalEntityName");
-        when(legalEntityIntegrationService.retrieveLegalEntities(legalEntityIngestPullRequest))
+        when(legalEntityIntegrationService.retrieveLegalEntities(legalEntityIngestPullRequest.block()))
                 .thenReturn(Flux.just(legalEntity));
 
         when(mapper.mapIntegrationToStream(legalEntity))

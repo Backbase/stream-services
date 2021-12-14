@@ -12,7 +12,6 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -28,32 +27,20 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
     /**
      * {@inheritDoc}
      */
-    public Mono<LegalEntityIngestResponse> ingestPull(LegalEntityIngestPullRequest ingestPullRequest) {
-        return ingest(legalEntityIntegrationService
-                .retrieveLegalEntities(ingestPullRequest)
-                .map(mapper::mapIntegrationToStream));
+    public Mono<LegalEntityIngestResponse> ingestPull(Mono<LegalEntityIngestPullRequest> ingestPullRequest) {
+        return ingestPullRequest
+                .flatMapMany(legalEntityIntegrationService::retrieveLegalEntities)
+                .map(mapper::mapIntegrationToStream)
+                .flatMap(this::sendLegalEntityToDbs)
+                .collectList()
+                .map(this::buildResponse);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Mono<LegalEntityIngestResponse> ingestPush(LegalEntityIngestPushRequest ingestPushRequest) {
-        return ingest(Flux.fromIterable(ingestPushRequest.getLegalEntities()));
-    }
-
-    /**
-     * Ingests legal entities to DBS.
-     *
-     * @param legalEnities List of legal entities
-     * @return Ingested legal entities
-     */
-    private Mono<LegalEntityIngestResponse> ingest(Flux<LegalEntity> legalEnities) {
-        return legalEnities
-                .flatMap(this::sendLegalEntityToDbs)
-                .collectList()
-                .doOnSuccess(this::handleSuccess)
-                .doOnError(this::handleError)
-                .map(this::buildResponse);
+    public Mono<LegalEntityIngestResponse> ingestPush(Mono<LegalEntityIngestPushRequest> ingestPushRequest) {
+        throw new UnsupportedOperationException();
     }
 
     /**
