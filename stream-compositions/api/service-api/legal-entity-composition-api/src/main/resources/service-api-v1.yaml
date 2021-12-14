@@ -1,0 +1,116 @@
+openapi: 3.0.3
+info:
+  title: Legal entity composition API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/service-api/v1
+    description: The server
+tags:
+  - name: LegalEntityComposition
+paths:
+  /service-api/v2/pull-ingestion:
+    post:
+      tags:
+        - LegalEntityComposition
+      summary: Ingests legal entity (in pull mode).
+      description: Ingests legal entity (in pull mode).
+      operationId: pullIngestLegalEntity
+      requestBody:
+        description: Pull Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PullIngestionRequest'
+      responses:
+        "201":
+          description: Legal Entity ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+  /service-api/v2/push-ingestion:
+    post:
+      tags:
+        - LegalEntityComposition
+      summary: Ingests legal entity (in push mode).
+      description: Ingests legal entity (in push mode).
+      operationId: pushIngestLegalEntity
+      requestBody:
+        description: Push Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushIngestionRequest'
+      responses:
+        "201":
+          description: Legal Entity ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    PullIngestionRequest:
+      type: object
+      properties:
+        legalEntityExternalId:
+          type: string
+
+    PushIngestionRequest:
+      type: object
+      properties:
+        legalEntities:
+          type: array
+          items:
+            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
+
+    IngestionResponse:
+      type: object
+      properties:
+        legalEntities:
+          type: array
+          items:
+            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+

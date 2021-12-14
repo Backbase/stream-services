@@ -1,0 +1,130 @@
+spring:
+  zipkin:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: http://localhost:10000/oauth/token
+  main:
+    allow-bean-definition-overriding: true
+
+eureka:
+  client:
+    enabled: false
+
+backbase:
+  security:
+    http:
+      enabled: true
+      adapter:
+        enabled: true
+    service-api:
+      authentication:
+        required-scope: api:service
+  stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+    dbs:
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
+    identity:
+      identity-integration-base-url: http://identity-integration-service:8080
+
+    compositions:
+      legal-entity:
+        enable-completed-events: true
+        e nable-failed-events: true
+        legal-entity-integration-url: http://localhost:18000
+
+bootstrap:
+  enabled: false
+  # This is just na example. Replace it with data corresponding to your bank
+  legalEntity:
+    name: "Moustache Bank"
+    realmName: "backbase"
+    externalId: "moustache-bank"
+    legalEntityType: "BANK"
+    referenceJobRoles:
+      - name: Entitlements - Manager
+        description: Full Entitlements administration.
+        functionGroups:
+          - name: "Manage Entitlements"
+            functions:
+              - functionId: "1019"
+                functionCode: "manage.data.groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+              - functionId: "1020"
+                functionCode: "manage.function.groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+      - name: Retail User - USA
+        description: Retail User Permissions for USA
+        functionGroups:
+          - name: "Products, payments, txn, contacts"
+            functions:
+              - functionId: "1006"
+                functionCode: "product.summary"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1003"
+                functionCode: "transactions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+              - functionId: "1017"
+                functionCode: "us.domestic.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1018"
+                functionCode: "us.foreign.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1005"
+                functionCode: "contacts"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+    administrators:
+      - externalId: "admin"
+        fullName: "Backbase Root Admin"
+        identityLinkStrategy: "IDENTITY_AGNOSTIC"
+        emailAddress:
+          address: "bbadmin@email.com"
+        mobileNumber:
+          number: "1234567890"
+    users:
+      - user:
+          externalId: "admin"
+          identityLinkStrategy: "IDENTITY_AGNOSTIC"
+        referenceJobRoleNames:
+          - "Entitlements - Manager"
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG
+    org.mockserver: WARN
+
+
