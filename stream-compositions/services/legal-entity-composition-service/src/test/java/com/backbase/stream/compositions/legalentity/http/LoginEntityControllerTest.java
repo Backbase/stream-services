@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.legalentity.http;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
+import com.backbase.stream.compositions.legalentity.model.PullIngestionRequest;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.streams.compositions.test.IntegrationTest;
 import com.google.gson.Gson;
@@ -13,27 +14,25 @@ import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.net.URI;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@AutoConfigureWebTestClient
 @ExtendWith(SpringExtension.class)
-@AutoConfigureMockMvc
 class LoginEntityControllerTest extends IntegrationTest {
     private static final int TOKEN_CONVERTER_PORT = 10000;
     private static final int INTEGRATION_SERVICE_PORT = 18000;
@@ -42,11 +41,12 @@ class LoginEntityControllerTest extends IntegrationTest {
     private MockServerClient integrationServerClient;
     private MockServerClient tokenConverterServerClient;
 
+    @Autowired
+    LegalEntityController legalEntityController;
+
     @MockBean
     private LegalEntitySaga legalEntitySaga;
 
-    @Autowired
-    private MockMvc mvc;
 
     @BeforeEach
     void initializeTokenConverterServer() throws IOException {
@@ -80,7 +80,6 @@ class LoginEntityControllerTest extends IntegrationTest {
                 );
     }
 
-
     @AfterEach
     void stopMockServesr() {
         tokenConverterServer.stop();
@@ -95,27 +94,17 @@ class LoginEntityControllerTest extends IntegrationTest {
         when(legalEntitySaga.executeTask(any()))
                 .thenReturn(Mono.just(new LegalEntityTask(legalEntity[0])));
 
-        mvc.perform(
-                post("/service-api/v2/pull-ingestion")
-                        .header("Authorization", token())
-                        .contentType(MediaType.APPLICATION_JSON.toString())
-                        .content(readContentFromClasspath("request-response/request-id1.json")))
-                .andDo(print())
-                .andExpect(status().isOk());
-    }
+        URI uri = URI.create("/service-api/v2/pull-ingestion");
 
-//    @Test
-//    public void pullIngestLegalEntity_Fail() throws Exception {
-//        when(legalEntitySaga.executeTask(any()))
-//                .thenThrow(new RuntimeException());
-//
-//        mvc.perform(
-//                post("/service-api/v2/pull-ingestion")
-//                        .header("Authorization", token())
-//                        .contentType(MediaType.APPLICATION_JSON.toString())
-//                        .content(readContentFromClasspath("request-response/request-id1.json")))
-//                .andDo(print())
-//                .andExpect(status().isOk());
-//    }
+        PullIngestionRequest pullIngestionRequest =
+                new PullIngestionRequest().withLegalEntityExternalId("externalId");
+
+        WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
+
+        webTestClient.post().uri(uri).body(Mono.just(pullIngestionRequest), PullIngestionRequest.class).exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "application/json")
+                .expectBody().jsonPath("$.legalEntities[0].name").isEqualTo("Test Legal Entity");
+    }
 }
 

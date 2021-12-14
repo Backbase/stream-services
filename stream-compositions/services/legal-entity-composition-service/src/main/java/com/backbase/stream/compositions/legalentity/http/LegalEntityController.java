@@ -13,6 +13,8 @@ import com.backbase.stream.compositions.legalentity.model.PushIngestionRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.util.stream.Collectors;
@@ -27,24 +29,22 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public ResponseEntity<IngestionResponse> pullIngestLegalEntity(@Valid PullIngestionRequest pullIngestionRequest) {
-        LegalEntityIngestResponse response = legalEntityIngestionService
-                .ingestPull(buildRequest(pullIngestionRequest))
-                .block();
-
-        return ResponseEntity.ok(buildResponse(response));
+    public Mono<ResponseEntity<IngestionResponse>> pullIngestLegalEntity(@Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+        return legalEntityIngestionService
+                .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
+                .map(this::mapIngestionToResponse)
+                .map(ResponseEntity::ok);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ResponseEntity<IngestionResponse> pushIngestLegalEntity(@Valid PushIngestionRequest pushIngestionRequest) {
-        LegalEntityIngestResponse response = legalEntityIngestionService
-                .ingestPush(buildRequest(pushIngestionRequest))
-                .block();
-
-        return ResponseEntity.ok(buildResponse(response));
+    public Mono<ResponseEntity<IngestionResponse>> pushIngestLegalEntity(@Valid Mono<PushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+        return legalEntityIngestionService.ingestPush(
+                pushIngestionRequest.map(this::buildPushRequest))
+                .map(this::mapIngestionToResponse)
+                .map(ResponseEntity::ok);
     }
 
     /**
@@ -53,7 +53,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @param request PullIngestionRequest
      * @return LegalEntityIngestPullRequest
      */
-    private LegalEntityIngestPullRequest buildRequest(PullIngestionRequest request) {
+    private LegalEntityIngestPullRequest buildPullRequest(PullIngestionRequest request) {
         return LegalEntityIngestPullRequest.builder()
                 .legalEntityExternalId(request.getLegalEntityExternalId())
                 .build();
@@ -65,7 +65,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @param request PushIngestionRequest
      * @return LegalEntityIngestPushRequest
      */
-    private LegalEntityIngestPushRequest buildRequest(PushIngestionRequest request) {
+    private LegalEntityIngestPushRequest buildPushRequest(PushIngestionRequest request) {
         return LegalEntityIngestPushRequest.builder()
                 .legalEntities(request.getLegalEntities()
                         .stream()
@@ -79,14 +79,16 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @param response LegalEntityIngestResponse
      * @return IngestionResponse
      */
-    private IngestionResponse buildResponse(LegalEntityIngestResponse response) {
+    private IngestionResponse mapIngestionToResponse(LegalEntityIngestResponse response) {
         if (response == null) {
             throw new InternalServerErrorException("Legal intity is null");
         }
+
         return new IngestionResponse()
-                .withLegalEntities(response.getLegalEntities()
-                        .stream()
-                        .map(mapper::mapStreamToComposition)
-                        .collect(Collectors.toList()));
+                .withLegalEntities(
+                        response.getLegalEntities()
+                                .stream()
+                                .map(mapper::mapStreamToComposition)
+                                .collect(Collectors.toList()));
     }
 }

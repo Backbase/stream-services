@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
  * All LegalEntity objects used in above modules have exactly same structureas they are built
  * from the common /api folder.
  */
+
 @Mapper
 @Component
 public interface LegalEntityMapper {
