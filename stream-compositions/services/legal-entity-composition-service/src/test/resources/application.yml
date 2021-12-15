@@ -15,6 +15,9 @@ spring:
             token-uri: http://localhost:10000/oauth/token
   main:
     allow-bean-definition-overriding: true
+  activemq:
+    broker-url: tcp://localhost:16161
+
 
 eureka:
   client:
@@ -124,7 +127,11 @@ bootstrap:
 
 logging:
   level:
+    org.activemq: DEBUG
     com.backbase.stream.compositions: DEBUG
     org.mockserver: WARN
 
 
+ctivemq:
+  store:
+    dir: /tmp

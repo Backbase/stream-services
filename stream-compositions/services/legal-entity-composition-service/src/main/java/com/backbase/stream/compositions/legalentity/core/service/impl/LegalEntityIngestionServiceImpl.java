@@ -33,6 +33,8 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
                 .map(mapper::mapIntegrationToStream)
                 .flatMap(this::sendLegalEntityToDbs)
                 .collectList()
+                .doOnSuccess(this::handleSuccess)
+                .doOnError(this::handleError)
                 .map(this::buildResponse);
     }
 

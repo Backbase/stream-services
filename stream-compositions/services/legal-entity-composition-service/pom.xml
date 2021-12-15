@@ -58,6 +58,25 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-broker</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq.tooling</groupId>
+            <artifactId>activemq-junit</artifactId>
+            <version>5.16.3</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.activemq/activemq-kahadb-store -->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-kahadb-store</artifactId>
+            <version>5.16.3</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -8,8 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableDiscoveryClient
 @SpringBootApplication
 @ComponentScan("com.backbase.stream")
-public class LegalentityCompositionApplication {
+public class LegalEntityCompositionApplication {
     public static void main(String[] args) {
-        SpringApplication.run(LegalentityCompositionApplication.class, args);
+        SpringApplication.run(LegalEntityCompositionApplication.class, args);
     }
 }

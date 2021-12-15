@@ -3,10 +3,13 @@ package com.backbase.stream.compositions.legalentity.http;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.legalentity.model.PullIngestionRequest;
+import com.backbase.stream.compositions.legalentity.model.PushIngestionRequest;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.streams.compositions.test.IntegrationTest;
 import com.google.gson.Gson;
+import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +26,8 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -32,14 +37,16 @@ import static org.mockserver.model.HttpResponse.response;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
-@ExtendWith(SpringExtension.class)
+@ExtendWith({SpringExtension.class})
 class LoginEntityControllerTest extends IntegrationTest {
     private static final int TOKEN_CONVERTER_PORT = 10000;
     private static final int INTEGRATION_SERVICE_PORT = 18000;
+    private static final int ACTIVEMQ_PORT = 16161;
     private ClientAndServer integrationServer;
     private ClientAndServer tokenConverterServer;
     private MockServerClient integrationServerClient;
     private MockServerClient tokenConverterServerClient;
+    private static BrokerService broker;
 
     @Autowired
     LegalEntityController legalEntityController;
@@ -47,6 +54,13 @@ class LoginEntityControllerTest extends IntegrationTest {
     @MockBean
     private LegalEntitySaga legalEntitySaga;
 
+    @BeforeAll
+    static void initActiveMqBroker() throws Exception {
+        broker = new BrokerService();
+        broker.addConnector("tcp://localhost:" + ACTIVEMQ_PORT);
+        broker.setPersistent(false);
+        broker.start();
+    }
 
     @BeforeEach
     void initializeTokenConverterServer() throws IOException {
@@ -81,10 +95,11 @@ class LoginEntityControllerTest extends IntegrationTest {
     }
 
     @AfterEach
-    void stopMockServesr() {
+    void stopMockServer() {
         tokenConverterServer.stop();
         integrationServer.stop();
     }
+
 
     @Test
     public void pullIngestLegalEntity_Success() throws Exception {
@@ -105,6 +120,22 @@ class LoginEntityControllerTest extends IntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type", "application/json")
                 .expectBody().jsonPath("$.legalEntities[0].name").isEqualTo("Test Legal Entity");
+    }
+
+    @Test
+    public void pushIngestLegalEntity_Fail() throws Exception {
+        URI uri = URI.create("/service-api/v2/push-ingestion");
+
+        List<com.backbase.stream.compositions.legalentity.model.LegalEntity> legalEntities = new ArrayList<>();
+        legalEntities.add(new com.backbase.stream.compositions.legalentity.model.LegalEntity());
+
+        PushIngestionRequest pushIngestionRequest = new PushIngestionRequest().withLegalEntities(legalEntities);
+
+        WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
+
+        webTestClient.post().uri(uri).body(Mono.just(pushIngestionRequest), PullIngestionRequest.class).exchange()
+                .expectStatus().is5xxServerError();
+
     }
 }
 

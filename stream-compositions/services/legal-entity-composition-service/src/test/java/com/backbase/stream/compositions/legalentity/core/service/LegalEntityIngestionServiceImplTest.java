@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -41,9 +42,9 @@ class LegalEntityIngestionServiceImplTest {
     }
 
     @Test
-    void ingestiInPullMode_Success() {
+    void ingestionInPullMode_Success() {
         Mono<LegalEntityIngestPullRequest> legalEntityIngestPullRequest = Mono.just(LegalEntityIngestPullRequest.builder()
-                .legalEntityExternalId("externa lId")
+                .legalEntityExternalId("externalId")
                 .build());
         LegalEntity legalEntity = new LegalEntity().name("legalEntityName");
         when(legalEntityIntegrationService.retrieveLegalEntities(legalEntityIngestPullRequest.block()))
