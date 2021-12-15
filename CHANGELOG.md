@@ -3,6 +3,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.52.0]
+### Removed 
+- Audit Core & Http Service. Created as a demo, never to be used.
+- Erroneous log message removed when assigning permissiosn without datagroups which is not an exception anymore. 
+### Changed
+- UserService
+  - Failed operations in User Service now generally return StreamTaskExceptions allowing for better control and handling of failures.
+- Stream Task
+  - Added last error message for easier logging down stream
+- LIngesting a Flux of Customers / Transaction will not cause a thread mayhem and can be controlled through configuration. For Legal Entity Http Serivce, set the `backbase.stream.legalentity.sink.task-executors` property to control. When processing a Flux of Legal Entities, provide the concurrency parameter when invoking the `com.backbase.stream.LegalEntitySaga.executeTask` method. For example :
+```
+        Flux<LegalEntity> flux = legalEntity
+            .map(LegalEntityTask::new)
+            .flatMap(legalEntitySaga::executeTask, legalEntitySagaConfiguration.getTaskExecutors())
+            .map(LegalEntityTask::getData)
+            .doOnNext(actual -> log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
+ ``` 
+    
+
+
 ## [2.51.0]
 ### Maintenance
 - Update to 2021.10

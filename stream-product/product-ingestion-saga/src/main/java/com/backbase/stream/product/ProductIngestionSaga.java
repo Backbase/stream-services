@@ -215,7 +215,7 @@ public class ProductIngestionSaga {
         LegalEntityReference legalEntityReference = jobProfileUser.getLegalEntityReference();
         Mono<User> getExistingUser = userService.getUserByExternalId(user.getExternalId())
             .doOnNext(existingUser -> streamTask.info(USER, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId()));
-        Mono<User> createNewUser = userService.createUser(user, legalEntityReference.getExternalId())
+        Mono<User> createNewUser = userService.createUser(user, legalEntityReference.getExternalId(), streamTask)
             .doOnNext(existingUser -> streamTask.info(USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId()));
         return getExistingUser.switchIfEmpty(createNewUser);
     }
@@ -226,7 +226,7 @@ public class ProductIngestionSaga {
         LegalEntityReference legalEntityReference = jobProfileUser.getLegalEntityReference();
         Mono<User> getExistingIdentityUser = userService.getUserByExternalId(user.getExternalId())
             .doOnNext(existingUser -> streamTask.info(IDENTITY_USER, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId()));
-        Mono<User> createNewIdentityUser = userService.createOrImportIdentityUser(user, legalEntityReference.getInternalId())
+        Mono<User> createNewIdentityUser = userService.createOrImportIdentityUser(user, legalEntityReference.getInternalId(), streamTask)
             .doOnNext(existingUser -> streamTask.info(IDENTITY_USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId()));
         return getExistingIdentityUser.switchIfEmpty(createNewIdentityUser);
     }

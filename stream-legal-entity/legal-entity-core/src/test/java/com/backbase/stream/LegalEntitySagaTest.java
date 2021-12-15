@@ -97,7 +97,7 @@ class LegalEntitySagaTest {
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(customSa), any())).thenReturn(Mono.just(customSa));
         when(userService.getUserByExternalId(eq(regularUserExId))).thenReturn(Mono.just(regularUser.getUser()));
         when(userService.getUserByExternalId(eq(adminExId))).thenReturn(Mono.just(adminUser));
-        when(userService.createUser(any(), any())).thenReturn(Mono.empty());
+        when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
