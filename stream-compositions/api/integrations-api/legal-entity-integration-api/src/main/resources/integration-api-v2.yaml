@@ -9,12 +9,19 @@ tags:
   - name: LegalEntityIntegration
 paths:
   /integration-api/v2/legal-entity:
-    post:
+    get:
       tags:
         - LegalEntityIntegration
       summary: Gets legal entity.
       description: Gets legal entity.
       operationId: getLegalEntities
+      parameters:
+        - in: query
+          name: externalId
+          schema:
+            type: string
+          required: true
+
       requestBody:
         description: Gets legal entity request.
         content:
@@ -50,12 +57,6 @@ components:
       type: object
       properties:
         message:
-          type: string
-
-    GetLegalEntityRequest:
-      type: object
-      properties:
-        externalId:
           type: string
 
     GetLegalEntityListResponse:

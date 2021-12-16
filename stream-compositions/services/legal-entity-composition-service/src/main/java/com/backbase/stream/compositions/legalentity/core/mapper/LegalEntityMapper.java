@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
  * from the common /api folder.
  */
 
-@Mapper
 @Component
+@Mapper(componentModel = "spring")
 public interface LegalEntityMapper {
     /**
      * Maps compositon LegalEntity to stream LegalEntity model.
