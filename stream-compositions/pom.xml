@@ -12,6 +12,10 @@
 
     <artifactId>stream-compositions</artifactId>
 
+    <properties>
+        <activemq.version>5.16.3</activemq.version>
+    </properties>
+
     <packaging>pom</packaging>
     <name>Stream :: Compositions</name>
 

@@ -28,7 +28,8 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pullIngestLegalEntity(@Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<IngestionResponse>> pullIngestLegalEntity(
+            @Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
         return legalEntityIngestionService
                 .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
                 .map(this::mapIngestionToResponse)
@@ -39,9 +40,10 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pushIngestLegalEntity(@Valid Mono<PushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-        return legalEntityIngestionService.ingestPush(
-                pushIngestionRequest.map(this::buildPushRequest))
+    public Mono<ResponseEntity<IngestionResponse>> pushIngestLegalEntity(
+            @Valid Mono<PushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+        return legalEntityIngestionService
+                .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
                 .map(this::mapIngestionToResponse)
                 .map(ResponseEntity::ok);
     }

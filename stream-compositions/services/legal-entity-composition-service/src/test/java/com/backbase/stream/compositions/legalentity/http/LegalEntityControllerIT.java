@@ -38,7 +38,7 @@ import static org.mockserver.model.HttpResponse.response;
 @SpringBootTest
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
-class LegalEntityControllerIntegrationTest extends IntegrationTest {
+class LegalEntityControllerIT extends IntegrationTest {
     private static final int TOKEN_CONVERTER_PORT = 10000;
     private static final int INTEGRATION_SERVICE_PORT = 18000;
     private static final int ACTIVEMQ_PORT = 16161;
@@ -100,7 +100,6 @@ class LegalEntityControllerIntegrationTest extends IntegrationTest {
         integrationServer.stop();
     }
 
-
     @Test
     void pullIngestLegalEntity_Success() throws Exception {
         LegalEntity[] legalEntity = new Gson()
@@ -110,7 +109,6 @@ class LegalEntityControllerIntegrationTest extends IntegrationTest {
                 .thenReturn(Mono.just(new LegalEntityTask(legalEntity[0])));
 
         URI uri = URI.create("/service-api/v2/pull-ingestion");
-
         PullIngestionRequest pullIngestionRequest =
                 new PullIngestionRequest().withLegalEntityExternalId("externalId");
 
@@ -130,7 +128,6 @@ class LegalEntityControllerIntegrationTest extends IntegrationTest {
         legalEntities.add(new com.backbase.stream.compositions.legalentity.model.LegalEntity());
 
         PushIngestionRequest pushIngestionRequest = new PushIngestionRequest().withLegalEntities(legalEntities);
-
         WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
 
         webTestClient.post().uri(uri).body(Mono.just(pushIngestionRequest), PullIngestionRequest.class).exchange()

@@ -11,6 +11,5 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class LegalEntityIngestPushRequest {
-    private String eventId;
     private List<LegalEntity> legalEntities;
 }

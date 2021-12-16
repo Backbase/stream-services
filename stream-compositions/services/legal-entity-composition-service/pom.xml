@@ -16,6 +16,18 @@
 
     <name>Stream :: Compositions :: Services :: Legal Entity</name>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.backbase.stream</groupId>
+                <artifactId>stream-compositions</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <properties>
         <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>
     </properties>
@@ -66,14 +78,13 @@
         <dependency>
             <groupId>org.apache.activemq.tooling</groupId>
             <artifactId>activemq-junit</artifactId>
-            <version>5.16.3</version>
+            <version>${activemq.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.activemq/activemq-kahadb-store -->
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-kahadb-store</artifactId>
-            <version>5.16.3</version>
+            <version>${activemq.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -83,18 +94,24 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
+                <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <!-- Sets the VM argument line used when unit tests are run. -->
-                    <skipTests>${skip.unit.tests}</skipTests>
-                    <!-- Excludes integration tests when unit tests are run. -->
                     <environmentVariables>
                         <SIG_SECRET_KEY>JWTSecretKeyDontUseInProduction!</SIG_SECRET_KEY>
                     </environmentVariables>
-                    <excludes>
-                        <exclude></exclude>
-                    </excludes>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <skipTests>${skip.integration.tests}</skipTests>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Unpack OpenAPI specs from zip dependencies -->
