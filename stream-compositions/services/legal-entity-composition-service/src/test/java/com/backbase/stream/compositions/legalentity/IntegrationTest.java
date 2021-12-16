@@ -1,4 +1,4 @@
-package com.backbase.streams.compositions.test;
+package com.backbase.stream.compositions.legalentity;
 
 import com.backbase.buildingblocks.jwt.core.JsonWebTokenProducerType;
 import com.backbase.buildingblocks.jwt.core.exception.JsonWebTokenException;
@@ -28,12 +28,7 @@ public abstract class IntegrationTest {
     }
 
     private static ThreadLocal<String> token = new ThreadLocal<>();
-    private static ThreadLocal<TokenType> tokenType = new ThreadLocal<TokenType>() {
-        @Override
-        protected TokenType initialValue() {
-            return TokenType.NONE;
-        }
-    };
+    private static ThreadLocal<TokenType> tokenType = ThreadLocal.withInitial(() -> TokenType.NONE);
 
     @Autowired
     private JsonWebTokenProperties tokenProperties;
@@ -104,6 +99,6 @@ public abstract class IntegrationTest {
         File file = new File(classLoader.getResource(resourcePath).getFile());
         return FileUtils.readFileToString(file, "UTF-8");
     }
-
 }
+
 

@@ -1,4 +1,0 @@
-eureka:
-  client:
-    enabled: false
-

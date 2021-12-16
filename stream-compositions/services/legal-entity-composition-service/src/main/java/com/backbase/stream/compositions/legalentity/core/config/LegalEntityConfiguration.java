@@ -23,17 +23,6 @@ public class LegalEntityConfiguration {
     private final LegalEntityConfigurationProperties legalEntityConfigurationProperties;
 
     @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange()
-                .anyExchange()
-                .permitAll()
-                .and()
-                .csrf()
-                .disable()
-                .build();
-    }
-
-    @Bean
     public LegalEntityMapper mapper() {
         return Mappers.getMapper(LegalEntityMapper.class);
     }

@@ -19,6 +19,5 @@
         <module>api</module>
         <module>events</module>
         <module>services</module>
-        <module>test-utils</module>
     </modules>
 </project>

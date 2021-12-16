@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @Import(LegalEntityCompositionApplication.class)
@@ -43,5 +44,6 @@ public class RootLegalEntityBootstrapTaskTest {
                 bootstrapConfigurationProperties);
 
         bootstrapTask.run(null);
+        verify(legalEntitySaga).executeTask(any());
     }
 }
