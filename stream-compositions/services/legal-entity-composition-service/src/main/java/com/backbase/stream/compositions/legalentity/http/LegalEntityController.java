@@ -1,6 +1,5 @@
 package com.backbase.stream.compositions.legalentity.http;
 
-import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
 import com.backbase.stream.compositions.legalentity.api.LegalEntityCompositionApi;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
@@ -80,10 +79,6 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @return IngestionResponse
      */
     private IngestionResponse mapIngestionToResponse(LegalEntityIngestResponse response) {
-        if (response == null) {
-            throw new InternalServerErrorException("Legal intity is null");
-        }
-
         return new IngestionResponse()
                 .withLegalEntities(
                         response.getLegalEntities()
