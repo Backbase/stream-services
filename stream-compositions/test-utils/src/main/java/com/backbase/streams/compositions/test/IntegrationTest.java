@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity;
+package com.backbase.streams.compositions.test;
 
 import com.backbase.buildingblocks.jwt.core.JsonWebTokenProducerType;
 import com.backbase.buildingblocks.jwt.core.exception.JsonWebTokenException;
@@ -100,5 +100,4 @@ public abstract class IntegrationTest {
         return FileUtils.readFileToString(file, "UTF-8");
     }
 }
-
 
