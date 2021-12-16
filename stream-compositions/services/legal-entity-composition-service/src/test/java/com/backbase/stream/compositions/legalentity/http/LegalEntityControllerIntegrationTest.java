@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -38,7 +39,7 @@ import static org.mockserver.model.HttpResponse.response;
 @SpringBootTest
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
-class LoginEntityControllerTest extends IntegrationTest {
+class LegalEntityControllerIntegrationTest extends IntegrationTest {
     private static final int TOKEN_CONVERTER_PORT = 10000;
     private static final int INTEGRATION_SERVICE_PORT = 18000;
     private static final int ACTIVEMQ_PORT = 16161;

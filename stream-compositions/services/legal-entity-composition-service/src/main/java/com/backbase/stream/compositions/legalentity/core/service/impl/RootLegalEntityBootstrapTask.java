@@ -39,9 +39,7 @@ public class RootLegalEntityBootstrapTask implements ApplicationRunner {
             log.debug("Bootstrapping root legal entity: {}.", rootLegalEntity.getName());
 
             return legalEntitySaga.executeTask(new LegalEntityTask(rootLegalEntity))
-                    .map(task -> {
-                        return task.getData().getInternalId();
-                    })
+                    .map(task -> task.getData().getInternalId())
                     .doOnError(Exception.class, e -> log.error("Failed to bootstrap root legal entity.", e))
                     .doOnSuccess(result -> log.info("Root legal entity bootstrapping complete. Internal ID: {}.", result));
         }

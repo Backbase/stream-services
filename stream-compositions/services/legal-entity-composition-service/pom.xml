@@ -81,20 +81,16 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
+                <configuration combine.self="override">
                     <!-- Sets the VM argument line used when unit tests are run. -->
                     <skipTests>${skip.unit.tests}</skipTests>
                     <!-- Excludes integration tests when unit tests are run. -->
                     <environmentVariables>
                         <SIG_SECRET_KEY>JWTSecretKeyDontUseInProduction!</SIG_SECRET_KEY>
                     </environmentVariables>
-                    <excludes>
-                        <exclude>**/*IT.java</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
 
