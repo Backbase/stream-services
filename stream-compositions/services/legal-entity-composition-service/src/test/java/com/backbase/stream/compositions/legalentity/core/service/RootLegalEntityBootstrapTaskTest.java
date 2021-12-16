@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @Import(LegalEntityCompositionApplication.class)
-public class RootLegalEntityBootstrapTaskTest {
+class RootLegalEntityBootstrapTaskTest {
     @Mock
     LegalEntitySaga legalEntitySaga;
 
@@ -27,7 +27,7 @@ public class RootLegalEntityBootstrapTaskTest {
     LegalEntityTask legalEntityTask;
 
     @Test
-    public void testRootIngestion() {
+    void testRootIngestion() {
         LegalEntity legalEntity = new LegalEntity().name("Test Legal Entity").externalId("externalId");
 
         lenient().when(legalEntityTask.getLegalEntity()).thenReturn(legalEntity);

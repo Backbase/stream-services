@@ -17,13 +17,12 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class LegalEntityIngestPullEventHandlerTest {
+class LegalEntityIngestPullEventHandlerTest {
     @Mock
     private LegalEntityIngestionService legalEntityIngestionService;
 
@@ -60,24 +59,24 @@ public class LegalEntityIngestPullEventHandlerTest {
 
     @Test
     void testHandleEvent_Failed() {
-        assertThrows(Exception.class, () -> {
-            List<LegalEntity> legalEntities = new ArrayList<>();
-            legalEntities.add(new LegalEntity().name("Legal Entity"));
+        List<LegalEntity> legalEntities = new ArrayList<>();
+        legalEntities.add(new LegalEntity().name("Legal Entity"));
 
-            when(legalEntityIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
+        when(legalEntityIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
 
-            LegalEntityConfigurationProperties properties = new LegalEntityConfigurationProperties();
+        LegalEntityConfigurationProperties properties = new LegalEntityConfigurationProperties();
 
-            LegalEntityIngestPullEventHandler handler = new LegalEntityIngestPullEventHandler(
-                    properties,
-                    legalEntityIngestionService,
-                    mapper,
-                    eventBus);
+        LegalEntityIngestPullEventHandler handler = new LegalEntityIngestPullEventHandler(
+                properties,
+                legalEntityIngestionService,
+                mapper,
+                eventBus);
 
-            EnvelopedEvent<LegalEntityIngestPullEvent> envelopedEvent = new EnvelopedEvent<>();
-            envelopedEvent.setEvent(new LegalEntityIngestPullEvent().withLegalEntityExternalId("externalLegalId"));
+        EnvelopedEvent<LegalEntityIngestPullEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(new LegalEntityIngestPullEvent().withLegalEntityExternalId("externalLegalId"));
 
-            handler.handle(envelopedEvent);
-        });
+        handler.handle(envelopedEvent);
     }
+
+
 }

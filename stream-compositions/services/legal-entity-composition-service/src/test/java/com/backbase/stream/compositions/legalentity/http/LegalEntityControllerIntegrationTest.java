@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -103,7 +102,7 @@ class LegalEntityControllerIntegrationTest extends IntegrationTest {
 
 
     @Test
-    public void pullIngestLegalEntity_Success() throws Exception {
+    void pullIngestLegalEntity_Success() throws Exception {
         LegalEntity[] legalEntity = new Gson()
                 .fromJson(readContentFromClasspath("integration-data/response.json"), LegalEntity[].class);
 
@@ -124,7 +123,7 @@ class LegalEntityControllerIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void pushIngestLegalEntity_Fail() throws Exception {
+    void pushIngestLegalEntity_Fail() throws Exception {
         URI uri = URI.create("/service-api/v2/push-ingestion");
 
         List<com.backbase.stream.compositions.legalentity.model.LegalEntity> legalEntities = new ArrayList<>();

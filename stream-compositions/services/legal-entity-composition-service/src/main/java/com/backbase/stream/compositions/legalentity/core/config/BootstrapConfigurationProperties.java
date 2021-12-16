@@ -1,7 +1,6 @@
 package com.backbase.stream.compositions.legalentity.core.config;
 
 import com.backbase.stream.legalentity.model.LegalEntity;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

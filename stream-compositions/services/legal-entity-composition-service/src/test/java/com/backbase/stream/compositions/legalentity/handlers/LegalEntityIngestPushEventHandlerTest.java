@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
-public class LegalEntityIngestPushEventHandlerTest {
+class LegalEntityIngestPushEventHandlerTest {
     @Mock
     private LegalEntityIngestionService legalEntityIngestionService;
 

@@ -35,10 +35,14 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
      */
     @Override
     public void handle(EnvelopedEvent<LegalEntityIngestPullEvent> envelopedEvent) {
-        legalEntityIngestionService
-                .ingestPull(buildRequest(envelopedEvent.getEvent()))
-                .doOnError(this::handleError)
-                .subscribe(this::handleResponse);
+        try {
+            legalEntityIngestionService
+                    .ingestPull(buildRequest(envelopedEvent.getEvent()))
+                    .doOnError(this::handleError)
+                    .subscribe(this::handleResponse);
+        } catch (Throwable ex) {
+            this.handleError(ex);
+        }
     }
 
     /**
@@ -55,7 +59,7 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
     }
 
     /**
-     * Handles reponse from ingestion service.
+     * Handles response from ingestion service.
      *
      * @param response LegalEntityIngestResponse
      */
