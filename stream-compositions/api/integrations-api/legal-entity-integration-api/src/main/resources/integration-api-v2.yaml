@@ -22,13 +22,6 @@ paths:
             type: string
           required: true
 
-      requestBody:
-        description: Gets legal entity request.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GetLegalEntityRequest'
-
       responses:
         "201":
           description: Legal Entity composition initialized.

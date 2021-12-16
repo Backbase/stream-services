@@ -85,7 +85,7 @@ class LegalEntityControllerIntegrationTest extends IntegrationTest {
         integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
         integrationServerClient.when(
                 request()
-                        .withMethod("POST")
+                        .withMethod("GET")
                         .withPath("/integration-api/v2/legal-entity"))
                 .respond(
                         response()
