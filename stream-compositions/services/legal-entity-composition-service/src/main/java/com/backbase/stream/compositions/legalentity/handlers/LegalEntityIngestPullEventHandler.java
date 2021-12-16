@@ -40,7 +40,7 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
                     .ingestPull(buildRequest(envelopedEvent.getEvent()))
                     .doOnError(this::handleError)
                     .subscribe(this::handleResponse);
-        } catch (Throwable ex) {
+        } catch (Exception ex) {
             this.handleError(ex);
         }
     }

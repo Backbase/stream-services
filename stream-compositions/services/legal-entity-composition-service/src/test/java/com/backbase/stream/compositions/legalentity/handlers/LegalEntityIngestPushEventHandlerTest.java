@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class LegalEntityIngestPushEventHandlerTest {
@@ -48,5 +49,6 @@ class LegalEntityIngestPushEventHandlerTest {
         envelopedEvent.setEvent(new LegalEntityIngestPushEvent());
 
         handler.handle(envelopedEvent);
+        verify(legalEntityIngestionService).ingestPush(any());
     }
 }
