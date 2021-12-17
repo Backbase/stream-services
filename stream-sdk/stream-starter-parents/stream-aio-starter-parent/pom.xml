@@ -52,12 +52,6 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-openapi-support</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-        </dependency>
-
     </dependencies>
 
     <build>
