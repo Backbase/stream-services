@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -96,7 +97,7 @@ public abstract class IntegrationTest {
             throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(resourcePath).getFile());
-        return FileUtils.readFileToString(file, "UTF-8");
+        return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
     }
 }
 

@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class AbstractIntegrationTest {
+class AbstractIntegrationTest {
 
     @Mock
     JsonWebTokenProperties jsonWebTokenProperties;
@@ -49,10 +49,12 @@ public class AbstractIntegrationTest {
         SampleTest test = new SampleTest();
         assertTrue(test.readContentFromClasspath("test.json").startsWith("{}"));
     }
-}
 
-class SampleTest extends IntegrationTest {
-    public String readContentFromClasspath(String resourcePath) throws IOException {
-        return super.readContentFromClasspath(resourcePath);
+    class SampleTest extends IntegrationTest {
+        public String readContentFromClasspath(String resourcePath) throws IOException {
+            return super.readContentFromClasspath(resourcePath);
+        }
     }
 }
+
+
