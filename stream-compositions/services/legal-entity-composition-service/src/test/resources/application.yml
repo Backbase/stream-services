@@ -18,7 +18,13 @@ spring:
   activemq:
 
     broker-url: tcp://localhost:16161
-
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
+      enabled: false
+      discovery:
+        enabled: true
 
 eureka:
   client:
