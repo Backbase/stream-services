@@ -3,22 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.backbase.buildingblocks</groupId>
-        <version>13.4.0</version>
-        <artifactId>service-sdk-starter-core</artifactId>
-        <relativePath/>
+        <groupId>com.backbase.stream.compositions</groupId>
+        <artifactId>services</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>legal-entity-composition-service</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
-
     <packaging>jar</packaging>
 
     <name>Stream :: Compositions :: Services :: Legal Entity</name>
-
-    <properties>
-        <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>
-    </properties>
 
     <dependencies>
         <!-- Service SDK dependencies -->
@@ -28,8 +21,20 @@
         </dependency>
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>auth-security</artifactId>
+            <artifactId>service-sdk-starter-eureka-client</artifactId>
         </dependency>
+
+        <!-- Spring dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- Third party dependencies -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct-processor</artifactId>
@@ -42,35 +47,39 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.backbase.stream.compositions.api</groupId>
-            <artifactId>legal-entity-composition-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>com.backbase.stream.compositions</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-broker</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq.tooling</groupId>
+            <artifactId>activemq-junit</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-kahadb-store</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>repackage</id>
-                        <goals>
-                            <goal>build-info</goal>
-                            <goal>repackage</goal>
-                        </goals>
-                        <configuration combine.self="override">
-                            <attach>false</attach>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <!-- Unpack OpenAPI specs from zip dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -118,25 +127,39 @@
                     <execution>
                         <id>generate-config-service-api-code</id>
                         <goals>
-                            <goal>generate-spring-boot-embedded</goal>
+                            <goal>generate</goal>
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <generatorName>java</generatorName>
-                            <inputSpec>${project.build.directory}/yaml/legal-entity-composition-api/service-api-v1.0.0.yaml</inputSpec>
-                            <modelPackage>com.backbase.stream.compositions.legalentity.model</modelPackage>
-                            <apiPackage>com.backbase.stream.compositions.legalentity.api</apiPackage>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${project.build.directory}/yaml/legal-entity-composition-api/service-api-v2.0.0.yaml</inputSpec>
                             <additionalProperties>useWithModifiers=true</additionalProperties>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <reactive>true</reactive>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <openapiDocketConfig>true</openapiDocketConfig>
+                                <interfaceOnly>true</interfaceOnly>
+                                <apiPackage>com.backbase.stream.compositions.legalentity.api</apiPackage>
+                                <modelPackage>com.backbase.stream.compositions.legalentity.model</modelPackage>
+                                <additionalProperties>useWithModifiers=true</additionalProperties>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <performBeanValidation>true</performBeanValidation>
+                                <apis/>
+                                <models/>
+                                <useTags>true</useTags>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-legale-entity-integration-api-code</id>
+                        <id>generate-legal-entity-integration-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v2.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.stream.compositions.integration.legalentity.api</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.integration.legalentity.model</modelPackage>
                         </configuration>

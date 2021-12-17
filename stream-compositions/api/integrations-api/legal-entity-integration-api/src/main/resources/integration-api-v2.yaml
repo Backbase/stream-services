@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: Legal Entity Integration API
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/service-api/v2
+    description: The server
+tags:
+  - name: LegalEntityIntegration
+paths:
+  /integration-api/v2/legal-entity:
+    get:
+      tags:
+        - LegalEntityIntegration
+      summary: Gets legal entity.
+      description: Gets legal entity.
+      operationId: getLegalEntities
+      parameters:
+        - in: query
+          name: externalId
+          schema:
+            type: string
+          required: true
+
+      responses:
+        "200":
+          description: Legal Entity composition returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLegalEntityListResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    GetLegalEntityListResponse:
+      type: array
+      items:
+        $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+

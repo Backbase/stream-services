@@ -1,12 +1,5 @@
 package com.backbase.stream;
 
-import static com.backbase.stream.legalentity.model.UpdatedServiceAgreementResponse.StateEnum.ACCEPTED;
-import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.configuration.LegalEntitySagaConfiguration;
@@ -26,8 +19,6 @@ import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
-import java.net.URI;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,15 +27,27 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
+import java.util.List;
+
+import static com.backbase.stream.legalentity.model.UpdatedServiceAgreementResponse.StateEnum.ACCEPTED;
+import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(LegalEntityAsyncController.class)
 @AutoConfigureWebTestClient
+@TestPropertySource(properties = "spring.cloud.kubernetes.enabled=false")
 @Import({LegalEntityHttpConfiguration.class, LegalEntitySagaConfiguration.class,
     UpdatedServiceAgreementSagaConfiguration.class})
 class LegalEntityHttpApplicationTest {

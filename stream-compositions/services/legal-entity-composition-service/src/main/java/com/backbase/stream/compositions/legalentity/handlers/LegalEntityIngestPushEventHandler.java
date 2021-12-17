@@ -3,11 +3,12 @@ package com.backbase.stream.compositions.legalentity.handlers;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityIngestPushEvent;
-import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
+import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.util.stream.Collectors;
 
@@ -28,13 +29,13 @@ public class LegalEntityIngestPushEventHandler implements EventHandler<LegalEnti
      * @param envelopedEvent EnvelopedEvent<LegalEntityIngestPushEvent>
      * @return LegalEntityIngestPullRequest
      */
-    private LegalEntityIngestPushRequest buildRequest(EnvelopedEvent<LegalEntityIngestPushEvent> envelopedEvent) {
+    private Mono<LegalEntityIngestPushRequest> buildRequest(EnvelopedEvent<LegalEntityIngestPushEvent> envelopedEvent) {
 
-        return LegalEntityIngestPushRequest.builder()
+        return Mono.just(LegalEntityIngestPushRequest.builder()
                 .legalEntities(envelopedEvent.getEvent().getLegalEntities()
                         .stream()
                         .map(mapper::mapEventToStream)
                         .collect(Collectors.toList()))
-                .build();
+                .build());
     }
 }

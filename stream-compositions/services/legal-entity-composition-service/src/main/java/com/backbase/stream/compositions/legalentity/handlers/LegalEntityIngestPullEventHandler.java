@@ -14,6 +14,7 @@ import com.backbase.stream.compositions.legalentity.core.service.LegalEntityInge
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -34,10 +35,14 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
      */
     @Override
     public void handle(EnvelopedEvent<LegalEntityIngestPullEvent> envelopedEvent) {
-        legalEntityIngestionService
-                .ingestPull(buildRequest(envelopedEvent.getEvent()))
-                .doOnError(this::handleError)
-                .subscribe(this::handleResponse);
+        try {
+            legalEntityIngestionService
+                    .ingestPull(buildRequest(envelopedEvent.getEvent()))
+                    .doOnError(this::handleError)
+                    .subscribe(this::handleResponse);
+        } catch (Exception ex) {
+            this.handleError(ex);
+        }
     }
 
     /**
@@ -46,19 +51,20 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
      * @param legalEntityIngestPullEvent LegalEntityIngestPullEvent
      * @return LegalEntityIngestPullRequest
      */
-    private LegalEntityIngestPullRequest buildRequest(LegalEntityIngestPullEvent legalEntityIngestPullEvent) {
-        return LegalEntityIngestPullRequest.builder()
-                .legalEntityExternalId(legalEntityIngestPullEvent.getLegalEntityExternalId())
-                .build();
+    private Mono<LegalEntityIngestPullRequest> buildRequest(LegalEntityIngestPullEvent legalEntityIngestPullEvent) {
+        return Mono.just(
+                LegalEntityIngestPullRequest.builder()
+                        .legalEntityExternalId(legalEntityIngestPullEvent.getLegalEntityExternalId())
+                        .build());
     }
 
     /**
-     * Handles reponse from ingestion service.
+     * Handles response from ingestion service.
      *
      * @param response LegalEntityIngestResponse
      */
     private void handleResponse(LegalEntityIngestResponse response) {
-        if (configProperties.getEnableCompletedEvents() == false) {
+        if (Boolean.FALSE.equals(configProperties.getEnableCompletedEvents())) {
             return;
         }
         LegalEntityIngestCompletedEvent event = new LegalEntityIngestCompletedEvent()
@@ -81,7 +87,7 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
      * @param ex Throwable
      */
     private void handleError(Throwable ex) {
-        if (configProperties.getEnableFailedEvents() == false) {
+        if (Boolean.FALSE.equals(configProperties.getEnableFailedEvents())) {
             return;
         }
         LegalEntityIngestFailedEvent event = new LegalEntityIngestFailedEvent()

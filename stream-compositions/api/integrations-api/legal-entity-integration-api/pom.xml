@@ -4,20 +4,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.backbase.buildingblocks</groupId>
-        <artifactId>backbase-openapi-spec-starter-parent</artifactId>
-        <version>13.4.0</version>
-        <relativePath/>
+        <artifactId>integrations-api</artifactId>
+        <groupId>com.backbase.stream.compositions</groupId>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions</groupId>
     <artifactId>legal-entity-integration-api</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
 
     <name>Stream :: Compositions :: API :: Legal Entity Integration</name>
 
     <properties>
-        <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>
+        <findMainClass.skip>true</findMainClass.skip>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+        <sonar.skip>true</sonar.skip>
     </properties>
 
     <build>
@@ -51,7 +51,7 @@
                             <goal>validate</goal>
                         </goals>
                         <configuration>
-                            <input>src/main/resources/service-api-v1.yaml</input>
+                            <input>src/main/resources/integration-api-v2.yaml</input>
                             <failOnWarning>true</failOnWarning>
                         </configuration>
                     </execution>

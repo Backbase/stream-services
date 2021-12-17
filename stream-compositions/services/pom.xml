@@ -18,6 +18,5 @@
     <modules>
         <module>product-composition-service</module>
         <module>legal-entity-composition-service</module>
-        <module>cursor-service</module>
     </modules>
 </project>

@@ -13,13 +13,15 @@ spring:
         provider:
           dbs:
             token-uri: http://token-converter:8080/oauth/token
+  main:
+    allow-bean-definition-overriding: true
 
 backbase:
-  mtls:
-    enabled: false
   security:
     http:
       enabled: true
+      adapter:
+        enabled: true
     service-api:
       authentication:
         required-scope: api:service
@@ -36,12 +38,12 @@ backbase:
 
     compositions:
       legal-entity:
-        enable-completed-events: false
+        enable-completed-events: true
         enable-failed-events: true
-        legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
+        legal-entity-integration-url: http://legal-entity-ingestion-integration:8080
 
 bootstrap:
-  enabled: true
+  enabled: false
   # This is just na example. Replace it with data corresponding to your bank
   legalEntity:
     name: "Moustache Bank"
@@ -119,3 +121,4 @@ bootstrap:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
+

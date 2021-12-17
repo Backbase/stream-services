@@ -39,7 +39,7 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <phase>generate-sources</phase>0
+                        <phase>generate-sources</phase>
                         <configuration>
                             <generatorName>spring</generatorName>
                             <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
