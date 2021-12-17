@@ -55,7 +55,9 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @return LegalEntityIngestPullRequest
      */
     private LegalEntityIngestPullRequest buildPullRequest(PullIngestionRequest request) {
-        return LegalEntityIngestPullRequest.builder().legalEntityExternalId(request.getLegalEntityExternalId()).build();
+        return LegalEntityIngestPullRequest
+                .builder()
+                .legalEntityExternalId(request.getLegalEntityExternalId()).build();
     }
 
     /**
@@ -65,8 +67,10 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @return LegalEntityIngestPushRequest
      */
     private LegalEntityIngestPushRequest buildPushRequest(PushIngestionRequest request) {
-        return LegalEntityIngestPushRequest.builder().legalEntities(
-                request.getLegalEntities().stream().map(mapper::mapCompostionToStream).collect(Collectors.toList())).build();
+        return LegalEntityIngestPushRequest
+                .builder().legalEntities(
+                        request.getLegalEntities().stream()
+                                .map(mapper::mapCompostionToStream).collect(Collectors.toList())).build();
     }
 
     /**
