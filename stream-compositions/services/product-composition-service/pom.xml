@@ -133,7 +133,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <generatorName>java</generatorName>
-                            <inputSpec>${project.build.directory}/yaml/product-composition-api/service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/product-composition-api/service-api-v2.0.0.yaml</inputSpec>
                             <modelPackage>com.backbase.stream.compositions.product.model</modelPackage>
                             <apiPackage>com.backbase.stream.compositions.product.api</apiPackage>
                             <additionalProperties>useWithModifiers=true</additionalProperties>
@@ -146,7 +146,7 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/product-integration-api/service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/product-integration-api/integration-api-v2.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.stream.compositions.integration.product.api</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.integration.product.model</modelPackage>
                         </configuration>

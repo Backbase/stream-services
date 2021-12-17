@@ -18,7 +18,6 @@ import java.util.Objects;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "bootstrap.enabled", matchIfMissing = false)
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
 @ConditionalOnProperty(name = "bootstrap.enabled")
 public class RootLegalEntityBootstrapTask implements ApplicationRunner {

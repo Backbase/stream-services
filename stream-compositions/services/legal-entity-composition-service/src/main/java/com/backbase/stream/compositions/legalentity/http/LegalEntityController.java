@@ -49,15 +49,6 @@ public class LegalEntityController implements LegalEntityCompositionApi {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ResponseEntity<IngestionResponse> ingestRootLegalEntity() {
-        legalEntityIngestionService.ingestRoot();
-        return ResponseEntity.ok().build();
-    }
-
-    /**
      * Builds ingestion request for downstream service.
      *
      * @param request PullIngestionRequest
