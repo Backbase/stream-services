@@ -72,12 +72,10 @@ public abstract class IntegrationTest {
     protected final void setUpToken(String internalUserId, String sub, TokenType tokType) throws JsonWebTokenException {
         final Map<String, Object> claims = new HashMap<>();
 
-        switch (tokType) {
-            default:
-                return;
-
-            case SERVICE:
-                claims.put("scope", asList(DEFAULT_REQUIRED_SCOPE));
+        if (TokenType.SERVICE.equals(tokType)) {
+            claims.put("scope", asList(DEFAULT_REQUIRED_SCOPE));
+        } else {
+            return;
         }
 
         @SuppressWarnings("unchecked") final JsonWebTokenProducerType<JsonWebTokenClaimsSet, String> tokenFactory =

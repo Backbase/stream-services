@@ -138,11 +138,8 @@ bootstrap:
 
 logging:
   level:
-    org.activemq: DEBUG
-    com.backbase.stream.compositions: DEBUG
-    org.mockserver: WARN
+    org.activemq: ERROR
 
-
-ctivemq:
+activemq:
   store:
     dir: /tmp
