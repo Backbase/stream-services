@@ -126,21 +126,35 @@
                 <version>${boat-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>generate-product-api-code</id>
+                        <id>generate-config-service-api-code</id>
                         <goals>
-                            <goal>generate-spring-boot-embedded</goal>
+                            <goal>generate</goal>
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <generatorName>java</generatorName>
+                            <generatorName>spring</generatorName>
                             <inputSpec>${project.build.directory}/yaml/product-composition-api/service-api-v2.0.0.yaml</inputSpec>
-                            <modelPackage>com.backbase.stream.compositions.product.model</modelPackage>
-                            <apiPackage>com.backbase.stream.compositions.product.api</apiPackage>
                             <additionalProperties>useWithModifiers=true</additionalProperties>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <reactive>true</reactive>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <openapiDocketConfig>true</openapiDocketConfig>
+                                <interfaceOnly>true</interfaceOnly>
+                                <apiPackage>com.backbase.stream.compositions.product.api</apiPackage>
+                                <modelPackage>com.backbase.stream.compositions.product.model</modelPackage>
+                                <additionalProperties>useWithModifiers=true</additionalProperties>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <performBeanValidation>true</performBeanValidation>
+                                <apis/>
+                                <models/>
+                                <useTags>true</useTags>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-product-integration-api-code</id>
+                        <id>generate-legal-entity-integration-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>

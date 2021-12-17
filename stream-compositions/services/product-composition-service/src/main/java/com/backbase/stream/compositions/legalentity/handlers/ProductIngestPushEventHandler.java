@@ -8,6 +8,7 @@ import com.backbase.stream.compositions.legalentity.core.model.ProductIngestPush
 import com.backbase.stream.compositions.legalentity.core.service.ProductIngestionService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 @Component
 @AllArgsConstructor
@@ -26,9 +27,10 @@ public class ProductIngestPushEventHandler implements EventHandler<ProductsInges
      * @param envelopedEvent EnvelopedEvent<ProductsIngestPushEvent>
      * @return ProductIngestPushRequest
      */
-    private ProductIngestPushRequest buildRequest(EnvelopedEvent<ProductsIngestPushEvent> envelopedEvent) {
-        return ProductIngestPushRequest.builder()
-                .productGroup(mapper.mapEventToStream(envelopedEvent.getEvent().getProductGroup()))
-                .build();
+    private Mono<ProductIngestPushRequest> buildRequest(EnvelopedEvent<ProductsIngestPushEvent> envelopedEvent) {
+        return Mono.just(
+                ProductIngestPushRequest.builder()
+                        .productGroup(mapper.mapEventToStream(envelopedEvent.getEvent().getProductGroup()))
+                        .build());
     }
 }

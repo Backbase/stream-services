@@ -14,6 +14,7 @@ import com.backbase.stream.compositions.legalentity.core.service.ProductIngestio
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -45,10 +46,11 @@ public class ProductIngestPullEventHandler implements EventHandler<ProductsInges
      * @param event ProductsIngestPullEvent
      * @return ProductIngestPullRequest
      */
-    private ProductIngestPullRequest buildRequest(ProductsIngestPullEvent event) {
-        return ProductIngestPullRequest.builder()
-                .legalEntityExternalId(event.getLegalEntityExternalId())
-                .build();
+    private Mono<ProductIngestPullRequest> buildRequest(ProductsIngestPullEvent event) {
+        return Mono.just(
+                ProductIngestPullRequest.builder()
+                        .legalEntityExternalId(event.getLegalEntityExternalId())
+                        .build());
     }
 
     /**

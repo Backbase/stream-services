@@ -30,7 +30,6 @@ public class LegalEntityIngestPushEventHandler implements EventHandler<LegalEnti
      * @return LegalEntityIngestPullRequest
      */
     private Mono<LegalEntityIngestPushRequest> buildRequest(EnvelopedEvent<LegalEntityIngestPushEvent> envelopedEvent) {
-
         return Mono.just(LegalEntityIngestPushRequest.builder()
                 .legalEntities(envelopedEvent.getEvent().getLegalEntities()
                         .stream()
