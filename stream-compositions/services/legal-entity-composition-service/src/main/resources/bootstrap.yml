@@ -1,10 +1,4 @@
 spring:
   application:
     name: legal-entity-composition-service
-  cloud:
-    kubernetes:
-      config:
-        enabled: false
-      enabled: false
-      discovery:
-        enabled: true
+

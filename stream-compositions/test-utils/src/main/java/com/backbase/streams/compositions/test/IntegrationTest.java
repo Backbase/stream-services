@@ -92,7 +92,13 @@ public abstract class IntegrationTest {
         tokenType.set(tokType);
     }
 
-
+    /**
+     * Reads file's content from classpath.
+     *
+     * @param resourcePath Resource path
+     * @return File's content
+     * @throws IOException
+     */
     protected String readContentFromClasspath(String resourcePath)
             throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();

@@ -23,8 +23,8 @@ paths:
           required: true
 
       responses:
-        "201":
-          description: Legal Entity composition initialized.
+        "200":
+          description: Legal Entity composition returned.
           content:
             application/json:
               schema:
