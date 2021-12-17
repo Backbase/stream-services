@@ -17,6 +17,7 @@
     <properties>
         <findMainClass.skip>true</findMainClass.skip>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+        <sonar.skip>true</sonar.skip>
     </properties>
 
     <dependencies>
