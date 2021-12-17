@@ -6,6 +6,7 @@ import com.backbase.buildingblocks.jwt.core.properties.JsonWebTokenProperties;
 import com.backbase.buildingblocks.jwt.core.token.JsonWebTokenClaimsSet;
 import com.backbase.buildingblocks.jwt.core.type.JsonWebTokenTypeFactory;
 import com.backbase.buildingblocks.jwt.internal.token.InternalJwtClaimsSet;
+import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,7 @@ import java.util.Map;
 import static com.backbase.buildingblocks.backend.security.auth.config.ServiceApiAuthenticationProperties.DEFAULT_REQUIRED_SCOPE;
 import static java.util.Arrays.asList;
 
+@Setter
 public abstract class IntegrationTest {
 
     protected static final String INTERNAL_USER_ID = "internalUerId";
@@ -32,7 +34,6 @@ public abstract class IntegrationTest {
 
     @Autowired
     private JsonWebTokenProperties tokenProperties;
-
 
     @BeforeEach
     public final void setUpToken() throws JsonWebTokenException {
