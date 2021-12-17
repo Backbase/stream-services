@@ -3,10 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.backbase.buildingblocks</groupId>
-        <artifactId>service-sdk-starter-core</artifactId>
-        <version>13.4.0</version>
-        <relativePath/>
+        <artifactId>stream-compositions</artifactId>
+        <groupId>com.backbase.stream</groupId>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions</groupId>
@@ -18,7 +17,8 @@
     <name>Stream :: Compositions :: Test Utils</name>
 
     <properties>
-        <sonar.skip>true</sonar.skip>
+        <findMainClass.skip>true</findMainClass.skip>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
     </properties>
 
     <dependencies>
