@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
-public class LegalEntityConfigurationTest {
+class LegalEntityConfigurationTest {
     @Mock
     ApiClient apiClient;
 

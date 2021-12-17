@@ -68,8 +68,9 @@ class LegalEntityIngestionServiceImplTest {
 
     @Test
     void ingestionInPushMode_Unsupported() {
+        Mono<LegalEntityIngestPushRequest> request = Mono.just(LegalEntityIngestPushRequest.builder().build());
         assertThrows(UnsupportedOperationException.class, () -> {
-            legalEntityIngestionService.ingestPush(Mono.just(LegalEntityIngestPushRequest.builder().build()));
+            legalEntityIngestionService.ingestPush(request);
         });
     }
 }
