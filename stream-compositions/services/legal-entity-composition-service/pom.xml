@@ -3,34 +3,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.backbase.buildingblocks</groupId>
-        <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>13.4.0</version>
-        <relativePath/>
+        <groupId>com.backbase.stream.compositions</groupId>
+        <artifactId>services</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>legal-entity-composition-service</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
 
     <name>Stream :: Compositions :: Services :: Legal Entity</name>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.backbase.stream</groupId>
-                <artifactId>stream-compositions</artifactId>
-                <version>${project.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <properties>
-        <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>
-    </properties>
 
     <dependencies>
         <!-- Service SDK dependencies -->
@@ -87,7 +69,6 @@
             <version>${activemq.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -96,9 +77,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
-                    <environmentVariables>
+                    <systemPropertyVariables>
                         <SIG_SECRET_KEY>JWTSecretKeyDontUseInProduction!</SIG_SECRET_KEY>
-                    </environmentVariables>
+                    </systemPropertyVariables>
                 </configuration>
                 <executions>
                     <execution>

@@ -60,6 +60,7 @@ class LegalEntityControllerIT extends IntegrationTest {
         broker.addConnector("tcp://localhost:" + ACTIVEMQ_PORT);
         broker.setPersistent(false);
         broker.start();
+        broker.waitUntilStarted();
     }
 
     @BeforeEach

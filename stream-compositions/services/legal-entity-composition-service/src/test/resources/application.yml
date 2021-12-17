@@ -16,12 +16,23 @@ spring:
   main:
     allow-bean-definition-overriding: true
   activemq:
+
     broker-url: tcp://localhost:16161
 
 
 eureka:
   client:
     enabled: false
+
+sso:
+  jwt:
+    internal:
+      type: signed
+      signature:
+        algorithm: HS256
+        key:
+          type: ENV
+          value: SIG_SECRET_KEY
 
 backbase:
   security:

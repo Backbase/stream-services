@@ -18,7 +18,6 @@
     <name>Stream :: Compositions :: Test Utils</name>
 
     <properties>
-        <activemq.version>5.16.3</activemq.version>
         <findMainClass.skip>true</findMainClass.skip>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <mock.server.version>5.11.2</mock.server.version>

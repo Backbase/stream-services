@@ -21,7 +21,7 @@ import static java.util.Arrays.asList;
 
 public abstract class IntegrationTest {
 
-    protected static final String INTERNAL_USER_ID = "internaUerId";
+    protected static final String INTERNAL_USER_ID = "internalUerId";
 
     protected enum TokenType {
         NONE, SERVICE, CLIENT, INTEGRATION,
