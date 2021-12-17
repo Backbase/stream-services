@@ -5,6 +5,7 @@ import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
 import com.backbase.stream.compositions.legalentity.core.service.impl.LegalEntityIngestionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,11 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -62,5 +63,13 @@ class LegalEntityIngestionServiceImplTest {
         Mono<LegalEntityIngestResponse> legalEntityIngestResponseMono = legalEntityIngestionService.ingestPull(legalEntityIngestPullRequest);
         assertEquals(1, legalEntityIngestResponseMono.block().getLegalEntities().size());
         assertEquals("legalEntityName", legalEntityIngestResponseMono.block().getLegalEntities().get(0).getName());
+    }
+
+
+    @Test
+    void ingestionInPushMode_Unsupported() {
+        assertThrows(UnsupportedOperationException.class, () -> {
+            legalEntityIngestionService.ingestPush(Mono.just(LegalEntityIngestPushRequest.builder().build()));
+        });
     }
 }
