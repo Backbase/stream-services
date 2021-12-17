@@ -15,6 +15,10 @@
 
     <name>Stream :: Compositions :: API :: Legal Entity</name>
 
+    <properties>
+        <findMainClass.skip>true</findMainClass.skip>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+    </properties>
 
     <build>
         <plugins>
