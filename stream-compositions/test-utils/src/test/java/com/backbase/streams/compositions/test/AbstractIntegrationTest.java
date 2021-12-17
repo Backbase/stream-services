@@ -25,36 +25,35 @@ class AbstractIntegrationTest {
 
     @Test
     void testToken() throws JsonWebTokenException {
-        SampleTest test = new SampleTest();
-        test.setTokenProperties(jsonWebTokenProperties);
+        SampleIT sampleIT = new SampleIT();
+        sampleIT.setTokenProperties(jsonWebTokenProperties);
 
         JsonWebTokenProducerType<JsonWebTokenClaimsSet, String> tokenFactory = tokenData -> "token";
 
         Mockito.mockStatic(JsonWebTokenTypeFactory.class);
         when(JsonWebTokenTypeFactory.getProducer(any())).thenReturn(tokenFactory);
 
-        assertNull(test.token());
-        test.setUpToken();
+        assertNull(sampleIT.token());
+        sampleIT.setUpToken();
 
-        assertEquals("Bearer token", test.token());
-        test.clearToken();
-        assertNull(test.token());
+        assertEquals("Bearer token", sampleIT.token());
+        sampleIT.clearToken();
+        assertNull(sampleIT.token());
 
-        test.setUpToken("userId", IntegrationTest.TokenType.SERVICE);
-        assertEquals("Bearer token", test.token());
+        sampleIT.setUpToken("userId", IntegrationTest.TokenType.SERVICE);
+        assertEquals("Bearer token", sampleIT.token());
     }
 
     @Test
     void testReadResource() throws IOException {
-        SampleTest test = new SampleTest();
+        SampleIT test = new SampleIT();
         assertTrue(test.readContentFromClasspath("test.json").startsWith("{}"));
-    }
-
-    class SampleTest extends IntegrationTest {
-        public String readContentFromClasspath(String resourcePath) throws IOException {
-            return super.readContentFromClasspath(resourcePath);
-        }
     }
 }
 
+class SampleIT extends IntegrationTest {
+    public String readContentFromClasspath(String resourcePath) throws IOException {
+        return super.readContentFromClasspath(resourcePath);
+    }
+}
 
