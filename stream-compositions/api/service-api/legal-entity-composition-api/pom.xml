@@ -11,7 +11,6 @@
 
     <groupId>com.backbase.stream.compositions.api</groupId>
     <artifactId>legal-entity-composition-api</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
 
     <name>Stream :: Compositions :: API :: Legal Entity</name>
 
@@ -52,7 +51,7 @@
                             <goal>validate</goal>
                         </goals>
                         <configuration>
-                            <input>src/main/resources/service-api-v1.yaml</input>
+                            <input>src/main/resources/service-api-v2.yaml</input>
                             <failOnWarning>true</failOnWarning>
                         </configuration>
                     </execution>
