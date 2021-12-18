@@ -1,0 +1,88 @@
+spring:
+  zipkin:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: http://token-converter:8080/oauth/token
+
+backbase:
+  mtls:
+    enabled: false
+  security:
+    http:
+      enabled: true
+    service-api:
+      authentication:
+        required-scope: api:service
+  stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+    dbs:
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
+    identity:
+      identity-integration-base-url: http://identity-integration-service:8080
+
+    compositions:
+      legal-entity:
+        enable-completed-events: false
+        enable-failed-events: true
+        legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
+
+bootstrap:
+  enabled: true
+  product-catalog:
+    productKinds:
+      - externalKindId: kind20
+        kindName: 'Special Account'
+        kinduri: 'special-account'
+
+    productTypes:
+      - externalProductId: Money Market
+        externalProductKindId: kind1
+        productKindName: Current Account
+        externalProductTypeId: Money Market
+        productTypeName: Money Market
+        externalId: Money Market
+        externalTypeId: Money Market
+        typeName: Money Market
+      - externalProductId: Checking
+        externalProductKindId: kind1
+        productKindName: Checking
+        externalProductTypeId: Checking
+        productTypeName: Checking
+        externalId: Checking
+        externalTypeId: Checking
+        typeName: Checking
+      - externalProductId: Savings
+        externalProductKindId: kind2
+        productKindName: Savings
+        externalProductTypeId: Savings
+        productTypeName: Savings
+        externalId: Savings
+        externalTypeId: Savings
+        typeName: Savings
+      - externalProductId: Savings
+        externalProductKindId: kind2
+        productKindName: Savings
+        externalProductTypeId: Savings
+        productTypeName: Savings
+        externalId: Savings
+        externalTypeId: Savings
+        typeName: Savings
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG
+

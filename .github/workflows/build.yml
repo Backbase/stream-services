@@ -4,6 +4,7 @@ on:
     branches:
       - master
       - develop
+      - feature/STRO-13-product-composition
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:

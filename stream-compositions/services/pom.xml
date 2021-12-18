@@ -16,7 +16,8 @@
     <name>Stream :: Compositions :: Services</name>
 
     <modules>
-        <module>product-composition-service</module>
         <module>legal-entity-composition-service</module>
+        <module>product-catalog-composition-service</module>
+        <module>product-composition-service</module>
     </modules>
 </project>
