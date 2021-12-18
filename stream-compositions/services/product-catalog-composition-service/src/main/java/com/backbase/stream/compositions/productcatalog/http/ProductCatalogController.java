@@ -6,7 +6,6 @@ import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalog
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
 import com.backbase.stream.compositions.productcatalog.model.IngestionResponse;
-import com.backbase.stream.compositions.productcatalog.model.PullIngestionRequest;
 import com.backbase.stream.compositions.productcatalog.model.PushIngestionRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +22,7 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
     private final ProductCatalogMapper mapper;
 
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pullIngestProductCatalog(
-            @Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<IngestionResponse>> pullIngestProductCatalog(ServerWebExchange exchange) {
         return productCatalogIngestionService
                 .ingestPull()
                 .map(this::mapIngestionToResponse)

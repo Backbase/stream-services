@@ -41,6 +41,14 @@
             <artifactId>product-catalog-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>com.backbase.stream.compositions</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -111,8 +119,6 @@
                                 <additionalProperties>useWithModifiers=true</additionalProperties>
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <performBeanValidation>true</performBeanValidation>
-                                <apis/>
-                                <models/>
                                 <useTags>true</useTags>
                             </configOptions>
                         </configuration>
