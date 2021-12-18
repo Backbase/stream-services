@@ -29,7 +29,6 @@ public class ProductController implements ProductCompositionApi {
     @Override
     public Mono<ResponseEntity<IngestionResponse>> pullIngestProductGroup(
             @Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-
         return productIngestionService
                 .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
                 .map(this::mapIngestionToResponse)
@@ -42,7 +41,6 @@ public class ProductController implements ProductCompositionApi {
     @Override
     public Mono<ResponseEntity<IngestionResponse>> pushIngestProductGroup(
             @Valid Mono<PushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-
         return productIngestionService
                 .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
                 .map(this::mapIngestionToResponse)
@@ -93,6 +91,5 @@ public class ProductController implements ProductCompositionApi {
     private IngestionResponse mapIngestionToResponse(ProductIngestResponse response) {
         return new IngestionResponse()
                 .withProductGgroup(this.mapper.mapStreamToComposition(response.getProductGroup()));
-
     }
 }
