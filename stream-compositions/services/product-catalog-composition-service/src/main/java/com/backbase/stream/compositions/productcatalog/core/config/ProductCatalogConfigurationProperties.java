@@ -10,5 +10,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ProductCatalogConfigurationProperties {
     private Boolean enableCompletedEvents = true;
     private Boolean enableFailedEvents = true;
-    private String productIntegrationUrl = "http://product-ingestion-integration:8080";
+    private String productCatalogIntegrationUrl = "http://product-catalog-ingestion-integration:8080";
 }
