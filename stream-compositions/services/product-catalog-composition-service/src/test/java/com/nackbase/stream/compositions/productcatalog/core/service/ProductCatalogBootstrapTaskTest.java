@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductCatalogBootstrapTaskTest {
@@ -24,7 +23,7 @@ public class ProductCatalogBootstrapTaskTest {
     ReactiveProductCatalogService reactiveProductCatalogService;
 
     @Test
-    void testProductCatalogSetup() {
+    void testProductCatalogSetup_Success() {
         List<ProductKind> productKinds = new ArrayList<>();
         productKinds.add(new ProductKind().kindName("kindName"));
         ProductCatalog productCatalog = new ProductCatalog().productKinds(productKinds);
@@ -40,5 +39,19 @@ public class ProductCatalogBootstrapTaskTest {
 
         bootstrapTask.run(null);
         verify(reactiveProductCatalogService).setupProductCatalog(productCatalog);
+    }
+
+    @Test
+    void testProductCatalogSetup_Fail() {
+        BootstrapConfigurationProperties bootstrapConfigurationProperties = new BootstrapConfigurationProperties();
+        bootstrapConfigurationProperties.setProductCatalog(null);
+
+        ProductCatalogBootstrapTask bootstrapTask = new ProductCatalogBootstrapTask(
+                reactiveProductCatalogService,
+                bootstrapConfigurationProperties);
+
+        bootstrapConfigurationProperties.setProductCatalog(null);
+        bootstrapTask.run(null);
+        verify(reactiveProductCatalogService, times(0)).setupProductCatalog(any());
     }
 }
