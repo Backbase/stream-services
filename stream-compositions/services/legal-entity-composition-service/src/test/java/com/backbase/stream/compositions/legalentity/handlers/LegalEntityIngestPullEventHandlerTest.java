@@ -78,5 +78,4 @@ class LegalEntityIngestPullEventHandlerTest {
         handler.handle(envelopedEvent);
         verify(legalEntityIngestionService).ingestPull(any());
     }
-
 }

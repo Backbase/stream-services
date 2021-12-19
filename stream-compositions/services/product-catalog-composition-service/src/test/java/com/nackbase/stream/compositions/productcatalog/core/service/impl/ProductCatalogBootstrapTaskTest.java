@@ -1,4 +1,4 @@
-package com.nackbase.stream.compositions.productcatalog.core.service;
+package com.nackbase.stream.compositions.productcatalog.core.service.impl;
 
 import com.backbase.stream.compositions.productcatalog.core.config.BootstrapConfigurationProperties;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogBootstrapTask;

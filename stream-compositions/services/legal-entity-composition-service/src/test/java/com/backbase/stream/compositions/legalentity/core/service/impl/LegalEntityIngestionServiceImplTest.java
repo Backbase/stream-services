@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.core.service;
+package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
@@ -7,6 +7,8 @@ import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMappe
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
+import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
+import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
 import com.backbase.stream.compositions.legalentity.core.service.impl.LegalEntityIngestionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,7 +66,6 @@ class LegalEntityIngestionServiceImplTest {
         assertEquals(1, legalEntityIngestResponseMono.block().getLegalEntities().size());
         assertEquals("legalEntityName", legalEntityIngestResponseMono.block().getLegalEntities().get(0).getName());
     }
-
 
     @Test
     void ingestionInPushMode_Unsupported() {

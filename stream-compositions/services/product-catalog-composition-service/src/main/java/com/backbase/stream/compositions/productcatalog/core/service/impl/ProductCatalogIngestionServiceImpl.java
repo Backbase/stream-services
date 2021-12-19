@@ -33,10 +33,7 @@ public class ProductCatalogIngestionServiceImpl implements ProductCatalogIngesti
 
     @Override
     public Mono<ProductCatalogIngestResponse> ingestPush(Mono<ProductCatalogIngestPushRequest> ingestPullRequest) {
-        return ingestPullRequest
-                .map(item -> item.getProductCatalog())
-                .flatMap(reactiveProductCatalogService::setupProductCatalog)
-                .map(this::buildResponse);
+        throw new UnsupportedOperationException();
     }
 
     private ProductCatalogIngestResponse buildResponse(ProductCatalog productCatalog) {

@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.core.service;
+package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.compositions.integration.legalentity.api.LegalEntityIntegrationApi;
 import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;

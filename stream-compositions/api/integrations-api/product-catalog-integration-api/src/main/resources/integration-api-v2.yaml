@@ -47,11 +47,10 @@ components:
         message:
           type: string
 
-
     GetProductGroupResponse:
       type: object
       properties:
-        productGroup:
+        productCatalog:
           $ref: '../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog'
 
     InternalServerError:
