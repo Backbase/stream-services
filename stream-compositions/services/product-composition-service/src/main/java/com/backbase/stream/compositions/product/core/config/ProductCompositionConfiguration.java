@@ -27,12 +27,12 @@ public class ProductCompositionConfiguration {
 
     @Bean
     @Primary
-    public ProductIntegrationApi productIntegrationApi(ApiClient legalEntityClient) {
-        return new ProductIntegrationApi(legalEntityClient);
+    public ProductIntegrationApi productIntegrationApi(ApiClient productClient) {
+        return new ProductIntegrationApi(productClient);
     }
 
     @Bean
-    public ApiClient legalEntityClient(
+    public ApiClient productClient(
             WebClient dbsWebClient,
             ObjectMapper objectMapper,
             DateFormat dateFormat) {
