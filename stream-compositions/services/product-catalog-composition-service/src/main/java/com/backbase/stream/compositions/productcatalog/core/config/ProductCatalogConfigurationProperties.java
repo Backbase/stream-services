@@ -1,10 +1,12 @@
 package com.backbase.stream.compositions.productcatalog.core.config;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @ConfigurationProperties("backbase.stream.compositions.product-catalog")
 public class ProductCatalogConfigurationProperties {

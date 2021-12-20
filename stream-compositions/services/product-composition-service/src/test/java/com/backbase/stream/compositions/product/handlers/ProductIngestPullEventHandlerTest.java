@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProductsIngestPullEventHandlerTest {
+class ProductIngestPullEventHandlerTest {
     @Mock
     private ProductIngestionService productIngestionService;
 
@@ -54,23 +54,22 @@ class ProductsIngestPullEventHandlerTest {
 
     @Test
     void testHandleEvent_Failed() {
+        when(productIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
+
+        ProductConfigurationProperties properties = new ProductConfigurationProperties();
+
+        ProductIngestPullEventHandler handler = new ProductIngestPullEventHandler(
+                properties,
+                productIngestionService,
+                mapper,
+                eventBus);
+
+        EnvelopedEvent<ProductsIngestPullEvent> envelopedEvent = new EnvelopedEvent<>();
+        ProductsIngestPullEvent event = new ProductsIngestPullEvent().withLegalEntityExternalId("externalId");
+        envelopedEvent.setEvent(event);
+
         assertThrows(RuntimeException.class, () -> {
-            when(productIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
-
-            ProductConfigurationProperties properties = new ProductConfigurationProperties();
-
-            ProductIngestPullEventHandler handler = new ProductIngestPullEventHandler(
-                    properties,
-                    productIngestionService,
-                    mapper,
-                    eventBus);
-
-            EnvelopedEvent<ProductsIngestPullEvent> envelopedEvent = new EnvelopedEvent<>();
-            ProductsIngestPullEvent event = new ProductsIngestPullEvent().withLegalEntityExternalId("externalId");
-            envelopedEvent.setEvent(event);
-
             handler.handle(envelopedEvent);
-            verify(productIngestionService).ingestPull(any());
         });
     }
 }

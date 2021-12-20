@@ -77,17 +77,6 @@ public class ProductController implements ProductCompositionApi {
      * @param response ProductIngestResponse
      * @return IngestionResponse
      */
-    private IngestionResponse buildResponse(ProductIngestResponse response) {
-        return new IngestionResponse()
-                .withProductGgroup(mapper.mapStreamToComposition(response.getProductGroup()));
-    }
-
-    /**
-     * Builds ingestion response for API endpoint.
-     *
-     * @param response ProductIngestResponse
-     * @return IngestionResponse
-     */
     private IngestionResponse mapIngestionToResponse(ProductIngestResponse response) {
         return new IngestionResponse()
                 .withProductGgroup(this.mapper.mapStreamToComposition(response.getProductGroup()));
