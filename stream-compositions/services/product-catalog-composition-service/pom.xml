@@ -9,8 +9,6 @@
     </parent>
 
     <artifactId>product-catalog-composition-service</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
-
     <packaging>jar</packaging>
 
     <name>Stream :: Compositions :: Services :: Product Catalog</name>
@@ -30,6 +28,16 @@
             <artifactId>mapstruct-processor</artifactId>
         </dependency>
 
+        <!-- Spring dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!-- Streams dependencies -->
         <dependency>
             <groupId>com.backbase.stream.compositions.events</groupId>
@@ -47,6 +55,23 @@
             <groupId>com.backbase.stream.compositions</groupId>
             <artifactId>test-utils</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-broker</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq.tooling</groupId>
+            <artifactId>activemq-junit</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-kahadb-store</artifactId>
+            <version>${activemq.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -137,9 +162,7 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
-
 
 </project>

@@ -21,7 +21,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductCatalogIngestPushEventHandlerTest {
+class ProductCatalogIngestPushEventHandlerTest {
     @Mock
     private ProductCatalogIngestionService productCatalogIngestionService;
 

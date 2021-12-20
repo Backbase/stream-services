@@ -63,7 +63,7 @@ backbase:
     compositions:
       legal-entity:
         enable-completed-events: true
-        e nable-failed-events: true
+        enable-failed-events: true
         legal-entity-integration-url: http://localhost:18000
 
 bootstrap:

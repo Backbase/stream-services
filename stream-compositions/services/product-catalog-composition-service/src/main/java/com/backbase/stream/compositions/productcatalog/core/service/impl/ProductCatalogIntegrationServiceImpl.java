@@ -1,6 +1,7 @@
 package com.backbase.stream.compositions.productcatalog.core.service.impl;
 
 import com.backbase.stream.compositions.integration.productcatalog.api.ProductCatalogIntegrationApi;
+import com.backbase.stream.compositions.integration.productcatalog.model.GetProductGroupResponse;
 import com.backbase.stream.compositions.integration.productcatalog.model.ProductCatalog;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIntegrationService;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,6 @@ public class ProductCatalogIntegrationServiceImpl implements ProductCatalogInteg
 
     @Override
     public Mono<ProductCatalog> retrieveProductCatalog() {
-        return productCatalogIntegrationApi.getProductCatalog().map(item -> item.getProductCatalog());
+        return productCatalogIntegrationApi.getProductCatalog().map(GetProductGroupResponse::getProductCatalog);
     }
 }

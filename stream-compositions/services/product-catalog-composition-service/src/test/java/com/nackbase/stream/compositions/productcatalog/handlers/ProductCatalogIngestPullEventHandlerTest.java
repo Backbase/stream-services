@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductCatalogIngestPullEventHandlerTest {
+class ProductCatalogIngestPullEventHandlerTest {
     @Mock
     private ProductCatalogIngestionService productCatalogIngestionService;
 

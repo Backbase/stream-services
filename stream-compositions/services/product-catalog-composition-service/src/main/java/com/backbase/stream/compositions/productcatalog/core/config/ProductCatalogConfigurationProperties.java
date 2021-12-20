@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
 @NoArgsConstructor
-@ConfigurationProperties("backbase.stream.compositions.product")
+@ConfigurationProperties("backbase.stream.compositions.product-catalog")
 public class ProductCatalogConfigurationProperties {
     private Boolean enableCompletedEvents = true;
     private Boolean enableFailedEvents = true;

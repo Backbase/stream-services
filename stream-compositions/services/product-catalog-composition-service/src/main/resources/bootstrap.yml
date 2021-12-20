@@ -2,28 +2,9 @@ spring:
   application:
     name: legal-entity-composition-service
   cloud:
-    config:
-      token: ${CLOUD_CONFIG_TOKEN:myroot}
-      uri: ${CLOUD_CONFIG_URI:http://wsecu-cloud-config-server-dbsx.dbsx.svc.cluster.local:8080}
-      enabled: true
-      name: ${spring.application.name}
-
-server:
-  port: ${port.http:8080}
-
-#Spring Admin Eureka Config
-eureka:
-  instance:
-    appname: ${spring.application.name}
-    non-secure-port: ${server.port:8080}
-    preferIpAddress: true
-    metadata-map:
-      public: false
-      role: live
-      contextPath: /
-      management:
-        context-path: ${server.servlet.context-path}/actuator #required to pick up actuator endpoints
-  client:
-    enabled: true
-    serviceUrl:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://registry-dbsx.dbsx.svc.cluster.local:8080/registry/eureka/}
+    kubernetes:
+      config:
+        enabled: false
+      enabled: false
+      discovery:
+        enabled: true

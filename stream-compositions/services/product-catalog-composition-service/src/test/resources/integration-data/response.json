@@ -1,0 +1,8 @@
+{
+  "productKinds": [
+    {
+      "externalKindId": "externalKindId",
+      "kindName": "kindName"
+    }
+  ]
+}

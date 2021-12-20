@@ -8,7 +8,7 @@ servers:
 tags:
   - name: ProductCatalogIntegration
 paths:
-  /service-api/v2/product-catalog:
+  /integration-api/v2/product-catalog:
     get:
       tags:
         - ProductCatalogIntegration

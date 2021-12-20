@@ -12,7 +12,24 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://token-converter:8080/oauth/token
+            token-uri:  http://localhost:10000/oauth/token
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
+      enabled: false
+      discovery:
+        enabled: true
+
+sso:
+  jwt:
+    internal:
+      type: signed
+      signature:
+        algorithm: HS256
+        key:
+          type: ENV
+          value: SIG_SECRET_KEY
 
 backbase:
   mtls:
@@ -37,10 +54,10 @@ backbase:
       product-catalog:
         enable-completed-events: false
         enable-failed-events: true
-        product-catalog-integration-url: http://product-catalog-ingestion-integration:8080
+        productCatalogIntegrationUrl: http://localhost:18000
 
 bootstrap:
-  enabled: true
+  enabled: false
   product-catalog:
     productKinds:
       - externalKindId: kind20
@@ -83,5 +100,5 @@ bootstrap:
 
 logging:
   level:
-    com.backbase.stream.compositions: DEBUG
+    org.activemq: ERROR
 
