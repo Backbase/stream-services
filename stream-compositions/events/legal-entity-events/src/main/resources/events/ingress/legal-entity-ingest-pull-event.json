@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "description": "Unique identifier of the event.",
+      "type": "string"
+    },
+    "legalEntityExternalId": {
+      "description": "Legal entity external id.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "eventId",
+    "legalEntityExternalId"
+  ]
+}
