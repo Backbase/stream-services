@@ -59,7 +59,7 @@ public class ProductIngestPullEventHandler implements EventHandler<ProductsInges
      * @param response ProductIngestResponse
      */
     private void handleResponse(ProductIngestResponse response) {
-        if (Boolean.FALSE.equals(configProperties.getEnableFailedEvents())) {
+        if (Boolean.FALSE.equals(configProperties.getEnableCompletedEvents())) {
             return;
         }
         ProductsIngestCompletedEvent event = new ProductsIngestCompletedEvent()
@@ -77,7 +77,7 @@ public class ProductIngestPullEventHandler implements EventHandler<ProductsInges
      * @param ex Throwable
      */
     private void handleError(Throwable ex) {
-        if (configProperties.getEnableFailedEvents() == false) {
+        if (Boolean.FALSE.equals(configProperties.getEnableFailedEvents())) {
             return;
         }
         ProductsIngestFailedEvent event = new ProductsIngestFailedEvent()

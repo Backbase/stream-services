@@ -73,8 +73,4 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
         }
 
     }
-
-    private void handleError(Throwable ex) {
-        log.error("Product group ingestion failed", ex);
-    }
 }

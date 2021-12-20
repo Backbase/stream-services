@@ -25,9 +25,6 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
     public Mono<ResponseEntity<IngestionResponse>> pullIngestProductCatalog(ServerWebExchange exchange) {
         return productCatalogIngestionService
                 .ingestPull()
-                .doOnSuccess( (item) ->  {
-                    System.out.println("ITEM: " + item);
-                })
                 .map(this::mapIngestionToResponse)
                 .map(ResponseEntity::ok);
     }
