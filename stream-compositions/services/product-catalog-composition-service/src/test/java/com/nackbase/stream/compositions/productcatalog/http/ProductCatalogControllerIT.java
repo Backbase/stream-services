@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.MediaType;
@@ -112,6 +111,6 @@ class ProductCatalogControllerIT extends IntegrationTest {
 
         WebTestClient webTestClient = WebTestClient.bindToController(productCatalogController).build();
 
-        webTestClient.post().uri(uri).exchange();
+        webTestClient.post().uri(uri).exchange().expectStatus().is5xxServerError();
     }
 }

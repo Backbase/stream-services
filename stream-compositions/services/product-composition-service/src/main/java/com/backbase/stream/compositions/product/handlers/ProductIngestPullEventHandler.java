@@ -59,7 +59,7 @@ public class ProductIngestPullEventHandler implements EventHandler<ProductsInges
      * @param response ProductIngestResponse
      */
     private void handleResponse(ProductIngestResponse response) {
-        if (configProperties.getEnableCompletedEvents() == false) {
+        if (Boolean.FALSE.equals(configProperties.getEnableFailedEvents())) {
             return;
         }
         ProductsIngestCompletedEvent event = new ProductsIngestCompletedEvent()

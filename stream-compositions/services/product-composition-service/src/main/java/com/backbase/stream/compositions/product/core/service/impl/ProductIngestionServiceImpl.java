@@ -51,27 +51,13 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * Ingests product group to DBS.
      *
      * @param productGroup Product group
-     * @return Ingested product group
-     */
-    private Mono<ProductIngestResponse> ingest(Mono<ProductGroup> productGroup) {
-        return productGroup
-                .flatMap(this::sendProductGroupToDbs)
-                .doOnSuccess(this::handleSuccess)
-                .doOnError(this::handleError)
-                .map(this::buildResponse);
-    }
-
-    /**
-     * Ingests product group to DBS.
-     *
-     * @param productGroup Product group
      * @return Ingested legal entities
      */
     private Mono<ProductGroup> sendProductGroupToDbs(ProductGroup productGroup) {
         return Mono.just(productGroup)
                 .map(ProductGroupTask::new)
                 .flatMap(productIngestionSaga::process)
-                .map(item -> item.getData());
+                .map(ProductGroupTask::getData);
     }
 
     private ProductIngestResponse buildResponse(ProductGroup productGroup) {
