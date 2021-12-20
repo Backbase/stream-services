@@ -1,7 +1,6 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.compositions.integration.legalentity.api.LegalEntityIntegrationApi;
-import com.backbase.stream.compositions.integration.legalentity.model.GetLegalEntityRequest;
 import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
@@ -17,11 +16,6 @@ public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegration
     private final LegalEntityIntegrationApi legalEntityIntegrationApi;
 
     public Flux<LegalEntity> retrieveLegalEntities(LegalEntityIngestPullRequest ingestPullRequest) {
-        return legalEntityIntegrationApi.getLegalEntities(prepareRequest(ingestPullRequest));
-    }
-
-    private GetLegalEntityRequest prepareRequest(LegalEntityIngestPullRequest ingestPullRequest) {
-        return new GetLegalEntityRequest()
-                .externalId(ingestPullRequest.getLegalEntityExternalId());
+        return legalEntityIntegrationApi.getLegalEntities(ingestPullRequest.getLegalEntityExternalId());
     }
 }

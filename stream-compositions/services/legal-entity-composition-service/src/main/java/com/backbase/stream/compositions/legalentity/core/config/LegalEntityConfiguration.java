@@ -10,8 +10,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.text.DateFormat;
@@ -21,17 +19,6 @@ import java.text.DateFormat;
 @EnableConfigurationProperties(LegalEntityConfigurationProperties.class)
 public class LegalEntityConfiguration {
     private final LegalEntityConfigurationProperties legalEntityConfigurationProperties;
-
-    @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange()
-                .anyExchange()
-                .permitAll()
-                .and()
-                .csrf()
-                .disable()
-                .build();
-    }
 
     @Bean
     public LegalEntityMapper mapper() {

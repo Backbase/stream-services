@@ -17,6 +17,5 @@
 
     <modules>
         <module>legal-entity-composition-service</module>
-        <module>cursor-service</module>
     </modules>
 </project>

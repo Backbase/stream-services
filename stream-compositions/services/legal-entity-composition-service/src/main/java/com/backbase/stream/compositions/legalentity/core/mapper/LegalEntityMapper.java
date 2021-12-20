@@ -10,15 +10,15 @@ import org.springframework.stereotype.Component;
  * - legal-entity-integration-api
  * - legal-entity-evens
  * <p>
- * All LegalEntity objects used in above modules have exactly same structureas they are built
+ * All LegalEntity objects used in above modules have exactly same structures they are built
  * from the common /api folder.
  */
 
-@Mapper
 @Component
+@Mapper(componentModel = "spring")
 public interface LegalEntityMapper {
     /**
-     * Maps compositon LegalEntity to stream LegalEntity model.
+     * Maps composition LegalEntity to stream LegalEntity model.
      *
      * @param legalEntity Integration legal entity
      * @return Stream legal entity

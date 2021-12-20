@@ -3,22 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.backbase.buildingblocks</groupId>
-        <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>13.4.0</version>
-        <relativePath/>
+        <groupId>com.backbase.stream.compositions</groupId>
+        <artifactId>services</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>legal-entity-composition-service</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
-
     <packaging>jar</packaging>
 
     <name>Stream :: Compositions :: Services :: Legal Entity</name>
-
-    <properties>
-        <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>
-    </properties>
 
     <dependencies>
         <!-- Service SDK dependencies -->
@@ -27,16 +20,24 @@
             <artifactId>events</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>service-sdk-starter-eureka-client</artifactId>
         </dependency>
+
+        <!-- Spring dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- Third party dependencies -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
         </dependency>
 
         <!-- Streams dependencies -->
@@ -58,27 +59,27 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-broker</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq.tooling</groupId>
+            <artifactId>activemq-junit</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-kahadb-store</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <!-- Sets the VM argument line used when unit tests are run. -->
-                    <skipTests>${skip.unit.tests}</skipTests>
-                    <!-- Excludes integration tests when unit tests are run. -->
-                    <environmentVariables>
-                        <SIG_SECRET_KEY>JWTSecretKeyDontUseInProduction!</SIG_SECRET_KEY>
-                    </environmentVariables>
-                    <excludes>
-                        <exclude>**/*IT.java</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-
             <!-- Unpack OpenAPI specs from zip dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -131,7 +132,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <generatorName>spring</generatorName>
-                            <inputSpec>${project.build.directory}/yaml/legal-entity-composition-api/service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/legal-entity-composition-api/service-api-v2.0.0.yaml</inputSpec>
                             <additionalProperties>useWithModifiers=true</additionalProperties>
                             <configOptions>
                                 <library>spring-boot</library>
@@ -152,7 +153,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-legale-entity-integration-api-code</id>
+                        <id>generate-legal-entity-integration-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>

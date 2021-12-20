@@ -5,6 +5,7 @@ import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
 import com.backbase.stream.compositions.legalentity.core.service.impl.LegalEntityIngestionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -41,9 +43,9 @@ class LegalEntityIngestionServiceImplTest {
     }
 
     @Test
-    void ingestiInPullMode_Success() {
+    void ingestionInPullMode_Success() {
         Mono<LegalEntityIngestPullRequest> legalEntityIngestPullRequest = Mono.just(LegalEntityIngestPullRequest.builder()
-                .legalEntityExternalId("externa lId")
+                .legalEntityExternalId("externalId")
                 .build());
         LegalEntity legalEntity = new LegalEntity().name("legalEntityName");
         when(legalEntityIntegrationService.retrieveLegalEntities(legalEntityIngestPullRequest.block()))
@@ -61,5 +63,14 @@ class LegalEntityIngestionServiceImplTest {
         Mono<LegalEntityIngestResponse> legalEntityIngestResponseMono = legalEntityIngestionService.ingestPull(legalEntityIngestPullRequest);
         assertEquals(1, legalEntityIngestResponseMono.block().getLegalEntities().size());
         assertEquals("legalEntityName", legalEntityIngestResponseMono.block().getLegalEntities().get(0).getName());
+    }
+
+
+    @Test
+    void ingestionInPushMode_Unsupported() {
+        Mono<LegalEntityIngestPushRequest> request = Mono.just(LegalEntityIngestPushRequest.builder().build());
+        assertThrows(UnsupportedOperationException.class, () -> {
+            legalEntityIngestionService.ingestPush(request);
+        });
     }
 }

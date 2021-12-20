@@ -9,22 +9,22 @@ tags:
   - name: LegalEntityIntegration
 paths:
   /integration-api/v2/legal-entity:
-    post:
+    get:
       tags:
         - LegalEntityIntegration
       summary: Gets legal entity.
       description: Gets legal entity.
       operationId: getLegalEntities
-      requestBody:
-        description: Gets legal entity request.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GetLegalEntityRequest'
+      parameters:
+        - in: query
+          name: externalId
+          schema:
+            type: string
+          required: true
 
       responses:
-        "201":
-          description: Legal Entity composition initialized.
+        "200":
+          description: Legal Entity composition returned.
           content:
             application/json:
               schema:
@@ -50,12 +50,6 @@ components:
       type: object
       properties:
         message:
-          type: string
-
-    GetLegalEntityRequest:
-      type: object
-      properties:
-        externalId:
           type: string
 
     GetLegalEntityListResponse:

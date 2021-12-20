@@ -19,7 +19,7 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
-@ConditionalOnProperty(name = "bootstrap.enabled", matchIfMissing = false)
+@ConditionalOnProperty(name = "bootstrap.enabled")
 public class RootLegalEntityBootstrapTask implements ApplicationRunner {
     private final LegalEntitySaga legalEntitySaga;
     private final BootstrapConfigurationProperties bootstrapConfigurationProperties;

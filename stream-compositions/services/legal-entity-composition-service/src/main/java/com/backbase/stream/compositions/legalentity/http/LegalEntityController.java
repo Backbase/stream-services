@@ -1,6 +1,5 @@
 package com.backbase.stream.compositions.legalentity.http;
 
-import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
 import com.backbase.stream.compositions.legalentity.api.LegalEntityCompositionApi;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
@@ -29,7 +28,8 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pullIngestLegalEntity(@Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<IngestionResponse>> pullIngestLegalEntity(
+            @Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
         return legalEntityIngestionService
                 .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
                 .map(this::mapIngestionToResponse)
@@ -40,9 +40,10 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pushIngestLegalEntity(@Valid Mono<PushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-        return legalEntityIngestionService.ingestPush(
-                pushIngestionRequest.map(this::buildPushRequest))
+    public Mono<ResponseEntity<IngestionResponse>> pushIngestLegalEntity(
+            @Valid Mono<PushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+        return legalEntityIngestionService
+                .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
                 .map(this::mapIngestionToResponse)
                 .map(ResponseEntity::ok);
     }
@@ -54,9 +55,9 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @return LegalEntityIngestPullRequest
      */
     private LegalEntityIngestPullRequest buildPullRequest(PullIngestionRequest request) {
-        return LegalEntityIngestPullRequest.builder()
-                .legalEntityExternalId(request.getLegalEntityExternalId())
-                .build();
+        return LegalEntityIngestPullRequest
+                .builder()
+                .legalEntityExternalId(request.getLegalEntityExternalId()).build();
     }
 
     /**
@@ -66,11 +67,10 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @return LegalEntityIngestPushRequest
      */
     private LegalEntityIngestPushRequest buildPushRequest(PushIngestionRequest request) {
-        return LegalEntityIngestPushRequest.builder()
-                .legalEntities(request.getLegalEntities()
-                        .stream()
-                        .map(mapper::mapCompostionToStream).collect(Collectors.toList()))
-                .build();
+        return LegalEntityIngestPushRequest
+                .builder().legalEntities(
+                        request.getLegalEntities().stream()
+                                .map(mapper::mapCompostionToStream).collect(Collectors.toList())).build();
     }
 
     /**
@@ -80,10 +80,6 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @return IngestionResponse
      */
     private IngestionResponse mapIngestionToResponse(LegalEntityIngestResponse response) {
-        if (response == null) {
-            throw new InternalServerErrorException("Legal intity is null");
-        }
-
         return new IngestionResponse()
                 .withLegalEntities(
                         response.getLegalEntities()

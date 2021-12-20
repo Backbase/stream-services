@@ -33,6 +33,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
                 .map(mapper::mapIntegrationToStream)
                 .flatMap(this::sendLegalEntityToDbs)
                 .collectList()
+                .doOnSuccess(this::handleSuccess)
                 .map(this::buildResponse);
     }
 
@@ -67,9 +68,5 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
         if (log.isDebugEnabled()) {
             log.debug("Ingested legal entities: {}", legalEntities);
         }
-    }
-
-    private void handleError(Throwable ex) {
-        log.error("Legal entity ingestion failed", ex);
     }
 }

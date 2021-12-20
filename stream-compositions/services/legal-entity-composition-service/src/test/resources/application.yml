@@ -15,10 +15,30 @@ spring:
             token-uri: http://localhost:10000/oauth/token
   main:
     allow-bean-definition-overriding: true
+  activemq:
+
+    broker-url: tcp://localhost:16161
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
+      enabled: false
+      discovery:
+        enabled: true
 
 eureka:
   client:
     enabled: false
+
+sso:
+  jwt:
+    internal:
+      type: signed
+      signature:
+        algorithm: HS256
+        key:
+          type: ENV
+          value: SIG_SECRET_KEY
 
 backbase:
   security:
@@ -124,7 +144,8 @@ bootstrap:
 
 logging:
   level:
-    com.backbase.stream.compositions: DEBUG
-    org.mockserver: WARN
+    org.activemq: ERROR
 
-
+activemq:
+  store:
+    dir: /tmp
