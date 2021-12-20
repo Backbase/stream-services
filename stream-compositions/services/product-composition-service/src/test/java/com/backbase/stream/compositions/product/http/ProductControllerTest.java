@@ -44,9 +44,15 @@ public class ProductControllerTest {
         Mono<PullIngestionRequest> requestMono = Mono.just(
                 new PullIngestionRequest().withLegalEntityExternalId("externalId"));
 
-        when(productIngestionService.ingestPull(any())).thenReturn(
-                Mono.just(ProductIngestResponse.builder()
-                        .build()));
+        doAnswer(invocation -> {
+            Mono mono = invocation.getArgument(0);
+            mono.block();
+
+            return Mono.just(ProductIngestResponse.builder()
+                    .productGroup(
+                            new com.backbase.stream.legalentity.model.ProductGroup())
+                    .build());
+        }).when(productIngestionService).ingestPull(any());
 
         ResponseEntity<IngestionResponse> responseEntity = controller.pullIngestProductGroup(requestMono, null).block();
         IngestionResponse ingestionResponse = responseEntity.getBody();
