@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.core.model;
+package com.backbase.stream.compositions.product.core.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

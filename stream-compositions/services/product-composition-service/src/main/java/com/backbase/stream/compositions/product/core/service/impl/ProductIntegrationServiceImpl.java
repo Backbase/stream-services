@@ -1,10 +1,10 @@
-package com.backbase.stream.compositions.legalentity.core.service.impl;
+package com.backbase.stream.compositions.product.core.service.impl;
 
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
 import com.backbase.stream.compositions.integration.product.model.GetProductGroupRequest;
 import com.backbase.stream.compositions.integration.product.model.GetProductGroupResponse;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.service.ProductIntegrationService;
+import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
+import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

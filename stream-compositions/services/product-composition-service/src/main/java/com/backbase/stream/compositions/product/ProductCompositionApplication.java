@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity;
+package com.backbase.stream.compositions.product;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

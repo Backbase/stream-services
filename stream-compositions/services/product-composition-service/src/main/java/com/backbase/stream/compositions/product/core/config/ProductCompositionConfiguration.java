@@ -1,8 +1,8 @@
-package com.backbase.stream.compositions.legalentity.core.config;
+package com.backbase.stream.compositions.product.core.config;
 
 import com.backbase.stream.compositions.integration.product.ApiClient;
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
-import com.backbase.stream.compositions.legalentity.core.mapper.ProductGroupMapper;
+import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.mapstruct.factory.Mappers;

@@ -1,11 +1,11 @@
-package com.backbase.stream.compositions.legalentity.handlers;
+package com.backbase.stream.compositions.product.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductsIngestPushEvent;
-import com.backbase.stream.compositions.legalentity.core.mapper.ProductGroupMapper;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestPushRequest;
-import com.backbase.stream.compositions.legalentity.core.service.ProductIngestionService;
+import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
+import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
+import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;

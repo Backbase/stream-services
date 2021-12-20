@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.handlers;
+package com.backbase.stream.compositions.product.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
@@ -6,11 +6,11 @@ import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductsIngestCompletedEvent;
 import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductsIngestFailedEvent;
 import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductsIngestPullEvent;
-import com.backbase.stream.compositions.legalentity.core.config.ProductConfigurationProperties;
-import com.backbase.stream.compositions.legalentity.core.mapper.ProductGroupMapper;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestResponse;
-import com.backbase.stream.compositions.legalentity.core.service.ProductIngestionService;
+import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
+import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
+import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
+import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;

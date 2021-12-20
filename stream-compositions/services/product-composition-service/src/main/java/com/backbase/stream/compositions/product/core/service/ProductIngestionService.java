@@ -1,8 +1,8 @@
-package com.backbase.stream.compositions.legalentity.core.service;
+package com.backbase.stream.compositions.product.core.service;
 
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestPushRequest;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestResponse;
+import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
+import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
+import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import reactor.core.publisher.Mono;
 
 public interface ProductIngestionService {

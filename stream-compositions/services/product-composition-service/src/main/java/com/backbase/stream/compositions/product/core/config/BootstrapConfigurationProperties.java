@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.core.config;
+package com.backbase.stream.compositions.product.core.config;
 
 import com.backbase.stream.productcatalog.model.ProductCatalog;
 import lombok.Data;

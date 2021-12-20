@@ -1,10 +1,10 @@
-package com.backbase.stream.compositions.legalentity.http;
+package com.backbase.stream.compositions.product.http;
 
-import com.backbase.stream.compositions.legalentity.core.mapper.ProductGroupMapper;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestPushRequest;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestResponse;
-import com.backbase.stream.compositions.legalentity.core.service.ProductIngestionService;
+import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
+import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
+import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
+import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import com.backbase.stream.compositions.product.api.ProductCompositionApi;
 import com.backbase.stream.compositions.product.model.IngestionResponse;
 import com.backbase.stream.compositions.product.model.PullIngestionRequest;

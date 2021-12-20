@@ -1,11 +1,11 @@
-package com.backbase.stream.compositions.legalentity.core.service.impl;
+package com.backbase.stream.compositions.product.core.service.impl;
 
-import com.backbase.stream.compositions.legalentity.core.mapper.ProductGroupMapper;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestPushRequest;
-import com.backbase.stream.compositions.legalentity.core.model.ProductIngestResponse;
-import com.backbase.stream.compositions.legalentity.core.service.ProductIngestionService;
-import com.backbase.stream.compositions.legalentity.core.service.ProductIntegrationService;
+import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
+import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
+import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
+import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
+import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.task.ProductGroupTask;

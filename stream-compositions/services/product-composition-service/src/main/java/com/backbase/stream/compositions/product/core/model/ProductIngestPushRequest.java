@@ -1,15 +1,14 @@
-package com.backbase.stream.compositions.legalentity.core.model;
+package com.backbase.stream.compositions.product.core.model;
 
 import com.backbase.stream.legalentity.model.ProductGroup;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.List;
-
 @Getter
 @Builder
 @AllArgsConstructor
-public class ProductIngestResponse {
-    private final ProductGroup productGroup;
+public class ProductIngestPushRequest {
+    private String eventId;
+    private ProductGroup productGroup;
 }

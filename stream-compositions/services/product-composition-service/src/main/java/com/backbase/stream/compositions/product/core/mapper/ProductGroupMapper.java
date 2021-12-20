@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity.core.mapper;
+package com.backbase.stream.compositions.product.core.mapper;
 
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
@@ -26,7 +26,7 @@ public interface ProductGroupMapper {
             com.backbase.stream.compositions.integration.product.model.ProductGroup productGroup);
 
     /**
-     * Maps integration ProductGroup to compositon ProductGroup model.
+     * Maps integration ProductGroup to composition ProductGroup model.
      *
      * @param productGroup Integration product group
      * @return Composition product group
