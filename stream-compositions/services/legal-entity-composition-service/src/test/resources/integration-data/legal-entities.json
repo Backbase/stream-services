@@ -1,0 +1,110 @@
+[
+  {
+    "name": "Test Legal Entity",
+    "internalId": null,
+    "externalId": "id",
+    "legalEntityType": "CUSTOMER",
+    "realmName": "backbase",
+    "parentExternalId": "moustache-bank",
+    "parentInternalId": "2c9380887d7d8050017d7e20a2890000",
+    "subsidiaries": null,
+    "productGroups": null,
+    "limit": null,
+    "users": [
+      {
+        "user": {
+          "internalId": null,
+          "externalId": "user1",
+          "legalEntityId": null,
+          "emailAddress": null,
+          "mobileNumber": null,
+          "fullName": "Piotr Marat",
+          "limit": null,
+          "additions": null,
+          "attributes": null,
+          "identityLinkStrategy": "IDENTITY_AGNOSTIC",
+          "userProfile": null,
+          "locked": null
+        },
+        "legalEntityReference": null,
+        "referenceJobRoleNames": null,
+        "businessFunctionGroups": [
+          {
+            "id": null,
+            "legalEntityId": null,
+            "serviceAgreementId": null,
+            "name": "Business Function Group",
+            "description": null,
+            "type": "DEFAULT",
+            "dataGroupsAllowed": null,
+            "functions": [
+              {
+                "name": "Business Function",
+                "functionId": "1003",
+                "functionCode": "transactions",
+                "resourceName": null,
+                "resourceCode": null,
+                "privileges": [
+                  {
+                    "privilege": "view",
+                    "supportsLimit": null,
+                    "limit": null
+                  },
+                  {
+                    "privilege": "edit",
+                    "supportsLimit": null,
+                    "limit": null
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "approvalStatus": null
+      }
+    ],
+    "referenceJobRoles": null,
+    "administrators": [
+      {
+        "internalId": null,
+        "externalId": "admin1",
+        "legalEntityId": null,
+        "emailAddress": null,
+        "mobileNumber": null,
+        "fullName": "Administrator",
+        "limit": null,
+        "additions": null,
+        "attributes": null,
+        "identityLinkStrategy": "IDENTITY_AGNOSTIC",
+        "userProfile": {
+          "userId": null,
+          "externalId": "user1",
+          "userName": null,
+          "name": null,
+          "displayName": "Display Name",
+          "nickName": null,
+          "profileUrl": null,
+          "personalInformation": null,
+          "identificationDetails": null,
+          "title": null,
+          "userType": null,
+          "preferredLanguage": null,
+          "locale": null,
+          "timezone": null,
+          "active": true,
+          "additionalEmails": null,
+          "additionalPhoneNumbers": null,
+          "ims": null,
+          "photos": null,
+          "x509Certificates": null,
+          "addresses": null,
+          "extended": null
+        },
+        "locked": null
+      }
+    ],
+    "masterServiceAgreement": null,
+    "customServiceAgreement": null
+  }
+]
+

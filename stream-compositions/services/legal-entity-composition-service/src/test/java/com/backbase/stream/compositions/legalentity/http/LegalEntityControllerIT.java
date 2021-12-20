@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -36,12 +37,12 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 @SpringBootTest
+@DirtiesContext
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
 class LegalEntityControllerIT extends IntegrationTest {
     private static final int TOKEN_CONVERTER_PORT = 10000;
     private static final int INTEGRATION_SERVICE_PORT = 18000;
-    private static final int ACTIVEMQ_PORT = 16161;
     private ClientAndServer integrationServer;
     private ClientAndServer tokenConverterServer;
     private MockServerClient integrationServerClient;
@@ -57,7 +58,7 @@ class LegalEntityControllerIT extends IntegrationTest {
     @BeforeAll
     static void initActiveMqBroker() throws Exception {
         broker = new BrokerService();
-        broker.addConnector("tcp://localhost:" + ACTIVEMQ_PORT);
+        broker.setBrokerName("activemq");
         broker.setPersistent(false);
         broker.start();
         broker.waitUntilStarted();
@@ -104,7 +105,7 @@ class LegalEntityControllerIT extends IntegrationTest {
     @Test
     void pullIngestLegalEntity_Success() throws Exception {
         LegalEntity[] legalEntity = new Gson()
-                .fromJson(readContentFromClasspath("integration-data/response.json"), LegalEntity[].class);
+                .fromJson(readContentFromClasspath("integration-data/legal-entities.json"), LegalEntity[].class);
 
         when(legalEntitySaga.executeTask(any()))
                 .thenReturn(Mono.just(new LegalEntityTask(legalEntity[0])));
@@ -114,7 +115,6 @@ class LegalEntityControllerIT extends IntegrationTest {
                 new PullIngestionRequest().withLegalEntityExternalId("externalId");
 
         WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
-
         webTestClient.post().uri(uri).body(Mono.just(pullIngestionRequest), PullIngestionRequest.class).exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type", "application/json")
@@ -129,11 +129,10 @@ class LegalEntityControllerIT extends IntegrationTest {
         legalEntities.add(new com.backbase.stream.compositions.legalentity.model.LegalEntity());
 
         PushIngestionRequest pushIngestionRequest = new PushIngestionRequest().withLegalEntities(legalEntities);
-        WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
 
+        WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
         webTestClient.post().uri(uri).body(Mono.just(pushIngestionRequest), PullIngestionRequest.class).exchange()
                 .expectStatus().is5xxServerError();
-
     }
 }
 

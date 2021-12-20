@@ -20,7 +20,8 @@ spring:
       enabled: false
       discovery:
         enabled: true
-
+  activemq:
+    broker-url: vm://activemq
 sso:
   jwt:
     internal:
@@ -102,3 +103,6 @@ logging:
   level:
     org.activemq: ERROR
 
+activemq:
+  store:
+    dir: /tmp

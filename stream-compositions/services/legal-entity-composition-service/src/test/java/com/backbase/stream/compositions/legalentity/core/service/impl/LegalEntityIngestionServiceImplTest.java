@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
+import com.backbase.stream.compositions.integration.legalentity.model.GetLegalEntityListResponse;
 import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
@@ -9,13 +10,11 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngest
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
-import com.backbase.stream.compositions.legalentity.core.service.impl.LegalEntityIngestionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,8 +49,9 @@ class LegalEntityIngestionServiceImplTest {
                 .legalEntityExternalId("externalId")
                 .build());
         LegalEntity legalEntity = new LegalEntity().name("legalEntityName");
+        GetLegalEntityListResponse getLegalEntityListResponse = new GetLegalEntityListResponse().addLegalEntitiesItem(legalEntity);
         when(legalEntityIntegrationService.retrieveLegalEntities(legalEntityIngestPullRequest.block()))
-                .thenReturn(Flux.just(legalEntity));
+                .thenReturn(Mono.just(getLegalEntityListResponse));
 
         when(mapper.mapIntegrationToStream(legalEntity))
                 .thenReturn(new com.backbase.stream.legalentity.model.LegalEntity().name(legalEntity.getName()));

@@ -16,8 +16,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   activemq:
-
-    broker-url: tcp://localhost:16161
+    broker-url: vm://activemq
   cloud:
     kubernetes:
       config:

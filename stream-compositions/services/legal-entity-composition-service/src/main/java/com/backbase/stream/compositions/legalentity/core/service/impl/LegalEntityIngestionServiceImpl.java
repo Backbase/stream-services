@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
+import com.backbase.stream.compositions.integration.legalentity.model.GetLegalEntityListResponse;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
@@ -29,7 +30,8 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
      */
     public Mono<LegalEntityIngestResponse> ingestPull(Mono<LegalEntityIngestPullRequest> ingestPullRequest) {
         return ingestPullRequest
-                .flatMapMany(legalEntityIntegrationService::retrieveLegalEntities)
+                .flatMap(legalEntityIntegrationService::retrieveLegalEntities)
+                .flatMapIterable(GetLegalEntityListResponse::getLegalEntities)
                 .map(mapper::mapIntegrationToStream)
                 .flatMap(this::sendLegalEntityToDbs)
                 .collectList()

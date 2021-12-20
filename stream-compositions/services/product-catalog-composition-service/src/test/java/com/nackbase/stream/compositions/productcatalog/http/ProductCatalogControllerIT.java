@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -32,7 +33,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-
+@DirtiesContext
 @SpringBootTest(classes = {ProductCatalogCompositionApplication.class})
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
@@ -55,7 +56,7 @@ class ProductCatalogControllerIT extends IntegrationTest {
     @BeforeAll
     static void initActiveMqBroker() throws Exception {
         broker = new BrokerService();
-        broker.addConnector("tcp://localhost:" + ACTIVEMQ_PORT);
+        broker.setBrokerName("activemq");
         broker.setPersistent(false);
         broker.start();
         broker.waitUntilStarted();

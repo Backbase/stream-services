@@ -53,9 +53,12 @@ components:
           type: string
 
     GetLegalEntityListResponse:
-      type: array
-      items:
-        $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
+      type: object
+      properties:
+        legalEntities:
+          type: array
+          items:
+            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
 
     InternalServerError:
       required:

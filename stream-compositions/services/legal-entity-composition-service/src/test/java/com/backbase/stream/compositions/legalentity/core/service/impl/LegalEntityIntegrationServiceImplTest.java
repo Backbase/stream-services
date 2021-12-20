@@ -1,17 +1,17 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.compositions.integration.legalentity.api.LegalEntityIntegrationApi;
+import com.backbase.stream.compositions.integration.legalentity.model.GetLegalEntityListResponse;
 import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.service.impl.LegalEntityIntegrationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -29,26 +29,31 @@ class LegalEntityIntegrationServiceImplTest {
 
     @Test
     void callIntegrationService_LegalEntitiesFound() throws UnsupportedOperationException {
-        LegalEntity legalEntity1 = new LegalEntity().name("Legal Enity 1");
-        LegalEntity legalEntity2 = new LegalEntity().name("Legal Enity 2");
+        LegalEntity legalEntity1 = new LegalEntity().name("Legal Entity 1");
+        LegalEntity legalEntity2 = new LegalEntity().name("Legal Entity 2");
+
+        GetLegalEntityListResponse getLegalEntityListResponse = new GetLegalEntityListResponse()
+                .addLegalEntitiesItem(legalEntity1)
+                .addLegalEntitiesItem(legalEntity2);
+
         when(legalEntityIntegrationApi.getLegalEntities(any()))
-                .thenReturn(Flux.just(legalEntity1, legalEntity2));
+                .thenReturn(Mono.just(getLegalEntityListResponse));
 
-        Flux<LegalEntity> legalEntities = legalEntityIntegrationService.retrieveLegalEntities(
-                LegalEntityIngestPullRequest.builder().legalEntityExternalId("externalId").build());
+        GetLegalEntityListResponse response = legalEntityIntegrationService.retrieveLegalEntities(
+                LegalEntityIngestPullRequest.builder().legalEntityExternalId("externalId").build()).block();
 
-        assertEquals(2, legalEntities.collectList().block().size());
+        assertEquals(2, response.getLegalEntities().size());
     }
 
     @Test
     void callIntegrationService_EmptyLegalEntityList() throws UnsupportedOperationException {
         when(legalEntityIntegrationApi.getLegalEntities(any()))
-                .thenReturn(Flux.just());
+                .thenReturn(Mono.empty());
 
-        Flux<LegalEntity> legalEntities = legalEntityIntegrationService.retrieveLegalEntities(
-                LegalEntityIngestPullRequest.builder().legalEntityExternalId("externalId").build());
+        GetLegalEntityListResponse response = legalEntityIntegrationService.retrieveLegalEntities(
+                LegalEntityIngestPullRequest.builder().legalEntityExternalId("externalId").build()).block();
 
-        assertEquals(0, legalEntities.collectList().block().size());
+        assertNull(response);
     }
 }
 
