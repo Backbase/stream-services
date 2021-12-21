@@ -8,7 +8,7 @@ servers:
 tags:
   - name: ProductIntegration
 paths:
-  /service-api/v2/product-group:
+  /integration-api/v2/product-group:
     get:
       tags:
         - ProductIntegration

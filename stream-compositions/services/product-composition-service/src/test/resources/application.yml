@@ -12,7 +12,17 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://token-converter:8080/oauth/token
+            token-uri: http://localhost:10000/oauth/token
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
+      enabled: false
+      discovery:
+        enabled: true
+  activemq:
+    broker-url: vm://activemq
+
 sso:
   jwt:
     internal:
@@ -22,6 +32,7 @@ sso:
         key:
           type: ENV
           value: SIG_SECRET_KEY
+
 backbase:
   mtls:
     enabled: false
@@ -43,10 +54,10 @@ backbase:
       identity-integration-base-url: http://identity-integration-service:8080
 
     compositions:
-      legal-entity:
+      product:
         enable-completed-events: false
         enable-failed-events: true
-        legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
+        product-integration-url: http://localhost:18000
 
 logging:
   level:

@@ -1,15 +1,16 @@
 package com.backbase.stream.compositions.product.http;
 
+import com.backbase.stream.compositions.product.api.ProductCompositionApi;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
-import com.backbase.stream.compositions.product.api.ProductCompositionApi;
 import com.backbase.stream.compositions.product.model.IngestionResponse;
 import com.backbase.stream.compositions.product.model.PullIngestionRequest;
 import com.backbase.stream.compositions.product.model.PushIngestionRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
@@ -31,8 +32,7 @@ public class ProductController implements ProductCompositionApi {
             @Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
         return productIngestionService
                 .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
-                .map(this::mapIngestionToResponse)
-                .map(ResponseEntity::ok);
+                .map(this::mapIngestionToResponse);
     }
 
     /**
@@ -43,8 +43,7 @@ public class ProductController implements ProductCompositionApi {
             @Valid Mono<PushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
         return productIngestionService
                 .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
-                .map(this::mapIngestionToResponse)
-                .map(ResponseEntity::ok);
+                .map(this::mapIngestionToResponse);
     }
 
     /**
@@ -74,11 +73,13 @@ public class ProductController implements ProductCompositionApi {
     /**
      * Builds ingestion response for API endpoint.
      *
-     * @param response ProductIngestResponse
+     * @param response ProductCatalogIngestResponse
      * @return IngestionResponse
      */
-    private IngestionResponse mapIngestionToResponse(ProductIngestResponse response) {
-        return new IngestionResponse()
-                .withProductGgroup(this.mapper.mapStreamToComposition(response.getProductGroup()));
+    private ResponseEntity<IngestionResponse> mapIngestionToResponse(ProductIngestResponse response) {
+        return new ResponseEntity<>(
+                new IngestionResponse()
+                        .withProductGgroup(mapper.mapStreamToComposition(response.getProductGroup())),
+                HttpStatus.CREATED);
     }
 }
