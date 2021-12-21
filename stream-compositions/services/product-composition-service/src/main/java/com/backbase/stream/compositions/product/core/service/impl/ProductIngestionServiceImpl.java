@@ -30,9 +30,8 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      */
     public Mono<ProductIngestResponse> ingestPull(Mono<ProductIngestPullRequest> ingestPullRequest) {
         return ingestPullRequest
-                .flatMap(productIntegrationService::retrieveProductGroup)
-                .map(item -> mapper.mapIntegrationToStream(item.getProductGroup()))
-                .flatMap(this::sendProductGroupToDbs)
+                .map(this::pullProductGroup)
+                .flatMap(this::sendToDbs)
                 .doOnSuccess(this::handleSuccess)
                 .map(this::buildResponse);
     }
@@ -48,13 +47,25 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
     }
 
     /**
+     * Pulls and remap product group from integration service.
+     *
+     * @param request ProductIngestPullRequest
+     * @return ProductGroup
+     */
+    private Mono<ProductGroup> pullProductGroup(ProductIngestPullRequest request) {
+        return productIntegrationService
+                .pullProductGroup(request)
+                .map(mapper::mapIntegrationToStream);
+    }
+
+    /**
      * Ingests product group to DBS.
      *
      * @param productGroup Product group
-     * @return Ingested legal entities
+     * @return Ingested product group
      */
-    private Mono<ProductGroup> sendProductGroupToDbs(ProductGroup productGroup) {
-        return Mono.just(productGroup)
+    private Mono<ProductGroup> sendToDbs(Mono<ProductGroup> productGroup) {
+        return productGroup
                 .map(ProductGroupTask::new)
                 .flatMap(productIngestionSaga::process)
                 .map(ProductGroupTask::getData);

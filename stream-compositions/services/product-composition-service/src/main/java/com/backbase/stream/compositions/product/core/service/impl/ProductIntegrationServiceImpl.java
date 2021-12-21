@@ -1,8 +1,8 @@
 package com.backbase.stream.compositions.product.core.service.impl;
 
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
-import com.backbase.stream.compositions.integration.product.model.GetProductGroupRequest;
-import com.backbase.stream.compositions.integration.product.model.GetProductGroupResponse;
+import com.backbase.stream.compositions.integration.product.model.ProductGroup;
+import com.backbase.stream.compositions.integration.product.model.PullProductGroupResponse;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
 import lombok.AllArgsConstructor;
@@ -16,12 +16,12 @@ import reactor.core.publisher.Mono;
 public class ProductIntegrationServiceImpl implements ProductIntegrationService {
     private final ProductIntegrationApi productIntegrationApi;
 
-    public Mono<GetProductGroupResponse> retrieveProductGroup(ProductIngestPullRequest ingestPullRequest) {
-        return productIntegrationApi.getProductGroup(prepareRequest(ingestPullRequest));
-    }
-
-    private GetProductGroupRequest prepareRequest(ProductIngestPullRequest ingestPullRequest) {
-        return new GetProductGroupRequest()
-                .legalEntityExternalId(ingestPullRequest.getLegalEntityExternalId());
+    /**
+     * {@inheritDoc}
+     */
+    public Mono<ProductGroup> pullProductGroup(ProductIngestPullRequest ingestPullRequest) {
+        return productIntegrationApi
+                .pullProductGroup(ingestPullRequest.getLegalEntityExternalId())
+                .map(PullProductGroupResponse::getProductGroup);
     }
 }

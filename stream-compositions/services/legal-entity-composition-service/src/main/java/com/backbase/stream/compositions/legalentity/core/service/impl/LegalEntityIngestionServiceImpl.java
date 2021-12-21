@@ -40,12 +40,24 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Pulls and remaps legal entity from integration service.
+     *
+     * @param request LegalEntityIngestPullRequest
+     * @return LegalEntity
+     */
     private Mono<LegalEntity> pullLegalEntity(LegalEntityIngestPullRequest request) {
         return legalEntityIntegrationService
                 .pullLegalEntity(request)
                 .map(mapper::mapIntegrationToStream);
     }
 
+    /**
+     * Sends product group to DBS.
+     *
+     * @param legalEntity LegalEntity
+     * @return LegalEntity
+     */
     private Mono<LegalEntity> sendToDbs(Mono<LegalEntity> legalEntity) {
         return legalEntity
                 .map(LegalEntityTask::new)

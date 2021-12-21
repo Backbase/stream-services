@@ -9,18 +9,18 @@ tags:
   - name: ProductIntegration
 paths:
   /service-api/v2/product-group:
-    post:
+    get:
       tags:
         - ProductIntegration
-      summary: Gets product group.
-      description: Gets product group.
-      operationId: getProductGroup
-      requestBody:
-        description: Gets product group request.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GetProductGroupRequest'
+      summary: Pulls product group.
+      description: Pulls product group.
+      operationId: pullProductGroup
+      parameters:
+        - in: query
+          name: externalId
+          schema:
+            type: string
+          required: true
 
       responses:
         "200":
@@ -28,7 +28,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetProductGroupResponse'
+                $ref: '#/components/schemas/PullProductGroupResponse'
 
         "400":
           description: BadRequest
@@ -53,13 +53,7 @@ components:
         message:
           type: string
 
-    GetProductGroupRequest:
-      type: object
-      properties:
-        legalEntityExternalId:
-          type: string
-
-    GetProductGroupResponse:
+    PullProductGroupResponse:
       type: object
       properties:
         productGroup:

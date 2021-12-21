@@ -1,6 +1,5 @@
 package com.backbase.stream.compositions.product.core.service.impl;
 
-import com.backbase.stream.compositions.integration.product.model.GetProductGroupResponse;
 import com.backbase.stream.compositions.integration.product.model.ProductGroup;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
@@ -50,9 +49,8 @@ class ProductIngestionServiceImplTest {
                 .build());
         ProductGroup productGroup = new ProductGroup();
 
-        GetProductGroupResponse getProductGroupResponse = new GetProductGroupResponse().productGroup(productGroup);
-        when(productIntegrationService.retrieveProductGroup(productIngestPullRequest.block()))
-                .thenReturn(Mono.just(getProductGroupResponse));
+        when(productIntegrationService.pullProductGroup(productIngestPullRequest.block()))
+                .thenReturn(Mono.just(productGroup));
 
         when(mapper.mapIntegrationToStream(productGroup))
                 .thenReturn(new com.backbase.stream.legalentity.model.ProductGroup());

@@ -110,6 +110,6 @@ class ProductCatalogControllerIT extends IntegrationTest {
         URI uri = URI.create("/service-api/v2/pull-ingestion");
         WebTestClient webTestClient = WebTestClient.bindToController(productCatalogController).build();
 
-        webTestClient.post().uri(uri).exchange().expectStatus().isOk();
+        webTestClient.post().uri(uri).exchange().expectStatus().isCreated();
     }
 }
