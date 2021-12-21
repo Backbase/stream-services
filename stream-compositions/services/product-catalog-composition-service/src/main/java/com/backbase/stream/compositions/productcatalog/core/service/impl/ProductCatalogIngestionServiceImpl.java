@@ -23,10 +23,9 @@ public class ProductCatalogIngestionServiceImpl implements ProductCatalogIngesti
 
     @Override
     public Mono<ProductCatalogIngestResponse> ingestPull() {
-        return productCatalogIntegrationService
-                .retrieveProductCatalog()
-                .map(mapper::mapIntegrationToStream)
-                .flatMap(reactiveProductCatalogService::setupProductCatalog)
+        return this
+                .pullProductCatalog()
+                .flatMap(this::sendToDbs)
                 .doOnSuccess(this::handleSuccess)
                 .map(this::buildResponse);
     }
@@ -34,6 +33,16 @@ public class ProductCatalogIngestionServiceImpl implements ProductCatalogIngesti
     @Override
     public Mono<ProductCatalogIngestResponse> ingestPush(Mono<ProductCatalogIngestPushRequest> ingestPullRequest) {
         throw new UnsupportedOperationException();
+    }
+
+    private Mono<ProductCatalog> pullProductCatalog() {
+        return productCatalogIntegrationService
+                .pullProductCatalog()
+                .map(mapper::mapIntegrationToStream);
+    }
+
+    private Mono<ProductCatalog> sendToDbs(ProductCatalog productCatalog) {
+        return reactiveProductCatalogService.setupProductCatalog(productCatalog);
     }
 
     private ProductCatalogIngestResponse buildResponse(ProductCatalog productCatalog) {

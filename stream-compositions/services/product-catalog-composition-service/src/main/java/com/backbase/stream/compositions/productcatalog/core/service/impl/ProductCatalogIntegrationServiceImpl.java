@@ -1,8 +1,8 @@
 package com.backbase.stream.compositions.productcatalog.core.service.impl;
 
 import com.backbase.stream.compositions.integration.productcatalog.api.ProductCatalogIntegrationApi;
-import com.backbase.stream.compositions.integration.productcatalog.model.GetProductGroupResponse;
 import com.backbase.stream.compositions.integration.productcatalog.model.ProductCatalog;
+import com.backbase.stream.compositions.integration.productcatalog.model.PullProductCatalogResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIntegrationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +15,13 @@ import reactor.core.publisher.Mono;
 public class ProductCatalogIntegrationServiceImpl implements ProductCatalogIntegrationService {
     private final ProductCatalogIntegrationApi productCatalogIntegrationApi;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Mono<ProductCatalog> retrieveProductCatalog() {
-        return productCatalogIntegrationApi.getProductCatalog().map(GetProductGroupResponse::getProductCatalog);
+    public Mono<ProductCatalog> pullProductCatalog() {
+        return productCatalogIntegrationApi
+                .pullProductCatalog()
+                .map(PullProductCatalogResponse::getProductCatalog);
     }
 }

@@ -50,7 +50,7 @@ paths:
               $ref: '#/components/schemas/PushIngestionRequest'
       responses:
         "201":
-          description: Product group ingested.
+          description: Product catalog ingested.
           content:
             application/json:
               schema:

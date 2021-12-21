@@ -1,8 +1,10 @@
 {
-  "productKinds": [
-    {
-      "externalKindId": "externalKindId",
-      "kindName": "kindName"
-    }
-  ]
+  "productCatalog": {
+    "productKinds": [
+      {
+        "externalKindId": "externalKindId",
+        "kindName": "kindName"
+      }
+    ]
+  }
 }

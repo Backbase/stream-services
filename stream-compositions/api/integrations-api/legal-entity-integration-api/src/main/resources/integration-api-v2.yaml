@@ -12,9 +12,9 @@ paths:
     get:
       tags:
         - LegalEntityIntegration
-      summary: Gets legal entity.
-      description: Gets legal entity.
-      operationId: getLegalEntities
+      summary: Pulls legal entity.
+      description: Pulls legal entity.
+      operationId: pullLegalEntity
       parameters:
         - in: query
           name: externalId
@@ -24,11 +24,11 @@ paths:
 
       responses:
         "200":
-          description: Legal Entity composition returned.
+          description: Legal Entity successfully returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetLegalEntityListResponse'
+                $ref: '#/components/schemas/PullLegalEntityResponse'
         "400":
           description: BadRequest
           content:
@@ -52,13 +52,11 @@ components:
         message:
           type: string
 
-    GetLegalEntityListResponse:
+    PullLegalEntityResponse:
       type: object
       properties:
-        legalEntities:
-          type: array
-          items:
-            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
+        legalEntity:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
 
     InternalServerError:
       required:

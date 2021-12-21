@@ -2,7 +2,6 @@ package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
-import com.backbase.stream.compositions.integration.legalentity.model.GetLegalEntityListResponse;
 import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
@@ -17,8 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -49,9 +47,8 @@ class LegalEntityIngestionServiceImplTest {
                 .legalEntityExternalId("externalId")
                 .build());
         LegalEntity legalEntity = new LegalEntity().name("legalEntityName");
-        GetLegalEntityListResponse getLegalEntityListResponse = new GetLegalEntityListResponse().addLegalEntitiesItem(legalEntity);
-        when(legalEntityIntegrationService.retrieveLegalEntities(legalEntityIngestPullRequest.block()))
-                .thenReturn(Mono.just(getLegalEntityListResponse));
+        when(legalEntityIntegrationService.pullLegalEntity(legalEntityIngestPullRequest.block()))
+                .thenReturn(Mono.just(legalEntity));
 
         when(mapper.mapIntegrationToStream(legalEntity))
                 .thenReturn(new com.backbase.stream.legalentity.model.LegalEntity().name(legalEntity.getName()));
@@ -63,8 +60,8 @@ class LegalEntityIngestionServiceImplTest {
                 .thenReturn(Mono.just(legalEntityTask));
 
         Mono<LegalEntityIngestResponse> legalEntityIngestResponseMono = legalEntityIngestionService.ingestPull(legalEntityIngestPullRequest);
-        assertEquals(1, legalEntityIngestResponseMono.block().getLegalEntities().size());
-        assertEquals("legalEntityName", legalEntityIngestResponseMono.block().getLegalEntities().get(0).getName());
+        assertNotNull(legalEntityIngestResponseMono.block());
+        assertEquals("legalEntityName", legalEntityIngestResponseMono.block().getLegalEntity().getName());
     }
 
     @Test

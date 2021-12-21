@@ -27,8 +27,6 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -104,11 +102,11 @@ class LegalEntityControllerIT extends IntegrationTest {
 
     @Test
     void pullIngestLegalEntity_Success() throws Exception {
-        LegalEntity[] legalEntity = new Gson()
-                .fromJson(readContentFromClasspath("integration-data/legal-entities.json"), LegalEntity[].class);
+        LegalEntity legalEntity = new Gson()
+                .fromJson(readContentFromClasspath("integration-data/legal-entity.json"), LegalEntity.class);
 
         when(legalEntitySaga.executeTask(any()))
-                .thenReturn(Mono.just(new LegalEntityTask(legalEntity[0])));
+                .thenReturn(Mono.just(new LegalEntityTask(legalEntity)));
 
         URI uri = URI.create("/service-api/v2/pull-ingestion");
         PullIngestionRequest pullIngestionRequest =
@@ -116,19 +114,17 @@ class LegalEntityControllerIT extends IntegrationTest {
 
         WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
         webTestClient.post().uri(uri).body(Mono.just(pullIngestionRequest), PullIngestionRequest.class).exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().valueEquals("Content-Type", "application/json")
-                .expectBody().jsonPath("$.legalEntities[0].name").isEqualTo("Test Legal Entity");
+                .expectBody().jsonPath("$.legalEntity.name").isEqualTo("Test Legal Entity");
     }
 
     @Test
-    void pushIngestLegalEntity_Fail() throws Exception {
+    void pushIngestLegalEntity_Fail() {
         URI uri = URI.create("/service-api/v2/push-ingestion");
 
-        List<com.backbase.stream.compositions.legalentity.model.LegalEntity> legalEntities = new ArrayList<>();
-        legalEntities.add(new com.backbase.stream.compositions.legalentity.model.LegalEntity());
-
-        PushIngestionRequest pushIngestionRequest = new PushIngestionRequest().withLegalEntities(legalEntities);
+        PushIngestionRequest pushIngestionRequest = new PushIngestionRequest()
+                .withLegalEntity(new com.backbase.stream.compositions.legalentity.model.LegalEntity());
 
         WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
         webTestClient.post().uri(uri).body(Mono.just(pushIngestionRequest), PullIngestionRequest.class).exchange()

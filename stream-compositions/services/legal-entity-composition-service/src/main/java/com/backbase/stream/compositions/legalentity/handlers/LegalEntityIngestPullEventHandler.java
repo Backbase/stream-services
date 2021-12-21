@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
@@ -69,12 +68,7 @@ public class LegalEntityIngestPullEventHandler implements EventHandler<LegalEnti
         }
         LegalEntityIngestCompletedEvent event = new LegalEntityIngestCompletedEvent()
                 .withEventId(UUID.randomUUID().toString())
-                .withLegalEntities(
-                        response.getLegalEntities()
-                                .stream()
-                                .map(mapper::mapStreamToEvent)
-                                .collect(Collectors.toList())
-                );
+                .withLegalEntity(mapper.mapStreamToEvent(response.getLegalEntity()));
 
         EnvelopedEvent<LegalEntityIngestCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);

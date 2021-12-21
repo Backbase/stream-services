@@ -4,7 +4,7 @@ import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityIngestPullEvent;
 import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties;
-import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
+import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.legalentity.model.LegalEntity;
@@ -26,19 +26,16 @@ class LegalEntityIngestPullEventHandlerTest {
     private LegalEntityIngestionService legalEntityIngestionService;
 
     @Mock
-    LegalEntityMapperImpl mapper;
+    LegalEntityMapper mapper;
 
     @Mock
     EventBus eventBus;
 
     @Test
     void testHandleEvent_Completed() {
-        List<LegalEntity> legalEntities = new ArrayList<>();
-        legalEntities.add(new LegalEntity().name("Legal Entity"));
-
         Mono<LegalEntityIngestResponse> responseMono = Mono.just(
                 LegalEntityIngestResponse
-                        .builder().legalEntities(legalEntities).build());
+                        .builder().legalEntity(new LegalEntity().name("Legal Entity")).build());
 
         lenient().when(legalEntityIngestionService.ingestPull(any())).thenReturn(responseMono);
 

@@ -2,7 +2,6 @@ package com.nackbase.stream.compositions.productcatalog.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalogIngestPushEvent;
-import com.backbase.stream.compositions.productcatalog.core.config.ProductCatalogConfigurationProperties;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
 import com.backbase.stream.compositions.productcatalog.handlers.ProductCatalogIngestPushEventHandler;
@@ -13,8 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;

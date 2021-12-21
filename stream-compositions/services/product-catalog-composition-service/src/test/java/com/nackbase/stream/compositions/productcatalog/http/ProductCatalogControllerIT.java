@@ -40,7 +40,6 @@ import static org.mockserver.model.HttpResponse.response;
 class ProductCatalogControllerIT extends IntegrationTest {
     private static final int TOKEN_CONVERTER_PORT = 10000;
     private static final int INTEGRATION_SERVICE_PORT = 18000;
-    private static final int ACTIVEMQ_PORT = 16161;
     private ClientAndServer integrationServer;
     private ClientAndServer tokenConverterServer;
     private MockServerClient integrationServerClient;
@@ -109,9 +108,8 @@ class ProductCatalogControllerIT extends IntegrationTest {
                 .thenReturn(Mono.just(productCatalog));
 
         URI uri = URI.create("/service-api/v2/pull-ingestion");
-
         WebTestClient webTestClient = WebTestClient.bindToController(productCatalogController).build();
 
-        webTestClient.post().uri(uri).exchange().expectStatus().is5xxServerError();
+        webTestClient.post().uri(uri).exchange().expectStatus().isOk();
     }
 }

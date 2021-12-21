@@ -12,17 +12,17 @@ paths:
     get:
       tags:
         - ProductCatalogIntegration
-      summary: Gets product catalog.
-      description: Gets product catalog.
-      operationId: getProductCatalog
+      summary: Pulls product catalog.
+      description: Pulls product catalog.
+      operationId: pullProductCatalog
 
       responses:
-        "200":
-          description: Product group successfully returned.
+        "201":
+          description: Product catalog successfully returned.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetProductGroupResponse'
+                $ref: '#/components/schemas/PullProductCatalogResponse'
 
         "400":
           description: BadRequest
@@ -47,7 +47,7 @@ components:
         message:
           type: string
 
-    GetProductGroupResponse:
+    PullProductCatalogResponse:
       type: object
       properties:
         productCatalog:

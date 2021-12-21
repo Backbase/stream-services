@@ -9,5 +9,5 @@ public interface ProductCatalogIntegrationService {
      *
      * @return Product catalog
      */
-    Mono<ProductCatalog> retrieveProductCatalog();
+    Mono<ProductCatalog> pullProductCatalog();
 }

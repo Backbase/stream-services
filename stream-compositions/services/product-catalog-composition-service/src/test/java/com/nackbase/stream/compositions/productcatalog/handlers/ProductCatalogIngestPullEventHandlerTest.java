@@ -54,12 +54,8 @@ class ProductCatalogIngestPullEventHandlerTest {
 
     @Test
     void testHandleEvent_Failed() {
-        ProductCatalog productCatalog = new ProductCatalog();
-
         when(productCatalogIngestionService.ingestPull()).thenThrow(new RuntimeException());
-
         ProductCatalogConfigurationProperties properties = new ProductCatalogConfigurationProperties();
-
         ProductCatalogIngestPullEventHandler handler = new ProductCatalogIngestPullEventHandler(
                 properties,
                 productCatalogIngestionService,

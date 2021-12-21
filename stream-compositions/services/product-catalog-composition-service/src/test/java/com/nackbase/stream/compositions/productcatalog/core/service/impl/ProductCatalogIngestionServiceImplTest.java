@@ -7,7 +7,6 @@ import com.backbase.stream.compositions.productcatalog.core.service.ProductCatal
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIntegrationService;
 import com.backbase.stream.compositions.productcatalog.core.service.impl.ProductCatalogIngestionServiceImpl;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
-import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapperImpl;
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +46,7 @@ class ProductCatalogIngestionServiceImplTest {
         when(mapper.mapIntegrationToStream(any()))
                 .thenReturn(new com.backbase.stream.productcatalog.model.ProductCatalog());
 
-        when(productCatalogIntegrationService.retrieveProductCatalog())
+        when(productCatalogIntegrationService.pullProductCatalog())
                 .thenReturn(Mono.just(new ProductCatalog()));
 
         when(reactiveProductCatalogService.setupProductCatalog(any())).thenReturn(Mono.just(new com.backbase.stream.productcatalog.model.ProductCatalog()));
