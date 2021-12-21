@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.productcatalog.core.service;
 
+import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPullRequest;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPushRequest;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import reactor.core.publisher.Mono;
@@ -10,7 +11,7 @@ public interface ProductCatalogIngestionService {
      *
      * @return ProductCatalogIngestResponse
      */
-    Mono<ProductCatalogIngestResponse> ingestPull();
+    Mono<ProductCatalogIngestResponse> ingestPull(Mono<ProductCatalogIngestPullRequest> ingestPullRequest);
 
     /**
      * Ingests product catalog in push mode.

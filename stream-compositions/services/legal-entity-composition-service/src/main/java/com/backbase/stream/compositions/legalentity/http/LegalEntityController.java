@@ -56,6 +56,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
         return LegalEntityIngestPullRequest
                 .builder()
                 .legalEntityExternalId(request.getLegalEntityExternalId())
+                .additionalParameters(request.getAdditionalParameters())
                 .build();
     }
 

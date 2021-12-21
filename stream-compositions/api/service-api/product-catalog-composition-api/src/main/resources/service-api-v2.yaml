@@ -15,6 +15,12 @@ paths:
       summary: Ingests product catalog (in pull mode).
       description: Ingests product catalog (in pull mode).
       operationId: pullIngestProductCatalog
+      requestBody:
+        description: Pull Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PullIngestionRequest'
       responses:
         "201":
           description: Product group ingested.
@@ -77,6 +83,14 @@ components:
       properties:
         message:
           type: string
+
+    PullIngestionRequest:
+      type: object
+      properties:
+        additionalParameters:
+          type: object
+          additionalProperties:
+            type: string
 
     PushIngestionRequest:
       type: object

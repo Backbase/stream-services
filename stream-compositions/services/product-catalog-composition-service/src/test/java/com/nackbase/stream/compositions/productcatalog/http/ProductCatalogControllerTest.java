@@ -6,6 +6,7 @@ import com.backbase.stream.compositions.productcatalog.http.ProductCatalogContro
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
 import com.backbase.stream.compositions.productcatalog.model.IngestionResponse;
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalog;
+import com.backbase.stream.compositions.productcatalog.model.PullIngestionRequest;
 import com.backbase.stream.compositions.productcatalog.model.PushIngestionRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,15 +44,16 @@ class ProductCatalogControllerTest {
 
     @Test
     void testPullIngestion_Success() {
-        when(productCatalogIngestionService.ingestPull()).thenReturn(
+        when(productCatalogIngestionService.ingestPull(any())).thenReturn(
                 Mono.just(ProductCatalogIngestResponse.builder()
                         .build()));
 
-        ResponseEntity<IngestionResponse> responseEntity = controller.pullIngestProductCatalog(null).block();
+        PullIngestionRequest request = new PullIngestionRequest();
+        ResponseEntity<IngestionResponse> responseEntity = controller.pullIngestProductCatalog(Mono.just(request), null).block();
         IngestionResponse ingestionResponse = responseEntity.getBody();
         assertNotNull(ingestionResponse);
         assertNotNull(ingestionResponse.getProductCatalog());
-        verify(productCatalogIngestionService).ingestPull();
+        verify(productCatalogIngestionService).ingestPull(any());
     }
 
     @Test

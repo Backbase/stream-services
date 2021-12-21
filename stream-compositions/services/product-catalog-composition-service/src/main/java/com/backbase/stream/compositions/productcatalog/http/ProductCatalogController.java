@@ -1,11 +1,13 @@
 package com.backbase.stream.compositions.productcatalog.http;
 
 import com.backbase.stream.compositions.productcatalog.api.ProductCatalogCompositionApi;
+import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPullRequest;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPushRequest;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
 import com.backbase.stream.compositions.productcatalog.model.IngestionResponse;
+import com.backbase.stream.compositions.productcatalog.model.PullIngestionRequest;
 import com.backbase.stream.compositions.productcatalog.model.PushIngestionRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,9 +25,10 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
     private final ProductCatalogMapper mapper;
 
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pullIngestProductCatalog(ServerWebExchange exchange) {
+    public Mono<ResponseEntity<IngestionResponse>> pullIngestProductCatalog(
+            @Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
         return productCatalogIngestionService
-                .ingestPull()
+                .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
                 .map(this::mapIngestionToResponse);
     }
 
@@ -35,6 +38,19 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
         return productCatalogIngestionService
                 .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
                 .map(this::mapIngestionToResponse);
+    }
+
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param request PullIngestionRequest
+     * @return ProductIngestPullRequest
+     */
+    private ProductCatalogIngestPullRequest buildPullRequest(PullIngestionRequest request) {
+        return ProductCatalogIngestPullRequest
+                .builder()
+                .additionalParameters(request.getAdditionalParameters())
+                .build();
     }
 
     /**

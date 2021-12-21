@@ -34,7 +34,7 @@ class LegalEntityIntegrationServiceImplTest {
 
         PullLegalEntityResponse getLegalEntityListResponse = new PullLegalEntityResponse().legalEntity(legalEntity1);
 
-        when(legalEntityIntegrationApi.pullLegalEntity(any()))
+        when(legalEntityIntegrationApi.pullLegalEntity(any(), any()))
                 .thenReturn(Mono.just(getLegalEntityListResponse));
 
         LegalEntity legalEntityResponse = legalEntityIntegrationService.pullLegalEntity(
@@ -45,7 +45,7 @@ class LegalEntityIntegrationServiceImplTest {
 
     @Test
     void callIntegrationService_EmptyLegalEntityList() throws UnsupportedOperationException {
-        when(legalEntityIntegrationApi.pullLegalEntity(any()))
+        when(legalEntityIntegrationApi.pullLegalEntity(any(), any()))
                 .thenReturn(Mono.empty());
 
         LegalEntity legalEntity = legalEntityIntegrationService.pullLegalEntity(

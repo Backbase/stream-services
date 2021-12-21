@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.productcatalog.core.service.impl;
 
+import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPullRequest;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPushRequest;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
@@ -22,9 +23,9 @@ public class ProductCatalogIngestionServiceImpl implements ProductCatalogIngesti
     private final ProductCatalogIntegrationService productCatalogIntegrationService;
 
     @Override
-    public Mono<ProductCatalogIngestResponse> ingestPull() {
-        return this
-                .pullProductCatalog()
+    public Mono<ProductCatalogIngestResponse> ingestPull(Mono<ProductCatalogIngestPullRequest> ingestPullRequest) {
+        return ingestPullRequest
+                .map(this::pullProductCatalog)
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(this::handleSuccess)
                 .map(this::buildResponse);
@@ -35,14 +36,14 @@ public class ProductCatalogIngestionServiceImpl implements ProductCatalogIngesti
         throw new UnsupportedOperationException();
     }
 
-    private Mono<ProductCatalog> pullProductCatalog() {
+    private Mono<ProductCatalog> pullProductCatalog(ProductCatalogIngestPullRequest ingestPullRequest) {
         return productCatalogIntegrationService
-                .pullProductCatalog()
+                .pullProductCatalog(ingestPullRequest)
                 .map(mapper::mapIntegrationToStream);
     }
 
-    private Mono<ProductCatalog> sendToDbs(ProductCatalog productCatalog) {
-        return reactiveProductCatalogService.setupProductCatalog(productCatalog);
+    private Mono<ProductCatalog> sendToDbs(Mono<ProductCatalog> productCatalog) {
+        return productCatalog.flatMap(reactiveProductCatalogService::setupProductCatalog);
     }
 
     private ProductCatalogIngestResponse buildResponse(ProductCatalog productCatalog) {

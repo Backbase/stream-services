@@ -2,6 +2,7 @@ package com.nackbase.stream.compositions.productcatalog.http;
 
 import com.backbase.stream.compositions.productcatalog.ProductCatalogCompositionApplication;
 import com.backbase.stream.compositions.productcatalog.http.ProductCatalogController;
+import com.backbase.stream.compositions.productcatalog.model.PushIngestionRequest;
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
 import com.backbase.streams.compositions.test.IntegrationTest;
@@ -107,9 +108,11 @@ class ProductCatalogControllerIT extends IntegrationTest {
         when(reactiveProductCatalogService.setupProductCatalog(any()))
                 .thenReturn(Mono.just(productCatalog));
 
+
+        PushIngestionRequest request = new PushIngestionRequest();
         URI uri = URI.create("/service-api/v2/pull-ingestion");
         WebTestClient webTestClient = WebTestClient.bindToController(productCatalogController).build();
 
-        webTestClient.post().uri(uri).exchange().expectStatus().isCreated();
+        webTestClient.post().uri(uri).body(Mono.just(request), PushIngestionRequest.class).exchange().expectStatus().isCreated();
     }
 }

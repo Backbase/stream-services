@@ -1,6 +1,7 @@
 package com.nackbase.stream.compositions.productcatalog.core.service.impl;
 
 import com.backbase.stream.compositions.integration.productcatalog.model.ProductCatalog;
+import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPullRequest;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPushRequest;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
@@ -46,12 +47,13 @@ class ProductCatalogIngestionServiceImplTest {
         when(mapper.mapIntegrationToStream(any()))
                 .thenReturn(new com.backbase.stream.productcatalog.model.ProductCatalog());
 
-        when(productCatalogIntegrationService.pullProductCatalog())
+        when(productCatalogIntegrationService.pullProductCatalog(any()))
                 .thenReturn(Mono.just(new ProductCatalog()));
 
         when(reactiveProductCatalogService.setupProductCatalog(any())).thenReturn(Mono.just(new com.backbase.stream.productcatalog.model.ProductCatalog()));
 
-        ProductCatalogIngestResponse productCatalogIngestResponse = productCatalogIngestionService.ingestPull().block();
+        ProductCatalogIngestPullRequest request = ProductCatalogIngestPullRequest.builder().build();
+        ProductCatalogIngestResponse productCatalogIngestResponse = productCatalogIngestionService.ingestPull(Mono.just(request)).block();
         assertNotNull(productCatalogIngestResponse.getProductCatalog());
     }
 

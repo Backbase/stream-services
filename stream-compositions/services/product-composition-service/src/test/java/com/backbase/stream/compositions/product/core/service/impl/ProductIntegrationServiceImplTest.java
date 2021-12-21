@@ -33,7 +33,7 @@ class ProductIntegrationServiceImplTest {
 
         PullProductGroupResponse getProductGroupResponse = new PullProductGroupResponse().
                 productGroup(productGroup);
-        when(productIntegrationApi.pullProductGroup(any()))
+        when(productIntegrationApi.pullProductGroup(any(),any()))
                 .thenReturn(Mono.just(getProductGroupResponse));
 
         ProductIngestPullRequest request = ProductIngestPullRequest.builder().legalEntityExternalId("externalId").build();
@@ -44,7 +44,7 @@ class ProductIntegrationServiceImplTest {
 
     @Test
     void callIntegrationService_EmptyLegalEntityList() throws UnsupportedOperationException {
-        when(productIntegrationApi.pullProductGroup(any())).thenReturn(Mono.empty());
+        when(productIntegrationApi.pullProductGroup(any(), any())).thenReturn(Mono.empty());
 
         ProductIngestPullRequest request = ProductIngestPullRequest.builder().legalEntityExternalId("externalId").build();
         ProductGroup response = productIntegrationService.pullProductGroup(request).block();

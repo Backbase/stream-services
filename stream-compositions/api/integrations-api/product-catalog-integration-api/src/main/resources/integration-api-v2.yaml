@@ -16,6 +16,14 @@ paths:
       description: Pulls product catalog.
       operationId: pullProductCatalog
 
+      parameters:
+        - in: query
+          name: additionalParameters
+          schema:
+            type: object
+            additionalProperties:
+              type: string
+
       responses:
         "201":
           description: Product catalog successfully returned.

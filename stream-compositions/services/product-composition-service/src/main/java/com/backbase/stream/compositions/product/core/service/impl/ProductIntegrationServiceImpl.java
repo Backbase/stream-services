@@ -21,7 +21,9 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
      */
     public Mono<ProductGroup> pullProductGroup(ProductIngestPullRequest ingestPullRequest) {
         return productIntegrationApi
-                .pullProductGroup(ingestPullRequest.getLegalEntityExternalId())
+                .pullProductGroup(
+                        ingestPullRequest.getLegalEntityExternalId()
+                        , ingestPullRequest.getParameters())
                 .map(PullProductGroupResponse::getProductGroup);
     }
 }

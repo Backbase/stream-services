@@ -89,6 +89,10 @@ components:
       properties:
         legalEntityExternalId:
           type: string
+        additionalParameters:
+          type: object
+          additionalProperties:
+            type: string
 
     PushIngestionRequest:
       type: object

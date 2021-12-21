@@ -36,7 +36,7 @@ class ProductCatalogIngestPullEventHandlerTest {
                 ProductCatalogIngestResponse
                         .builder().productCatalog(productCatalog).build());
 
-        lenient().when(productCatalogIngestionService.ingestPull()).thenReturn(responseMono);
+        lenient().when(productCatalogIngestionService.ingestPull(any())).thenReturn(responseMono);
         ProductCatalogConfigurationProperties properties = new ProductCatalogConfigurationProperties();
 
         ProductCatalogIngestPullEventHandler handler = new ProductCatalogIngestPullEventHandler(
@@ -49,12 +49,12 @@ class ProductCatalogIngestPullEventHandlerTest {
         envelopedEvent.setEvent(new ProductCatalogIngestPullEvent());
 
         handler.handle(envelopedEvent);
-        verify(productCatalogIngestionService).ingestPull();
+        verify(productCatalogIngestionService).ingestPull(any());
     }
 
     @Test
     void testHandleEvent_Failed() {
-        when(productCatalogIngestionService.ingestPull()).thenThrow(new RuntimeException());
+        when(productCatalogIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
         ProductCatalogConfigurationProperties properties = new ProductCatalogConfigurationProperties();
         ProductCatalogIngestPullEventHandler handler = new ProductCatalogIngestPullEventHandler(
                 properties,
@@ -66,6 +66,6 @@ class ProductCatalogIngestPullEventHandlerTest {
         envelopedEvent.setEvent(new ProductCatalogIngestPullEvent());
 
         handler.handle(envelopedEvent);
-        verify(productCatalogIngestionService).ingestPull();
+        verify(productCatalogIngestionService).ingestPull(any());
     }
 }

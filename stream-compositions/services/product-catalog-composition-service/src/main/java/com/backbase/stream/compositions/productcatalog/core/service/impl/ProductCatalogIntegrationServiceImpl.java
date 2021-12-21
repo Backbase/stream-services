@@ -3,6 +3,7 @@ package com.backbase.stream.compositions.productcatalog.core.service.impl;
 import com.backbase.stream.compositions.integration.productcatalog.api.ProductCatalogIntegrationApi;
 import com.backbase.stream.compositions.integration.productcatalog.model.ProductCatalog;
 import com.backbase.stream.compositions.integration.productcatalog.model.PullProductCatalogResponse;
+import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPullRequest;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIntegrationService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +20,9 @@ public class ProductCatalogIntegrationServiceImpl implements ProductCatalogInteg
      * {@inheritDoc}
      */
     @Override
-    public Mono<ProductCatalog> pullProductCatalog() {
+    public Mono<ProductCatalog> pullProductCatalog(ProductCatalogIngestPullRequest ingestPullRequest) {
         return productCatalogIntegrationApi
-                .pullProductCatalog()
+                .pullProductCatalog(ingestPullRequest.getAdditionalParameters())
                 .map(PullProductCatalogResponse::getProductCatalog);
     }
 }

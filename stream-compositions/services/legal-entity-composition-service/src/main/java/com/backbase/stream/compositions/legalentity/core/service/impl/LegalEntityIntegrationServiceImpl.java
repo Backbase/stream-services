@@ -21,7 +21,9 @@ public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegration
      */
     public Mono<LegalEntity> pullLegalEntity(LegalEntityIngestPullRequest ingestPullRequest) {
         return legalEntityIntegrationApi
-                .pullLegalEntity(ingestPullRequest.getLegalEntityExternalId())
+                .pullLegalEntity(
+                        ingestPullRequest.getLegalEntityExternalId(),
+                        ingestPullRequest.getAdditionalParameters())
                 .map(PullLegalEntityResponse::getLegalEntity);
     }
 }
