@@ -1,8 +1,8 @@
 package com.backbase.stream.compositions.product.core.service.impl;
 
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
-import com.backbase.stream.compositions.integration.product.model.GetProductGroupResponse;
 import com.backbase.stream.compositions.integration.product.model.ProductGroup;
+import com.backbase.stream.compositions.integration.product.model.PullProductGroupResponse;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,23 +31,23 @@ class ProductIntegrationServiceImplTest {
     void callIntegrationService_Success() throws UnsupportedOperationException {
         ProductGroup productGroup = new ProductGroup();
 
-        GetProductGroupResponse getProductGroupResponse = new GetProductGroupResponse().
+        PullProductGroupResponse getProductGroupResponse = new PullProductGroupResponse().
                 productGroup(productGroup);
-        when(productIntegrationApi.getProductGroup(any()))
+        when(productIntegrationApi.pullProductGroup(any()))
                 .thenReturn(Mono.just(getProductGroupResponse));
 
         ProductIngestPullRequest request = ProductIngestPullRequest.builder().legalEntityExternalId("externalId").build();
 
-        GetProductGroupResponse response = productIntegrationService.retrieveProductGroup(request).block();
-        assertEquals(productGroup, response.getProductGroup());
+        ProductGroup response = productIntegrationService.pullProductGroup(request).block();
+        assertEquals(productGroup, response);
     }
 
     @Test
     void callIntegrationService_EmptyLegalEntityList() throws UnsupportedOperationException {
-        when(productIntegrationApi.getProductGroup(any())).thenReturn(Mono.empty());
+        when(productIntegrationApi.pullProductGroup(any())).thenReturn(Mono.empty());
 
         ProductIngestPullRequest request = ProductIngestPullRequest.builder().legalEntityExternalId("externalId").build();
-        GetProductGroupResponse response = productIntegrationService.retrieveProductGroup(request).block();
+        ProductGroup response = productIntegrationService.pullProductGroup(request).block();
         assertEquals(null, response);
     }
 }
