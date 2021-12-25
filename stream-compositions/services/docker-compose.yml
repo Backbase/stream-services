@@ -50,10 +50,11 @@ services:
     image: harbor.backbase.eu/development/wsecu-legal-entity-ingestion-integration-service
     ports:
       - "9092:8080"
+      - "5592:5555"
     networks:
       - wsecu_bb_local
     environment:
-      - JAVA_TOOL_OPTIONS= -Deureka.client.serviceUrl.defaultZone=http://registry:8080/eureka/
+      - JAVA_TOOL_OPTIONS= -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5555 -Deureka.client.serviceUrl.defaultZone=http://registry:8080/eureka/
       - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
       - SPRING_ACTIVEMQ_USER=admin
       - SPRING_ACTIVEMQ_PASSWORD=admin

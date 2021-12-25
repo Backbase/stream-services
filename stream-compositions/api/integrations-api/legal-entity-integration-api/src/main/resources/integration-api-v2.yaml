@@ -24,7 +24,7 @@ paths:
         - in: query
           name: additionalParameters
           schema:
-            type: object
+            type: string
             additionalProperties:
               type: string
 

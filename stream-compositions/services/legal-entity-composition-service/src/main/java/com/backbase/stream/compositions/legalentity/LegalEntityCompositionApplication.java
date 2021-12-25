@@ -12,4 +12,6 @@ public class LegalEntityCompositionApplication {
     public static void main(String[] args) {
         SpringApplication.run(LegalEntityCompositionApplication.class, args);
     }
+
+
 }

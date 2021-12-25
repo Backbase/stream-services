@@ -80,6 +80,7 @@
 
     <build>
         <plugins>
+
             <!-- Unpack OpenAPI specs from zip dependencies -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -152,21 +153,48 @@
                             </configOptions>
                         </configuration>
                     </execution>
+
+<!--                    <execution>-->
+<!--                        <id>generate-legal-entity-integration-api-code</id>-->
+<!--                        <goals>-->
+<!--                            <goal>generate-webclient-embedded</goal>-->
+<!--                        </goals>-->
+<!--                        <phase>generate-sources</phase>-->
+<!--                        <configuration>-->
+<!--                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v2.0.0.yaml</inputSpec>-->
+<!--                            <apiPackage>com.backbase.stream.compositions.integration.legalentity.api</apiPackage>-->
+<!--                            <modelPackage>com.backbase.stream.compositions.integration.legalentity.model</modelPackage>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <!-- RELEASE_VERSION -->
+                <version>5.3.0</version>
+                <!-- /RELEASE_VERSION -->
+                <executions>
                     <execution>
-                        <id>generate-legal-entity-integration-api-code</id>
                         <goals>
-                            <goal>generate-webclient-embedded</goal>
+                            <goal>generate</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v2.0.0.yaml</inputSpec>
+
                             <apiPackage>com.backbase.stream.compositions.integration.legalentity.api</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.integration.legalentity.model</modelPackage>
+                            <generatorName>java</generatorName>
+                            <configOptions>
+                                <library>webclient</library>
+                                <dateLibrary>java8</dateLibrary>
+                                <sourceFolder>src/gen/java/main</sourceFolder>
+                            </configOptions>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 

@@ -16,7 +16,7 @@
     <version>3.0.0-SNAPSHOT</version>
 
     <properties>
-        <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>
+        <boat-maven-plugin.version>0.15.3-SNAPSHOT</boat-maven-plugin.version>
         <activemq.version>5.16.3</activemq.version>
         <testcontainers.version>1.12.5</testcontainers.version>
         <mock.server.version>5.11.2</mock.server.version>

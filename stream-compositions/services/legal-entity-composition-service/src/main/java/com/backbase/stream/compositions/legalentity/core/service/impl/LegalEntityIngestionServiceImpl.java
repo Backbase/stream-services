@@ -62,7 +62,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
         return legalEntity
                 .map(LegalEntityTask::new)
                 .flatMap(legalEntitySaga::executeTask)
-                .map(LegalEntityTask::getData);
+                .map(LegalEntityTask::getData );
     }
 
     private LegalEntityIngestResponse buildResponse(LegalEntity legalEnity) {
