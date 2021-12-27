@@ -902,6 +902,10 @@ components:
           $ref: '#/components/schemas/ServiceAgreement'
         customServiceAgreement:
           $ref: '#/components/schemas/ServiceAgreement'
+        additions:
+          type: object
+          additionalProperties:
+            type: string
       required:
         - name
         - external
