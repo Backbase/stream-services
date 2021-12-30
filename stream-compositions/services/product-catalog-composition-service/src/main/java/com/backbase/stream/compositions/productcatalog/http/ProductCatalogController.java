@@ -47,8 +47,7 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
      * @return ProductIngestPullRequest
      */
     private ProductCatalogIngestPullRequest buildPullRequest(PullIngestionRequest request) {
-        return ProductCatalogIngestPullRequest
-                .builder()
+        return ProductCatalogIngestPullRequest.builder()
                 .additionalParameters(request.getAdditionalParameters())
                 .build();
     }

@@ -12,16 +12,17 @@ import com.backbase.stream.productcatalog.mapper.ProductCatalogMapper;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
 import com.backbase.stream.productcatalog.model.ProductKind;
 import com.backbase.stream.productcatalog.model.ProductType;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Reactive Product Catalog Service allowing to setup a complete Product Catalog in a single call.
@@ -186,6 +187,7 @@ public class ReactiveProductCatalogService {
                     productItem.setProductKindName(productKind.getKindName());
                     productItem.setProductTypeName(productType.getTypeName());
                     productItem.setExternalTypeId(productType.getExternalTypeId());
+                    productItem.setAdditions(productType.getAdditions());
                     return productItem;
                 })
                 .flatMap(
@@ -217,6 +219,7 @@ public class ReactiveProductCatalogService {
                 productItem.setProductKindName(productKind.getKindName());
                 productItem.setProductTypeName(productType.getTypeName());
                 productItem.setExternalTypeId(productType.getExternalTypeId());
+                productItem.setAdditions(productType.getAdditions());
                 return productItem;
             })
             .flatMap(

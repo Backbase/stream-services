@@ -22,7 +22,8 @@ spring:
         enabled: true
   activemq:
     broker-url: vm://activemq
-
+  main:
+    allow-bean-definition-overriding: true
 sso:
   jwt:
     internal:

@@ -24,9 +24,10 @@ services:
       - EUREKA_INSTANCE_INSTANCE_HOSTNAME=legal-entity-composition
       - EUREKA_INSTANCE_NON-SECURE-PORT=8080
 
-  product-composition:
-    container_name: wsecu_bb_product_composition
-    image: harbor.backbase.eu/development/product-composition-service:latest
+  product-catalog-composition:
+    restart: always
+    container_name: wsecu_bb_product_catalog_composition
+    image: harbor.backbase.eu/development/product-catalog-composition-service:latest
     ports:
       - "9091:8080"
       - "5591:5555"
@@ -42,7 +43,7 @@ services:
       - EXTERNAL_SIG_SECRET_KEY=JWTSecretKeyDontUseInProduction!
       - EXTERNAL_ENC_SECRET_KEY=JWTEncKeyDontUseInProduction666!
       - EUREKA_INSTANCE_PREFER-IP-ADDRESS=true
-      - EUREKA_INSTANCE_INSTANCE_HOSTNAME=product-composition
+      - EUREKA_INSTANCE_INSTANCE_HOSTNAME=product-catalog-composition
       - EUREKA_INSTANCE_NON-SECURE-PORT=8080
 
   legal-entity-ingestion-integration:
@@ -66,15 +67,17 @@ services:
       - EUREKA_INSTANCE_INSTANCE_HOSTNAME=legal-entity-composition-service
       - EUREKA_INSTANCE_NON-SECURE-PORT=8080
 
-  product-ingestion-integration:
-    container_name: wsecu_bb_product_integration
-    image: harbor.backbase.eu/development/wsecu-product-ingestion-integration-service
+  product-catalog-ingestion-integration:
+    restart: always
+    container_name: wsecu_bb_product_catalog_integration
+    image: harbor.backbase.eu/development/wsecu-product-catalog-ingestion-integration-service
     ports:
       - "9093:8080"
+      - "5593:5555"
     networks:
       - wsecu_bb_local
     environment:
-      - JAVA_TOOL_OPTIONS= -Deureka.client.serviceUrl.defaultZone=http://registry:8080/eureka/
+      - JAVA_TOOL_OPTIONS= -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5555 -Deureka.client.serviceUrl.defaultZone=http://registry:8080/eureka/
       - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
       - SPRING_ACTIVEMQ_USER=admin
       - SPRING_ACTIVEMQ_PASSWORD=admin
@@ -83,7 +86,7 @@ services:
       - EXTERNAL_SIG_SECRET_KEY=JWTSecretKeyDontUseInProduction!
       - EXTERNAL_ENC_SECRET_KEY=JWTEncKeyDontUseInProduction666!
       - EUREKA_INSTANCE_PREFER-IP-ADDRESS=true
-      - EUREKA_INSTANCE_INSTANCE_HOSTNAME=product-composition-service
+      - EUREKA_INSTANCE_INSTANCE_HOSTNAME=product-catalog-composition-service
       - EUREKA_INSTANCE_NON-SECURE-PORT=8080
 
 networks:

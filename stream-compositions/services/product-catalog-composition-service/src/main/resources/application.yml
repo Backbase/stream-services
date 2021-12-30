@@ -13,7 +13,8 @@ spring:
         provider:
           dbs:
             token-uri: http://token-converter:8080/oauth/token
-
+  main:
+    allow-bean-definition-overriding: true
 backbase:
   mtls:
     enabled: false
@@ -40,7 +41,7 @@ backbase:
         product-catalog-integration-url: http://product-catalog-ingestion-integration:8080
 
 bootstrap:
-  enabled: true
+  enabled: false
   product-catalog:
     productKinds:
       - externalKindId: kind20
@@ -48,30 +49,22 @@ bootstrap:
         kinduri: 'special-account'
 
     productTypes:
-      - externalProductId: Money Market
-        externalProductKindId: kind1
+      - externalProductId: Money Market1
+        externalProductKindId: kind2
         productKindName: Current Account
-        externalProductTypeId: Money Market
-        productTypeName: Money Market
-        externalId: Money Market
-        externalTypeId: Money Market
-        typeName: Money Market
+        externalProductTypeId: Money Market2
+        productTypeName: Money Market3
+        externalId: Money Market4
+        externalTypeId: Money Market5
+        typeName: Money Market6
       - externalProductId: Checking
-        externalProductKindId: kind1
+        externalProductKindId: kind3
         productKindName: Checking
         externalProductTypeId: Checking
         productTypeName: Checking
         externalId: Checking
         externalTypeId: Checking
         typeName: Checking
-      - externalProductId: Savings
-        externalProductKindId: kind2
-        productKindName: Savings
-        externalProductTypeId: Savings
-        productTypeName: Savings
-        externalId: Savings
-        externalTypeId: Savings
-        typeName: Savings
       - externalProductId: Savings
         externalProductKindId: kind2
         productKindName: Savings
