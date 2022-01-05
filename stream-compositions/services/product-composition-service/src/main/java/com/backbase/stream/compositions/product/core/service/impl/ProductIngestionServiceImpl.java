@@ -7,7 +7,7 @@ import com.backbase.stream.compositions.product.core.model.ProductIngestResponse
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
 import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.product.ProductIngestionSaga;
+import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.ProductGroupTask;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class ProductIngestionServiceImpl implements ProductIngestionService {
     private final ProductGroupMapper mapper;
-    private final ProductIngestionSaga productIngestionSaga;
+    private final BatchProductIngestionSaga batchProductIngestionSaga;
     private final ProductIntegrationService productIntegrationService;
 
     /**
@@ -67,7 +67,7 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
     private Mono<ProductGroup> sendToDbs(Mono<ProductGroup> productGroup) {
         return productGroup
                 .map(ProductGroupTask::new)
-                .flatMap(productIngestionSaga::process)
+                .flatMap(batchProductIngestionSaga::process)
                 .map(ProductGroupTask::getData);
     }
 

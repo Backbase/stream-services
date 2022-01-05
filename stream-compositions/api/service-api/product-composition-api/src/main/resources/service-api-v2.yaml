@@ -3,7 +3,7 @@ info:
   title: Product composition API
   version: 2.0.0
 servers:
-  - url: http://localhost:8080/service-api/v1
+  - url: http://localhost:8080/service-api/v2
     description: The server
 tags:
   - name: ProductComposition
@@ -86,8 +86,18 @@ components:
 
     PullIngestionRequest:
       type: object
+      required:
+        - legalEntityExternalId
+        - serviceAgreementInternalId
+        - userExternalId
       properties:
         legalEntityExternalId:
+          type: string
+        serviceAgreementExternalId:
+          type: string
+        serviceAgreementInternalId:
+          type: string
+        userExternalId:
           type: string
         additionalParameters:
           type: object

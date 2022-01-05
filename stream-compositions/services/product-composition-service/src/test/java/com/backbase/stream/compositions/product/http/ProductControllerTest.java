@@ -35,7 +35,7 @@ class ProductControllerTest {
                 productIngestionService,
                 mapper);
 
-        lenient().when(mapper.mapCompostionToStream(any())).thenReturn(new com.backbase.stream.legalentity.model.ProductGroup());
+        lenient().when(mapper.mapCompositionToStream(any())).thenReturn(new com.backbase.stream.legalentity.model.ProductGroup());
         lenient().when(mapper.mapStreamToComposition(any())).thenReturn(new ProductGroup());
     }
 

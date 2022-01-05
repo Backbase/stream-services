@@ -3,7 +3,7 @@ package com.backbase.stream.compositions.product.http;
 import com.backbase.stream.compositions.product.ProductCompositionApplication;
 import com.backbase.stream.compositions.product.model.PullIngestionRequest;
 import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.product.ProductIngestionSaga;
+import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.streams.compositions.test.IntegrationTest;
 import com.google.gson.Gson;
@@ -49,8 +49,8 @@ class ProductControllerIT extends IntegrationTest {
     private static BrokerService broker;
 
     @MockBean
-    @Qualifier("productIngestionSaga")
-    ProductIngestionSaga productIngestionSaga;
+    @Qualifier("batchProductIngestionSaga")
+    BatchProductIngestionSaga batchProductIngestionSaga;
 
     @Autowired
     ProductController productController;
@@ -69,9 +69,9 @@ class ProductControllerIT extends IntegrationTest {
         tokenConverterServer = startClientAndServer(TOKEN_CONVERTER_PORT);
         tokenConverterServerClient = new MockServerClient("localhost", TOKEN_CONVERTER_PORT);
         tokenConverterServerClient.when(
-                request()
-                        .withMethod("POST")
-                        .withPath("/oauth/token"))
+                        request()
+                                .withMethod("POST")
+                                .withPath("/oauth/token"))
                 .respond(
                         response()
                                 .withStatusCode(200)
@@ -85,9 +85,9 @@ class ProductControllerIT extends IntegrationTest {
         integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
         integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
         integrationServerClient.when(
-                request()
-                        .withMethod("GET")
-                        .withPath("/integration-api/v2/product-group"))
+                        request()
+                                .withMethod("GET")
+                                .withPath("/integration-api/v2/product-group"))
                 .respond(
                         response()
                                 .withStatusCode(200)
@@ -107,11 +107,15 @@ class ProductControllerIT extends IntegrationTest {
         ProductGroup productGroup = new Gson()
                 .fromJson(readContentFromClasspath("integration-data/response.json"), ProductGroup.class);
 
-        when(productIngestionSaga.process(any()))
+        when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
                 .thenReturn(Mono.just(new ProductGroupTask(productGroup)));
 
         PullIngestionRequest pullIngestionRequest =
-                new PullIngestionRequest().withLegalEntityExternalId("externalId");
+                new PullIngestionRequest()
+                        .withLegalEntityExternalId("leId")
+                        .withServiceAgreementExternalId("saExId")
+                        .withServiceAgreementInternalId("saId")
+                        .withUserExternalId("userId");
 
         URI uri = URI.create("/service-api/v2/pull-ingestion");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();

@@ -13,6 +13,8 @@ spring:
         provider:
           dbs:
             token-uri: http://token-converter:8080/oauth/token
+  main:
+    allow-bean-definition-overriding: true
 sso:
   jwt:
     internal:

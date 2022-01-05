@@ -16,6 +16,8 @@
         <swagger-api.version>2.1.0</swagger-api.version>
         <swagger-ui.version>3.24.3</swagger-ui.version>
         <webjars-locator.version>0.38</webjars-locator.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
 
     <dependencies>

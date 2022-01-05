@@ -7,7 +7,7 @@ import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequ
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
-import com.backbase.stream.product.ProductIngestionSaga;
+import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.ProductGroupTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,13 +32,13 @@ class ProductIngestionServiceImplTest {
     ProductGroupMapper mapper;
 
     @Mock
-    ProductIngestionSaga productIngestionSaga;
+    BatchProductIngestionSaga batchProductIngestionSaga;
 
     @BeforeEach
     void setUp() {
         productIngestionService = new ProductIngestionServiceImpl(
                 mapper,
-                productIngestionSaga,
+                batchProductIngestionSaga,
                 productIntegrationService);
     }
 
@@ -58,7 +58,7 @@ class ProductIngestionServiceImplTest {
         ProductGroupTask productGroupTask = new ProductGroupTask();
         productGroupTask.setProductGroup(new com.backbase.stream.legalentity.model.ProductGroup());
 
-        when(productIngestionSaga.process(any()))
+        when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
                 .thenReturn(Mono.just(productGroupTask));
 
         ProductIngestResponse productIngestResponse = productIngestionService.ingestPull(productIngestPullRequest).block();

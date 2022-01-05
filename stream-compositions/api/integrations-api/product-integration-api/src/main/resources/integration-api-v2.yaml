@@ -17,7 +17,22 @@ paths:
       operationId: pullProductGroup
       parameters:
         - in: query
-          name: externalId
+          name: legalEntityExternalId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: serviceAgreementExternalId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: serviceAgreementInternalId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: userExternalId
           schema:
             type: string
           required: true

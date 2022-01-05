@@ -11,6 +11,9 @@ import java.util.Map;
 @AllArgsConstructor
 public class ProductIngestPullRequest {
     private String legalEntityExternalId;
-    private Map<String, String> parameters;
+    private String serviceAgreementExternalId;
+    private String serviceAgreementInternalId;
+    private String userExternalId;
+    private Map<String, String> additionalParameters;
 }
 

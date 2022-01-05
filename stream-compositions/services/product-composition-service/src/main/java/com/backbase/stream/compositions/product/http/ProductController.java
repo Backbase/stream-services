@@ -55,7 +55,12 @@ public class ProductController implements ProductCompositionApi {
     private ProductIngestPullRequest buildPullRequest(PullIngestionRequest request) {
         return ProductIngestPullRequest
                 .builder()
-                .legalEntityExternalId(request.getLegalEntityExternalId()).build();
+                .legalEntityExternalId(request.getLegalEntityExternalId())
+                .serviceAgreementExternalId(request.getServiceAgreementExternalId())
+                .serviceAgreementInternalId(request.getServiceAgreementInternalId())
+                .userExternalId(request.getUserExternalId())
+                .additionalParameters(request.getAdditionalParameters())
+                .build();
     }
 
     /**
@@ -66,7 +71,7 @@ public class ProductController implements ProductCompositionApi {
      */
     private ProductIngestPushRequest buildPushRequest(PushIngestionRequest request) {
         return ProductIngestPushRequest.builder()
-                .productGroup(mapper.mapCompostionToStream(request.getProductGgroup()))
+                .productGroup(mapper.mapCompositionToStream(request.getProductGgroup()))
                 .build();
     }
 
