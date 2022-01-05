@@ -1,0 +1,232 @@
+openapi: 3.0.3
+info:
+  title: Ingestion Cursor API
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/
+    description: The server
+tags:
+  - name: IngestionCursor
+paths:
+  /cursor/{id}:
+    get:
+      tags:
+        - GetIngestionCursor
+      summary: Gets Ingestion Cursor.
+      description:  Returns ther ingstion cursor obtained by id.
+      operationId: getIngestionCursor
+      parameters:
+        - name: id
+          in: path
+          description: The id of the member/account
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Gets the ingestion cursor Object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionCursor'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+    put:
+      tags:
+        - updateIngestionCursor
+      summary: creates the Ingestion Cursor.
+      description:  updates the ingstion cursor obtained by id.
+      operationId: updateIngestionCursor
+      parameters:
+        schema:
+          $ref: '#/components/schemas/IngestionCursor'
+      responses:
+        "200":
+          description: Gets the ingestion cursor Object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionCursor'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+    delete:
+      tags:
+        - deleteIngestionCursor
+      summary: Delete the Ingestion Cursor.
+      description:  delete the ingestion cursor
+      operationId: deleteIngestionCursor
+      parameters:
+        - name: id
+          in: path
+          description: The id of the member/account
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Gets the ingestion cursor Object
+          content: {}
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /cursor:
+    get:
+      tags:
+        - GetAllIngestionCursor
+      summary: Gets All the Ingestion Cursor.
+      description:  Returns an array of ingestion cursor obtained by id.
+      operationId: getAllIngestionCursor
+      parameters:
+      responses:
+        "200":
+          description: Gets the ingestion cursor Object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionCursor'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+    post:
+      tags:
+        - createIngestionCursor
+      summary: creates the Ingestion Cursor.
+      description:  creates the ingstion cursor obtained by id.
+      operationId: getIngestionCursor
+      parameters:
+       schema:
+          $ref: '#/components/schemas/IngestionCursor'
+      responses:
+        "200":
+          description: Gets the ingestion cursor Object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestionCursor'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    IngestionCursor:
+      type: object
+      required:
+        - userExternalId
+        - userInternalId
+        - legalEntityInternalId
+        - serviceAgreementInternalId
+        - serviceAgreementExternalId
+      properties:
+        id:
+          type: string
+        userExternalId:
+          type: string
+        userInternalId:
+          type: string
+        legalEntityInternalId:
+          type: string
+        legalEntityExternalId:
+          type: string
+        serviceAgreementInternalId:
+          type: string
+        serviceAgreementExternalId:
+          type: string
+        lastProfileIngestionDate:
+          type: string
+          format: date-time
+        lastProductsIngestionDate:
+          type: string
+          format: date-time
+        productCursors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductIngestionCursor'
+        lastIngestedTransactions:
+          type: array
+          items:
+            $ref: int
+    ProductIngestionCursor:
+      type: object
+      properties:
+        arrangementId:
+          type: string
+        productId:
+          type: string
+        productType:
+          type: string
+        lastProductIngestionDate:
+          type: string
+          format: date-time
+        lastTransactionsIngestionDate:
+          type: string
+          format: date-time
+        productOwnership:
+          type: string
+        productNumber:
+          type: string
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
