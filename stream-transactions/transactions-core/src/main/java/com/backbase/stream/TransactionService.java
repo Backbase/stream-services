@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-public interface TransactionService {
+public interface   TransactionService {
     Flux<UnitOfWork<TransactionTask>> processTransactions(Flux<TransactionsPostRequestBody> transactions);
 
     default Flux<TransactionsPostResponseBody> getTransactionIdsFlux(UnitOfWork<TransactionTask> unitOfWork) {

@@ -1,0 +1,87 @@
+openapi: 3.0.3
+info:
+  title: Transaction Integration API
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/integration-api/v1
+    description: The server
+tags:
+  - name: TransactionIntegration
+paths:
+  /integration-api/v2/transactions:
+    get:
+      tags:
+        - TransactionIntegration
+      summary: Pulls transactions.
+      description: Pulls transactions.
+      operationId: pullTransactions
+      parameters:
+        - in: query
+          name: externalArrangementIds
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: additionalParameters
+          schema:
+            type: object
+            additionalProperties:
+              type: string
+
+      responses:
+        "200":
+          description: Transactions sucessfully returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PullTransactionsResponse'
+
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    PullTransactionsResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: '../../../target/yaml/transaction-manager/transaction-manager-service-api-v2.7.0.yaml#/components/schemas/TransactionsPostRequestBody'
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+        name:
+          type: string
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
