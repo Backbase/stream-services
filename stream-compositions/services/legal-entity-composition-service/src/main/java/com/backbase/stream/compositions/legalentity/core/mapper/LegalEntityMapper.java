@@ -27,7 +27,7 @@ public interface LegalEntityMapper {
             com.backbase.stream.compositions.integration.legalentity.model.LegalEntity legalEntity);
 
     /**
-     * Maps integration LegalEntity to compositon LegalEntity model.
+     * Maps integration LegalEntity to composition LegalEntity model.
      *
      * @param legalEntity Integration legal entity
      * @return Composition legal entity

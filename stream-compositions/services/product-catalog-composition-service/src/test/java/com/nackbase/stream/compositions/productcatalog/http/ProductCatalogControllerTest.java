@@ -38,7 +38,7 @@ class ProductCatalogControllerTest {
                 productCatalogIngestionService,
                 mapper);
 
-        lenient().when(mapper.mapCompostionToStream(any())).thenReturn(new com.backbase.stream.productcatalog.model.ProductCatalog());
+        lenient().when(mapper.mapCompositionToStream(any())).thenReturn(new com.backbase.stream.productcatalog.model.ProductCatalog());
         lenient().when(mapper.mapStreamToComposition(any())).thenReturn(new ProductCatalog());
     }
 

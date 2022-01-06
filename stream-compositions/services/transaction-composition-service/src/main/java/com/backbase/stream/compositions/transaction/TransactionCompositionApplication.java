@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.legalentity;
+package com.backbase.stream.compositions.transaction;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,8 +8,8 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableDiscoveryClient
 @SpringBootApplication
 @ComponentScan("com.backbase.stream")
-public class LegalEntityCompositionApplication {
+public class TransactionCompositionApplication {
     public static void main(String[] args) {
-        SpringApplication.run(LegalEntityCompositionApplication.class, args);
+        SpringApplication.run(TransactionCompositionApplication.class, args);
     }
 }

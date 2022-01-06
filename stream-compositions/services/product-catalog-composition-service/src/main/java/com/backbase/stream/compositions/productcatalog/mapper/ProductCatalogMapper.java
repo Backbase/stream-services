@@ -41,7 +41,7 @@ public interface ProductCatalogMapper {
      * @param productCatalog Composition product catalog
      * @return Stream product catalog
      */
-    com.backbase.stream.productcatalog.model.ProductCatalog mapCompostionToStream(
+    com.backbase.stream.productcatalog.model.ProductCatalog mapCompositionToStream(
             com.backbase.stream.compositions.productcatalog.model.ProductCatalog productCatalog);
 
     /**

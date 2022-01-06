@@ -60,7 +60,7 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
      */
     private ProductCatalogIngestPushRequest buildPushRequest(PushIngestionRequest request) {
         return ProductCatalogIngestPushRequest.builder()
-                .productCatalog(mapper.mapCompostionToStream(request.getProductCatalog()))
+                .productCatalog(mapper.mapCompositionToStream(request.getProductCatalog()))
                 .build();
 
     }

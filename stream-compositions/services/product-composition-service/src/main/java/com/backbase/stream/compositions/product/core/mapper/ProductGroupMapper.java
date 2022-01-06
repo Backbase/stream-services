@@ -4,20 +4,20 @@ import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 /**
- * This is a mapper for LegalEntity objects used in:
+ * This is a mapper for ProductGroup objects used in:
  * - stream-models/legal-entity-model
- * - legal-entity-composition-api
- * - legal-entity-integration-api
- * - legal-entity-evens
+ * - product-composition-api
+ * - product-integration-api
+ * - product-events
  * <p>
- * All LegalEntity objects used in above modules have exactly same structureas they are built
+ * All ProductGroup objects used in above modules have exactly same structures they are built
  * from the common /api folder.
  */
 @Mapper
 @Component
 public interface ProductGroupMapper {
     /**
-     * Maps compositon ProductGroup to stream ProductGroup model.
+     * Maps composition ProductGroup to stream ProductGroup model.
      *
      * @param productGroup Integration product group
      * @return Stream product group
@@ -31,7 +31,7 @@ public interface ProductGroupMapper {
      * @param productGroup Integration product group
      * @return Composition product group
      */
-    com.backbase.stream.compositions.product.model.ProductGroup mapIntegrationToCompostion(
+    com.backbase.stream.compositions.product.model.ProductGroup mapIntegrationToComposition(
             com.backbase.stream.compositions.integration.product.model.ProductGroup productGroup);
 
     /**
