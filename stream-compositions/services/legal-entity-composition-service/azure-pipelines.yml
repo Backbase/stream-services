@@ -18,7 +18,7 @@ pool:
     - maven
 
 extends:
-  template: /streams-composition/services/azure-pipeline-template.yml
+  template: /streams-compositions/services/azure-pipeline-template.yml
   parameters:
     tag: '$(Build.BuildId)'
     servicePath: 'services/legal-entity-composition-service'
