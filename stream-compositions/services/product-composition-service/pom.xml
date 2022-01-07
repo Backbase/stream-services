@@ -40,6 +40,11 @@
             <artifactId>product-composition-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>product-integration-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Streams dependencies -->
         <dependency>
@@ -109,7 +114,7 @@
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.stream.compositions</groupId>
+                                    <groupId>com.backbase.stream.compositions.api</groupId>
                                     <artifactId>product-integration-api</artifactId>
                                     <version>${project.version}</version>
                                     <classifier>api</classifier>
