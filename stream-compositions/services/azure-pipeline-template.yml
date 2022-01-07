@@ -1,5 +1,4 @@
 variables:
-  registry: oly-harbor-52.wsecu.int
   wait: --wait
   appName: dbs
 
