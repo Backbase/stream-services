@@ -104,6 +104,6 @@ stages:
             displayName: 'Helm Deploy v3'
             inputs:
               filename: /opt/helm/bin/helm-v3.5.4
-              arguments: '--kubeconfig=/opt/kubeconfigs/k8s4d.yml upgrade ${{ parameters.serviceName }}-nextgen --install --force $(wait) --set ingressHostnames={nextgendbs.wsecu.int} --namespace nextgen --version 2.0.0-$(Build.BuildNumber) --set version=2.0.0-$(Build.BuildNumber) --set dockerRegistry=$(registry) kubernetes/helm/charts/${{ parameters.serviceName }}'
+              arguments: '--kubeconfig=/opt/kubeconfigs/k8s4d.yml upgrade ${{ parameters.serviceName }}-nextgen --install --force $(wait) --set ingressHostnames=$(ingress-host) --namespace nextgen --version 2.0.0-$(Build.BuildNumber) --set version=2.0.0-$(Build.BuildNumber) --set dockerRegistry=$(registry) kubernetes/helm/charts/${{ parameters.serviceName }}'
 
 
