@@ -33,6 +33,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>product-catalog-composition-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Streams dependencies -->
         <dependency>
