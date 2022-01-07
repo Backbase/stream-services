@@ -32,7 +32,7 @@ stages:
             JAVA_HOME: /usr/lib/jvm/adoptopenjdk-11-hotspot
           inputs:
             goals: 'clean install'
-            mavenPomFile: '$(System.DefaultWorkingDirectory)/dbs/pom.xml'
+            mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'
             options: '-pl ${{ parameters.servicePath }} -am --settings /opt/bbSettings2.xml'
             mavenOptions: '-Xmx4096M'
             mavenAuthenticateFeed: false
