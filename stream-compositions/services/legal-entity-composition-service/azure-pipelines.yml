@@ -21,5 +21,5 @@ extends:
   template: /stream-compositions/services/azure-pipeline-template.yml
   parameters:
     tag: '$(Build.BuildId)'
-    servicePath: 'services/legal-entity-composition-service'
+    servicePath: 'stream-compositions/services/legal-entity-composition-service'
     serviceName: 'legal-entity-composition-service'
