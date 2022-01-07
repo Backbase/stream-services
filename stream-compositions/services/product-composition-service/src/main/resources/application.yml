@@ -45,10 +45,10 @@ backbase:
       identity-integration-base-url: http://identity-integration-service:8080
 
     compositions:
-      legal-entity:
+      product:
         enable-completed-events: false
         enable-failed-events: true
-        legal-entity-integraion-url: http://legal-entity-ingestion-integration:8080
+        product-integraion-url: http://http://product-ingestion-integration:8080:8080
 
 logging:
   level:
