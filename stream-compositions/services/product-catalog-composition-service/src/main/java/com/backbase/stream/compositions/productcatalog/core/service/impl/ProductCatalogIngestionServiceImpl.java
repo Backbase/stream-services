@@ -43,7 +43,8 @@ public class ProductCatalogIngestionServiceImpl implements ProductCatalogIngesti
     }
 
     private Mono<ProductCatalog> sendToDbs(Mono<ProductCatalog> productCatalog) {
-        return productCatalog.flatMap(reactiveProductCatalogService::setupProductCatalog);
+        return productCatalog
+                .flatMap(reactiveProductCatalogService::upsertProductCatalog);
     }
 
     private ProductCatalogIngestResponse buildResponse(ProductCatalog productCatalog) {

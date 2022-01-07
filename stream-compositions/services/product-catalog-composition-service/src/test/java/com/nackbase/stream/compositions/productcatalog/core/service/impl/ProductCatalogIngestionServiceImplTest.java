@@ -50,7 +50,8 @@ class ProductCatalogIngestionServiceImplTest {
         when(productCatalogIntegrationService.pullProductCatalog(any()))
                 .thenReturn(Mono.just(new ProductCatalog()));
 
-        when(reactiveProductCatalogService.setupProductCatalog(any())).thenReturn(Mono.just(new com.backbase.stream.productcatalog.model.ProductCatalog()));
+        //when(reactiveProductCatalogService.setupProductCatalog(any())).thenReturn(Mono.just(new com.backbase.stream.productcatalog.model.ProductCatalog()));
+        when(reactiveProductCatalogService.upsertProductCatalog(any())).thenReturn(Mono.just(new com.backbase.stream.productcatalog.model.ProductCatalog()));
 
         ProductCatalogIngestPullRequest request = ProductCatalogIngestPullRequest.builder().build();
         ProductCatalogIngestResponse productCatalogIngestResponse = productCatalogIngestionService.ingestPull(Mono.just(request)).block();

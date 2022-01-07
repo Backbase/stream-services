@@ -108,6 +108,11 @@ class ProductCatalogControllerIT extends IntegrationTest {
         when(reactiveProductCatalogService.setupProductCatalog(any()))
                 .thenReturn(Mono.just(productCatalog));
 
+        when(reactiveProductCatalogService.updateExistingProductCatalog(any()))
+                .thenReturn(Mono.just(productCatalog));
+
+        when(reactiveProductCatalogService.upsertProductCatalog(any()))
+                .thenReturn(Mono.just(productCatalog));
 
         PushIngestionRequest request = new PushIngestionRequest();
         URI uri = URI.create("/service-api/v2/pull-ingestion");
