@@ -1,0 +1,114 @@
+variables:
+  registry: oly-harbor-52.wsecu.int
+  wait: --wait
+  appName: dbs
+
+parameters:
+  - name: tag
+    type: string
+  - name: servicePath
+    type: string
+  - name: serviceName
+    type: string
+  - name: dockerFile
+    type: string
+    default: jar.Dockerfile
+  - name: appConfig
+    type: string
+    default: .
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Build
+        steps:
+        - checkout: self  # self represents the repo where the initial Azure Pipelines YAML file was found
+          clean: true
+          fetchDepth: 1
+
+        - task: Maven@1
+          displayName: 'Install service'
+          env:
+            JAVA_HOME: /usr/lib/jvm/adoptopenjdk-11-hotspot
+          inputs:
+            goals: 'clean install'
+            mavenPomFile: '$(System.DefaultWorkingDirectory)/dbs/pom.xml'
+            options: '-pl ${{ parameters.servicePath }} -am --settings /opt/bbSettings2.xml'
+            mavenOptions: '-Xmx4096M'
+            mavenAuthenticateFeed: false
+
+        - task: PublishCodeCoverageResults@1
+          displayName: 'Publish code coverage from {{ parameters.servicePath }}/target/site/jacoco/jacoco.xml'
+          inputs:
+            summaryFileLocation: '${{ parameters.servicePath }}/target/site/jacoco/jacoco.xml'
+            reportDirectory: '${{ parameters.servicePath }}/target/site/jacoco'
+          continueOnError: true
+
+        - task: CopyFiles@2
+          displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
+          inputs:
+            SourceFolder: '$(build.sourcesdirectory)'
+            Contents: |
+              stream-compositions/${{ parameters.servicePath }}/target/${{ parameters.serviceName }}.war
+              stream-compositions/${{ parameters.servicePath }}/target/${{ parameters.serviceName }}-exec.jar
+              stream-compositions/${{ parameters.servicePath }}/target/${{ parameters.serviceName }}.jar
+              stream-compositions/${{ parameters.servicePath }}/src/main/resources/*.yml
+              stream-compositions/${{ parameters.servicePath }}/src/main/resources/*.token
+              stream-compositions/${{ parameters.servicePath }}/src/main/resources/**/*.sql
+              kubernetes/docker/*
+            TargetFolder: '$(build.artifactstagingdirectory)'
+            flattenFolders: true
+
+        # Create docker image
+        - task: CopyFiles@2
+          displayName: 'Copy Helm Chart'
+          inputs:
+            SourceFolder: '$(build.sourcesdirectory)'
+            Contents: |
+              kubernetes/helm/charts/${{ parameters.serviceName }}/**
+              kubernetes/docker/**
+            TargetFolder: '$(build.artifactstagingdirectory)'
+            OverWrite: true
+
+        - task: Docker@0
+          displayName: 'Build docker image for service Harbor 52'
+          inputs:
+            containerregistrytype: 'Container Registry'
+            dockerRegistryConnection: 'oly-harbor-52'
+            dockerFile: '$(build.artifactstagingdirectory)/${{ parameters.dockerFile }}'
+            buildArguments: |
+              CAPABILITY=${{ parameters.serviceName }}
+              APPLICATION_CONFIG=${{ parameters.appConfig }}
+            imageName: 'dbp/${{ parameters.serviceName }}-nextgen:2.0.0-$(Build.BuildNumber)'
+            includeLatestTag: true
+
+        - task: Docker@0
+          displayName: 'Push docker image for service Harbor 52'
+          inputs:
+            containerregistrytype: 'Container Registry'
+            dockerRegistryConnection: 'oly-harbor-52'
+            action: 'Push an image'
+            imageName: 'dbp/${{ parameters.serviceName }}-nextgen:2.0.0-$(Build.BuildNumber)'
+            includeLatestTag: true
+
+        - task: Docker@0
+          displayName: 'Remove local image copy'
+          inputs:
+            containerregistrytype: 'Container Registry'
+            dockerRegistryConnection: 'oly-harbor-52'
+            action: 'Run a Docker command'
+            customCommand: 'rmi -f oly-harbor-52.wsecu.int/dbp/${{ parameters.serviceName }}-nextgen:2.0.0-$(Build.BuildNumber)'
+
+# Releases
+  - stage: NextGen
+    dependsOn: Build
+    jobs:
+      - job: NextGen
+        steps:
+          - task: CmdLine@1
+            displayName: 'Helm Deploy v3'
+            inputs:
+              filename: /opt/helm/bin/helm-v3.5.4
+              arguments: '--kubeconfig=/opt/kubeconfigs/k8s4d.yml upgrade ${{ parameters.serviceName }}-nextgen --install --force $(wait) --set ingressHostnames={nextgendbs.wsecu.int} --namespace nextgen --version 2.0.0-$(Build.BuildNumber) --set version=2.0.0-$(Build.BuildNumber) --set dockerRegistry=$(registry) kubernetes/helm/charts/${{ parameters.serviceName }}'
+
+

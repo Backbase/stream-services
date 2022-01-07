@@ -141,7 +141,6 @@ public class ReactiveProductCatalogService {
     public Mono<ProductCatalog> upsertProductCatalog(ProductCatalog productCatalog) {
         return updateExistingProductCatalog(productCatalog)
                 .flatMap(this::setupProductCatalog);
-
     }
 
     private Flux<ExternalProductKindItemPut> updateProductKind(List<ProductKind> productKinds) {
