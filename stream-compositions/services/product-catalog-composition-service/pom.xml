@@ -83,6 +83,7 @@
     </dependencies>
 
     <build>
+        <finalName>${project.artifactId}</finalName>
         <plugins>
             <!-- Unpack OpenAPI specs from zip dependencies -->
             <plugin>
