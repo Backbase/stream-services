@@ -1,0 +1,50 @@
+version: "3.1"
+# Docker Compose Docs: https://docs.docker.com/compose/compose-file/
+# Backbase Docker Compose Example: https://github.com/Backbase/docker-compose-examples/blob/master/docker-compose.yaml
+
+services:
+  legal-entity-composition:
+    container_name: wsecu_bb_legal_entity_composition
+    image: harbor.backbase.eu/development/legal-entity-composition-service:latest
+    ports:
+      - "9090:8080"
+      - "5590:5555"
+    networks:
+      - wsecu_bb_local
+    environment:
+      - JAVA_TOOL_OPTIONS= -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5555 -Deureka.client.serviceUrl.defaultZone=http://registry:8080/eureka/
+      - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
+      - SPRING_ACTIVEMQ_USER=admin
+      - SPRING_ACTIVEMQ_PASSWORD=admin
+      - USERCTX_KEY=JWTSecretKeyDontUseInProduction!
+      - SIG_SECRET_KEY=JWTSecretKeyDontUseInProduction!
+      - EXTERNAL_SIG_SECRET_KEY=JWTSecretKeyDontUseInProduction!
+      - EXTERNAL_ENC_SECRET_KEY=JWTEncKeyDontUseInProduction666!
+      - EUREKA_INSTANCE_PREFER-IP-ADDRESS=true
+      - EUREKA_INSTANCE_INSTANCE_HOSTNAME=legal-entity-composition
+      - EUREKA_INSTANCE_NON-SECURE-PORT=8080
+
+  legal-entity-ingestion-integration:
+    container_name: wsecu_bb_legal_entity_integration
+    image: harbor.backbase.eu/development/wsecu-legal-entity-integration-service
+    ports:
+      - "9091:8080"
+    networks:
+      - wsecu_bb_local
+    environment:
+      - JAVA_TOOL_OPTIONS= -Deureka.client.serviceUrl.defaultZone=http://registry:8080/eureka/
+      - SPRING_ACTIVEMQ_BROKER-URL=tcp://activemq:61616
+      - SPRING_ACTIVEMQ_USER=admin
+      - SPRING_ACTIVEMQ_PASSWORD=admin
+      - USERCTX_KEY=JWTSecretKeyDontUseInProduction!
+      - SIG_SECRET_KEY=JWTSecretKeyDontUseInProduction!
+      - EXTERNAL_SIG_SECRET_KEY=JWTSecretKeyDontUseInProduction!
+      - EXTERNAL_ENC_SECRET_KEY=JWTEncKeyDontUseInProduction666!
+      - EUREKA_INSTANCE_PREFER-IP-ADDRESS=true
+      - EUREKA_INSTANCE_INSTANCE_HOSTNAME=legal-entity-composition-service
+      - EUREKA_INSTANCE_NON-SECURE-PORT=8080
+
+networks:
+  wsecu_bb_local:
+    external: true
+

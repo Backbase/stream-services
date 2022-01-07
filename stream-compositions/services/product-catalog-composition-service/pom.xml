@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.backbase.stream.compositions</groupId>
+        <artifactId>services</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>product-catalog-composition-service</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Stream :: Compositions :: Services :: Product Catalog</name>
+
+    <dependencies>
+        <!-- Service SDK dependencies -->
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>events</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+        </dependency>
+
+        <!-- Spring dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- Streams dependencies -->
+        <dependency>
+            <groupId>com.backbase.stream.compositions.events</groupId>
+            <artifactId>product-catalog-events</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>product-catalog-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>com.backbase.stream.compositions</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-broker</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq.tooling</groupId>
+            <artifactId>activemq-junit</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-kahadb-store</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Unpack OpenAPI specs from zip dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.backbase.stream.compositions.api</groupId>
+                                    <artifactId>product-catalog-composition-api</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>api</classifier>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <type>zip</type>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.stream.compositions</groupId>
+                                    <artifactId>product-catalog-integration-api</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                            </artifactItems>
+                            <includes>**/*.yaml, **/*.json</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Generate models and clients from unpacked OpenAPI specs -->
+            <plugin>
+                <groupId>com.backbase.oss</groupId>
+                <artifactId>boat-maven-plugin</artifactId>
+                <version>${boat-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-config-service-api-code</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${project.build.directory}/yaml/product-catalog-composition-api/service-api-v2.0.0.yaml</inputSpec>
+                            <additionalProperties>useWithModifiers=true</additionalProperties>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <reactive>true</reactive>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <openapiDocketConfig>true</openapiDocketConfig>
+                                <interfaceOnly>true</interfaceOnly>
+                                <apiPackage>com.backbase.stream.compositions.productcatalog.api</apiPackage>
+                                <modelPackage>com.backbase.stream.compositions.productcatalog.model</modelPackage>
+                                <additionalProperties>useWithModifiers=true</additionalProperties>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <performBeanValidation>true</performBeanValidation>
+                                <useTags>true</useTags>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-legal-entity-integration-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/product-catalog-integration-api/integration-api-v2.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.stream.compositions.integration.productcatalog.api</apiPackage>
+                            <modelPackage>com.backbase.stream.compositions.integration.productcatalog.model</modelPackage>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

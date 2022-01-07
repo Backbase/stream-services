@@ -125,6 +125,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TranslationItem'
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional properties
     TranslationItem:
       title: Translation item
       type: object

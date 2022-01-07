@@ -5,13 +5,13 @@
     <parent>
         <artifactId>stream-parent</artifactId>
         <groupId>com.backbase.stream</groupId>
-        <version>2.54.0</version>
+        <version>3.0.0-SNAPSHOT</version>
         <relativePath>../stream-parent</relativePath>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-starter-parents</artifactId>
-    <version>2.54.0</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Starter Parents</name>
     <description>Parent for all Stream SDK modules</description>
@@ -38,9 +38,6 @@
         <module>stream-http-starter-parent</module>
         <module>stream-aio-starter-parent</module>
         <module>stream-task-starter-parent</module>
-        <module>stream-processor-starter-parent</module>
-        <module>stream-sink-starter-parent</module>
-        <module>stream-source-starter-parent</module>
         <module>stream-batch-starter-parent</module>
     </modules>
 

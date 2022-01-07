@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-parent</artifactId>
-    <version>2.54.0</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Parent</name>
     <description>Parent for all Stream SDK modules</description>
@@ -31,12 +31,7 @@
     <modules>
         <module>stream-dbs-web-client</module>
         <module>stream-test-support</module>
-        <module>stream-scs-starter-config</module>
-        <module>stream-openapi-support</module>
         <module>stream-worker</module>
-        <module>stream-micrometer-support</module>
-        <module>stream-web-start-ui</module>
-        <module>stream-web-start-mvc</module>
     </modules>
 
     <properties>
