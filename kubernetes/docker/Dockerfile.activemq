@@ -1,0 +1,10 @@
+FROM rmohr/activemq:5.14.4
+
+USER root
+COPY kubernetes/docker/certs/*.crt /usr/local/share/ca-certificates/
+RUN chmod 644 /usr/local/share/ca-certificates/*
+RUN update-ca-certificates
+
+COPY activemq/activemq_customized.xml /opt/apache-activemq-5.14.4/conf/activemq.xml
+RUN cd /opt && curl -LO http://oly-k8srepo-51/devops/elastic-apm/elastic-apm-agent-1.20.0.jar
+USER activemq

@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: wsecu-lending-referral-email-presentation-service
+name: wsecu-lending-referral-presentation-service
+version: 1.0.0

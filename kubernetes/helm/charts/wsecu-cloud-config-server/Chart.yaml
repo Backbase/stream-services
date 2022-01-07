@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: Cloud Config Server
+name: wsecu-cloud-config-server
+version: 0.1.0

@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: audit-persistence-service
+name: audit-persistence-service
+version: 0.1.0

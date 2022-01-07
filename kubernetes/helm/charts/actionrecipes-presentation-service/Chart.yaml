@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: actionrecipes-presentation-service
+name: actionrecipes-presentation-service
+version: 0.1.0

@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJvbHktaGFyYm9yLTUxLndzZWN1LmludCI6eyJwYXNzd29yZCI6IjhmdTIhVlJFa04jI3VnblciLCJ1c2VybmFtZSI6InN2Y0hhcmJvckxEQVAifX19
+kind: Secret
+metadata:
+  name: oly-harbor-51
+type: kubernetes.io/dockerconfigjson

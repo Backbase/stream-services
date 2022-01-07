@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: wsecu-authentication-service
+name: wsecu-authentication-service-nextgen
+version: 2.0.0

@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: wsecu-userconfig-pandp-service
+name: wsecu-userconfig-pandp-service
+version: 1.0.0

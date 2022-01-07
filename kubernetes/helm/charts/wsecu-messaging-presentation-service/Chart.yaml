@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: wsecu-messaging-presentation-service
+name: wsecu-messaging-presentation-service
+version: 1.0.0

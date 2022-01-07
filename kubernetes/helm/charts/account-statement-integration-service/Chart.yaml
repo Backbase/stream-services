@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: account-statement-integration-service
+name: account-statement-integration-service
+version: 1.0.0

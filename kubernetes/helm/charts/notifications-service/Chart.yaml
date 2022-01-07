@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: notifications-service chart
+name: notifications-service
+version: 2.0.0

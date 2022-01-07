@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: product-summary-presentation-service
+name: product-summary-presentation-service
+version: 0.1.0
