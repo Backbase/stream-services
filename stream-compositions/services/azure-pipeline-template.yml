@@ -47,13 +47,9 @@ stages:
           displayName: 'Copy Files to: $(build.artifactstagingdirectory)'
           inputs:
             SourceFolder: '$(build.sourcesdirectory)'
-            Contents: |
-              stream-compositions/${{ parameters.servicePath }}/target/${{ parameters.serviceName }}.war
-              stream-compositions/${{ parameters.servicePath }}/target/${{ parameters.serviceName }}-exec.jar
-              stream-compositions/${{ parameters.servicePath }}/target/${{ parameters.serviceName }}.jar
-              stream-compositions/${{ parameters.servicePath }}/src/main/resources/*.yml
-              stream-compositions/${{ parameters.servicePath }}/src/main/resources/*.token
-              stream-compositions/${{ parameters.servicePath }}/src/main/resources/**/*.sql
+            Contents: |                            
+              ${{ parameters.servicePath }}/target/${{ parameters.serviceName }}.jar
+              ${{ parameters.servicePath }}/src/main/resources/*.yml                            
               kubernetes/docker/*
             TargetFolder: '$(build.artifactstagingdirectory)'
             flattenFolders: true
@@ -73,7 +69,7 @@ stages:
           displayName: 'Build docker image for service Harbor 52'
           inputs:
             containerregistrytype: 'Container Registry'
-            dockerRegistryConnection: 'oly-harbor-52'
+            dockerRegistryConnection: '$(registry)'
             dockerFile: '$(build.artifactstagingdirectory)/${{ parameters.dockerFile }}'
             buildArguments: |
               CAPABILITY=${{ parameters.serviceName }}
@@ -85,7 +81,7 @@ stages:
           displayName: 'Push docker image for service Harbor 52'
           inputs:
             containerregistrytype: 'Container Registry'
-            dockerRegistryConnection: 'oly-harbor-52'
+            dockerRegistryConnection: '$(registry)'
             action: 'Push an image'
             imageName: 'dbp/${{ parameters.serviceName }}-nextgen:2.0.0-$(Build.BuildNumber)'
             includeLatestTag: true
@@ -94,9 +90,9 @@ stages:
           displayName: 'Remove local image copy'
           inputs:
             containerregistrytype: 'Container Registry'
-            dockerRegistryConnection: 'oly-harbor-52'
+            dockerRegistryConnection: '$(registry)'
             action: 'Run a Docker command'
-            customCommand: 'rmi -f oly-harbor-52.wsecu.int/dbp/${{ parameters.serviceName }}-nextgen:2.0.0-$(Build.BuildNumber)'
+            customCommand: 'rmi -f $(registry)/dbp/${{ parameters.serviceName }}-nextgen:2.0.0-$(Build.BuildNumber)'
 
 # Releases
   - stage: NextGen
