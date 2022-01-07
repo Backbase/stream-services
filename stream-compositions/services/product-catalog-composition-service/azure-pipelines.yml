@@ -1,0 +1,25 @@
+resources:
+  - repo: self
+
+trigger:
+  branches:
+    include:
+      - develop
+  paths:
+    include:
+      - product-catalog-composition-service
+
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+pool:
+  name: Docker
+  demands:
+    - sh
+    - maven
+
+extends:
+  template: /stream-compositions/services/azure-pipeline-template.yml
+  parameters:
+    tag: '$(Build.BuildId)'
+    servicePath: 'stream-compositions/services/product-catalog-composition-service'
+    serviceName: 'product-catalog-composition-service'
