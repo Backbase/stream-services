@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: wsecu-card-details-presentation-service
+name: wsecu-card-details-presentation-service
+version: 1.0.0

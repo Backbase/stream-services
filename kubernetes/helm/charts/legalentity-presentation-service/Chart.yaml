@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: legalentity-presentation-service
+name: legalentity-presentation-service
+version: 0.1.0

@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: oidc-token-converter-service chart
+name: oidc-token-converter-service
+version: 2.0.0

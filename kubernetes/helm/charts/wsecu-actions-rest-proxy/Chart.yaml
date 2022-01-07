@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: wsecu-actions-rest-proxy
+name: wsecu-actions-rest-proxy
+version: 1.0.0

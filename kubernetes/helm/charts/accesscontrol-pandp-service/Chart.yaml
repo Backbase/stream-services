@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: accesscontrol-pandp-service
+name: accesscontrol-pandp-service
+version: 0.1.0

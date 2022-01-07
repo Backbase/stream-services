@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: wsecu-transactions-presentation-service
+name: wsecu-transactions-presentation-service
+version: 1.0.0

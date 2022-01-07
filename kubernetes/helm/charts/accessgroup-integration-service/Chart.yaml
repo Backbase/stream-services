@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: accessgroup-integration-service chart
+name: accessgroup-integration-service
+version: 2.0.0

@@ -1,0 +1,4 @@
+---
+startDelaySeconds: 0
+jmxUrl: service:jmx:rmi:///jndi/rmi://127.0.0.1:8686/jmxrmi
+ssl: false

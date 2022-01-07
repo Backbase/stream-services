@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: "2.0.0"
+type: application
+description: messages-service chart
+name: messages-service
+version: 2.0.0
