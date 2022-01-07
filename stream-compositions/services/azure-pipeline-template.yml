@@ -69,7 +69,7 @@ stages:
           displayName: 'Build docker image for service Harbor 52'
           inputs:
             containerregistrytype: 'Container Registry'
-            dockerRegistryConnection: '$(registry)'
+            dockerRegistryConnection: '$(registry-connection)'
             dockerFile: '$(build.artifactstagingdirectory)/${{ parameters.dockerFile }}'
             buildArguments: |
               CAPABILITY=${{ parameters.serviceName }}
@@ -81,7 +81,7 @@ stages:
           displayName: 'Push docker image for service Harbor 52'
           inputs:
             containerregistrytype: 'Container Registry'
-            dockerRegistryConnection: '$(registry)'
+            dockerRegistryConnection: '$(registry-connection)'
             action: 'Push an image'
             imageName: 'dbp/${{ parameters.serviceName }}-nextgen:2.0.0-$(Build.BuildNumber)'
             includeLatestTag: true
@@ -90,7 +90,7 @@ stages:
           displayName: 'Remove local image copy'
           inputs:
             containerregistrytype: 'Container Registry'
-            dockerRegistryConnection: '$(registry)'
+            dockerRegistryConnection: '$(registry-connection)'
             action: 'Run a Docker command'
             customCommand: 'rmi -f $(registry)/dbp/${{ parameters.serviceName }}-nextgen:2.0.0-$(Build.BuildNumber)'
 
