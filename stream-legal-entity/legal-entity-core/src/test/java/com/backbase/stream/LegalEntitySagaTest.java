@@ -2,6 +2,7 @@ package com.backbase.stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -181,7 +182,7 @@ class LegalEntitySagaTest {
         JobRole jobRole = new JobRole().functionGroups(Collections.singletonList(functionGroup)).name("someJobRole");
         ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
         LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).parentExternalId(leExternalId)
-            .masterServiceAgreement(sa).productGroups(Collections.singletonList(productGroup));
+            .activateSingleServiceAgreement(false).masterServiceAgreement(sa).productGroups(Collections.singletonList(productGroup));
 
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
@@ -191,7 +192,6 @@ class LegalEntitySagaTest {
         when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(eq(leInternalId))).thenReturn(Mono.just(sa));
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
-        when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
             .thenReturn(productGroupTaskMono);
         when(userService.setupRealm(task.getLegalEntity()))
@@ -204,10 +204,17 @@ class LegalEntitySagaTest {
 
         verify(userService).setupRealm(task.getLegalEntity());
         verify(userService).linkLegalEntityToRealm(task.getLegalEntity());
+
+        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
+        result = legalEntitySaga.executeTask(task);
+        result.block();
+
+        verify(userService, times(2)).setupRealm(task.getLegalEntity());
+        verify(userService, times(2)).linkLegalEntityToRealm(task.getLegalEntity());
     }
 
     @Test
-    void masterServiceAgreementCreation_existingLE() {
+    void masterServiceAgreementCreation_activateSingleServiceAgreement() {
         String leExternalId = "someLeExternalId";
         String leInternalId = "someLeInternalId";
         String customSaExId = "someCustomSaExId";
@@ -223,16 +230,16 @@ class LegalEntitySagaTest {
 
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
         JobRole jobRole = new JobRole().functionGroups(Collections.singletonList(functionGroup)).name("someJobRole");
-        ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
         LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).parentExternalId(leExternalId)
-            .masterServiceAgreement(sa).productGroups(Collections.singletonList(productGroup));
+            .productGroups(Collections.singletonList(productGroup));
+        ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
 
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
         when(task.getLegalEntity()).thenReturn(legalEntity);
-        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
         when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(eq(leInternalId))).thenReturn(Mono.just(sa));
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(eq(leInternalId))).thenReturn(Mono.empty());
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
         when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
@@ -248,6 +255,13 @@ class LegalEntitySagaTest {
 
         verify(userService).setupRealm(task.getLegalEntity());
         verify(userService).linkLegalEntityToRealm(task.getLegalEntity());
+
+        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
+        result = legalEntitySaga.executeTask(task);
+        result.block();
+
+        verify(userService, times(2)).setupRealm(task.getLegalEntity());
+        verify(userService, times(2)).linkLegalEntityToRealm(task.getLegalEntity());
     }
 
     @NotNull
