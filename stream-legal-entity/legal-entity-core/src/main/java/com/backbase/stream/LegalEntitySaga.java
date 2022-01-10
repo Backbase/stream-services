@@ -589,7 +589,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Existing Service Agreement: %s found for Legal Entity: %s", serviceAgreement.getExternalId(), legalEntity.getExternalId());
                     return Mono.just(streamTask);
                 });
-            if (streamTask.getLegalEntity() != null &&
+            /*
+            Fix: Master Service Agreement can be created only if activateSingleServiceAgreement property is missing or it has the value: true
+            */
                 (streamTask.getLegalEntity().getActivateSingleServiceAgreement() == null || streamTask.getLegalEntity().getActivateSingleServiceAgreement())) {
                 ServiceAgreement newServiceAgreement = createMasterServiceAgreement(legalEntity, legalEntity.getAdministrators());
                 Mono<LegalEntityTask> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask, newServiceAgreement)
