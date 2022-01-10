@@ -62,6 +62,8 @@ class LegalEntitySagaTest {
     @Test
     void customServiceAgreementCreation() {
         String leExternalId = "someLeExternalId";
+        String leParentExternalId = "someParentLeExternalId";
+        String leInternalId = "someLeInternalId";
         String adminExId = "someAdminExId";
         String regularUserExId = "someRegularUserExId";
         String customSaExId = "someCustomSaExId";
@@ -79,10 +81,10 @@ class LegalEntitySagaTest {
             .externalId(regularUserExId));
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
         JobRole jobRole = new JobRole().functionGroups(Collections.singletonList(functionGroup)).name("someJobRole");
-        ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole);
+        ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
-        LegalEntity legalEntity = new LegalEntity().externalId(leExternalId).addAdministratorsItem(adminUser)
-            .customServiceAgreement(customSa).users(Collections.singletonList(regularUser))
+        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).addAdministratorsItem(adminUser)
+            .parentExternalId(leParentExternalId).customServiceAgreement(customSa).users(Collections.singletonList(regularUser))
             .productGroups(Collections.singletonList(productGroup)).subsidiaries(Collections.singletonList(
                     new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
             ));
@@ -90,6 +92,7 @@ class LegalEntitySagaTest {
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
         when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.empty());
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
@@ -117,6 +120,7 @@ class LegalEntitySagaTest {
     @Test
     void customServiceAgreementCreationNoUsersOrAdministrators() {
         String leExternalId = "someLeExternalId";
+        String leInternalId = "someLeInternalId";
         String customSaExId = "someCustomSaExId";
 
         SavingsAccount account = new SavingsAccount();
@@ -130,13 +134,14 @@ class LegalEntitySagaTest {
 
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
         JobRole jobRole = new JobRole().functionGroups(Collections.singletonList(functionGroup)).name("someJobRole");
-        ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole);
-        LegalEntity legalEntity = new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
-            .productGroups(Collections.singletonList(productGroup));
+        ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
+        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).customServiceAgreement(customSa)
+            .parentExternalId(leExternalId).productGroups(Collections.singletonList(productGroup));
 
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
         when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.empty());
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
