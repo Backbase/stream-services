@@ -10,8 +10,8 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.backbase.stream.compositions</groupId>
-    <artifactId>legal-entity-integration-api</artifactId>
+    <groupId>com.backbase.stream.cursor</groupId>
+    <artifactId>ingestion-cursor-api</artifactId>
     <version>3.0.0-SNAPSHOT</version>
 
     <name>Stream :: Compositions :: API:: Ingestion Cursor</name>

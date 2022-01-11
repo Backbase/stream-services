@@ -9,19 +9,20 @@ tags:
   - name: IngestionCursor
 paths:
   /cursor/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: The id of the member/account
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - GetIngestionCursor
       summary: Gets Ingestion Cursor.
       description:  Returns ther ingstion cursor obtained by id.
       operationId: getIngestionCursor
-      parameters:
-        - name: id
-          in: path
-          description: The id of the member/account
-          required: true
-          schema:
-            type: string
+
       responses:
         "200":
           description: Gets the ingestion cursor Object
@@ -47,9 +48,12 @@ paths:
       summary: creates the Ingestion Cursor.
       description:  updates the ingstion cursor obtained by id.
       operationId: updateIngestionCursor
-      parameters:
-        schema:
-          $ref: '#/components/schemas/IngestionCursor'
+      requestBody:
+        description: Endpoint to search for particular payment
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestionCursor'
       responses:
         "200":
           description: Gets the ingestion cursor Object
@@ -105,7 +109,6 @@ paths:
       summary: Gets All the Ingestion Cursor.
       description:  Returns an array of ingestion cursor obtained by id.
       operationId: getAllIngestionCursor
-      parameters:
       responses:
         "200":
           description: Gets the ingestion cursor Object
@@ -130,10 +133,13 @@ paths:
         - createIngestionCursor
       summary: creates the Ingestion Cursor.
       description:  creates the ingstion cursor obtained by id.
-      operationId: getIngestionCursor
-      parameters:
-       schema:
-          $ref: '#/components/schemas/IngestionCursor'
+      operationId: postIngestionCursor
+      requestBody:
+        description: Endpoint to search for particular payment
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestionCursor'
       responses:
         "200":
           description: Gets the ingestion cursor Object
@@ -229,4 +235,3 @@ components:
       properties:
         message:
           type: string
-
