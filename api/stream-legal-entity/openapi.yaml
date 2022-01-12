@@ -863,6 +863,8 @@ components:
       properties:
         name:
           type: string
+        activateSingleServiceAgreement:
+          type: boolean
         internalId:
           $ref: '#/components/schemas/InternalIdentifier'
         externalId:
@@ -1326,6 +1328,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/JobRole'
+        creatorLegalEntity:
+          $ref: '#/components/schemas/ExternalIdentifier'
     ApsIdentifiers:
       type: object
       properties:

@@ -199,6 +199,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             })
             .flatMap(actual -> {
                 task.getData().setInternalId(actual.getInternalId());
+                legalEntityService.getLegalEntityByInternalId(actual.getInternalId()).subscribe(result -> {
+                    task.getData().setParentInternalId(result.getParentInternalId());
+                });
                 // TODO: Add Update Legal Entity Logic
                 task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, EXISTS, legalEntity.getExternalId(), actual.getInternalId(), "Legal Entity: %s already exists", legalEntity.getName());
                 return Mono.just(task);
@@ -207,6 +210,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         Mono<LegalEntityTask> createNewLegalEntity = legalEntityService.createLegalEntity(legalEntity)
             .flatMap(actual -> {
                 task.getData().setInternalId(legalEntity.getInternalId());
+                legalEntityService.getLegalEntityByInternalId(actual.getInternalId()).subscribe(result -> {
+                    task.getData().setParentInternalId(result.getParentInternalId());
+                });
                 task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, CREATED, legalEntity.getExternalId(), legalEntity.getInternalId(), "Created new Legal Entity");
                 return Mono.just(task);
             })
@@ -579,19 +585,25 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Existing Service Agreement: %s found for Legal Entity: %s", serviceAgreement.getExternalId(), legalEntity.getExternalId());
                     return Mono.just(streamTask);
                 });
-            ServiceAgreement newServiceAgreement = createMasterServiceAgreement(legalEntity, legalEntity.getAdministrators());
 
-            Mono<LegalEntityTask> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask, newServiceAgreement)
-                .onErrorMap(AccessGroupException.class, accessGroupException -> {
-                    streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, newServiceAgreement.getExternalId(), null, accessGroupException, accessGroupException.getMessage(), accessGroupException.getHttpResponse());
-                    return new StreamTaskException(streamTask, accessGroupException);
-                })
-                .flatMap(serviceAgreement -> {
-                    streamTask.getData().setMasterServiceAgreement(serviceAgreement);
-                    streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s", serviceAgreement.getExternalId(), legalEntity.getAdministrators().stream().map(User::getExternalId).collect(Collectors.joining(", ")), legalEntity.getExternalId());
-                    return Mono.just(streamTask);
-                });
-            return existingServiceAgreement.switchIfEmpty(createServiceAgreement);
+                // Master Service Agreement can be created only if activateSingleServiceAgreement property is missing or it has the value: true
+                if (streamTask.getLegalEntity() != null &&
+                    (streamTask.getLegalEntity().getActivateSingleServiceAgreement() == null || streamTask.getLegalEntity().getActivateSingleServiceAgreement())) {
+                    ServiceAgreement newServiceAgreement = createMasterServiceAgreement(legalEntity, legalEntity.getAdministrators());
+                    Mono<LegalEntityTask> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask, newServiceAgreement)
+                        .onErrorMap(AccessGroupException.class, accessGroupException -> {
+                            streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, newServiceAgreement.getExternalId(), null, accessGroupException, accessGroupException.getMessage(), accessGroupException.getHttpResponse());
+                            return new StreamTaskException(streamTask, accessGroupException);
+                        })
+                        .flatMap(serviceAgreement -> {
+                            streamTask.getData().setMasterServiceAgreement(serviceAgreement);
+                            streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s", serviceAgreement.getExternalId(), legalEntity.getAdministrators().stream().map(User::getExternalId).collect(Collectors.joining(", ")), legalEntity.getExternalId());
+                            return Mono.just(streamTask);
+                        });
+                    return existingServiceAgreement.switchIfEmpty(createServiceAgreement);
+                }
+            return existingServiceAgreement;
+
         } else {
             return Mono.just(streamTask);
         }
@@ -619,7 +631,12 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 return accessGroupService.updateServiceAgreementAssociations(streamTask, newSa, userActions)
                     .thenReturn(streamTask);
             });
-
+        // As creatorLegalEntity doesnt accept external ID
+        // If creatorLegalEntity property is specified and equals to LE's parentExternalId then setup the
+        // creatorLegalEntity for SA as the LE's parent Internal ID
+        if (legalEntity.getParentExternalId().equals(newSa.getCreatorLegalEntity())) {
+            newSa.setCreatorLegalEntity(legalEntity.getParentInternalId());
+        }
         Mono<LegalEntityTask> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask, newSa)
             .onErrorMap(AccessGroupException.class, accessGroupException -> {
                 streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, newSa.getExternalId(), null,
