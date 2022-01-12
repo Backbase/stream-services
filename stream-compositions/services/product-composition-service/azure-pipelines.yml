@@ -4,7 +4,7 @@ resources:
 trigger:
   branches:
     include:
-      - develop
+      - feature/stream-v3-w
   paths:
     include:
       - product-composition-service
