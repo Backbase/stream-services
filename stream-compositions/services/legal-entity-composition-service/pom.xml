@@ -164,19 +164,6 @@
                             </configOptions>
                         </configuration>
                     </execution>
-
-                    <!--                    <execution>-->
-                    <!--                        <id>generate-legal-entity-integration-api-code</id>-->
-                    <!--                        <goals>-->
-                    <!--                            <goal>generate-webclient-embedded</goal>-->
-                    <!--                        </goals>-->
-                    <!--                        <phase>generate-sources</phase>-->
-                    <!--                        <configuration>-->
-                    <!--                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v2.0.0.yaml</inputSpec>-->
-                    <!--                            <apiPackage>com.backbase.stream.compositions.integration.legalentity.api</apiPackage>-->
-                    <!--                            <modelPackage>com.backbase.stream.compositions.integration.legalentity.model</modelPackage>-->
-                    <!--                        </configuration>-->
-                    <!--                    </execution>-->
                 </executions>
             </plugin>
 
@@ -193,7 +180,6 @@
                         </goals>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v2.0.0.yaml</inputSpec>
-
                             <apiPackage>com.backbase.stream.compositions.integration.legalentity.api</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.integration.legalentity.model</modelPackage>
                             <generatorName>java</generatorName>
