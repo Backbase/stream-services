@@ -48,7 +48,7 @@ backbase:
       product:
         enable-completed-events: false
         enable-failed-events: true
-        product-integraion-url: http://http://product-ingestion-integration:8080:8080
+        product-integraion-url: http://wsecu-product-integration-service-nextgen:8080
 
 logging:
   level:
