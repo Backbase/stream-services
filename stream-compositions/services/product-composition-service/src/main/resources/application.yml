@@ -38,9 +38,9 @@ backbase:
       sink:
         useIdentityIntegration: true
     dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
+      user-manager-base-url: http://user-manager-nextgen:8080
+      access-control-base-url: http://access-control-nextgen:8080
+      arrangement-manager-base-url: http://arrangement-manage-nexgen:8080
     identity:
       identity-integration-base-url: http://identity-integration-service:8080
 
