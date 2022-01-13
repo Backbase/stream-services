@@ -41,7 +41,7 @@ backbase:
       legal-entity:
         enable-completed-events: true
         enable-failed-events: true
-        legal-entity-integration-url: http://legal-entity-ingestion-integration:8080
+        legal-entity-integration-url: http://wsecu-legal-entity-integration-service-nextgen:8080
 
 bootstrap:
   enabled: false
