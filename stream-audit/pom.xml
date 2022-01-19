@@ -17,6 +17,5 @@
 
     <modules>
         <module>audit-core</module>
-        <module>audit-http</module>
     </modules>
 </project>

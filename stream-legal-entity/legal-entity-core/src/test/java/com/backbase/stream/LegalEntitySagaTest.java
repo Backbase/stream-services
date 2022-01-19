@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.backbase.dbs.accesscontrol.api.service.v2.model.GetServiceAgreement;
 import com.backbase.dbs.user.api.service.v2.model.Realm;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -87,8 +88,11 @@ class LegalEntitySagaTest {
                     new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
             ));
 
+        ServiceAgreement serviceAgreement = new ServiceAgreement();
+
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
+        when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(eq(leExternalId))).thenReturn(Mono.just(serviceAgreement));
         when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
@@ -97,7 +101,7 @@ class LegalEntitySagaTest {
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(customSa), any())).thenReturn(Mono.just(customSa));
         when(userService.getUserByExternalId(eq(regularUserExId))).thenReturn(Mono.just(regularUser.getUser()));
         when(userService.getUserByExternalId(eq(adminExId))).thenReturn(Mono.just(adminUser));
-        when(userService.createUser(any(), any())).thenReturn(Mono.empty());
+        when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
@@ -134,8 +138,10 @@ class LegalEntitySagaTest {
         LegalEntity legalEntity = new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
             .productGroups(Collections.singletonList(productGroup));
 
+        ServiceAgreement serviceAgreement = new ServiceAgreement();
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
+        when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(eq(leExternalId))).thenReturn(Mono.just(serviceAgreement));
         when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());

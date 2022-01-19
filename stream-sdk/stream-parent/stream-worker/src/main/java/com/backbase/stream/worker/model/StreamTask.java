@@ -21,6 +21,7 @@ public abstract class StreamTask {
     private OffsetDateTime registeredAt;
     private OffsetDateTime finishedAt;
     private State state;
+    private String error;
 
     // Temporary until
     private List<TaskHistory> history = new ArrayList<>();
@@ -45,12 +46,14 @@ public abstract class StreamTask {
                       String message, Object... messageArgs) {
         addHistory(entity, operation, result, externalId, internalId, String.format(message, messageArgs),
             TaskHistory.Severity.ERROR, null, null);
+        error = message;
     }
 
     public void error(String entity, String operation, String result, String externalId, String internalId,
                       Throwable throwable, String errorMessage, String message, Object... messageArgs) {
         addHistory(entity, operation, result, externalId, internalId, String.format(message, messageArgs),
             TaskHistory.Severity.ERROR, throwable, errorMessage);
+        error = message;
     }
 
     @ContinueSpan
@@ -106,9 +109,12 @@ public abstract class StreamTask {
         log.info("\n\n" +
                 "Stream Task: {}\n" +
                 "Status: {}\n\n" +
+                (isFailed() ? "error: {}\n\n" : "") +
                 "History:\n{}\n",
             this.getId(),
-            this.getState(), "\t" + this.getHistory().stream().map(TaskHistory::toDisplayString)
+            this.getState(),
+            this.getError(),
+            "\t" + this.getHistory().stream().map(TaskHistory::toDisplayString)
                 .collect(Collectors.joining("\n\t")));
     }
 

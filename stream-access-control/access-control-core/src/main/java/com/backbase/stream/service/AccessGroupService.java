@@ -535,12 +535,6 @@ public class AccessGroupService {
                         .collect(Collectors.toList())))
             .collect(Collectors.toList());
 
-        if (request.stream().anyMatch(usersPermission -> usersPermission.getFunctionGroupDataGroups().stream()
-            .anyMatch(this::hasDataGroupIdentifiers))) {
-            log.error("You are assigning permissions without data groups!!");
-        }
-
-
         return Mono.just(request)
             .flatMap(userPermissionsRequest -> {
                 if (task.getIngestionMode().equals(BatchProductGroupTask.IngestionMode.REPLACE)) {
@@ -877,7 +871,7 @@ public class AccessGroupService {
         ServiceAgreement serviceAgreement, List<BusinessFunctionGroup> businessFunctionGroups) {
 
         streamTask.info(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "", serviceAgreement.getExternalId(),
-            serviceAgreement.getInternalId(), "Setting up %s Business Functions for Service Agreement: %s",
+                serviceAgreement.getInternalId(), "Setting up %s Business Functions for Service Agreement: %s",
             businessFunctionGroups.size(), serviceAgreement.getName());
         log.info("Setup {} Business Function for Service Agreement: {}", businessFunctionGroups.size(),
             serviceAgreement.getExternalId());

@@ -44,7 +44,7 @@ backbase:
         legal-entity-integration-url: http://legal-entity-ingestion-integration:8080
 
 bootstrap:
-  enabled: false
+  enabled: true
   # This is just na example. Replace it with data corresponding to   your bank
   legalEntity:
     name: "WSECU"
