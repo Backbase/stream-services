@@ -31,9 +31,9 @@ backbase:
       sink:
         useIdentityIntegration: true
     dbs:
-      user-manager-base-url: http://user-manager-nextgen:8080
-      access-control-base-url: http://access-control-nextgen:8080
-      arrangement-manager-base-url: http://arrangement-manager-nextgen:8080
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
     identity:
       identity-integration-base-url: http://identity-integration-service:8080
 
@@ -41,10 +41,10 @@ backbase:
       legal-entity:
         enable-completed-events: true
         enable-failed-events: true
-        legal-entity-integration-url: http://wsecu-legal-entity-integration-service-nextgen:8080
+        legal-entity-integration-url: http://legal-entity-ingestion-integration:8080
 
 bootstrap:
-  enabled: false
+  enabled: true
   # This is just na example. Replace it with data corresponding to   your bank
   legalEntity:
     name: "WSECU"

@@ -871,7 +871,7 @@ public class AccessGroupService {
         ServiceAgreement serviceAgreement, List<BusinessFunctionGroup> businessFunctionGroups) {
 
         streamTask.info(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "", serviceAgreement.getExternalId(),
-            serviceAgreement.getInternalId(), "Setting up %s Business Functions for Service Agreement: %s",
+                serviceAgreement.getInternalId(), "Setting up %s Business Functions for Service Agreement: %s",
             businessFunctionGroups.size(), serviceAgreement.getName());
         log.info("Setup {} Business Function for Service Agreement: {}", businessFunctionGroups.size(),
             serviceAgreement.getExternalId());

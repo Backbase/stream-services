@@ -68,7 +68,7 @@ services:
 
   legal-entity-ingestion-integration:
     container_name: wsecu_bb_legal_entity_integration
-    image: harbor.backbase.eu/development/wsecu-legal-entity-ingestion-integration-service
+    image: harbor.backbase.eu/development/wsecu-legal-entity-integration-service
     ports:
       - "9091:8080"
       - "5591:5555"
