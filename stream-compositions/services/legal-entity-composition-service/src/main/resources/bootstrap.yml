@@ -8,3 +8,19 @@ spring:
       enabled: false
       discovery:
         enabled: true
+
+eureka:
+  instance:
+    appname: ${spring.application.name}
+    non-secure-port: ${server.port:8080}
+    preferIpAddress: true
+    metadata-map:
+      public: false
+      role: live
+      contextPath: /
+      management:
+        context-path: /actuator #required to pick up actuator endpoints
+  client:
+    enabled: true
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://registry-dbsx.dbsx.svc.cluster.local:8080/registry/eureka/}
