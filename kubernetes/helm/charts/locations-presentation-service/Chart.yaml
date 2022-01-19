@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: locations-presentation-service
-name: locations-presentation-service
-version: 1.0.0

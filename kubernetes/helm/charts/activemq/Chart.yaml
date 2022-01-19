@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: A Helm chart for ActiveMQ
-name: activemq
-version: 5.10.0

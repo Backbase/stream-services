@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: billpay-integration-external-provider-outbound
-name: billpay-integration-external-provider-outbound
-version: 1.0.0

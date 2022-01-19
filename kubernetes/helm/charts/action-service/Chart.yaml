@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: action-service chart
-name: action-service
-version: 2.0.0

@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: wsecu-external-accounts-batch-service
-name: wsecu-external-accounts-batch-service
-version: 1.0.0

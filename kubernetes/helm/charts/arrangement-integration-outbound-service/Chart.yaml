@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: arrangement-integration-outbound-service
-name: arrangement-integration-outbound-service-nextgen
-version: 2.0.0

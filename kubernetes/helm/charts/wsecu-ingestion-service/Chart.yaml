@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: wsecu-ingestion-service
-name: wsecu-ingestion-service
-version: 1.0.0

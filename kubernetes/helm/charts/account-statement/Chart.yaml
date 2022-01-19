@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: account-statement chart
-name: account-statement
-version: 2.0.0

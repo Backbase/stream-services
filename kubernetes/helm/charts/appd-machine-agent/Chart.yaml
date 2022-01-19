@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: AppDynamics Machine Agent
-name: appd-machine-agent
-version: 1.0.0

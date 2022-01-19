@@ -1,6 +1,0 @@
-apiVersion: v2
-name: wsecu-harland-presentation-service
-description: wsecu-harland-presentation-service
-type: application
-appVersion: "2.0.0"
-version: 1.0.0

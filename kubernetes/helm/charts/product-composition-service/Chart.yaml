@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: product-composition-service
-name: product-composition-service-nextgen
-version: 2.0.0

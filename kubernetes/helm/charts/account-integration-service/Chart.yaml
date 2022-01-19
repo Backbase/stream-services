@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: account-integration-service
-name: account-integration-service
-version: 0.1.0

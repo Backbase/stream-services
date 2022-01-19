@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: "2.0.0"
-type: application
-description: wsecu-csr-portal-presentation-service
-name: wsecu-csr-portal-presentation-service
-version: 1.0.0
