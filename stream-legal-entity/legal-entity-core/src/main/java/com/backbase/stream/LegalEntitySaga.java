@@ -121,6 +121,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::setupAdministrators)
             .flatMap(this::setupUsers)
             .flatMap(this::setupServiceAgreement)
+            .flatMap(this::deleteLegalEntityPermissions)
             .flatMap(this::createJobRoles)
             .flatMap(this::processJobProfiles)
             .flatMap(this::setupAdministratorPermissions)
@@ -182,6 +183,36 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     .then(userService.archiveUsers(le.getInternalId(), userIds))
                     .then(legalEntityService.deleteLegalEntity(legalEntityExternalId));
             });
+    }
+
+    private Mono<LegalEntityTask> deleteLegalEntityPermissions(LegalEntityTask streamTask) {
+        String legalEntityExternalId = streamTask.getData().getExternalId();
+
+        return Mono.zip(legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(legalEntityExternalId),
+                        legalEntityService.getLegalEntityByExternalId(legalEntityExternalId))
+                .flatMap(data -> {
+                    LegalEntity le = data.getT2();
+                    return userService.getUsersByLegalEntity(le.getInternalId())
+                            .map(usersByLegalEntityIdsResponse -> {
+                                List<GetUser> users = usersByLegalEntityIdsResponse.getUsers();
+                                return Tuples.of(data.getT1(), le, users);
+                            });
+                })
+                .flatMap(data -> {
+                    ServiceAgreement sa = data.getT1();
+                    List<GetUser> users = data.getT3();
+                    return Flux.fromIterable(users)
+                            .flatMap(user -> accessGroupService.removePermissionsForUser(sa.getInternalId(), user.getId())
+                                    .thenReturn(user.getExternalId()))
+                            .collectList()
+                            .map(userIds -> Tuples.of(sa, data.getT2(), userIds));
+
+                })
+                .flatMap(data -> {
+                    ServiceAgreement sa = data.getT1();
+                    return accessGroupService.deleteFunctionGroupsForServiceAgreement(sa.getInternalId());
+                })
+                .thenReturn(streamTask);
     }
 
     private Mono<LegalEntityTask> upsertLegalEntity(LegalEntityTask task) {
