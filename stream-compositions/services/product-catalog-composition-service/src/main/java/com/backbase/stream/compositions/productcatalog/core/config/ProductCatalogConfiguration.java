@@ -2,10 +2,8 @@ package com.backbase.stream.compositions.productcatalog.core.config;
 
 import com.backbase.stream.compositions.integration.productcatalog.ApiClient;
 import com.backbase.stream.compositions.integration.productcatalog.api.ProductCatalogIntegrationApi;
-import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.mapstruct.factory.Mappers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,15 +23,8 @@ public class ProductCatalogConfiguration {
     private final ProductCatalogConfigurationProperties properties;
 
     @Bean
-    public ProductCatalogMapper mapper() {
-        return Mappers.getMapper(ProductCatalogMapper.class);
-    }
-
-    @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http
-                .csrf().disable()
-                .build();
+        return http.csrf().disable().build();
     }
 
     @Bean

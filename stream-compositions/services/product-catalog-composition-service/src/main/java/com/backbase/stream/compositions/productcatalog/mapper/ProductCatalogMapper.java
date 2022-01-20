@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.productcatalog.mapper;
 
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component;
  */
 
 @Component
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ProductCatalogMapper {
     /**
      * Maps composition ProductCatalog to stream ProductCatalog model.
