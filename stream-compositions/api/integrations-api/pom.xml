@@ -15,6 +15,7 @@
 
     <modules>
         <module>legal-entity-integration-api</module>
+        <module>product-integration-api</module>
     </modules>
 
 </project>
