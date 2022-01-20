@@ -2,10 +2,8 @@ package com.backbase.stream.compositions.product.core.config;
 
 import com.backbase.stream.compositions.integration.product.ApiClient;
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
-import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.mapstruct.factory.Mappers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +19,6 @@ import java.text.DateFormat;
 @EnableConfigurationProperties(ProductConfigurationProperties.class)
 public class ProductCompositionConfiguration {
     private final ProductConfigurationProperties productConfigurationProperties;
-
-    @Bean
-    public ProductGroupMapper mapper() {
-        return Mappers.getMapper(ProductGroupMapper.class);
-    }
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {

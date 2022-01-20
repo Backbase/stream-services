@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.product.core.mapper;
 
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +14,8 @@ import org.springframework.stereotype.Component;
  * All ProductGroup objects used in above modules have exactly same structures they are built
  * from the common /api folder.
  */
-@Mapper
 @Component
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ProductGroupMapper {
     /**
      * Maps composition ProductGroup to stream ProductGroup model.
