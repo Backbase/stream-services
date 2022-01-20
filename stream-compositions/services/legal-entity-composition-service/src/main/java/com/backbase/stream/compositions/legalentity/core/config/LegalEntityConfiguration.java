@@ -25,11 +25,6 @@ public class LegalEntityConfiguration {
     private final LegalEntityConfigurationProperties legalEntityConfigurationProperties;
 
     @Bean
-    public LegalEntityMapper mapper() {
-        return Mappers.getMapper(LegalEntityMapper.class);
-    }
-
-    @Bean
     @Primary
     public LegalEntityIntegrationApi legalEntityIntegrationApi(ApiClient legalEntityClient) {
         return new LegalEntityIntegrationApi(legalEntityClient);
