@@ -35,7 +35,6 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-@Disabled
 @DirtiesContext
 @SpringBootTest(classes = {ProductCatalogCompositionApplication.class})
 @AutoConfigureWebTestClient
