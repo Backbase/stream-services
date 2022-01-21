@@ -2,10 +2,8 @@ package com.backbase.stream.compositions.legalentity.core.config;
 
 import com.backbase.stream.compositions.integration.legalentity.ApiClient;
 import com.backbase.stream.compositions.integration.legalentity.api.LegalEntityIntegrationApi;
-import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.mapstruct.factory.Mappers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
