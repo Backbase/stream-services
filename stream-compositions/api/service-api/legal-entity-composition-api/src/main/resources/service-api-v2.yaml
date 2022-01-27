@@ -89,22 +89,22 @@ components:
       properties:
         legalEntityExternalId:
           type: string
+        additionalParameters:
+          type: object
+          additionalProperties:
+            type: string
 
     PushIngestionRequest:
       type: object
       properties:
-        legalEntities:
-          type: array
-          items:
-            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
+        legalEntity:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
 
     IngestionResponse:
       type: object
       properties:
-        legalEntities:
-          type: array
-          items:
-            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
+        legalEntity:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
 
     InternalServerError:
       required:

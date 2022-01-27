@@ -10,8 +10,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.stream.Collectors;
-
 @Component
 @AllArgsConstructor
 public class LegalEntityIngestPushEventHandler implements EventHandler<LegalEntityIngestPushEvent> {
@@ -30,12 +28,8 @@ public class LegalEntityIngestPushEventHandler implements EventHandler<LegalEnti
      * @return LegalEntityIngestPullRequest
      */
     private Mono<LegalEntityIngestPushRequest> buildRequest(EnvelopedEvent<LegalEntityIngestPushEvent> envelopedEvent) {
-
         return Mono.just(LegalEntityIngestPushRequest.builder()
-                .legalEntities(envelopedEvent.getEvent().getLegalEntities()
-                        .stream()
-                        .map(mapper::mapEventToStream)
-                        .collect(Collectors.toList()))
+                .legalEntity(mapper.mapEventToStream(envelopedEvent.getEvent().getLegalEntity()))
                 .build());
     }
 }
