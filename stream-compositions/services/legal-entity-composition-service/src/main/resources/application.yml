@@ -43,8 +43,8 @@ backbase:
         legal-entity-integration-url: http://legal-entity-ingestion-integration:8080
 
 bootstrap:
-  enabled: false
-  # This is just na example. Replace it with data corresponding to your bank
+  enabled: true
+  # This is just na example. Replace it with data corresponding to   your bank
   legalEntity:
     name: "Moustache Bank"
     realmName: "backbase"
@@ -121,4 +121,3 @@ bootstrap:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
-

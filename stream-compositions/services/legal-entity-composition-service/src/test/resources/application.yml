@@ -16,8 +16,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   activemq:
-
-    broker-url: tcp://localhost:16161
+    broker-url: vm://activemq
   cloud:
     kubernetes:
       config:
@@ -63,7 +62,7 @@ backbase:
     compositions:
       legal-entity:
         enable-completed-events: true
-        e nable-failed-events: true
+        enable-failed-events: true
         legal-entity-integration-url: http://localhost:18000
 
 bootstrap:

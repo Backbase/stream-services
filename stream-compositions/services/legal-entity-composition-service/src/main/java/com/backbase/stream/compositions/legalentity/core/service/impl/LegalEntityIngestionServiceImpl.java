@@ -14,8 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -29,10 +27,8 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
      */
     public Mono<LegalEntityIngestResponse> ingestPull(Mono<LegalEntityIngestPullRequest> ingestPullRequest) {
         return ingestPullRequest
-                .flatMapMany(legalEntityIntegrationService::retrieveLegalEntities)
-                .map(mapper::mapIntegrationToStream)
-                .flatMap(this::sendLegalEntityToDbs)
-                .collectList()
+                .map(this::pullLegalEntity)
+                .flatMap(this::sendToDbs)
                 .doOnSuccess(this::handleSuccess)
                 .map(this::buildResponse);
     }
@@ -45,28 +41,40 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
     }
 
     /**
-     * Ingests single legal entity to DBS.
+     * Pulls and remaps legal entity from integration service.
      *
-     * @param legalEntity Legal entity
-     * @return Ingested legal entities
+     * @param request LegalEntityIngestPullRequest
+     * @return LegalEntity
      */
-    private Mono<LegalEntity> sendLegalEntityToDbs(LegalEntity legalEntity) {
-        return Mono.just(legalEntity)
-                .map(LegalEntityTask::new)
-                .flatMap(legalEntitySaga::executeTask)
-                .map(LegalEntityTask::getData);
+    private Mono<LegalEntity> pullLegalEntity(LegalEntityIngestPullRequest request) {
+        return legalEntityIntegrationService
+                .pullLegalEntity(request)
+                .map(mapper::mapIntegrationToStream);
     }
 
-    private LegalEntityIngestResponse buildResponse(List<LegalEntity> legalEnityList) {
+    /**
+     * Sends product group to DBS.
+     *
+     * @param legalEntity LegalEntity
+     * @return LegalEntity
+     */
+    private Mono<LegalEntity> sendToDbs(Mono<LegalEntity> legalEntity) {
+        return legalEntity
+                .map(LegalEntityTask::new)
+                .flatMap(legalEntitySaga::executeTask)
+                .map(LegalEntityTask::getData );
+    }
+
+    private LegalEntityIngestResponse buildResponse(LegalEntity legalEnity) {
         return LegalEntityIngestResponse.builder()
-                .legalEntities(legalEnityList)
+                .legalEntity(legalEnity)
                 .build();
     }
 
-    private void handleSuccess(List<LegalEntity> legalEntities) {
-        log.info("Legal entities ingestion completed (count: {})", legalEntities.size());
+    private void handleSuccess(LegalEntity legalEntity) {
+        log.info("Legal entities ingestion completed.");
         if (log.isDebugEnabled()) {
-            log.debug("Ingested legal entities: {}", legalEntities);
+            log.debug("Ingested legal entity: {}", legalEntity);
         }
     }
 }
