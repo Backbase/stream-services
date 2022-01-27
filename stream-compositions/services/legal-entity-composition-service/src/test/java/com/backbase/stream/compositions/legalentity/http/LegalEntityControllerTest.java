@@ -5,14 +5,13 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngest
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.model.PullIngestionRequest;
 import com.backbase.stream.compositions.legalentity.model.PushIngestionRequest;
+import com.backbase.stream.legalentity.model.LegalEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -42,7 +41,7 @@ class LegalEntityControllerTest {
 
         when(legalEntityIngestionService.ingestPull(any())).thenReturn(
                 Mono.just(LegalEntityIngestResponse.builder()
-                        .legalEntities(new ArrayList<>())
+                        .legalEntity(new LegalEntity())
                         .build()));
 
         controller.pullIngestLegalEntity(requestMono, null).block();
@@ -52,11 +51,11 @@ class LegalEntityControllerTest {
     @Test
     void testPushIngestion_Success() {
         Mono<PushIngestionRequest> requestMono = Mono.just(
-                new PushIngestionRequest().withLegalEntities(new ArrayList<>()));
+                new PushIngestionRequest().withLegalEntity(new com.backbase.stream.compositions.legalentity.model.LegalEntity()));
 
         when(legalEntityIngestionService.ingestPush(any())).thenReturn(
                 Mono.just(LegalEntityIngestResponse.builder()
-                        .legalEntities(new ArrayList<>())
+                        .legalEntity(new LegalEntity())
                         .build()));
 
         controller.pushIngestLegalEntity(requestMono, null).block();
