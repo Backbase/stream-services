@@ -13,9 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -30,12 +27,9 @@ class LegalEntityIngestPushEventHandlerTest {
 
     @Test
     void testHandleEvent_Completed() {
-        List<LegalEntity> legalEntities = new ArrayList<>();
-        legalEntities.add(new LegalEntity().name("Legal Entity"));
-
         Mono<LegalEntityIngestResponse> responseMono = Mono.just(
                 LegalEntityIngestResponse
-                        .builder().legalEntities(legalEntities).build());
+                        .builder().legalEntity(new LegalEntity().name("Legal Entity")).build());
 
         lenient().when(legalEntityIngestionService.ingestPush(any())).thenReturn(responseMono);
 
