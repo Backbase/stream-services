@@ -6,14 +6,13 @@
       "description": "Unique identifier of the event.",
       "type": "string"
     },
-    "legalEntities": {
-      "type": "array",
-      "items": {
-        "$ref": "../legal-entity.json"
-      }
+    "legalEntity": {
+      "type": "object",
+      "$ref": "../legal-entity.json"
     }
   },
   "required": [
-    "eventId"
+    "eventId",
+    "legalEntity"
   ]
 }
