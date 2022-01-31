@@ -6,9 +6,9 @@ import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalog
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
-import com.backbase.stream.compositions.productcatalog.model.IngestionResponse;
-import com.backbase.stream.compositions.productcatalog.model.PullIngestionRequest;
-import com.backbase.stream.compositions.productcatalog.model.PushIngestionRequest;
+import com.backbase.stream.compositions.productcatalog.model.ProductCatalogIngestionResponse;
+import com.backbase.stream.compositions.productcatalog.model.ProductCatalogPullIngestionRequest;
+import com.backbase.stream.compositions.productcatalog.model.ProductCatalogPushIngestionRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,16 +25,16 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
     private final ProductCatalogMapper mapper;
 
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pullIngestProductCatalog(
-            @Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<ProductCatalogIngestionResponse>> pullIngestProductCatalog(
+            @Valid Mono<ProductCatalogPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
         return productCatalogIngestionService
                 .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
                 .map(this::mapIngestionToResponse);
     }
 
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pushIngestProductCatalog(
-            @Valid Mono<PushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<ProductCatalogIngestionResponse>> pushIngestProductCatalog(
+            @Valid Mono<ProductCatalogPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
         return productCatalogIngestionService
                 .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
                 .map(this::mapIngestionToResponse);
@@ -46,7 +46,7 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
      * @param request PullIngestionRequest
      * @return ProductIngestPullRequest
      */
-    private ProductCatalogIngestPullRequest buildPullRequest(PullIngestionRequest request) {
+    private ProductCatalogIngestPullRequest buildPullRequest(ProductCatalogPullIngestionRequest request) {
         return ProductCatalogIngestPullRequest.builder()
                 .additionalParameters(request.getAdditionalParameters())
                 .build();
@@ -58,7 +58,7 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
      * @param request PushIngestionRequest
      * @return LegalEntityIngestPushRequest
      */
-    private ProductCatalogIngestPushRequest buildPushRequest(PushIngestionRequest request) {
+    private ProductCatalogIngestPushRequest buildPushRequest(ProductCatalogPushIngestionRequest request) {
         return ProductCatalogIngestPushRequest.builder()
                 .productCatalog(mapper.mapCompositionToStream(request.getProductCatalog()))
                 .build();
@@ -71,9 +71,9 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
      * @param response ProductCatalogIngestResponse
      * @return IngestionResponse
      */
-    private ResponseEntity<IngestionResponse> mapIngestionToResponse(ProductCatalogIngestResponse response) {
+    private ResponseEntity<ProductCatalogIngestionResponse> mapIngestionToResponse(ProductCatalogIngestResponse response) {
         return new ResponseEntity<>(
-                new IngestionResponse()
+                new ProductCatalogIngestionResponse()
                         .withProductCatalog(mapper.mapStreamToComposition(response.getProductCatalog())),
                 HttpStatus.CREATED);
     }

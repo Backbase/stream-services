@@ -1,7 +1,7 @@
 package com.backbase.stream.compositions.product.http;
 
 import com.backbase.stream.compositions.product.ProductCompositionApplication;
-import com.backbase.stream.compositions.product.model.PullIngestionRequest;
+import com.backbase.stream.compositions.product.model.ProductPullIngestionRequest;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.ProductGroupTask;
@@ -112,8 +112,8 @@ class ProductControllerIT extends IntegrationTest {
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
                 .thenReturn(Mono.just(new ProductGroupTask(productGroup)));
 
-        PullIngestionRequest pullIngestionRequest =
-                new PullIngestionRequest()
+        ProductPullIngestionRequest pullIngestionRequest =
+                new ProductPullIngestionRequest()
                         .withLegalEntityExternalId("leId")
                         .withServiceAgreementExternalId("saExId")
                         .withServiceAgreementInternalId("saId")
@@ -122,6 +122,6 @@ class ProductControllerIT extends IntegrationTest {
         URI uri = URI.create("/service-api/v2/pull-ingestion");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
-        webTestClient.post().uri(uri).body(Mono.just(pullIngestionRequest), PullIngestionRequest.class).exchange().expectStatus().isCreated();
+        webTestClient.post().uri(uri).body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class).exchange().expectStatus().isCreated();
     }
 }

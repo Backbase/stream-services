@@ -4,10 +4,10 @@ import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalog
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
 import com.backbase.stream.compositions.productcatalog.http.ProductCatalogController;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
-import com.backbase.stream.compositions.productcatalog.model.IngestionResponse;
+import com.backbase.stream.compositions.productcatalog.model.ProductCatalogIngestionResponse;
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalog;
-import com.backbase.stream.compositions.productcatalog.model.PullIngestionRequest;
-import com.backbase.stream.compositions.productcatalog.model.PushIngestionRequest;
+import com.backbase.stream.compositions.productcatalog.model.ProductCatalogPullIngestionRequest;
+import com.backbase.stream.compositions.productcatalog.model.ProductCatalogPushIngestionRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,9 +48,9 @@ class ProductCatalogControllerTest {
                 Mono.just(ProductCatalogIngestResponse.builder()
                         .build()));
 
-        PullIngestionRequest request = new PullIngestionRequest();
-        ResponseEntity<IngestionResponse> responseEntity = controller.pullIngestProductCatalog(Mono.just(request), null).block();
-        IngestionResponse ingestionResponse = responseEntity.getBody();
+        ProductCatalogPullIngestionRequest request = new ProductCatalogPullIngestionRequest();
+        ResponseEntity<ProductCatalogIngestionResponse> responseEntity = controller.pullIngestProductCatalog(Mono.just(request), null).block();
+        ProductCatalogIngestionResponse ingestionResponse = responseEntity.getBody();
         assertNotNull(ingestionResponse);
         assertNotNull(ingestionResponse.getProductCatalog());
         verify(productCatalogIngestionService).ingestPull(any());
@@ -58,8 +58,8 @@ class ProductCatalogControllerTest {
 
     @Test
     void testPushIngestion_Success() {
-        Mono<PushIngestionRequest> requestMono = Mono.just(
-                new PushIngestionRequest().withProductCatalog(new ProductCatalog()));
+        Mono<ProductCatalogPushIngestionRequest> requestMono = Mono.just(
+                new ProductCatalogPushIngestionRequest().withProductCatalog(new ProductCatalog()));
 
         doAnswer(invocation -> {
             Mono mono = invocation.getArgument(0);
@@ -73,8 +73,8 @@ class ProductCatalogControllerTest {
                     .build());
         }).when(productCatalogIngestionService).ingestPush(any());
 
-        ResponseEntity<IngestionResponse> responseEntity = controller.pushIngestProductCatalog(requestMono, null).block();
-        IngestionResponse ingestionResponse = responseEntity.getBody();
+        ResponseEntity<ProductCatalogIngestionResponse> responseEntity = controller.pushIngestProductCatalog(requestMono, null).block();
+        ProductCatalogIngestionResponse ingestionResponse = responseEntity.getBody();
         assertNotNull(ingestionResponse);
         assertNotNull(ingestionResponse.getProductCatalog());
         verify(productCatalogIngestionService).ingestPush(any());

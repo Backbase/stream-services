@@ -6,9 +6,9 @@ import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequ
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
-import com.backbase.stream.compositions.product.model.IngestionResponse;
-import com.backbase.stream.compositions.product.model.PullIngestionRequest;
-import com.backbase.stream.compositions.product.model.PushIngestionRequest;
+import com.backbase.stream.compositions.product.model.ProductIngestionResponse;
+import com.backbase.stream.compositions.product.model.ProductPullIngestionRequest;
+import com.backbase.stream.compositions.product.model.ProductPushIngestionRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +28,8 @@ public class ProductController implements ProductCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pullIngestProductGroup(
-            @Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProductGroup(
+            @Valid Mono<ProductPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
         return productIngestionService
                 .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
                 .map(this::mapIngestionToResponse);
@@ -39,8 +39,8 @@ public class ProductController implements ProductCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pushIngestProductGroup(
-            @Valid Mono<PushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<ProductIngestionResponse>> pushIngestProductGroup(
+            @Valid Mono<ProductPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
         return productIngestionService
                 .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
                 .map(this::mapIngestionToResponse);
@@ -52,7 +52,7 @@ public class ProductController implements ProductCompositionApi {
      * @param request PullIngestionRequest
      * @return ProductIngestPullRequest
      */
-    private ProductIngestPullRequest buildPullRequest(PullIngestionRequest request) {
+    private ProductIngestPullRequest buildPullRequest(ProductPullIngestionRequest request) {
         return ProductIngestPullRequest
                 .builder()
                 .legalEntityExternalId(request.getLegalEntityExternalId())
@@ -69,7 +69,7 @@ public class ProductController implements ProductCompositionApi {
      * @param request PushIngestionRequest
      * @return ProductIngestPushRequest
      */
-    private ProductIngestPushRequest buildPushRequest(PushIngestionRequest request) {
+    private ProductIngestPushRequest buildPushRequest(ProductPushIngestionRequest request) {
         return ProductIngestPushRequest.builder()
                 .productGroup(mapper.mapCompositionToStream(request.getProductGgroup()))
                 .build();
@@ -81,9 +81,9 @@ public class ProductController implements ProductCompositionApi {
      * @param response ProductCatalogIngestResponse
      * @return IngestionResponse
      */
-    private ResponseEntity<IngestionResponse> mapIngestionToResponse(ProductIngestResponse response) {
+    private ResponseEntity<ProductIngestionResponse> mapIngestionToResponse(ProductIngestResponse response) {
         return new ResponseEntity<>(
-                new IngestionResponse()
+                new ProductIngestionResponse()
                         .withProductGgroup(mapper.mapStreamToComposition(response.getProductGroup())),
                 HttpStatus.CREATED);
     }

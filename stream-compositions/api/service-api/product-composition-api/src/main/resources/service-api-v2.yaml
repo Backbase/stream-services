@@ -20,14 +20,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PullIngestionRequest'
+              $ref: '#/components/schemas/ProductPullIngestionRequest'
       responses:
         "201":
           description: Product group ingested.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IngestionResponse'
+                $ref: '#/components/schemas/ProductIngestionResponse'
         "400":
           description: BadRequest
           content:
@@ -53,14 +53,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PushIngestionRequest'
+              $ref: '#/components/schemas/ProductPushIngestionRequest'
       responses:
         "201":
           description: Product group ingested.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IngestionResponse'
+                $ref: '#/components/schemas/ProductIngestionResponse'
         "400":
           description: BadRequest
           content:
@@ -84,7 +84,7 @@ components:
         message:
           type: string
 
-    PullIngestionRequest:
+    ProductPullIngestionRequest:
       type: object
       required:
         - legalEntityExternalId
@@ -104,13 +104,13 @@ components:
           additionalProperties:
             type: string
 
-    PushIngestionRequest:
+    ProductPushIngestionRequest:
       type: object
       properties:
         productGgroup:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
 
-    IngestionResponse:
+    ProductIngestionResponse:
       type: object
       properties:
         productGgroup:
