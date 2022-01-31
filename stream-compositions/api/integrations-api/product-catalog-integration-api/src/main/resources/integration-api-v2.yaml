@@ -1,0 +1,71 @@
+openapi: 3.0.3
+info:
+  title: Product Catalog Integration API
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/service-api/v1
+    description: The server
+tags:
+  - name: ProductCatalogIntegration
+paths:
+  /integration-api/v2/product-catalog:
+    get:
+      tags:
+        - ProductCatalogIntegration
+      summary: Pulls product catalog.
+      description: Pulls product catalog.
+      operationId: pullProductCatalog
+
+      parameters:
+        - in: query
+          name: additionalParameters
+          schema:
+            type: object
+            additionalProperties:
+              type: string
+
+      responses:
+        "201":
+          description: Product catalog successfully returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PullProductCatalogResponse'
+
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    PullProductCatalogResponse:
+      type: object
+      properties:
+        productCatalog:
+          $ref: '../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog'
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
