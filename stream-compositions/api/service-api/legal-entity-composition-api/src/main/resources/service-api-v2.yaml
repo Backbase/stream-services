@@ -20,14 +20,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PullIngestionRequest'
+              $ref: '#/components/schemas/LegalEntityPullIngestionRequest'
       responses:
         "201":
           description: Legal Entity ingested.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IngestionResponse'
+                $ref: '#/components/schemas/LegalEntityIngestionResponse'
         "400":
           description: BadRequest
           content:
@@ -53,14 +53,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PushIngestionRequest'
+              $ref: '#/components/schemas/LegalEntityPushIngestionRequest'
       responses:
         "201":
           description: Legal Entity ingested.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IngestionResponse'
+                $ref: '#/components/schemas/LegalEntityIngestionResponse'
         "400":
           description: BadRequest
           content:
@@ -84,7 +84,7 @@ components:
         message:
           type: string
 
-    PullIngestionRequest:
+    LegalEntityPullIngestionRequest:
       type: object
       properties:
         legalEntityExternalId:
@@ -94,13 +94,13 @@ components:
           additionalProperties:
             type: string
 
-    PushIngestionRequest:
+    LegalEntityPushIngestionRequest:
       type: object
       properties:
         legalEntity:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
 
-    IngestionResponse:
+    LegalEntityIngestionResponse:
       type: object
       properties:
         legalEntity:

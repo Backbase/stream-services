@@ -6,9 +6,9 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngest
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
-import com.backbase.stream.compositions.legalentity.model.IngestionResponse;
-import com.backbase.stream.compositions.legalentity.model.PullIngestionRequest;
-import com.backbase.stream.compositions.legalentity.model.PushIngestionRequest;
+import com.backbase.stream.compositions.legalentity.model.LegalEntityIngestionResponse;
+import com.backbase.stream.compositions.legalentity.model.LegalEntityPullIngestionRequest;
+import com.backbase.stream.compositions.legalentity.model.LegalEntityPushIngestionRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +28,8 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pullIngestLegalEntity(
-            @Valid Mono<PullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<LegalEntityIngestionResponse>> pullIngestLegalEntity(
+            @Valid Mono<LegalEntityPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
         return legalEntityIngestionService
                 .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
                 .map(this::mapIngestionToResponse);
@@ -39,8 +39,8 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<IngestionResponse>> pushIngestLegalEntity(
-            @Valid Mono<PushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<LegalEntityIngestionResponse>> pushIngestLegalEntity(
+            @Valid Mono<LegalEntityPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
         return legalEntityIngestionService
                 .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
                 .map(this::mapIngestionToResponse);
@@ -52,7 +52,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @param request PullIngestionRequest
      * @return LegalEntityIngestPullRequest
      */
-    private LegalEntityIngestPullRequest buildPullRequest(PullIngestionRequest request) {
+    private LegalEntityIngestPullRequest buildPullRequest(LegalEntityPullIngestionRequest request) {
         return LegalEntityIngestPullRequest
                 .builder()
                 .legalEntityExternalId(request.getLegalEntityExternalId())
@@ -66,7 +66,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @param request PushIngestionRequest
      * @return LegalEntityIngestPushRequest
      */
-    private LegalEntityIngestPushRequest buildPushRequest(PushIngestionRequest request) {
+    private LegalEntityIngestPushRequest buildPushRequest(LegalEntityPushIngestionRequest request) {
         return LegalEntityIngestPushRequest
                 .builder()
                 .legalEntity(mapper.mapCompostionToStream(request.getLegalEntity()))
@@ -79,9 +79,9 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @param response LegalEntityIngestResponse
      * @return ResponseEntity<IngestionResponse>
      */
-    private ResponseEntity<IngestionResponse> mapIngestionToResponse(LegalEntityIngestResponse response) {
+    private ResponseEntity<LegalEntityIngestionResponse> mapIngestionToResponse(LegalEntityIngestResponse response) {
         return new ResponseEntity<>(
-                new IngestionResponse()
+                new LegalEntityIngestionResponse()
                         .withLegalEntity(mapper.mapStreamToComposition(response.getLegalEntity())),
                 HttpStatus.CREATED);
     }
