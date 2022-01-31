@@ -3,8 +3,8 @@ package com.backbase.stream.compositions.legalentity.http;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
-import com.backbase.stream.compositions.legalentity.model.PullIngestionRequest;
-import com.backbase.stream.compositions.legalentity.model.PushIngestionRequest;
+import com.backbase.stream.compositions.legalentity.model.LegalEntityPullIngestionRequest;
+import com.backbase.stream.compositions.legalentity.model.LegalEntityPushIngestionRequest;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,8 +36,8 @@ class LegalEntityControllerTest {
 
     @Test
     void testPullIngestion_Success() {
-        Mono<PullIngestionRequest> requestMono = Mono.just(
-                new PullIngestionRequest().withLegalEntityExternalId("externalId"));
+        Mono<LegalEntityPullIngestionRequest> requestMono = Mono.just(
+                new LegalEntityPullIngestionRequest().withLegalEntityExternalId("externalId"));
 
         when(legalEntityIngestionService.ingestPull(any())).thenReturn(
                 Mono.just(LegalEntityIngestResponse.builder()
@@ -50,8 +50,8 @@ class LegalEntityControllerTest {
 
     @Test
     void testPushIngestion_Success() {
-        Mono<PushIngestionRequest> requestMono = Mono.just(
-                new PushIngestionRequest().withLegalEntity(new com.backbase.stream.compositions.legalentity.model.LegalEntity()));
+        Mono<LegalEntityPushIngestionRequest> requestMono = Mono.just(
+                new LegalEntityPushIngestionRequest().withLegalEntity(new com.backbase.stream.compositions.legalentity.model.LegalEntity()));
 
         when(legalEntityIngestionService.ingestPush(any())).thenReturn(
                 Mono.just(LegalEntityIngestResponse.builder()
