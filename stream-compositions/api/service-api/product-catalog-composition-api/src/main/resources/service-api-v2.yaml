@@ -20,14 +20,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PullIngestionRequest'
+              $ref: '#/components/schemas/ProductCatalogPullIngestionRequest'
       responses:
         "201":
           description: Product group ingested.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IngestionResponse'
+                $ref: '#/components/schemas/ProductCatalogIngestionResponse'
         "400":
           description: BadRequest
           content:
@@ -53,14 +53,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PushIngestionRequest'
+              $ref: '#/components/schemas/ProductCatalogPushIngestionRequest'
       responses:
         "201":
           description: Product catalog ingested.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IngestionResponse'
+                $ref: '#/components/schemas/ProductCatalogIngestionResponse'
         "400":
           description: BadRequest
           content:
@@ -84,7 +84,7 @@ components:
         message:
           type: string
 
-    PullIngestionRequest:
+    ProductCatalogPullIngestionRequest:
       type: object
       properties:
         additionalParameters:
@@ -92,13 +92,13 @@ components:
           additionalProperties:
             type: string
 
-    PushIngestionRequest:
+    ProductCatalogPushIngestionRequest:
       type: object
       properties:
         productCatalog:
           $ref: '../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog'
 
-    IngestionResponse:
+    ProductCatalogIngestionResponse:
       type: object
       properties:
         productCatalog:
