@@ -17,6 +17,7 @@
 
     <modules>
         <module>legal-entity-events</module>
+        <module>product-catalog-events</module>
     </modules>
 
 </project>
