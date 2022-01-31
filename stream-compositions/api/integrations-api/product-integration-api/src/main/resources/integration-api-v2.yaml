@@ -1,0 +1,100 @@
+openapi: 3.0.3
+info:
+  title: Product Integration API
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/service-api/v1
+    description: The server
+tags:
+  - name: ProductIntegration
+paths:
+  /integration-api/v2/product-group:
+    get:
+      tags:
+        - ProductIntegration
+      summary: Pulls product group.
+      description: Pulls product group.
+      operationId: pullProductGroup
+      parameters:
+        - in: query
+          name: legalEntityExternalId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: serviceAgreementExternalId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: serviceAgreementInternalId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: userExternalId
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: additionalParameters
+          schema:
+            type: object
+            additionalProperties:
+              type: string
+
+      responses:
+        "200":
+          description: Product group sucessfully returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PullProductGroupResponse'
+
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    PullProductGroupResponse:
+      type: object
+      properties:
+        productGroup:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+        name:
+          type: string
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
