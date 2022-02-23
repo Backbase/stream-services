@@ -13,7 +13,7 @@ Currently the following DBS services are exposed as Stream Components:
 * [Stream Access Control](stream-cursor/readme.md) (Lib) → The Stream Access Control library provides access to Access Control services from a single library and provides an easier abstraction layer to use these services. It mixes access to persistence and service api's to enable proper service to service comms for non DBS services such as Stream. Requires Access Control, Product Summary
 * [Stream Legal Entity](stream-cursor/readme.md) (Lib, Rest, Sink) → Legal Entity Ingestion Service that orchestrate all calls to DBS from a single aggregate model. This service is exposed as a library, REST full service and as a Sink. Supports retry of the aggregate and uses the Legal Entity Ingestion Model to have a single interface into DBS. Requires Access Control, Product Summary
 * [Stream Product Catalog](stream-cursor/readme.md) (Lib, Rest, Task) → Enabled bootstrapping of product types into DBS. Product Types are currently hardcoded in the streamTask definition. Orchestrates calls into Product Summary
-* [Stream Transactions](stream-cursor/readme.md) (Lib, Rest, Sink) → Allows ingestion into DBS in a controlled way with support for retry, rate limiting and configurable batch sizes. 
+* [Stream Transactions](stream-transactions) (Lib, Rest, Sink) → Allows ingestion into DBS in a controlled way with support for retry, rate limiting and configurable batch sizes. 
 
 ## Supported DBS versions
 
