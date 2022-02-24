@@ -1,11 +1,14 @@
 package com.backbase.stream;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.api.service.v2.model.Realm;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -23,7 +26,9 @@ import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -262,6 +267,64 @@ class LegalEntitySagaTest {
 
         verify(userService, times(2)).setupRealm(task.getLegalEntity());
         verify(userService, times(2)).linkLegalEntityToRealm(task.getLegalEntity());
+    }
+
+    @Test
+    void deleteLegalEntity_processesPaginatedListOfUsers() {
+        String leExternalId = "someLeExternalId";
+        String leInternalId = "someLeInternalId";
+        String customSaExId = "someCustomSaExId";
+
+        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId)
+            .parentExternalId(leExternalId);
+        ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).creatorLegalEntity(leExternalId);
+
+        when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(leExternalId)).thenReturn(
+            Mono.just(sa));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
+
+        Long totalUsers = 22L;
+
+        List<GetUser> users = getUsers(totalUsers.intValue());
+        GetUsersList getUsersList1 = new GetUsersList();
+        getUsersList1.setTotalElements(totalUsers);
+        getUsersList1.users(users.subList(0, 10));
+
+        GetUsersList getUsersList2 = new GetUsersList();
+        getUsersList2.setTotalElements(totalUsers);
+        getUsersList2.users(users.subList(10, 20));
+
+        GetUsersList getUsersList3 = new GetUsersList();
+        getUsersList3.setTotalElements(totalUsers);
+        getUsersList3.users(users.subList(20, 22));
+
+        when(userService.getUsersByLegalEntity(eq(leInternalId), anyInt(), anyInt()))
+            .thenReturn(Mono.just(getUsersList1))
+            .thenReturn(Mono.just(getUsersList2))
+            .thenReturn(Mono.just(getUsersList3));
+
+        when(accessGroupService.removePermissionsForUser(any(), any())).thenReturn(Mono.empty());
+
+        when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.empty());
+        when(accessGroupService.deleteAdmins(any())).thenReturn(Mono.empty());
+        when(userService.archiveUsers(any(), any())).thenReturn(Mono.empty());
+        when(legalEntityService.deleteLegalEntity(any())).thenReturn(Mono.empty());
+
+        Mono<Void> result = legalEntitySaga.deleteLegalEntity(leExternalId);
+        result.block();
+
+        verify(userService, times(3)).getUsersByLegalEntity(eq(leInternalId), anyInt(), anyInt());
+    }
+
+    private List<GetUser> getUsers(int amount) {
+        List<GetUser> users = new ArrayList<>();
+
+        for (var i = 0; i < amount; i++) {
+            GetUser user = new GetUser();
+            user.externalId("user_" + i);
+            users.add(user);
+        }
+        return users;
     }
 
     @NotNull
