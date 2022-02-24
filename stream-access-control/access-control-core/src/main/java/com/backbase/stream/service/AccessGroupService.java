@@ -45,9 +45,10 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAg
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
-import com.backbase.dbs.user.api.service.StringUtil;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
+import com.backbase.stream.config.BackbaseStreamConfigurationProperties.DeletionProperties.FunctionGroupItemType;
 import com.backbase.stream.legalentity.model.ApprovalStatus;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -140,6 +141,8 @@ public class AccessGroupService {
     private final ServiceAgreementApi serviceAgreementApi;
     @NonNull
     private final ServiceAgreementsApi serviceAgreementsApi;
+    @NonNull
+    private final BackbaseStreamConfigurationProperties configurationProperties;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
@@ -1014,14 +1017,25 @@ public class AccessGroupService {
      */
     public Mono<Void> deleteFunctionGroupsForServiceAgreement(String serviceAgreementInternalId) {
         log.debug("Retrieving Function Groups for Service Agreement {}", serviceAgreementInternalId);
+        FunctionGroupItem.TypeEnum typeEnum = configurationProperties.getDbs().getDeletion()
+            .getFunctionGroupItemType().equals(FunctionGroupItemType.SYSTEM) ? FunctionGroupItem.TypeEnum.TEMPLATE
+            : FunctionGroupItem.TypeEnum.SYSTEM;
+
         return functionGroupApi.getFunctionGroups(serviceAgreementInternalId)
             .collectList()
             .flatMap(functionGroups ->
                 functionGroupsApi.postFunctionGroupsDelete(
-                        functionGroups.stream().filter(f->!FunctionGroupItem.TypeEnum.TEMPLATE.equals(f.getType())).map(fg -> mapId(fg.getId())).collect(Collectors.toList()))
-                        .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
-                        .collectList())
+                        functionGroups.stream()
+                            .filter(f -> filterFunctionGroupItemTypeNotEqual(f, typeEnum))
+                            .map(fg -> mapId(fg.getId()))
+                            .collect(Collectors.toList())
+                    ).map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
+                    .collectList())
             .then();
+    }
+
+    private boolean filterFunctionGroupItemTypeNotEqual(FunctionGroupItem functionGroupItem, FunctionGroupItem.TypeEnum typeEnum) {
+        return !typeEnum.equals(functionGroupItem.getType());
     }
 
     /**
