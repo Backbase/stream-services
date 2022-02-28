@@ -17,5 +17,6 @@
         <module>legal-entity-composition-api</module>
         <module>product-composition-api</module>
         <module>product-catalog-composition-api</module>
+        <module>transaction-composition-api</module>
     </modules>
 </project>

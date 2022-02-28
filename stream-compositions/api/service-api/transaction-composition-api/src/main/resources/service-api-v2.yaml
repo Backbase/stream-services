@@ -1,0 +1,217 @@
+openapi: 3.0.3
+info:
+  title: Transaction composition API
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/service-api/v2
+    description: The server
+tags:
+  - name: TransactionComposition
+paths:
+  /service-api/v2/pull-ingestion:
+    post:
+      tags:
+        - TransactionComposition
+      summary: Ingests transactions (in pull mode).
+      description: Ingests transactions (in pull mode).
+      operationId: pullIngestTransactions
+      requestBody:
+        description: Pull Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionPullIngestionRequest'
+      responses:
+        "201":
+          description: Transactions ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionIngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+  /service-api/v2/push-ingestion:
+    post:
+      tags:
+        - TransactionComposition
+      summary: Ingests transactions (in push mode).
+      description: Ingests tranasctions (in push mode).
+      operationId: pushIngestTransactions
+      requestBody:
+        description: Push Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionPushIngestionRequest'
+      responses:
+        "201":
+          description: Product group ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionIngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    TransactionPullIngestionRequest:
+      type: object
+      properties:
+        userExternalId:
+          type: string
+        productGroup:
+          $ref: '#/components/schemas/ProductGroup'
+        additionalParameters:
+          type: object
+          additionalProperties:
+            type: string
+
+    TransactionPushIngestionRequest:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: '../../../target/yaml/transaction-manager/transaction-manager-service-api-v2.7.0.yaml#/components/schemas/TransactionsPostRequestBody'
+
+    TransactionIngestionResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: '../../../target/yaml/transaction-manager/transaction-manager-service-api-v2.7.0.yaml#/components/schemas/TransactionsPostResponseBody'
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    ProductGroup:
+      type: object
+      description: "Products assigned to service agreement"
+      allOf:
+        - $ref: '#/components/schemas/BaseProductGroup'
+
+    BatchProductGroup:
+      type: object
+      description: "Product groups assigned to the users within same legal entity"
+      properties:
+        productGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseProductGroup'
+
+    BaseProductGroup:
+      type: object
+      description: "Product groups assigned to the users within same legal entity"
+      properties:
+        currentAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrentAccount'
+        savingAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavingsAccount'
+        debitCards:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebitCard'
+        creditCards:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreditCard'
+        loans:
+          type: array
+          items:
+            $ref: '#/components/schemas/Loan'
+        termDeposits:
+          type: array
+          items:
+            $ref: '#/components/schemas/TermDeposit'
+        investmentAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvestmentAccount'
+
+    BaseProduct:
+      title: Base Product
+      description: |
+        The Base product holds all common properties between different product types
+      type: object
+      properties:
+        externalId:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: A unique identifier for the product coming from the core banking system.
+        internalId:
+          minLength: 1
+          maxLength: 50
+          type: string
+          description: A unique identifier for the product coming from the core banking system.
+        productTypeExternalId:
+            title: External ID of the Product Type as setup in Product Summary
+            maxLength: 64
+            minLength: 1
+            pattern: ^[^\r\n]{1,64}$
+            type: string
+
+    CurrentAccount:
+      allOf:
+      - $ref: '#/components/schemas/BaseProduct'
+    SavingsAccount:
+      allOf:
+        - $ref: '#/components/schemas/BaseProduct'
+    DebitCard:
+      allOf:
+        - $ref: '#/components/schemas/BaseProduct'
+    CreditCard:
+      allOf:
+        - $ref: '#/components/schemas/BaseProduct'
+    Loan:
+      allOf:
+        - $ref: '#/components/schemas/BaseProduct'
+    TermDeposit:
+      allOf:
+        - $ref: '#/components/schemas/BaseProduct'
+    InvestmentAccount:
+      allOf:
+        - $ref: '#/components/schemas/BaseProduct'
+    Product:
+      allOf:
+        - $ref: '#/components/schemas/BaseProduct'
