@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.60.0]
+### Fixed
+- Legal Entity Saga: referenceJobRoleNames are mixed up between users ( when multiple users are ingested)
+
 ## [2.52.0]
 ### Removed 
 - Audit Core & Http Service. Created as a demo, never to be used.
