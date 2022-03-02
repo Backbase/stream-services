@@ -342,7 +342,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                             streamTask.info(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, "assigned", legalEntity.getExternalId(), legalEntity.getInternalId(), "Assigned Business Function Group: %s with functions: %s to Service Agreement: %s", bfg.getName(),
                                 Optional.ofNullable(bfg.getFunctions()).orElse(Collections.singletonList(new BusinessFunction().name("<not loaded>"))).stream().map(BusinessFunction::getFunctionCode).collect(Collectors.joining(", ")), serviceAgreement.getExternalId());
                         });
-                        return setupUserPermissions(streamTask, jobProfileUser.getBusinessFunctionGroups());
+                        return setupUserPermissions(streamTask, jobProfileUser);
                     })
                     .map(actual -> jobProfileUser);
             })
@@ -429,14 +429,14 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         }
     }
 
-    public Mono<LegalEntityTask> setupUserPermissions(LegalEntityTask legalEntityTask, List<BusinessFunctionGroup> businessFunctionGroups) {
+    public Mono<LegalEntityTask> setupUserPermissions(LegalEntityTask legalEntityTask, JobProfileUser userJobProfile) {
         LegalEntity legalEntity = legalEntityTask.getData();
-        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = nullableCollectionToStream(legalEntity.getUsers())
+        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = Stream.of(userJobProfile)
             // Ensure internal Id present.
             .filter(jobProfileUser -> Objects.nonNull(jobProfileUser.getUser().getInternalId()))
             .collect(Collectors.toMap(
                 JobProfileUser::getUser,
-                jobProfileUser -> businessFunctionGroups.stream()
+                jobProfileUser -> userJobProfile.getBusinessFunctionGroups().stream()
                     .collect(Collectors.toMap(
                         bfg -> bfg,
                         bfg -> Collections.emptyList()
