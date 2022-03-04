@@ -3,7 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.60.0]
+## [2.62.0]
+### Fixed
+- Legal Entity Saga: linkLegalEntityToRealm method executed multiple times ( when multiple users are ingested): `unique constraint (PK_LE_ASSIGN_REALM) violated`
+## [2.61.0]
 ### Fixed
 - Legal Entity Saga: referenceJobRoleNames are mixed up between users ( when multiple users are ingested)
 
