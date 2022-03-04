@@ -1,5 +1,3 @@
-server.port: 7084
-
 spring:
   zipkin:
     enabled: false
@@ -14,7 +12,7 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+            token-uri: http://token-converter:8080/oauth/token
   main:
     allow-bean-definition-overriding: true
 sso:
@@ -40,22 +38,18 @@ backbase:
       sink:
         useIdentityIntegration: true
     dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manage:8080
     identity:
-      identity-integration-base-url: http://localhost:8181/identity-integration-service
+      identity-integration-base-url: http://identity-integration-service:8080
 
     compositions:
       product:
         enable-completed-events: false
         enable-failed-events: true
-        product-integration-url: http://localhost:7085
+        product-integration-url: http://product-integration-service:8080
 
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
-
-backbase.activemq.enabled: true
-spring.activemq.broker-url: tcp://localhost:61616
-
