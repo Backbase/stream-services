@@ -48,9 +48,8 @@ backbase:
       product:
         enable-completed-events: false
         enable-failed-events: true
-        product-integraion-url: http://product-integration-service:8080
+        product-integration-url: http://product-integration-service:8080
 
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
-
