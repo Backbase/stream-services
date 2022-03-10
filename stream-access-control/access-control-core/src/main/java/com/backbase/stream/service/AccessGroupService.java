@@ -1017,25 +1017,21 @@ public class AccessGroupService {
      */
     public Mono<Void> deleteFunctionGroupsForServiceAgreement(String serviceAgreementInternalId) {
         log.debug("Retrieving Function Groups for Service Agreement {}", serviceAgreementInternalId);
-        FunctionGroupItem.TypeEnum typeEnum = configurationProperties.getDbs().getDeletion()
-            .getFunctionGroupItemType().equals(FunctionGroupItemType.SYSTEM) ? FunctionGroupItem.TypeEnum.TEMPLATE
-            : FunctionGroupItem.TypeEnum.SYSTEM;
+        FunctionGroupItem.TypeEnum functionGroupItemTypeToDelete = configurationProperties.getDbs().getDeletion()
+            .getFunctionGroupItemType().equals(FunctionGroupItemType.SYSTEM) ? FunctionGroupItem.TypeEnum.SYSTEM
+            : FunctionGroupItem.TypeEnum.TEMPLATE;
 
         return functionGroupApi.getFunctionGroups(serviceAgreementInternalId)
             .collectList()
             .flatMap(functionGroups ->
                 functionGroupsApi.postFunctionGroupsDelete(
                         functionGroups.stream()
-                            .filter(f -> filterFunctionGroupItemTypeNotEqual(f, typeEnum))
+                            .filter(f -> functionGroupItemTypeToDelete.equals(f.getType()))
                             .map(fg -> mapId(fg.getId()))
                             .collect(Collectors.toList())
                     ).map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
                     .collectList())
             .then();
-    }
-
-    private boolean filterFunctionGroupItemTypeNotEqual(FunctionGroupItem functionGroupItem, FunctionGroupItem.TypeEnum typeEnum) {
-        return !typeEnum.equals(functionGroupItem.getType());
     }
 
     /**

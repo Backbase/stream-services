@@ -16,7 +16,7 @@ public class BackbaseStreamConfigurationProperties {
     @NoArgsConstructor
     public static class DbsConnectionProperties {
 
-        private DeletionProperties deletion;
+        private DeletionProperties deletion = new DeletionProperties();
 
         /**
          * The location of Access Group Presentation Service.
