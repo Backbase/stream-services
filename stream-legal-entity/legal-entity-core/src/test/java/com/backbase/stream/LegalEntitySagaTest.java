@@ -1,5 +1,6 @@
 package com.backbase.stream;
 
+import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -267,6 +268,45 @@ class LegalEntitySagaTest {
 
         verify(userService, times(2)).setupRealm(task.getLegalEntity());
         verify(userService, times(2)).linkLegalEntityToRealm(task.getLegalEntity());
+    }
+
+    @Test
+    void deleteLegalEntity_usersPrefixedWithRemovedNotProcessed() {
+        String leExternalId = "someLeExternalId";
+        String leInternalId = "someLeInternalId";
+        String customSaExId = "someCustomSaExId";
+
+        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId)
+            .parentExternalId(leExternalId);
+        ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).creatorLegalEntity(leExternalId);
+
+        when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(leExternalId)).thenReturn(
+            Mono.just(sa));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
+
+        Long totalUsers = 5L;
+
+        List<GetUser> users = getUsers(totalUsers.intValue());
+        users.get(0).setExternalId(REMOVED_PREFIX + "user0");
+        users.get(1).setExternalId(REMOVED_PREFIX + "user1");
+        GetUsersList getUsersList1 = new GetUsersList();
+        getUsersList1.setTotalElements(totalUsers);
+        getUsersList1.users(users);
+
+        when(userService.getUsersByLegalEntity(eq(leInternalId), anyInt(), anyInt()))
+            .thenReturn(Mono.just(getUsersList1));
+
+        when(accessGroupService.removePermissionsForUser(any(), any())).thenReturn(Mono.empty());
+
+        when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.empty());
+        when(accessGroupService.deleteAdmins(any())).thenReturn(Mono.empty());
+        when(userService.archiveUsers(any(), any())).thenReturn(Mono.empty());
+        when(legalEntityService.deleteLegalEntity(any())).thenReturn(Mono.empty());
+
+        Mono<Void> result = legalEntitySaga.deleteLegalEntity(leExternalId);
+        result.block();
+
+        verify(accessGroupService, times(3)).removePermissionsForUser(any(), any());
     }
 
     @Test
