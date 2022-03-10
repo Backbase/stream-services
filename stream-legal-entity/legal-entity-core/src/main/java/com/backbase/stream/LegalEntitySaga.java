@@ -151,7 +151,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
      * @return Mono<Void>
      */
     public Mono<Void> deleteLegalEntity(String legalEntityExternalId, int userQuerySize) {
-        AtomicInteger from = new AtomicInteger();
+        AtomicInteger from = new AtomicInteger(0);
         return Mono.zip(
                 legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(legalEntityExternalId),
                 legalEntityService.getLegalEntityByExternalId(legalEntityExternalId))
@@ -159,12 +159,12 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 LegalEntity le = data.getT2();
                 return userService.getUsersByLegalEntity(le.getInternalId(), userQuerySize, from.get())
                     .expand(response -> {
-                        int nextFrom = from.get() + userQuerySize;
-                        from.set(nextFrom);
-                        if (nextFrom >= response.getTotalElements()) {
+                        int totalPages = response.getTotalElements().intValue() / userQuerySize;
+                        from.getAndIncrement();
+                        if (from.get() > totalPages) {
                             return Mono.empty();
                         }
-                        return userService.getUsersByLegalEntity(le.getInternalId(), userQuerySize, nextFrom);
+                        return userService.getUsersByLegalEntity(le.getInternalId(), userQuerySize, from.get());
                     })
                     .map(GetUsersList::getUsers)
                     .collectList()
