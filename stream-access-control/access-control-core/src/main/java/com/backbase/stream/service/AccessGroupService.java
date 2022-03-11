@@ -535,12 +535,6 @@ public class AccessGroupService {
                         .collect(Collectors.toList())))
             .collect(Collectors.toList());
 
-        if (request.stream().anyMatch(usersPermission -> usersPermission.getFunctionGroupDataGroups().stream()
-            .anyMatch(this::hasDataGroupIdentifiers))) {
-            log.error("You are assigning permissions without data groups!!");
-        }
-
-
         return Mono.just(request)
             .flatMap(userPermissionsRequest -> {
                 if (task.getIngestionMode().equals(BatchProductGroupTask.IngestionMode.REPLACE)) {
