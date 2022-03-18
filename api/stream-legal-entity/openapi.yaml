@@ -590,6 +590,8 @@ components:
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
+        availableBalance:
+          $ref: '#/components/schemas/AvailableBalance'
         principalAmount:
           $ref: '#/components/schemas/PrincipalAmount'
         urgentTransferAllowed:
@@ -612,6 +614,8 @@ components:
           $ref: '#/components/schemas/AmountInArrear'
         interestSettlementAccount:
           $ref: '#/components/schemas/InterestSettlementAccount'
+        minimumPayment:
+          $ref: '#/components/schemas/MinimumPayment'
         minimumPaymentDueDate:
           $ref: '#/components/schemas/MinimumPaymentDueDate'
         accruedInterest:
