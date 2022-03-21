@@ -584,6 +584,8 @@ components:
           $ref: '#/components/schemas/CreditLimitInterestRate'
         accruedInterest:
           $ref: '#/components/schemas/AccruedInterest'
+        bankBranchCode:
+          $ref: '#/components/schemas/BankBranchCode'
     Loan:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
@@ -636,6 +638,8 @@ components:
           $ref: '#/components/schemas/IBAN'
         BBAN:
           $ref: '#/components/schemas/BBAN'
+        bankBranchCode:
+          $ref: '#/components/schemas/BankBranchCode'
     TermDeposit:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
