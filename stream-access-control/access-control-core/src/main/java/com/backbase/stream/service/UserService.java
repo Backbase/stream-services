@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -30,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -310,22 +310,25 @@ public class UserService {
      * @param realm user's realm.
      * @return user.
      */
-    public Mono<User> changeEnableStatus(User user, String realm) {
+    public Mono<User> updateUserState(User user, String realm) {
+        log.info("Changing user {} state to locked status {} and additional realm roles {}", user.getInternalId(),
+            user.getLocked(), user.getAdditionalRealmRoles());
+
         return identityIntegrationApi.map(api -> getIdentityUser(user, realm)
-            .flatMap(eur -> {
-                boolean shouldEnable = user.getLocked() != null ? !user.getLocked() : eur.getEnabled();
-                if (!eur.getEnabled().equals(shouldEnable)) {
-                    UserRequestBody presentationUser = mapper.toPresentation(eur);
-                    presentationUser.setEnabled(shouldEnable);
-                    return api.updateUserById(realm, user.getInternalId(), presentationUser);
+            .flatMap(currentUser -> {
+                Optional<UserRequestBody> updateRequestBody = updateRequired(currentUser, user);
+
+                if (updateRequestBody.isPresent()) {
+                    return api.updateUserById(realm, user.getInternalId(), updateRequestBody.get());
                 }
+
                 return Mono.just(user);
             })
             .doOnNext(eur -> {
                 log.info("User {} locked successfully", user.getExternalId());
             })
             .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error locking user {}: {}", user.getInternalId(), e.getResponseBodyAsString());
+                log.error("Error updated user {} state due to error: {}", user.getInternalId(), e.getResponseBodyAsString());
                 return Mono.error(e);
             })
             .thenReturn(user)).orElse(Mono.just(user));
@@ -347,6 +350,37 @@ public class UserService {
         log.info("Created user: {} with internalId: {}", user.getFullName(), userCreated.getId());
         user.setInternalId(userCreated.getId());
         return user;
+    }
+
+    private Optional<UserRequestBody> updateRequired(EnhancedUserRepresentation currentUser, User user) {
+        boolean updateRequired = false;
+        UserRequestBody userRequestBody = mapper.toPresentation(currentUser);
+
+        if (currentUser.getEnabled() != null) {
+            boolean shouldEnable = user.getLocked() == null ? currentUser.getEnabled() : !user.getLocked();
+
+            if (!currentUser.getEnabled().equals(shouldEnable)) {
+                updateRequired = true;
+
+                userRequestBody.setEnabled(shouldEnable);
+
+                log.debug("Enabled set to {}", shouldEnable);
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(user.getAdditionalRealmRoles())) {
+            for (String realmRole : user.getAdditionalRealmRoles()) {
+                if (userRequestBody.getRealmRoles().stream().noneMatch(realmRole::equals)) {
+                    updateRequired = true;
+
+                    userRequestBody.getRealmRoles().add(realmRole);
+
+                    log.debug("Realm role {} added", realmRole);
+                }
+            }
+        }
+
+        return updateRequired ? Optional.of(userRequestBody) : Optional.empty();
     }
 
 }

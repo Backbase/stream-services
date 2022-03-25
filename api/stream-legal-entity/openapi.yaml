@@ -989,6 +989,10 @@ components:
         locked:
           type: boolean
           description: Identity status. If true identity will be locked.
+        additionalRealmRoles:
+          type: array
+          items:
+            type: String
       required:
         - externalId
         - fullName
