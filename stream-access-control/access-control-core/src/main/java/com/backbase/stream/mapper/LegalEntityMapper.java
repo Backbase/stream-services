@@ -19,6 +19,7 @@ public interface LegalEntityMapper {
 
     @Mapping(source = "type", target = "legalEntityType")
     @Mapping(source = "id", target = "internalId")
+    @Mapping(source = "parentId", target = "parentInternalId")
     LegalEntity toStream(LegalEntityItem legalEntityItem);
 
     com.backbase.stream.legalentity.model.LegalEntityType map(LegalEntityType legalEntityType);

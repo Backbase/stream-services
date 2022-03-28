@@ -1,7 +1,6 @@
 package com.backbase.stream.webclient;
 
 import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
-import com.backbase.stream.webclient.logging.CustomLogger;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -190,15 +189,21 @@ public class DbsWebClientConfiguration {
                 if (response.statusCode().is4xxClientError()) {
                     ResponseCookie csrfCookie = response.cookies().getFirst("XSRF-TOKEN");
                     if (csrfCookie != null) {
-                        ClientRequest retryRequest = ClientRequest.from(request)
-                            .headers(httpHeaders -> httpHeaders.set("X-XSRF-TOKEN", csrfCookie.getValue()))
-                            .cookies(cookies -> cookies.add("XSRF-TOKEN", csrfCookie.getValue()))
-                            .build();
-                        return next.exchange(retryRequest);
+                        return response
+                                .releaseBody()
+                                .thenReturn(createRequestWithCsrfHeader(request, csrfCookie))
+                                .flatMap(next::exchange);
                     }
                 }
                 return Mono.just(response);
             });
+        }
+
+        private ClientRequest createRequestWithCsrfHeader(ClientRequest request, ResponseCookie csrfCookie) {
+            return ClientRequest.from(request)
+                .headers(httpHeaders -> httpHeaders.set("X-XSRF-TOKEN", csrfCookie.getValue()))
+                .cookies(cookies -> cookies.add("XSRF-TOKEN", csrfCookie.getValue()))
+                .build();
         }
     }
 
