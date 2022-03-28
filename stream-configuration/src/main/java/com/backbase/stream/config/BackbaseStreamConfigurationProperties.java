@@ -72,10 +72,10 @@ public class BackbaseStreamConfigurationProperties {
         /**
          * The function group item type to delete.
          */
-        private FunctionGroupItemType functionGroupItemType = FunctionGroupItemType.SYSTEM;
+        private FunctionGroupItemType functionGroupItemType = FunctionGroupItemType.NONE;
 
         public enum FunctionGroupItemType {
-            SYSTEM,
+            NONE,
             TEMPLATE
         }
     }

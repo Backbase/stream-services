@@ -638,9 +638,19 @@ class AccessGroupServiceTest {
         verify(accessControlUsersApi).putAssignUserPermissions(expectedPermissions);
     }
 
-    @ParameterizedTest
-    @EnumSource(FunctionGroupItemType.class)
-    void deleteFunctionGroupsForServiceAgreement_typeConfigured_deletesOnlyConfiguredType(FunctionGroupItemType enumType) {
+    @Test
+    void deleteFunctionGroupsForServiceAgreement_noneTypeConfigured_doesNotInvokeDeletion() {
+        String internalSaId = "sa-internal-id";
+
+        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(FunctionGroupItemType.NONE);
+
+        subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
+
+        verify(functionGroupsApi, times(0)).postFunctionGroupsDelete(any());
+    }
+
+    @Test
+    void deleteFunctionGroupsForServiceAgreement_templateTypeConfigured_deletesOnlyTemplateType() {
         String internalSaId = "sa-internal-id";
 
         FunctionGroupItem systemFunctionGroup = new FunctionGroupItem().id("system-group-id-1")
@@ -658,7 +668,7 @@ class AccessGroupServiceTest {
 
         when(functionGroupsApi.postFunctionGroupsDelete(any())).thenReturn(Flux.empty());
 
-        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(enumType);
+        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(FunctionGroupItemType.TEMPLATE);
 
         subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
 
@@ -667,12 +677,7 @@ class AccessGroupServiceTest {
         verify(functionGroupsApi).postFunctionGroupsDelete(captor.capture());
 
         List<PresentationIdentifier> value = captor.getValue();
-
-        FunctionGroupItem functionGroupItem = systemFunctionGroup;
-        if (enumType.equals(FunctionGroupItemType.TEMPLATE)) {
-            functionGroupItem = templateFunctionGroup;
-        }
-        assertEquals(functionGroupItem.getId(), value.get(0).getIdIdentifier());
+        assertEquals(templateFunctionGroup.getId(), value.get(0).getIdIdentifier());
     }
 
     private void thenRegularUsersUpdateCall(String expectedSaExId, PresentationAction expectedAction,

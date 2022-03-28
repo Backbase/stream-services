@@ -1017,16 +1017,17 @@ public class AccessGroupService {
      */
     public Mono<Void> deleteFunctionGroupsForServiceAgreement(String serviceAgreementInternalId) {
         log.debug("Retrieving Function Groups for Service Agreement {}", serviceAgreementInternalId);
-        FunctionGroupItem.TypeEnum functionGroupItemTypeToDelete = configurationProperties.getDbs().getDeletion()
-            .getFunctionGroupItemType().equals(FunctionGroupItemType.SYSTEM) ? FunctionGroupItem.TypeEnum.SYSTEM
-            : FunctionGroupItem.TypeEnum.TEMPLATE;
+        if (configurationProperties.getDbs().getDeletion().getFunctionGroupItemType().equals(FunctionGroupItemType.NONE)) {
+            log.info("Skipped deleting Function Groups due to deletion configuration set to NONE");
+            return Mono.empty();
+        }
 
         return functionGroupApi.getFunctionGroups(serviceAgreementInternalId)
             .collectList()
             .flatMap(functionGroups ->
                 functionGroupsApi.postFunctionGroupsDelete(
                         functionGroups.stream()
-                            .filter(f -> functionGroupItemTypeToDelete.equals(f.getType()))
+                            .filter(f -> FunctionGroupItem.TypeEnum.TEMPLATE.equals(f.getType()))
                             .map(fg -> mapId(fg.getId()))
                             .collect(Collectors.toList())
                     ).map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))

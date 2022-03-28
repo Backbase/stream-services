@@ -618,7 +618,7 @@ class BackbaseStreamConfigurationPropertiesTest {
     void shouldGetDefaultDbsDeletionFunctionGroupItemType() {
         DeletionProperties deletionProperties = new DeletionProperties();
 
-        Assertions.assertEquals(FunctionGroupItemType.SYSTEM, deletionProperties.getFunctionGroupItemType());
+        Assertions.assertEquals(FunctionGroupItemType.NONE, deletionProperties.getFunctionGroupItemType());
     }
 
     @Test
