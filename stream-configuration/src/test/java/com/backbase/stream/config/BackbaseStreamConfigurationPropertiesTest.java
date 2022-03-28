@@ -1,8 +1,6 @@
 package com.backbase.stream.config;
 
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties.DbsConnectionProperties;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties.DeletionProperties;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties.DeletionProperties.FunctionGroupItemType;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties.IdentityConnectionProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -612,22 +610,6 @@ class BackbaseStreamConfigurationPropertiesTest {
         String identityIntegrationBaseUrl = identityConnectionProperties.getIdentityIntegrationBaseUrl();
 
         Assertions.assertEquals(modifiedIdentityIntegrationBaseUrl, identityIntegrationBaseUrl);
-    }
-
-    @Test
-    void shouldGetDefaultDbsDeletionFunctionGroupItemType() {
-        DeletionProperties deletionProperties = new DeletionProperties();
-
-        Assertions.assertEquals(FunctionGroupItemType.SYSTEM, deletionProperties.getFunctionGroupItemType());
-    }
-
-    @Test
-    void shouldGetModifiedDbsDeletionFunctionGroupItemType() {
-        DeletionProperties deletionProperties = new DeletionProperties();
-
-        deletionProperties.setFunctionGroupItemType(FunctionGroupItemType.TEMPLATE);
-
-        Assertions.assertEquals(FunctionGroupItemType.TEMPLATE, deletionProperties.getFunctionGroupItemType());
     }
 
 }

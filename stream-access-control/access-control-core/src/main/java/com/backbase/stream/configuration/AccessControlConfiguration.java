@@ -84,8 +84,7 @@ public class AccessControlConfiguration {
     @Bean
     public AccessGroupService accessGroupService(
         com.backbase.dbs.accesscontrol.api.service.ApiClient accessControlApiClient,
-        com.backbase.dbs.user.api.service.ApiClient usersApiClient,
-        BackbaseStreamConfigurationProperties configurationProperties) {
+        com.backbase.dbs.user.api.service.ApiClient usersApiClient) {
 
         UserManagementApi usersApi = new UserManagementApi(usersApiClient);
         UserQueryApi userQueryApi = new UserQueryApi(accessControlApiClient);
@@ -98,8 +97,7 @@ public class AccessControlConfiguration {
         ServiceAgreementApi serviceAgreementApi = new ServiceAgreementApi(accessControlApiClient);
         ServiceAgreementsApi serviceAgreementsApi = new ServiceAgreementsApi(accessControlApiClient);
         return new AccessGroupService(usersApi, userQueryApi, accessControlUsersApi, dataGroupApi, dataGroupsApi,
-            functionGroupApi, functionGroupsApi, serviceAgreementQueryApi, serviceAgreementApi, serviceAgreementsApi,
-            configurationProperties);
+            functionGroupApi, functionGroupsApi, serviceAgreementQueryApi, serviceAgreementApi, serviceAgreementsApi);
     }
 
     @Bean

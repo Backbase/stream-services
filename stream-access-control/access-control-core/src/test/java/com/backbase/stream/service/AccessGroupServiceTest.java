@@ -43,8 +43,6 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties.DeletionProperties.FunctionGroupItemType;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -68,8 +66,6 @@ import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -117,9 +113,6 @@ class AccessGroupServiceTest {
 
     @Mock
     private ServiceAgreementsApi serviceAgreementsApi;
-
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private BackbaseStreamConfigurationProperties configurationProperties;
 
     @Test
     void getServiceAgreementByExternalIdRetrievesServiceAgreementByExternalId() {
@@ -638,9 +631,8 @@ class AccessGroupServiceTest {
         verify(accessControlUsersApi).putAssignUserPermissions(expectedPermissions);
     }
 
-    @ParameterizedTest
-    @EnumSource(FunctionGroupItemType.class)
-    void deleteFunctionGroupsForServiceAgreement_typeConfigured_deletesOnlyConfiguredType(FunctionGroupItemType enumType) {
+    @Test
+    void deleteFunctionGroupsForServiceAgreement_oneSystemAndOneTemplate_deletesOnlyTemplateFunctionGroup() {
         String internalSaId = "sa-internal-id";
 
         FunctionGroupItem systemFunctionGroup = new FunctionGroupItem().id("system-group-id-1")
@@ -658,8 +650,6 @@ class AccessGroupServiceTest {
 
         when(functionGroupsApi.postFunctionGroupsDelete(any())).thenReturn(Flux.empty());
 
-        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(enumType);
-
         subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
 
         ArgumentCaptor<List<PresentationIdentifier>> captor = ArgumentCaptor.forClass(
@@ -668,11 +658,7 @@ class AccessGroupServiceTest {
 
         List<PresentationIdentifier> value = captor.getValue();
 
-        FunctionGroupItem functionGroupItem = systemFunctionGroup;
-        if (enumType.equals(FunctionGroupItemType.TEMPLATE)) {
-            functionGroupItem = templateFunctionGroup;
-        }
-        assertEquals(functionGroupItem.getId(), value.get(0).getIdIdentifier());
+        assertEquals(templateFunctionGroup.getId(), value.get(0).getIdIdentifier());
     }
 
     private void thenRegularUsersUpdateCall(String expectedSaExId, PresentationAction expectedAction,

@@ -16,8 +16,6 @@ public class BackbaseStreamConfigurationProperties {
     @NoArgsConstructor
     public static class DbsConnectionProperties {
 
-        private DeletionProperties deletion = new DeletionProperties();
-
         /**
          * The location of Access Group Presentation Service.
          */
@@ -63,21 +61,6 @@ public class BackbaseStreamConfigurationProperties {
          * The location of Identity Service.
          */
         private String identityIntegrationBaseUrl = "http://identity-integration-service:8080";
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class DeletionProperties {
-
-        /**
-         * The function group item type to delete.
-         */
-        private FunctionGroupItemType functionGroupItemType = FunctionGroupItemType.SYSTEM;
-
-        public enum FunctionGroupItemType {
-            SYSTEM,
-            TEMPLATE
-        }
     }
 
 }

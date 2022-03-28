@@ -47,8 +47,6 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsers
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties.DeletionProperties.FunctionGroupItemType;
 import com.backbase.stream.legalentity.model.ApprovalStatus;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -141,8 +139,6 @@ public class AccessGroupService {
     private final ServiceAgreementApi serviceAgreementApi;
     @NonNull
     private final ServiceAgreementsApi serviceAgreementsApi;
-    @NonNull
-    private final BackbaseStreamConfigurationProperties configurationProperties;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
@@ -1017,16 +1013,13 @@ public class AccessGroupService {
      */
     public Mono<Void> deleteFunctionGroupsForServiceAgreement(String serviceAgreementInternalId) {
         log.debug("Retrieving Function Groups for Service Agreement {}", serviceAgreementInternalId);
-        FunctionGroupItem.TypeEnum functionGroupItemTypeToDelete = configurationProperties.getDbs().getDeletion()
-            .getFunctionGroupItemType().equals(FunctionGroupItemType.SYSTEM) ? FunctionGroupItem.TypeEnum.SYSTEM
-            : FunctionGroupItem.TypeEnum.TEMPLATE;
 
         return functionGroupApi.getFunctionGroups(serviceAgreementInternalId)
             .collectList()
             .flatMap(functionGroups ->
                 functionGroupsApi.postFunctionGroupsDelete(
                         functionGroups.stream()
-                            .filter(f -> functionGroupItemTypeToDelete.equals(f.getType()))
+                            .filter(f -> f.getType().equals(FunctionGroupItem.TypeEnum.TEMPLATE))
                             .map(fg -> mapId(fg.getId()))
                             .collect(Collectors.toList())
                     ).map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
