@@ -21,7 +21,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.backbase.stream.worker.exception.StreamTaskException;
+import com.backbase.stream.worker.model.StreamTask;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -65,14 +68,18 @@ public class UserService {
         return Mono.empty();
     }
 
-    public Mono<User> createUser(User user, String legalEntityExternalId) {
+    public Mono<User> createUser(User user, String legalEntityExternalId, StreamTask streamTask) {
         UserExternal createUser = mapper.toPresentation(user);
         createUser.setLegalEntityExternalId(legalEntityExternalId);
 
         return usersApi.createUser(createUser)
             .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error creating user: {} Response: {}", user, e.getResponseBodyAsString());
-                return Mono.error(e);
+                log.error("Error creating user: {} Response: {}", user.getExternalId(), e.getResponseBodyAsString());
+                String message = "Failed to create user: " + user.getExternalId();
+                streamTask.error("user", "create-user", "failed",
+                    legalEntityExternalId, user.getExternalId(), e, e.getMessage(), message);
+
+                return Mono.error(new StreamTaskException(streamTask, message));
             })
             .map(userCreated -> handleCreateUserResult(user, userCreated));
     }
@@ -245,7 +252,7 @@ public class UserService {
      * @param legalEntityInternalId
      * @return the same User with updated internal and external id on success
      */
-    public Mono<User> createOrImportIdentityUser(User user, String legalEntityInternalId) {
+    public Mono<User> createOrImportIdentityUser(User user, String legalEntityInternalId, StreamTask streamTask) {
         CreateIdentityRequest createIdentityRequest = new CreateIdentityRequest();
         createIdentityRequest.setLegalEntityInternalId(legalEntityInternalId);
         createIdentityRequest.setExternalId(user.getExternalId());
@@ -263,26 +270,33 @@ public class UserService {
 
         return identityManagementApi.createIdentity(createIdentityRequest)
             .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error create identity: {}", e.getResponseBodyAsString());
-                return Mono.error(e);
+                log.error("Error creating identity: {} Response: {}", user.getExternalId(), e.getResponseBodyAsString());
+                String message = "Failed to create user: " + user.getExternalId();
+                streamTask.error("user", "create-identity", "failed",
+                    user.getExternalId(), legalEntityInternalId, e, e.getMessage(), message);
+                return Mono.error(new StreamTaskException(streamTask, message));
             })
             .map(identityCreatedItem -> {
                 user.setInternalId(identityCreatedItem.getInternalId());
                 user.setExternalId(identityCreatedItem.getExternalId());
                 return user;
             })
-            .flatMap(this::updateIdentityUserAttributes);
+            .flatMap(newUser -> this.updateIdentityUserAttributes(user, streamTask));
     }
 
-    private Mono<User> updateIdentityUserAttributes(User user) {
+    private Mono<User> updateIdentityUserAttributes(User user, StreamTask streamTask) {
         if (IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())
             && user.getAttributes() != null) {
             UpdateIdentityRequest replaceIdentity = new UpdateIdentityRequest();
             replaceIdentity.attributes(user.getAttributes());
             return identityManagementApi.updateIdentity(user.getInternalId(), replaceIdentity)
                 .onErrorResume(WebClientResponseException.class, e -> {
-                    log.error("Error adding user attributes: {}", e.getResponseBodyAsString());
-                    return Mono.error(e);
+                    log.error("Error updating identity: {} Response: {}", user.getExternalId(), e.getResponseBodyAsString());
+                    String message = "Failed to update identity: " + user.getExternalId();
+                    streamTask.error("user", "update-identity-attributes", "failed",
+                        user.getExternalId(), user.getInternalId(), e, e.getMessage(), message);
+
+                    return Mono.error(new StreamTaskException(streamTask, message));
                 })
                 .then(Mono.just(user));
         }
@@ -319,13 +333,13 @@ public class UserService {
 
     private Mono<EnhancedUserRepresentation> getIdentityUser(User user, String realm) {
         return identityIntegrationApi.map(api -> api.getUserById(realm, user.getInternalId())
-            .doOnNext(eur -> {
-                log.info("Identity user found: {}", user.getExternalId());
-            })
-            .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error retrieving identity user {}: {}", user.getInternalId(), e.getResponseBodyAsString());
-                return Mono.error(e);
-            }))
+                .doOnNext(eur -> {
+                    log.info("Identity user found: {}", user.getExternalId());
+                })
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    log.error("Error retrieving identity user {}: {}", user.getInternalId(), e.getResponseBodyAsString());
+                    return Mono.error(e);
+                }))
             .orElse(Mono.empty());
     }
 

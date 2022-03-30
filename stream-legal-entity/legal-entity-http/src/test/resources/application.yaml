@@ -2,6 +2,7 @@ logging:
   level:
     com.backbase: debug
 
+
 spring:
   zipkin:
     enabled: false
@@ -17,6 +18,12 @@ spring:
         provider:
           dbs:
             token-uri: http://token-converter:8080/oauth/token
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
+        enable-api: false
+      enabled: false
 
 backbase:
   stream:

@@ -2,7 +2,6 @@ package com.backbase.stream.worker;
 
 
 import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
-import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.TaskHistory;
 import com.backbase.stream.worker.model.UnitOfWork;
@@ -23,18 +22,14 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
 
     private final UnitOfWorkRepository<T, String> repository;
     private final StreamTaskExecutor<T> streamTaskExecutor;
-    private final Scheduler workUnitExecutor;
     private final Scheduler taskExecutor;
 
     protected final StreamWorkerConfiguration streamWorkerConfiguration;
-
-    private Flux<UnitOfWork<T>> scheduler;
 
     public UnitOfWorkExecutor(UnitOfWorkRepository<T, String> repository, StreamTaskExecutor<T> streamTaskExecutor,
         StreamWorkerConfiguration streamWorkerConfiguration) {
         this.repository = repository;
         this.streamTaskExecutor = streamTaskExecutor;
-        this.workUnitExecutor = Schedulers.newParallel("unit-of-work", streamWorkerConfiguration.getWorkerUnitExecutors());
         this.taskExecutor = Schedulers.newParallel("TaskScheduler", streamWorkerConfiguration.getTaskExecutors());
         this.streamWorkerConfiguration = streamWorkerConfiguration;
     }
@@ -49,29 +44,6 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
 
     public Mono<UnitOfWork<T>> retrieve(String unitOfWorkId) {
         return repository.findById(unitOfWorkId);
-    }
-
-    public Flux<UnitOfWork<T>> getScheduler() {
-        if (this.scheduler == null) {
-            this.scheduler = Flux.interval(streamWorkerConfiguration.getSchedulerIntervalDuration())
-                .name("unitofwork-executor")
-                .publishOn(workUnitExecutor)
-                .doOnNext(aLong -> {
-                    log.info("Starting to look for work for the {} time", aLong);
-                })
-                .flatMap(i -> selectUnitOfWork())
-                .flatMap(this::executeUnitOfWork);
-        }
-        return this.scheduler;
-    }
-
-    @SuppressWarnings("ComparatorMethodParameterNotUsed")
-    public Mono<UnitOfWork<T>> selectUnitOfWork() {
-        return repository.findAllByNextAttemptAtBefore(OffsetDateTime.now())
-            .filter(UnitOfWork::isUnLocked)
-//            .sort((o1, o2) -> new Random().nextInt(1))
-            .next()
-            .doOnNext(unitOfWork -> log.info("Selected Unit Of Work: {}", unitOfWork.getUnitOfOWorkId()));
     }
 
     private Mono<UnitOfWork<T>> complete(UnitOfWork<T> unitOfWork) {
