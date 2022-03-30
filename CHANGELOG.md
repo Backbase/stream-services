@@ -3,12 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.63.1]
+## [2.64.0]
 ### Fixed
-- JUnit and Hibernate Validator dependency update to address security vulnerabilities
+- JUnit and Hibernate Validator dependency update to address security vulnerabilities.
+
 ## [2.62.0]
 ### Fixed
 - Legal Entity Saga: linkLegalEntityToRealm method executed multiple times ( when multiple users are ingested): `unique constraint (PK_LE_ASSIGN_REALM) violated`
+
 ## [2.61.0]
 ### Fixed
 - Legal Entity Saga: referenceJobRoleNames are mixed up between users ( when multiple users are ingested)
@@ -29,9 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
             .flatMap(legalEntitySaga::executeTask, legalEntitySagaConfiguration.getTaskExecutors())
             .map(LegalEntityTask::getData)
             .doOnNext(actual -> log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
- ``` 
-    
-
+ ```
 
 ## [2.51.0]
 ### Maintenance
@@ -529,6 +529,16 @@ backbase:
       transaction-manager-base-url: http://transaction-manager:8080
       limit-manager-base-url: http://limits-manager:8080
 ```
+
+[2.64.0]: https://github.com/Backbase/stream-services-2.0/compare/2.62.0...2.64.0
+[2.62.0]: https://github.com/Backbase/stream-services-2.0/compare/2.61.0...2.62.0
+[2.61.0]: https://github.com/Backbase/stream-services-2.0/compare/2.52.0...2.61.0
+[2.52.0]: https://github.com/Backbase/stream-services-2.0/compare/2.51.0...2.52.0
+[2.51.0]: https://github.com/Backbase/stream-services-2.0/compare/2.48.0...2.51.0
+[2.48.0]: https://github.com/Backbase/stream-services-2.0/compare/2.47.0...2.48.0
+[2.47.0]: https://github.com/Backbase/stream-services-2.0/compare/2.46.3...2.47.0
+[2.46.3]: https://github.com/Backbase/stream-services-2.0/compare/2.46.2...2.46.3
+[2.46.2]: https://github.com/Backbase/stream-services-2.0/compare/2.46.1...2.46.2
 [2.46.1]: https://github.com/Backbase/stream-services-2.0/compare/2.46.0...2.46.1
 [2.46.0]: https://github.com/Backbase/stream-services-2.0/compare/2.45.0...2.46.0
 [2.45.0]: https://github.com/Backbase/stream-services-2.0/compare/2.44.0...2.45.0
