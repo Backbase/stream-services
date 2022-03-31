@@ -15,16 +15,26 @@ Currently the following DBS services are exposed as Stream Components:
 * [Stream Product Catalog](stream-cursor/readme.md) (Lib, Rest, Task) → Enabled bootstrapping of product types into DBS. Product Types are currently hardcoded in the streamTask definition. Orchestrates calls into Product Summary
 * [Stream Transactions](stream-transactions) (Lib, Rest, Sink) → Allows ingestion into DBS in a controlled way with support for retry, rate limiting and configurable batch sizes. 
 
+## Stream API Documentation
+
+You can find listed here the API specification containing the opinionated model of the supported Stream Services
+
+| Service                | OpenAPI Spec                                            | [Redoc](https://github.com/Redocly/redoc)                                                                         |
+|------------------------|---------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| stream-legal-entity    | [openapi.yaml](api/stream-legal-entity/openapi.yaml)    | [Ingest Legal Entity API](https://engineering.backbase.com/stream-services/api/stream-legal-entity/index.html)    |
+| stream-approvals       | [openapi.yaml](api/stream-audit/openapi.yaml)           | [Audit](https://engineering.backbase.com/stream-services/api/stream-audit/index.html)                             |
+| stream-audit           | [openapi.yaml](api/stream-approvals/openapi.yaml)       | [Ingest Approval API](https://engineering.backbase.com/stream-services/api/stream-approvals/index.html)           |
+| stream-product-catalog | [openapi.yaml](api/stream-product-catalog/openapi.yaml) | [Product Catalog API](https://engineering.backbase.com/stream-services/api/stream-product-catalog/index.html)     |
+| stream-transactions    | [openapi.yaml](api/stream-transactions/openapi.yaml)    | [Transactions Ingestion API](https://engineering.backbase.com/stream-services/api/stream-transactions/index.html) |
+
 ## Supported DBS versions
 
-| DBS version | Stream [version](https://github.com/Backbase/stream-services/releases) |
-|-------------|-------------------------------------------------------------------------|
-| 2021.09 (2.21.2.x) | 2.49.0 to latest                                                   |
-| 2021.07 (2.21.0.x) | 2.44.0 to 2.48.0                                                   |
-| 2.20.x             | 2.23.0 to 2.43.0                                                   |
-| 2.19.x             | 2.1.0 to 2.22.0                                                    |
-
-For previous DBS version please check [Stream v1 GitHub repository](https://github.com/Backbase/stream-services).
+| DBS version        | Stream [version](https://github.com/Backbase/stream-services/releases) |
+|--------------------|------------------------------------------------------------------------|
+| 2021.09 (2.21.2.x) | 2.49.0 to latest                                                       |
+| 2021.07 (2.21.0.x) | 2.44.0 to 2.48.0                                                       |
+| 2.20.x             | 2.23.0 to 2.43.0                                                       |
+| 2.19.x             | 2.1.0 to 2.22.0                                                        |
 
 ## Contributing
 You are welcome to provide bug fixes and new features in the form of pull requests. If you'd like to contribute, please be mindful of the following guidelines:
