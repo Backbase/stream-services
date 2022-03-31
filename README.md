@@ -1,4 +1,4 @@
-[![Build Stream Services](https://github.com/Backbase/stream-services-2.0/actions/workflows/build.yml/badge.svg)](https://github.com/Backbase/stream-services-2.0/actions/workflows/build.yml)
+[![Build Stream Services](https://github.com/Backbase/stream-services/actions/workflows/build.yml/badge.svg)](https://github.com/Backbase/stream-services/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.backbase.stream%3Astream-services&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.backbase.stream%3Astream-services)
 # Stream Services
 Stream Services are the "out-of-the-box" components that talk to DBS and are responsible for orchestrating calls to DBS. 
@@ -17,7 +17,7 @@ Currently the following DBS services are exposed as Stream Components:
 
 ## Supported DBS versions
 
-| DBS version | Stream [version](https://github.com/Backbase/stream-services-2.0/releases) |
+| DBS version | Stream [version](https://github.com/Backbase/stream-services/releases) |
 |-------------|-------------------------------------------------------------------------|
 | 2021.09 (2.21.2.x) | 2.49.0 to latest                                                   |
 | 2021.07 (2.21.0.x) | 2.44.0 to 2.48.0                                                   |
