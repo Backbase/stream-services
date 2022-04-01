@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.65.0]
+### Added
+- Additional realm roles added as attribute to User model and will be passed to legal-entity-integration service within Legal Entity Saga execution
+
 ## [2.64.0]
 ### Fixed
 - JUnit and Hibernate Validator dependency update to address security vulnerabilities.
