@@ -81,8 +81,8 @@ jobs:
       - name: Commit files
         if: "contains(github.ref, 'master') || contains(github.ref, 'support/')"
         run: |
-         git config --local user.email "action@github.com"
-         git config --local user.name "GitHub Action"
+         git config --local user.email "stream_releaser@backbase.com"
+         git config --local user.name "bb-stream-bot"
          git commit -m "[skip bump] version bump" -a
          git tag -a $NEW_VERSION -m "[version bump]"
 
@@ -90,7 +90,7 @@ jobs:
         if: "contains(github.ref, 'master') || contains(github.ref, 'support/')"
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.STREAM_BOT_TOKEN }}
 
       - name: Upload to Repo
         if: "contains(github.ref, 'master') || contains(github.ref, 'support/') || contains(github.ref, 'develop')" # In case of develop branch it will upload the snapshot version
