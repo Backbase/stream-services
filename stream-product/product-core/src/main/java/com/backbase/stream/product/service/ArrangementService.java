@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Manage Products (In DBS Called Arrangements).
@@ -76,7 +77,7 @@ public class ArrangementService {
                     if (!BatchResponseStatusCode.HTTP_STATUS_OK.equals(r.getStatus())) {
                         List<ErrorItem> errors = r.getErrors();
                         throw new IllegalStateException("Batch arrangement update failed: '"
-                            + r.getResourceId() + "'; errors: " + (errors != null ? (join(",",
+                            + r.getResourceId() + "'; errors: " + (errors != null ? (String.join(",",
                             errors.stream().map(ErrorItem::toString).collect(Collectors.toList()))) : "unknown"));
                     }
                     return r;
