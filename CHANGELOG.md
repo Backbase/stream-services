@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.65.2]
+### Changed
+- Update Spring Boot to 2.5.12
+> [CVE-2022-22965: Spring Framework (Spring4Shell)](https://developer.backbase.com/security/CVE-2022-22965-spring-framework-spring4shell)
+- Update Spring Cloud Function to 3.1.7
+> [CVE-2022-22963: Spring Cloud Function RCE](https://developer.backbase.com/security/cve-2022-22963_spring_cloud_function_rce)
+
 ## [2.65.1]
 ### Changed
 - Administrative changes: Updating documentation and cleaning specs.

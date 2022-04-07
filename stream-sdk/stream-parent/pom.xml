@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.5.5</version>
+        <version>2.5.12</version>
         <relativePath />
     </parent>
 
@@ -42,7 +42,8 @@
     <properties>
         <source.version>1.8</source.version>
         <spring-cloud.version>2020.0.4</spring-cloud.version>
-        <spring-boot.version>2.5.5</spring-boot.version>
+        <spring-cloud-function.version>3.1.7</spring-cloud-function.version>
+        <spring-boot.version>2.5.12</spring-boot.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
 
@@ -102,6 +103,17 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-function-context</artifactId>
+                <version>${spring-cloud-function.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-function-core</artifactId>
+                <version>${spring-cloud-function.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
