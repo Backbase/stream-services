@@ -44,7 +44,6 @@ jobs:
 
       - name: Get version from POM
         run: |
-          echo "${{toJSON(github.event)}}"
           VERSION_PARTS=($(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | tr "." "\n"))
           echo "MAJOR=${VERSION_PARTS[0]}" >> $GITHUB_ENV
           echo "MINOR=${VERSION_PARTS[1]}" >> $GITHUB_ENV
