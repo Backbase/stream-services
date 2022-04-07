@@ -74,7 +74,10 @@ public class ArrangementService {
                     log.info("Batch Arrangement update result for arrangementId: {}, resourceId: {}, action: {}, result: {}", r.getArrangementId(), r.getResourceId(), r.getAction(), r.getStatus());
                     // Check if any failed, then fail everything.
                     if (!BatchResponseStatusCode.HTTP_STATUS_OK.equals(r.getStatus())) {
-                        throw new IllegalStateException("Batch arrangement update failed: " + r.getResourceId());
+                        List<ErrorItem> errors = r.getErrors();
+                        throw new IllegalStateException("Batch arrangement update failed: '"
+                            + r.getResourceId() + "'; errors: " + (errors != null ? (join(",",
+                            errors.stream().map(ErrorItem::toString).collect(Collectors.toList()))) : "unknown"));
                     }
                     return r;
                 })
