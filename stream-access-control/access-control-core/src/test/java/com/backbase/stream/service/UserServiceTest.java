@@ -21,6 +21,7 @@ import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.User;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -53,7 +54,7 @@ class UserServiceTest {
     }
 
     @Test
-    void changeEnableStatusToDisable() {
+    void updateUserStateSetStatusToDisable() {
         String internalId = "someInternalId";
         String realm = "someRealm";
         String email = "some@email.com";
@@ -64,7 +65,7 @@ class UserServiceTest {
 
 
         User user = new User().internalId(internalId).locked(true);
-        Mono<User> result = subject.changeEnableStatus(user, realm);
+        Mono<User> result = subject.updateUserState(user, realm);
 
 
         result.subscribe(assertEqualsTo(user));
@@ -75,7 +76,7 @@ class UserServiceTest {
     }
 
     @Test
-    void changeEnableStatusToEnabled() {
+    void updateUserStateSetStatusToEnabled() {
         String internalId = "someInternalId";
         String realm = "someRealm";
         String email = "some@email.com";
@@ -86,7 +87,7 @@ class UserServiceTest {
 
 
         User user = new User().internalId(internalId).locked(false);
-        Mono<User> result = subject.changeEnableStatus(user, realm);
+        Mono<User> result = subject.updateUserState(user, realm);
 
 
         result.subscribe(assertEqualsTo(user));
@@ -97,7 +98,7 @@ class UserServiceTest {
     }
 
     @Test
-    void changeEnableStatusDoesntChangeWhenUndefinedLocked() {
+    void updateUserStateStatusDoesntChangeWhenUndefinedLocked() {
         String internalId = "someInternalId";
         String realm = "someRealm";
         String email = "some@email.com";
@@ -107,14 +108,37 @@ class UserServiceTest {
 
 
         User user = new User().internalId(internalId).locked(null);
-        Mono<User> result = subject.changeEnableStatus(user, realm);
+        Mono<User> result = subject.updateUserState(user, realm);
 
 
         result.subscribe(assertEqualsTo(user));
         verify(identityIntegrationApi).getUserById(eq(realm), eq(internalId));
-        UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email).enabled(true)
-            .credentials(Collections.emptyList());
         verifyNoMoreInteractions(identityIntegrationApi);
+    }
+
+    @Test
+    void updateUserStateAdditionalRealmRoles() {
+        String internalId = "someInternalId";
+        String realm = "someRealm";
+        String email = "some@email.com";
+
+        EnhancedUserRepresentation enhancedUserRepresentation = new EnhancedUserRepresentation().id(internalId)
+            .email(email).addRealmRolesItem("banking");
+        when(identityIntegrationApi.getUserById(realm, internalId))
+            .thenReturn(Mono.just(enhancedUserRepresentation));
+        when(identityIntegrationApi.updateUserById(eq(realm), eq(internalId), any(UserRequestBody.class)))
+            .thenReturn(Mono.empty());
+
+        User user = new User().internalId(internalId)
+            .additionalRealmRoles(Arrays.asList("private", "private", "wealth"));
+        Mono<User> result = subject.updateUserState(user, realm);
+
+
+        result.subscribe(assertEqualsTo(user));
+        verify(identityIntegrationApi).getUserById(realm, internalId);
+        UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email)
+            .credentials(Collections.emptyList()).realmRoles(Arrays.asList("banking", "private", "wealth"));
+        verify(identityIntegrationApi).updateUserById(realm, internalId, expectedUser);
     }
 
     @Test
