@@ -18,6 +18,7 @@
     <properties>
         <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/api/openapi.yaml</raml2openapi-maven-plugin.output>
+        <wiremock-jre8.version>2.33.1</wiremock-jre8.version>
     </properties>
 
     <dependencies>
@@ -27,6 +28,12 @@
             <version>2.65.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
+            <version>${wiremock-jre8.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
