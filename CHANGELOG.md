@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.66.0]
+### Changed
+- Order of product group stream task processing within legal entity saga is changed to sequential. This is due to the fact that in some 
+  circumstances user permissions update loosing previously assigned permissions during ingestion process (due to the nature of reactive processing) 
+### Fixed
+- Additional headers propagation to several calls within legal entity saga
+
 ## [2.65.2]
 ### Changed
 - Update Spring Boot to 2.5.12

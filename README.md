@@ -22,8 +22,8 @@ You can find listed here the API specification containing the opinionated model 
 | Service                | OpenAPI Spec                                            | [Redoc](https://github.com/Redocly/redoc)                                                                         |
 |------------------------|---------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
 | stream-legal-entity    | [openapi.yaml](api/stream-legal-entity/openapi.yaml)    | [Ingest Legal Entity API](https://engineering.backbase.com/stream-services/api/stream-legal-entity/index.html)    |
-| stream-approvals       | [openapi.yaml](api/stream-audit/openapi.yaml)           | [Audit](https://engineering.backbase.com/stream-services/api/stream-audit/index.html)                             |
-| stream-audit           | [openapi.yaml](api/stream-approvals/openapi.yaml)       | [Ingest Approval API](https://engineering.backbase.com/stream-services/api/stream-approvals/index.html)           |
+| stream-audit           | [openapi.yaml](api/stream-audit/openapi.yaml)           | [Audit](https://engineering.backbase.com/stream-services/api/stream-audit/index.html)                             |
+| stream-approvals       | [openapi.yaml](api/stream-approvals/openapi.yaml)       | [Ingest Approval API](https://engineering.backbase.com/stream-services/api/stream-approvals/index.html)           |
 | stream-product-catalog | [openapi.yaml](api/stream-product-catalog/openapi.yaml) | [Product Catalog API](https://engineering.backbase.com/stream-services/api/stream-product-catalog/index.html)     |
 | stream-transactions    | [openapi.yaml](api/stream-transactions/openapi.yaml)    | [Transactions Ingestion API](https://engineering.backbase.com/stream-services/api/stream-transactions/index.html) |
 
