@@ -213,22 +213,24 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             })
             .flatMap(actual -> {
                 task.getData().setInternalId(actual.getInternalId());
-                legalEntityService.getLegalEntityByInternalId(actual.getInternalId()).subscribe(result -> {
-                    task.getData().setParentInternalId(result.getParentInternalId());
-                });
-                // TODO: Add Update Legal Entity Logic
-                task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, EXISTS, legalEntity.getExternalId(), actual.getInternalId(), "Legal Entity: %s already exists", legalEntity.getName());
-                return Mono.just(task);
+                return legalEntityService.getLegalEntityByInternalId(actual.getInternalId())
+                    .flatMap(result -> {
+                        task.getData().setParentInternalId(result.getParentInternalId());
+                        // TODO: Add Update Legal Entity Logic
+                        task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, EXISTS, legalEntity.getExternalId(), actual.getInternalId(), "Legal Entity: %s already exists", legalEntity.getName());
+                        return Mono.just(task);
+                    });
             });
         // Pipeline for Creating New Legal Entity
         Mono<LegalEntityTask> createNewLegalEntity = legalEntityService.createLegalEntity(legalEntity)
             .flatMap(actual -> {
                 task.getData().setInternalId(legalEntity.getInternalId());
-                legalEntityService.getLegalEntityByInternalId(actual.getInternalId()).subscribe(result -> {
-                    task.getData().setParentInternalId(result.getParentInternalId());
-                });
-                task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, CREATED, legalEntity.getExternalId(), legalEntity.getInternalId(), "Created new Legal Entity");
-                return Mono.just(task);
+                return legalEntityService.getLegalEntityByInternalId(actual.getInternalId())
+                    .flatMap(result -> {
+                        task.getData().setParentInternalId(result.getParentInternalId());
+                        task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, CREATED, legalEntity.getExternalId(), legalEntity.getInternalId(), "Created new Legal Entity");
+                        return Mono.just(task);
+                    });
             })
             .onErrorResume(LegalEntityException.class, legalEntityException -> {
                 task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(), legalEntityException, legalEntityException.getHttpResponse(), legalEntityException.getMessage());
@@ -246,7 +248,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
         return Flux.fromIterable(legalEntity.getProductGroups())
             .map(actual -> createProductGroupTask(streamTask, actual))
-            .flatMap(productGroupStreamTask -> batchProductIngestionSaga.process(productGroupStreamTask)
+            .concatMap(productGroupStreamTask -> batchProductIngestionSaga.process(productGroupStreamTask)
                 .onErrorResume(throwable -> {
                     String message = throwable.getMessage();
                     if (throwable.getClass().isAssignableFrom(WebClientResponseException.class)) {
@@ -567,19 +569,13 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             userService.setupRealm(legalEntity)
                 .switchIfEmpty(Mono.error(new StreamTaskException(streamTask, "Realm: " + legalEntity.getRealmName() + " not found!")))
                 .then(userService.createOrImportIdentityUser(user, legalEntity.getInternalId(), streamTask)
-                .flatMap(u -> updateUserStatus(u, legalEntity.getRealmName()))
+                .flatMap(currentUser -> userService.updateUserState(currentUser, legalEntity.getRealmName()))
                 .map(existingUser -> {
                     user.setInternalId(existingUser.getInternalId());
                     streamTask.info(IDENTITY_USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId());
                     return user;
                 }));
         return getExistingIdentityUser.switchIfEmpty(createNewIdentityUser);
-    }
-
-    private Mono<User> updateUserStatus(User user, String realm) {
-        log.info("changing user {} status to locked {}", user.getInternalId(), user.getLocked());
-        return userService.changeEnableStatus(user, realm)
-            .thenReturn(user);
     }
 
     private Mono<LegalEntityTask> setupServiceAgreement(LegalEntityTask streamTask) {

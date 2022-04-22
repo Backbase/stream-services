@@ -14,22 +14,35 @@ import com.backbase.dbs.user.api.service.v2.model.Realm;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
+import com.backbase.stream.legalentity.model.CurrentAccount;
+import com.backbase.stream.legalentity.model.EmailAddress;
+import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.LegalEntityParticipant;
+import com.backbase.stream.legalentity.model.LegalEntityStatus;
+import com.backbase.stream.legalentity.model.LegalEntityType;
+import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.BatchProductIngestionSaga;
+import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import java.util.ArrayList;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -39,6 +52,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
@@ -99,7 +113,7 @@ class LegalEntitySagaTest {
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
         when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
@@ -148,7 +162,7 @@ class LegalEntitySagaTest {
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
         when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
@@ -268,6 +282,155 @@ class LegalEntitySagaTest {
 
         verify(userService, times(2)).setupRealm(task.getLegalEntity());
         verify(userService, times(2)).linkLegalEntityToRealm(task.getLegalEntity());
+    }
+
+    /**
+     * Intention of this test is to verify that {@link ProductGroupTask} are processed in order at
+     * {@link LegalEntitySaga#processProducts(LegalEntityTask)} (in short that .concatMap is used instead of .flatMap).
+     * Otherwise it may happen that during permission assignment at
+     * {@link AccessGroupService#assignPermissionsBatch(BatchProductGroupTask, Map)} there will be stale set of
+     * permissions which will lead to state when not all of desired applied
+     */
+    @Test
+    void productGroupsProcessedSequentially() {
+        // Given
+        LegalEntity legalEntity = new LegalEntity()
+            .name("Legal Entity")
+            .externalId("100000")
+            .internalId("100001")
+            .parentExternalId("parent-100000")
+            .legalEntityType(LegalEntityType.CUSTOMER)
+            .realmName("customer-bank")
+            .productGroups(Arrays.asList(
+                (ProductGroup) new ProductGroup()
+                    .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+                    .name("Default PG")
+                    .users(Collections.singletonList(
+                        new JobProfileUser()
+                            .user(
+                                new User()
+                                    .externalId("john.doe")
+                                    .fullName("John Doe")
+                                    .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
+                            )
+                            .referenceJobRoleNames(Collections.singletonList("Private - Read only"))
+                    ))
+                    .currentAccounts(Collections.singletonList(
+                        (CurrentAccount) new CurrentAccount()
+                            .BBAN("01318000")
+                            .externalId("7155000")
+                            .productTypeExternalId("privateCurrentAccount")
+                            .name("Account 1")
+                            .currency("GBP")
+                    )),
+                (ProductGroup) new ProductGroup()
+                    .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+                    .name("Mixed PG")
+                    .users(Collections.singletonList(
+                        new JobProfileUser()
+                            .user(
+                                new User()
+                                    .externalId("john.doe")
+                                    .fullName("John Doe")
+                                    .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
+                            )
+                            .referenceJobRoleNames(Collections.singletonList("Private - Full access"))
+                    ))
+                    .currentAccounts(Collections.singletonList(
+                        (CurrentAccount) new CurrentAccount()
+                            .BBAN("01318001")
+                            .externalId("7155001")
+                            .productTypeExternalId("privateCurrentAccount")
+                            .name("Account 2")
+                            .currency("GBP")
+                    ))
+            ))
+            .users(Collections.singletonList(
+                new JobProfileUser()
+                    .user(
+                        new User()
+                            .externalId("john.doe")
+                            .fullName("John Doe")
+                            .identityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY)
+                            .locked(false)
+                            .emailAddress(new EmailAddress().address("test@example.com"))
+                            .mobileNumber(new PhoneNumber().number("+12345"))
+                    )
+                    .referenceJobRoleNames(Arrays.asList(
+                        "Private - Read only", "Private - Full access"
+                    ))
+            ))
+            .administrators(Collections.emptyList())
+            .customServiceAgreement(
+                new ServiceAgreement()
+                    .externalId("Service_Agreement_Id")
+                    .name("Service Agreement")
+                    .description("Custom Service Agreement")
+                    .participants(Collections.singletonList(
+                        new LegalEntityParticipant()
+                            .externalId("user-external-id")
+                            .sharingUsers(true)
+                            .sharingAccounts(true)
+                            .users(Collections.singletonList("john.doe"))
+                    ))
+                    .status(LegalEntityStatus.ENABLED)
+                    .isMaster(false)
+            );
+
+        LegalEntityTask legalEntityTask = new LegalEntityTask(legalEntity);
+
+        List<String> productGroupTaskProcessingOrder = new CopyOnWriteArrayList<>();
+
+        when(legalEntityService.getLegalEntityByExternalId("100000"))
+            .thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
+        when(legalEntityService.getLegalEntityByInternalId("100001"))
+            .thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
+        when(legalEntityService.createLegalEntity(legalEntityTask.getLegalEntity()))
+            .thenReturn(Mono.empty());
+        when(legalEntitySagaConfigurationProperties.isUseIdentityIntegration())
+            .thenReturn(true);
+        when(userService.setupRealm(legalEntityTask.getLegalEntity()))
+            .thenReturn(Mono.empty());
+        when(userService.linkLegalEntityToRealm(legalEntityTask.getLegalEntity()))
+            .thenReturn(Mono.empty());
+        when(userService.getUserByExternalId("john.doe"))
+            .thenReturn(Mono.just(new User().internalId("100").externalId("john.doe")));
+        when(userService.createOrImportIdentityUser(any(), any(), any()))
+            .thenReturn(Mono.empty());
+        when(accessGroupService.getServiceAgreementByExternalId("Service_Agreement_Id"))
+            .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
+        when(accessGroupService.updateServiceAgreementAssociations(any(), any(), any()))
+            .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
+        when(accessGroupService.createServiceAgreement(any(), any()))
+            .thenReturn(Mono.empty());
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
+            .thenReturn(Mono.empty());
+        when(accessGroupService.getFunctionGroupsForServiceAgreement("101"))
+            .thenReturn(Mono.empty());
+        when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+            .thenAnswer((Answer<Mono<ProductGroupTask>>) invocationOnMock -> {
+                ProductGroupTask productGroupTask = invocationOnMock.getArgument(0);
+                Duration delay = productGroupTask.getName().contains("100000-Default PG")
+                    ? Duration.ofMillis(500) // First product group will be processed with delay
+                    : Duration.ofMillis(1);
+
+                return Mono.delay(delay)
+                    .then(Mono.just(productGroupTask))
+                    .map(productGroup -> {
+                        productGroupTaskProcessingOrder.add(productGroup.getName());
+                        return productGroup;
+                    });
+            });
+
+        // When
+        legalEntitySaga.executeTask(legalEntityTask)
+            .block(Duration.ofSeconds(10));
+
+        // Then
+        Assertions.assertEquals(
+            Arrays.asList("100000-Default PG", "100000-Mixed PG"),
+            productGroupTaskProcessingOrder
+        );
     }
 
     @Test

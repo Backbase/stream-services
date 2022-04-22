@@ -3,9 +3,36 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.66.0]
+### Changed
+- Order of product group stream task processing within legal entity saga is changed to sequential. This is due to the fact that in some 
+  circumstances user permissions update loosing previously assigned permissions during ingestion process (due to the nature of reactive processing) 
+### Fixed
+- Additional headers propagation to several calls within legal entity saga
+
+## [2.65.2]
+### Changed
+- Update Spring Boot to 2.5.12
+> [CVE-2022-22965: Spring Framework (Spring4Shell)](https://developer.backbase.com/security/CVE-2022-22965-spring-framework-spring4shell)
+- Update Spring Cloud Function to 3.1.7
+> [CVE-2022-22963: Spring Cloud Function RCE](https://developer.backbase.com/security/cve-2022-22963_spring_cloud_function_rce)
+
+## [2.65.1]
+### Changed
+- Administrative changes: Updating documentation and cleaning specs.
+
+## [2.65.0]
+### Added
+- Additional realm roles added as attribute to User model and will be passed to legal-entity-integration service within Legal Entity Saga execution
+
+## [2.64.0]
+### Fixed
+- JUnit and Hibernate Validator dependency update to address security vulnerabilities.
+
 ## [2.62.0]
 ### Fixed
 - Legal Entity Saga: linkLegalEntityToRealm method executed multiple times ( when multiple users are ingested): `unique constraint (PK_LE_ASSIGN_REALM) violated`
+
 ## [2.61.0]
 ### Fixed
 - Legal Entity Saga: referenceJobRoleNames are mixed up between users ( when multiple users are ingested)
@@ -26,9 +53,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
             .flatMap(legalEntitySaga::executeTask, legalEntitySagaConfiguration.getTaskExecutors())
             .map(LegalEntityTask::getData)
             .doOnNext(actual -> log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
- ``` 
-    
-
+ ```
 
 ## [2.51.0]
 ### Maintenance
@@ -72,7 +97,7 @@ via jvm option `-Dlogging.config=file:logback.xml` or specify in the `applicatio
 
 ## [2.46.0]
 ### Fixed
-- Fix for issue https://github.com/Backbase/stream-services-2.0/issues/74 : Reference Job Roles updated in LegalEntitySaga
+- Fix for issue https://github.com/Backbase/stream-services/issues/74 : Reference Job Roles updated in LegalEntitySaga
 with empty functions.
 - Exclude old snakeyaml dependency
 - UserService: improved Exception management
@@ -235,7 +260,7 @@ bootstrap:
 
 ## [2.27.0]
 ### Fixed
-- Fix for issue https://github.com/Backbase/stream-services-2.0/issues/46
+- Fix for issue https://github.com/Backbase/stream-services/issues/46
 ```
 While deleting a legal entity , we are trying to get user information by sending an internal id to
 service-api/v2/users/externalids/{externlaIId}?skipHierarchyCheck=true instead of /service-api/v2/users/{internalId}.
@@ -526,45 +551,55 @@ backbase:
       transaction-manager-base-url: http://transaction-manager:8080
       limit-manager-base-url: http://limits-manager:8080
 ```
-[2.46.1]: https://github.com/Backbase/stream-services-2.0/compare/2.46.0...2.46.1
-[2.46.0]: https://github.com/Backbase/stream-services-2.0/compare/2.45.0...2.46.0
-[2.45.0]: https://github.com/Backbase/stream-services-2.0/compare/2.44.0...2.45.0
-[2.44.0]: https://github.com/Backbase/stream-services-2.0/compare/2.43.0...2.44.0
-[2.43.0]: https://github.com/Backbase/stream-services-2.0/compare/2.42.0...2.43.0
-[2.42.0]: https://github.com/Backbase/stream-services-2.0/compare/2.41.0...2.42.0
-[2.41.0]: https://github.com/Backbase/stream-services-2.0/compare/2.40.0...2.41.0
-[2.40.0]: https://github.com/Backbase/stream-services-2.0/compare/2.39.0...2.40.0
-[2.39.0]: https://github.com/Backbase/stream-services-2.0/compare/2.38.0...2.39.0
-[2.38.0]: https://github.com/Backbase/stream-services-2.0/compare/2.37.0...2.38.0
-[2.37.0]: https://github.com/Backbase/stream-services-2.0/compare/2.36.0...2.37.0
-[2.36.0]: https://github.com/Backbase/stream-services-2.0/compare/2.35.0...2.36.0
-[2.35.0]: https://github.com/Backbase/stream-services-2.0/compare/2.34.0...2.35.0
-[2.34.0]: https://github.com/Backbase/stream-services-2.0/compare/2.33.0...2.34.0
-[2.33.0]: https://github.com/Backbase/stream-services-2.0/compare/2.32.0...2.33.0
-[2.32.0]: https://github.com/Backbase/stream-services-2.0/compare/2.31.0...2.32.0
-[2.31.0]: https://github.com/Backbase/stream-services-2.0/compare/2.30.0...2.31.0
-[2.30.0]: https://github.com/Backbase/stream-services-2.0/compare/2.29.0...2.30.0
-[2.29.0]: https://github.com/Backbase/stream-services-2.0/compare/2.28.0...2.29.0
-[2.28.0]: https://github.com/Backbase/stream-services-2.0/compare/2.27.0...2.28.0
-[2.27.0]: https://github.com/Backbase/stream-services-2.0/compare/2.26.0...2.27.0
-[2.26.0]: https://github.com/Backbase/stream-services-2.0/compare/2.25.0...2.26.0
-[2.25.0]: https://github.com/Backbase/stream-services-2.0/compare/2.24.0...2.25.0
-[2.24.0]: https://github.com/Backbase/stream-services-2.0/compare/2.23.0...2.24.0
-[2.23.0]: https://github.com/Backbase/stream-services-2.0/compare/2.22.0...2.23.0
-[2.22.0]: https://github.com/Backbase/stream-services-2.0/compare/2.21.0...2.22.0
-[2.21.0]: https://github.com/Backbase/stream-services-2.0/compare/2.20.0...2.21.0
-[2.20.0]: https://github.com/Backbase/stream-services-2.0/compare/2.19.0...2.20.0
-[2.19.0]: https://github.com/Backbase/stream-services-2.0/compare/2.18.0...2.19.0
-[2.18.0]: https://github.com/Backbase/stream-services-2.0/compare/2.17.0...2.18.0
-[2.17.0]: https://github.com/Backbase/stream-services-2.0/compare/2.16.0...2.17.0
-[2.16.0]: https://github.com/Backbase/stream-services-2.0/compare/2.15.0...2.16.0
-[2.15.0]: https://github.com/Backbase/stream-services-2.0/compare/2.14.0...2.15.0
-[2.14.0]: https://github.com/Backbase/stream-services-2.0/compare/2.13.0...2.14.0
-[2.13.0]: https://github.com/Backbase/stream-services-2.0/compare/2.12.0...2.13.0
-[2.12.0]: https://github.com/Backbase/stream-services-2.0/compare/2.11.0...2.12.0
-[2.11.0]: https://github.com/Backbase/stream-services-2.0/compare/2.10.0...2.11.0
-[2.10.0]: https://github.com/Backbase/stream-services-2.0/compare/2.9.0...2.10.0
-[2.9.0]: https://github.com/Backbase/stream-services-2.0/compare/2.8.0...2.9.0
-[2.8.0]: https://github.com/Backbase/stream-services-2.0/compare/2.7.0...2.8.0
-[2.7.0]: https://github.com/Backbase/stream-services-2.0/compare/2.6.0...2.7.0
-[2.6.0]: https://github.com/Backbase/stream-services-2.0/releases/tag/2.6.0
+
+[2.64.0]: https://github.com/Backbase/stream-services/compare/2.62.0...2.64.0
+[2.62.0]: https://github.com/Backbase/stream-services/compare/2.61.0...2.62.0
+[2.61.0]: https://github.com/Backbase/stream-services/compare/2.52.0...2.61.0
+[2.52.0]: https://github.com/Backbase/stream-services/compare/2.51.0...2.52.0
+[2.51.0]: https://github.com/Backbase/stream-services/compare/2.48.0...2.51.0
+[2.48.0]: https://github.com/Backbase/stream-services/compare/2.47.0...2.48.0
+[2.47.0]: https://github.com/Backbase/stream-services/compare/2.46.3...2.47.0
+[2.46.3]: https://github.com/Backbase/stream-services/compare/2.46.2...2.46.3
+[2.46.2]: https://github.com/Backbase/stream-services/compare/2.46.1...2.46.2
+[2.46.1]: https://github.com/Backbase/stream-services/compare/2.46.0...2.46.1
+[2.46.0]: https://github.com/Backbase/stream-services/compare/2.45.0...2.46.0
+[2.45.0]: https://github.com/Backbase/stream-services/compare/2.44.0...2.45.0
+[2.44.0]: https://github.com/Backbase/stream-services/compare/2.43.0...2.44.0
+[2.43.0]: https://github.com/Backbase/stream-services/compare/2.42.0...2.43.0
+[2.42.0]: https://github.com/Backbase/stream-services/compare/2.41.0...2.42.0
+[2.41.0]: https://github.com/Backbase/stream-services/compare/2.40.0...2.41.0
+[2.40.0]: https://github.com/Backbase/stream-services/compare/2.39.0...2.40.0
+[2.39.0]: https://github.com/Backbase/stream-services/compare/2.38.0...2.39.0
+[2.38.0]: https://github.com/Backbase/stream-services/compare/2.37.0...2.38.0
+[2.37.0]: https://github.com/Backbase/stream-services/compare/2.36.0...2.37.0
+[2.36.0]: https://github.com/Backbase/stream-services/compare/2.35.0...2.36.0
+[2.35.0]: https://github.com/Backbase/stream-services/compare/2.34.0...2.35.0
+[2.34.0]: https://github.com/Backbase/stream-services/compare/2.33.0...2.34.0
+[2.33.0]: https://github.com/Backbase/stream-services/compare/2.32.0...2.33.0
+[2.32.0]: https://github.com/Backbase/stream-services/compare/2.31.0...2.32.0
+[2.31.0]: https://github.com/Backbase/stream-services/compare/2.30.0...2.31.0
+[2.30.0]: https://github.com/Backbase/stream-services/compare/2.29.0...2.30.0
+[2.29.0]: https://github.com/Backbase/stream-services/compare/2.28.0...2.29.0
+[2.28.0]: https://github.com/Backbase/stream-services/compare/2.27.0...2.28.0
+[2.27.0]: https://github.com/Backbase/stream-services/compare/2.26.0...2.27.0
+[2.26.0]: https://github.com/Backbase/stream-services/compare/2.25.0...2.26.0
+[2.25.0]: https://github.com/Backbase/stream-services/compare/2.24.0...2.25.0
+[2.24.0]: https://github.com/Backbase/stream-services/compare/2.23.0...2.24.0
+[2.23.0]: https://github.com/Backbase/stream-services/compare/2.22.0...2.23.0
+[2.22.0]: https://github.com/Backbase/stream-services/compare/2.21.0...2.22.0
+[2.21.0]: https://github.com/Backbase/stream-services/compare/2.20.0...2.21.0
+[2.20.0]: https://github.com/Backbase/stream-services/compare/2.19.0...2.20.0
+[2.19.0]: https://github.com/Backbase/stream-services/compare/2.18.0...2.19.0
+[2.18.0]: https://github.com/Backbase/stream-services/compare/2.17.0...2.18.0
+[2.17.0]: https://github.com/Backbase/stream-services/compare/2.16.0...2.17.0
+[2.16.0]: https://github.com/Backbase/stream-services/compare/2.15.0...2.16.0
+[2.15.0]: https://github.com/Backbase/stream-services/compare/2.14.0...2.15.0
+[2.14.0]: https://github.com/Backbase/stream-services/compare/2.13.0...2.14.0
+[2.13.0]: https://github.com/Backbase/stream-services/compare/2.12.0...2.13.0
+[2.12.0]: https://github.com/Backbase/stream-services/compare/2.11.0...2.12.0
+[2.11.0]: https://github.com/Backbase/stream-services/compare/2.10.0...2.11.0
+[2.10.0]: https://github.com/Backbase/stream-services/compare/2.9.0...2.10.0
+[2.9.0]: https://github.com/Backbase/stream-services/compare/2.8.0...2.9.0
+[2.8.0]: https://github.com/Backbase/stream-services/compare/2.7.0...2.8.0
+[2.7.0]: https://github.com/Backbase/stream-services/compare/2.6.0...2.7.0
+[2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0

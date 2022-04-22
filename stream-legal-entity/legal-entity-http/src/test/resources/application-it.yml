@@ -1,0 +1,17 @@
+spring:
+  zipkin:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+
+logging:
+  level:
+    root: INFO
+    com.backbase.stream: DEBUG
