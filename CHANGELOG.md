@@ -3,6 +3,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.67.0]
+### Added
+- Ability to configure what Function Group type needs to be deleted. This can be configured through `backbase.stream.deletion.functionGroupItemType`. With values `NONE` (default) or `TEMPLATE`.
+
+### Fixed
+- When deleting a legal entity, it now will iterate over all found users to be deleted.
+
 ## [2.66.0]
 ### Changed
 - Order of product group stream task processing within legal entity saga is changed to sequential. This is due to the fact that in some 
