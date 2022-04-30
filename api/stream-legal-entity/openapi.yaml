@@ -586,6 +586,8 @@ components:
           $ref: '#/components/schemas/AccruedInterest'
         bankBranchCode:
           $ref: '#/components/schemas/BankBranchCode'
+        cardDetails:
+          $ref: '#/components/schemas/CardDetailsItem'
     Loan:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
@@ -844,7 +846,64 @@ components:
           maxLength: 32
           type: string
           description: Status of the card ex. Active, Expired etc
+    CardDetailsItem:
+      required:
+        - cardProvider
+      type: object
+      properties:
+        cardProvider:
+          maxLength: 40
+          type: string
+          description: |
+            This field specifies the Card Provider associated with the Account.
+            Example: Maestro, Visa, Master Card, American Express or Discover.
+        secured:
+          type: boolean
+          description: |
+            A card can either be Secured or Unsecured.
 
+            * true: amount deposited in the CC determines the Limit.
+            * false: credit limit is based off various factors including the CC holder’s Credit Score, Credit History and is determined by the lending bank.
+        availableCashCredit:
+          type: number
+          format: double
+          description: |
+            The amount of money currently available for a bank cash advance.
+
+            This is calculated given the portion of the CashCreditLimit which has been used for Cash Advance Transactions.
+        cashCreditLimit:
+          type: number
+          format: double
+          description: The portion of the credit limit available for bank cash advance transactions..
+        lastPaymentDate:
+          type: string
+          format: date
+          description: The Date the last payment was made on the Credit-based arrangement
+        lastPaymentAmount:
+          type: number
+          format: double
+          description: The amount of the last payment that was made on the Credit-based arrangement.
+        latePaymentFee:
+          type: string
+          pattern: /^\d+(\.\d+)?%?$/
+          description: |
+            The charge triggered by infractions such as late credit card payments. It can be expressed as fixed amount or as percent.
+
+            Example:
+              * 12.32: as fixed amount
+              * 3.14%: as percent
+        previousStatementDate:
+          type: string
+          format: date
+          description: The date of the previous billing cycle for the arrangement.
+        previousStatementBalance:
+          type: number
+          format: double
+          description: The amount owed on the credit card as of the previous billing cycle.
+        statementBalance:
+          type: number
+          format: double
+          description: The amount owed on the credit card as of the latest billing cycle.
 
     LegalEntityReference:
       title: Legal Entity Reference
