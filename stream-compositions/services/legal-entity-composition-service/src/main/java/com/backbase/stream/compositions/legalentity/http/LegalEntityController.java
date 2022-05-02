@@ -49,6 +49,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
     @Override
     public Mono<ResponseEntity<LegalEntityIngestionResponse>> pullLegalEntity(
             @Valid Mono<LegalEntityPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+        log.info("Start synchronous ingestion of Legal Entity");
         return legalEntityIngestionService.ingestPull(pullIngestionRequest.map(this::buildPullRequest))
                 .map(this::handleResponse)
                 .map(this::mapIngestionToResponse);
@@ -102,6 +103,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
 
     private LegalEntityResponse handleResponse(LegalEntityResponse response) {
         if (Boolean.TRUE.equals(configProperties.getChainProductEvent())) {
+            log.info("Calling Product ingestion service api for LE {}", response.getLegalEntity().getExternalId());
             sendProductPullEvent(response);
         }
         return response;
