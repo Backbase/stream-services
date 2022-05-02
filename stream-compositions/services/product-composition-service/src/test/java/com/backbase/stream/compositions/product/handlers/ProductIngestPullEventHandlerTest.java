@@ -2,7 +2,7 @@ package com.backbase.stream.compositions.product.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductsIngestPullEvent;
+import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPullEvent;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
@@ -39,14 +39,14 @@ class ProductIngestPullEventHandlerTest {
         lenient().when(productIngestionService.ingestPull(any())).thenReturn(responseMono);
         ProductConfigurationProperties properties = new ProductConfigurationProperties();
 
-        ProductIngestPullEventHandler handler = new ProductIngestPullEventHandler(
+        ProductPullEventHandler handler = new ProductPullEventHandler(
                 properties,
                 productIngestionService,
                 mapper,
                 eventBus);
 
-        EnvelopedEvent<ProductsIngestPullEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(new ProductsIngestPullEvent());
+        EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(new ProductPullEvent());
 
         handler.handle(envelopedEvent);
         verify(productIngestionService).ingestPull(any());
@@ -58,14 +58,14 @@ class ProductIngestPullEventHandlerTest {
 
         ProductConfigurationProperties properties = new ProductConfigurationProperties();
 
-        ProductIngestPullEventHandler handler = new ProductIngestPullEventHandler(
+        ProductPullEventHandler handler = new ProductPullEventHandler(
                 properties,
                 productIngestionService,
                 mapper,
                 eventBus);
 
-        EnvelopedEvent<ProductsIngestPullEvent> envelopedEvent = new EnvelopedEvent<>();
-        ProductsIngestPullEvent event = new ProductsIngestPullEvent().withLegalEntityExternalId("externalId");
+        EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
+        ProductPullEvent event = new ProductPullEvent().withLegalEntityExternalId("externalId");
         envelopedEvent.setEvent(event);
 
         assertThrows(RuntimeException.class, () -> {

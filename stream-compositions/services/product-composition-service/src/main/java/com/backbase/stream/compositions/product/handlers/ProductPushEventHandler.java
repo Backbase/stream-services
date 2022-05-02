@@ -2,7 +2,7 @@ package com.backbase.stream.compositions.product.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductsIngestPushEvent;
+import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPushEvent;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
@@ -12,12 +12,12 @@ import reactor.core.publisher.Mono;
 
 @Component
 @AllArgsConstructor
-public class ProductIngestPushEventHandler implements EventHandler<ProductsIngestPushEvent> {
+public class ProductPushEventHandler implements EventHandler<ProductPushEvent> {
     private final ProductIngestionService productIngestionService;
     private final ProductGroupMapper mapper;
 
     @Override
-    public void handle(EnvelopedEvent<ProductsIngestPushEvent> envelopedEvent) {
+    public void handle(EnvelopedEvent<ProductPushEvent> envelopedEvent) {
         productIngestionService.ingestPush(buildRequest(envelopedEvent));
     }
 
@@ -27,7 +27,7 @@ public class ProductIngestPushEventHandler implements EventHandler<ProductsInges
      * @param envelopedEvent EnvelopedEvent<ProductsIngestPushEvent>
      * @return ProductIngestPushRequest
      */
-    private Mono<ProductIngestPushRequest> buildRequest(EnvelopedEvent<ProductsIngestPushEvent> envelopedEvent) {
+    private Mono<ProductIngestPushRequest> buildRequest(EnvelopedEvent<ProductPushEvent> envelopedEvent) {
         return Mono.just(
                 ProductIngestPushRequest.builder()
                         .productGroup(mapper.mapEventToStream(envelopedEvent.getEvent().getProductGroup()))

@@ -2,13 +2,13 @@ package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
-import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
+import com.backbase.stream.compositions.legalentity.integration.client.model.LegalEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,12 +41,11 @@ class LegalEntityIngestionServiceImplTest {
                 legalEntityIntegrationService);
     }
 
-    @Test
     void ingestionInPullMode_Success() {
-        Mono<LegalEntityIngestPullRequest> legalEntityIngestPullRequest = Mono.just(LegalEntityIngestPullRequest.builder()
+        Mono<LegalEntityPullRequest> legalEntityIngestPullRequest = Mono.just(LegalEntityPullRequest.builder()
                 .legalEntityExternalId("externalId")
                 .build());
-        LegalEntity legalEntity = new LegalEntity().name("legalEntityName");
+        LegalEntity legalEntity = new LegalEntity().withName("legalEntityName");
         when(legalEntityIntegrationService.pullLegalEntity(legalEntityIngestPullRequest.block()))
                 .thenReturn(Mono.just(legalEntity));
 
@@ -59,14 +58,14 @@ class LegalEntityIngestionServiceImplTest {
         when(legalEntitySaga.executeTask(any()))
                 .thenReturn(Mono.just(legalEntityTask));
 
-        Mono<LegalEntityIngestResponse> legalEntityIngestResponseMono = legalEntityIngestionService.ingestPull(legalEntityIngestPullRequest);
+        Mono<LegalEntityResponse> legalEntityIngestResponseMono = legalEntityIngestionService.ingestPull(legalEntityIngestPullRequest);
         assertNotNull(legalEntityIngestResponseMono.block());
         assertEquals("legalEntityName", legalEntityIngestResponseMono.block().getLegalEntity().getName());
     }
 
     @Test
     void ingestionInPushMode_Unsupported() {
-        Mono<LegalEntityIngestPushRequest> request = Mono.just(LegalEntityIngestPushRequest.builder().build());
+        Mono<LegalEntityPushRequest> request = Mono.just(LegalEntityPushRequest.builder().build());
         assertThrows(UnsupportedOperationException.class, () -> {
             legalEntityIngestionService.ingestPush(request);
         });

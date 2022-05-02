@@ -9,7 +9,7 @@ import java.util.Map;
 @Getter
 @Builder
 @AllArgsConstructor
-public class LegalEntityIngestPullRequest {
+public class LegalEntityPullRequest {
     private String legalEntityExternalId;
     private Map<String, String> additionalParameters;
 }

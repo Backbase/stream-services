@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.legalentity.core.service;
 
+import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.legalentity.LegalEntityCompositionApplication;
@@ -26,6 +27,9 @@ class RootLegalEntityBootstrapTaskTest {
     @Mock
     LegalEntityTask legalEntityTask;
 
+    @Mock
+    EventBus eventBus;
+
     @Test
     void testRootIngestion() {
         LegalEntity legalEntity = new LegalEntity().name("Test Legal Entity").externalId("externalId");
@@ -41,7 +45,8 @@ class RootLegalEntityBootstrapTaskTest {
 
         RootLegalEntityBootstrapTask bootstrapTask = new RootLegalEntityBootstrapTask(
                 legalEntitySaga,
-                bootstrapConfigurationProperties);
+                bootstrapConfigurationProperties,
+                eventBus);
 
         bootstrapTask.run(null);
         verify(legalEntitySaga).executeTask(any());

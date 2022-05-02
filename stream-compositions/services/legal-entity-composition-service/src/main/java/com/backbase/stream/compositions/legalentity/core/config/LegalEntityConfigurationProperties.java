@@ -10,7 +10,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @ConfigurationProperties("backbase.stream.compositions.legal-entity")
 public class LegalEntityConfigurationProperties {
-    private Boolean enableCompletedEvents = true;
-    private Boolean enableFailedEvents = true;
-    private String legalEntityIntegrationUrl = "http://legal-entity-ingestion-integration:8080";
+    private Boolean enableCompletedEvent = false;
+    private Boolean enableFailedEvent = false;
+    private Boolean chainProductEvent = false;
+    private String legalEntityIntegrationUrl = "http://legal-entity-ingestion-integration:9000";
+    private String productCompositionUrl = "http://localhost:8083/product-composition-service";
 }

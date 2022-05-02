@@ -1,7 +1,7 @@
 package com.backbase.stream.compositions.product.http;
 
 import com.backbase.stream.compositions.product.ProductCompositionApplication;
-import com.backbase.stream.compositions.product.model.ProductPullIngestionRequest;
+import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.ProductGroupTask;

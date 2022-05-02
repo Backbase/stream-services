@@ -1,9 +1,9 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
-import com.backbase.stream.compositions.integration.legalentity.api.LegalEntityIntegrationApi;
-import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
-import com.backbase.stream.compositions.integration.legalentity.model.PullLegalEntityResponse;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
+import com.backbase.stream.compositions.legalentity.integration.client.LegalEntityIntegrationApi;
+import com.backbase.stream.compositions.legalentity.integration.client.model.LegalEntity;
+import com.backbase.stream.compositions.legalentity.integration.client.model.PullLegalEntityResponse;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,15 +30,15 @@ class LegalEntityIntegrationServiceImplTest {
 
     @Test
     void callIntegrationService_LegalEntitiesFound() throws UnsupportedOperationException {
-        LegalEntity legalEntity1 = new LegalEntity().name("Legal Entity 1");
+        LegalEntity legalEntity1 = new LegalEntity().withName("Legal Entity 1");
 
-        PullLegalEntityResponse getLegalEntityListResponse = new PullLegalEntityResponse().legalEntity(legalEntity1);
+        PullLegalEntityResponse getLegalEntityListResponse = new PullLegalEntityResponse().withLegalEntity(legalEntity1);
 
         when(legalEntityIntegrationApi.pullLegalEntity(any(), any()))
                 .thenReturn(Mono.just(getLegalEntityListResponse));
 
         LegalEntity legalEntityResponse = legalEntityIntegrationService.pullLegalEntity(
-                LegalEntityIngestPullRequest.builder().legalEntityExternalId("externalId").build()).block();
+                LegalEntityPullRequest.builder().legalEntityExternalId("externalId").build()).block();
 
         assertEquals("Legal Entity 1", legalEntityResponse.getName());
     }
@@ -49,7 +49,7 @@ class LegalEntityIntegrationServiceImplTest {
                 .thenReturn(Mono.empty());
 
         LegalEntity legalEntity = legalEntityIntegrationService.pullLegalEntity(
-                LegalEntityIngestPullRequest.builder().legalEntityExternalId("externalId").build()).block();
+                LegalEntityPullRequest.builder().legalEntityExternalId("externalId").build()).block();
 
         assertNull(legalEntity);
     }
