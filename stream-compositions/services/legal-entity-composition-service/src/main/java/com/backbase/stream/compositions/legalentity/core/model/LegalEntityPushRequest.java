@@ -8,6 +8,6 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class LegalEntityIngestResponse {
-    private final LegalEntity legalEntity;
+public class LegalEntityPushRequest {
+    private LegalEntity legalEntity;
 }

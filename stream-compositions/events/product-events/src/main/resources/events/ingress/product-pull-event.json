@@ -12,6 +12,7 @@
     }
   },
   "required": [
-    "eventId"
+    "eventId",
+    "legalEntityExternalId"
   ]
 }

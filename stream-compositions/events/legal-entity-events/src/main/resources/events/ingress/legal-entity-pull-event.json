@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "externalId": {
+      "description": "Legal entity external id. This is the externally identifiable value on the downstream system for the given legal entity",
+      "type": "string"
+    },
+    "taxId": {
+      "description": "Tax id of the individual or corporation used for membership identification",
+      "type": "string"
+    },
+    "membershipIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "legalEntityExternalId"
+  ]
+}

@@ -1,10 +1,10 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
+import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.legalentity.LegalEntityCompositionApplication;
 import com.backbase.stream.compositions.legalentity.core.config.BootstrapConfigurationProperties;
-import com.backbase.stream.compositions.legalentity.core.service.impl.RootLegalEntityBootstrapTask;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +26,9 @@ class RootLegalEntityBootstrapTaskTest {
     @Mock
     LegalEntityTask legalEntityTask;
 
+    @Mock
+    EventBus eventBus;
+
     @Test
     void testRootIngestion() {
         LegalEntity legalEntity = new LegalEntity().name("Test Legal Entity").externalId("externalId");
@@ -41,7 +44,8 @@ class RootLegalEntityBootstrapTaskTest {
 
         RootLegalEntityBootstrapTask bootstrapTask = new RootLegalEntityBootstrapTask(
                 legalEntitySaga,
-                bootstrapConfigurationProperties);
+                bootstrapConfigurationProperties,
+                eventBus);
 
         bootstrapTask.run(null);
         verify(legalEntitySaga).executeTask(any());

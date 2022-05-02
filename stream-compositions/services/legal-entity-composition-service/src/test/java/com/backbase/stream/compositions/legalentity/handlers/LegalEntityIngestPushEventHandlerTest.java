@@ -1,10 +1,10 @@
 package com.backbase.stream.compositions.legalentity.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityIngestPushEvent;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityPushEvent;
 import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import org.junit.jupiter.api.Test;
@@ -27,20 +27,20 @@ class LegalEntityIngestPushEventHandlerTest {
 
     @Test
     void testHandleEvent_Completed() {
-        Mono<LegalEntityIngestResponse> responseMono = Mono.just(
-                LegalEntityIngestResponse
+        Mono<LegalEntityResponse> responseMono = Mono.just(
+                LegalEntityResponse
                         .builder().legalEntity(new LegalEntity().name("Legal Entity")).build());
 
         lenient().when(legalEntityIngestionService.ingestPush(any())).thenReturn(responseMono);
 
         LegalEntityConfigurationProperties properties = new LegalEntityConfigurationProperties();
 
-        LegalEntityIngestPushEventHandler handler = new LegalEntityIngestPushEventHandler(
+        LegalEntityPushEventHandler handler = new LegalEntityPushEventHandler(
                 legalEntityIngestionService,
                 mapper);
 
-        EnvelopedEvent<LegalEntityIngestPushEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(new LegalEntityIngestPushEvent());
+        EnvelopedEvent<LegalEntityPushEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(new LegalEntityPushEvent());
 
         handler.handle(envelopedEvent);
         verify(legalEntityIngestionService).ingestPush(any());
