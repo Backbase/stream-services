@@ -14,38 +14,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ArrangementPrivilegesGetResponseBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.DataGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.DataGroupItemSystemBase;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.Functiongroupupdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.IdItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ListOfFunctionGroupsWithDataGroups;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPermissions;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationApprovalStatus;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAssignUserPermissions;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupItemPutRequestBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionDataGroup;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupDataGroup;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupPutRequestBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationGenericObjectId;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationItemIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermissionFunctionGroupUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationSearchDataGroupsRequest;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUserPair;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUsersBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
-import com.backbase.dbs.user.api.service.StringUtil;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.*;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.legalentity.model.ApprovalStatus;
@@ -527,10 +496,10 @@ public class AccessGroupService {
                 .functionGroupDataGroups(
                     usersPermissions.get(user).keySet().stream()
                         .map(bfg -> new PresentationFunctionGroupDataGroup()
-                            .functionGroupIdentifier(mapId(bfg.getId()))
+                            .functionGroupIdentifier(mapFunctionGroup(bfg.getId()))
                             .dataGroupIdentifiers(
                                 usersPermissions.get(user).get(bfg).stream()
-                                    .map(pg -> mapId(pg.getInternalId()))
+                                    .map(pg -> mapDataGroupId(pg.getInternalId()))
                                     .collect(Collectors.toList())))
                         .collect(Collectors.toList())))
             .collect(Collectors.toList());
@@ -624,8 +593,8 @@ public class AccessGroupService {
                                 dataGroupIds.addAll(userPermission.getDataGroupIds());
                             }
                             PresentationFunctionGroupDataGroup functionGroup = new PresentationFunctionGroupDataGroup()
-                                    .functionGroupIdentifier(mapId(userPermission.getFunctionGroupId()))
-                                    .dataGroupIdentifiers(dataGroupIds.stream().map(this::mapId).collect(Collectors.toList()));
+                                    .functionGroupIdentifier(mapFunctionGroup(userPermission.getFunctionGroupId()))
+                                    .dataGroupIdentifiers(dataGroupIds.stream().map(this::mapDataGroupId).collect(Collectors.toList()));
 
                             mergedUserPermissions.addFunctionGroupDataGroupsItem(functionGroup);
                         });
@@ -674,11 +643,11 @@ public class AccessGroupService {
     }
 
 
-    private String prettyPrintPresentationDataGroups(List<PresentationIdentifier> dataGroupIdentifiers) {
+    private String prettyPrintPresentationDataGroups(List<PresentationDataGroupIdentifier> dataGroupIdentifiers) {
         if (dataGroupIdentifiers == null) {
             return "NO DATA GROUP IDS!";
         }
-        return dataGroupIdentifiers.stream().map(PresentationIdentifier::getIdIdentifier).collect(Collectors.joining(","));
+        return dataGroupIdentifiers.stream().map(PresentationDataGroupIdentifier::getIdIdentifier).collect(Collectors.joining(","));
     }
 
     private boolean hasDataGroupIdentifiers(PresentationFunctionGroupDataGroup functionWithDataGroup) {
@@ -686,8 +655,12 @@ public class AccessGroupService {
             && !functionWithDataGroup.getDataGroupIdentifiers().isEmpty();
     }
 
-    private PresentationIdentifier mapId(String id) {
+    private PresentationIdentifier mapFunctionGroup(String id) {
         return new PresentationIdentifier().idIdentifier(id);
+    }
+
+    private PresentationDataGroupIdentifier mapDataGroupId(String id) {
+        return new PresentationDataGroupIdentifier().idIdentifier(id);
     }
 
     private String prettyPrintDataGroups(List<PresentationAssignUserPermissions> r) {
@@ -696,7 +669,7 @@ public class AccessGroupService {
             .map(fdgd -> "functionGroupIdentifier: "
                 + fdgd.getFunctionGroupIdentifier().getIdIdentifier()
                 + " dataGroupItems: [" + fdgd.getDataGroupIdentifiers().stream()
-                .map(PresentationIdentifier::getIdIdentifier)
+                .map(PresentationDataGroupIdentifier::getIdIdentifier)
                 .collect(Collectors.joining(",")) + "]").collect(Collectors.joining(", "));
     }
 
@@ -798,7 +771,7 @@ public class AccessGroupService {
             });
             if (!CollectionUtils.isEmpty(arrangementsToAdd)) {
                 batchUpdateRequest.add(new PresentationDataGroupItemPutRequestBody()
-                    .dataGroupIdentifier(mapId(dbsDataGroup.getId()))
+                    .dataGroupIdentifier(mapDataGroupId(dbsDataGroup.getId()))
                     .type(dbsDataGroup.getType())
                     .action(PresentationAction.ADD)
                     .dataItems(arrangementsToAdd.stream().map(id -> new PresentationItemIdentifier().internalIdIdentifier(id)).collect(Collectors.toList()))
@@ -806,7 +779,7 @@ public class AccessGroupService {
             }
             if (!CollectionUtils.isEmpty(arrangementsToRemove)) {
                 batchUpdateRequest.add(new PresentationDataGroupItemPutRequestBody()
-                    .dataGroupIdentifier(mapId(dbsDataGroup.getId()))
+                    .dataGroupIdentifier(mapDataGroupId(dbsDataGroup.getId()))
                     .type(dbsDataGroup.getType())
                     .action(PresentationAction.REMOVE)
                     .dataItems(arrangementsToRemove.stream().map(id -> new PresentationItemIdentifier().internalIdIdentifier(id)).collect(Collectors.toList()))
@@ -934,7 +907,7 @@ public class AccessGroupService {
             .map(id -> new PresentationItemIdentifier().internalIdIdentifier(id)).collect(Collectors.toList());
 
         PresentationDataGroupUpdate presentationDataGroupUpdate = new PresentationDataGroupUpdate();
-        presentationDataGroupUpdate.setDataGroupIdentifier(mapId(dataGroupsDataGroupItem.getId()));
+        presentationDataGroupUpdate.setDataGroupIdentifier(mapDataGroupId(dataGroupsDataGroupItem.getId()));
         presentationDataGroupUpdate.setDataItems(dataItems);
         presentationDataGroupUpdate.setDescription(dataGroupsDataGroupItem.getDescription());
         presentationDataGroupUpdate.setName(dataGroupsDataGroupItem.getName());
@@ -1018,7 +991,7 @@ public class AccessGroupService {
             .collectList()
             .flatMap(functionGroups ->
                 functionGroupsApi.postFunctionGroupsDelete(
-                        functionGroups.stream().filter(f->!FunctionGroupItem.TypeEnum.TEMPLATE.equals(f.getType())).map(fg -> mapId(fg.getId())).collect(Collectors.toList()))
+                        functionGroups.stream().filter(f->!FunctionGroupItem.TypeEnum.TEMPLATE.equals(f.getType())).map(fg -> mapFunctionGroup(fg.getId())).collect(Collectors.toList()))
                         .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
                         .collectList())
             .then();
