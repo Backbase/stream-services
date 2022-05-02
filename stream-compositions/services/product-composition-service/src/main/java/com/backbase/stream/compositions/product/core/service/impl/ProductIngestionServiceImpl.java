@@ -8,6 +8,7 @@ import com.backbase.stream.compositions.product.core.service.ProductIngestionSer
 import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.product.BatchProductIngestionSaga;
+import com.backbase.stream.product.task.ProductGroupTask;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -64,10 +65,10 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @return Ingested product group
      */
     private Mono<ProductGroup> sendToDbs(Mono<ProductGroup> productGroup) {
-        return productGroup;/*
+        return productGroup
                 .map(ProductGroupTask::new)
                 .flatMap(batchProductIngestionSaga::process)
-                .map(ProductGroupTask::getData);*/
+                .map(ProductGroupTask::getData);
     }
 
     private ProductIngestResponse buildResponse(ProductGroup productGroup) {
