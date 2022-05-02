@@ -3,9 +3,9 @@ package com.backbase.stream.compositions.product.handlers;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductsIngestCompletedEvent;
-import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductsIngestFailedEvent;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductsIngestPullEvent;
+import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
+import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
+import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPullEvent;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
@@ -21,19 +21,19 @@ import java.util.UUID;
 @Component
 @AllArgsConstructor
 @EnableConfigurationProperties(ProductConfigurationProperties.class)
-public class ProductIngestPullEventHandler implements EventHandler<ProductsIngestPullEvent> {
+public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
     private final ProductConfigurationProperties configProperties;
     private final ProductIngestionService productIngestionService;
     private final ProductGroupMapper mapper;
     private final EventBus eventBus;
 
     /**
-     * Handles ProductsIngestPullEvent.
+     * Handles ProductsPullEvent.
      *
-     * @param envelopedEvent EnvelopedEvent<ProductsIngestPullEvent>
+     * @param envelopedEvent EnvelopedEvent<ProductsPullEvent>
      */
     @Override
-    public void handle(EnvelopedEvent<ProductsIngestPullEvent> envelopedEvent) {
+    public void handle(EnvelopedEvent<ProductPullEvent> envelopedEvent) {
         productIngestionService
                 .ingestPull(buildRequest(envelopedEvent.getEvent()))
                 .doOnError(this::handleError)
@@ -43,10 +43,10 @@ public class ProductIngestPullEventHandler implements EventHandler<ProductsInges
     /**
      * Builds ingestion request for downstream service.
      *
-     * @param event ProductsIngestPullEvent
-     * @return ProductIngestPullRequest
+     * @param event ProductsPullEvent
+     * @return ProductPullRequest
      */
-    private Mono<ProductIngestPullRequest> buildRequest(ProductsIngestPullEvent event) {
+    private Mono<ProductIngestPullRequest> buildRequest(ProductPullEvent event) {
         return Mono.just(
                 ProductIngestPullRequest.builder()
                         .legalEntityExternalId(event.getLegalEntityExternalId())
@@ -62,11 +62,11 @@ public class ProductIngestPullEventHandler implements EventHandler<ProductsInges
         if (Boolean.FALSE.equals(configProperties.getEnableCompletedEvents())) {
             return;
         }
-        ProductsIngestCompletedEvent event = new ProductsIngestCompletedEvent()
+        ProductCompletedEvent event = new ProductCompletedEvent()
                 .withEventId(UUID.randomUUID().toString())
                 .withProductGroup(mapper.mapStreamToEvent(response.getProductGroup()));
 
-        EnvelopedEvent<ProductsIngestCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
+        EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);
         eventBus.emitEvent(envelopedEvent);
     }
@@ -80,11 +80,11 @@ public class ProductIngestPullEventHandler implements EventHandler<ProductsInges
         if (Boolean.FALSE.equals(configProperties.getEnableFailedEvents())) {
             return;
         }
-        ProductsIngestFailedEvent event = new ProductsIngestFailedEvent()
+        ProductFailedEvent event = new ProductFailedEvent()
                 .withEventId(UUID.randomUUID().toString())
                 .withMessage(ex.getMessage());
 
-        EnvelopedEvent<ProductsIngestFailedEvent> envelopedEvent = new EnvelopedEvent<>();
+        EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);
         eventBus.emitEvent(envelopedEvent);
     }

@@ -1,11 +1,10 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.LegalEntitySaga;
-import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
 import com.backbase.stream.legalentity.model.LegalEntity;
@@ -25,18 +24,21 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
     /**
      * {@inheritDoc}
      */
-    public Mono<LegalEntityIngestResponse> ingestPull(Mono<LegalEntityIngestPullRequest> ingestPullRequest) {
+    public Mono<LegalEntityResponse> ingestPull(Mono<LegalEntityPullRequest> ingestPullRequest) {
         return ingestPullRequest
                 .map(this::pullLegalEntity)
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(this::handleSuccess)
                 .map(this::buildResponse);
+
+                /*.flatMap(this::sendToDbs)
+                */
     }
 
     /**
      * {@inheritDoc}
      */
-    public Mono<LegalEntityIngestResponse> ingestPush(Mono<LegalEntityIngestPushRequest> ingestPushRequest) {
+    public Mono<LegalEntityResponse> ingestPush(Mono<LegalEntityPushRequest> ingestPushRequest) {
         throw new UnsupportedOperationException();
     }
 
@@ -46,7 +48,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
      * @param request LegalEntityIngestPullRequest
      * @return LegalEntity
      */
-    private Mono<LegalEntity> pullLegalEntity(LegalEntityIngestPullRequest request) {
+    private Mono<LegalEntity> pullLegalEntity(LegalEntityPullRequest request) {
         return legalEntityIntegrationService
                 .pullLegalEntity(request)
                 .map(mapper::mapIntegrationToStream);
@@ -59,14 +61,14 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
      * @return LegalEntity
      */
     private Mono<LegalEntity> sendToDbs(Mono<LegalEntity> legalEntity) {
-        return legalEntity
-                .map(LegalEntityTask::new)
+        return legalEntity;
+                /*.map(LegalEntityTask::new)
                 .flatMap(legalEntitySaga::executeTask)
-                .map(LegalEntityTask::getData );
+                .map(LegalEntityTask::getData );*/
     }
 
-    private LegalEntityIngestResponse buildResponse(LegalEntity legalEnity) {
-        return LegalEntityIngestResponse.builder()
+    private LegalEntityResponse buildResponse(LegalEntity legalEnity) {
+        return LegalEntityResponse.builder()
                 .legalEntity(legalEnity)
                 .build();
     }

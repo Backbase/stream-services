@@ -32,7 +32,7 @@ public interface ProductGroupMapper {
      * @param productGroup Integration product group
      * @return Composition product group
      */
-    com.backbase.stream.compositions.product.model.ProductGroup mapIntegrationToComposition(
+    com.backbase.stream.compositions.product.api.model.ProductGroup mapIntegrationToComposition(
             com.backbase.stream.compositions.integration.product.model.ProductGroup productGroup);
 
     /**
@@ -42,7 +42,7 @@ public interface ProductGroupMapper {
      * @return Stream product group
      */
     com.backbase.stream.legalentity.model.ProductGroup mapCompositionToStream(
-            com.backbase.stream.compositions.product.model.ProductGroup productGroup);
+            com.backbase.stream.compositions.product.api.model.ProductGroup productGroup);
 
     /**
      * Maps stream ProductGroup to composition ProductGroup model.
@@ -50,7 +50,7 @@ public interface ProductGroupMapper {
      * @param productGroup Stream product group
      * @return Composition product group
      */
-    com.backbase.stream.compositions.product.model.ProductGroup mapStreamToComposition(
+    com.backbase.stream.compositions.product.api.model.ProductGroup mapStreamToComposition(
             com.backbase.stream.legalentity.model.ProductGroup productGroup);
 
     /**

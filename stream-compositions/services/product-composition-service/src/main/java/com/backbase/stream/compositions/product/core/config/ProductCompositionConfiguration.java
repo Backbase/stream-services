@@ -28,6 +28,14 @@ public class ProductCompositionConfiguration {
     }
 
     @Bean
+    public ApiClient productIntegrationClient(
+            WebClient dbsWebClient,
+            ObjectMapper objectMapper,
+            DateFormat dateFormat) {
+        return new ApiClient(dbsWebClient, objectMapper, dateFormat);
+    }
+
+    @Bean
     @Primary
     public ProductIntegrationApi productIntegrationApi(ApiClient productClient) {
         return new ProductIntegrationApi(productClient);

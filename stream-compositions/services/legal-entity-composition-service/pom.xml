@@ -47,6 +47,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.backbase.stream.compositions.events</groupId>
+            <artifactId>product-events</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-core</artifactId>
             <version>${project.version}</version>
@@ -59,6 +64,11 @@
         <dependency>
             <groupId>com.backbase.stream.compositions.api</groupId>
             <artifactId>legal-entity-integration-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>product-composition-api</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -123,6 +133,15 @@
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.stream.compositions.api</groupId>
+                                    <artifactId>product-composition-api</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
                             </artifactItems>
                             <includes>**/*.yaml, **/*.json</includes>
                         </configuration>
@@ -135,8 +154,80 @@
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
                 <version>${boat-maven-plugin.version}</version>
+                <configuration>
+                    <output>${project.build.directory}/generated-sources/api</output>
+                    <generateSupportingFiles>true</generateSupportingFiles>
+                    <strictSpec>true</strictSpec>
+                    <generateApiTests>false</generateApiTests>
+                    <generateModelTests>false</generateModelTests>
+                    <configOptions>
+                        <dateLibrary>java8</dateLibrary>
+                        <interfaceOnly>true</interfaceOnly>
+                        <skipDefaultInterface>true</skipDefaultInterface>
+                        <useBeanValidation>true</useBeanValidation>
+                        <useClassLevelBeanValidation>false</useClassLevelBeanValidation>
+                        <useTags>true</useTags>
+                        <java8>true</java8>
+                        <useOptional>false</useOptional>
+                    </configOptions>
+                    <input />
+                    <model />
+                </configuration>
                 <executions>
                     <execution>
+                        <id>generate-legal-entity-composition-api-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/legal-entity-composition-api/service-api-v2.0.0.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <additionalProperties>useWithModifiers=true</additionalProperties>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <apiPackage>com.backbase.stream.compositions.legalentity.api</apiPackage>
+                                <modelPackage>com.backbase.stream.compositions.legalentity.api.model</modelPackage>
+                                <reactive>true</reactive>
+                                <performBeanValidation>true</performBeanValidation>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-legal-entity-integration-client-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v2.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.stream.compositions.legalentity.integration.client</apiPackage>
+                            <modelPackage>com.backbase.stream.compositions.legalentity.integration.client.model</modelPackage>
+                            <additionalProperties>useWithModifiers=true</additionalProperties>
+                            <configOptions>
+                                <reactive>true</reactive>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-product-composition-client-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/product-composition-api/service-api-v2.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.stream.compositions.product.client</apiPackage>
+                            <modelPackage>com.backbase.stream.compositions.product.client.model</modelPackage>
+                            <additionalProperties>useWithModifiers=true</additionalProperties>
+                            <configOptions>
+                                <reactive>true</reactive>
+                            </configOptions>
+
+                        </configuration>
+                    </execution>
+                    <!--execution>
                         <id>generate-config-service-api-code</id>
                         <goals>
                             <goal>generate</goal>
@@ -163,37 +254,10 @@
                                 <useTags>true</useTags>
                             </configOptions>
                         </configuration>
-                    </execution>
+                    </execution-->
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <!-- RELEASE_VERSION -->
-                <version>5.3.0</version>
-                <!-- /RELEASE_VERSION -->
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v2.0.0.yaml</inputSpec>
-                            <apiPackage>com.backbase.stream.compositions.integration.legalentity.api</apiPackage>
-                            <modelPackage>com.backbase.stream.compositions.integration.legalentity.model</modelPackage>
-                            <generatorName>java</generatorName>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelTests>false</generateModelTests>
-                            <configOptions>
-                                <library>webclient</library>
-                                <dateLibrary>java8</dateLibrary>
-                                <sourceFolder>src/gen/java/main</sourceFolder>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 

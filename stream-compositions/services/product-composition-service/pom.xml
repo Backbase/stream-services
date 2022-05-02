@@ -53,11 +53,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.backbase.stream.compositions.api</groupId>
-            <artifactId>product-composition-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-ingestion-saga</artifactId>
             <version>${project.version}</version>
@@ -114,15 +109,6 @@
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.backbase.stream.compositions.api</groupId>
-                                    <artifactId>product-integration-api</artifactId>
-                                    <version>${project.version}</version>
-                                    <classifier>api</classifier>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
                             </artifactItems>
                             <includes>**/*.yaml, **/*.json</includes>
                         </configuration>
@@ -135,45 +121,44 @@
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
                 <version>${boat-maven-plugin.version}</version>
+                <configuration>
+                    <output>${project.build.directory}/generated-sources/api</output>
+                    <generateSupportingFiles>true</generateSupportingFiles>
+                    <strictSpec>true</strictSpec>
+                    <generateApiTests>false</generateApiTests>
+                    <generateModelTests>false</generateModelTests>
+                    <configOptions>
+                        <dateLibrary>java8</dateLibrary>
+                        <interfaceOnly>true</interfaceOnly>
+                        <skipDefaultInterface>true</skipDefaultInterface>
+                        <useBeanValidation>true</useBeanValidation>
+                        <useClassLevelBeanValidation>false</useClassLevelBeanValidation>
+                        <useTags>true</useTags>
+                        <java8>true</java8>
+                        <useOptional>false</useOptional>
+                    </configOptions>
+                    <input />
+                    <model />
+                </configuration>
                 <executions>
                     <execution>
-                        <id>generate-config-service-api-code</id>
+                        <id>generate-product-composition-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
-                            <generatorName>spring</generatorName>
                             <inputSpec>${project.build.directory}/yaml/product-composition-api/service-api-v2.0.0.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
                             <additionalProperties>useWithModifiers=true</additionalProperties>
                             <configOptions>
                                 <library>spring-boot</library>
-                                <reactive>true</reactive>
-                                <java8>true</java8>
-                                <dateLibrary>java8</dateLibrary>
-                                <openapiDocketConfig>true</openapiDocketConfig>
-                                <interfaceOnly>true</interfaceOnly>
                                 <apiPackage>com.backbase.stream.compositions.product.api</apiPackage>
-                                <modelPackage>com.backbase.stream.compositions.product.model</modelPackage>
-                                <additionalProperties>useWithModifiers=true</additionalProperties>
-                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <modelPackage>com.backbase.stream.compositions.product.api.model</modelPackage>
+                                <reactive>true</reactive>
                                 <performBeanValidation>true</performBeanValidation>
-                                <apis/>
-                                <models/>
-                                <useTags>true</useTags>
+                                <skipDefaultInterface>true</skipDefaultInterface>
                             </configOptions>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-legal-entity-integration-api-code</id>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <inputSpec>${project.build.directory}/yaml/product-integration-api/integration-api-v2.0.0.yaml</inputSpec>
-                            <apiPackage>com.backbase.stream.compositions.integration.product.api</apiPackage>
-                            <modelPackage>com.backbase.stream.compositions.integration.product.model</modelPackage>
                         </configuration>
                     </execution>
                 </executions>

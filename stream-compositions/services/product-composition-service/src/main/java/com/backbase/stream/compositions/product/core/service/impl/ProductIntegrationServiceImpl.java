@@ -2,7 +2,6 @@ package com.backbase.stream.compositions.product.core.service.impl;
 
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
 import com.backbase.stream.compositions.integration.product.model.ProductGroup;
-import com.backbase.stream.compositions.integration.product.model.PullProductGroupResponse;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
 import lombok.AllArgsConstructor;
@@ -20,13 +19,14 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
      * {@inheritDoc}
      */
     public Mono<ProductGroup> pullProductGroup(ProductIngestPullRequest ingestPullRequest) {
-        return productIntegrationApi
+        return Mono.just(new ProductGroup().name("Some Name"));
+                /*productIntegrationApi
                 .pullProductGroup(
                         ingestPullRequest.getLegalEntityExternalId(),
                         ingestPullRequest.getServiceAgreementExternalId(),
                         ingestPullRequest.getServiceAgreementInternalId(),
                         ingestPullRequest.getUserExternalId(),
                         ingestPullRequest.getAdditionalParameters())
-                .map(PullProductGroupResponse::getProductGroup);
+                .map(PullProductGroupResponse::getProductGroup);*/
     }
 }
