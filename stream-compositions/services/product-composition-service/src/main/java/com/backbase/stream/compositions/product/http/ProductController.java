@@ -10,6 +10,7 @@ import com.backbase.stream.compositions.product.api.model.ProductIngestionRespon
 import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
 import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,7 @@ import javax.validation.Valid;
 
 @RestController
 @AllArgsConstructor
+@Slf4j
 public class ProductController implements ProductCompositionApi {
     private final ProductIngestionService productIngestionService;
     private final ProductGroupMapper mapper;
@@ -30,7 +32,7 @@ public class ProductController implements ProductCompositionApi {
     @Override
     public Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProductGroup(
             @Valid Mono<ProductPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-        System.out.println("INside Product Composition Controller");
+        log.info("Inside Product Composition Controller");
         return productIngestionService
                 .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
                 .map(this::mapIngestionToResponse);

@@ -1,6 +1,7 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.LegalEntitySaga;
+import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
@@ -61,10 +62,10 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
      * @return LegalEntity
      */
     private Mono<LegalEntity> sendToDbs(Mono<LegalEntity> legalEntity) {
-        return legalEntity;
-                /*.map(LegalEntityTask::new)
+        return legalEntity
+                .map(LegalEntityTask::new)
                 .flatMap(legalEntitySaga::executeTask)
-                .map(LegalEntityTask::getData );*/
+                .map(LegalEntityTask::getData );
     }
 
     private LegalEntityResponse buildResponse(LegalEntity legalEnity) {
