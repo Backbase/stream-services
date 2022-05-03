@@ -21,6 +21,7 @@ import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.User;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -227,6 +228,32 @@ class UserServiceTest {
                 .fullName(fullName).attributes(attributesMap);
         verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
         verifyNoMoreInteractions(identityManagementApi);
+    }
+
+    @Test
+    void createOrImportIdentityUserFailure() {
+        final String internalId = "someInternalId";
+        final String externalId = "someExternalId";
+        final String legalEntityId = "someLegalEntityId";
+        final Map<String, String> attributesMap = Collections.singletonMap("someKey", "someValue");
+        final IdentityUserLinkStrategy strategy = CREATE_IN_IDENTITY;
+        final String emailAddress = "some@email.com";
+        final String mobileNumber = "123456";
+        final String fullName = "someName";
+
+        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.error(WebClientResponseException.create(500,"", new HttpHeaders(), "Error response".getBytes(StandardCharsets.UTF_8), null)));
+
+        User user = new User().externalId(externalId).attributes(attributesMap)
+                .identityLinkStrategy(strategy).fullName(fullName)
+                .emailAddress(new EmailAddress().address(emailAddress))
+                .mobileNumber(new PhoneNumber().number(mobileNumber));
+
+
+        Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask());
+
+        StepVerifier.create(result)
+                .expectError().verify();
+
     }
 
     @Test
