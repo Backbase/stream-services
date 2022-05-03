@@ -11,9 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
-import com.backbase.dbs.user.api.service.v2.model.CreateIdentityRequest;
-import com.backbase.dbs.user.api.service.v2.model.CreateIdentityResponse;
-import com.backbase.dbs.user.api.service.v2.model.UpdateIdentityRequest;
+import com.backbase.dbs.user.api.service.v2.model.*;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
@@ -21,18 +19,26 @@ import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.User;
+
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
 import com.backbase.stream.product.task.ProductGroupTask;
+import com.backbase.stream.worker.model.StreamTask;
+import org.bouncycastle.util.encoders.UTF8;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -71,7 +77,7 @@ class UserServiceTest {
         result.subscribe(assertEqualsTo(user));
         verify(identityIntegrationApi).getUserById(eq(realm), eq(internalId));
         UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email).enabled(false)
-            .credentials(Collections.emptyList());
+                .credentials(Collections.emptyList());
         verify(identityIntegrationApi).updateUserById(eq(realm), eq(internalId), eq(expectedUser));
     }
 
@@ -93,7 +99,7 @@ class UserServiceTest {
         result.subscribe(assertEqualsTo(user));
         verify(identityIntegrationApi).getUserById(eq(realm), eq(internalId));
         UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email).enabled(true)
-            .credentials(Collections.emptyList());
+                .credentials(Collections.emptyList());
         verify(identityIntegrationApi).updateUserById(eq(realm), eq(internalId), eq(expectedUser));
     }
 
@@ -123,21 +129,21 @@ class UserServiceTest {
         String email = "some@email.com";
 
         EnhancedUserRepresentation enhancedUserRepresentation = new EnhancedUserRepresentation().id(internalId)
-            .email(email).addRealmRolesItem("banking");
+                .email(email).addRealmRolesItem("banking");
         when(identityIntegrationApi.getUserById(realm, internalId))
-            .thenReturn(Mono.just(enhancedUserRepresentation));
+                .thenReturn(Mono.just(enhancedUserRepresentation));
         when(identityIntegrationApi.updateUserById(eq(realm), eq(internalId), any(UserRequestBody.class)))
-            .thenReturn(Mono.empty());
+                .thenReturn(Mono.empty());
 
         User user = new User().internalId(internalId)
-            .additionalRealmRoles(Arrays.asList("private", "private", "wealth"));
+                .additionalRealmRoles(Arrays.asList("private", "private", "wealth"));
         Mono<User> result = subject.updateUserState(user, realm);
 
 
         result.subscribe(assertEqualsTo(user));
         verify(identityIntegrationApi).getUserById(realm, internalId);
         UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email)
-            .credentials(Collections.emptyList()).realmRoles(Arrays.asList("banking", "private", "wealth"));
+                .credentials(Collections.emptyList()).realmRoles(Arrays.asList("banking", "private", "wealth"));
         verify(identityIntegrationApi).updateUserById(realm, internalId, expectedUser);
     }
 
@@ -155,7 +161,7 @@ class UserServiceTest {
         when(identityManagementApi.updateIdentity(eq(internalId), any())).thenReturn(Mono.empty().then());
 
         User user = new User().externalId(externalId).attributes(attributesMap)
-            .identityLinkStrategy(strategy);
+                .identityLinkStrategy(strategy);
 
 
         Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask());
@@ -163,7 +169,7 @@ class UserServiceTest {
 
         result.subscribe(assertEqualsTo(user));
         CreateIdentityRequest expectedCreateIdentityRequest = new CreateIdentityRequest().externalId(externalId)
-            .legalEntityInternalId(legalEntityId);
+                .legalEntityInternalId(legalEntityId);
         verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
         UpdateIdentityRequest expectedUpdateIdentityRequest = new UpdateIdentityRequest().attributes(attributesMap);
         verify(identityManagementApi).updateIdentity(internalId, expectedUpdateIdentityRequest);
@@ -187,7 +193,7 @@ class UserServiceTest {
 
         result.subscribe(assertEqualsTo(user));
         CreateIdentityRequest expectedCreateIdentityRequest = new CreateIdentityRequest().externalId(externalId)
-            .legalEntityInternalId(legalEntityId);
+                .legalEntityInternalId(legalEntityId);
         verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
         verifyNoMoreInteractions(identityManagementApi);
     }
@@ -207,9 +213,9 @@ class UserServiceTest {
         when(identityManagementApi.createIdentity(any())).thenReturn(Mono.just(response));
 
         User user = new User().externalId(externalId).attributes(attributesMap)
-            .identityLinkStrategy(strategy).fullName(fullName)
-            .emailAddress(new EmailAddress().address(emailAddress))
-            .mobileNumber(new PhoneNumber().number(mobileNumber));
+                .identityLinkStrategy(strategy).fullName(fullName)
+                .emailAddress(new EmailAddress().address(emailAddress))
+                .mobileNumber(new PhoneNumber().number(mobileNumber));
 
 
         Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask());
@@ -217,9 +223,71 @@ class UserServiceTest {
 
         result.subscribe(assertEqualsTo(user));
         CreateIdentityRequest expectedCreateIdentityRequest = new CreateIdentityRequest().externalId(externalId)
-            .legalEntityInternalId(legalEntityId).emailAddress(emailAddress).mobileNumber(mobileNumber)
-            .fullName(fullName).attributes(attributesMap);
+                .legalEntityInternalId(legalEntityId).emailAddress(emailAddress).mobileNumber(mobileNumber)
+                .fullName(fullName).attributes(attributesMap);
         verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
         verifyNoMoreInteractions(identityManagementApi);
+    }
+
+    @Test
+    void getUserByExternalId() {
+        final String externalId = "someExternalId";
+        final String fullName = "someName";
+        GetUser getUser = new GetUser().externalId(externalId)
+                .fullName(fullName);
+
+        when(usersApi.getUserByExternalId(externalId, true)).thenReturn(Mono.just(getUser));
+
+        Mono<User> userByExternalId = subject.getUserByExternalId(externalId);
+        StepVerifier.create(userByExternalId)
+                .assertNext(Assertions::assertNotNull)
+                .verifyComplete();
+
+    }
+
+    @Test
+    void getUserByExternalIdNotFound() {
+        final String externalId = "someExternalId";
+        final String fullName = "someName";
+        when(usersApi.getUserByExternalId(externalId, true)).thenReturn(Mono.error(WebClientResponseException.NotFound.create(404, "not found", new HttpHeaders(), new byte[0], null)));
+
+        Mono<User> userByExternalId = subject.getUserByExternalId(externalId);
+        StepVerifier.create(userByExternalId)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void createUser() {
+        final String internalId = "someInternalId";
+        final String externalId = "someExternalId";
+        final String legalEntityId = "someLegalEntityId";
+        final Map<String, String> attributesMap = Collections.singletonMap("someKey", "someValue");
+        final IdentityUserLinkStrategy strategy = CREATE_IN_IDENTITY;
+        final String emailAddress = "some@email.com";
+        final String mobileNumber = "123456";
+        final String fullName = "someName";
+        UserExternal userExternal = new UserExternal()
+                .externalId(externalId)
+                        .fullName(fullName);
+
+
+        when(usersApi.createUser(any())).thenReturn(Mono.just(new UserCreated().id(internalId) ));
+
+        User user = new User().externalId(externalId).attributes(attributesMap)
+                .identityLinkStrategy(strategy).fullName(fullName)
+                .emailAddress(new EmailAddress().address(emailAddress))
+                .mobileNumber(new PhoneNumber().number(mobileNumber));
+
+        Mono<User> user1 = subject.createUser(user, "12345", new StreamTask() {
+            @Override
+            public String getName() {
+                return null;
+            }
+        });
+
+        StepVerifier.create(user1)
+                .expectNextCount(1)
+                .verifyComplete();
     }
 }
