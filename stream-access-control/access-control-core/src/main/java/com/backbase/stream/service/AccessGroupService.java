@@ -829,7 +829,7 @@ public class AccessGroupService {
     public Flux<String> getDataGroupItemIdsByServiceAgreementId(String serviceAgreementId) {
         PresentationServiceAgreementIdentifier serviceAgreementIdentifier =
             new PresentationServiceAgreementIdentifier().idIdentifier(serviceAgreementId);
-        return getDataGroupItemIds(null, serviceAgreementIdentifier);
+        return getDataGroupItemIds("ARRANGEMENTS", serviceAgreementIdentifier);
     }
 
     /**
@@ -1247,7 +1247,7 @@ public class AccessGroupService {
                     return Flux.empty();
                 }
             })
-            .flatMap(details -> getExistingDataGroups(details.getId(), null))
+            .flatMap(details -> getExistingDataGroups(details.getId(), type))
             .flatMap(dataGroupItem -> Flux.fromIterable(dataGroupItem.getItems()));
     }
 
