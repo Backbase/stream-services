@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
+import com.backbase.stream.compositions.legalentity.core.config.BootstrapConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
@@ -31,6 +32,9 @@ class LegalEntityIngestionServiceImplTest {
     LegalEntityMapperImpl mapper;
 
     @Mock
+    BootstrapConfigurationProperties bootstrapConfigurationProperties;
+
+    @Mock
     LegalEntitySaga legalEntitySaga;
 
     @BeforeEach
@@ -38,7 +42,8 @@ class LegalEntityIngestionServiceImplTest {
         legalEntityIngestionService = new LegalEntityIngestionServiceImpl(
                 mapper,
                 legalEntitySaga,
-                legalEntityIntegrationService);
+                legalEntityIntegrationService,
+                bootstrapConfigurationProperties);
     }
 
     void ingestionInPullMode_Success() {
