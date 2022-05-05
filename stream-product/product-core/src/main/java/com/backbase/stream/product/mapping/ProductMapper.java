@@ -24,11 +24,13 @@ import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.TermUnit;
 import com.backbase.stream.legalentity.model.UserPreferences;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -180,18 +182,26 @@ public interface ProductMapper {
 
 
     default BookedBalance mapBookedBalance(BigDecimal bigDecimal) {
+        if (bigDecimal == null)
+            return null;
         return new BookedBalance().amount(bigDecimal);
     }
 
     default AvailableBalance mapAvailable(BigDecimal bigDecimal) {
+        if (bigDecimal == null)
+            return null;
         return new AvailableBalance().amount(bigDecimal);
     }
 
     default PrincipalAmount mapPrincipal(BigDecimal bigDecimal) {
+        if (bigDecimal == null)
+            return null;
         return new PrincipalAmount().amount(bigDecimal);
     }
 
     default CreditLimit mapCreditLimit(BigDecimal bigDecimal) {
+        if (bigDecimal == null)
+            return null;
         return new CreditLimit().amount(bigDecimal);
     }
 
@@ -282,28 +292,28 @@ public interface ProductMapper {
     }
 
     @ValueMappings({
-        @ValueMapping(source = "QUARTERLY", target = MappingConstants.NULL),
-        @ValueMapping(source = ProductMapperConstants.DAILY, target = ProductMapperConstants.D),
-        @ValueMapping(source = ProductMapperConstants.WEEKLY, target = ProductMapperConstants.W),
-        @ValueMapping(source = ProductMapperConstants.MONTHLY, target = ProductMapperConstants.M),
-        @ValueMapping(source = ProductMapperConstants.YEARLY, target = ProductMapperConstants.Y)
+            @ValueMapping(source = "QUARTERLY", target = MappingConstants.NULL),
+            @ValueMapping(source = ProductMapperConstants.DAILY, target = ProductMapperConstants.D),
+            @ValueMapping(source = ProductMapperConstants.WEEKLY, target = ProductMapperConstants.W),
+            @ValueMapping(source = ProductMapperConstants.MONTHLY, target = ProductMapperConstants.M),
+            @ValueMapping(source = ProductMapperConstants.YEARLY, target = ProductMapperConstants.Y)
     })
     TimeUnit map(TermUnit termUnit);
 
     @ValueMappings({
-        @ValueMapping(source = "QUARTERLY", target = MappingConstants.NULL),
-        @ValueMapping(source = ProductMapperConstants.DAILY, target = ProductMapperConstants.D),
-        @ValueMapping(source = ProductMapperConstants.WEEKLY, target = ProductMapperConstants.W),
-        @ValueMapping(source = ProductMapperConstants.MONTHLY, target = ProductMapperConstants.M),
-        @ValueMapping(source = ProductMapperConstants.YEARLY, target = ProductMapperConstants.Y)
+            @ValueMapping(source = "QUARTERLY", target = MappingConstants.NULL),
+            @ValueMapping(source = ProductMapperConstants.DAILY, target = ProductMapperConstants.D),
+            @ValueMapping(source = ProductMapperConstants.WEEKLY, target = ProductMapperConstants.W),
+            @ValueMapping(source = ProductMapperConstants.MONTHLY, target = ProductMapperConstants.M),
+            @ValueMapping(source = ProductMapperConstants.YEARLY, target = ProductMapperConstants.Y)
     })
     TimeUnit map(InterestPaymentFrequencyUnit interestPaymentFrequencyUnit);
 
     @ValueMappings({
-        @ValueMapping(source = ProductMapperConstants.D, target = ProductMapperConstants.DAILY),
-        @ValueMapping(source = ProductMapperConstants.W, target = ProductMapperConstants.WEEKLY),
-        @ValueMapping(source = ProductMapperConstants.M, target = ProductMapperConstants.MONTHLY),
-        @ValueMapping(source = ProductMapperConstants.Y, target = ProductMapperConstants.YEARLY)
+            @ValueMapping(source = ProductMapperConstants.D, target = ProductMapperConstants.DAILY),
+            @ValueMapping(source = ProductMapperConstants.W, target = ProductMapperConstants.WEEKLY),
+            @ValueMapping(source = ProductMapperConstants.M, target = ProductMapperConstants.MONTHLY),
+            @ValueMapping(source = ProductMapperConstants.Y, target = ProductMapperConstants.YEARLY)
     })
     TermUnit map(TimeUnit unit);
 
@@ -326,10 +336,10 @@ public interface ProductMapper {
 
 
     @ValueMappings({
-        @ValueMapping(source = ProductMapperConstants.D, target = ProductMapperConstants.DAILY),
-        @ValueMapping(source = ProductMapperConstants.W, target = ProductMapperConstants.WEEKLY),
-        @ValueMapping(source = ProductMapperConstants.M, target = ProductMapperConstants.MONTHLY),
-        @ValueMapping(source = ProductMapperConstants.Y, target = ProductMapperConstants.YEARLY)
+            @ValueMapping(source = ProductMapperConstants.D, target = ProductMapperConstants.DAILY),
+            @ValueMapping(source = ProductMapperConstants.W, target = ProductMapperConstants.WEEKLY),
+            @ValueMapping(source = ProductMapperConstants.M, target = ProductMapperConstants.MONTHLY),
+            @ValueMapping(source = ProductMapperConstants.Y, target = ProductMapperConstants.YEARLY)
     })
     InterestPaymentFrequencyUnit mapInterestPayment(TimeUnit unit);
 

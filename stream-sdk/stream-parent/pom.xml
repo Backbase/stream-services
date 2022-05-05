@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.5.12</version>
+        <version>2.5.13</version>
         <relativePath />
     </parent>
 
@@ -41,9 +41,9 @@
 
     <properties>
         <source.version>1.8</source.version>
-        <spring-cloud.version>2020.0.4</spring-cloud.version>
+        <spring-cloud.version>2020.0.5</spring-cloud.version>
         <spring-cloud-function.version>3.1.7</spring-cloud-function.version>
-        <spring-boot.version>2.5.12</spring-boot.version>
+        <spring-boot.version>2.5.13</spring-boot.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
 
