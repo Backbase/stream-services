@@ -29,5 +29,7 @@ class ProductMapperConstants {
     static final String ID = "id";
     static final String EXTERNAL_STATE_ID = "externalStateId";
     static final String INTERNAL_ID = "internalId";
+    static final String DEBIT_CARDS_ITEMS = "debitCardsItems";
+    static final String DEBIT_CARDS = "debitCards";
 
 }
