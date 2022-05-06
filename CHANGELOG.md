@@ -5,7 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.68.0]
 ### Added
-- Added debitCards to Current Account in LegalEntity spec.
+- Added debitCards to Savings Account in LegalEntity spec.
 
 ## [2.67.0]
 ### Added
