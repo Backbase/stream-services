@@ -448,6 +448,10 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         accruedInterest:
           $ref: '#/components/schemas/AccruedInterest'
+        debitCardsItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebitCardItem'
         IBAN:
           $ref: '#/components/schemas/IBAN'
         BBAN:

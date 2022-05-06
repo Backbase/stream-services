@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.68.0]
+### Added
+- Added debitCards to Current Account in LegalEntity spec.
+
 ## [2.67.0]
 ### Added
 - Added cardDetails to Credit Card in LegalEntity spec.
