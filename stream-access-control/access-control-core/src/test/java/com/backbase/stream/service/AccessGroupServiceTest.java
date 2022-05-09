@@ -8,6 +8,7 @@ import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
 import static com.backbase.stream.test.LambdaAssertions.assertEqualsTo;
 import static com.backbase.stream.test.WebClientTestUtils.buildWebResponseExceptionMono;
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,6 +28,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem.TypeEnum;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPermissions;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPermissionsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction;
@@ -41,6 +43,8 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
+import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
+import com.backbase.stream.config.BackbaseStreamConfigurationProperties.DeletionProperties.FunctionGroupItemType;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -64,6 +68,10 @@ import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -109,6 +117,9 @@ class AccessGroupServiceTest {
 
     @Mock
     private ServiceAgreementsApi serviceAgreementsApi;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private BackbaseStreamConfigurationProperties configurationProperties;
 
     @Test
     void getServiceAgreementByExternalIdRetrievesServiceAgreementByExternalId() {
@@ -625,6 +636,48 @@ class AccessGroupServiceTest {
         Assertions.assertSame(batchProductGroupTask, result);
 
         verify(accessControlUsersApi).putAssignUserPermissions(expectedPermissions);
+    }
+
+    @Test
+    void deleteFunctionGroupsForServiceAgreement_noneTypeConfigured_doesNotInvokeDeletion() {
+        String internalSaId = "sa-internal-id";
+
+        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(FunctionGroupItemType.NONE);
+
+        subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
+
+        verify(functionGroupsApi, times(0)).postFunctionGroupsDelete(any());
+    }
+
+    @Test
+    void deleteFunctionGroupsForServiceAgreement_templateTypeConfigured_deletesOnlyTemplateType() {
+        String internalSaId = "sa-internal-id";
+
+        FunctionGroupItem systemFunctionGroup = new FunctionGroupItem().id("system-group-id-1")
+            .name("SYSTEM_FUNCTION_GROUP")
+            .type(TypeEnum.SYSTEM);
+
+        FunctionGroupItem templateFunctionGroup = new FunctionGroupItem().id("template-group-id-2").name("Full access")
+            .type(TypeEnum.TEMPLATE);
+
+        when(functionGroupApi.getFunctionGroups(internalSaId))
+            .thenReturn(Flux.just(
+                systemFunctionGroup,
+                templateFunctionGroup
+            ));
+
+        when(functionGroupsApi.postFunctionGroupsDelete(any())).thenReturn(Flux.empty());
+
+        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(FunctionGroupItemType.TEMPLATE);
+
+        subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
+
+        ArgumentCaptor<List<PresentationIdentifier>> captor = ArgumentCaptor.forClass(
+            List.class);
+        verify(functionGroupsApi).postFunctionGroupsDelete(captor.capture());
+
+        List<PresentationIdentifier> value = captor.getValue();
+        assertEquals(templateFunctionGroup.getId(), value.get(0).getIdIdentifier());
     }
 
     private void thenRegularUsersUpdateCall(String expectedSaExId, PresentationAction expectedAction,

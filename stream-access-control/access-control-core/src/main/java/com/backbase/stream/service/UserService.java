@@ -42,6 +42,9 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class UserService {
 
+    public static final String REMOVED_PREFIX = "REMOVED_";
+    public static final String ARCHIVED_PREFIX = "archived_";
+
     private final UserMapper mapper = Mappers.getMapper(UserMapper.class);
     private final RealmMapper realmMapper = Mappers.getMapper(RealmMapper.class);
 
@@ -90,11 +93,13 @@ public class UserService {
      * @param legalEntityInternalId legal  entity internal id.
      * @return flux of user  items.
      */
-    public Mono<GetUsersList> getUsersByLegalEntity(String legalEntityInternalId) {
+    public Mono<GetUsersList> getUsersByLegalEntity(String legalEntityInternalId, int size, int from) {
         log.debug("Retrieving users for Legal Entity '{}'", legalEntityInternalId);
 
         GetUsersByLegalEntityIdsRequest request = new GetUsersByLegalEntityIdsRequest();
         request.addLegalEntityIdsItem(legalEntityInternalId);
+        request.size(size);
+        request.from(from);
         return usersApi.getUsersByLegalEntityIds(request, true);
     }
 
@@ -115,9 +120,9 @@ public class UserService {
                         return new BatchUser()
                             .externalId(userExternalId)
                             .userUpdate(new com.backbase.dbs.user.api.service.v2.model.User()
-                                .externalId("REMOVED_" + userExternalId + "_" + UUID.randomUUID().toString())
+                                .externalId(REMOVED_PREFIX + userExternalId + "_" + UUID.randomUUID())
                                 .legalEntityId(legalEntityInternalId)
-                                .fullName("archived_" + userExternalId));
+                                .fullName(ARCHIVED_PREFIX + userExternalId));
                     })
                     .collect(Collectors.toList()))
             .map(r -> {
