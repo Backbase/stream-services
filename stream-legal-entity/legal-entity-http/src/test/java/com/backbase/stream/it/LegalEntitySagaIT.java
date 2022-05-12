@@ -100,6 +100,13 @@ public class LegalEntitySagaIT {
         );
 
         wireMockServer.stubFor(
+            WireMock.put("/access-control/service-api/v2/legalentities")
+                .willReturn(WireMock.aResponse()
+                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                     .withBody("{\n\"additions\":{},\"id\":\"500000\",\"externalId\":\"100000\",\"name\":\"Legal Entity\",\"type\":\"CUSTOMER\"\n}"))
+        );
+
+        wireMockServer.stubFor(
             WireMock.get("/user-manager/service-api/v2/users/identities/realms")
                 .willReturn(WireMock.aResponse()
                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -279,8 +286,8 @@ public class LegalEntitySagaIT {
             .header("Content-Type", "application/json")
             .header("X-TID", "tenant-id")
             .bodyValue(legalEntityTask.getLegalEntity())
-            .exchange().
-            expectStatus().isEqualTo(200);
+            .exchange()
+            .expectStatus().isEqualTo(200);
 
         // Then
         wireMockServer.verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v2/legalentities/500000"))
