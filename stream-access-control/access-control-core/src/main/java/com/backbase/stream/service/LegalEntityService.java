@@ -5,6 +5,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntityApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntitiesBatchDelete;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityCreateItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityItemId;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityPut;
 import com.backbase.stream.exceptions.LegalEntityException;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
@@ -204,6 +205,23 @@ public class LegalEntityService {
             log.error("Error obtaining access token: ", e);
             return null;
         }
+    }
+
+    /**
+     * Update Legal Entity in Access Control.
+     *
+     * @param legalEntity The Legal Entity to update
+     * @return The Updated Legal Entity
+     */
+    public Mono<LegalEntity> putLegalEntity(LegalEntity legalEntity) {
+        LegalEntityPut legalEntityPut = mapper.toLegalEntityPut(legalEntity);
+
+        return legalEntitiesApi.putLegalEntities(Collections.singletonList(legalEntityPut))
+                .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
+                .onErrorResume(WebClientResponseException.class, exception ->
+                        Mono.error(new RuntimeException("Failed to update Legal Entity",  exception)))
+                .onErrorStop()
+                .then(getLegalEntityByExternalId(legalEntityPut.getExternalId()));
     }
 
 }

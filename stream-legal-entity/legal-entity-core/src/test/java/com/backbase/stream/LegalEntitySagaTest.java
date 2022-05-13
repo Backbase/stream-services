@@ -40,7 +40,6 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.jetbrains.annotations.NotNull;
@@ -125,6 +124,7 @@ class LegalEntitySagaTest {
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
+        when(userService.updateUser(any())).thenReturn(Mono.just(regularUser.getUser()));
 
         LegalEntityTask result = legalEntitySaga.executeTask(task)
             .block();
@@ -226,6 +226,7 @@ class LegalEntitySagaTest {
         verify(userService).linkLegalEntityToRealm(task.getLegalEntity());
 
         when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         result = legalEntitySaga.executeTask(task);
         result.block();
 
@@ -277,6 +278,7 @@ class LegalEntitySagaTest {
         verify(userService).linkLegalEntityToRealm(task.getLegalEntity());
 
         when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         result = legalEntitySaga.executeTask(task);
         result.block();
 
@@ -387,6 +389,7 @@ class LegalEntitySagaTest {
             .thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
         when(legalEntityService.createLegalEntity(legalEntityTask.getLegalEntity()))
             .thenReturn(Mono.empty());
+        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
         when(legalEntitySagaConfigurationProperties.isUseIdentityIntegration())
             .thenReturn(true);
         when(userService.setupRealm(legalEntityTask.getLegalEntity()))

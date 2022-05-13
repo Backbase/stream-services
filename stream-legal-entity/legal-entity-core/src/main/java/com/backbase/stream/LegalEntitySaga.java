@@ -82,6 +82,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     public static final String FAILED = "failed";
     public static final String EXISTS = "exists";
     public static final String CREATED = "created";
+
+    public static final String UPDATED = "updated";
     public static final String PROCESS_PRODUCTS = "process-products";
     public static final String PROCESS_JOB_PROFILES = "process-job-profiles";
     public static final String REJECTED = "rejected";
@@ -216,9 +218,12 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 return legalEntityService.getLegalEntityByInternalId(actual.getInternalId())
                     .flatMap(result -> {
                         task.getData().setParentInternalId(result.getParentInternalId());
-                        // TODO: Add Update Legal Entity Logic
-                        task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, EXISTS, legalEntity.getExternalId(), actual.getInternalId(), "Legal Entity: %s already exists", legalEntity.getName());
-                        return Mono.just(task);
+
+                        return legalEntityService.putLegalEntity(task.getData()).flatMap(leUpdated -> {
+                            log.info("Updated LegalEntity: {}", leUpdated.getName());
+                            task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, UPDATED, legalEntity.getExternalId(), actual.getInternalId(), "Legal Entity: %s updated", legalEntity.getName());
+                            return Mono.just(task);
+                        });
                     });
             });
         // Pipeline for Creating New Legal Entity
@@ -540,10 +545,15 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         LegalEntity legalEntity = streamTask.getData();
         streamTask.info(USER, UPSERT, "", user.getExternalId(), "Upsert User with External ID: %s", user.getExternalId());
 
-        Mono<User> getExistingUser = Mono.zip(Mono.just(user), userService.getUserByExternalId(user.getExternalId()), (u, existingUser) -> {
-            u.setInternalId(existingUser.getInternalId());
-            streamTask.info(USER, EXISTS, u.getExternalId(), u.getInternalId(), "User %s already exists", existingUser.getExternalId());
-            return u;
+        Mono<User> existingUser = userService.getUserByExternalId(user.getExternalId()).flatMap(existUser -> {
+            user.setInternalId(existUser.getInternalId());
+            user.setLegalEntityId(existUser.getLegalEntityId());
+
+            return userService.updateUser(user).flatMap(userUpdated -> {
+                log.info("User was updated: {}", userUpdated.getFullName());
+                streamTask.info(USER, UPDATED, user.getExternalId(), user.getInternalId(), "User %s updated", existUser.getExternalId());
+                return Mono.just(userUpdated);
+            });
         });
 
         Mono<User> createNewUser = Mono.zip(Mono.just(user), userService.createUser(user, legalEntity.getExternalId(), streamTask),
@@ -552,7 +562,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 streamTask.info(USER, CREATED, u.getExternalId(), user.getInternalId(), "User %s created", newUser.getExternalId());
                 return user;
             });
-        return getExistingUser.switchIfEmpty(createNewUser);
+        return existingUser.switchIfEmpty(createNewUser);
     }
 
     private Mono<User> upsertIdentityUser(LegalEntityTask streamTask, User user) {
