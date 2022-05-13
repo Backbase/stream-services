@@ -218,8 +218,7 @@ public class LegalEntityService {
 
         return legalEntitiesApi.putLegalEntities(Collections.singletonList(legalEntityPut))
                 .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
-                .onErrorResume(WebClientResponseException.class, exception ->
-                        Mono.error(new RuntimeException("Failed to update Legal Entity",  exception)))
+                .onErrorResume(WebClientResponseException.class, exception -> Mono.error(new RuntimeException("Failed to update Legal Entity",  exception)))
                 .onErrorStop()
                 .then(getLegalEntityByExternalId(legalEntityPut.getExternalId()));
     }

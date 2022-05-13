@@ -402,10 +402,11 @@ public class UserService {
                 .map(r -> {
                     log.debug("Updated user response: status {} for resource {}, errors: {}", r.getStatus(), r.getResourceId(), r.getErrors());
                     if (r.getStatus().getValue() != null && !HttpStatus.valueOf(Integer.parseInt(r.getStatus().getValue())).is2xxSuccessful()) {
-                        throw new RuntimeException(
-                                MessageFormat.format("Failed item in the batch for User Update: status {0} for resource {1}, errors: {2}",
-                                        r.getStatus(), r.getResourceId(), r.getErrors())
-                        );
+                        String errorMsg = MessageFormat.format(
+                                "Failed item in the batch for User Update: status {0} for resource {1}, errors: {2}",
+                                r.getStatus(), r.getResourceId(), r.getErrors());
+                        throw new UserUpsertException(errorMsg, Collections.singletonList(user),
+                                Collections.singletonList(r));
                     }
                     return r;
                 })
