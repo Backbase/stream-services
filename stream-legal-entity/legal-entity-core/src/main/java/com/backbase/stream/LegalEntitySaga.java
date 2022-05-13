@@ -1,10 +1,12 @@
 package com.backbase.stream;
 
 import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
+import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.exceptions.AccessGroupException;
@@ -45,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -147,17 +150,28 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
      * @param legalEntityExternalId legal entity external ID.
      * @return Mono<Void>
      */
-    public Mono<Void> deleteLegalEntity(String legalEntityExternalId) {
+    public Mono<Void> deleteLegalEntity(String legalEntityExternalId, int userQuerySize) {
+        AtomicInteger from = new AtomicInteger(0);
         return Mono.zip(
                 legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(legalEntityExternalId),
                 legalEntityService.getLegalEntityByExternalId(legalEntityExternalId))
             .flatMap(data -> {
                 LegalEntity le = data.getT2();
-                return userService.getUsersByLegalEntity(le.getInternalId())
-                    .map(usersByLegalEntityIdsResponse -> {
-                        List<GetUser> users = usersByLegalEntityIdsResponse.getUsers();
-                        return Tuples.of(data.getT1(), le, users);
-                    });
+                return userService.getUsersByLegalEntity(le.getInternalId(), userQuerySize, from.get())
+                    .expand(response -> {
+                        int totalPages = response.getTotalElements().intValue() / userQuerySize;
+                        from.getAndIncrement();
+                        if (from.get() > totalPages) {
+                            return Mono.empty();
+                        }
+                        return userService.getUsersByLegalEntity(le.getInternalId(), userQuerySize, from.get());
+                    })
+                    .map(GetUsersList::getUsers)
+                    .collectList()
+                    .flatMap(lists -> Mono.just(
+                        lists.stream().flatMap(List::stream).filter(getUser -> !getUser.getExternalId().startsWith(
+                            REMOVED_PREFIX)).collect(Collectors.toList())))
+                    .map(getUsers -> Tuples.of(data.getT1(), le, getUsers));
             })
             .flatMap(data -> {
                 ServiceAgreement sa = data.getT1();
@@ -178,6 +192,10 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     .then(userService.archiveUsers(le.getInternalId(), userIds))
                     .then(legalEntityService.deleteLegalEntity(legalEntityExternalId));
             });
+    }
+
+    public Mono<Void> deleteLegalEntity(String legalEntityExternalId) {
+        return deleteLegalEntity(legalEntityExternalId, 10);
     }
 
     private Mono<LegalEntityTask> upsertLegalEntity(LegalEntityTask task) {
