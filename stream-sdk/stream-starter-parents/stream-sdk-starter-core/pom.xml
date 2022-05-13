@@ -44,7 +44,7 @@
         <boat-maven-plugin.version>0.14.4</boat-maven-plugin.version>
 
         <!-- other config -->
-        <jacoco.version>0.8.7</jacoco.version>
+        <jacoco.version>0.8.8</jacoco.version>
         <skip.integration.tests>${skipTests}</skip.integration.tests>
         <skip.unit.tests>${skipTests}</skip.unit.tests>
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>

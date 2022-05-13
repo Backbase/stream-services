@@ -41,7 +41,7 @@
     </modules>
 
     <properties>
-        <backbase-bom.version>2022.04</backbase-bom.version>
+        <backbase-bom.version>2022.04.5</backbase-bom.version>
         <boat-maven-plugin.version>0.15.0</boat-maven-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
