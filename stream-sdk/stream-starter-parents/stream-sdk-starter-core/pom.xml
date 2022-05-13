@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.5.12</version>
+        <version>2.5.13</version>
         <relativePath/>
     </parent>
 
@@ -33,7 +33,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <source.version>11</source.version>
-        <spring-boot.version>2.5.12</spring-boot.version>
+        <spring-boot.version>2.5.13</spring-boot.version>
         <spring-cloud.version>2020.0.4</spring-cloud.version>
         <spring-cloud-function.version>3.1.7</spring-cloud-function.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
@@ -44,7 +44,7 @@
         <boat-maven-plugin.version>0.14.4</boat-maven-plugin.version>
 
         <!-- other config -->
-        <jacoco.version>0.8.7</jacoco.version>
+        <jacoco.version>0.8.8</jacoco.version>
         <skip.integration.tests>${skipTests}</skip.integration.tests>
         <skip.unit.tests>${skipTests}</skip.unit.tests>
         <sonar-maven-plugin.version>3.7.0.1746</sonar-maven-plugin.version>
@@ -254,6 +254,7 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
+            <version>6.0.21.Final</version>
         </dependency>
 
         <dependency>

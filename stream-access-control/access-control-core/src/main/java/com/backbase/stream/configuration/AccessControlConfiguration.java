@@ -103,7 +103,7 @@ public class AccessControlConfiguration {
     }
 
     @Bean
-    protected com.backbase.dbs.user.api.service.ApiClient usersApiClient(
+    public com.backbase.dbs.user.api.service.ApiClient usersApiClient(
         WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
@@ -115,7 +115,7 @@ public class AccessControlConfiguration {
     }
 
     @Bean
-    protected com.backbase.dbs.user.profile.api.service.ApiClient userProfileApiClient(
+    public com.backbase.dbs.user.profile.api.service.ApiClient userProfileApiClient(
         WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
@@ -127,7 +127,7 @@ public class AccessControlConfiguration {
     }
 
     @Bean
-    protected com.backbase.dbs.accesscontrol.api.service.ApiClient accessControlApiClient(
+    public com.backbase.dbs.accesscontrol.api.service.ApiClient accessControlApiClient(
         WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
@@ -140,7 +140,7 @@ public class AccessControlConfiguration {
 
     @Bean
     @ConditionalOnProperty(value = "backbase.stream.legalentity.sink.use-identity-integration")
-    protected com.backbase.identity.integration.api.service.ApiClient identityApiClient(
+    public com.backbase.identity.integration.api.service.ApiClient identityApiClient(
         WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {

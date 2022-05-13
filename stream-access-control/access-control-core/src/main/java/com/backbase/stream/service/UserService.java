@@ -275,7 +275,7 @@ public class UserService {
 
         return identityManagementApi.createIdentity(createIdentityRequest)
             .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error creating identity: {} Response: {}", user.getExternalId(), e.getResponseBodyAsString());
+                log.error("Error creating identity: {} Response: {}", createIdentityRequest, e.getResponseBodyAsString());
                 String message = "Failed to create user: " + user.getExternalId();
                 streamTask.error("user", "create-identity", "failed",
                     user.getExternalId(), legalEntityInternalId, e, e.getMessage(), message);
