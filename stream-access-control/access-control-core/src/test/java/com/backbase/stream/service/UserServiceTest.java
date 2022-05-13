@@ -36,6 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -313,6 +314,28 @@ class UserServiceTest {
 
         StepVerifier.create(user1)
                 .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void updateUser() {
+        final String externalId = "someExternalId";
+        final String fullName = "newName";
+        GetUser getUser = new GetUser().externalId(externalId)
+                .fullName(fullName);
+
+        BatchResponseItem batchResponseItem = new BatchResponseItem().status(BatchResponseItem.StatusEnum._200);
+
+        when(usersApi.updateUserInBatch(any())).thenReturn(Flux.just(batchResponseItem));
+        when(usersApi.getUserByExternalId(externalId, true)).thenReturn(Mono.just(getUser));
+
+        User user = new User().externalId(externalId).fullName("oldName");
+        Mono<User> result = subject.updateUser(user);
+
+        User expectedUser = new User().externalId(externalId).fullName(fullName);
+
+        StepVerifier.create(result)
+                .assertNext(assertEqualsTo(expectedUser))
                 .verifyComplete();
     }
 }
