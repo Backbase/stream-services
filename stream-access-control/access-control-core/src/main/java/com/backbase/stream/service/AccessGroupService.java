@@ -14,37 +14,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ArrangementPrivilegesGetResponseBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.DataGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.DataGroupItemSystemBase;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.Functiongroupupdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.IdItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ListOfFunctionGroupsWithDataGroups;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPermissions;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationApprovalStatus;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAssignUserPermissions;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupItemPutRequestBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionDataGroup;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupDataGroup;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupPutRequestBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationGenericObjectId;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationItemIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermissionFunctionGroupUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationSearchDataGroupsRequest;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUserPair;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUsersBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.*;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
@@ -1032,7 +1002,7 @@ public class AccessGroupService {
                 functionGroupsApi.postFunctionGroupsDelete(
                         functionGroups.stream()
                             .filter(f -> FunctionGroupItem.TypeEnum.TEMPLATE.equals(f.getType()))
-                            .map(fg -> mapId(fg.getId()))
+                            .map(fg -> mapFunctionGroup(fg.getId()))
                             .collect(Collectors.toList())
                     ).map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
                     .collectList())

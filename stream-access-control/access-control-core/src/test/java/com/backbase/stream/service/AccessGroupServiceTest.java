@@ -5,17 +5,14 @@ import static com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseI
 import static com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction.ADD;
 import static com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction.REMOVE;
 import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
-import static com.backbase.stream.test.LambdaAssertions.assertEqualsTo;
-import static com.backbase.stream.test.WebClientTestUtils.buildWebResponseExceptionMono;
+import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
+import static com.backbase.stream.WebClientTestUtils.buildWebResponseExceptionMono;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
@@ -33,6 +30,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPe
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPermissionsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAssignUserPermissions;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupDataGroup;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantBatchUpdate;
@@ -43,6 +41,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
+import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -51,9 +50,6 @@ import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
-import com.backbase.stream.product.task.BatchProductGroupTask;
-import com.backbase.stream.worker.exception.StreamTaskException;
-import com.backbase.stream.worker.model.StreamTask;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,12 +58,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.backbase.stream.product.task.BatchProductGroupTask;
+import com.backbase.stream.worker.exception.StreamTaskException;
+import com.backbase.stream.worker.model.StreamTask;
 import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -79,6 +77,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class AccessGroupServiceTest {
@@ -126,12 +125,14 @@ class AccessGroupServiceTest {
 
         when(serviceAgreementApi.getServiceAgreementExternalId(eq(externalId))).thenReturn(dbsSa);
 
-
         Mono<ServiceAgreement> result = subject.getServiceAgreementByExternalId(externalId);
 
-
         ServiceAgreement expected = new ServiceAgreement().externalId(externalId);
-        result.subscribe(assertEqualsTo(expected));
+
+        StepVerifier.create(result)
+                .assertNext(serviceAgreement -> assertEquals(serviceAgreement,expected))
+                .verifyComplete();
+
     }
 
     @Test
@@ -200,7 +201,7 @@ class AccessGroupServiceTest {
         result.block();
 
 
-        InOrder inOrderValidator = Mockito.inOrder(serviceAgreementApi);
+        InOrder inOrderValidator = inOrder(serviceAgreementApi);
         thenUpdateParticipantsCall(inOrderValidator, saExternalId, ADD,
             new ExpectedParticipantUpdate("p1", true, true),
             new ExpectedParticipantUpdate("p2", false, false));
@@ -271,7 +272,7 @@ class AccessGroupServiceTest {
         result.block();
 
 
-        InOrder inOrderValidator = Mockito.inOrder(serviceAgreementApi);
+        InOrder inOrderValidator = inOrder(serviceAgreementApi);
         thenUpdateParticipantsCall(inOrderValidator, saExternalId, ADD,
             new ExpectedParticipantUpdate("p3", false, false));
         thenUpdateParticipantsCall(inOrderValidator, saExternalId, REMOVE,
@@ -640,7 +641,7 @@ class AccessGroupServiceTest {
     void deleteFunctionGroupsForServiceAgreement_noneTypeConfigured_doesNotInvokeDeletion() {
         String internalSaId = "sa-internal-id";
 
-        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(FunctionGroupItemType.NONE);
+        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(BackbaseStreamConfigurationProperties.DeletionProperties.FunctionGroupItemType.NONE);
 
         subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
 
@@ -666,7 +667,7 @@ class AccessGroupServiceTest {
 
         when(functionGroupsApi.postFunctionGroupsDelete(any())).thenReturn(Flux.empty());
 
-        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(FunctionGroupItemType.TEMPLATE);
+        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(BackbaseStreamConfigurationProperties.DeletionProperties.FunctionGroupItemType.TEMPLATE);
 
         subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
 

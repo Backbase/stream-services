@@ -2,7 +2,7 @@ package com.backbase.stream.service;
 
 import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.CREATE_IN_IDENTITY;
 import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY;
-import static com.backbase.stream.test.LambdaAssertions.assertEqualsTo;
+import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -20,7 +20,6 @@ import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.User;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,7 +28,6 @@ import java.util.Optional;
 
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.worker.model.StreamTask;
-import org.bouncycastle.util.encoders.UTF8;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
