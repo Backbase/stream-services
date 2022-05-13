@@ -374,6 +374,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserPreferences'
+        debitCards:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebitCardItem'
+        cardDetails:
+          $ref: '#/components/schemas/CardDetailsItem'
         additions:
           type: object
           additionalProperties:
@@ -590,8 +596,6 @@ components:
           $ref: '#/components/schemas/AccruedInterest'
         bankBranchCode:
           $ref: '#/components/schemas/BankBranchCode'
-        cardDetails:
-          $ref: '#/components/schemas/CardDetailsItem'
     Loan:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
@@ -743,10 +747,7 @@ components:
           $ref: '#/components/schemas/CreditLimitExpiryDate'
         accruedInterest:
           $ref: '#/components/schemas/AccruedInterest'
-        debitCardsItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/DebitCardItem'
+
         accountHolderName:
           $ref: '#/components/schemas/AccountHolderName'
         startDate:
