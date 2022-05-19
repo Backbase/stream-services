@@ -21,4 +21,10 @@ public interface UserMapper {
     UserExternal toPresentation(com.backbase.stream.legalentity.model.User user);
 
     UserRequestBody toPresentation(EnhancedUserRepresentation user);
+
+    @Mapping(source = "externalId", target = "externalId")
+    @Mapping(source = "legalEntityId", target = "legalEntityId")
+    @Mapping(source = "userProfile.preferredLanguage", target = "preferredLanguage")
+    @Mapping(source = "additions", target = "additions")
+    User toServiceUser(com.backbase.stream.legalentity.model.User user);
 }

@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.71.0]
+### Added
+- Support for updating Legal Entity data (name and additional fields)
+- Support for updating User data
+
 ## [2.70.1]
 ### Fixed
 - Fix for issue https://github.com/Backbase/stream-services/issues/138

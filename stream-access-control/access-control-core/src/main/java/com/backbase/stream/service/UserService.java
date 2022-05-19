@@ -16,6 +16,7 @@ import com.backbase.stream.mapper.RealmMapper;
 import com.backbase.stream.mapper.UserMapper;
 
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -386,6 +387,35 @@ public class UserService {
         }
 
         return updateRequired ? Optional.of(userRequestBody) : Optional.empty();
+    }
+
+    /**
+     * Update user
+     *
+     * @param user
+     * @return Mono<Void>
+     */
+    public Mono<User> updateUser(User user) {
+        return usersApi.updateUserInBatch(Collections.singletonList(new BatchUser()
+                        .externalId(user.getExternalId())
+                        .userUpdate(mapper.toServiceUser(user))))
+                .map(r -> {
+                    log.debug("Updated user response: status {} for resource {}, errors: {}", r.getStatus(), r.getResourceId(), r.getErrors());
+                    if (r.getStatus().getValue() != null && !HttpStatus.valueOf(Integer.parseInt(r.getStatus().getValue())).is2xxSuccessful()) {
+                        String errorMsg = MessageFormat.format(
+                                "Failed item in the batch for User Update: status {0} for resource {1}, errors: {2}",
+                                r.getStatus(), r.getResourceId(), r.getErrors());
+                        throw new UserUpsertException(errorMsg, Collections.singletonList(user),
+                                Collections.singletonList(r));
+                    }
+                    return r;
+                })
+                .collectList()
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    log.error("Failed to update user: {}", e.getResponseBodyAsString(), e);
+                    return Mono.error(e);
+                })
+                .then(getUserByExternalId(user.getExternalId()));
     }
 
 }
