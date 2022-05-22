@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
@@ -14,6 +15,8 @@ public class ProductIngestPullRequest {
     private String serviceAgreementExternalId;
     private String serviceAgreementInternalId;
     private String userExternalId;
+    private String userInternalId;
+    private List<String> membershipAccounts;
     private Map<String, String> additionalParameters;
 }
 

@@ -6,8 +6,5 @@
       "type": "object",
       "$ref": "../legal-entity.json"
     }
-  },
-  "required": [
-    "legalEntity"
-  ]
+  }
 }

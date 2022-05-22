@@ -3,9 +3,9 @@ package com.backbase.stream.compositions.legalentity.handlers;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityPullEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.LegalEntityCompletedEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.LegalEntityFailedEvent;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityPullEvent;
 import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
@@ -14,7 +14,6 @@ import com.backbase.stream.compositions.legalentity.core.service.LegalEntityInge
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -34,25 +33,19 @@ public class LegalEntityPullEventHandler implements EventHandler<LegalEntityPull
      */
     @Override
     public void handle(EnvelopedEvent<LegalEntityPullEvent> envelopedEvent) {
-        try {
-            System.out.println("Event received   " + envelopedEvent.getEvent().getExternalId());
-            legalEntityIngestionService.ingestPull(buildRequest(envelopedEvent.getEvent()));
-        } catch (Exception ex) {
-            this.handleError(ex);
-        }
+        legalEntityIngestionService.ingestPull(buildRequest(envelopedEvent.getEvent()))
+                    .doOnSuccess(this::handleResponse)
+                    .doOnError(this::handleError);
     }
 
     /**
      * Builds ingestion request for downstream service.
      *
-     * @param legalEntityIngestPullEvent LegalEntityIngestPullEvent
+     * @param event LegalEntityIngestPullEvent
      * @return LegalEntityIngestPullRequest
      */
-    private Mono<LegalEntityPullRequest> buildRequest(LegalEntityPullEvent legalEntityIngestPullEvent) {
-        return Mono.just(
-                LegalEntityPullRequest.builder()
-                        .legalEntityExternalId(legalEntityIngestPullEvent.getExternalId())
-                        .build());
+    private LegalEntityPullRequest buildRequest(LegalEntityPullEvent event) {
+        return mapper.mapPullRequestEventToStream(event);
     }
 
     /**
@@ -61,11 +54,8 @@ public class LegalEntityPullEventHandler implements EventHandler<LegalEntityPull
      * @param response LegalEntityIngestResponse
      */
     private void handleResponse(LegalEntityResponse response) {
-        if (Boolean.TRUE.equals(configProperties.getEnableCompletedEvent())) {
+        if (Boolean.TRUE.equals(configProperties.getEvents().getEnableCompleted())) {
             sendCompletedEvent(response);
-        }
-        if (Boolean.TRUE.equals(configProperties.getChainProductEvent())) {
-            //sendProductPullEvent(response);
         }
     }
 
@@ -77,26 +67,17 @@ public class LegalEntityPullEventHandler implements EventHandler<LegalEntityPull
         envelopedEvent.setEvent(event);
         eventBus.emitEvent(envelopedEvent);
     }
-/*
-    private void sendProductPullEvent(LegalEntityResponse response) {
-        ProductPullEvent event = new ProductPullEvent()
-                .withEventId(UUID.randomUUID().toString())
-                .withLegalEntityExternalId(response.getLegalEntity().getExternalId());
 
-        EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(event);
-        eventBus.emitEvent(envelopedEvent);
-    }
-*/
     /**
      * Handles error from ingestion service.
      *
      * @param ex Throwable
      */
     private void handleError(Throwable ex) {
-        if (Boolean.FALSE.equals(configProperties.getEnableFailedEvent())) {
+        if (Boolean.FALSE.equals(configProperties.getEvents().getEnableFailed())) {
             return;
         }
+
         LegalEntityFailedEvent event = new LegalEntityFailedEvent()
                 .withEventId(UUID.randomUUID().toString())
                 .withMessage(ex.getMessage());

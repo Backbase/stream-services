@@ -1,4 +1,6 @@
 spring:
+  activemq:
+    broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
   security:
@@ -12,7 +14,7 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://token-converter:8080/oauth/token
+            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   main:
     allow-bean-definition-overriding: true
 sso:
@@ -24,6 +26,12 @@ sso:
         key:
           type: ENV
           value: SIG_SECRET_KEY
+eureka:
+  client:
+    enabled: true
+    serviceUrl.defaultZone: http://localhost:8080/registry/eureka
+server:
+  port: 9002
 backbase:
   mtls:
     enabled: false
@@ -34,21 +42,15 @@ backbase:
       authentication:
         required-scope: api:service
   stream:
-    legalentity:
-      sink:
-        useIdentityIntegration: true
     dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manage:8080
-    identity:
-      identity-integration-base-url: http://identity-integration-service:8080
-
+      user-manager-base-url: http://localhost:8086/user-manager
+      access-control-base-url: http://localhost:8086/access-control
+      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
     compositions:
       product:
-        enable-completed-events: false
-        enable-failed-events: true
-        product-integration-url: http://product-integration-service:8080
+        enable-completed-event: false
+        enable-failed-event: false
+        product-integraion-url: http://localhost:9999
 
 logging:
   level:

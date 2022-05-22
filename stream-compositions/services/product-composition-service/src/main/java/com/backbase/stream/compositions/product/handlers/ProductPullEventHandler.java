@@ -12,6 +12,7 @@ import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequ
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 @EnableConfigurationProperties(ProductConfigurationProperties.class)
 public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
     private final ProductConfigurationProperties configProperties;
@@ -34,8 +36,8 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
      */
     @Override
     public void handle(EnvelopedEvent<ProductPullEvent> envelopedEvent) {
-        productIngestionService
-                .ingestPull(buildRequest(envelopedEvent.getEvent()))
+        buildRequest(envelopedEvent.getEvent())
+                .flatMap(productIngestionService::ingestPull)
                 .doOnError(this::handleError)
                 .subscribe(this::handleResponse);
     }
@@ -59,7 +61,7 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
      * @param response ProductIngestResponse
      */
     private void handleResponse(ProductIngestResponse response) {
-        if (Boolean.FALSE.equals(configProperties.getEnableCompletedEvents())) {
+        if (Boolean.TRUE.equals(configProperties.getEnableCompletedEvents())) {
             return;
         }
         ProductCompletedEvent event = new ProductCompletedEvent()
@@ -77,15 +79,16 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
      * @param ex Throwable
      */
     private void handleError(Throwable ex) {
-        if (Boolean.FALSE.equals(configProperties.getEnableFailedEvents())) {
-            return;
-        }
-        ProductFailedEvent event = new ProductFailedEvent()
-                .withEventId(UUID.randomUUID().toString())
-                .withMessage(ex.getMessage());
+        log.error("Error ingesting legal entity using the Pull event: {}", ex.getMessage());
 
-        EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(event);
-        eventBus.emitEvent(envelopedEvent);
+        if (Boolean.TRUE.equals(configProperties.getEnableFailedEvents())) {
+            ProductFailedEvent event = new ProductFailedEvent()
+                    .withEventId(UUID.randomUUID().toString())
+                    .withMessage(ex.getMessage());
+
+            EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
+            envelopedEvent.setEvent(event);
+            eventBus.emitEvent(envelopedEvent);
+        }
     }
 }

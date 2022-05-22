@@ -12,4 +12,8 @@
     <packaging>pom</packaging>
 
     <name>Stream :: Compositions :: API :: Cursor</name>
+
+    <modules>
+        <module>transaction-cursor-api</module>
+    </modules>
 </project>

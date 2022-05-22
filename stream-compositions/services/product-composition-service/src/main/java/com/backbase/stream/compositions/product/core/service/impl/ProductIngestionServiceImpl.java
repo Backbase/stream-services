@@ -28,9 +28,8 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @param ingestPullRequest Ingest pull request
      * @return LegalEntityIngestResponse
      */
-    public Mono<ProductIngestResponse> ingestPull(Mono<ProductIngestPullRequest> ingestPullRequest) {
-        return ingestPullRequest
-                .map(this::pullProductGroup)
+    public Mono<ProductIngestResponse> ingestPull(ProductIngestPullRequest ingestPullRequest) {
+        return pullProductGroup(ingestPullRequest)
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(this::handleSuccess)
                 .map(this::buildResponse);
@@ -42,7 +41,7 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @param ingestPushRequest Ingest push request
      * @return ProductIngestResponse
      */
-    public Mono<ProductIngestResponse> ingestPush(Mono<ProductIngestPushRequest> ingestPushRequest) {
+    public Mono<ProductIngestResponse> ingestPush(ProductIngestPushRequest ingestPushRequest) {
         throw new UnsupportedOperationException();
     }
 
@@ -64,10 +63,8 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @param productGroup Product group
      * @return Ingested product group
      */
-    private Mono<ProductGroup> sendToDbs(Mono<ProductGroup> productGroup) {
-        return productGroup
-                .map(ProductGroupTask::new)
-                .flatMap(batchProductIngestionSaga::process)
+    private Mono<ProductGroup> sendToDbs(ProductGroup productGroup) {
+        return batchProductIngestionSaga.process(new ProductGroupTask(productGroup))
                 .map(ProductGroupTask::getData);
     }
 
@@ -78,7 +75,7 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
     }
 
     private void handleSuccess(ProductGroup productGroup) {
-        log.error("Product group ingestion completed");
+        log.info("Product group ingestion completed");
         if (log.isDebugEnabled()) {
             log.debug("Product group: {}", productGroup);
         }
