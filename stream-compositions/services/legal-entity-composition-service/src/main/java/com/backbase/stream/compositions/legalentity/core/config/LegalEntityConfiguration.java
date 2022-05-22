@@ -27,7 +27,7 @@ public class LegalEntityConfiguration {
     @Primary
     public LegalEntityIntegrationApi legalEntityIntegrationApi() {
         LegalEntityIntegrationApi legalEntityIntegrationApi = new LegalEntityIntegrationApi();
-        legalEntityIntegrationApi.getApiClient().setBasePath(legalEntityConfigurationProperties.getLegalEntityIntegrationUrl());
+        legalEntityIntegrationApi.getApiClient().setBasePath(legalEntityConfigurationProperties.getIntegrationBaseUrl());
         return legalEntityIntegrationApi;
     }
 
@@ -43,7 +43,7 @@ public class LegalEntityConfiguration {
             ObjectMapper objectMapper,
             DateFormat dateFormat) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(legalEntityConfigurationProperties.getProductCompositionUrl());
+        apiClient.setBasePath(legalEntityConfigurationProperties.getChains().getProductComposition().getBaseUrl());
 
         return apiClient;
     }

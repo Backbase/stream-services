@@ -44,12 +44,12 @@ class ProductIngestionServiceImplTest {
 
     @Test
     void ingestionInPullMode_Success() {
-        Mono<ProductIngestPullRequest> productIngestPullRequest = Mono.just(ProductIngestPullRequest.builder()
+        ProductIngestPullRequest productIngestPullRequest = ProductIngestPullRequest.builder()
                 .legalEntityExternalId("externalId")
-                .build());
+                .build();
         ProductGroup productGroup = new ProductGroup();
 
-        when(productIntegrationService.pullProductGroup(productIngestPullRequest.block()))
+        when(productIntegrationService.pullProductGroup(productIngestPullRequest))
                 .thenReturn(Mono.just(productGroup));
 
         when(mapper.mapIntegrationToStream(productGroup))
@@ -68,7 +68,7 @@ class ProductIngestionServiceImplTest {
 
     @Test
     void ingestionInPushMode_Unsupported() {
-        Mono<ProductIngestPushRequest> request = Mono.just(ProductIngestPushRequest.builder().build());
+        ProductIngestPushRequest request = ProductIngestPushRequest.builder().build();
         assertThrows(UnsupportedOperationException.class, () -> {
             productIngestionService.ingestPush(request);
         });

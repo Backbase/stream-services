@@ -11,7 +11,6 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRe
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.product.client.ProductCompositionApi;
-import com.backbase.stream.compositions.product.client.model.ProductPullIngestionRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -36,7 +35,8 @@ public class LegalEntityController implements LegalEntityCompositionApi {
 
     @Override
     public Mono<ResponseEntity<Void>> pullAsyncLegalEntity(Mono<LegalEntityPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-        Mono.fromCallable(() -> legalEntityIngestionService.ingestPull(pullIngestionRequest.map(this::buildPullRequest)))
+        Mono.fromCallable(() -> pullIngestionRequest.map(this::buildPullRequest)
+                                .flatMap(legalEntityIngestionService::ingestPull))
                 .subscribeOn(Schedulers.boundedElastic()).subscribe();
 
         return Mono.empty();
@@ -50,16 +50,17 @@ public class LegalEntityController implements LegalEntityCompositionApi {
     public Mono<ResponseEntity<LegalEntityIngestionResponse>> pullLegalEntity(
             @Valid Mono<LegalEntityPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
         log.info("Start synchronous ingestion of Legal Entity");
-        return legalEntityIngestionService.ingestPull(pullIngestionRequest.map(this::buildPullRequest))
+        return pullIngestionRequest.map(this::buildPullRequest)
+                .flatMap(legalEntityIngestionService::ingestPull)
                 .map(this::handleResponse)
                 .map(this::mapIngestionToResponse);
     }
 
     @Override
     public Mono<ResponseEntity<Void>> pushAsyncLegalEntity(Mono<LegalEntityPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-        legalEntityIngestionService
-                .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
-                .subscribeOn(Schedulers.boundedElastic());
+        Mono.fromCallable(() -> pushIngestionRequest.map(this::buildPushRequest)
+                .flatMap(legalEntityIngestionService::ingestPush))
+                .subscribeOn(Schedulers.boundedElastic()).subscribe();
         return Mono.empty();
     }
 
@@ -69,8 +70,8 @@ public class LegalEntityController implements LegalEntityCompositionApi {
     @Override
     public Mono<ResponseEntity<LegalEntityIngestionResponse>> pushLegalEntity(
             @Valid Mono<LegalEntityPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-        return legalEntityIngestionService
-                .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
+        return pushIngestionRequest.map(this::buildPushRequest)
+                .flatMap(legalEntityIngestionService::ingestPush)
                 .map(this::mapIngestionToResponse);
     }
 
@@ -81,11 +82,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @return LegalEntityIngestPullRequest
      */
     private LegalEntityPullRequest buildPullRequest(LegalEntityPullIngestionRequest request) {
-        return LegalEntityPullRequest
-                .builder()
-                .legalEntityExternalId(request.getLegalEntityExternalId())
-                .additionalParameters(request.getAdditionalParameters())
-                .build();
+        return mapper.mapPullRequestCompositionToStream(request);
     }
 
     /**
@@ -102,10 +99,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
     }
 
     private LegalEntityResponse handleResponse(LegalEntityResponse response) {
-        if (Boolean.TRUE.equals(configProperties.getChainProductEvent())) {
-            log.info("Calling Product ingestion service api for LE {}", response.getLegalEntity().getExternalId());
-            sendProductPullEvent(response);
-        }
+        log.info("Legal Entity Ingestion completed for id {}", response.getLegalEntity().getInternalId());
         return response;
     }
 
@@ -122,19 +116,5 @@ public class LegalEntityController implements LegalEntityCompositionApi {
                 HttpStatus.CREATED);
     }
 
-    private void sendProductPullEvent(LegalEntityResponse response) {
-        log.info("Calling Product Composition API");
-        ProductPullIngestionRequest productPullIngestionRequest =
-                new ProductPullIngestionRequest().withLegalEntityExternalId("le1")
-                .withServiceAgreementExternalId("sae1")
-                .withServiceAgreementInternalId("sai1")
-                .withUserExternalId("u1");
 
-        productCompositionApi.pullIngestProductGroup(productPullIngestionRequest)
-                .onErrorResume(e -> {
-                    log.info(e.getMessage());
-                    return Mono.empty();
-                })
-                .subscribe();
-    }
 }

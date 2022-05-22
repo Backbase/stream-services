@@ -9,40 +9,18 @@ tags:
   - name: ProductIntegration
 paths:
   /integration-api/v2/product-group:
-    get:
+    post:
       tags:
         - ProductIntegration
       summary: Pulls product group.
       description: Pulls product group.
       operationId: pullProductGroup
-      parameters:
-        - in: query
-          name: legalEntityExternalId
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: serviceAgreementExternalId
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: serviceAgreementInternalId
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: userExternalId
-          schema:
-            type: string
-          required: true
-        - in: query
-          name: additionalParameters
-          schema:
-            type: object
-            additionalProperties:
-              type: string
-
+      requestBody:
+        description: Product Pull Integration Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PullProductGroupRequest'
       responses:
         "200":
           description: Product group sucessfully returned.
@@ -73,6 +51,28 @@ components:
       properties:
         message:
           type: string
+
+    PullProductGroupRequest:
+      type: object
+      properties:
+        legalEntityExternalId:
+          type: string
+        serviceAgreementExternalId:
+          type: string
+        serviceAgreementInternalId:
+          type: string
+        userExternalId:
+          type: string
+        userInternalId:
+          type: string
+        membershipAccounts:
+          type: array
+          items:
+            type: string
+        additionalParameters:
+          type: object
+          additionalProperties:
+            type: string
 
     PullProductGroupResponse:
       type: object

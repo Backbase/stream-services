@@ -4,11 +4,14 @@
   "properties": {
     "legalEntity": {
       "type": "object",
-      "$ref": "../legal-entity.json"
+      "properties": {
+        "internalId": {
+          "type": "string"
+        },
+        "externalId": {
+          "type": "string"
+        }
+      }
     }
-  },
-  "required": [
-    "eventId",
-    "legalEntity"
-  ]
+  }
 }

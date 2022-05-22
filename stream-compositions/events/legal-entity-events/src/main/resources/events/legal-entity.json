@@ -9,22 +9,6 @@
     "externalId": {
       "description": "Legal entity external id",
       "type": "string"
-    },
-    "name": {
-      "description": "Full name associated with the legal entity",
-      "type": "string"
-    },
-    "type": {
-      "description": "Type of Legal Entity",
-      "enum": ["RETAIL", "SME", "CORPORATE"],
-      "type": "string"
-    },
-    "memberships": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "$ref": "membership.json"
-      }
     }
   },
   "required": [

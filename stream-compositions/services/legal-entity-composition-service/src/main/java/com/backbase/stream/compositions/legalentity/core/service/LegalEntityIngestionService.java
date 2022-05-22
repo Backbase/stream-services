@@ -12,7 +12,7 @@ public interface LegalEntityIngestionService {
      * @param ingestPullRequest Ingest pull request
      * @return LegalEntityIngestResponse
      */
-    Mono<LegalEntityResponse> ingestPull(Mono<LegalEntityPullRequest> ingestPullRequest);
+    Mono<LegalEntityResponse> ingestPull(LegalEntityPullRequest ingestPullRequest);
 
     /**
      * Ingests legal entity in push mode.
@@ -20,5 +20,5 @@ public interface LegalEntityIngestionService {
      * @param ingestPushRequest Ingest push request
      * @return LegalEntityIngestResponse
      */
-    Mono<LegalEntityResponse> ingestPush(Mono<LegalEntityPushRequest> ingestPushRequest);
+    Mono<LegalEntityResponse> ingestPush(LegalEntityPushRequest ingestPushRequest);
 }

@@ -18,7 +18,9 @@ public class ProductPushEventHandler implements EventHandler<ProductPushEvent> {
 
     @Override
     public void handle(EnvelopedEvent<ProductPushEvent> envelopedEvent) {
-        productIngestionService.ingestPush(buildRequest(envelopedEvent));
+        buildRequest(envelopedEvent)
+                .flatMap(productIngestionService::ingestPush)
+                .subscribe();
     }
 
     /**

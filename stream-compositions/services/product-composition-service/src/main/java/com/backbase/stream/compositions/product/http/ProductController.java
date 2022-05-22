@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.validation.Valid;
 
@@ -30,11 +31,22 @@ public class ProductController implements ProductCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProductGroup(
+    public Mono<ResponseEntity<Void>> pullIngestProductAsync(
             @Valid Mono<ProductPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-        log.info("Inside Product Composition Controller");
-        return productIngestionService
-                .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
+
+        Mono.fromCallable(() -> pullIngestionRequest.map(this::buildPullRequest)
+                .flatMap(productIngestionService::ingestPull)
+                .map(this::mapIngestionToResponse)).subscribeOn(Schedulers.boundedElastic()).subscribe();
+
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProduct(
+            @Valid Mono<ProductPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+
+        return pullIngestionRequest.map(this::buildPullRequest)
+                .flatMap(productIngestionService::ingestPull)
                 .map(this::mapIngestionToResponse);
     }
 
@@ -42,10 +54,22 @@ public class ProductController implements ProductCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<ProductIngestionResponse>> pushIngestProductGroup(
+    public Mono<ResponseEntity<Void>> pushIngestProductAsync(
             @Valid Mono<ProductPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-        return productIngestionService
-                .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
+        Mono.fromCallable(() -> pushIngestionRequest.map(this::buildPushRequest)
+                .flatMap(productIngestionService::ingestPush)
+                .map(this::mapIngestionToResponse))
+                .subscribeOn(Schedulers.boundedElastic())
+                .subscribe();
+
+         return Mono.empty();
+    }
+
+    @Override
+    public Mono<ResponseEntity<ProductIngestionResponse>> pushIngestProduct(
+            @Valid Mono<ProductPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+        return pushIngestionRequest.map(this::buildPushRequest)
+                .flatMap(productIngestionService::ingestPush)
                 .map(this::mapIngestionToResponse);
     }
 

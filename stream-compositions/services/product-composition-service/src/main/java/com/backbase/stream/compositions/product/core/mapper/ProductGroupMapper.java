@@ -1,5 +1,7 @@
 package com.backbase.stream.compositions.product.core.mapper;
 
+import com.backbase.stream.compositions.integration.product.model.PullProductGroupRequest;
+import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
@@ -70,4 +72,11 @@ public interface ProductGroupMapper {
      */
     com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductGroup mapStreamToEvent(
             com.backbase.stream.legalentity.model.ProductGroup productGroup);
+
+    /**
+     * Maps steam ProductIngestPullRequest to integration PullProductProductRequest model.
+     * @param productIngestPullRequest
+     * @return Pull Product Group Request object
+     */
+    PullProductGroupRequest mapStreamToIntegration(ProductIngestPullRequest productIngestPullRequest);
 }

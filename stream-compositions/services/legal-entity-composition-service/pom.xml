@@ -14,6 +14,7 @@
     <name>Stream :: Compositions :: Services :: Legal Entity</name>
 
     <dependencies>
+
         <!-- Service SDK dependencies -->
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
@@ -32,12 +33,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-
-        <!-- Third party dependencies -->
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
         </dependency>
 
         <!-- Streams dependencies -->
@@ -70,6 +65,12 @@
             <groupId>com.backbase.stream.compositions.api</groupId>
             <artifactId>product-composition-api</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <!-- Third party dependencies -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
         </dependency>
 
         <!-- Test dependencies -->
@@ -181,7 +182,8 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/legal-entity-composition-api/service-api-v2.0.0.yaml</inputSpec>
+                            <!--inputSpec>${project.basedir}/yaml/legal-entity-composition-api/service-api-v2.0.0.yaml</inputSpec-->
+                            <inputSpec>${project.basedir}/../../api/service-api/legal-entity-composition-api/src/main/resources/service-api-v2.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <additionalProperties>useWithModifiers=true</additionalProperties>
                             <configOptions>
@@ -201,7 +203,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/legal-entity-integration-api/integration-api-v2.0.0.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/../../api/integrations-api/legal-entity-integration-api/src/main/resources/integration-api-v2.yaml</inputSpec>
                             <apiPackage>com.backbase.stream.compositions.legalentity.integration.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.legalentity.integration.client.model</modelPackage>
                             <additionalProperties>useWithModifiers=true</additionalProperties>

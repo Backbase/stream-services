@@ -2,22 +2,33 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "externalId": {
-      "description": "Legal entity external id. This is the externally identifiable value on the downstream system for the given legal entity",
+    "legalEntityExternalId": {
       "type": "string"
     },
     "taxId": {
-      "description": "Tax id of the individual or corporation used for membership identification",
       "type": "string"
     },
-    "membershipIds": {
+    "userExternalId": {
+      "type": "string"
+    },
+    "parentLegalEntityExternalId": {
+      "type": "string"
+    },
+    "realmName": {
+      "type": "string"
+    },
+    "referenceJobRoleNames": {
       "type": "array",
       "items": {
         "type": "string"
       }
+    },
+    "isAdmin": {
+      "type": "boolean"
+    },
+    "identityUserLinkStrategy": {
+      "type": "string",
+      "enum": ["IMPORT_FROM_IDENTIY","CREATE_IN_IDENTITY","IDENTITY_AGNOSTIC"]
     }
-  },
-  "required": [
-    "legalEntityExternalId"
-  ]
+  }
 }
