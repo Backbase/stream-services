@@ -1,4 +1,6 @@
 spring:
+  activemq:
+    broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
   security:
@@ -15,6 +17,12 @@ spring:
             token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   main:
     allow-bean-definition-overriding: true
+eureka:
+  client:
+    enabled: true
+    serviceUrl.defaultZone: http://localhost:8080/registry/eureka
+server:
+  port: 9001
 
 backbase:
   security:

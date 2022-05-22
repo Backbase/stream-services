@@ -35,7 +35,7 @@ class LegalEntityIngestionServiceImplTest {
     Validator validator;
 
     @Mock
-    BootstrapConfigurationProperties bootstrapConfigurationProperties;
+    Validator validator;
 
     @Mock
     LegalEntitySaga legalEntitySaga;

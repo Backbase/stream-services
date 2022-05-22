@@ -4,7 +4,6 @@ import com.backbase.buildingblocks.presentation.errors.BadRequestException;
 import com.backbase.buildingblocks.presentation.errors.Error;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
-import com.backbase.stream.compositions.legalentity.core.config.BootstrapConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
@@ -109,20 +108,24 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
 
     /**
      * Perform any pre-processing on the data received from the downstream system
-     * @param legalEntity
-     * @return
+     * @param res
+     * @return A Mono publisher for LegalEntity
      */
-    private Mono<LegalEntity> preprocess(Mono<LegalEntity> legalEntity) {
-        return legalEntity
-                .map(this::validateLegalEntity);
+    private Mono<LegalEntityResponse> validate(LegalEntityResponse res) {
+        Set<ConstraintViolation<LegalEntity>> violations = validator.validate(res.getLegalEntity());
+
+        if (!CollectionUtils.isEmpty(violations)) {
+            List<Error> errors = violations.stream().map(c -> new Error()
+                    .withMessage(c.getMessage())
+                    .withKey(Error.INVALID_INPUT_MESSAGE)).collect(Collectors.toList());
+            return Mono.error(new BadRequestException().withErrors(errors));
+        }
+
+        return Mono.just(res);
     }
 
-    private LegalEntity validateLegalEntity(LegalEntity legalEntity) {
-        if (legalEntity.getParentExternalId() == null) {
-            legalEntity.setParentExternalId(
-                    bootstrapConfigurationProperties.getLegalEntity().getParentExternalId());
-        }
-        return legalEntity;
+    private Mono<LegalEntity> pushLegalEntity(LegalEntityPushRequest legalEntityPushRequest) {
+        return Mono.just(legalEntityPushRequest.getLegalEntity());
     }
 
     private LegalEntityResponse buildResponse(LegalEntity legalEnity) {
