@@ -38,11 +38,6 @@ public class LegalEntityConfiguration {
     }
 
     @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.csrf().disable().build();
-    }
-
-    @Bean
     public ApiClient productClient(
             WebClient dbsWebClient,
             ObjectMapper objectMapper,

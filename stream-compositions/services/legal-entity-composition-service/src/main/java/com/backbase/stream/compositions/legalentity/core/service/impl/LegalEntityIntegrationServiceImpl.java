@@ -26,7 +26,12 @@ public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegration
                 .pullLegalEntity(
                         mapper.mapPullRequestStreamToIntegration(ingestPullRequest))
                 .map(mapper::mapResponseIntegrationToStream)
+                .onErrorResume(e -> {
+                    log.error("Exception: {}", e.getMessage());
+                    return Mono.empty();
+                })
                 .flatMap(this::handleIntegrationResponse);
+
     }
 
     private Mono<LegalEntityResponse> handleIntegrationResponse(LegalEntityResponse res) {
@@ -34,5 +39,6 @@ public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegration
             log.debug("Membership Accounts received from Integration: {}", res.getMembershipAccounts());
             log.debug("Legal Entity received from Integration: {}", res.getLegalEntity());
         }
+        return Mono.just(res);
     }
 }

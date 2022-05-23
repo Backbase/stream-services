@@ -7,14 +7,11 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityRespon
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityPostIngestionService;
 import com.backbase.stream.compositions.product.client.ProductCompositionApi;
 import com.backbase.stream.compositions.product.client.model.ProductPullIngestionRequest;
-import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
-
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -42,17 +39,14 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
     }
 
-    public void handleFailure(LegalEntity legalEntity) {
-        if (Boolean.TRUE.equals(legalEntityConfigurationProperties.getChains().getProductComposition().getEnableOnComplete())) {
-            log.info("Call product-composition-service for Legal Entity {}", legalEntity.getInternalId());
-            sendProductPullEvent(legalEntity);
-        }
-
-
+    public void handleFailure(LegalEntityResponse res) {
+        //TODO: Send failure event
 
     }
 
     private void sendProductPullEvent(LegalEntityResponse res) {
+        LegalEntity legalEntity = res.getLegalEntity();
+
         if (CollectionUtils.isEmpty(legalEntity.getUsers())) {
             log.error("Legalentity is missing users. Cannot call product-composition");
             return;
@@ -62,7 +56,7 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
                 new ProductPullIngestionRequest().withLegalEntityExternalId(legalEntity.getExternalId())
                         .withServiceAgreementExternalId(legalEntity.getMasterServiceAgreement().getExternalId())
                         .withServiceAgreementInternalId(legalEntity.getMasterServiceAgreement().getInternalId())
-                        .withMembershipAccounts();
+                        .withMembershipAccounts(res.getMembershipAccounts());
 
 
         productPullIngestionRequest.setUserExternalId(

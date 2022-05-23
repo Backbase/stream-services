@@ -8,6 +8,7 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRe
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
+import com.backbase.stream.compositions.legalentity.core.service.LegalEntityPostIngestionService;
 import com.backbase.stream.compositions.legalentity.integration.client.model.LegalEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,10 +36,10 @@ class LegalEntityIngestionServiceImplTest {
     Validator validator;
 
     @Mock
-    Validator validator;
+    LegalEntitySaga legalEntitySaga;
 
     @Mock
-    LegalEntitySaga legalEntitySaga;
+    LegalEntityPostIngestionService legalEntityPostIngestionService;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +47,8 @@ class LegalEntityIngestionServiceImplTest {
                 mapper,
                 legalEntitySaga,
                 legalEntityIntegrationService,
-                validator);
+                validator,
+                legalEntityPostIngestionService);
     }
 
     void ingestionInPullMode_Success() {
@@ -54,8 +56,10 @@ class LegalEntityIngestionServiceImplTest {
                 .legalEntityExternalId("externalId")
                 .build();
         LegalEntity legalEntity = new LegalEntity().withName("legalEntityName");
+        LegalEntityResponse res = new LegalEntityResponse(
+                new com.backbase.stream.legalentity.model.LegalEntity().name("legalEntityName"), null);
         when(legalEntityIntegrationService.pullLegalEntity(legalEntityIngestPullRequest))
-                .thenReturn(Mono.just(legalEntity));
+                .thenReturn(Mono.just(res));
 
         when(mapper.mapIntegrationToStream(legalEntity))
                 .thenReturn(new com.backbase.stream.legalentity.model.LegalEntity().name(legalEntity.getName()));

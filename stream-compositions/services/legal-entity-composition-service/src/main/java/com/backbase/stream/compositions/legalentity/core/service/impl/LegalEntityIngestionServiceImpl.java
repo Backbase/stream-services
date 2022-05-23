@@ -43,8 +43,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
         return pullLegalEntity(ingestPullRequest)
                 .flatMap(this::validate)
                 .flatMap(this::sendToDbs)
-                .doOnSuccess(legalEntityPostIngestionService::handleSuccess)
-                .map(this::buildResponse);
+                .doOnSuccess(legalEntityPostIngestionService::handleSuccess);
     }
 
     /**
@@ -54,8 +53,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
         return pushLegalEntity(ingestPushRequest)
                 .flatMap(this::validate)
                 .flatMap(this::sendToDbs)
-                .doOnSuccess(this::handleSuccess)
-                .map(this::buildResponse);
+                .doOnSuccess(legalEntityPostIngestionService::handleSuccess);
     }
 
     /**
@@ -102,30 +100,10 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
         return Mono.just(res);
     }
 
-    private Mono<LegalEntity> pushLegalEntity(LegalEntityPushRequest legalEntityPushRequest) {
-        return Mono.just(legalEntityPushRequest.getLegalEntity());
-    }
-
-    /**
-     * Perform any pre-processing on the data received from the downstream system
-     * @param res
-     * @return A Mono publisher for LegalEntity
-     */
-    private Mono<LegalEntityResponse> validate(LegalEntityResponse res) {
-        Set<ConstraintViolation<LegalEntity>> violations = validator.validate(res.getLegalEntity());
-
-        if (!CollectionUtils.isEmpty(violations)) {
-            List<Error> errors = violations.stream().map(c -> new Error()
-                    .withMessage(c.getMessage())
-                    .withKey(Error.INVALID_INPUT_MESSAGE)).collect(Collectors.toList());
-            return Mono.error(new BadRequestException().withErrors(errors));
-        }
-
-        return Mono.just(res);
-    }
-
-    private Mono<LegalEntity> pushLegalEntity(LegalEntityPushRequest legalEntityPushRequest) {
-        return Mono.just(legalEntityPushRequest.getLegalEntity());
+    private Mono<LegalEntityResponse> pushLegalEntity(LegalEntityPushRequest legalEntityPushRequest) {
+        return Mono.just(LegalEntityResponse.builder()
+                .legalEntity(legalEntityPushRequest.getLegalEntity())
+                .build());
     }
 
     private LegalEntityResponse buildResponse(LegalEntity legalEnity) {

@@ -2,7 +2,6 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-<<<<<<<< HEAD:stream-compositions/events/transaction-events/src/main/resources/events/ingress/transactions-ingest-push-event.json
     "eventId": {
       "description": "Unique identifier of the event.",
       "type": "string"
@@ -16,23 +15,5 @@
   },
   "required": [
     "eventId"
-========
-    "legalEntityExternalId": {
-      "description": "Legal entity external id.",
-      "type": "string"
-    },
-    "name": {
-      "description": "Full name associated with the legal entity",
-      "type": "string"
-    },
-    "type": {
-      "description": "Type of Legal Entity",
-      "enum": ["RETAIL", "SME", "CORPORATE"],
-      "type": "string"
-    }
-  },
-  "required": [
-    "legalEntityExternalId"
->>>>>>>> eac0daa1 (- Updated Integration and Service Specs):stream-compositions/events/legal-entity-events/src/main/resources/events/ingress/legal-entity-request.json
   ]
 }
