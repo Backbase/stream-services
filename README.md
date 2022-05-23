@@ -1,9 +1,9 @@
 [![Build Stream Services](https://github.com/Backbase/stream-services-2.0/actions/workflows/build.yml/badge.svg)](https://github.com/Backbase/stream-services-2.0/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.backbase.stream%3Astream-services&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.backbase.stream%3Astream-services)
 # Stream Services
-Stream Services are the "out-of-the-box" components that talk to DBS and are responsible for orchestrating calls to DBS. 
+Stream Services are the "out-of-the-box" components that talk to DBS are responsible for orchestrating calls to DBS. 
 The orchestration of calling different services is written in a functional programming style on project reactor enabling resiliency and scalability. 
-Stream Services are packaged as libraries that can be included in any project, REST Service and/or Spring Cloud Data Flow Applications.
+Stream Services are packaged as libraries that can be included in any project, REST Service and/or Spring Cloud Data Flow Applications
 
 The Services are listed with Service name and how they are packaged
 
@@ -13,7 +13,7 @@ Currently the following DBS services are exposed as Stream Components:
 * [Stream Access Control](stream-cursor/readme.md) (Lib) → The Stream Access Control library provides access to Access Control services from a single library and provides an easier abstraction layer to use these services. It mixes access to persistence and service api's to enable proper service to service comms for non DBS services such as Stream. Requires Access Control, Product Summary
 * [Stream Legal Entity](stream-cursor/readme.md) (Lib, Rest, Sink) → Legal Entity Ingestion Service that orchestrate all calls to DBS from a single aggregate model. This service is exposed as a library, REST full service and as a Sink. Supports retry of the aggregate and uses the Legal Entity Ingestion Model to have a single interface into DBS. Requires Access Control, Product Summary
 * [Stream Product Catalog](stream-cursor/readme.md) (Lib, Rest, Task) → Enabled bootstrapping of product types into DBS. Product Types are currently hardcoded in the streamTask definition. Orchestrates calls into Product Summary
-* [Stream Transactions](stream-transactions) (Lib, Rest, Sink) → Allows ingestion into DBS in a controlled way with support for retry, rate limiting and configurable batch sizes. 
+* [Stream Transactions](stream-cursor/readme.md) (Lib, Rest, Sink) → Allows ingestion into DBS in a controlled way with support for retry, rate limiting and configurable batch sizes. 
 
 ## Supported DBS versions
 

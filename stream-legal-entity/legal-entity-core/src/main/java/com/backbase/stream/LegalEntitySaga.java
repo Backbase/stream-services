@@ -1,8 +1,5 @@
 package com.backbase.stream;
 
-import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
-import static org.springframework.util.CollectionUtils.isEmpty;
-
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
@@ -24,16 +21,6 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.cloud.sleuth.annotation.SpanTag;
@@ -108,7 +95,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     @Override
     public Mono<LegalEntityTask> executeTask(@SpanTag(value = "streamTask") LegalEntityTask streamTask) {
         return upsertLegalEntity(streamTask)
-            .flatMap(this::linkLegalEntityToRealm)
             .flatMap(this::setupAdministrators)
             .flatMap(this::setupUsers)
             .flatMap(this::setupServiceAgreement)
@@ -116,6 +102,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::processJobProfiles)
             .flatMap(this::setupAdministratorPermissions)
             .flatMap(this::processProducts)
+            .flatMap(this::linkLegalEntityToRealm)
             .flatMap(this::processSubsidiaries);
     }
 
@@ -333,7 +320,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                             streamTask.info(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, "assigned", legalEntity.getExternalId(), legalEntity.getInternalId(), "Assigned Business Function Group: %s with functions: %s to Service Agreement: %s", bfg.getName(),
                                 Optional.ofNullable(bfg.getFunctions()).orElse(Collections.singletonList(new BusinessFunction().name("<not loaded>"))).stream().map(BusinessFunction::getFunctionCode).collect(Collectors.joining(", ")), serviceAgreement.getExternalId());
                         });
-                        return setupUserPermissions(streamTask, jobProfileUser);
+                        return setupUserPermissions(streamTask, jobProfileUser.getBusinessFunctionGroups());
                     })
                     .map(actual -> jobProfileUser);
             })
@@ -420,14 +407,14 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         }
     }
 
-    public Mono<LegalEntityTask> setupUserPermissions(LegalEntityTask legalEntityTask, JobProfileUser userJobProfile) {
+    public Mono<LegalEntityTask> setupUserPermissions(LegalEntityTask legalEntityTask, List<BusinessFunctionGroup> businessFunctionGroups) {
         LegalEntity legalEntity = legalEntityTask.getData();
-        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = Stream.of(userJobProfile)
+        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = nullableCollectionToStream(legalEntity.getUsers())
             // Ensure internal Id present.
             .filter(jobProfileUser -> Objects.nonNull(jobProfileUser.getUser().getInternalId()))
             .collect(Collectors.toMap(
                 JobProfileUser::getUser,
-                jobProfileUser -> userJobProfile.getBusinessFunctionGroups().stream()
+                jobProfileUser -> businessFunctionGroups.stream()
                     .collect(Collectors.toMap(
                         bfg -> bfg,
                         bfg -> Collections.emptyList()
@@ -543,6 +530,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         Mono<User> createNewIdentityUser =
             userService.setupRealm(legalEntity)
                 .switchIfEmpty(Mono.error(new StreamTaskException(streamTask, "Realm: " + legalEntity.getRealmName() + " not found!")))
+                .then(userService.linkLegalEntityToRealm(legalEntity))
                 .then(userService.createOrImportIdentityUser(user, legalEntity.getInternalId(), streamTask)
                 .flatMap(u -> updateUserStatus(u, legalEntity.getRealmName()))
                 .map(existingUser -> {
@@ -703,6 +691,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private Mono<LegalEntityTask> linkLegalEntityToRealm(LegalEntityTask streamTask) {
         return Mono.just(streamTask)
             .filter(task -> legalEntitySagaConfigurationProperties.isUseIdentityIntegration())
+            .filter(task -> CollectionUtils.isEmpty(task.getData().getAdministrators())
+                && CollectionUtils.isEmpty(task.getData().getUsers()))
             .flatMap(task ->
                 userService.setupRealm(task.getLegalEntity())
                     .then(userService.linkLegalEntityToRealm(task.getLegalEntity()))

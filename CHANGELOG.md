@@ -3,18 +3,6 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [3.0.0] 
-### Removed
-- Sources, Processors and Sinks for Stream Components
-- Removed obsolete Stream SDK modules in preparation to support ServiceSDK
-- Removed generators. Test data generation to be done using `space-generator`
-## [2.62.0]
-### Fixed
-- Legal Entity Saga: linkLegalEntityToRealm method executed multiple times ( when multiple users are ingested): `unique constraint (PK_LE_ASSIGN_REALM) violated`
-## [2.61.0]
-### Fixed
-- Legal Entity Saga: referenceJobRoleNames are mixed up between users ( when multiple users are ingested)
-
 ## [2.52.0]
 ### Removed 
 - Audit Core & Http Service. Created as a demo, never to be used.

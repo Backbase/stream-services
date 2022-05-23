@@ -19,7 +19,6 @@
         <module>legal-entity-composition-service</module>
         <module>product-composition-service</module>
         <module>product-catalog-composition-service</module>
-        <module>transaction-composition-service</module>
     </modules>
 
     <dependencies>

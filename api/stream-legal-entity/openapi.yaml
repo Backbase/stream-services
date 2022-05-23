@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Ingest Legal Entity API
   description: Ingestion Saga for Legal Entities and their products
-  version: 2.3.0
+  version: 2.2.0
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
     backgroundColor: "#FFFFFF"
@@ -600,16 +600,12 @@ components:
           $ref: '#/components/schemas/CreditLimitInterestRate'
         accruedInterest:
           $ref: '#/components/schemas/AccruedInterest'
-        bankBranchCode:
-          $ref: '#/components/schemas/BankBranchCode'
     Loan:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
-        availableBalance:
-          $ref: '#/components/schemas/AvailableBalance'
         principalAmount:
           $ref: '#/components/schemas/PrincipalAmount'
         urgentTransferAllowed:
@@ -634,8 +630,6 @@ components:
           $ref: '#/components/schemas/AmountInArrear'
         interestSettlementAccount:
           $ref: '#/components/schemas/InterestSettlementAccount'
-        minimumPayment:
-          $ref: '#/components/schemas/MinimumPayment'
         minimumPaymentDueDate:
           $ref: '#/components/schemas/MinimumPaymentDueDate'
         accruedInterest:
@@ -656,8 +650,6 @@ components:
           $ref: '#/components/schemas/IBAN'
         BBAN:
           $ref: '#/components/schemas/BBAN'
-        bankBranchCode:
-          $ref: '#/components/schemas/BankBranchCode'
     TermDeposit:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
@@ -1360,10 +1352,6 @@ components:
             $ref: '#/components/schemas/JobRole'
         creatorLegalEntity:
           $ref: '#/components/schemas/ExternalIdentifier'
-        additions:
-          type: object
-          additionalProperties:
-            type: string
     ApsIdentifiers:
       type: object
       properties:

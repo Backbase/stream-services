@@ -51,7 +51,7 @@ jobs:
           echo "PATCH=${VERSION_PARTS[2]}" >> $GITHUB_ENV
 
       - name: Setup release version
-        if: contains(github.ref, 'master')
+        if: "contains(github.ref, 'master') && !contains(github.event.head_commit.message, 'hotfix/')"
         run: |
           NEW_VERSION="$((MAJOR)).$((MINOR+1)).0"
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
@@ -81,7 +81,7 @@ jobs:
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
       - name: Commit files
-        if: "contains(github.ref, 'master') || contains(github.ref, 'support/')"
+        if: contains(github.ref, 'master')
         run: |
          git config --local user.email "stream_releaser@backbase.com"
          git config --local user.name "bb-stream-bot"
@@ -89,11 +89,11 @@ jobs:
          git tag -a $NEW_VERSION -m "[version bump]"
 
       - name: Push changes
-        if: "contains(github.ref, 'master') || contains(github.ref, 'support/')"
+        if: contains(github.ref, 'master')
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.STREAM_BOT_TOKEN }}
 
       - name: Upload to Repo
-        if: "contains(github.ref, 'master') || contains(github.ref, 'support/') || contains(github.ref, 'develop')" # In case of develop branch it will upload the snapshot version
-        run: mvn deploy -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
+        if: "contains(github.ref, 'master') || contains(github.ref, 'develop')" # In case of develop branch it will upload the snapshot version
+        run: mvn deploy -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/artifactory/backbase-stream-releases/
