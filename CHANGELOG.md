@@ -31,14 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
             .flatMap(legalEntitySaga::executeTask, legalEntitySagaConfiguration.getTaskExecutors())
             .map(LegalEntityTask::getData)
             .doOnNext(actual -> log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
- ``` 
-    
-
-## [3.0.0] 
-### Removed
-- Sources, Processors and Sinks for Stream Components
-- Removed obsolete Stream SDK modules in preparation to support ServiceSDK
-- Removed generators. Test data generation to be done using `space-generator`
+ ```
 
 ## [2.51.0]
 ### Maintenance
