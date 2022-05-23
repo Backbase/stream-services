@@ -32,7 +32,7 @@ class ProductConfigurationTest {
     @Test
     void test() {
         ProductConfigurationProperties properties = new ProductConfigurationProperties();
-        properties.setProductIntegrationUrl("http://product");
+        properties.setIntegrationBaseUrl("http://product");
 
         ProductCompositionConfiguration configuration = new ProductCompositionConfiguration(properties);
         assertNotNull(configuration.productIntegrationApi(apiClient));

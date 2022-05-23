@@ -28,14 +28,6 @@ public class ProductCompositionConfiguration {
     }
 
     @Bean
-    public ApiClient productIntegrationClient(
-            WebClient dbsWebClient,
-            ObjectMapper objectMapper,
-            DateFormat dateFormat) {
-        return new ApiClient(dbsWebClient, objectMapper, dateFormat);
-    }
-
-    @Bean
     @Primary
     public ProductIntegrationApi productIntegrationApi(ApiClient productClient) {
         return new ProductIntegrationApi(productClient);
@@ -47,7 +39,7 @@ public class ProductCompositionConfiguration {
             ObjectMapper objectMapper,
             DateFormat dateFormat) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(productConfigurationProperties.getProductIntegrationUrl());
+        apiClient.setBasePath(productConfigurationProperties.getIntegrationBaseUrl());
 
         return apiClient;
     }

@@ -2,7 +2,7 @@ package com.backbase.stream.compositions.transaction.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsIngestPushEvent;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsIngestPushEvent;
 import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPushRequest;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;

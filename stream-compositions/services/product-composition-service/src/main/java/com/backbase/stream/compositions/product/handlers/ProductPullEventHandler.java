@@ -61,7 +61,7 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
      * @param response ProductIngestResponse
      */
     private void handleResponse(ProductIngestResponse response) {
-        if (Boolean.TRUE.equals(configProperties.getEnableCompletedEvents())) {
+        if (Boolean.FALSE.equals(configProperties.getEvents().getEnableCompleted())) {
             return;
         }
         ProductCompletedEvent event = new ProductCompletedEvent()
@@ -81,7 +81,7 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
     private void handleError(Throwable ex) {
         log.error("Error ingesting legal entity using the Pull event: {}", ex.getMessage());
 
-        if (Boolean.TRUE.equals(configProperties.getEnableFailedEvents())) {
+        if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
             ProductFailedEvent event = new ProductFailedEvent()
                     .withEventId(UUID.randomUUID().toString())
                     .withMessage(ex.getMessage());

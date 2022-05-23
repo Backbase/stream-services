@@ -43,7 +43,8 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
         return pullLegalEntity(ingestPullRequest)
                 .flatMap(this::validate)
                 .flatMap(this::sendToDbs)
-                .doOnSuccess(legalEntityPostIngestionService::handleSuccess);
+                .doOnSuccess(legalEntityPostIngestionService::handleSuccess)
+                .onErrorResume(legalEntityPostIngestionService::handleFailure);
     }
 
     /**
@@ -104,12 +105,6 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
         return Mono.just(LegalEntityResponse.builder()
                 .legalEntity(legalEntityPushRequest.getLegalEntity())
                 .build());
-    }
-
-    private LegalEntityResponse buildResponse(LegalEntity legalEnity) {
-        return LegalEntityResponse.builder()
-                .legalEntity(legalEnity)
-                .build();
     }
 
 }

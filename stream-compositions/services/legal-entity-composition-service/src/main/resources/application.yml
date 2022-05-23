@@ -50,11 +50,11 @@ backbase:
           product-composition:
             enableOnComplete: true
             enableOnFailure: false
-            base-url: http://localhost:9002/product-composition-service
+            base-url: http://localhost:9002
             async: false
         events:
           enableCompleted: false
-          enableFailed: false
+          enableFailed: true
         cursor:
           enabled: false
           base-url: http://localhost:9999
@@ -136,4 +136,4 @@ bootstrap:
 
 logging:
   level:
-    com.backbase.stream.compositions: DEBUG
+    com.backbase.stream.compositions: INFO

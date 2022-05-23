@@ -59,5 +59,5 @@ public interface TransactionMapper {
      * @return Stream transaction
      */
     com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody mapEventToStream(
-            com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.Transaction transaction);
+            com.backbase.stream.compositions.events.ingress.event.spec.v1.Transaction transaction);
 }

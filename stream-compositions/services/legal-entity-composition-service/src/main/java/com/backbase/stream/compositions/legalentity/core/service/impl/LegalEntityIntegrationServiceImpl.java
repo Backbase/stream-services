@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
+import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
@@ -27,8 +28,11 @@ public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegration
                         mapper.mapPullRequestStreamToIntegration(ingestPullRequest))
                 .map(mapper::mapResponseIntegrationToStream)
                 .onErrorResume(e -> {
-                    log.error("Exception: {}", e.getMessage());
-                    return Mono.empty();
+                    log.error("Error while pulling Legal Entities: {}", e.getMessage());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Request Object for the pullLegalEntity call: {}", ingestPullRequest);
+                    }
+                    return Mono.error(new InternalServerErrorException().withMessage(e.getMessage()));
                 })
                 .flatMap(this::handleIntegrationResponse);
 
