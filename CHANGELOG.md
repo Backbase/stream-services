@@ -33,6 +33,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
             .doOnNext(actual -> log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
  ```
 
+
+
 ## [2.51.0]
 ### Maintenance
 - Update to 2021.10
