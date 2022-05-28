@@ -1,0 +1,165 @@
+server.port: 7085
+
+spring:
+  zipkin:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+  main:
+    allow-bean-definition-overriding: true
+  codec:
+    max-in-memory-size: 10MB
+sso:
+  jwt:
+    internal:
+      type: signed
+      signature:
+        algorithm: HS256
+        key:
+          type: ENV
+          value: SIG_SECRET_KEY
+backbase:
+  mtls:
+    enabled: false
+  security:
+    http:
+      enabled: true
+    service-api:
+      authentication:
+        required-scope: api:service
+  stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+    dbs:
+      user-manager-base-url: http://localhost:8086/user-manager
+      access-control-base-url: http://localhost:8086/access-control
+      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+      transaction-manager-base-url: http://localhost:8083/transaction-manager
+    identity:
+      identity-integration-base-url: http://localhost:8181/identity-integration-service
+
+    compositions:
+      transaction:
+        enable-completed-events: false
+        enable-failed-events: true
+        transaction-integration-url:  http://localhost:5085
+
+backbase.activemq.enabled: true
+spring.activemq.broker-url: tcp://localhost:61616
+
+eureka:
+  instance:
+    metadata-map:
+      public: true
+      role: live
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8080/registry/eureka/
+
+bootstrap:
+  enabled: false
+  # This is just na example. Replace arrangementId from your project database reference
+  transactions:
+    - arrangementId: "acb00b86-efd7-40d1-a5a1-fbce4bc84f15"
+      externalId: "MealSavings"
+      reference: "BCA-123456"
+      externalArrangementId: "CurKind2"
+      description: "Meal @ Burger King"
+      type: "Cash"
+      typeGroup: "Payment"
+      category: "Category"
+      bookingDate: "2021-04-16"
+      valueDate: "2020-05-17"
+      creditDebitIndicator: "DBIT"
+      transactionAmountCurrency:
+        amount: "10.29"
+        currencyCode: "EUR"
+      instructedAmountCurrency:
+        amount: "321.20"
+        currencyCode: "USD"
+      currencyExchangeRate: 2.2
+      counterPartyName: "AF Chagal"
+      counterPartyAccountNumber: "2732"
+      counterPartyBIC: "ING00000001"
+      counterPartyCountry: "NL"
+      counterPartyBankName: "ING"
+      creditorId: "764532"
+      mandateReference: "6541235478"
+      billingStatus: "BILLED"
+      checkSerialNumber: 123
+      sequenceNumber: "1234567"
+      enrichmentIndicator: "NO_ENRICHMENT"
+    - arrangementId: "b7adc8d4-779d-4d45-b980-10111fab0cd9"
+      externalId: "GiftCardSavings"
+      reference: "BCA-456123"
+      externalArrangementId: "SavKind2"
+      description: "GiftCard @ Burger King"
+      type: "Cash"
+      typeGroup: "Payment"
+      category: "Category"
+      bookingDate: "2016-05-16"
+      valueDate: "2020-05-17"
+      creditDebitIndicator: "DBIT"
+      transactionAmountCurrency:
+        amount: "10.29"
+        currencyCode: "EUR"
+      instructedAmountCurrency:
+        amount: "321.20"
+        currencyCode: "USD"
+      currencyExchangeRate: 2.2
+      counterPartyName: "AF Chagal"
+      counterPartyAccountNumber: "2732"
+      counterPartyBIC: "ING00000001"
+      counterPartyCountry: "NL"
+      counterPartyBankName: "ING"
+      creditorId: "764532"
+      mandateReference: "6541235478"
+      billingStatus: "BILLED"
+      checkSerialNumber: 123
+      sequenceNumber: "1234567"
+      enrichmentIndicator: "NO_ENRICHMENT"
+    - arrangementId: "edef6d71-6f0e-437c-880c-d99ac748637f"
+      externalId: "GiftCard2Savings"
+      reference: "BCA-456123"
+      externalArrangementId: "kind2"
+      description: "GiftCard @ Burger King 2"
+      type: "Cash"
+      typeGroup: "Payment"
+      category: "Category"
+      bookingDate: "2016-05-16"
+      valueDate: "2020-05-17"
+      creditDebitIndicator: "DBIT"
+      transactionAmountCurrency:
+        amount: "10.29"
+        currencyCode: "EUR"
+      instructedAmountCurrency:
+        amount: "321.20"
+        currencyCode: "USD"
+      currencyExchangeRate: 2.2
+      counterPartyName: "AF Chagal"
+      counterPartyAccountNumber: "2732"
+      counterPartyBIC: "ING00000001"
+      counterPartyCountry: "NL"
+      counterPartyBankName: "ING"
+      creditorId: "764532"
+      mandateReference: "6541235478"
+      billingStatus: "BILLED"
+      checkSerialNumber: 123
+      sequenceNumber: "1234567"
+      enrichmentIndicator: "NO_ENRICHMENT"
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG
+

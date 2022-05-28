@@ -1,4 +1,4 @@
-package com.nackbase.stream.compositions.productcatalog.handlers;
+package com.backbase.stream.compositions.productcatalog.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;

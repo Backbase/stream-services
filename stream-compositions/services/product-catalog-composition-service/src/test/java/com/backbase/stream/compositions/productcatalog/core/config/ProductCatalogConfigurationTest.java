@@ -1,4 +1,4 @@
-package com.nackbase.stream.compositions.productcatalog.core.config;
+package com.backbase.stream.compositions.productcatalog.core.config;
 
 import com.backbase.stream.compositions.integration.productcatalog.ApiClient;
 import com.backbase.stream.compositions.productcatalog.core.config.ProductCatalogConfiguration;

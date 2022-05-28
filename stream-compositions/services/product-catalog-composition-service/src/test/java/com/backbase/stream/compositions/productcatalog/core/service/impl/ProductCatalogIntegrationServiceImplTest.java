@@ -1,4 +1,4 @@
-package com.nackbase.stream.compositions.productcatalog.core.service.impl;
+package com.backbase.stream.compositions.productcatalog.core.service.impl;
 
 import com.backbase.stream.compositions.integration.productcatalog.api.ProductCatalogIntegrationApi;
 import com.backbase.stream.compositions.integration.productcatalog.model.ProductCatalog;

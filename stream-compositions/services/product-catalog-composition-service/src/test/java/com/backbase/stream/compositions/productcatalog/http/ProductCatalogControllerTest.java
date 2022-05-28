@@ -1,4 +1,4 @@
-package com.nackbase.stream.compositions.productcatalog.http;
+package com.backbase.stream.compositions.productcatalog.http;
 
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;

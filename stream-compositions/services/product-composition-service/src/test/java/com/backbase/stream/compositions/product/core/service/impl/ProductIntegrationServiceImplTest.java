@@ -35,7 +35,7 @@ class ProductIntegrationServiceImplTest {
         ProductGroup productGroup = new ProductGroup();
 
         PullProductGroupResponse getProductGroupResponse = new PullProductGroupResponse().
-                productGroup(productGroup);
+                withProductGroup(productGroup);
         when(productIntegrationApi.pullProductGroup(any()))
                 .thenReturn(Mono.just(getProductGroupResponse));
 
