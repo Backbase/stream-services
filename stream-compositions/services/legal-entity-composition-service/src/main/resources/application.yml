@@ -37,8 +37,10 @@ backbase:
     legalentity:
       sink:
         useIdentityIntegration: true
+        userProfileEnabled: true
     dbs:
       user-manager-base-url: http://localhost:8086/user-manager
+      user-profile-manager-base-url: http://localhost:8086/user-profile-manager
       access-control-base-url: http://localhost:8086/access-control
       arrangement-manager-base-url: http://localhost:8082/arrangement-manager
     identity:
