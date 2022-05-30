@@ -98,7 +98,8 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
         return transactionCursorRepository
             .patchByArrangementId(arrangementId, transactionCursorPatchReq);
       } catch (ParseException parseException) {
-        parseException.printStackTrace();
+        log.error("TransactionCursorServiceImpl patchByArrangementId Exception {} ",
+            parseException);
       }
       return Mono.empty();
     }).subscribe();
