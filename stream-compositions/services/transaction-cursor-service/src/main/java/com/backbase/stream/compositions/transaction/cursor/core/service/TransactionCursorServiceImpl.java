@@ -26,7 +26,8 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
 
   /**
    * The Service to filter the cursor based on arrangementId
-   * @param arrangementId
+   *
+   * @param arrangementId ArrangementId of the Cursor
    * @return TransactionCursorResponse
    */
   @Override
@@ -35,13 +36,14 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
     return transactionCursorRepository.findByArrangementId(arrangementId)
         .map(this::mapModelToResponse)
         .orElse(
-            Mono.just(new ResponseEntity<>(new TransactionCursorResponse(), HttpStatus.NOT_FOUND)));
+            Mono.just(new ResponseEntity<>(HttpStatus.NOT_FOUND)));
   }
 
   /**
    * The Service to delete the cursor based on either id or arrangementId
-   * @param transactionCursorDeleteRequest
-   * @return
+   *
+   * @param transactionCursorDeleteRequest TransactionDeleteRequest Payload
+   * @return Response Entity
    */
   @Override
   public Mono<ResponseEntity<Void>> deleteCursor(
@@ -52,7 +54,8 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
 
   /**
    * The Service to filter the cursor based on id
-   * @param id
+   *
+   * @param id Id of the Cursor
    * @return TransactionCursorResponse
    */
   @Override
@@ -66,7 +69,8 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
 
   /**
    * The Service to upsert a cursor
-   * @param transactionCursorUpsertRequest
+   *
+   * @param transactionCursorUpsertRequest TransactionCursorUpsertRequest payload
    * @return TransactionCursorUpsertResponse
    */
   @Override
@@ -78,11 +82,12 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
   }
 
   /**
-   * The Service to patch the cursor to update lastTxnIds, lastTxnDate & status
-   * based on arrangementId
-   * @param arrangementId
-   * @param transactionCursorPatchRequest
-   * @return
+   * The Service to patch the cursor to update lastTxnIds, lastTxnDate & status based on
+   * arrangementId
+   *
+   * @param arrangementId                 ArrangementId of the Cursor
+   * @param transactionCursorPatchRequest TransactionCursorPatchRequest Payload
+   * @return Response Entity
    */
   @Override
   public Mono<ResponseEntity<Void>> patchByArrangementId(String arrangementId,
@@ -102,7 +107,8 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
 
   /**
    * Transform domain to model response
-   * @param response
+   *
+   * @param response Model to CursorResponse
    * @return TransactionCursorResponse
    */
   private Mono<ResponseEntity<TransactionCursorResponse>> mapModelToResponse(
@@ -112,7 +118,8 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
 
   /**
    * Create the response for Upsert Cursor
-   * @param id
+   *
+   * @param id Cursor Unique Id reference
    * @return TransactionCursorUpsertResponse
    */
   private ResponseEntity<TransactionCursorUpsertResponse> mapUpsertToResponse(String id) {

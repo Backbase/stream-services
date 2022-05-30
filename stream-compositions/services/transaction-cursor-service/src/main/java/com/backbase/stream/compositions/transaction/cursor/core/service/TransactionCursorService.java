@@ -12,6 +12,7 @@ public interface TransactionCursorService {
 
   /**
    * The Service to filter the cursor based on arrangementId
+   *
    * @param arrangementId
    * @return TransactionCursorResponse
    */
@@ -19,6 +20,7 @@ public interface TransactionCursorService {
 
   /**
    * The Service to delete the cursor based on either id or arrangementId
+   *
    * @param transactionCursorDeleteRequest
    * @return
    */
@@ -27,6 +29,7 @@ public interface TransactionCursorService {
 
   /**
    * The Service to filter the cursor based on id
+   *
    * @param id
    * @return TransactionCursorResponse
    */
@@ -34,6 +37,7 @@ public interface TransactionCursorService {
 
   /**
    * The Service to upsert a cursor
+   *
    * @param transactionCursorUpsertRequest
    * @return TransactionCursorUpsertResponse
    */
@@ -41,8 +45,9 @@ public interface TransactionCursorService {
       Mono<TransactionCursorUpsertRequest> transactionCursorUpsertRequest);
 
   /**
-   * The Service to patch the cursor to update lastTxnIds, lastTxnDate & status
-   * based on arrangementId
+   * The Service to patch the cursor to update lastTxnIds, lastTxnDate & status based on
+   * arrangementId
+   *
    * @param arrangementId
    * @param transactionCursorPatchRequest
    * @return

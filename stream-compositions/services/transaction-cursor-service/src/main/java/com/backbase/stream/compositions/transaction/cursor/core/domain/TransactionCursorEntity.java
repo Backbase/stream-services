@@ -9,7 +9,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
 /**
- *  The Domain Model for the transaction cursor service
+ * The Domain Model for the transaction cursor service
  */
 @Entity
 @Table(name = "txn_cursor")

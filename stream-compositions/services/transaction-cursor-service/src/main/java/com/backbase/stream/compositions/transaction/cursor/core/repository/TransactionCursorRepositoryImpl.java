@@ -33,6 +33,7 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
 
   /**
    * Query the cursor based on arrangement_id criteria
+   *
    * @param arrangementId
    * @return TransactionCursorEntity
    */
@@ -49,6 +50,7 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
 
   /**
    * delete the cursor based on either id or arrangement_id
+   *
    * @param transactionCursorDeleteRequest
    * @return if the statement is executed or not (1 or 0)
    */
@@ -66,12 +68,13 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
     Predicate deletePredicate = criteriaBuilder.or(idPredicate, arrangementPredicate);
     cq.where(deletePredicate);
     int result = this.entityManager.createQuery(cq).executeUpdate();
-    log.debug("TransactionCursorDeleteRequest Result {} ", result);
+    log.debug("TransactionCursorRepository :: deleteCursor Result {} ", result);
     return result;
   }
 
   /**
    * Query the cursor based on id criteria
+   *
    * @param id
    * @return TransactionCursorEntity
    */
@@ -88,6 +91,7 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
 
   /**
    * Upsert the cursor
+   *
    * @param transactionCursorEntity
    * @return primary key of the cursor
    */
@@ -96,12 +100,13 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
       TransactionCursorEntity transactionCursorEntity) {
     TransactionCursorEntity transCursorEntity = this.entityManager
         .merge(transactionCursorEntity);
-    log.debug("I am in repository upsertCursor {} ", transCursorEntity.getId());
+    log.debug("TransactionCursorRepository :: upsertCursor Result {} ", transCursorEntity.getId());
     return Mono.just(transCursorEntity.getId());
   }
 
   /**
    * Patch the Cursor based on arrangement_id
+   *
    * @param arrangementId
    * @param transactionCursorPatchRequest
    * @return if the statement is executed or not (1 or 0)
@@ -121,12 +126,13 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
     cq.where(toPredicate(criteriaBuilder, transactionCursor.get("arrangement_id"), arrangementId,
         "EQUALS"));
     int result = this.entityManager.createQuery(cq).executeUpdate();
-    log.debug("patchByArrangementId Result {} ", result);
+    log.debug("TransactionCursorRepository :: patchByArrangementId Result {} ", result);
     return result;
   }
 
   /**
    * Generate the Predicate based on expression & operator
+   *
    * @param criteriaBuilder
    * @param expression
    * @param value
@@ -145,6 +151,7 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
 
   /**
    * Convert String to SQL timestamp for the lastTxnDate column
+   *
    * @param lastTxnDate
    * @return
    * @throws ParseException

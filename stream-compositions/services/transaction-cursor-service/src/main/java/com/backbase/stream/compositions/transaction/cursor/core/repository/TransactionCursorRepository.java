@@ -13,6 +13,7 @@ public interface TransactionCursorRepository {
 
   /**
    * Query the cursor based on arrangement_id criteria
+   *
    * @param arrangementId
    * @return TransactionCursorEntity
    */
@@ -23,6 +24,7 @@ public interface TransactionCursorRepository {
 
   /**
    * delete the cursor based on either id or arrangement_id
+   *
    * @param transactionCursorDeleteRequest
    * @return if the statement is executed or not (1 or 0)
    */
@@ -33,6 +35,7 @@ public interface TransactionCursorRepository {
 
   /**
    * Query the cursor based on id criteria
+   *
    * @param id
    * @return TransactionCursorEntity
    */
@@ -43,6 +46,7 @@ public interface TransactionCursorRepository {
 
   /**
    * Upsert the cursor
+   *
    * @param transactionCursorEntity
    * @return primary key of the cursor
    */
@@ -54,6 +58,7 @@ public interface TransactionCursorRepository {
 
   /**
    * Patch the Cursor based on arrangement_id
+   *
    * @param arrangementId
    * @param transactionCursorPatchRequest
    * @return if the statement is executed or not (1 or 0)
