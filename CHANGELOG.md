@@ -59,6 +59,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - JUnit and Hibernate Validator dependency update to address security vulnerabilities.
 
+## [3.0.0] 
+### Removed
+- Sources, Processors and Sinks for Stream Components
+- Removed obsolete Stream SDK modules in preparation to support ServiceSDK
+- Removed generators. Test data generation to be done using `space-generator`
 ## [2.62.0]
 ### Fixed
 - Legal Entity Saga: linkLegalEntityToRealm method executed multiple times ( when multiple users are ingested): `unique constraint (PK_LE_ASSIGN_REALM) violated`
