@@ -21,10 +21,6 @@
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>events</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-        </dependency>
 
         <!-- Spring dependencies -->
         <dependency>
@@ -56,6 +52,12 @@
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-ingestion-saga</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <!-- Third party dependencies -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
         </dependency>
 
         <!-- Test dependencies -->
@@ -109,6 +111,15 @@
                                     <type>zip</type>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.stream.compositions.api</groupId>
+                                    <artifactId>product-integration-api</artifactId>
+                                    <version>${project.version}</version>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
                             </artifactItems>
                             <includes>**/*.yaml, **/*.json</includes>
                         </configuration>
@@ -158,6 +169,22 @@
                                 <reactive>true</reactive>
                                 <performBeanValidation>true</performBeanValidation>
                                 <skipDefaultInterface>true</skipDefaultInterface>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-product-composition-integration-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/product-integration-api/integration-api-v2.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.stream.compositions.integration.product.api</apiPackage>
+                            <modelPackage>com.backbase.stream.compositions.integration.product.model</modelPackage>
+                            <additionalProperties>useWithModifiers=true</additionalProperties>
+                            <configOptions>
+                                <reactive>true</reactive>
                             </configOptions>
                         </configuration>
                     </execution>

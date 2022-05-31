@@ -1,0 +1,95 @@
+server.port: 7087
+
+spring:
+  zipkin:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+  main:
+    allow-bean-definition-overriding: true
+backbase:
+  mtls:
+    enabled: false
+  security:
+    http:
+      enabled: true
+    service-api:
+      authentication:
+        required-scope: api:service
+  stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+    dbs:
+      user-manager-base-url: http://localhost:8086/user-manager
+      access-control-base-url: http://localhost:8086/access-control
+      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+    identity:
+      identity-integration-base-url: http://localhost:8181/identity-integration-service
+    compositions:
+      product-catalog:
+        enable-completed-events: false
+        enable-failed-events: true
+        product-catalog-integration-url: http://localhost:5087
+
+backbase.activemq.enabled: true
+spring.activemq.broker-url: tcp://localhost:61616
+
+eureka:
+  instance:
+    metadata-map:
+      public: true
+      role: live
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8080/registry/eureka/
+
+bootstrap:
+  enabled: false
+  # This is just na example. Replace it with data corresponding to your project
+  product-catalog:
+    productKinds:
+      - externalKindId: kind20
+        kindName: 'Special Account'
+        kinduri: 'special-account'
+
+    productTypes:
+      - externalProductId: Money Market1
+        externalProductKindId: kind2
+        productKindName: Current Account
+        externalProductTypeId: Money Market2
+        productTypeName: Money Market3
+        externalId: Money Market4
+        externalTypeId: Money Market5
+        typeName: Money Market6
+      - externalProductId: Checking
+        externalProductKindId: kind3
+        productKindName: Checking
+        externalProductTypeId: Checking
+        productTypeName: Checking
+        externalId: Checking
+        externalTypeId: Checking
+        typeName: Checking
+      - externalProductId: Savings
+        externalProductKindId: kind2
+        productKindName: Savings
+        externalProductTypeId: Savings
+        productTypeName: Savings
+        externalId: Savings
+        externalTypeId: Savings
+        typeName: Savings
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG
+    org.mockserver: DEBUG

@@ -21,10 +21,7 @@
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>events</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-        </dependency>
+
 
         <!-- Spring dependencies -->
         <dependency>
@@ -61,6 +58,11 @@
             <groupId>com.backbase.stream</groupId>
             <artifactId>transactions-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
         </dependency>
 
         <!-- Test dependencies -->

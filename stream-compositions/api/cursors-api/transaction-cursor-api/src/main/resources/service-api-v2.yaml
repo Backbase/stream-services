@@ -205,6 +205,13 @@ components:
         legalEntityId:
           type: string
           description: The internal legal entity id
+        status:
+          type: string
+          description: The status of the cursor
+          enum:
+            - IN_PROGRESS
+            - FAILED
+            - SUCCESS
         additions:
           type: object
           additionalProperties:
@@ -235,7 +242,7 @@ components:
           type: string
         lastTxnDate:
           type: string
-        lastTxnId:
+        lastTxnIds:
           type: string
 
     TransactionCursorDeleteRequest:

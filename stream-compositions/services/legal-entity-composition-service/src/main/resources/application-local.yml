@@ -1,3 +1,5 @@
+server.port: 7081
+
 spring:
   activemq:
     broker-url: tcp://localhost:61616
@@ -21,8 +23,6 @@ eureka:
   client:
     enabled: true
     serviceUrl.defaultZone: http://localhost:8080/registry/eureka
-server:
-  port: 9001
 
 backbase:
   security:
@@ -47,19 +47,19 @@ backbase:
       identity-integration-base-url: http://localhost:8181/identity-integration-service
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:9999
+        integration-base-url: http://localhost:5081
         chains:
           product-composition:
             enableOnComplete: true
             enableOnFailure: false
-            base-url: http://localhost:9002
+            base-url: http://localhost:7083/product-composition-service
             async: false
         events:
           enableCompleted: false
-          enableFailed: true
+          enableFailed: false
         cursor:
           enabled: false
-          base-url: http://localhost:9999
+          base-url: http://localhost:7089/transaction-cursor-service
 bootstrap:
   enabled: false
   # This is just an example. Replace it with data corresponding to your bank
@@ -138,4 +138,4 @@ bootstrap:
 
 logging:
   level:
-    com.backbase.stream.compositions: INFO
+    com.backbase.stream.compositions: DEBUG

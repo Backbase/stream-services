@@ -86,6 +86,8 @@ public class ProductController implements ProductCompositionApi {
                 .serviceAgreementExternalId(request.getServiceAgreementExternalId())
                 .serviceAgreementInternalId(request.getServiceAgreementInternalId())
                 .userExternalId(request.getUserExternalId())
+                .userInternalId(request.getUserInternalId())
+                .membershipAccounts(request.getMembershipAccounts())
                 .additionalParameters(request.getAdditionalParameters())
                 .build();
     }
