@@ -28,4 +28,13 @@ public interface LegalEntityMapper {
 
     @Mapping(source = "id", target = "internalId")
     ServiceAgreement toStream(GetServiceAgreement getServiceAgreement);
+
+    @Mapping(source = "additions", target = "legalEntity.additions")
+    @Mapping(source = "externalId", target = "legalEntity.externalId")
+    @Mapping(source = "name", target = "legalEntity.name")
+    @Mapping(source = "legalEntityType", target = "legalEntity.type")
+    @Mapping(source = "parentExternalId", target = "legalEntity.parentExternalId")
+    @Mapping(source = "activateSingleServiceAgreement", target = "legalEntity.activateSingleServiceAgreement")
+    @Mapping(source = "externalId", target = "externalId")
+    LegalEntityPut toLegalEntityPut(LegalEntity legalEntity);
 }

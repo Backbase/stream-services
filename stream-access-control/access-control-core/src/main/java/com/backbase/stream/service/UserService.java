@@ -16,12 +16,12 @@ import com.backbase.stream.mapper.RealmMapper;
 import com.backbase.stream.mapper.UserMapper;
 
 import java.text.MessageFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -41,6 +42,9 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @AllArgsConstructor
 public class UserService {
+
+    public static final String REMOVED_PREFIX = "REMOVED_";
+    public static final String ARCHIVED_PREFIX = "archived_";
 
     private final UserMapper mapper = Mappers.getMapper(UserMapper.class);
     private final RealmMapper realmMapper = Mappers.getMapper(RealmMapper.class);
@@ -90,11 +94,13 @@ public class UserService {
      * @param legalEntityInternalId legal  entity internal id.
      * @return flux of user  items.
      */
-    public Mono<GetUsersList> getUsersByLegalEntity(String legalEntityInternalId) {
+    public Mono<GetUsersList> getUsersByLegalEntity(String legalEntityInternalId, int size, int from) {
         log.debug("Retrieving users for Legal Entity '{}'", legalEntityInternalId);
 
         GetUsersByLegalEntityIdsRequest request = new GetUsersByLegalEntityIdsRequest();
         request.addLegalEntityIdsItem(legalEntityInternalId);
+        request.size(size);
+        request.from(from);
         return usersApi.getUsersByLegalEntityIds(request, true);
     }
 
@@ -115,9 +121,9 @@ public class UserService {
                         return new BatchUser()
                             .externalId(userExternalId)
                             .userUpdate(new com.backbase.dbs.user.api.service.v2.model.User()
-                                .externalId("REMOVED_" + userExternalId + "_" + UUID.randomUUID().toString())
+                                .externalId(REMOVED_PREFIX + userExternalId + "_" + UUID.randomUUID())
                                 .legalEntityId(legalEntityInternalId)
-                                .fullName("archived_" + userExternalId));
+                                .fullName(ARCHIVED_PREFIX + userExternalId));
                     })
                     .collect(Collectors.toList()))
             .map(r -> {
@@ -270,7 +276,7 @@ public class UserService {
 
         return identityManagementApi.createIdentity(createIdentityRequest)
             .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error creating identity: {} Response: {}", user.getExternalId(), e.getResponseBodyAsString());
+                log.error("Error creating identity: {} Response: {}", createIdentityRequest, e.getResponseBodyAsString());
                 String message = "Failed to create user: " + user.getExternalId();
                 streamTask.error("user", "create-identity", "failed",
                     user.getExternalId(), legalEntityInternalId, e, e.getMessage(), message);
@@ -310,22 +316,25 @@ public class UserService {
      * @param realm user's realm.
      * @return user.
      */
-    public Mono<User> changeEnableStatus(User user, String realm) {
+    public Mono<User> updateUserState(User user, String realm) {
+        log.info("Changing user {} state to locked status {} and additional realm roles {}", user.getInternalId(),
+            user.getLocked(), user.getAdditionalRealmRoles());
+
         return identityIntegrationApi.map(api -> getIdentityUser(user, realm)
-            .flatMap(eur -> {
-                boolean shouldEnable = user.getLocked() != null ? !user.getLocked() : eur.getEnabled();
-                if (!eur.getEnabled().equals(shouldEnable)) {
-                    UserRequestBody presentationUser = mapper.toPresentation(eur);
-                    presentationUser.setEnabled(shouldEnable);
-                    return api.updateUserById(realm, user.getInternalId(), presentationUser);
+            .flatMap(currentUser -> {
+                Optional<UserRequestBody> updateRequestBody = updateRequired(currentUser, user);
+
+                if (updateRequestBody.isPresent()) {
+                    return api.updateUserById(realm, user.getInternalId(), updateRequestBody.get());
                 }
+
                 return Mono.just(user);
             })
             .doOnNext(eur -> {
                 log.info("User {} locked successfully", user.getExternalId());
             })
             .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error locking user {}: {}", user.getInternalId(), e.getResponseBodyAsString());
+                log.error("Error updated user {} state due to error: {}", user.getInternalId(), e.getResponseBodyAsString());
                 return Mono.error(e);
             })
             .thenReturn(user)).orElse(Mono.just(user));
@@ -347,6 +356,66 @@ public class UserService {
         log.info("Created user: {} with internalId: {}", user.getFullName(), userCreated.getId());
         user.setInternalId(userCreated.getId());
         return user;
+    }
+
+    private Optional<UserRequestBody> updateRequired(EnhancedUserRepresentation currentUser, User user) {
+        boolean updateRequired = false;
+        UserRequestBody userRequestBody = mapper.toPresentation(currentUser);
+
+        if (currentUser.getEnabled() != null) {
+            boolean shouldEnable = user.getLocked() == null ? currentUser.getEnabled() : !user.getLocked();
+
+            if (!currentUser.getEnabled().equals(shouldEnable)) {
+                updateRequired = true;
+
+                userRequestBody.setEnabled(shouldEnable);
+
+                log.debug("Enabled set to {}", shouldEnable);
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(user.getAdditionalRealmRoles())) {
+            for (String realmRole : user.getAdditionalRealmRoles()) {
+                if (userRequestBody.getRealmRoles().stream().noneMatch(realmRole::equals)) {
+                    updateRequired = true;
+
+                    userRequestBody.getRealmRoles().add(realmRole);
+
+                    log.debug("Realm role {} added", realmRole);
+                }
+            }
+        }
+
+        return updateRequired ? Optional.of(userRequestBody) : Optional.empty();
+    }
+
+    /**
+     * Update user
+     *
+     * @param user
+     * @return Mono<Void>
+     */
+    public Mono<User> updateUser(User user) {
+        return usersApi.updateUserInBatch(Collections.singletonList(new BatchUser()
+                        .externalId(user.getExternalId())
+                        .userUpdate(mapper.toServiceUser(user))))
+                .map(r -> {
+                    log.debug("Updated user response: status {} for resource {}, errors: {}", r.getStatus(), r.getResourceId(), r.getErrors());
+                    if (r.getStatus().getValue() != null && !HttpStatus.valueOf(Integer.parseInt(r.getStatus().getValue())).is2xxSuccessful()) {
+                        String errorMsg = MessageFormat.format(
+                                "Failed item in the batch for User Update: status {0} for resource {1}, errors: {2}",
+                                r.getStatus(), r.getResourceId(), r.getErrors());
+                        throw new UserUpsertException(errorMsg, Collections.singletonList(user),
+                                Collections.singletonList(r));
+                    }
+                    return r;
+                })
+                .collectList()
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    log.error("Failed to update user: {}", e.getResponseBodyAsString(), e);
+                    return Mono.error(e);
+                })
+                .then(getUserByExternalId(user.getExternalId()));
     }
 
 }
