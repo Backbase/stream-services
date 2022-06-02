@@ -18,11 +18,13 @@ import javax.persistence.criteria.CriteriaUpdate;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
+@AllArgsConstructor
 @Slf4j
 public class TransactionCursorRepositoryImpl implements TransactionCursorRepository {
 
@@ -100,8 +102,7 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
       TransactionCursorEntity transactionCursorEntity) {
     TransactionCursorEntity transCursorEntity = this.entityManager
         .merge(transactionCursorEntity);
-    log.debug("TransactionCursorRepository :: upsertCursor Result {} ", transCursorEntity.getId());
-    return Mono.just(transCursorEntity.getId());
+    return Mono.just(null!=transCursorEntity.getId()?transCursorEntity.getId():"");
   }
 
   /**

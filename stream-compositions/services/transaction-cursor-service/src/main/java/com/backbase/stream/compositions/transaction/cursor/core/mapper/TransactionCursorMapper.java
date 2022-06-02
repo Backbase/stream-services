@@ -24,7 +24,6 @@ import org.mapstruct.ReportingPolicy;
  * The Mapper for transforming Model to Domain & Entity to Domain Model
  */
 @Mapper(
-    componentModel = "spring",
     unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface TransactionCursorMapper {

@@ -13,9 +13,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan(basePackages = {"com.backbase.stream"})
 @EntityScan({"com.backbase.stream.compositions.transaction.cursor.core.domain"})
 @EnableJpaRepositories({"com.backbase.stream.compositions.transaction.cursor.core.repository"})
-public class TransactionCursorCompositionApplication {
+public class TransactionCursorApplication {
 
   public static void main(String args[]) {
-    SpringApplication.run(TransactionCursorCompositionApplication.class, args);
+    SpringApplication.run(TransactionCursorApplication.class, args);
   }
 }

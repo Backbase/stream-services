@@ -78,6 +78,7 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
       Mono<TransactionCursorUpsertRequest> transactionCursorUpsertRequest) {
     return transactionCursorUpsertRequest.map(mapper::mapToDomain)
         .flatMap(transactionCursorRepository::upsertCursor)
+        .doOnNext(id -> log.info("Id is {}", id))
         .map(this::mapUpsertToResponse);
   }
 
@@ -98,11 +99,12 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
         return transactionCursorRepository
             .patchByArrangementId(arrangementId, transactionCursorPatchReq);
       } catch (ParseException parseException) {
-        log.error("TransactionCursorServiceImpl patchByArrangementId Exception {} ",
-            parseException);
+        throw new RuntimeException(parseException);
       }
-      return Mono.empty();
-    }).subscribe();
+    }).doOnError(throwable -> log
+        .error("TransactionCursorServiceImpl patchByArrangementId Exception: {}",
+            throwable.getMessage()))
+        .subscribe();
     return Mono.empty();
   }
 

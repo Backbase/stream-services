@@ -49,6 +49,12 @@
       <version>${project.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.backbase.stream</groupId>
+      <artifactId>stream-dbs-web-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!-- Third party dependencies -->
 
     <dependency>

@@ -1,4 +1,6 @@
 spring:
+  liquibase:
+    enabled: false
   application:
     name: transaction-cursor-service
   cloud:
