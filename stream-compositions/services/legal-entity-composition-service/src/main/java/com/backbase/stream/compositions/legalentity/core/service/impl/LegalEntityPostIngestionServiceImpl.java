@@ -96,10 +96,12 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
         if (Boolean.FALSE.equals(legalEntityConfigurationProperties.getChains().getProductComposition().getAsync())) {
             productCompositionApi.pullIngestProduct(productPullIngestionRequest)
+                    .doOnSuccess(response -> log.info("Received Response from Product Composition: ID :: {}", response.getProductGgroup().getInternalId()))
                     .onErrorResume(this::handleProductError)
                     .subscribe();
         } else {
             productCompositionApi.pullIngestProductAsync(productPullIngestionRequest)
+                    .doOnSuccess(response -> log.info("Product COmposition Call Ended"))
                     .onErrorResume(this::handleAsyncProductError)
                     .subscribe();
         }

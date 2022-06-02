@@ -26,7 +26,14 @@ public class TransactionPostIngestionServiceImpl implements TransactionPostInges
 
     @Override
     public void handleSuccess(List<TransactionsPostResponseBody> res) {
-        log.info("Transaction ingestion completed successfully. {}", res);
+        /**
+         * TODO: Call to PATCH /cursor/arrangement/{id}
+         * This is only for successful completion of Ingestion
+         * Status => SUCCESS
+         * last_txn_date => current_timestamp
+         * last_txn_ids => "id1,id2"
+         */
+        log.info("Transaction ingestion completed successfully.");
         if (Boolean.TRUE.equals(transactionConfigurationProperties.getEvents().getEnableCompleted())) {
             TransactionsCompletedEvent event = new TransactionsCompletedEvent()
                     .withTransactionIds(res.stream().map(TransactionsPostResponseBody::getId).collect(Collectors.toList()));
@@ -42,6 +49,13 @@ public class TransactionPostIngestionServiceImpl implements TransactionPostInges
 
     @Override
     public Mono<List<TransactionsPostResponseBody>> handleFailure(Throwable error) {
+        /**
+         * TODO: Call to PATCH /cursor/arrangement/{id}
+         * This is only for successful completion of Ingestion
+         * Status => FAILED
+         * last_txn_date <=/=> NO CHANGE
+         * last_txn_ids <=/=> NO CHANGE
+         */
         log.error("Transaction ingestion failed. {}", error.getMessage());
         if (Boolean.TRUE.equals(transactionConfigurationProperties.getEvents().getEnableFailed())) {
             TransactionsFailedEvent event = new TransactionsFailedEvent().withEventId(UUID.randomUUID().toString())

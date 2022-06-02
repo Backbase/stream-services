@@ -52,7 +52,6 @@ public class LegalEntityController implements LegalEntityCompositionApi {
         log.info("Start synchronous ingestion of Legal Entity");
         return pullIngestionRequest.map(this::buildPullRequest)
                 .flatMap(legalEntityIngestionService::ingestPull)
-                .map(this::handleResponse)
                 .map(this::mapIngestionToResponse);
     }
 
@@ -96,11 +95,6 @@ public class LegalEntityController implements LegalEntityCompositionApi {
                 .builder()
                 .legalEntity(mapper.mapCompostionToStream(request.getLegalEntity()))
                 .build();
-    }
-
-    private LegalEntityResponse handleResponse(LegalEntityResponse response) {
-        log.info("Legal Entity Ingestion completed for id {}", response.getLegalEntity().getInternalId());
-        return response;
     }
 
     /**

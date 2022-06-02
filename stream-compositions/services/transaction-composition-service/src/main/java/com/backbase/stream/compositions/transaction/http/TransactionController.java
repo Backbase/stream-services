@@ -10,6 +10,7 @@ import com.backbase.stream.compositions.transaction.core.model.TransactionIngest
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
+@Slf4j
 public class TransactionController implements TransactionCompositionApi {
     private final TransactionIngestionService transactionIngestionService;
     private final TransactionMapper mapper;

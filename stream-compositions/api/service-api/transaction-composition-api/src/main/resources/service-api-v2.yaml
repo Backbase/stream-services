@@ -112,6 +112,8 @@ components:
     TransactionPullIngestionRequest:
       type: object
       properties:
+        arrangementId:
+          type: string
         externalArrangementId:
           type: string
         dateRangeStart:

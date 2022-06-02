@@ -43,8 +43,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         log.info("Product ingestion completed successfully.");
         if (Boolean.TRUE.equals(productConfigurationProperties.getChains().getTransactionComposition().getEnableOnComplete())) {
             extractProducts(res.getProductGroup())
-                    .doOnNext(this::sendTransactionPullEvent).subscribe();
-            log.info("Call transaction-composition-service for all products {}", res.getProductGroup());
+                    .doOnNext(this::sendTransactionPullRequest).subscribe();
         }
 
         if (Boolean.TRUE.equals(productConfigurationProperties.getEvents().getEnableCompleted())) {
@@ -104,18 +103,21 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         return Mono.empty();
     }
 
-    private void sendTransactionPullEvent(BaseProduct product) {
+    private void sendTransactionPullRequest(BaseProduct product) {
         TransactionPullIngestionRequest transactionPullIngestionRequest =
                 new TransactionPullIngestionRequest()
                         .withExternalArrangementId(product.getExternalId());
 
+        log.info("Call transaction-composition-service for Arrangement ID {}", product.getInternalId());
 
         if (Boolean.FALSE.equals(productConfigurationProperties.getChains().getTransactionComposition().getAsync())) {
             transactionCompositionApi.pullTransactions(transactionPullIngestionRequest)
                     .onErrorResume(this::handleTransactionError)
+                    .doOnSuccess(res -> log.info("Received Response from Transaction Composition: Ingested Size :: {}", res.getTransactions().size()))
                     .subscribe();
         } else {
             transactionCompositionApi.pullTransactionsAsync(transactionPullIngestionRequest)
+                    .doOnSuccess(res -> log.info("Transaction Composition Call complete"))
                     .onErrorResume(this::handleAsyncTransactionError)
                     .subscribe();
         }
