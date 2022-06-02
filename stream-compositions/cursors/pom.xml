@@ -9,6 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
+  <groupId>com.backbase.stream.compositions</groupId>
   <artifactId>cursors</artifactId>
 
   <packaging>pom</packaging>
