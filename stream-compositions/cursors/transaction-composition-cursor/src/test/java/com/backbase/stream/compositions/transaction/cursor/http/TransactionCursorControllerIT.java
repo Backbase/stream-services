@@ -1,12 +1,11 @@
 package com.backbase.stream.compositions.transaction.cursor.http;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.compositions.transaction.cursor.core.config.TransactionCursorConfiguration;
 import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
 import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepository;
+import com.backbase.stream.compositions.transaction.cursor.core.config.TransactionCursorConfiguration;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorDeleteRequest;

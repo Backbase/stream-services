@@ -6,7 +6,7 @@ spring:
   datasource:
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:root}
-    url: jdbc:mysql://localhost:3306/transaction_cursor_service?useSSL=false
+    url: jdbc:mysql://localhost:3306/transaction_cursor?useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
   zipkin:
     enabled: false
@@ -50,7 +50,6 @@ backbase:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
-    com.backbase.legalentity.integration: INFO
 
 backbase.activemq.enabled: true
 spring.activemq.broker-url: tcp://localhost:61616

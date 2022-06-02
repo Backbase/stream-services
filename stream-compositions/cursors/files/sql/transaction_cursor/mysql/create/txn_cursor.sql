@@ -1,4 +1,4 @@
-CREATE TABLE `transaction_cursor_service`.`txn_cursor` (
+CREATE TABLE `transaction_cursor`.`txn_cursor` (
   `id` VARCHAR(36) NOT NULL,
   `arrangement_id` VARCHAR(36) NOT NULL,
   `ext_arrangement_id` VARCHAR(50) NOT NULL,

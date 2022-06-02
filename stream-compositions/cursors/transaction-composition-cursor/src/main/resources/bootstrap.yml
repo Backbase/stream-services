@@ -2,7 +2,7 @@ spring:
   liquibase:
     enabled: false
   application:
-    name: transaction-cursor-service
+    name: transaction-cursor
   cloud:
     kubernetes:
       config:
