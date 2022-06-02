@@ -57,6 +57,8 @@ components:
       properties:
         legalEntityExternalId:
           type: string
+        legalEntityInternalId:
+          type: string
         serviceAgreementExternalId:
           type: string
         serviceAgreementInternalId:
@@ -65,6 +67,9 @@ components:
           type: string
         userInternalId:
           type: string
+        referenceJobRoleNames:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
+          description: The reference job roles that should get assigned to the user
         membershipAccounts:
           type: array
           items:

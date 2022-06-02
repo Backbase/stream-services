@@ -30,9 +30,6 @@ backbase:
       enabled: true
       adapter:
         enabled: true
-    service-api:
-      authentication:
-        required-scope: api:service
   stream:
     legalentity:
       sink:
@@ -55,7 +52,7 @@ backbase:
             base-url: http://localhost:9002
             async: false
         events:
-          enableCompleted: false
+          enableCompleted: true
           enableFailed: true
         cursor:
           enabled: false
@@ -64,9 +61,9 @@ bootstrap:
   enabled: false
   # This is just an example. Replace it with data corresponding to your bank
   legalEntity:
-    name: "Moustache Bank"
+    name: "ACME Bank"
     realmName: "backbase"
-    externalId: "moustache-bank"
+    externalId: "ACME"
     legalEntityType: "BANK"
     referenceJobRoles:
       - name: Entitlements - Manager

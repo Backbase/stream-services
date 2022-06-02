@@ -25,10 +25,9 @@ public class LegalEntityConfiguration {
 
     @Bean
     @Primary
-    public LegalEntityIntegrationApi legalEntityIntegrationApi() {
-        LegalEntityIntegrationApi legalEntityIntegrationApi = new LegalEntityIntegrationApi();
-        legalEntityIntegrationApi.getApiClient().setBasePath(legalEntityConfigurationProperties.getIntegrationBaseUrl());
-        return legalEntityIntegrationApi;
+    public LegalEntityIntegrationApi legalEntityIntegrationApi(
+            com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient) {
+        return new LegalEntityIntegrationApi(legalEntityClient);
     }
 
     @Bean
@@ -38,12 +37,21 @@ public class LegalEntityConfiguration {
     }
 
     @Bean
-    public ApiClient productClient(
-            WebClient dbsWebClient,
-            ObjectMapper objectMapper,
-            DateFormat dateFormat) {
+    public ApiClient productClient(WebClient dbsWebClient, ObjectMapper objectMapper,
+                                       DateFormat dateFormat) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(legalEntityConfigurationProperties.getChains().getProductComposition().getBaseUrl());
+
+        return apiClient;
+    }
+
+    @Bean
+    public com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient(
+            WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
+        com.backbase.stream.compositions.legalentity.integration.ApiClient apiClient =
+                new com.backbase.stream.compositions.legalentity.integration.ApiClient(
+                        dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(legalEntityConfigurationProperties.getIntegrationBaseUrl());
 
         return apiClient;
     }

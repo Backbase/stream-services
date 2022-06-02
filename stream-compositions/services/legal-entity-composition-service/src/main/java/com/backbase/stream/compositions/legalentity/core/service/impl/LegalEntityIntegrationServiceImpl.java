@@ -27,13 +27,7 @@ public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegration
                 .pullLegalEntity(
                         mapper.mapPullRequestStreamToIntegration(ingestPullRequest))
                 .map(mapper::mapResponseIntegrationToStream)
-                .onErrorResume(e -> {
-                    log.error("Error while pulling Legal Entities: {}", e.getMessage());
-                    if (log.isDebugEnabled()) {
-                        log.debug("Request Object for the pullLegalEntity call: {}", ingestPullRequest);
-                    }
-                    return Mono.error(new InternalServerErrorException().withMessage(e.getMessage()));
-                })
+                .onErrorResume(this::handleIntegrationError)
                 .flatMap(this::handleIntegrationResponse);
 
     }
@@ -44,5 +38,10 @@ public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegration
             log.debug("Legal Entity received from Integration: {}", res.getLegalEntity());
         }
         return Mono.just(res);
+    }
+
+    private Mono<LegalEntityResponse> handleIntegrationError(Throwable e) {
+        log.error("Error while pulling Legal Entities: {}", e.getMessage());
+        return Mono.error(new InternalServerErrorException().withMessage(e.getMessage()));
     }
 }

@@ -12,7 +12,7 @@ paths:
     post:
       tags:
         - TransactionIntegration
-      summary: Pulls transactions.
+      summary: Pulls transactions for the Arrangement and either date range of number of billing cycles.
       description: Pulls transactions.
       operationId: pullTransactions
       requestBody:
@@ -56,10 +56,16 @@ components:
     PullIngestionRequest:
       type: object
       properties:
-        userExternalId:
+        externalArrangementId:
           type: string
-        productGroup:
-          $ref: '#/components/schemas/ProductGroup'
+        dateRangeStart:
+          type: string
+          format: date-time
+        dateRangeEnd:
+          type: string
+          format: date-time
+        billingCycles:
+          type: integer
         additionalParameters:
           type: object
           additionalProperties:

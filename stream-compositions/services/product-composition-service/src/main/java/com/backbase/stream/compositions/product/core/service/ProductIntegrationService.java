@@ -1,7 +1,7 @@
 package com.backbase.stream.compositions.product.core.service;
 
-import com.backbase.stream.compositions.integration.product.model.ProductGroup;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
+import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import reactor.core.publisher.Mono;
 
 public interface ProductIntegrationService {
@@ -11,5 +11,5 @@ public interface ProductIntegrationService {
      * @param ingestPullRequest ProductIngestPullRequest
      * @return Mono<ProductGroup>
      */
-    Mono<ProductGroup> pullProductGroup(ProductIngestPullRequest ingestPullRequest);
+    Mono<ProductIngestResponse> pullProductGroup(ProductIngestPullRequest ingestPullRequest);
 }

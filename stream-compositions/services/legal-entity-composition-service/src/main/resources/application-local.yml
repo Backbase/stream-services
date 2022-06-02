@@ -61,12 +61,12 @@ backbase:
           enabled: false
           base-url: http://localhost:7089/transaction-cursor-service
 bootstrap:
-  enabled: false
+  enabled: true
   # This is just an example. Replace it with data corresponding to your bank
   legalEntity:
-    name: "Moustache Bank"
+    name: "ACME Bank"
     realmName: "backbase"
-    externalId: "moustache-bank"
+    externalId: "ACME"
     legalEntityType: "BANK"
     referenceJobRoles:
       - name: Entitlements - Manager

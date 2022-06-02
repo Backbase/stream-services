@@ -9,6 +9,7 @@ import com.backbase.stream.compositions.transaction.core.model.TransactionIngest
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIntegrationService;
+import com.backbase.stream.compositions.transaction.core.service.TransactionPostIngestionService;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.worker.model.UnitOfWork;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,9 @@ import java.util.List;
 public class TransactionIngestionServiceImpl implements TransactionIngestionService {
     private final TransactionMapper mapper;
     private final TransactionService transactionService;
-    private final TransactionIntegrationService productIntegrationService;
+    private final TransactionIntegrationService transactionIntegrationService;
+
+    private final TransactionPostIngestionService transactionPostIngestionService;
 
     /**
      * Ingests transactions in pull mode.
@@ -37,7 +40,8 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
         return ingestPullRequest
                 .map(this::pullTransactions)
                 .flatMap(this::sendToDbs)
-                .doOnSuccess(this::handleSuccess)
+                .doOnSuccess(transactionPostIngestionService::handleSuccess)
+                .onErrorResume(transactionPostIngestionService::handleFailure)
                 .map(this::buildResponse);
     }
 
@@ -58,8 +62,9 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
      * @return Flux<TransactionsPostRequestBody>
      */
     private Flux<TransactionsPostRequestBody> pullTransactions(TransactionIngestPullRequest request) {
-        return productIntegrationService
+        return transactionIntegrationService
                 .pullTransactions(request)
+                .doOnNext(t -> log.info("Retrieved Transaction from Integration {}", t.getExternalId()))
                 .map(mapper::mapIntegrationToStream);
     }
 

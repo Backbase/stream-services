@@ -1,7 +1,9 @@
 package com.backbase.stream.compositions.product.core.mapper;
 
 import com.backbase.stream.compositions.integration.product.model.PullProductGroupRequest;
+import com.backbase.stream.compositions.integration.product.model.PullProductGroupResponse;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
+import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
@@ -79,4 +81,11 @@ public interface ProductGroupMapper {
      * @return Pull Product Group Request object
      */
     PullProductGroupRequest mapStreamToIntegration(ProductIngestPullRequest productIngestPullRequest);
+
+    /**
+     * Maps integration response to Stream response
+     * @param pullProductGroupResponse
+     * @return Stream Product Response
+     */
+    ProductIngestResponse mapResponseIntegrationToStream(PullProductGroupResponse pullProductGroupResponse);
 }

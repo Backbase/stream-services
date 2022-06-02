@@ -38,9 +38,6 @@ backbase:
   security:
     http:
       enabled: true
-    service-api:
-      authentication:
-        required-scope: api:service
   stream:
     dbs:
       user-manager-base-url: http://localhost:8086/user-manager
@@ -48,22 +45,20 @@ backbase:
       arrangement-manager-base-url: http://localhost:8082/arrangement-manager
     compositions:
       product:
-        enable-completed-event: false
-        enable-failed-event: false
         integration-base-url: http://localhost:9999
         chains:
           transaction-composition:
-            enableOnComplete: false
+            enableOnComplete: true
             enableOnFailure: false
             base-url: http://localhost:9003
             async: false
+            excludeProductTypeExternalIds:
         events:
-          enableCompleted: false
+          enableCompleted: true
           enableFailed: true
         cursor:
           enabled: false
           base-url: http://localhost:9999
-
 
 logging:
   level:

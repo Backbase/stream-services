@@ -12,10 +12,12 @@ import java.util.Map;
 @AllArgsConstructor
 public class ProductIngestPullRequest {
     private String legalEntityExternalId;
+    private String legalEntityInternalId;
     private String serviceAgreementExternalId;
     private String serviceAgreementInternalId;
     private String userExternalId;
     private String userInternalId;
+    private List<String> referenceJobRoleNames;
     private List<String> membershipAccounts;
     private Map<String, String> additionalParameters;
 }

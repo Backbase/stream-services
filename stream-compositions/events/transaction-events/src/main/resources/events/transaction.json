@@ -2,9 +2,229 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "id": {
-      "description": "Unique identifier of the event",
-      "type": "string"
+    "CreditDebitIndicator": {
+      "description": "Indicates whether the amount is credited or debited.",
+      "type": "string",
+      "enum": [
+        "CRDT",
+        "DBIT"
+      ]
+    },
+    "CheckImageAvailability": {
+      "type": "string",
+      "example": "AVAILABLE",
+      "enum": [
+        "AVAILABLE",
+        "UNAVAILABLE"
+      ]
+    },
+    "EnrichmentIndicator": {
+      "type": "string",
+      "description": "Indicates whether transaction needs to be enriched or not by following logic.\nSTANDARD_ENRICHMENT: Use default rules in service for enrichment\nDO_ENRICHMENT: Ignore any existing rules and enrich the transaction only if it's not enriched already\nFORCE_ENRICHMENT: Ignore any existing rules and enrich the transaction even if it's already enriched\nNO_ENRICHMENT: Ignore any existing rules and don't attempt to enrich the transaction\nCONFIGURED_ENRICHMENT: Use configured category in service for categorisation of the transaction\n",
+      "example": "DO_ENRICHMENT",
+      "enum": [
+        "STANDARD_ENRICHMENT",
+        "DO_ENRICHMENT",
+        "FORCE_ENRICHMENT",
+        "NO_ENRICHMENT",
+        "CONFIGURED_ENRICHMENT"
+      ]
+    },
+    "Currency": {
+      "title": "Currency",
+      "type": "object",
+      "properties": {
+        "amount": {
+          "description": "The amount in the specified currency",
+          "type": "string",
+          "minimum": -1000000000000000000,
+          "maximum": 1000000000000000000
+        },
+        "currencyCode": {
+          "description": "The alpha-3 code (complying with ISO 4217) of the currency that qualifies the amount",
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        }
+      },
+      "required": [
+        "amount",
+        "currencyCode"
+      ]
+    },
+    "DisputeStatus": {
+      "enum": [
+        "UNDISPUTED",
+        "PENDING",
+        "REJECTED",
+        "REFUNDED"
+      ],
+      "type": "string",
+      "example": "UNDISPUTED"
+    },
+    "TransactionsPostRequestBody": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "arrangementId": {
+          "description": "Reference to the product to which the transaction belongs",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "externalId": {
+          "description": "Internally used unique external identification of the transaction",
+          "maxLength": 300,
+          "type": "string"
+        },
+        "externalArrangementId": {
+          "description": "External reference to the product to which the transaction belongs",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "reference": {
+          "description": "A tag/label issued by the initiator of the transaction in order to be able to refer to the respective transaction",
+          "maxLength": 36,
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 280,
+          "type": "string"
+        },
+        "typeGroup": {
+          "description": "Bank specific code of the group the transaaction type belangs to this to be mapped to in integration",
+          "maxLength": 36,
+          "type": "string"
+        },
+        "type": {
+          "description": "Bank specific code to be mapped to generic type in integration",
+          "maxLength": 36,
+          "type": "string"
+        },
+        "category": {
+          "description": "Transaction category",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "bookingDate": {
+          "description": "The date the amount is posted to the balance of an account from a book keeping perspective.",
+          "type": "string",
+          "format": "date"
+        },
+        "valueDate": {
+          "description": "The date on which an amount posted to an account becomes interest bearing",
+          "type": "string",
+          "format": "date"
+        },
+        "creditDebitIndicator": {
+          "$ref": "#/properties/CreditDebitIndicator"
+        },
+        "transactionAmountCurrency": {
+          "$ref": "#/properties/Currency"
+        },
+        "instructedAmountCurrency": {
+          "$ref": "#/properties/Currency"
+        },
+        "currencyExchangeRate": {
+          "description": "The exchange rate (between both account and transaction currency) that was used for the conversion. To be used if those currencies are not the same",
+          "type": "number"
+        },
+        "counterPartyName": {
+          "description": "The name of the counterparty",
+          "maxLength": 128,
+          "type": "string"
+        },
+        "counterPartyAccountNumber": {
+          "description": "The International Bank Account Number of the counterparty",
+          "maxLength": 36,
+          "type": "string"
+        },
+        "counterPartyBIC": {
+          "description": "The BIC of the counterparty",
+          "maxLength": 11,
+          "type": "string"
+        },
+        "counterPartyCountry": {
+          "description": "ISO Country code",
+          "pattern": "^[A-Z]{2}$",
+          "type": "string"
+        },
+        "counterPartyCity": {
+          "description": "City of the counterparty",
+          "maxLength": 35,
+          "type": "string"
+        },
+        "counterPartyAddress": {
+          "description": "Address of the counterparty",
+          "maxLength": 140,
+          "type": "string"
+        },
+        "counterPartyBankName": {
+          "description": "The bank name of the counterparty",
+          "maxLength": 128,
+          "type": "string"
+        },
+        "creditorId": {
+          "description": "Id of the creditor (Only for SEPA DD)",
+          "maxLength": 19,
+          "type": "string"
+        },
+        "mandateReference": {
+          "description": "Mandate Reference (Only for SEPA DD)",
+          "maxLength": 128,
+          "type": "string"
+        },
+        "billingStatus": {
+          "maxLength": 8,
+          "type": "string"
+        },
+        "checkSerialNumber": {
+          "description": "Serial number of the check. Each check has a different number for identification purposes.",
+          "type": "integer",
+          "format": "int64",
+          "minimum": 0,
+          "maximum": 10000000000000000
+        },
+        "sequenceNumber": {
+          "maxLength": 20,
+          "pattern": "(^[1-9][0-9]*)|0$",
+          "type": "string"
+        },
+        "runningBalance": {
+          "description": "Indicates the balance of the account at that moment when the transaction was executed",
+          "type": "number",
+          "minimum": -100000000000000,
+          "maximum": 1000000000000000
+        },
+        "creationTime": {
+          "description": "Indicates the creation time of the transaction",
+          "type": "string"
+        },
+        "checkImageAvailability": {
+          "description": "Indicates the state of check images for the transaction",
+          "$ref": "#/properties/CheckImageAvailability"
+        },
+        "enrichmentIndicator": {
+          "$ref": "#/properties/EnrichmentIndicator"
+        },
+        "disputeStatus": {
+          "description": "Indicates the dispute status of a transaction",
+          "$ref": "#/properties/DisputeStatus"
+        },
+        "batchOrderId": {
+          "description": "Transaction batch order ID from DBS batches",
+          "maxLength": 50,
+          "type": "string"
+        }
+      },
+      "required": [
+        "bookingDate",
+        "creditDebitIndicator",
+        "description",
+        "externalArrangementId",
+        "externalId",
+        "type",
+        "typeGroup",
+        "transactionAmountCurrency"
+      ]
     }
   }
 }

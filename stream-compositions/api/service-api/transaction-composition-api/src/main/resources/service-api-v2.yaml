@@ -8,13 +8,13 @@ servers:
 tags:
   - name: TransactionComposition
 paths:
-  /service-api/v2/pull-ingestion:
+  /service-api/v2/ingest/pull:
     post:
       tags:
         - TransactionComposition
       summary: Ingests transactions (in pull mode).
       description: Ingests transactions (in pull mode).
-      operationId: pullIngestTransactions
+      operationId: pullTransactions
       requestBody:
         description: Pull Ingestion Request
         content:
@@ -40,8 +40,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InternalServerError'
-
-  /service-api/v2/push-ingestion:
+  /service-api/v2/ingest/pull/async:
+    post:
+      tags:
+        - TransactionComposition
+      summary: Ingests transactions (in pull mode).
+      description: Ingests transactions (in pull mode).
+      operationId: pullTransactionsAsync
+      requestBody:
+        description: Pull Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionPullIngestionRequest'
+      responses:
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /service-api/v2/ingest/push:
     post:
       tags:
         - TransactionComposition
@@ -87,10 +112,16 @@ components:
     TransactionPullIngestionRequest:
       type: object
       properties:
-        userExternalId:
+        externalArrangementId:
           type: string
-        productGroup:
-          $ref: '#/components/schemas/ProductGroup'
+        dateRangeStart:
+          type: string
+          format: date-time
+        dateRangeEnd:
+          type: string
+          format: date-time
+        billingCycles:
+          type: integer
         additionalParameters:
           type: object
           additionalProperties:

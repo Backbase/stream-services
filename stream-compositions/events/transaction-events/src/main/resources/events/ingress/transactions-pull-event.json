@@ -2,18 +2,15 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "eventId": {
-      "description": "Unique identifier of the event.",
-      "type": "string"
-    },
-    "transactions": {
+    "externalArrangementIds": {
+      "description": "list of external arrangement ids",
       "type": "array",
       "items": {
-        "$ref": "../transaction.json"
+        "type": "string"
       }
     }
   },
   "required": [
-    "eventId"
+    "externalArrangementIds"
   ]
 }

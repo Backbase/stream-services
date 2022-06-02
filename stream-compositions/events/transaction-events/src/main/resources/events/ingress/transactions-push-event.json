@@ -2,9 +2,9 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "productGroup": {
+    "transactionsPostRequestBody": {
       "type": "object",
-      "$ref": "../product-group.json"
+      "$ref": "../transaction.json#/properties/TransactionsPostRequestBody"
     }
   }
 }

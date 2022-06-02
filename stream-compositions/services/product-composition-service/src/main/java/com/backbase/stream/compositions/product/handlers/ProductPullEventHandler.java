@@ -17,8 +17,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 @Component
 @AllArgsConstructor
 @Slf4j
@@ -65,7 +63,6 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
             return;
         }
         ProductCompletedEvent event = new ProductCompletedEvent()
-                .withEventId(UUID.randomUUID().toString())
                 .withProductGroup(mapper.mapStreamToEvent(response.getProductGroup()));
 
         EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
@@ -83,7 +80,6 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
 
         if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
             ProductFailedEvent event = new ProductFailedEvent()
-                    .withEventId(UUID.randomUUID().toString())
                     .withMessage(ex.getMessage());
 
             EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();

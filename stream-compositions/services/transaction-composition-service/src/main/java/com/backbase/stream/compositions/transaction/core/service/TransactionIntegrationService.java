@@ -1,6 +1,6 @@
 package com.backbase.stream.compositions.transaction.core.service;
 
-import com.backbase.stream.compositions.integration.transaction.model.TransactionsPostRequestBody;
+import com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPullRequest;
 import reactor.core.publisher.Flux;
 

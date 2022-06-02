@@ -6,6 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Setter
 @Getter
 @NoArgsConstructor
@@ -15,6 +18,7 @@ public class ProductConfigurationProperties {
     private Chains chains;
     private Events events;
     private Cursor cursor;
+
 
     @Data
     @NoArgsConstructor
@@ -43,5 +47,8 @@ public class ProductConfigurationProperties {
         private Boolean async = Boolean.FALSE;
     }
     @NoArgsConstructor
-    public static class TransactionComposition extends BaseComposition {}
+    @Data
+    public static class TransactionComposition extends BaseComposition {
+        private List<String> excludeProductTypeExternalIds = new ArrayList<>();
+    }
 }

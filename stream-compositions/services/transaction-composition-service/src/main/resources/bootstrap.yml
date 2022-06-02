@@ -8,11 +8,6 @@ spring:
       enabled: false
       discovery:
         enabled: true
-    config:
-      token: ${CLOUD_CONFIG_TOKEN:myroot}
-      uri: ${CLOUD_CONFIG_URI:http://wsecu-cloud-config-server-dbsx.dbsx.svc.cluster.local:8080}
-      enabled: true
-      name: ${spring.application.name}
 
 eureka:
   instance:

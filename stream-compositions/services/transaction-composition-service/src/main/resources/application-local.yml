@@ -51,9 +51,13 @@ backbase:
 
     compositions:
       transaction:
-        enable-completed-events: false
-        enable-failed-events: true
-        transaction-integration-url:  http://localhost:5085
+        integration-base-url: http://localhost:9999
+        events:
+          enableCompleted: true
+          enableFailed: true
+        cursor:
+          enabled: false
+          base-url: http://localhost:9999
 
 backbase.activemq.enabled: true
 spring.activemq.broker-url: tcp://localhost:61616

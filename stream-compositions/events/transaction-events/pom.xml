@@ -45,8 +45,10 @@
                         </goals>
                         <configuration>
                             <packageVersion>1</packageVersion>
+                            <useJavaTime>true</useJavaTime>
                             <outputFile>${project.basedir}/target/generated-sources</outputFile>
-                              <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
+                            <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
+                            <!-- The packageName should not contain com.backbase as that is already the default value of the basePackageName -->
                             <packageName>stream.compositions.events.ingress</packageName>
                         </configuration>
                     </execution>
@@ -58,8 +60,10 @@
                         </goals>
                         <configuration>
                             <packageVersion>1</packageVersion>
+                            <useJavaTime>true</useJavaTime>
                             <outputFile>${project.basedir}/target/generated-sources</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
+                            <!-- The packageName should not contain com.backbase as that is already the default value of the basePackageName -->
                             <packageName>stream.compositions.events.egress</packageName>
                         </configuration>
                     </execution>

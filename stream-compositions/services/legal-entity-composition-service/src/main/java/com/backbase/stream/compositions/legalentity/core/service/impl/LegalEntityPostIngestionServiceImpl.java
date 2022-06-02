@@ -2,13 +2,19 @@ package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
+import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
+import com.backbase.stream.compositions.events.egress.event.spec.v1.LegalEntityCompletedEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.LegalEntityFailedEvent;
 import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties;
+import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityPostIngestionService;
 import com.backbase.stream.compositions.product.client.ProductCompositionApi;
+import com.backbase.stream.compositions.product.client.model.ProductIngestionResponse;
 import com.backbase.stream.compositions.product.client.model.ProductPullIngestionRequest;
+import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.User;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,6 +34,8 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
     private final ProductCompositionApi productCompositionApi;
 
+    private final LegalEntityMapper legalEntityMapper;
+
 
     @Override
     public void handleSuccess(LegalEntityResponse res) {
@@ -37,10 +45,17 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
             sendProductPullEvent(res);
         }
 
+        if (Boolean.TRUE.equals(legalEntityConfigurationProperties.getEvents().getEnableCompleted())) {
+            LegalEntityCompletedEvent event = new LegalEntityCompletedEvent()
+                    .withLegalEntity(legalEntityMapper.mapStreamToEvent(res.getLegalEntity()));
+            EnvelopedEvent<LegalEntityCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
+            envelopedEvent.setEvent(event);
+            eventBus.emitEvent(envelopedEvent);
+        }
+
         if (log.isDebugEnabled()) {
             log.debug("Ingested legal entity: {}", res.getLegalEntity());
         }
-
 
     }
 
@@ -64,21 +79,40 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
             return;
         }
 
+        JobProfileUser jpUser = legalEntity.getUsers().get(0);
+        User user = jpUser.getUser();
+
         ProductPullIngestionRequest productPullIngestionRequest =
-                new ProductPullIngestionRequest().withLegalEntityExternalId(legalEntity.getExternalId())
+                new ProductPullIngestionRequest()
+                        .withLegalEntityInternalId(legalEntity.getInternalId())
+                        .withLegalEntityExternalId(legalEntity.getExternalId())
                         .withServiceAgreementExternalId(legalEntity.getMasterServiceAgreement().getExternalId())
                         .withServiceAgreementInternalId(legalEntity.getMasterServiceAgreement().getInternalId())
-                        .withMembershipAccounts(res.getMembershipAccounts());
+                        .withMembershipAccounts(res.getMembershipAccounts())
+                        .withUserExternalId(user.getExternalId())
+                        .withUserInternalId(user.getInternalId())
+                        .withReferenceJobRoleNames(jpUser.getReferenceJobRoleNames());
 
 
-        productPullIngestionRequest.setUserExternalId(
-                legalEntity.getUsers().get(0).getUser().getExternalId());
+        if (Boolean.FALSE.equals(legalEntityConfigurationProperties.getChains().getProductComposition().getAsync())) {
+            productCompositionApi.pullIngestProduct(productPullIngestionRequest)
+                    .onErrorResume(this::handleProductError)
+                    .subscribe();
+        } else {
+            productCompositionApi.pullIngestProductAsync(productPullIngestionRequest)
+                    .onErrorResume(this::handleAsyncProductError)
+                    .subscribe();
+        }
 
-        productCompositionApi.pullIngestProduct(productPullIngestionRequest)
-                .onErrorResume(e -> {
-                    log.info(e.getMessage());
-                    return Mono.empty();
-                })
-                .subscribe();
+    }
+
+    private Mono<Void> handleAsyncProductError(Throwable t) {
+        log.error("Error while calling Product Composition asynchronously: {}", t.getMessage());
+        return Mono.empty();
+    }
+
+    private Mono<ProductIngestionResponse> handleProductError(Throwable t) {
+        log.error("Error while calling Product Composition: {}", t.getMessage());
+        throw new InternalServerErrorException(t.getMessage());
     }
 }
