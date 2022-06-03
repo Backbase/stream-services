@@ -27,6 +27,10 @@ public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegration
                 .pullLegalEntity(
                         mapper.mapPullRequestStreamToIntegration(ingestPullRequest))
                 .map(mapper::mapResponseIntegrationToStream)
+                .map(leRes -> {
+                    leRes.setProductChainEnabledFromRequest(ingestPullRequest.getProductChainEnabled());
+                    return leRes;
+                })
                 .onErrorResume(this::handleIntegrationError)
                 .flatMap(this::handleIntegrationResponse);
 

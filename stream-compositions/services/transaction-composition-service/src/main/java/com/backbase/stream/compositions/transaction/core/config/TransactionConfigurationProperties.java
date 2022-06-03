@@ -29,4 +29,8 @@ public class TransactionConfigurationProperties {
         private Boolean enabled = Boolean.FALSE;
         private String baseUrl = "http://product-cursor:9000";
     }
+
+    public final boolean isCursorEnabled() {
+        return Boolean.TRUE.equals(cursor.getEnabled());
+    }
 }

@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class TransactionIngestionServiceImpl implements TransactionIngestionService {
+    public static final String DELIMITER = ",";
+    public static final String dateFormat = "yyyy-MM-dd hh:mm:ss";
     private final TransactionMapper mapper;
     private final TransactionService transactionService;
     private final TransactionIntegrationService transactionIntegrationService;
@@ -40,7 +42,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
 
     private final TransactionConfigurationProperties config;
 
-    private static final String dateFormat = "yyyy-MM-dd hh:mm:ss";
+
 
     /**
      * Ingests transactions in pull mode.
@@ -65,8 +67,13 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
         transactionIngestPullRequest.setDateRangeStart(
                 currentTime.minusDays(config.getDefaultStartOffsetInDays()));
 
-        return getCursor(transactionIngestPullRequest)
-                .switchIfEmpty(createCursor(transactionIngestPullRequest));
+        if (config.isCursorEnabled()) {
+            log.info("Transaction Cursor is enabled");
+            return getCursor(transactionIngestPullRequest)
+                    .switchIfEmpty(createCursor(transactionIngestPullRequest));
+        }
+
+        return Mono.just(transactionIngestPullRequest);
     }
 
     /**
@@ -172,11 +179,13 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
     }
 
     private void handleSuccess(String arrangementId, List<TransactionsPostResponseBody> transactions) {
-        patchCursor(arrangementId, buildPatchCursorRequest(
-                TransactionCursor.StatusEnum.SUCCESS,
-                OffsetDateTime.now().format(DateTimeFormatter.ofPattern(dateFormat)),
-                transactions.stream().map(TransactionsPostResponseBody::getExternalId)
-                        .collect(Collectors.joining(","))));
+        if (config.isCursorEnabled()) {
+            patchCursor(arrangementId, buildPatchCursorRequest(
+                    TransactionCursor.StatusEnum.SUCCESS,
+                    OffsetDateTime.now().format(DateTimeFormatter.ofPattern(dateFormat)),
+                    transactions.stream().map(TransactionsPostResponseBody::getExternalId)
+                            .collect(Collectors.joining(DELIMITER))));
+        }
 
         transactionPostIngestionService.handleSuccess(transactions);
 
@@ -186,9 +195,11 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
     }
 
     private Mono<List<TransactionsPostResponseBody>> handleError(String arrangementId, Throwable e) {
-        patchCursor(arrangementId, buildPatchCursorRequest(
-                TransactionCursor.StatusEnum.FAILED,
-                null, null));
+        if (config.isCursorEnabled()) {
+            patchCursor(arrangementId, buildPatchCursorRequest(
+                    TransactionCursor.StatusEnum.FAILED,
+                    null, null));
+        }
         return transactionPostIngestionService.handleFailure(e);
     }
 

@@ -28,5 +28,7 @@ public class LegalEntityPullRequest {
     private IdentityUserLinkStrategy identityUserLinkStrategy;
 
     private Map<String, String> additionalParameters;
+
+    private Boolean productChainEnabled;
 }
 

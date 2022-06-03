@@ -52,8 +52,12 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
     private Mono<LegalEntityResponse> processChains(LegalEntityResponse res) {
         Mono<LegalEntityResponse> productChainMono;
+        boolean isProductChainEnabled = res.getProductChainEnabledFromRequest() == null ?
+                config.isProductChainEnabled():
+                res.getProductChainEnabledFromRequest();
 
-        if (!config.isProductChainEnabled()) {
+
+        if (!isProductChainEnabled) {
             if (log.isDebugEnabled()) {
                 log.debug("Product Chain is disabled");
             }
