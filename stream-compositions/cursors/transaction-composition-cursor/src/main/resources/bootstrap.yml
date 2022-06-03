@@ -1,0 +1,12 @@
+spring:
+  liquibase:
+    enabled: false
+  application:
+    name: transaction-cursor
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
+      enabled: false
+      discovery:
+        enabled: true

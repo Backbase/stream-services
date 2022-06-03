@@ -1,0 +1,73 @@
+server.port: 7089
+
+spring:
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5Dialect
+  datasource:
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:root}
+    url: jdbc:mysql://localhost:3306/transaction_cursor?useSSL=false
+    driver-class-name: com.mysql.jdbc.Driver
+  zipkin:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          dbs:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            client-authentication-method: post
+        provider:
+          dbs:
+            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+  main:
+    allow-bean-definition-overriding: true
+
+
+backbase:
+  security:
+    http:
+      enabled: false
+      adapter:
+        enabled: false
+      mtls:
+        enabled: false
+  stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+        userProfileEnabled: true
+    dbs:
+      user-manager-base-url: http://localhost:8086/user-manager
+      user-profile-manager-base-url: http://localhost:8086/user-profile-manager
+      access-control-base-url: http://localhost:8086/access-control
+      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+    identity:
+      identity-integration-base-url: http://localhost:8181/identity-integration-service
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG
+
+backbase.activemq.enabled: true
+spring.activemq.broker-url: tcp://localhost:61616
+
+eureka:
+  instance:
+    metadata-map:
+      public: true
+      role: live
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8080/registry/eureka/
+
+sso:
+  jwt:
+    internal:
+      signature:
+        key:
+          type: ENV
+          value: SIG_SECRET_KEY
+
