@@ -41,35 +41,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/InternalServerError'
 
-  /service-api/v2/ingest/pull/async:
-    post:
-      tags:
-        - ProductComposition
-      summary: Ingests products (in pull mode) Asynchronously.
-      description: Ingests products (in pull mode) Asynchronously.
-      operationId: pullIngestProductAsync
-      requestBody:
-        description: Product Pull Ingestion Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProductPullIngestionRequest'
-      responses:
-        "201":
-          description: Products ingested.
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BadRequest'
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InternalServerError'
-
   /service-api/v2/ingest/push:
     post:
       tags:
@@ -90,32 +61,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductIngestionResponse'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BadRequest'
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InternalServerError'
-  /service-api/v2/ingest/push/async:
-    post:
-      tags:
-        - ProductComposition
-      summary: Ingests products (in push mode) Asynchronously.
-      description: Ingests poducts (in push mode) Asynchronously.
-      operationId: pushIngestProductAsync
-      requestBody:
-        description: Push Ingestion Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProductPushIngestionRequest'
-      responses:
         "400":
           description: BadRequest
           content:

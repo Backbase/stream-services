@@ -9,11 +9,11 @@ public interface ProductPostIngestionService {
      * Post processing for a completed ingestion process
      * @param response
      */
-    void handleSuccess(ProductIngestResponse response);
+    Mono<ProductIngestResponse> handleSuccess(ProductIngestResponse response);
 
     /**
      * Post processing for a failed ingestion process
      * @param error
      */
-    Mono<ProductIngestResponse> handleFailure(Throwable error);
+    void handleFailure(Throwable error);
 }

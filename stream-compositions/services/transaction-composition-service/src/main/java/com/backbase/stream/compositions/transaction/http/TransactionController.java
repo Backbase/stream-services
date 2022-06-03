@@ -16,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import javax.validation.Valid;
 import java.util.stream.Collectors;
@@ -30,17 +29,9 @@ public class TransactionController implements TransactionCompositionApi {
 
     @Override
     public Mono<ResponseEntity<TransactionIngestionResponse>> pullTransactions(Mono<TransactionPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-        return transactionIngestionService
-                .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
+        return pullIngestionRequest.map(this::buildPullRequest)
+                .flatMap(transactionIngestionService::ingestPull)
                 .map(this::mapIngestionToResponse);
-    }
-
-    @Override
-    public Mono<ResponseEntity<Void>> pullTransactionsAsync(Mono<TransactionPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-        Mono.fromCallable(() -> transactionIngestionService
-                .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
-                .map(this::mapIngestionToResponse).subscribeOn(Schedulers.boundedElastic()).subscribe());
-        return Mono.empty();
     }
 
     /**
@@ -49,8 +40,8 @@ public class TransactionController implements TransactionCompositionApi {
     @Override
     public Mono<ResponseEntity<TransactionIngestionResponse>> pushIngestTransactions(
             @Valid Mono<TransactionPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-        return transactionIngestionService
-                .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
+        return pushIngestionRequest.map(this::buildPushRequest)
+                .flatMap(transactionIngestionService::ingestPush)
                 .map(this::mapIngestionToResponse);
     }
 
@@ -63,6 +54,8 @@ public class TransactionController implements TransactionCompositionApi {
     private TransactionIngestPullRequest buildPullRequest(TransactionPullIngestionRequest request) {
         return TransactionIngestPullRequest
                 .builder()
+                .arrangementId(request.getArrangementId())
+                .legalEntityInternalId(request.getLegalEntityInternalId())
                 .externalArrangementId(request.getExternalArrangementId())
                 .dateRangeStart(request.getDateRangeStart())
                 .dateRangeEnd(request.getDateRangeEnd())

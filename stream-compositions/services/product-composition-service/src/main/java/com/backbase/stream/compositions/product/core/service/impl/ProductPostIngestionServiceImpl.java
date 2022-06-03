@@ -32,31 +32,94 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private final EventBus eventBus;
 
-    private final ProductConfigurationProperties productConfigurationProperties;
+    private final ProductConfigurationProperties config;
 
     private final TransactionCompositionApi transactionCompositionApi;
 
-    private final ProductGroupMapper productGroupMapper;
+    private final ProductGroupMapper mapper;
 
     @Override
-    public void handleSuccess(ProductIngestResponse res) {
-        log.info("Product ingestion completed successfully.");
-        if (Boolean.TRUE.equals(productConfigurationProperties.getChains().getTransactionComposition().getEnableOnComplete())) {
-            extractProducts(res.getProductGroup())
-                    .doOnNext(this::sendTransactionPullRequest).subscribe();
+    public Mono<ProductIngestResponse> handleSuccess(ProductIngestResponse res) {
+        return Mono.just(res)
+                .doOnNext(r -> log.info("Product ingestion completed successfully for SA {}",
+                        res.getProductGroup().getServiceAgreement().getInternalId()))
+                .flatMap(this::processChains)
+                .doOnNext(this::processSuccessEvent)
+                .doOnNext(r -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Ingested products: {}", res.getProductGroup());
+                    }
+                });
+    }
+
+    @Override
+    public void handleFailure(Throwable error) {
+        log.error("Product ingestion failed. {}", error.getMessage());
+        if (Boolean.TRUE.equals(config.getEvents().getEnableFailed())) {
+            ProductFailedEvent event = new ProductFailedEvent()
+                    .withMessage(error.getMessage());
+            EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
+            envelopedEvent.setEvent(event);
+            eventBus.emitEvent(envelopedEvent);
+        }
+    }
+
+    private Mono<ProductIngestResponse> processChains(ProductIngestResponse res) {
+        Mono<ProductIngestResponse> transactionChainMono;
+
+        if (!config.isTransactionChainEnabled()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Transaction Chain is disabled");
+            }
+            transactionChainMono = Mono.just(res);
+        } else if (config.isTransactionChainAsync()) {
+            transactionChainMono = ingestTransactionsAsync(res);
+        } else {
+            transactionChainMono = ingestTransactions(res);
         }
 
-        if (Boolean.TRUE.equals(productConfigurationProperties.getEvents().getEnableCompleted())) {
+        return transactionChainMono;
+
+    }
+
+    private Mono<ProductIngestResponse> ingestTransactions(ProductIngestResponse res) {
+        return extractProducts(res.getProductGroup())
+                .map(this::buildTransactionPullRequest)
+                .flatMap(transactionCompositionApi::pullTransactions)
+                .onErrorResume(this::handleTransactionError)
+                .doOnNext(response -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Response from Transaction Composition: {}",
+                                response.getTransactions());
+                    }
+                })
+                .collectList()
+                .map(p -> res);
+    }
+
+    private Mono<ProductIngestResponse> ingestTransactionsAsync(ProductIngestResponse res) {
+        return extractProducts(res.getProductGroup())
+                .map(this::buildTransactionPullRequest)
+                .doOnNext(transactionCompositionApi::pullTransactions)
+                .doOnNext(t -> log.info("Async transaction ingestion called for arrangement: {}",
+                        t.getArrangementId()))
+                .collectList()
+                .map(p -> res);
+    }
+
+    private void processSuccessEvent(ProductIngestResponse res) {
+        if (Boolean.TRUE.equals(config.isCompletedEventEnabled())) {
             ProductCompletedEvent event = new ProductCompletedEvent()
-                    .withProductGroup(productGroupMapper.mapStreamToEvent(res.getProductGroup()));
+                    .withProductGroup(mapper.mapStreamToEvent(res.getProductGroup()));
             EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
         }
+    }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Ingested Product: {}", res.getProductGroup());
-        }
+    private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
+        log.error("Error while calling Transaction Composition: {}", t.getMessage());
+        return Mono.error(new InternalServerErrorException(t.getMessage()));
     }
 
     private Flux<BaseProduct> extractProducts(ProductGroup productGroup) {
@@ -79,7 +142,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     }
 
     private Boolean excludeProducts(BaseProduct product) {
-        List<String> excludeList = productConfigurationProperties
+        List<String> excludeList = config
                 .getChains().getTransactionComposition()
                 .getExcludeProductTypeExternalIds();
 
@@ -90,47 +153,10 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         return !excludeList.contains(product.getProductTypeExternalId());
     }
 
-    @Override
-    public Mono<ProductIngestResponse> handleFailure(Throwable error) {
-        log.error("Product ingestion failed. {}", error.getMessage());
-        if (Boolean.TRUE.equals(productConfigurationProperties.getEvents().getEnableFailed())) {
-            ProductFailedEvent event = new ProductFailedEvent()
-                    .withMessage(error.getMessage());
-            EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
-            envelopedEvent.setEvent(event);
-            eventBus.emitEvent(envelopedEvent);
-        }
-        return Mono.empty();
-    }
-
-    private void sendTransactionPullRequest(BaseProduct product) {
-        TransactionPullIngestionRequest transactionPullIngestionRequest =
-                new TransactionPullIngestionRequest()
+    private TransactionPullIngestionRequest buildTransactionPullRequest(BaseProduct product) {
+        return new TransactionPullIngestionRequest()
+                .withLegalEntityInternalId(product.getLegalEntities().get(0).getInternalId())
+                .withArrangementId(product.getInternalId())
                         .withExternalArrangementId(product.getExternalId());
-
-        log.info("Call transaction-composition-service for Arrangement ID {}", product.getInternalId());
-
-        if (Boolean.FALSE.equals(productConfigurationProperties.getChains().getTransactionComposition().getAsync())) {
-            transactionCompositionApi.pullTransactions(transactionPullIngestionRequest)
-                    .onErrorResume(this::handleTransactionError)
-                    .doOnSuccess(res -> log.info("Received Response from Transaction Composition: Ingested Size :: {}", res.getTransactions().size()))
-                    .subscribe();
-        } else {
-            transactionCompositionApi.pullTransactionsAsync(transactionPullIngestionRequest)
-                    .doOnSuccess(res -> log.info("Transaction Composition Call complete"))
-                    .onErrorResume(this::handleAsyncTransactionError)
-                    .subscribe();
-        }
-
-    }
-
-    private Mono<Void> handleAsyncTransactionError(Throwable t) {
-        log.error("Error while calling Transaction Composition asynchronously: {}", t.getMessage());
-        return Mono.empty();
-    }
-
-    private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
-        log.error("Error while calling Transaction Composition: {}", t.getMessage());
-        throw new InternalServerErrorException(t.getMessage());
     }
 }

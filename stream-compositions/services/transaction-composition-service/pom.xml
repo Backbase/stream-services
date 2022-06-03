@@ -162,6 +162,24 @@
                             </configOptions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-transaction-cursor-client-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../../api/cursors-api/transaction-cursor-api/src/main/resources/service-api-v2.yaml</inputSpec>
+                            <apiPackage>com.backbase.stream.compositions.transaction.cursor.client</apiPackage>
+                            <modelPackage>com.backbase.stream.compositions.transaction.cursor.client.model</modelPackage>
+                            <additionalProperties>useWithModifiers=true</additionalProperties>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <reactive>true</reactive>
+                                <performBeanValidation>true</performBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 

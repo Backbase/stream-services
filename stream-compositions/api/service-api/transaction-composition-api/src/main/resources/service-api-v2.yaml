@@ -40,32 +40,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InternalServerError'
-  /service-api/v2/ingest/pull/async:
-    post:
-      tags:
-        - TransactionComposition
-      summary: Ingests transactions (in pull mode).
-      description: Ingests transactions (in pull mode).
-      operationId: pullTransactionsAsync
-      requestBody:
-        description: Pull Ingestion Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TransactionPullIngestionRequest'
-      responses:
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BadRequest'
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InternalServerError'
   /service-api/v2/ingest/push:
     post:
       tags:
@@ -115,6 +89,8 @@ components:
         arrangementId:
           type: string
         externalArrangementId:
+          type: string
+        legalEntityInternalId:
           type: string
         dateRangeStart:
           type: string

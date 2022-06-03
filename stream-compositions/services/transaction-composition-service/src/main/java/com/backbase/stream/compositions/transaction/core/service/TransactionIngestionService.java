@@ -13,7 +13,7 @@ public interface TransactionIngestionService {
      * @param ingestPullRequest Ingest pull request
      * @return LegalEntityIngestResponse
      */
-    Mono<TransactionIngestResponse> ingestPull(Mono<TransactionIngestPullRequest> ingestPullRequest);
+    Mono<TransactionIngestResponse> ingestPull(TransactionIngestPullRequest ingestPullRequest);
 
     /**
      * Ingests product group in push mode.
@@ -21,5 +21,5 @@ public interface TransactionIngestionService {
      * @param ingestPushRequest Ingest push request
      * @return ProductIngestResponse
      */
-    Mono<TransactionIngestResponse> ingestPush(Mono<TransactionIngestPushRequest> ingestPushRequest);
+    Mono<TransactionIngestResponse> ingestPush(TransactionIngestPushRequest ingestPushRequest);
 }

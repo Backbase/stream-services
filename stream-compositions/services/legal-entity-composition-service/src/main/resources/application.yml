@@ -47,8 +47,7 @@ backbase:
         integration-base-url: http://localhost:9999
         chains:
           product-composition:
-            enableOnComplete: true
-            enableOnFailure: false
+            enabled: true
             base-url: http://localhost:9002
             async: false
         events:

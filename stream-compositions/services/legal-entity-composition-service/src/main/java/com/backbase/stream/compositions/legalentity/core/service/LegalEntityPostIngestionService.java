@@ -8,11 +8,11 @@ public interface LegalEntityPostIngestionService {
      * Post processing for a completed ingestion process
      * @param response
      */
-    public void handleSuccess(LegalEntityResponse response);
+    Mono<LegalEntityResponse> handleSuccess(LegalEntityResponse response);
 
     /**
      * Post processing for a failed ingestion process
      * @param error
      */
-    public Mono<LegalEntityResponse> handleFailure(Throwable error);
+    void handleFailure(Throwable error);
 }

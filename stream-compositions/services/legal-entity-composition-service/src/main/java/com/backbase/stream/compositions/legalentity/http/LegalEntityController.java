@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import javax.validation.Valid;
 
@@ -33,16 +32,6 @@ public class LegalEntityController implements LegalEntityCompositionApi {
     private final LegalEntityConfigurationProperties configProperties;
     private final ProductCompositionApi productCompositionApi;
 
-    @Override
-    public Mono<ResponseEntity<Void>> pullAsyncLegalEntity(Mono<LegalEntityPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-        Mono.fromCallable(() -> pullIngestionRequest.map(this::buildPullRequest)
-                                .flatMap(legalEntityIngestionService::ingestPull))
-                .subscribeOn(Schedulers.boundedElastic()).subscribe();
-
-        return Mono.empty();
-    }
-
-
     /**
      * {@inheritDoc}
      */
@@ -53,14 +42,6 @@ public class LegalEntityController implements LegalEntityCompositionApi {
         return pullIngestionRequest.map(this::buildPullRequest)
                 .flatMap(legalEntityIngestionService::ingestPull)
                 .map(this::mapIngestionToResponse);
-    }
-
-    @Override
-    public Mono<ResponseEntity<Void>> pushAsyncLegalEntity(Mono<LegalEntityPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-        Mono.fromCallable(() -> pushIngestionRequest.map(this::buildPushRequest)
-                .flatMap(legalEntityIngestionService::ingestPush))
-                .subscribeOn(Schedulers.boundedElastic()).subscribe();
-        return Mono.empty();
     }
 
     /**

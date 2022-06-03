@@ -29,8 +29,8 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
      */
     @Override
     public void handle(EnvelopedEvent<TransactionsPullEvent> envelopedEvent) {
-        productIngestionService
-                .ingestPull(buildRequest(envelopedEvent.getEvent()));
+        buildRequest(envelopedEvent.getEvent())
+                .map(productIngestionService::ingestPull);
     }
 
     /**

@@ -41,8 +41,7 @@ public class ProductConfigurationProperties {
     }
     @Data
     public static abstract class BaseComposition {
-        private Boolean enableOnComplete = Boolean.FALSE;
-        private Boolean enableOnFailure = Boolean.FALSE;
+        private Boolean enabled = Boolean.FALSE;
         private String baseUrl = "http://localhost:9003/";
         private Boolean async = Boolean.FALSE;
     }
@@ -50,5 +49,21 @@ public class ProductConfigurationProperties {
     @Data
     public static class TransactionComposition extends BaseComposition {
         private List<String> excludeProductTypeExternalIds = new ArrayList<>();
+    }
+
+    public boolean isCompletedEventEnabled() {
+        return Boolean.TRUE.equals(events.getEnableCompleted());
+    }
+
+    public boolean isFailedEventEnabled() {
+        return Boolean.TRUE.equals(events.getEnableFailed());
+    }
+
+    public boolean isTransactionChainEnabled() {
+        return Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled());
+    }
+
+    public boolean isTransactionChainAsync() {
+        return Boolean.TRUE.equals(chains.getTransactionComposition().getAsync());
     }
 }

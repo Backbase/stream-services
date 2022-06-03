@@ -14,7 +14,7 @@ public class TransactionConfigurationProperties {
     private String integrationBaseUrl = "http://transaction-ingestion-integration:8080";
     private Events events;
     private Cursor cursor;
-
+    private Integer defaultStartOffsetInDays;
 
     @Data
     @NoArgsConstructor

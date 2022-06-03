@@ -51,15 +51,16 @@ backbase:
       transaction-manager-base-url: http://localhost:8083/transaction-manager
     compositions:
       transaction:
+        defaultStartOffsetInDays: 30
         integration-base-url: http://localhost:9999
         events:
           enableCompleted: true
           enableFailed: true
         cursor:
           enabled: true
-          base-url: http://localhost:9999
+          base-url: http://localhost:9004
 
 logging:
   level:
-    com.backbase.stream.compositions: INFO
+    com.backbase.stream.compositions: DEBUG
 

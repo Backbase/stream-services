@@ -16,7 +16,7 @@
 
   <name>Stream :: Compositions :: Cursors</name>
   <modules>
-    <module>transaction-composition-cursor</module>
+    <module>transaction-cursor</module>
   </modules>
 
   <properties>

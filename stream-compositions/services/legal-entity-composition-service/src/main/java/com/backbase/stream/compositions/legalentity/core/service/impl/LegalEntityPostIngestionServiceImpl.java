@@ -18,7 +18,6 @@ import com.backbase.stream.legalentity.model.User;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -30,60 +29,97 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
     private final EventBus eventBus;
 
-    private final LegalEntityConfigurationProperties legalEntityConfigurationProperties;
+    private final LegalEntityConfigurationProperties config;
 
     private final ProductCompositionApi productCompositionApi;
 
-    private final LegalEntityMapper legalEntityMapper;
+    private final LegalEntityMapper mapper;
 
 
     @Override
-    public void handleSuccess(LegalEntityResponse res) {
-        log.info("Legal entities ingestion completed successfully. {}", res);
-        if (Boolean.TRUE.equals(legalEntityConfigurationProperties.getChains().getProductComposition().getEnableOnComplete())) {
-            log.info("Call product-composition-service for Legal Entity {}", res.getLegalEntity().getInternalId());
-            sendProductPullEvent(res);
+    public Mono<LegalEntityResponse> handleSuccess(LegalEntityResponse res) {
+        return Mono.just(res)
+                .doOnNext(r -> log.info("Legal entities ingestion completed successfully. {}",
+                        res.getLegalEntity().getInternalId()))
+                .flatMap(this::processChains)
+                .doOnNext(this::processSuccessEvent)
+                .doOnNext(r -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Ingested legal entity: {}", res.getLegalEntity());
+                    }
+                });
+    }
+
+    private Mono<LegalEntityResponse> processChains(LegalEntityResponse res) {
+        Mono<LegalEntityResponse> productChainMono;
+
+        if (!config.isProductChainEnabled()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Product Chain is disabled");
+            }
+            productChainMono = Mono.just(res);
+        } else if (config.isProductChainAsync()) {
+            productChainMono = ingestProductsAsync(res);
+        } else {
+            productChainMono = ingestProducts(res);
         }
 
-        if (Boolean.TRUE.equals(legalEntityConfigurationProperties.getEvents().getEnableCompleted())) {
+        return productChainMono;
+
+    }
+
+    private Mono<LegalEntityResponse> ingestProducts(LegalEntityResponse res) {
+        return buildProductPullRequest(res)
+                .flatMap(productCompositionApi::pullIngestProduct)
+                .onErrorResume(this::handleProductError)
+                .doOnSuccess(response -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Response from Product Composition: {}",
+                                response.getProductGgroup());
+                    }
+                })
+                .map(p -> res);
+    }
+
+    private Mono<LegalEntityResponse> ingestProductsAsync(LegalEntityResponse res) {
+        return buildProductPullRequest(res)
+                .doOnNext(productCompositionApi::pullIngestProduct)
+                .doOnNext(t -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Async product ingestion called");
+                    }
+                })
+                .map(p -> res);
+    }
+
+    private void processSuccessEvent(LegalEntityResponse res) {
+        if (config.isCompletedEventEnabled()) {
             LegalEntityCompletedEvent event = new LegalEntityCompletedEvent()
-                    .withLegalEntity(legalEntityMapper.mapStreamToEvent(res.getLegalEntity()));
+                    .withLegalEntity(mapper.mapStreamToEvent(res.getLegalEntity()));
             EnvelopedEvent<LegalEntityCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
         }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Ingested legal entity: {}", res.getLegalEntity());
-        }
-
     }
 
-    public Mono<LegalEntityResponse> handleFailure(Throwable error) {
+    public void handleFailure(Throwable error) {
         log.error("Legal entities ingestion failed. {}", error.getMessage());
-        if (Boolean.TRUE.equals(legalEntityConfigurationProperties.getEvents().getEnableFailed())) {
+        if (config.isFailedEventEnabled()) {
             LegalEntityFailedEvent event = new LegalEntityFailedEvent().withEventId(UUID.randomUUID().toString())
                     .withMessage(error.getMessage());
             EnvelopedEvent<LegalEntityFailedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
         }
-        return Mono.empty();
     }
 
-    private void sendProductPullEvent(LegalEntityResponse res) {
+    private Mono<ProductPullIngestionRequest> buildProductPullRequest(LegalEntityResponse res) {
         LegalEntity legalEntity = res.getLegalEntity();
-
-        if (CollectionUtils.isEmpty(legalEntity.getUsers())) {
-            log.error("Legalentity is missing users. Cannot call product-composition");
-            return;
-        }
 
         JobProfileUser jpUser = legalEntity.getUsers().get(0);
         User user = jpUser.getUser();
 
-        ProductPullIngestionRequest productPullIngestionRequest =
-                new ProductPullIngestionRequest()
+        return Mono.just(new ProductPullIngestionRequest()
                         .withLegalEntityInternalId(legalEntity.getInternalId())
                         .withLegalEntityExternalId(legalEntity.getExternalId())
                         .withServiceAgreementExternalId(legalEntity.getMasterServiceAgreement().getExternalId())
@@ -91,30 +127,11 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
                         .withMembershipAccounts(res.getMembershipAccounts())
                         .withUserExternalId(user.getExternalId())
                         .withUserInternalId(user.getInternalId())
-                        .withReferenceJobRoleNames(jpUser.getReferenceJobRoleNames());
-
-
-        if (Boolean.FALSE.equals(legalEntityConfigurationProperties.getChains().getProductComposition().getAsync())) {
-            productCompositionApi.pullIngestProduct(productPullIngestionRequest)
-                    .doOnSuccess(response -> log.info("Received Response from Product Composition: ID :: {}", response.getProductGgroup().getInternalId()))
-                    .onErrorResume(this::handleProductError)
-                    .subscribe();
-        } else {
-            productCompositionApi.pullIngestProductAsync(productPullIngestionRequest)
-                    .doOnSuccess(response -> log.info("Product COmposition Call Ended"))
-                    .onErrorResume(this::handleAsyncProductError)
-                    .subscribe();
-        }
-
-    }
-
-    private Mono<Void> handleAsyncProductError(Throwable t) {
-        log.error("Error while calling Product Composition asynchronously: {}", t.getMessage());
-        return Mono.empty();
+                        .withReferenceJobRoleNames(jpUser.getReferenceJobRoleNames()));
     }
 
     private Mono<ProductIngestionResponse> handleProductError(Throwable t) {
         log.error("Error while calling Product Composition: {}", t.getMessage());
-        throw new InternalServerErrorException(t.getMessage());
+        return Mono.error(new InternalServerErrorException(t.getMessage()));
     }
 }

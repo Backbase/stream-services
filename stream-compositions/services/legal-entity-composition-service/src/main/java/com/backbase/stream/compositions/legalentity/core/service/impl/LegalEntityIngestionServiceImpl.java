@@ -4,7 +4,6 @@ import com.backbase.buildingblocks.presentation.errors.BadRequestException;
 import com.backbase.buildingblocks.presentation.errors.Error;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
-import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
@@ -28,13 +27,10 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionService {
-    private final LegalEntityMapper mapper;
     private final LegalEntitySaga legalEntitySaga;
     private final LegalEntityIntegrationService legalEntityIntegrationService;
     private final Validator validator;
-
     private final LegalEntityPostIngestionService legalEntityPostIngestionService;
-
 
     /**
      * {@inheritDoc}
@@ -43,8 +39,8 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
         return pullLegalEntity(ingestPullRequest)
                 .flatMap(this::validate)
                 .flatMap(this::sendToDbs)
-                .doOnSuccess(legalEntityPostIngestionService::handleSuccess)
-                .onErrorResume(legalEntityPostIngestionService::handleFailure);
+                .flatMap(legalEntityPostIngestionService::handleSuccess)
+                .doOnError(legalEntityPostIngestionService::handleFailure);
     }
 
     /**

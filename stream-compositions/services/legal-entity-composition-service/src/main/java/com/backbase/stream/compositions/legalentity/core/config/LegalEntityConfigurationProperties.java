@@ -37,12 +37,26 @@ public class LegalEntityConfigurationProperties {
     }
     @Data
     public static abstract class BaseComposition {
-        private Boolean enableOnComplete = Boolean.FALSE;
-        private Boolean enableOnFailure = Boolean.FALSE;
+        private Boolean enabled = Boolean.FALSE;
         private String baseUrl = "http://localhost:9002/";
         private Boolean async = Boolean.FALSE;
     }
     @NoArgsConstructor
     public static class ProductComposition extends BaseComposition {}
 
+    public Boolean isCompletedEventEnabled() {
+        return Boolean.TRUE.equals(events.getEnableCompleted());
+    }
+
+    public Boolean isFailedEventEnabled() {
+        return Boolean.TRUE.equals(events.getEnableFailed());
+    }
+
+    public boolean isProductChainEnabled() {
+        return Boolean.TRUE.equals(chains.getProductComposition().getEnabled());
+    }
+
+    public boolean isProductChainAsync() {
+        return Boolean.TRUE.equals(chains.getProductComposition().getAsync());
+    }
 }

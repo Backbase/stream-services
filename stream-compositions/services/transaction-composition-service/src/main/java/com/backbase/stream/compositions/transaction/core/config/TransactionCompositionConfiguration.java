@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.transaction.core.config;
 
+import com.backbase.stream.compositions.transaction.cursor.client.TransactionCursorApi;
 import com.backbase.stream.compositions.transaction.integration.ApiClient;
 import com.backbase.stream.compositions.transaction.integration.client.TransactionIntegrationApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,16 +30,35 @@ public class TransactionCompositionConfiguration {
 
     @Bean
     @Primary
-    public TransactionIntegrationApi transactionIntegrationApi(ApiClient transactionClient) {
-        return new TransactionIntegrationApi(transactionClient);
+    public TransactionIntegrationApi transactionIntegrationApi(ApiClient transactionIntegrationClient) {
+        return new TransactionIntegrationApi(transactionIntegrationClient);
     }
 
     @Bean
-    public ApiClient transactionClient(WebClient dbsWebClient, ObjectMapper objectMapper,
+    @Primary
+    public TransactionCursorApi transactionCursorApi(
+            com.backbase.stream.compositions.transaction.cursor.ApiClient transactionCursorClient) {
+        return new TransactionCursorApi(transactionCursorClient);
+    }
+
+    @Bean
+    public ApiClient transactionIntegrationClient(WebClient dbsWebClient, ObjectMapper objectMapper,
             DateFormat dateFormat) {
 
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(transactionConfigurationProperties.getIntegrationBaseUrl());
+
+        return apiClient;
+    }
+
+    @Bean
+    public com.backbase.stream.compositions.transaction.cursor.ApiClient transactionCursorClient(
+            WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
+
+        com.backbase.stream.compositions.transaction.cursor.ApiClient apiClient =
+                new com.backbase.stream.compositions.transaction.cursor.ApiClient(
+                        dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(transactionConfigurationProperties.getCursor().getBaseUrl());
 
         return apiClient;
     }
