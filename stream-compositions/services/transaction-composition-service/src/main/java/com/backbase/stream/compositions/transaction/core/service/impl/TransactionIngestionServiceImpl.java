@@ -62,10 +62,22 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
      * @return Flux<TransactionsPostRequestBody>
      */
     private Flux<TransactionsPostRequestBody> pullTransactions(TransactionIngestPullRequest request) {
-        return transactionIntegrationService
-                .pullTransactions(request)
-                .doOnNext(t -> log.info("Retrieved Transaction from Integration {}", t.getExternalId()))
+        /**
+         * TODO: Call to GET /cursor/arrangement/{id}
+         * If the cursor does not exist, call upsert IN_PROGRESS
+         * If the cursor exists, call PATCH IN_PROGRESS
+         * Get call gives you  startDate (last_txn_date). The endDate is always (now == current_timestamp)
+         * Set Default startDate in application.yml (30 days), i.e. now() - 30 days
+         *
+         */
+
+
+        return transactionIntegrationService.pullTransactions(request)
                 .map(mapper::mapIntegrationToStream);
+    }
+
+    private Mono<TransactionIngestPullRequest> getCursor(TransactionIngestPullRequest request) {
+        return Mono.empty();
     }
 
     /**
@@ -75,7 +87,8 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
      * @return Ingested transactions
      */
     private Mono<List<TransactionsPostResponseBody>> sendToDbs(Flux<TransactionsPostRequestBody> transactions) {
-        return transactionService.processTransactions(transactions)
+        return transactions
+                .publish(transactionService::processTransactions)
                 .flatMapIterable(UnitOfWork::getStreamTasks)
                 .flatMapIterable(TransactionTask::getResponse)
                 .collectList();
