@@ -44,7 +44,6 @@ class LegalEntityIngestionServiceImplTest {
     @BeforeEach
     void setUp() {
         legalEntityIngestionService = new LegalEntityIngestionServiceImpl(
-                mapper,
                 legalEntitySaga,
                 legalEntityIntegrationService,
                 validator,
@@ -56,7 +55,7 @@ class LegalEntityIngestionServiceImplTest {
                 .legalEntityExternalId("externalId")
                 .build();
         LegalEntity legalEntity = new LegalEntity().withName("legalEntityName");
-        LegalEntityResponse res = new LegalEntityResponse(
+        LegalEntityResponse res = new LegalEntityResponse(Boolean.TRUE,
                 new com.backbase.stream.legalentity.model.LegalEntity().name("legalEntityName"), null);
         when(legalEntityIntegrationService.pullLegalEntity(legalEntityIngestPullRequest))
                 .thenReturn(Mono.just(res));

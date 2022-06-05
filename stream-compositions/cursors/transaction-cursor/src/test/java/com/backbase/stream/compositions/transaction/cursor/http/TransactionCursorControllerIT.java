@@ -1,25 +1,20 @@
 package com.backbase.stream.compositions.transaction.cursor.http;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.backbase.stream.compositions.transaction.cursor.core.config.TransactionCursorConfiguration;
 import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
 import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepository;
-import com.backbase.stream.compositions.transaction.cursor.core.config.TransactionCursorConfiguration;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorDeleteRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
-import java.sql.Timestamp;
 import java.text.ParseException;
-import java.time.Instant;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -52,7 +47,7 @@ public class TransactionCursorControllerIT {
   @Autowired
   private WebTestClient webTestClient;
 
-  @Mock
+  @Autowired
   TransactionCursorMapper mapper;
 
   @Test
@@ -126,34 +121,10 @@ public class TransactionCursorControllerIT {
 
   // @Test
   void upsertCursor_Success() {
-
-    TransactionCursorUpsertRequest transactionCursorUpsertRequest = new TransactionCursorUpsertRequest()
-        .withCursor(new TransactionCursor()
-            .withId("3337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-            .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-            .withExtArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-            .withLegalEntityId("test-ext-emp")
-            .withLastTxnDate("2022-05-24 03:18:19")
-            .withStatus(StatusEnum.IN_PROGRESS)
-            .withLastTxnIds(List.of("11", "12", "13", "14"))
-            .withAdditions(Map.of("111", "111")));
-
-    TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
-    transactionCursorEntity.setId("3337f8cc-d66d-41b3-a00e-f71ff15d93cq");
-    transactionCursorEntity.setArrangement_id("4337f8cc-d66d-41b3-a00e-f71ff15d93cq");
-    transactionCursorEntity.setExt_arrangement_id("5337f8cc-d66d-41b3-a00e-f71ff15d93cq");
-    transactionCursorEntity.setLegal_entity_id("test-ext-emp");
-    transactionCursorEntity.setLast_txn_date(Timestamp.from(Instant.now()));
-    transactionCursorEntity.setStatus(StatusEnum.IN_PROGRESS.getValue());
-    transactionCursorEntity.setLast_txn_ids("11,12,13,14");
-    transactionCursorEntity.setAdditions("1,2,3");
-
-   // when(Mockito.mock(TransactionCursorMapper.class).mapToDomain(transactionCursorUpsertRequest))
-     //   .thenReturn(new TransactionCursorEntity());
     webTestClient.post().uri("/service-api/v2/cursor/upsert")
         .contentType(MediaType.APPLICATION_JSON)
-        .body(Mono.just(transactionCursorUpsertRequest), TransactionCursorUpsertRequest.class)
-        .exchange().expectStatus().isCreated();
+        .body(Mono.just(any()), TransactionCursorUpsertRequest.class)
+        .exchange().expectStatus().isOk();
   }
 
 }

@@ -1,4 +1,4 @@
-server.port: 9004
+server.port: 7089
 
 spring:
   jpa:

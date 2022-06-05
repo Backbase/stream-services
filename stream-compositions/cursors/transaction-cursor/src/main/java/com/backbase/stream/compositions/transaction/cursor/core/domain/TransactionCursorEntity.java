@@ -110,19 +110,6 @@ public class TransactionCursorEntity {
   )
   private String ext_arrangement_id;
 
-  @Override
-  public String toString() {
-    return "TransactionCursorEntity{" +
-        "id='" + id + '\'' +
-        ", arrangement_id='" + arrangement_id + '\'' +
-        ", ext_arrangement_id='" + ext_arrangement_id + '\'' +
-        ", last_txn_date=" + last_txn_date +
-        ", last_txn_ids='" + last_txn_ids + '\'' +
-        ", legal_entity_id='" + legal_entity_id + '\'' +
-        ", additions='" + additions + '\'' +
-        ", status='" + status + '\'' +
-        '}';
-  }
 
   @Column(
       name = "last_txn_date",

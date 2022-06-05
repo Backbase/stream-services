@@ -25,21 +25,27 @@ public class TransactionCursorController implements TransactionCursorApi {
   public Mono<ResponseEntity<Void>> deleteCursor(
       Mono<TransactionCursorDeleteRequest> transactionCursorDeleteRequest,
       ServerWebExchange exchange) {
-    log.debug("TransactionCursorController :: deleteCursor");
+    if (log.isDebugEnabled()) {
+      log.debug("TransactionCursorController :: deleteCursor");
+    }
     return transactionCursorService.deleteCursor(transactionCursorDeleteRequest);
   }
 
   @Override
   public Mono<ResponseEntity<TransactionCursorResponse>> getByArrangementId(String arrangementId,
       ServerWebExchange exchange) {
-    log.debug("TransactionCursorController :: getByArrangementId {} ", arrangementId);
+    if (log.isDebugEnabled()) {
+      log.debug("TransactionCursorController :: getByArrangementId {} ", arrangementId);
+    }
     return transactionCursorService.findByArrangementId(arrangementId);
   }
 
   @Override
   public Mono<ResponseEntity<TransactionCursorResponse>> getById(String id,
       ServerWebExchange exchange) {
-    log.debug("TransactionCursorController :: getById {} ", id);
+    if (log.isDebugEnabled()) {
+      log.debug("TransactionCursorController :: getById {} ", id);
+    }
     return transactionCursorService.findById(id);
   }
 
@@ -47,7 +53,9 @@ public class TransactionCursorController implements TransactionCursorApi {
   public Mono<ResponseEntity<Void>> patchByArrangementId(String arrangementId,
       Mono<TransactionCursorPatchRequest> transactionCursorPatchRequest,
       ServerWebExchange exchange) {
-    log.debug("TransactionCursorController :: patchByArrangementId {} ", arrangementId);
+    if (log.isDebugEnabled()) {
+      log.debug("TransactionCursorController :: patchByArrangementId {} ", arrangementId);
+    }
     return transactionCursorService
         .patchByArrangementId(arrangementId, transactionCursorPatchRequest);
   }
@@ -56,7 +64,9 @@ public class TransactionCursorController implements TransactionCursorApi {
   public Mono<ResponseEntity<TransactionCursorUpsertResponse>> upsertCursor(
       Mono<TransactionCursorUpsertRequest> transactionCursorUpsertRequest,
       ServerWebExchange exchange) {
-    log.debug("TransactionCursorController :: upsertCursor");
+    if (log.isDebugEnabled()) {
+      log.debug("TransactionCursorController :: upsertCursor");
+    }
     return transactionCursorService.upsertCursor(transactionCursorUpsertRequest);
   }
 }
