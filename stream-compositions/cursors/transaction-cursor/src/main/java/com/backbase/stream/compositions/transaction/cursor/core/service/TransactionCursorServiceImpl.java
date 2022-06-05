@@ -3,15 +3,18 @@ package com.backbase.stream.compositions.transaction.cursor.core.service;
 import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
 import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepository;
-import com.backbase.stream.compositions.transaction.cursor.model.*;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorDeleteRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
+import java.text.ParseException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.text.ParseException;
 
 @Service
 @AllArgsConstructor
@@ -29,7 +32,9 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
    */
   @Override
   public Mono<ResponseEntity<TransactionCursorResponse>> findByArrangementId(String arrangementId) {
-    log.debug("TransactionCursorService :: findByArrangementId {} ", arrangementId);
+    if (log.isDebugEnabled()) {
+      log.debug("TransactionCursorService :: findByArrangementId {} ", arrangementId);
+    }
     return transactionCursorRepository.findByArrangementId(arrangementId)
         .map(this::mapModelToResponse)
         .orElse(
@@ -57,11 +62,13 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
    */
   @Override
   public Mono<ResponseEntity<TransactionCursorResponse>> findById(String id) {
-    log.debug("TransactionCursorService :: findById {} ", id);
+    if (log.isDebugEnabled()) {
+      log.debug("TransactionCursorService :: findById {} ", id);
+    }
     return transactionCursorRepository.findById(id)
         .map(this::mapModelToResponse)
         .orElse(
-            Mono.just(new ResponseEntity<>(new TransactionCursorResponse(), HttpStatus.NOT_FOUND)));
+            Mono.just(new ResponseEntity<>(HttpStatus.NO_CONTENT)));
   }
 
   /**
@@ -76,7 +83,8 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
     return transactionCursorUpsertRequest.map(mapper::mapToDomain)
         .flatMap(transactionCursorRepository::upsertCursor)
         .doOnNext(id -> log.info("Id is {}", id))
-        .map(this::mapUpsertToResponse);
+        .map(id -> new ResponseEntity<>(new TransactionCursorUpsertResponse().withId(id),
+            HttpStatus.CREATED));
   }
 
   /**
@@ -98,10 +106,14 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
       } catch (ParseException parseException) {
         throw new RuntimeException(parseException);
       }
-    }).doOnError(throwable -> log
-        .error("TransactionCursorServiceImpl patchByArrangementId Exception: {}",
-            throwable.getMessage()))
-        .subscribe();
+    }).onErrorResume(throwable -> {
+      if (log.isErrorEnabled()) {
+        log
+            .error("TransactionCursorServiceImpl patchByArrangementId Exception: {}",
+                throwable.getMessage());
+      }
+      return Mono.error(throwable);
+    }).subscribe();
     return Mono.empty();
   }
 
@@ -114,19 +126,6 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
   private Mono<ResponseEntity<TransactionCursorResponse>> mapModelToResponse(
       TransactionCursorEntity response) {
     return Mono.just(new ResponseEntity<>(mapper.mapToModel(response), HttpStatus.OK));
-  }
-
-  /**
-   * Create the response for Upsert Cursor
-   *
-   * @param id Cursor Unique Id reference
-   * @return TransactionCursorUpsertResponse
-   */
-  private ResponseEntity<TransactionCursorUpsertResponse> mapUpsertToResponse(String id) {
-    return new ResponseEntity<>(
-        new TransactionCursorUpsertResponse()
-            .withId(id),
-        HttpStatus.CREATED);
   }
 
 }

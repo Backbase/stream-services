@@ -51,7 +51,8 @@
                   <password>root</password>
                   <forceMojoExecution>true</forceMojoExecution>
                   <sqlCommand>
-                    DROP DATABASE IF EXISTS transaction_cursor;
+                    DROP
+                    DATABASE IF EXISTS transaction_cursor;
                   </sqlCommand>
                 </configuration>
               </execution>

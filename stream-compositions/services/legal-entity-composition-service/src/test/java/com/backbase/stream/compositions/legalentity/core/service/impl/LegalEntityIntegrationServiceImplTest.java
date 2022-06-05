@@ -45,7 +45,7 @@ class LegalEntityIntegrationServiceImplTest {
         com.backbase.stream.legalentity.model.LegalEntity legalEntity2 =
                 new com.backbase.stream.legalentity.model.LegalEntity().name(leName);
         List<String> membershipAccounts = Collections.singletonList("012");
-        LegalEntityResponse res1 = new LegalEntityResponse(legalEntity2, membershipAccounts);
+        LegalEntityResponse res1 = new LegalEntityResponse(Boolean.TRUE,legalEntity2, membershipAccounts);
         Mono<PullLegalEntityResponse> res = Mono.just(new PullLegalEntityResponse()
                 .withLegalEntity(legalEntity1).withMembershipAccounts(Collections.singletonList("012")));
 
@@ -65,7 +65,7 @@ class LegalEntityIntegrationServiceImplTest {
         com.backbase.stream.legalentity.model.LegalEntity legalEntity2 =
                 new com.backbase.stream.legalentity.model.LegalEntity().name("Legal Entity 1");
         List<String> membershipAccounts = Collections.singletonList("012");
-        LegalEntityResponse res1 = new LegalEntityResponse(legalEntity2, membershipAccounts);
+        LegalEntityResponse res1 = new LegalEntityResponse(Boolean.TRUE,legalEntity2, membershipAccounts);
         PullLegalEntityResponse getLegalEntityListResponse = new PullLegalEntityResponse().withLegalEntity(legalEntity1);
 
         when(legalEntityIntegrationApi.pullLegalEntity(any()))
