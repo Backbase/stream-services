@@ -1,4 +1,4 @@
-server.port: 7083
+server.port: 9003
 
 spring:
   activemq:
@@ -51,19 +51,19 @@ backbase:
       product:
         enable-completed-event: true
         enable-failed-event: false
-        integration-base-url: http://localhost:5083
+        integration-base-url: http://localhost:9999
         chains:
           transaction-composition:
             enableOnComplete: false
             enableOnFailure: false
-            base-url: http://localhost:9003
+            base-url: http://localhost:9004
             async: false
         events:
           enableCompleted: false
           enableFailed: true
         cursor:
           enabled: false
-          base-url: http://localhost:9999
+          base-url: http://localhost:9005
 
 logging:
   level:

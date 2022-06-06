@@ -84,7 +84,8 @@ public class AccessControlConfiguration {
     @Bean
     public AccessGroupService accessGroupService(
         com.backbase.dbs.accesscontrol.api.service.ApiClient accessControlApiClient,
-        com.backbase.dbs.user.api.service.ApiClient usersApiClient) {
+        com.backbase.dbs.user.api.service.ApiClient usersApiClient,
+        BackbaseStreamConfigurationProperties configurationProperties) {
 
         UserManagementApi usersApi = new UserManagementApi(usersApiClient);
         UserQueryApi userQueryApi = new UserQueryApi(accessControlApiClient);
@@ -97,11 +98,12 @@ public class AccessControlConfiguration {
         ServiceAgreementApi serviceAgreementApi = new ServiceAgreementApi(accessControlApiClient);
         ServiceAgreementsApi serviceAgreementsApi = new ServiceAgreementsApi(accessControlApiClient);
         return new AccessGroupService(usersApi, userQueryApi, accessControlUsersApi, dataGroupApi, dataGroupsApi,
-            functionGroupApi, functionGroupsApi, serviceAgreementQueryApi, serviceAgreementApi, serviceAgreementsApi);
+            functionGroupApi, functionGroupsApi, serviceAgreementQueryApi, serviceAgreementApi, serviceAgreementsApi,
+            configurationProperties);
     }
 
     @Bean
-    protected com.backbase.dbs.user.api.service.ApiClient usersApiClient(
+    public com.backbase.dbs.user.api.service.ApiClient usersApiClient(
         WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
@@ -113,7 +115,7 @@ public class AccessControlConfiguration {
     }
 
     @Bean
-    protected com.backbase.dbs.user.profile.api.service.ApiClient userProfileApiClient(
+    public com.backbase.dbs.user.profile.api.service.ApiClient userProfileApiClient(
         WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
@@ -125,7 +127,7 @@ public class AccessControlConfiguration {
     }
 
     @Bean
-    protected com.backbase.dbs.accesscontrol.api.service.ApiClient accessControlApiClient(
+    public com.backbase.dbs.accesscontrol.api.service.ApiClient accessControlApiClient(
         WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
@@ -138,7 +140,7 @@ public class AccessControlConfiguration {
 
     @Bean
     @ConditionalOnProperty(value = "backbase.stream.legalentity.sink.use-identity-integration")
-    protected com.backbase.identity.integration.api.service.ApiClient identityApiClient(
+    public com.backbase.identity.integration.api.service.ApiClient identityApiClient(
         WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {

@@ -1,4 +1,4 @@
-server.port: 7087
+server.port: 9002
 
 spring:
   zipkin:

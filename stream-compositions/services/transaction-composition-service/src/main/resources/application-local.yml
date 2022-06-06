@@ -1,4 +1,4 @@
-server.port: 7085
+server.port: 9004
 
 spring:
   zipkin:
@@ -56,8 +56,8 @@ backbase:
           enableCompleted: true
           enableFailed: true
         cursor:
-          enabled: false
-          base-url: http://localhost:9999
+          enabled: true
+          base-url: http://localhost:9005
 
 backbase.activemq.enabled: true
 spring.activemq.broker-url: tcp://localhost:61616
