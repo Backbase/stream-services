@@ -32,9 +32,7 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
    */
   @Override
   public Mono<ResponseEntity<TransactionCursorResponse>> findByArrangementId(String arrangementId) {
-    if (log.isDebugEnabled()) {
-      log.debug("TransactionCursorService :: findByArrangementId {} ", arrangementId);
-    }
+    log.debug("TransactionCursorService :: findByArrangementId {} ", arrangementId);
     return transactionCursorRepository.findByArrangementId(arrangementId)
         .map(this::mapModelToResponse)
         .orElse(
@@ -62,9 +60,7 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
    */
   @Override
   public Mono<ResponseEntity<TransactionCursorResponse>> findById(String id) {
-    if (log.isDebugEnabled()) {
-      log.debug("TransactionCursorService :: findById {} ", id);
-    }
+    log.debug("TransactionCursorService :: findById {} ", id);
     return transactionCursorRepository.findById(id)
         .map(this::mapModelToResponse)
         .orElse(
@@ -107,11 +103,9 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
         throw new RuntimeException(parseException);
       }
     }).onErrorResume(throwable -> {
-      if (log.isErrorEnabled()) {
-        log
-            .error("TransactionCursorServiceImpl patchByArrangementId Exception: {}",
-                throwable.getMessage());
-      }
+      log
+          .error("TransactionCursorServiceImpl patchByArrangementId Exception: {}",
+              throwable.getMessage());
       return Mono.error(throwable);
     }).subscribe();
     return Mono.empty();

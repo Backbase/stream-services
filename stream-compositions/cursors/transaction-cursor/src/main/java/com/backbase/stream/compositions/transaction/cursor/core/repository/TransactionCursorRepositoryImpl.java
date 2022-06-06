@@ -33,6 +33,8 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
 
   private static final String DATE_TIME_FORMAT = "yyyy-MM-dd hh:mm:ss";
 
+  private static final String ARRANGEMENT_ID = "arrangement_id";
+
   /**
    * Query the cursor based on arrangement_id criteria
    *
@@ -46,7 +48,7 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
         .createQuery(TransactionCursorEntity.class);
     Root<TransactionCursorEntity> transactionCursor = cq.from(TransactionCursorEntity.class);
     cq.select(transactionCursor).where(equalPredicate(
-        criteriaBuilder, transactionCursor.get("arrangement_id"), arrangementId));
+        criteriaBuilder, transactionCursor.get(ARRANGEMENT_ID), arrangementId));
     return this.entityManager.createQuery(cq).getResultStream().findFirst();
   }
 
@@ -65,14 +67,12 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
     Predicate idPredicate = equalPredicate(criteriaBuilder, transactionCursor.get("id"),
         transactionCursorDeleteRequest.getId());
     Predicate arrangementPredicate =
-        equalPredicate(criteriaBuilder, transactionCursor.get("arrangement_id"),
+        equalPredicate(criteriaBuilder, transactionCursor.get(ARRANGEMENT_ID),
             transactionCursorDeleteRequest.getArrangementId());
     Predicate deletePredicate = criteriaBuilder.or(idPredicate, arrangementPredicate);
     cq.where(deletePredicate);
     int result = this.entityManager.createQuery(cq).executeUpdate();
-    if (log.isDebugEnabled()) {
-      log.debug("TransactionCursorRepository :: deleteCursor Result {} ", result);
-    }
+    log.debug("TransactionCursorRepository :: deleteCursor Result {} ", result);
     return result;
   }
 
@@ -132,11 +132,9 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorReposit
     }
 
     cq.where(
-        equalPredicate(criteriaBuilder, transactionCursor.get("arrangement_id"), arrangementId));
+        equalPredicate(criteriaBuilder, transactionCursor.get(ARRANGEMENT_ID), arrangementId));
     int result = this.entityManager.createQuery(cq).executeUpdate();
-    if (log.isDebugEnabled()) {
-      log.debug("TransactionCursorRepository :: patchByArrangementId Result {} ", result);
-    }
+    log.debug("TransactionCursorRepository :: patchByArrangementId Result {} ", result);
     return result;
   }
 

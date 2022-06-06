@@ -96,8 +96,8 @@ class TransactionCursorServiceImplTest {
         .create(transactionCursorService.upsertCursor(Mono.just(new TransactionCursorUpsertRequest()
             .withCursor(new TransactionCursor().withId("123")))))
         .consumeNextWith(transactionCursorUpsertResponseResponseEntity
-            -> assertEquals(transactionCursorUpsertResponseResponseEntity.getBody().getId(),
-            "123"));
+            -> assertEquals(
+            "123",transactionCursorUpsertResponseResponseEntity.getBody().getId()));
   }
 
   @Test
