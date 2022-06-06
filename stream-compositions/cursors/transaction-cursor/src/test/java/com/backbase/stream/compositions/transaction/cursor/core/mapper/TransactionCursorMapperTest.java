@@ -71,9 +71,6 @@ class TransactionCursorMapperTest {
 
     assertThrows(JsonProcessingException.class,
         () -> mapper.convertJsonToMapFormat("~"));
-
-    assertThrows(NullPointerException.class,
-        () -> mapper.convertMapToJsonFormat(Map.of("test", null)));
   }
 
   private TransactionCursorUpsertRequest getMockModel() {
