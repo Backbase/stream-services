@@ -1331,7 +1331,10 @@ public class AccessGroupService {
                     "Failed to setup Job Role: " + badRequest.getResponseBodyAsString()));
             })
             .collectList()
-            .map(idItems -> jobRole);
+            .map(idItems -> {
+                jobRole.setId(idItems.get(0).getResourceId());
+                return jobRole;
+            });
     }
 
     private Mono<List<BatchResponseItemExtended>> updateBatchBusinessFunctionGroup(StreamTask streamTask,
