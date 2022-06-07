@@ -42,13 +42,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!--<dependency>
-            <groupId>io.github.cdimascio</groupId>
-            <artifactId>openapi-spring-webflux-validator</artifactId>
-            <version>3.0.0</version>
-        </dependency>-->
-
-
     </dependencies>
 
     <build>
