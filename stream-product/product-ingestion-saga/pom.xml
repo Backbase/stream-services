@@ -13,18 +13,22 @@
     <packaging>jar</packaging>
     <name>Stream :: Product Ingestion Core</name>
 
+    <properties>
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+    </properties>
+
     <dependencies>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>product-core</artifactId>
-            <version>2.73.0</version>
+            <artifactId>access-control-core</artifactId>
+            <version>2.72.0</version>
         </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>access-control-core</artifactId>
-            <version>2.73.0</version>
+            <artifactId>product-core</artifactId>
+            <version>2.72.0</version>
         </dependency>
 
         <dependency>

@@ -21,8 +21,24 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
     </dependencies>
 
@@ -44,6 +60,7 @@
                             <generateApiTests>false</generateApiTests>
                             <generateApis>false</generateApis>
                             <generateModels>true</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
                             <output>${openapi-generator-maven-plugin.output}</output>
                             <configOptions>
                                 <library>spring-boot</library>
@@ -56,8 +73,8 @@
                                 <apiPackage>com.backbase.stream.productcatalog.api</apiPackage>
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <performBeanValidation>true</performBeanValidation>
-                                <apis/>
-                                <models/>
+                                <apis />
+                                <models />
                             </configOptions>
                         </configuration>
                     </execution>
@@ -72,6 +89,5 @@
 
         </plugins>
     </build>
-
 
 </project>
