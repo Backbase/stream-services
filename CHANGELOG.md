@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - Fix for issue https://github.com/Backbase/stream-services/issues/138
 
-## [2.70.0]
+## [2.71.0]
 ### Changed
 - Upgraded to DBS 2022.04
 - Upgrade Spring Boot to 2.15.13
@@ -633,4 +633,4 @@ backbase:
 [2.8.0]: https://github.com/Backbase/stream-services/compare/2.7.0...2.8.0
 [2.7.0]: https://github.com/Backbase/stream-services/compare/2.6.0...2.7.0
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
-[2.70.1]: https://github.com/Backbase/stream-services/compare/2.70.0...2.70.1
+[2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
