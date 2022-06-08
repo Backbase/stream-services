@@ -1,13 +1,28 @@
 package com.backbase.stream.it;
 
+import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
+
 import com.backbase.stream.LegalEntityHttpApplication;
 import com.backbase.stream.LegalEntityTask;
-import com.backbase.stream.legalentity.model.*;
+import com.backbase.stream.legalentity.model.BaseProductGroup;
+import com.backbase.stream.legalentity.model.CurrentAccount;
+import com.backbase.stream.legalentity.model.EmailAddress;
+import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
+import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.LegalEntityParticipant;
+import com.backbase.stream.legalentity.model.LegalEntityStatus;
+import com.backbase.stream.legalentity.model.LegalEntityType;
+import com.backbase.stream.legalentity.model.PhoneNumber;
+import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.User;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import java.util.Arrays;
+import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +37,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 @SpringBootTest(classes = LegalEntityHttpApplication.class)
 @ContextConfiguration(classes = {LegalEntitySagaIT.TestConfiguration.class})
@@ -284,7 +296,7 @@ public class LegalEntitySagaIT {
         LegalEntityTask legalEntityTask = defaultLegalEntityTask();
 
         // When
-        webTestClient.post()
+        webTestClient.mutateWith(csrf()).post()
                 .uri("/legal-entity")
                 .header("Content-Type", "application/json")
                 .header("X-TID", "tenant-id")
@@ -305,7 +317,7 @@ public class LegalEntitySagaIT {
         LegalEntityTask legalEntityTask = defaultLegalEntityTask();
 
         // When
-        webTestClient.post()
+        webTestClient.mutateWith(csrf()).post()
                 .uri("/legal-entity")
                 .header("Content-Type", "application/json")
                 .header("X-TID", "tenant-id")
@@ -313,7 +325,7 @@ public class LegalEntitySagaIT {
                 .exchange()
                 .expectStatus().isEqualTo(200);
 
-        webTestClient.post()
+        webTestClient.mutateWith(csrf()).post()
                 .uri("/legal-entity")
                 .header("Content-Type", "application/json")
                 .header("X-TID", "tenant-id")

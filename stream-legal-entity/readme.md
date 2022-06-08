@@ -40,7 +40,7 @@ spring:
           dbs:
             token-uri: http://token-converter:8080/oauth/token
         registration:
-          dbs:
+          bb:
             authorization-grant-type: client_credentials
             client-id: bb-client
             client-secret: bb-secret

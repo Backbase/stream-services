@@ -31,7 +31,6 @@
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>service-sdk-starter-mapping</artifactId>
-            <version>14.1.1</version>
         </dependency>
 
         <dependency>

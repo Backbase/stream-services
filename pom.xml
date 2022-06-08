@@ -42,6 +42,7 @@
 
     <properties>
         <backbase-bom.version>2022.04.5</backbase-bom.version>
+        <ssdk.version>14.1.1</ssdk.version>
         <boat-maven-plugin.version>0.15.8</boat-maven-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
@@ -62,6 +63,13 @@
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
                 <version>22.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.backbase.buildingblocks</groupId>
+                <artifactId>backbase-building-blocks-release</artifactId>
+                <version>${ssdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
