@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,6 @@ import java.util.Collections;
 @ContextConfiguration(classes = {LegalEntitySagaIT.TestConfiguration.class})
 @TestPropertySource(properties = {"spring.config.location=classpath:application-it.yml"})
 @AutoConfigureWebTestClient
-
 public class LegalEntitySagaIT {
 
     @RegisterExtension

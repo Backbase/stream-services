@@ -76,14 +76,14 @@ public class CustomLogger  extends LoggingHandler {
 
 
     /**
-     * Returns the {@link LogLevel} that this handler uses to log
+     * Returns the {@link LogLevel} that this handler uses to log.
      */
     public LogLevel level() {
         return level;
     }
 
     /**
-     * Returns the {@link ByteBufFormat} that this handler uses to log
+     * Returns the {@link ByteBufFormat} that this handler uses to log.
      */
     public ByteBufFormat byteBufFormat() {
         return byteBufFormat;

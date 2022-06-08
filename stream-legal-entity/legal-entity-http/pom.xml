@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.backbase.stream</groupId>
-        <artifactId>stream-http-starter-parent</artifactId>
-        <version>2.72.0</version>
-        <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
+        <groupId>com.backbase.buildingblocks</groupId>
+        <artifactId>service-sdk-starter-reactive</artifactId>
+        <version>14.1.1</version>
+        <relativePath/>
     </parent>
 
     <artifactId>legal-entity-http</artifactId>
@@ -19,6 +19,7 @@
         <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/api/openapi.yaml</raml2openapi-maven-plugin.output>
         <wiremock-jre8.version>2.33.1</wiremock-jre8.version>
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
     </properties>
 
     <dependencies>

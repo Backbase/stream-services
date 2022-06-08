@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -15,6 +14,7 @@
 
     <properties>
         <sonar.skip>true</sonar.skip>
+        <japicmp.skip>true</japicmp.skip>
     </properties>
 
     <dependencyManagement>
@@ -36,13 +36,13 @@
             <version>3.0.2</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-dbs-web-client</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
         </dependency>
 
     </dependencies>
@@ -54,6 +54,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>unpack</id>
@@ -146,13 +147,14 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
+                <version>0.15.8</version>
                 <executions>
                     <execution>
                         <id>generate-accesscontrol-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.service.v2</apiPackage>
@@ -161,10 +163,10 @@
                     </execution>
                     <execution>
                         <id>generate-accesscontrol-integration-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v2</apiPackage>
@@ -173,10 +175,10 @@
                     </execution>
                     <execution>
                         <id>generate-arrangement-manager-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.arrangement.api.service.v2</apiPackage>
@@ -185,10 +187,10 @@
                     </execution>
                     <execution>
                         <id>generate-user-manager-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.api.service.v2</apiPackage>
@@ -197,10 +199,10 @@
                     </execution>
                     <execution>
                         <id>generate-user-profile-manager-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.profile.api.service.v2</apiPackage>
@@ -209,10 +211,10 @@
                     </execution>
                     <execution>
                         <id>generate-transaction-manager-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
@@ -221,10 +223,10 @@
                     </execution>
                     <execution>
                         <id>generate-audit-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/audit/audit-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.audit.api.service.v2</apiPackage>
@@ -233,10 +235,10 @@
                     </execution>
                     <execution>
                         <id>generate-limit-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/limit/limit-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.limit.api.service.v2</apiPackage>
@@ -245,10 +247,10 @@
                     </execution>
                     <execution>
                         <id>generate-approval-service-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.approval.api.service.v2</apiPackage>
@@ -257,10 +259,10 @@
                     </execution>
                     <execution>
                         <id>generate-identity-integration-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/identity/identity-integration-outbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.identity.integration.api.service.v1</apiPackage>

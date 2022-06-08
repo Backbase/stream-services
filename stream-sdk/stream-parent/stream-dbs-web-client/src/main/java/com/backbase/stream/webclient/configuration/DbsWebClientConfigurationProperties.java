@@ -16,7 +16,7 @@ import java.util.List;
 public class DbsWebClientConfigurationProperties {
 
     /**
-     * The client registration id used in in the DBS Web Client
+     * The client registration id used in in the DBS Web Client.
      */
     private String defaultClientRegistrationId = "dbs";
 
@@ -27,7 +27,7 @@ public class DbsWebClientConfigurationProperties {
     private MultiValueMap<String, String> additionalHeaders = null;
 
     /**
-     * Header keys from the original request to forward to DBS
+     * Header keys from the original request to forward to DBS.
      */
     private List<String> headersToForward = asList("X-TID");
 

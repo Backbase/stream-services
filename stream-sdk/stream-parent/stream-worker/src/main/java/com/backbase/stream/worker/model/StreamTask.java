@@ -42,6 +42,16 @@ public abstract class StreamTask {
             TaskHistory.Severity.WARN, null, null);
     }
 
+    /**
+     * Added error to task history.
+     * @param entity  The entity being processed
+     * @param operation the operation on the entity
+     * @param result the result of the operation
+     * @param externalId The extenral id of the entity
+     * @param internalId the internal id of the entity
+     * @param message The message (can include formatting placeholders)
+     * @param messageArgs The arguments for formatting the message
+     */
     public void error(String entity, String operation, String result, String externalId, String internalId,
                       String message, Object... messageArgs) {
         addHistory(entity, operation, result, externalId, internalId, String.format(message, messageArgs),
@@ -49,6 +59,17 @@ public abstract class StreamTask {
         error = message;
     }
 
+    /**
+     * Added error to task history.
+     * @param entity  The entity being processed
+     * @param operation The operation on the entity
+     * @param result The result of the operation
+     * @param externalId The extenral id of the entity
+     * @param internalId The internal id of the entity
+     * @param throwable The exception to log inside the history
+     * @param message The message (can include formatting placeholders)
+     * @param messageArgs The arguments for formatting the message
+     */
     public void error(String entity, String operation, String result, String externalId, String internalId,
                       Throwable throwable, String errorMessage, String message, Object... messageArgs) {
         addHistory(entity, operation, result, externalId, internalId, String.format(message, messageArgs),
@@ -56,6 +77,17 @@ public abstract class StreamTask {
         error = message;
     }
 
+    /**
+     * Added item to task history.
+     * @param entity  The entity being processed
+     * @param operation The operation on the entity
+     * @param result The result of the operation
+     * @param externalId The extenral id of the entity
+     * @param internalId The internal id of the entity
+     * @param severity The severity of the error
+     * @param throwable The exception to log inside the history
+     * @param errorMessage The error message
+     */
     @ContinueSpan
     public void addHistory(
         @SpanTag("entity") String entity,
@@ -92,6 +124,10 @@ public abstract class StreamTask {
         return this.state == State.COMPLETED;
     }
 
+    /**
+     * Checks if the taks is failed.
+     * @return True if task failed.
+     */
     public boolean isFailed() {
         return this.state == State.FAILED;
     }
@@ -105,6 +141,9 @@ public abstract class StreamTask {
         COMPLETED
     }
 
+    /**
+     * Logs the summary of a task on INFO.
+     */
     public void logSummary() {
         log.info("\n\n" +
                 "Stream Task: {}\n" +

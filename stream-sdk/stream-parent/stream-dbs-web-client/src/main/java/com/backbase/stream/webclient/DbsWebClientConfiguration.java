@@ -156,6 +156,12 @@ public class DbsWebClientConfiguration {
         return new ClientCredentialsReactiveOAuth2AuthorizedClientProvider();
     }
 
+    /**
+     * OAuth Client Manager.
+     * @param reactiveClientRegistrationRepository the repository
+     * @param reactiveOAuth2AuthorizedClientProvider client provider
+     * @return client manager
+     */
     @Bean
     public ReactiveOAuth2AuthorizedClientManager reactiveOAuth2AuthorizedClientManager(
         ReactiveClientRegistrationRepository reactiveClientRegistrationRepository,
@@ -172,6 +178,11 @@ public class DbsWebClientConfiguration {
         return clientServiceReactiveOAuth2AuthorizedClientManager;
     }
 
+    /**
+     * Reactive Client Registration Repository responsible for storing client credentials.
+     * @param properties Configuration properties
+     * @return Client Registration Repository
+     */
     @Bean
     public ReactiveClientRegistrationRepository reactiveClientRegistrationRepository(OAuth2ClientProperties
                                                                                          properties) {

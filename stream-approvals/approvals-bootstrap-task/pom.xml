@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.backbase.stream</groupId>
-        <artifactId>stream-task-starter-parent</artifactId>
-        <version>2.72.0</version>
-        <relativePath>../../stream-sdk/stream-starter-parents/stream-task-starter-parent</relativePath>
+        <groupId>com.backbase.buildingblocks</groupId>
+        <artifactId>service-sdk-starter-reactive</artifactId>
+        <version>14.1.1</version>
+        <relativePath/>
     </parent>
 
     <artifactId>approvals-bootstrap-task</artifactId>
@@ -15,11 +15,20 @@
     <packaging>jar</packaging>
     <name>Stream :: Approvals Bootstrap Task</name>
 
+    <properties>
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+    </properties>
+
     <dependencies>
 
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-task</artifactId>
         </dependency>
 
         <dependency>

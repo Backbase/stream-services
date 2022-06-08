@@ -17,6 +17,13 @@ public class UnitOfWork<T extends StreamTask> {
         return from(unitOfOWorkId, Collections.singletonList(task));
     }
 
+    /**
+     * Create Unit Of Work for list of tasks.
+     * @param unitOfOWorkId The ID of the unit of work
+     * @param tasks The list of Stream Tasks to execute
+     * @param <T> Class extending StreamTask
+     * @return A Unit of Work
+     */
     public static <T extends StreamTask> UnitOfWork<T> from(String unitOfOWorkId, List<T> tasks) {
         UnitOfWork<T> unitOfWork = new UnitOfWork<T>();
         unitOfWork.setUnitOfOWorkId(unitOfOWorkId);
@@ -25,10 +32,6 @@ public class UnitOfWork<T extends StreamTask> {
         unitOfWork.setRegisteredAt(OffsetDateTime.now());
         unitOfWork.setNextAttemptAt(OffsetDateTime.now());
         return unitOfWork;
-    }
-
-    public static <T extends StreamTask> boolean isUnLocked(UnitOfWork<T> unitOfWork) {
-        return unitOfWork.getLockedAt() == null;
     }
 
     public enum State {
@@ -58,6 +61,9 @@ public class UnitOfWork<T extends StreamTask> {
 
     private int retries = 0;
 
+    /**
+     * Outputs the summary of the unit of work to the log in debug.
+     */
     public void logSummary() {
         if (log.isDebugEnabled()) {
             log.debug("UnitOfWork: {} Started at: {} Finished at: {} State: {}",
