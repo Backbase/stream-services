@@ -189,9 +189,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
 
         transactionPostIngestionService.handleSuccess(transactions);
 
-        if (log.isDebugEnabled()) {
-            log.debug("Ingested transactions: {}", transactions);
-        }
+        log.debug("Ingested transactions: {}", transactions);
     }
 
     private Mono<List<TransactionsPostResponseBody>> handleError(String arrangementId, Throwable e) {

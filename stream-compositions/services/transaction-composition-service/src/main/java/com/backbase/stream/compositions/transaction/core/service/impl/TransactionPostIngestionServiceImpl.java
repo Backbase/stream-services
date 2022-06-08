@@ -35,9 +35,7 @@ public class TransactionPostIngestionServiceImpl implements TransactionPostInges
             eventBus.emitEvent(envelopedEvent);
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Ingested Transactions: {}", res);
-        }
+        log.debug("Ingested Transactions: {}", res);
     }
 
     @Override

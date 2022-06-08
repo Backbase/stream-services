@@ -33,17 +33,15 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
     }
 
     private Mono<ProductIngestResponse> handleIntegrationResponse(ProductIngestResponse res) {
-        if (log.isDebugEnabled()) {
-            log.debug("Savings Accounts received from Integration: {}", res.getProductGroup().getSavingAccounts());
-            log.debug("Current Accounts received from Integration: {}", res.getProductGroup().getCurrentAccounts());
-            log.debug("Loan Accounts received from Integration: {}", res.getProductGroup().getLoans());
-            log.debug("Credit Cards received from Integration: {}", res.getProductGroup().getCreditCards());
-            log.debug("Debit Cards received from Integration: {}", res.getProductGroup().getDebitCards());
-            log.debug("Investment accounts received from Integration: {}", res.getProductGroup().getInvestmentAccounts());
-            log.debug("Term Deposit Accounts received from Integration: {}", res.getProductGroup().getTermDeposits());
-            log.debug("Custom Accounts received from Integration: {}", res.getProductGroup().getCustomProducts());
-            log.debug("Custom Data group items received from Integration: {}", res.getProductGroup().getCustomDataGroupItems());
-        }
+        log.debug("Savings Accounts received from Integration: {}", res.getProductGroup().getSavingAccounts());
+        log.debug("Current Accounts received from Integration: {}", res.getProductGroup().getCurrentAccounts());
+        log.debug("Loan Accounts received from Integration: {}", res.getProductGroup().getLoans());
+        log.debug("Credit Cards received from Integration: {}", res.getProductGroup().getCreditCards());
+        log.debug("Debit Cards received from Integration: {}", res.getProductGroup().getDebitCards());
+        log.debug("Investment accounts received from Integration: {}", res.getProductGroup().getInvestmentAccounts());
+        log.debug("Term Deposit Accounts received from Integration: {}", res.getProductGroup().getTermDeposits());
+        log.debug("Custom Accounts received from Integration: {}", res.getProductGroup().getCustomProducts());
+        log.debug("Custom Data group items received from Integration: {}", res.getProductGroup().getCustomDataGroupItems());
         return Mono.just(res);
     }
 

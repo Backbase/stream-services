@@ -44,9 +44,7 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
                 .flatMap(this::processChains)
                 .doOnNext(this::processSuccessEvent)
                 .doOnNext(r -> {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Ingested legal entity: {}", res.getLegalEntity());
-                    }
+                    log.debug("Ingested legal entity: {}", res.getLegalEntity());
                 });
     }
 
@@ -58,9 +56,7 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
 
         if (!isProductChainEnabled) {
-            if (log.isDebugEnabled()) {
-                log.debug("Product Chain is disabled");
-            }
+            log.debug("Product Chain is disabled");
             productChainMono = Mono.just(res);
         } else if (config.isProductChainAsync()) {
             productChainMono = ingestProductsAsync(res);
@@ -77,10 +73,8 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
                 .flatMap(productCompositionApi::pullIngestProduct)
                 .onErrorResume(this::handleProductError)
                 .doOnSuccess(response -> {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Response from Product Composition: {}",
-                                response.getProductGgroup());
-                    }
+                    log.debug("Response from Product Composition: {}",
+                            response.getProductGgroup());
                 })
                 .map(p -> res);
     }
@@ -89,9 +83,7 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
         return buildProductPullRequest(res)
                 .doOnNext(productCompositionApi::pullIngestProduct)
                 .doOnNext(t -> {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Async product ingestion called");
-                    }
+                    log.debug("Async product ingestion called");
                 })
                 .map(p -> res);
     }

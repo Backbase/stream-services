@@ -37,10 +37,8 @@ public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegration
     }
 
     private Mono<LegalEntityResponse> handleIntegrationResponse(LegalEntityResponse res) {
-        if (log.isDebugEnabled()) {
-            log.debug("Membership Accounts received from Integration: {}", res.getMembershipAccounts());
-            log.debug("Legal Entity received from Integration: {}", res.getLegalEntity());
-        }
+        log.debug("Membership Accounts received from Integration: {}", res.getMembershipAccounts());
+        log.debug("Legal Entity received from Integration: {}", res.getLegalEntity());
         return Mono.just(res);
     }
 

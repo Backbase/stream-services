@@ -46,9 +46,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .flatMap(this::processChains)
                 .doOnNext(this::processSuccessEvent)
                 .doOnNext(r -> {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Ingested products: {}", res.getProductGroup());
-                    }
+                    log.debug("Ingested products: {}", res.getProductGroup());
                 });
     }
 
@@ -68,9 +66,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         Mono<ProductIngestResponse> transactionChainMono;
 
         if (!config.isTransactionChainEnabled()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Transaction Chain is disabled");
-            }
+            log.debug("Transaction Chain is disabled");
             transactionChainMono = Mono.just(res);
         } else if (config.isTransactionChainAsync()) {
             transactionChainMono = ingestTransactionsAsync(res);
@@ -88,10 +84,8 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .flatMap(transactionCompositionApi::pullTransactions)
                 .onErrorResume(this::handleTransactionError)
                 .doOnNext(response -> {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Response from Transaction Composition: {}",
-                                response.getTransactions());
-                    }
+                    log.debug("Response from Transaction Composition: {}",
+                            response.getTransactions());
                 })
                 .collectList()
                 .map(p -> res);
