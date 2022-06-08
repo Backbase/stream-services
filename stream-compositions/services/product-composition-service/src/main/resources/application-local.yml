@@ -1,4 +1,5 @@
-server.port: 9003
+server:
+  port: 9003
 
 spring:
   activemq:

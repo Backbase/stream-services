@@ -37,7 +37,7 @@ backbase:
       arrangement-manager-base-url: http://arrangement-manage:8080
     compositions:
       product:
-        integration-base-url: http://localhost:9999
+        integration-base-url: http://product-integration:8080
         chains:
           transaction-composition:
             enabled: true
@@ -49,8 +49,5 @@ backbase:
           enableFailed: true
         cursor:
           enabled: false
-          base-url: http://localhost:9999
+          base-url: http://product-cursor:8080
 
-logging:
-  level:
-    com.backbase.stream.compositions: INFO

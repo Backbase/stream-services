@@ -1,4 +1,5 @@
-server.port: 9001
+server:
+  port: 9001
 
 spring:
   activemq:

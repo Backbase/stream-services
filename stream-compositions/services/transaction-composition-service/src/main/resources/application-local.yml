@@ -1,6 +1,8 @@
 server.port: 9004
 
 spring:
+  activemq:
+    broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
   security:
@@ -29,6 +31,8 @@ sso:
           type: ENV
           value: SIG_SECRET_KEY
 backbase:
+  activemq:
+    enabled: true
   mtls:
     enabled: false
   security:
@@ -53,9 +57,6 @@ backbase:
         cursor:
           enabled: true
           base-url: http://localhost:9005
-
-backbase.activemq.enabled: true
-spring.activemq.broker-url: tcp://localhost:61616
 
 eureka:
   instance:
