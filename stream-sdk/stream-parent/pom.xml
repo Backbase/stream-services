@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.5.13</version>
+        <version>2.5.14</version>
         <relativePath />
     </parent>
 
@@ -43,7 +43,7 @@
         <source.version>1.8</source.version>
         <spring-cloud.version>2020.0.5</spring-cloud.version>
         <spring-cloud-function.version>3.1.7</spring-cloud-function.version>
-        <spring-boot.version>2.5.13</spring-boot.version>
+        <spring-boot.version>2.5.14</spring-boot.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
 
@@ -77,6 +77,7 @@
 
     <dependencyManagement>
         <dependencies>
+
 
             <dependency>
                 <groupId>org.mapstruct</groupId>
@@ -115,6 +116,19 @@
                 <artifactId>spring-cloud-function-core</artifactId>
                 <version>${spring-cloud-function.version}</version>
             </dependency>
+
+
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk15on</artifactId>
+                <version>1.70</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk15on</artifactId>
+                <version>1.70</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
