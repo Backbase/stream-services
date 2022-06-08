@@ -49,6 +49,12 @@
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>service-sdk-web-client</artifactId>
+            <version>14.1.1</version>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -80,14 +86,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-dbs-web-client</artifactId>
-            <version>2.72.0</version>
-            <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
 
         <dependency>

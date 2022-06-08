@@ -4,7 +4,6 @@ import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.productcatalog.ProductCatalogService;
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
-import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -19,7 +18,6 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @Configuration
 @EnableConfigurationProperties(BackbaseStreamConfigurationProperties.class)
-@Import(DbsWebClientConfiguration.class)
 public class ProductCatalogServiceConfiguration {
 
 

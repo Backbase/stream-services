@@ -29,7 +29,6 @@
     </developers>
 
     <modules>
-        <module>stream-dbs-web-client</module>
         <module>stream-test-support</module>
         <module>stream-openapi-support</module>
         <module>stream-worker</module>

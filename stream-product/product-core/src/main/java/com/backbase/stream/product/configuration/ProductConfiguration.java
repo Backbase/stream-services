@@ -6,7 +6,6 @@ import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.product.service.ArrangementService;
-import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import lombok.AllArgsConstructor;
@@ -21,7 +20,6 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @Configuration
 @EnableConfigurationProperties(BackbaseStreamConfigurationProperties.class)
-@Import(DbsWebClientConfiguration.class)
 @AllArgsConstructor
 public class ProductConfiguration {
 

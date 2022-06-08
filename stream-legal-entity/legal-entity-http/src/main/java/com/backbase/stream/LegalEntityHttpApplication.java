@@ -7,8 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @SpringBootApplication
 public class LegalEntityHttpApplication {
@@ -20,16 +18,6 @@ public class LegalEntityHttpApplication {
 
 @Configuration
 class LegalEntityHttpConfiguration {
-    @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange()
-            .anyExchange()
-            .permitAll()
-            .and()
-            .csrf()
-            .disable()
-            .build();
-    }
 
     /**
      * To support tracing requests to the services.
