@@ -38,6 +38,8 @@
 
     </modules>
 
+
+
     <properties>
         <backbase-bom.version>2022.04.5</backbase-bom.version>
         <boat-maven-plugin.version>0.15.8</boat-maven-plugin.version>
@@ -53,6 +55,16 @@
 
         <japicmp.skip>true</japicmp.skip>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>22.0.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>

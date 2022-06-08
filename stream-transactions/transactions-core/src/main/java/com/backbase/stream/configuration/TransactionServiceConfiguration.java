@@ -9,7 +9,6 @@ import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionTaskExecutor;
 import com.backbase.stream.transaction.TransactionUnitOfWorkExecutor;
 import com.backbase.stream.transaction.repository.TransactionUnitOfWorkRepository;
-import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
@@ -27,7 +26,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 })
 @AllArgsConstructor
 @Configuration
-@Import({DbsWebClientConfiguration.class})
 public class TransactionServiceConfiguration {
 
 

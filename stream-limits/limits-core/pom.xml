@@ -28,12 +28,7 @@
             <artifactId>stream-dbs-clients</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-dbs-web-client</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-worker</artifactId>

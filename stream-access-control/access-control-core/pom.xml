@@ -59,12 +59,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-dbs-web-client</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <!-- TEST -->
         <dependency>
             <groupId>com.backbase.stream</groupId>
@@ -80,13 +74,5 @@
 
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

@@ -8,7 +8,6 @@ import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.limit.LimitsUnitOfWorkExecutor;
 import com.backbase.stream.limit.repository.LimitsUnitOfWorkRepository;
-import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
@@ -26,7 +25,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 })
 @AllArgsConstructor
 @Configuration
-@Import({DbsWebClientConfiguration.class})
 public class LimitsServiceConfiguration {
 
     @Bean
