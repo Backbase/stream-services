@@ -35,6 +35,7 @@
     </modules>
 
     <properties>
+        <ssdk.version>14.1.1</ssdk.version>
         <japicmp.skip>true</japicmp.skip>
     </properties>
 
@@ -54,6 +55,13 @@
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
                 <version>1.70</version>
+            </dependency>
+            <dependency>
+                <groupId>com.backbase.buildingblocks</groupId>
+                <artifactId>backbase-building-blocks-release</artifactId>
+                <version>${ssdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
         </dependencies>

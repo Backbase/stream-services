@@ -1,3 +1,10 @@
 spring:
   codec:
     max-in-memory-size: 10MB
+
+backbase:
+  security:
+    http:
+      enabled: false
+    csrf:
+      enabled: false

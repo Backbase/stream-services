@@ -26,13 +26,13 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>cursor-publishers</artifactId>
-            <version>2.72.0</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>cursor-store</artifactId>
-            <version>2.72.0</version>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>
@@ -76,7 +76,7 @@
 
                 </executions>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>

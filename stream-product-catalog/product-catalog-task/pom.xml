@@ -9,22 +9,17 @@
         <relativePath/>
     </parent>
 
-    <artifactId>approvals-bootstrap-task</artifactId>
+    <artifactId>product-catalog-task</artifactId>
     <version>2.72.0</version>
 
     <packaging>jar</packaging>
-    <name>Stream :: Approvals Bootstrap Task</name>
+    <name>Stream :: Product Catalog Task</name>
 
     <properties>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -38,17 +33,22 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>approvals-core</artifactId>
+            <artifactId>product-catalog-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>service-sdk-starter-test</artifactId>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
     </dependencies>
-
 
 </project>
