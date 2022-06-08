@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [2.72.0]
+### Changed
+- Update Spring Boot to 2.5.14
+- Update Swagger Core to 2.2.0
+- Update bcprov-jdk15on to 1.70 
 
 ## [2.71.0]
 ### Added
