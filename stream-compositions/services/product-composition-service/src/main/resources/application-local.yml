@@ -49,15 +49,13 @@ backbase:
       arrangement-manager-base-url: http://localhost:8082/arrangement-manager
     compositions:
       product:
-        enable-completed-event: true
-        enable-failed-event: false
-        integration-base-url: http://localhost:9999
+        integration-base-url: http://localhost:7003
         chains:
           transaction-composition:
-            enableOnComplete: false
-            enableOnFailure: false
+            enabled: true
             base-url: http://localhost:9004
             async: false
+            excludeProductTypeExternalIds:
         events:
           enableCompleted: false
           enableFailed: true

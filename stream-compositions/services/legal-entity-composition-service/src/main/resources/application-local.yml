@@ -47,7 +47,7 @@ backbase:
       identity-integration-base-url: http://localhost:8181/identity-integration-service
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:9999
+        integration-base-url: http://localhost:7001
         chains:
           product-composition:
             enableOnComplete: true

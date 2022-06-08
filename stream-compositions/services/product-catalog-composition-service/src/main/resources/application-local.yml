@@ -40,7 +40,7 @@ backbase:
       product-catalog:
         enable-completed-events: false
         enable-failed-events: true
-        product-catalog-integration-url: http://localhost:5087
+        product-catalog-integration-url: http://localhost:7002
 
 backbase.activemq.enabled: true
 spring.activemq.broker-url: tcp://localhost:61616
