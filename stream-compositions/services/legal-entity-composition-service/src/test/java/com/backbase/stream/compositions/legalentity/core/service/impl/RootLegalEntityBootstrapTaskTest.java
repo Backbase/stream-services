@@ -1,6 +1,12 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
-import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.legalentity.LegalEntityCompositionApplication;
@@ -13,41 +19,55 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
 import reactor.core.publisher.Mono;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
 @Import(LegalEntityCompositionApplication.class)
 class RootLegalEntityBootstrapTaskTest {
-    @Mock
-    LegalEntitySaga legalEntitySaga;
 
-    @Mock
-    LegalEntityTask legalEntityTask;
+  @Mock
+  LegalEntitySaga legalEntitySaga;
 
-    @Mock
-    EventBus eventBus;
+  @Mock
+  LegalEntityTask legalEntityTask;
 
-    @Test
-    void testRootIngestion() {
-        LegalEntity legalEntity = new LegalEntity().name("Test Legal Entity").externalId("externalId");
+  @Test
+  void testRootIngestion_Success() {
+    LegalEntity legalEntity = new LegalEntity().name("Test Legal Entity").externalId("externalId")
+        .internalId("internalId");
 
-        lenient().when(legalEntityTask.getLegalEntity()).thenReturn(legalEntity);
-        lenient().when(legalEntityTask.getData()).thenReturn(legalEntity);
+    lenient().when(legalEntityTask.getLegalEntity()).thenReturn(legalEntity);
+    lenient().when(legalEntityTask.getData()).thenReturn(legalEntity);
 
-        lenient().when(legalEntitySaga.executeTask(any()))
-                .thenReturn(Mono.just(legalEntityTask));
+    lenient().when(legalEntitySaga.executeTask(any()))
+        .thenReturn(Mono.just(legalEntityTask));
 
-        BootstrapConfigurationProperties bootstrapConfigurationProperties = new BootstrapConfigurationProperties();
-        bootstrapConfigurationProperties.setLegalEntity(new LegalEntity().name("Test Legal Entity").externalId("externalId"));
+    BootstrapConfigurationProperties bootstrapConfigurationProperties = new BootstrapConfigurationProperties();
+    bootstrapConfigurationProperties
+        .setLegalEntity(new LegalEntity().name("Test Legal Entity").externalId("externalId"));
+    bootstrapConfigurationProperties.setEnabled(Boolean.TRUE);
 
-        RootLegalEntityBootstrapTask bootstrapTask = new RootLegalEntityBootstrapTask(
-                legalEntitySaga,
-                bootstrapConfigurationProperties,
-                eventBus);
+    RootLegalEntityBootstrapTask bootstrapTask = new RootLegalEntityBootstrapTask(
+        legalEntitySaga,
+        bootstrapConfigurationProperties);
 
-        bootstrapTask.run(null);
-        verify(legalEntitySaga).executeTask(any());
-    }
+    bootstrapTask.run(null);
+    verify(legalEntitySaga, times(1)).executeTask(any());
+    assertNotNull(legalEntitySaga.executeTask(any()).block().getData().getInternalId());
+    assertTrue(bootstrapConfigurationProperties.getEnabled());
+  }
+
+  @Test
+  void testRootIngestion_Fail() {
+
+    BootstrapConfigurationProperties bootstrapConfigurationProperties = new BootstrapConfigurationProperties();
+    bootstrapConfigurationProperties.setLegalEntity(null);
+    bootstrapConfigurationProperties.setEnabled(Boolean.TRUE);
+
+    RootLegalEntityBootstrapTask bootstrapTask = new RootLegalEntityBootstrapTask(
+        legalEntitySaga,
+        bootstrapConfigurationProperties);
+
+    bootstrapTask.run(null);
+    verify(legalEntitySaga, times(0)).executeTask(any());
+  }
+
 }
