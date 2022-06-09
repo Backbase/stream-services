@@ -1,0 +1,15 @@
+
+     ______                                                                     ${AnsiColor.BRIGHT_YELLOW}`_ ,${AnsiColor.DEFAULT}
+    / __/ /________ ___ ___ _                                                  ${AnsiColor.BRIGHT_YELLOW}-(_)-${AnsiColor.BLACK}${AnsiColor.DEFAULT}
+   _\ \/ __/ __/ -_) _ `/  ' \              ${AnsiColor.RED}.'  '.${AnsiColor.BLACK}                              ${AnsiColor.BRIGHT_YELLOW},  `${AnsiColor.BLACK}${AnsiColor.DEFAULT}
+  /___/\__/_/  \__/\_,_/_/_/_/             ${AnsiColor.RED}/======\${AnsiColor.BLACK}${AnsiColor.DEFAULT}
+                                          ${AnsiColor.RED};:   ${AnsiColor.BRIGHT_YELLOW}\\${AnsiColor.BLACK}  ${AnsiColor.RED};${AnsiColor.BLACK}${AnsiColor.DEFAULT}
+       |                                  ${AnsiColor.RED}|:   ${AnsiColor.BRIGHT_YELLOW}(o>${AnsiColor.BLACK} ${AnsiColor.RED}|${AnsiColor.BLACK}${AnsiColor.DEFAULT}
+      \|/                                 ${AnsiColor.RED}|:${AnsiColor.BRIGHT_YELLOW}\\_//)${AnsiColor.BLACK} ${AnsiColor.RED}|${AnsiColor.BLACK}${AnsiColor.DEFAULT}
+       ^                                  ${AnsiColor.RED}|: ${AnsiColor.BRIGHT_YELLOW}\_/_)${AnsiColor.BLACK} ${AnsiColor.RED}|${AnsiColor.BLACK}${AnsiColor.DEFAULT}
+      / \                                 ${AnsiColor.RED};:  ${AnsiColor.BRIGHT_YELLOW}_|_${AnsiColor.BLACK}  ${AnsiColor.RED};${AnsiColor.BLACK}                  __      _${AnsiColor.DEFAULT}
+     /   \                              ${AnsiColor.RED}.' \:.    / `.${AnsiColor.BLACK}              o'')}____//${AnsiColor.DEFAULT}
+    / /|  \                            ${AnsiColor.RED}/ .-'':._.'`-. \${AnsiColor.BLACK}              `_/      )${AnsiColor.DEFAULT}
+   / /\|   \                           ${AnsiColor.RED}|/    /||\    \|${AnsiColor.BLACK}              (_(_/-(_/${AnsiColor.DEFAULT}
+_-/_/ _\7___\${AnsiColor.GREEN}_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-${AnsiColor.RED}bv${AnsiColor.GREEN}_-${AnsiColor.DEFAULT}
+${AnsiColor.DEFAULT}

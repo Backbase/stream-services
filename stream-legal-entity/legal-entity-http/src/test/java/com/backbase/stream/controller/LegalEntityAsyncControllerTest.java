@@ -1,4 +1,4 @@
-package com.backbase.stream;
+package com.backbase.stream.controller;
 
 import static com.backbase.stream.legalentity.model.UpdatedServiceAgreementResponse.StateEnum.ACCEPTED;
 import static java.util.Arrays.asList;
@@ -9,9 +9,9 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.stream.config.LegalEntityHttpConfiguration;
 import com.backbase.stream.configuration.LegalEntitySagaConfiguration;
 import com.backbase.stream.configuration.UpdatedServiceAgreementSagaConfiguration;
-import com.backbase.stream.controller.LegalEntityAsyncController;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.JobProfileUser;
@@ -28,8 +28,6 @@ import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
 import java.net.URI;
 import java.util.List;
-
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +47,7 @@ import reactor.core.publisher.Mono;
 @AutoConfigureWebTestClient
 @Import({LegalEntityHttpConfiguration.class, LegalEntitySagaConfiguration.class,
     UpdatedServiceAgreementSagaConfiguration.class})
-class LegalEntityHttpApplicationTest {
+class LegalEntityAsyncControllerTest {
 
     @MockBean
     private ReactiveClientRegistrationRepository reactiveClientRegistrationRepository;
@@ -79,7 +77,7 @@ class LegalEntityHttpApplicationTest {
     private WebTestClient webTestClient;
 
     @Test
-    void asyncUpdateServiceAgreement() throws Exception {
+    void updateServiceAgreementAsyncTest() throws Exception {
         final String saExternalId = "someSaExternalId";
         final String saInternalId = "someSaInternalId";
         URI uri = URI.create("/async/service-agreement");
@@ -126,13 +124,11 @@ class LegalEntityHttpApplicationTest {
 
         when(accessGroupService.getServiceAgreementByExternalId(eq(saExternalId))).thenReturn(Mono.just(internalSA));
 
-
         WebTestClient.ResponseSpec result =
             webTestClient.put().uri(uri).body(Mono.just(serviceAgreement), UpdatedServiceAgreement.class).exchange();
         FluxExchangeResult<UpdatedServiceAgreementResponse> responseFlux =
             result.returnResult(UpdatedServiceAgreementResponse.class);
         UpdatedServiceAgreementResponse response = responseFlux.getResponseBody().blockLast();
-
 
         assertEquals(ACCEPTED, response.getState());
     }

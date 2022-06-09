@@ -52,8 +52,9 @@
             <artifactId>reactor-test</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>service-sdk-web-client</artifactId>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>stream-dbs-web-client</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

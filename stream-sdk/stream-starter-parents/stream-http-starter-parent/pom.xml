@@ -22,11 +22,6 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>multi-tenancy</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
