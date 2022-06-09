@@ -22,10 +22,6 @@
             <artifactId>spring-security-config</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>multi-tenancy</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-task</artifactId>
         </dependency>
