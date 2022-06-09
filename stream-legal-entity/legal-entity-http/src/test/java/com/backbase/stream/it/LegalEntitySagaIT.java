@@ -2,6 +2,8 @@ package com.backbase.stream.it;
 
 import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
 
+import com.backbase.buildingblocks.multitenancy.Tenant;
+import com.backbase.buildingblocks.multitenancy.TenantContext;
 import com.backbase.stream.LegalEntityHttpApplication;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -38,7 +40,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
-@SpringBootTest(classes = LegalEntityHttpApplication.class)
+@SpringBootTest(classes = LegalEntityHttpApplication.class, properties = {"backbase.multi-tenancy.enabled=true"})
 @ContextConfiguration(classes = {LegalEntitySagaIT.TestConfiguration.class})
 @TestPropertySource(properties = {"spring.config.location=classpath:application-it.yml"})
 @AutoConfigureWebTestClient
@@ -295,6 +297,11 @@ public class LegalEntitySagaIT {
         setupWireMock();
         LegalEntityTask legalEntityTask = defaultLegalEntityTask();
 
+        Tenant tenant = new Tenant();
+        tenant.setId("tenant-id");
+        TenantContext.setTenant(tenant);
+
+
         // When
         webTestClient.mutateWith(csrf()).post()
                 .uri("/legal-entity")
@@ -315,6 +322,11 @@ public class LegalEntitySagaIT {
         // Given
         setupWireMock();
         LegalEntityTask legalEntityTask = defaultLegalEntityTask();
+
+        Tenant tenant = new Tenant();
+        tenant.setId("tenant-id");
+        TenantContext.setTenant(tenant);
+
 
         // When
         webTestClient.mutateWith(csrf()).post()
