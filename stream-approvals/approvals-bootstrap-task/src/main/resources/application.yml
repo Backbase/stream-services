@@ -23,7 +23,9 @@ backbase:
 
 ---
 spring:
-  profiles: moustache-bank
+  config:
+    activate:
+      on-profile: moustache-bank
   cloud:
     kubernetes:
       discovery:

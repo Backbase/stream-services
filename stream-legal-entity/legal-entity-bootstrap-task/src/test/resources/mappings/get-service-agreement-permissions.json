@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/access-control/service-api/v2/accesscontrol/accessgroups/users/([\\w-]+)/service-agreements/([\\w-]+)/permissions"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {},
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}
