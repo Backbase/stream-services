@@ -59,6 +59,9 @@ class LegalEntityControllerIT extends IntegrationTest {
   @MockBean
   private LegalEntitySaga legalEntitySaga;
 
+  static {
+    System.setProperty("spring.application.name", "legal-entity-composition-service");
+  }
   @BeforeAll
   static void initActiveMqBroker() throws Exception {
     broker = new BrokerService();
@@ -90,7 +93,7 @@ class LegalEntityControllerIT extends IntegrationTest {
     integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
     integrationServerClient.when(
         request()
-            .withMethod("GET")
+            .withMethod("POST")
             .withPath("/integration-api/v2/legal-entity"))
         .respond(
             response()
