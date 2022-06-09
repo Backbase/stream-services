@@ -3,8 +3,6 @@ package com.backbase.stream.config;
 import com.backbase.stream.ApprovalSaga;
 import com.backbase.stream.ApprovalTask;
 import com.backbase.stream.approval.model.Approval;
-import com.backbase.stream.worker.model.StreamTask;
-import java.util.Collections;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,21 +29,16 @@ public class SetupApprovalsHierarchyConfiguration {
     }
 
     private void run(String... args) {
-        log.debug("Approvals: {}", bootstrapConfigurationProperties.getApprovals());
         List<Approval> approvals = bootstrapConfigurationProperties.getApprovals();
-        if (approvals == null) {
-            log.error("Failed to load Approvals Structure");
-            System.exit(1);
-        } else {
-            log.info("Bootstrapping Root Approvals Structure");
+        log.debug("Approvals: {}", approvals);
+        log.info("Bootstrapping Root Approvals Structure");
 
-            Flux.fromIterable(bootstrapConfigurationProperties.getApprovals())
-                .map(ApprovalTask::new)
-                .flatMap(approvalSaga::executeTask)
-                .collectList()
-                .block();
-            log.info("Finished bootstrapping Approvals Structure");
-            System.exit(0);
-        }
+        Flux.fromIterable(bootstrapConfigurationProperties.getApprovals())
+            .map(ApprovalTask::new)
+            .flatMap(approvalSaga::executeTask)
+            .collectList()
+            .block();
+        
+        log.info("Finished bootstrapping Approvals Structure");
     }
 }

@@ -1,7 +1,5 @@
 package com.backbase.stream.it;
 
-import static org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers.csrf;
-
 import com.backbase.buildingblocks.multitenancy.Tenant;
 import com.backbase.buildingblocks.multitenancy.TenantContext;
 import com.backbase.stream.LegalEntityHttpApplication;
@@ -303,7 +301,7 @@ public class LegalEntitySagaIT {
 
 
         // When
-        webTestClient.mutateWith(csrf()).post()
+        webTestClient.post()
                 .uri("/legal-entity")
                 .header("Content-Type", "application/json")
                 .header("X-TID", "tenant-id")
@@ -329,7 +327,7 @@ public class LegalEntitySagaIT {
 
 
         // When
-        webTestClient.mutateWith(csrf()).post()
+        webTestClient.post()
                 .uri("/legal-entity")
                 .header("Content-Type", "application/json")
                 .header("X-TID", "tenant-id")
@@ -337,7 +335,7 @@ public class LegalEntitySagaIT {
                 .exchange()
                 .expectStatus().isEqualTo(200);
 
-        webTestClient.mutateWith(csrf()).post()
+        webTestClient.post()
                 .uri("/legal-entity")
                 .header("Content-Type", "application/json")
                 .header("X-TID", "tenant-id")

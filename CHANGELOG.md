@@ -30,6 +30,7 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
   - `stream-sink-starter-parent`
   - `stream-source-starter-parent`
 - Removed `stream-dbs-web-client` (replaced by `service-sdk-web-client`)
+  - **ACTION REQUIRED**: The OAuth2 client (provider and registration) initially defined as `dbs` is now called `bb`, hence the token converter configuration needs to be updated (e.g. `spring.security.oauth2.client.provider.bb.token-uri=http://token-converter:8080/oauth/token`)
   
 ### Changed
 - Replaced Stream SDK with Service SDK 14.1.0.

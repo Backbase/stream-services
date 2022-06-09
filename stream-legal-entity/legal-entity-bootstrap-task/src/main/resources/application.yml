@@ -23,7 +23,9 @@ backbase:
 
 ---
 spring:
-  profiles: moustache-bank
+  config:
+    activate:
+      on-profile: moustache-bank
   cloud:
     kubernetes:
       discovery:
@@ -113,7 +115,12 @@ bootstrap:
     users:
       - user:
           externalId: "admin"
+          fullName: "Backbase Root Admin"
           identityLinkStrategy: "CREATE_IN_IDENTITY"
+          emailAddress:
+            address: "bbadmin@email.com"
+          mobileNumber:
+            number: "1234567890"
         referenceJobRoleNames:
           - "Entitlements - Manager"
     subsidiaries:
@@ -137,7 +144,12 @@ bootstrap:
             users:
               - user:
                   externalId: "sara"
+                  fullName: "Sara Jones"
                   identityLinkStrategy: "CREATE_IN_IDENTITY"
+                  emailAddress:
+                    address: "sara@email.com"
+                  mobileNumber:
+                    number: "1234567890"
                 referenceJobRoleNames:
                   - "Retail User - USA"
             productGroups:
