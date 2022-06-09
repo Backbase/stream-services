@@ -1,8 +1,8 @@
 package com.backbase.stream.compositions.legalentity.core.service;
 
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import reactor.core.publisher.Mono;
 
 public interface LegalEntityIngestionService {
@@ -12,7 +12,7 @@ public interface LegalEntityIngestionService {
      * @param ingestPullRequest Ingest pull request
      * @return LegalEntityIngestResponse
      */
-    Mono<LegalEntityIngestResponse> ingestPull(Mono<LegalEntityIngestPullRequest> ingestPullRequest);
+    Mono<LegalEntityResponse> ingestPull(LegalEntityPullRequest ingestPullRequest);
 
     /**
      * Ingests legal entity in push mode.
@@ -20,5 +20,5 @@ public interface LegalEntityIngestionService {
      * @param ingestPushRequest Ingest push request
      * @return LegalEntityIngestResponse
      */
-    Mono<LegalEntityIngestResponse> ingestPush(Mono<LegalEntityIngestPushRequest> ingestPushRequest);
+    Mono<LegalEntityResponse> ingestPush(LegalEntityPushRequest ingestPushRequest);
 }

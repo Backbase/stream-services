@@ -22,33 +22,39 @@ backbase:
       enabled: true
       adapter:
         enabled: true
-    service-api:
-      authentication:
-        required-scope: api:service
   stream:
     legalentity:
       sink:
         useIdentityIntegration: true
+        userProfileEnabled: true
     dbs:
       user-manager-base-url: http://user-manager:8080
       access-control-base-url: http://access-control:8080
       arrangement-manager-base-url: http://arrangement-manager:8080
+      user-profile-manager-base-url: http://user-profile-manager:8080
     identity:
       identity-integration-base-url: http://identity-integration-service:8080
-
     compositions:
       legal-entity:
-        enable-completed-events: true
-        enable-failed-events: true
-        legal-entity-integration-url: http://legal-entity-ingestion-integration:8080
-
+        integration-base-url: http://legal-entity-integration:8080
+        chains:
+          product-composition:
+            enabled: true
+            base-url: http://product-composition:8080
+            async: false
+        events:
+          enableCompleted: true
+          enableFailed: true
+        cursor:
+          enabled: false
+          base-url: http://legal-entity-cursor:8080
 bootstrap:
-  enabled: true
-  # This is just na example. Replace it with data corresponding to   your bank
+  enabled: false
+  # This is just an example. Replace it with data corresponding to your bank
   legalEntity:
-    name: "Moustache Bank"
+    name: "Bank"
     realmName: "backbase"
-    externalId: "moustache-bank"
+    externalId: "BANK"
     legalEntityType: "BANK"
     referenceJobRoles:
       - name: Entitlements - Manager
@@ -117,7 +123,3 @@ bootstrap:
           identityLinkStrategy: "IDENTITY_AGNOSTIC"
         referenceJobRoleNames:
           - "Entitlements - Manager"
-
-logging:
-  level:
-    com.backbase.stream.compositions: DEBUG

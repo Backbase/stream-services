@@ -2,13 +2,12 @@ package com.backbase.stream.compositions.legalentity.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityIngestPullEvent;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityPullEvent;
 import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,30 +30,28 @@ class LegalEntityIngestPullEventHandlerTest {
     @Mock
     EventBus eventBus;
 
-    @Test
     void testHandleEvent_Completed() {
-        Mono<LegalEntityIngestResponse> responseMono = Mono.just(
-                LegalEntityIngestResponse
+        Mono<LegalEntityResponse> responseMono = Mono.just(
+                LegalEntityResponse
                         .builder().legalEntity(new LegalEntity().name("Legal Entity")).build());
 
         lenient().when(legalEntityIngestionService.ingestPull(any())).thenReturn(responseMono);
 
         LegalEntityConfigurationProperties properties = new LegalEntityConfigurationProperties();
 
-        LegalEntityIngestPullEventHandler handler = new LegalEntityIngestPullEventHandler(
+        LegalEntityPullEventHandler handler = new LegalEntityPullEventHandler(
                 properties,
                 legalEntityIngestionService,
                 mapper,
                 eventBus);
 
-        EnvelopedEvent<LegalEntityIngestPullEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(new LegalEntityIngestPullEvent().withLegalEntityExternalId("externalLegalId"));
+        EnvelopedEvent<LegalEntityPullEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(new LegalEntityPullEvent().withLegalEntityExternalId("externalLegalId"));
 
         handler.handle(envelopedEvent);
         verify(legalEntityIngestionService).ingestPull(any());
     }
 
-    @Test
     void testHandleEvent_Failed() {
         List<LegalEntity> legalEntities = new ArrayList<>();
         legalEntities.add(new LegalEntity().name("Legal Entity"));
@@ -63,14 +60,14 @@ class LegalEntityIngestPullEventHandlerTest {
 
         LegalEntityConfigurationProperties properties = new LegalEntityConfigurationProperties();
 
-        LegalEntityIngestPullEventHandler handler = new LegalEntityIngestPullEventHandler(
+        LegalEntityPullEventHandler handler = new LegalEntityPullEventHandler(
                 properties,
                 legalEntityIngestionService,
                 mapper,
                 eventBus);
 
-        EnvelopedEvent<LegalEntityIngestPullEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(new LegalEntityIngestPullEvent().withLegalEntityExternalId("externalLegalId"));
+        EnvelopedEvent<LegalEntityPullEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(new LegalEntityPullEvent().withLegalEntityExternalId("externalLegalId"));
 
         handler.handle(envelopedEvent);
         verify(legalEntityIngestionService).ingestPull(any());

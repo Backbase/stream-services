@@ -1,0 +1,267 @@
+openapi: 3.0.3
+info:
+  title: Transaction Cursor API
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/service-api/v2
+    description: The server
+tags:
+  - name: TransactionCursor
+paths:
+  /service-api/v2/cursor/{id}:
+    get:
+      tags:
+        - TransactionCursor
+      summary: Gets Cursor by the internal id of the cursor.
+      operationId: getById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: internal id of the cursor
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Transaction Cursor Details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionCursorResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /service-api/v2/cursor/arrangement/{arrangementId}:
+    get:
+      tags:
+        - TransactionCursor
+      summary: Gets Cursor by the internal Arrangement id.
+      operationId: getByArrangementId
+      parameters:
+        - name: arrangementId
+          in: path
+          required: true
+          description: internal id of the arrangement
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transaction Cursor Details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionCursorResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+    patch:
+      tags:
+        - TransactionCursor
+      summary: Patches Transaction Cursor by arrangement id.
+      description: Patches Transaction Cursor by Arrangement Id.
+      operationId: patchByArrangementId
+      parameters:
+        - name: arrangementId
+          in: path
+          required: true
+          description: internal id of the arrangement
+          schema:
+            type: string
+      requestBody:
+        description: Patch Transaction Cursor
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCursorPatchRequest'
+      responses:
+        "200":
+          description: Transaction Cursor Patched.
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /service-api/v2/cursor/upsert:
+    post:
+      tags:
+        - TransactionCursor
+      summary: Upserts the Transaction Cursor record.
+      description: Upserts the Transaction Cursor record.
+      operationId: upsertCursor
+      requestBody:
+        description: Upsert Transaction Cursor
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCursorUpsertRequest'
+      responses:
+        "201":
+          description: Transaction Cursor Upserted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionCursorUpsertResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /service-api/v2/cursor/delete:
+    delete:
+      tags:
+        - TransactionCursor
+      summary: Deletes Transaction Cursor by id or arrangement id.
+      description: Patches Transaction Cursor by Id or Arrangement Id.
+      operationId: deleteCursor
+      requestBody:
+        description: Delete Transaction Cursor
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCursorDeleteRequest'
+      responses:
+        "200":
+          description: Transaction Cursor Patched.
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    TransactionCursor:
+      type: object
+      required:
+        - arrangementId
+      properties:
+        id:
+          type: string
+          description: The primary key identifier
+        arrangementId:
+          type: string
+          description: The arrangement internal identifier
+        extArrangementId:
+          type: string
+          description: The arrangement external identifier
+        lastTxnDate:
+          type: string
+          description: Datetime of the last ingested transaction
+        lastTxnIds:
+          type: array
+          description: ids of the last ingested transaction record
+          items:
+            properties:
+              txnId:
+                type: string
+                description: id of the transaction ingested in previous execution
+        legalEntityId:
+          type: string
+          description: The internal legal entity id
+        status:
+          type: string
+          description: The status of the cursor
+          enum:
+            - IN_PROGRESS
+            - FAILED
+            - SUCCESS
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+
+    TransactionCursorResponse:
+      type: object
+      properties:
+        cursor:
+          $ref: 'TransactionCursor'
+
+    TransactionCursorUpsertRequest:
+      type: object
+      properties:
+        cursor:
+          $ref: 'TransactionCursor'
+
+    TransactionCursorUpsertResponse:
+      type: object
+      properties:
+        id:
+          type: string
+
+    TransactionCursorPatchRequest:
+      type: object
+      properties:
+        status:
+          type: string
+        lastTxnDate:
+          type: string
+        lastTxnIds:
+          type: string
+
+    TransactionCursorDeleteRequest:
+      type: object
+      description: Use one of id or arrangement id to delete the corresponding cursor
+      properties:
+        id:
+          type: string
+        arrangementId:
+          type: string
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+
+
+

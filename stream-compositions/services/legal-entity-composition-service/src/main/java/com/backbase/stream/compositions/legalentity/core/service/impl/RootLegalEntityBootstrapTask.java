@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
+import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.legalentity.core.config.BootstrapConfigurationProperties;
@@ -13,6 +14,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.PostConstruct;
 import java.util.Objects;
 
 @Slf4j
@@ -23,13 +25,22 @@ import java.util.Objects;
 public class RootLegalEntityBootstrapTask implements ApplicationRunner {
     private final LegalEntitySaga legalEntitySaga;
     private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
+    private final EventBus eventBus;
 
     @Override
     public void run(ApplicationArguments args) {
         LegalEntity rootLegalEntity = bootstrapConfigurationProperties.getLegalEntity();
         bootstrapRootLegalEntity(rootLegalEntity)
                 .subscribe();
+
+
     }
+
+    @PostConstruct
+    public void eventTest() {
+
+    }
+
 
     private Mono<String> bootstrapRootLegalEntity(LegalEntity rootLegalEntity) {
         if (Objects.isNull(rootLegalEntity)) {

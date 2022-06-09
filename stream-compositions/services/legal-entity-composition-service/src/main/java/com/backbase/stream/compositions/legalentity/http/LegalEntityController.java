@@ -1,15 +1,19 @@
 package com.backbase.stream.compositions.legalentity.http;
 
 import com.backbase.stream.compositions.legalentity.api.LegalEntityCompositionApi;
+import com.backbase.stream.compositions.legalentity.api.model.LegalEntityIngestionResponse;
+import com.backbase.stream.compositions.legalentity.api.model.LegalEntityPullIngestionRequest;
+import com.backbase.stream.compositions.legalentity.api.model.LegalEntityPushIngestionRequest;
+import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
-import com.backbase.stream.compositions.legalentity.model.LegalEntityIngestionResponse;
-import com.backbase.stream.compositions.legalentity.model.LegalEntityPullIngestionRequest;
-import com.backbase.stream.compositions.legalentity.model.LegalEntityPushIngestionRequest;
+import com.backbase.stream.compositions.product.client.ProductCompositionApi;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,18 +24,23 @@ import javax.validation.Valid;
 
 @RestController
 @AllArgsConstructor
+@Slf4j
+@EnableConfigurationProperties(LegalEntityConfigurationProperties.class)
 public class LegalEntityController implements LegalEntityCompositionApi {
     private final LegalEntityIngestionService legalEntityIngestionService;
     private final LegalEntityMapper mapper;
+    private final LegalEntityConfigurationProperties configProperties;
+    private final ProductCompositionApi productCompositionApi;
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<LegalEntityIngestionResponse>> pullIngestLegalEntity(
+    public Mono<ResponseEntity<LegalEntityIngestionResponse>> pullLegalEntity(
             @Valid Mono<LegalEntityPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-        return legalEntityIngestionService
-                .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
+        log.info("Start synchronous ingestion of Legal Entity");
+        return pullIngestionRequest.map(this::buildPullRequest)
+                .flatMap(legalEntityIngestionService::ingestPull)
                 .map(this::mapIngestionToResponse);
     }
 
@@ -39,10 +48,10 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<LegalEntityIngestionResponse>> pushIngestLegalEntity(
+    public Mono<ResponseEntity<LegalEntityIngestionResponse>> pushLegalEntity(
             @Valid Mono<LegalEntityPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-        return legalEntityIngestionService
-                .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
+        return pushIngestionRequest.map(this::buildPushRequest)
+                .flatMap(legalEntityIngestionService::ingestPush)
                 .map(this::mapIngestionToResponse);
     }
 
@@ -52,12 +61,8 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @param request PullIngestionRequest
      * @return LegalEntityIngestPullRequest
      */
-    private LegalEntityIngestPullRequest buildPullRequest(LegalEntityPullIngestionRequest request) {
-        return LegalEntityIngestPullRequest
-                .builder()
-                .legalEntityExternalId(request.getLegalEntityExternalId())
-                .additionalParameters(request.getAdditionalParameters())
-                .build();
+    private LegalEntityPullRequest buildPullRequest(LegalEntityPullIngestionRequest request) {
+        return mapper.mapPullRequestCompositionToStream(request);
     }
 
     /**
@@ -66,8 +71,8 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @param request PushIngestionRequest
      * @return LegalEntityIngestPushRequest
      */
-    private LegalEntityIngestPushRequest buildPushRequest(LegalEntityPushIngestionRequest request) {
-        return LegalEntityIngestPushRequest
+    private LegalEntityPushRequest buildPushRequest(LegalEntityPushIngestionRequest request) {
+        return LegalEntityPushRequest
                 .builder()
                 .legalEntity(mapper.mapCompostionToStream(request.getLegalEntity()))
                 .build();
@@ -79,10 +84,12 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @param response LegalEntityIngestResponse
      * @return ResponseEntity<IngestionResponse>
      */
-    private ResponseEntity<LegalEntityIngestionResponse> mapIngestionToResponse(LegalEntityIngestResponse response) {
+    private ResponseEntity<LegalEntityIngestionResponse> mapIngestionToResponse(LegalEntityResponse response) {
         return new ResponseEntity<>(
                 new LegalEntityIngestionResponse()
                         .withLegalEntity(mapper.mapStreamToComposition(response.getLegalEntity())),
                 HttpStatus.CREATED);
     }
+
+
 }

@@ -2,19 +2,21 @@ package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
-import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
-import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapperImpl;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPushRequest;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestResponse;
+import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
+import com.backbase.stream.compositions.legalentity.core.service.LegalEntityPostIngestionService;
+import com.backbase.stream.compositions.legalentity.integration.client.model.LegalEntity;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
+
+import javax.validation.Validator;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,27 +30,35 @@ class LegalEntityIngestionServiceImplTest {
     private LegalEntityIntegrationService legalEntityIntegrationService;
 
     @Mock
-    LegalEntityMapperImpl mapper;
+    LegalEntityMapper mapper;
+
+    @Mock
+    Validator validator;
 
     @Mock
     LegalEntitySaga legalEntitySaga;
 
+    @Mock
+    LegalEntityPostIngestionService legalEntityPostIngestionService;
+
     @BeforeEach
     void setUp() {
         legalEntityIngestionService = new LegalEntityIngestionServiceImpl(
-                mapper,
                 legalEntitySaga,
-                legalEntityIntegrationService);
+                legalEntityIntegrationService,
+                validator,
+                legalEntityPostIngestionService);
     }
 
-    @Test
     void ingestionInPullMode_Success() {
-        Mono<LegalEntityIngestPullRequest> legalEntityIngestPullRequest = Mono.just(LegalEntityIngestPullRequest.builder()
+        LegalEntityPullRequest legalEntityIngestPullRequest = LegalEntityPullRequest.builder()
                 .legalEntityExternalId("externalId")
-                .build());
-        LegalEntity legalEntity = new LegalEntity().name("legalEntityName");
-        when(legalEntityIntegrationService.pullLegalEntity(legalEntityIngestPullRequest.block()))
-                .thenReturn(Mono.just(legalEntity));
+                .build();
+        LegalEntity legalEntity = new LegalEntity().withName("legalEntityName");
+        LegalEntityResponse res = new LegalEntityResponse(Boolean.TRUE,
+                new com.backbase.stream.legalentity.model.LegalEntity().name("legalEntityName"), null);
+        when(legalEntityIntegrationService.pullLegalEntity(legalEntityIngestPullRequest))
+                .thenReturn(Mono.just(res));
 
         when(mapper.mapIntegrationToStream(legalEntity))
                 .thenReturn(new com.backbase.stream.legalentity.model.LegalEntity().name(legalEntity.getName()));
@@ -59,14 +69,13 @@ class LegalEntityIngestionServiceImplTest {
         when(legalEntitySaga.executeTask(any()))
                 .thenReturn(Mono.just(legalEntityTask));
 
-        Mono<LegalEntityIngestResponse> legalEntityIngestResponseMono = legalEntityIngestionService.ingestPull(legalEntityIngestPullRequest);
+        Mono<LegalEntityResponse> legalEntityIngestResponseMono = legalEntityIngestionService.ingestPull(legalEntityIngestPullRequest);
         assertNotNull(legalEntityIngestResponseMono.block());
         assertEquals("legalEntityName", legalEntityIngestResponseMono.block().getLegalEntity().getName());
     }
 
-    @Test
     void ingestionInPushMode_Unsupported() {
-        Mono<LegalEntityIngestPushRequest> request = Mono.just(LegalEntityIngestPushRequest.builder().build());
+        LegalEntityPushRequest request = LegalEntityPushRequest.builder().build();
         assertThrows(UnsupportedOperationException.class, () -> {
             legalEntityIngestionService.ingestPush(request);
         });

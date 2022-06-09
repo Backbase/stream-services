@@ -1,7 +1,7 @@
 package com.backbase.stream.compositions.product.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductsIngestPushEvent;
+import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPushEvent;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
@@ -34,12 +34,12 @@ class ProductIngestPushEventHandlerTest {
 
         lenient().when(productCatalogIngestionService.ingestPush(any())).thenReturn(responseMono);
 
-        ProductIngestPushEventHandler handler = new ProductIngestPushEventHandler(
+        ProductPushEventHandler handler = new ProductPushEventHandler(
                 productCatalogIngestionService,
                 mapper);
 
-        EnvelopedEvent<ProductsIngestPushEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(new ProductsIngestPushEvent());
+        EnvelopedEvent<ProductPushEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(new ProductPushEvent());
 
         handler.handle(envelopedEvent);
         verify(productCatalogIngestionService).ingestPush(any());

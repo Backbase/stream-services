@@ -26,6 +26,7 @@ sso:
         key:
           type: ENV
           value: SIG_SECRET_KEY
+
 backbase:
   mtls:
     enabled: false
@@ -36,24 +37,18 @@ backbase:
       authentication:
         required-scope: api:service
   stream:
-    legalentity:
-      sink:
-        useIdentityIntegration: true
     dbs:
-      user-manager-base-url: http://user-manager-nextgen:8080
-      access-control-base-url: http://access-control-nextgen:8080
-      arrangement-manager-base-url: http://arrangement-manager-nextgen:8080
-      transaction-manager-base-url: http://transaction-manager-nextgen:8080
-    identity:
-      identity-integration-base-url: http://identity-integration-service:8080
-
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
+      transaction-manager-base-url: http://transaction-manager:8080
     compositions:
       transaction:
-        enable-completed-events: false
-        enable-failed-events: true
-        transaction-integration-url:  http://wsecu-transaction-integration-service-nextgen:8080
-
-logging:
-  level:
-    com.backbase.stream.compositions: DEBUG
-
+        defaultStartOffsetInDays: 30
+        integration-base-url: http://transaction-integration:8080
+        events:
+          enableCompleted: true
+          enableFailed: true
+        cursor:
+          enabled: true
+          base-url: http://transaction-cursor:8080

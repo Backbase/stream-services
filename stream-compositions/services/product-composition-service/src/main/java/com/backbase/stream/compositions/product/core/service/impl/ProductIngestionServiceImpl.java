@@ -1,26 +1,39 @@
 package com.backbase.stream.compositions.product.core.service.impl;
 
-import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
+import com.backbase.buildingblocks.presentation.errors.BadRequestException;
+import com.backbase.buildingblocks.presentation.errors.Error;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
+import com.backbase.stream.compositions.product.core.service.ProductPostIngestionService;
+import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.product.BatchProductIngestionSaga;
-import com.backbase.stream.product.task.ProductGroupTask;
+import com.backbase.stream.product.task.BatchProductGroupTask;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class ProductIngestionServiceImpl implements ProductIngestionService {
-    private final ProductGroupMapper mapper;
     private final BatchProductIngestionSaga batchProductIngestionSaga;
     private final ProductIntegrationService productIntegrationService;
+
+    private final Validator validator;
+
+    private final ProductPostIngestionService productPostIngestionService;
 
     /**
      * Ingests legal Entities in pull mode.
@@ -28,12 +41,12 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @param ingestPullRequest Ingest pull request
      * @return LegalEntityIngestResponse
      */
-    public Mono<ProductIngestResponse> ingestPull(Mono<ProductIngestPullRequest> ingestPullRequest) {
-        return ingestPullRequest
-                .map(this::pullProductGroup)
+    public Mono<ProductIngestResponse> ingestPull(ProductIngestPullRequest ingestPullRequest) {
+        return pullProductGroup(ingestPullRequest)
+                .flatMap(this::validate)
                 .flatMap(this::sendToDbs)
-                .doOnSuccess(this::handleSuccess)
-                .map(this::buildResponse);
+                .flatMap(productPostIngestionService::handleSuccess)
+                .doOnError(productPostIngestionService::handleFailure);
     }
 
     /**
@@ -42,7 +55,7 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @param ingestPushRequest Ingest push request
      * @return ProductIngestResponse
      */
-    public Mono<ProductIngestResponse> ingestPush(Mono<ProductIngestPushRequest> ingestPushRequest) {
+    public Mono<ProductIngestResponse> ingestPush(ProductIngestPushRequest ingestPushRequest) {
         throw new UnsupportedOperationException();
     }
 
@@ -52,36 +65,45 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @param request ProductIngestPullRequest
      * @return ProductGroup
      */
-    private Mono<ProductGroup> pullProductGroup(ProductIngestPullRequest request) {
+    private Mono<ProductIngestResponse> pullProductGroup(ProductIngestPullRequest request) {
         return productIntegrationService
-                .pullProductGroup(request)
-                .map(mapper::mapIntegrationToStream);
+                .pullProductGroup(request);
     }
 
     /**
      * Ingests product group to DBS.
      *
-     * @param productGroup Product group
+     * @param res Product Ingest Response
      * @return Ingested product group
      */
-    private Mono<ProductGroup> sendToDbs(Mono<ProductGroup> productGroup) {
-        return productGroup
-                .map(ProductGroupTask::new)
-                .flatMap(batchProductIngestionSaga::process)
-                .map(ProductGroupTask::getData);
+    private Mono<ProductIngestResponse> sendToDbs(ProductIngestResponse res) {
+       return batchProductIngestionSaga.process(buildBatchTask(res.getProductGroup()))
+                .map(BatchProductGroupTask::getData)
+                .map(pg -> ProductIngestResponse.builder()
+                        .productGroup((ProductGroup) pg.getProductGroups().get(0))
+                        .build());
     }
 
-    private ProductIngestResponse buildResponse(ProductGroup productGroup) {
-        return ProductIngestResponse.builder()
-                .productGroup(productGroup)
-                .build();
+    private BatchProductGroupTask buildBatchTask(ProductGroup productGroup) {
+        BatchProductGroup bpg = new BatchProductGroup();
+        bpg.addProductGroupsItem(productGroup);
+        bpg.setServiceAgreement(productGroup.getServiceAgreement());
+        return new BatchProductGroupTask(productGroup.getServiceAgreement().getInternalId(),
+                bpg, BatchProductGroupTask.IngestionMode.UPDATE);
     }
 
-    private void handleSuccess(ProductGroup productGroup) {
-        log.error("Product group ingestion completed");
-        if (log.isDebugEnabled()) {
-            log.debug("Product group: {}", productGroup);
+
+
+    private Mono<ProductIngestResponse> validate(ProductIngestResponse res) {
+        Set<ConstraintViolation<ProductGroup>> violations = validator.validate(res.getProductGroup());
+
+        if (!CollectionUtils.isEmpty(violations)) {
+            List<Error> errors = violations.stream().map(c -> new Error()
+                    .withMessage(c.getMessage())
+                    .withKey(Error.INVALID_INPUT_MESSAGE)).collect(Collectors.toList());
+            return Mono.error(new BadRequestException().withErrors(errors));
         }
 
+        return Mono.just(res);
     }
 }

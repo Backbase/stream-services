@@ -8,22 +8,22 @@ servers:
 tags:
   - name: ProductComposition
 paths:
-  /service-api/v2/pull-ingestion:
+  /service-api/v2/ingest/pull:
     post:
       tags:
         - ProductComposition
-      summary: Ingests product group (in pull mode).
-      description: Ingests product group (in pull mode).
-      operationId: pullIngestProductGroup
+      summary: Ingests products (in pull mode).
+      description: Ingests products (in pull mode).
+      operationId: pullIngestProduct
       requestBody:
-        description: Pull Ingestion Request
+        description: Product Pull Ingestion Request
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ProductPullIngestionRequest'
       responses:
         "201":
-          description: Product group ingested.
+          description: Products ingested.
           content:
             application/json:
               schema:
@@ -41,13 +41,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/InternalServerError'
 
-  /service-api/v2/push-ingestion:
+  /service-api/v2/ingest/push:
     post:
       tags:
         - ProductComposition
-      summary: Ingests product group (in push mode).
-      description: Ingests poduct group (in push mode).
-      operationId: pushIngestProductGroup
+      summary: Ingests products (in push mode).
+      description: Ingests poducts (in push mode).
+      operationId: pushIngestProduct
       requestBody:
         description: Push Ingestion Request
         content:
@@ -56,7 +56,7 @@ paths:
               $ref: '#/components/schemas/ProductPushIngestionRequest'
       responses:
         "201":
-          description: Product group ingested.
+          description: Products ingested.
           content:
             application/json:
               schema:
@@ -86,12 +86,10 @@ components:
 
     ProductPullIngestionRequest:
       type: object
-      required:
-        - legalEntityExternalId
-        - serviceAgreementInternalId
-        - userExternalId
       properties:
         legalEntityExternalId:
+          type: string
+        legalEntityInternalId:
           type: string
         serviceAgreementExternalId:
           type: string
@@ -99,6 +97,15 @@ components:
           type: string
         userExternalId:
           type: string
+        userInternalId:
+          type: string
+        referenceJobRoleNames:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
+          description: The reference job roles that should get assigned to the user
+        membershipAccounts:
+          type: array
+          items:
+            type: string
         additionalParameters:
           type: object
           additionalProperties:

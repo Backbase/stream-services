@@ -1,18 +1,22 @@
 package com.backbase.stream.compositions.transaction.core.model;
 
-import com.backbase.stream.compositions.transaction.model.ProductGroup;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 
-@Getter
+@Data
 @Builder
 @AllArgsConstructor
 public class TransactionIngestPullRequest {
-    private String userExternalId;
-    private ProductGroup productGroup;
+    private String externalArrangementId;
+    private String legalEntityInternalId;
+    private String arrangementId;
     private Map<String, String> additionalParameters;
+    private OffsetDateTime dateRangeStart;
+    private OffsetDateTime dateRangeEnd;
+    private Integer billingCycles;
 }
 

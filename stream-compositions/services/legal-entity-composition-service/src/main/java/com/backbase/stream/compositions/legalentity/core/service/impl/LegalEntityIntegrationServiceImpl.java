@@ -1,10 +1,11 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
-import com.backbase.stream.compositions.integration.legalentity.api.LegalEntityIntegrationApi;
-import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
-import com.backbase.stream.compositions.integration.legalentity.model.PullLegalEntityResponse;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
+import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
+import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
+import com.backbase.stream.compositions.legalentity.integration.client.LegalEntityIntegrationApi;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,14 +17,33 @@ import reactor.core.publisher.Mono;
 public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegrationService {
     private final LegalEntityIntegrationApi legalEntityIntegrationApi;
 
+    private final LegalEntityMapper mapper;
+
     /**
      * {@inheritDoc}
      */
-    public Mono<LegalEntity> pullLegalEntity(LegalEntityIngestPullRequest ingestPullRequest) {
+    public Mono<LegalEntityResponse> pullLegalEntity(LegalEntityPullRequest ingestPullRequest) {
         return legalEntityIntegrationApi
                 .pullLegalEntity(
-                        ingestPullRequest.getLegalEntityExternalId(),
-                        ingestPullRequest.getAdditionalParameters())
-                .map(PullLegalEntityResponse::getLegalEntity);
+                        mapper.mapPullRequestStreamToIntegration(ingestPullRequest))
+                .map(mapper::mapResponseIntegrationToStream)
+                .map(leRes -> {
+                    leRes.setProductChainEnabledFromRequest(ingestPullRequest.getProductChainEnabled());
+                    return leRes;
+                })
+                .onErrorResume(this::handleIntegrationError)
+                .flatMap(this::handleIntegrationResponse);
+
+    }
+
+    private Mono<LegalEntityResponse> handleIntegrationResponse(LegalEntityResponse res) {
+        log.debug("Membership Accounts received from Integration: {}", res.getMembershipAccounts());
+        log.debug("Legal Entity received from Integration: {}", res.getLegalEntity());
+        return Mono.just(res);
+    }
+
+    private Mono<LegalEntityResponse> handleIntegrationError(Throwable e) {
+        log.error("Error while pulling Legal Entities: {}", e.getMessage());
+        return Mono.error(new InternalServerErrorException().withMessage(e.getMessage()));
     }
 }

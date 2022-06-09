@@ -30,26 +30,24 @@ backbase:
   security:
     http:
       enabled: true
-    service-api:
-      authentication:
-        required-scope: api:service
   stream:
-    legalentity:
-      sink:
-        useIdentityIntegration: true
     dbs:
       user-manager-base-url: http://user-manager:8080
       access-control-base-url: http://access-control:8080
       arrangement-manager-base-url: http://arrangement-manage:8080
-    identity:
-      identity-integration-base-url: http://identity-integration-service:8080
-
     compositions:
       product:
-        enable-completed-events: false
-        enable-failed-events: true
-        product-integration-url: http://product-integration-service:8080
+        integration-base-url: http://product-integration:8080
+        chains:
+          transaction-composition:
+            enabled: true
+            base-url: http://transaction-composition:8080
+            async: false
+            excludeProductTypeExternalIds:
+        events:
+          enableCompleted: true
+          enableFailed: true
+        cursor:
+          enabled: false
+          base-url: http://product-cursor:8080
 
-logging:
-  level:
-    com.backbase.stream.compositions: DEBUG

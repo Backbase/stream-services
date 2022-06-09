@@ -1,7 +1,7 @@
 package com.backbase.stream.compositions.legalentity.core.service;
 
-import com.backbase.stream.compositions.integration.legalentity.model.LegalEntity;
-import com.backbase.stream.compositions.legalentity.core.model.LegalEntityIngestPullRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
+import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import reactor.core.publisher.Mono;
 
 public interface LegalEntityIntegrationService {
@@ -11,5 +11,5 @@ public interface LegalEntityIntegrationService {
      * @param ingestPullRequest LegalEntityIngestPullRequest
      * @return LegalEntity
      */
-    Mono<LegalEntity> pullLegalEntity(LegalEntityIngestPullRequest ingestPullRequest);
+    Mono<LegalEntityResponse> pullLegalEntity(LegalEntityPullRequest ingestPullRequest);
 }

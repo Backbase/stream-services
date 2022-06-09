@@ -11,22 +11,7 @@ import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.exceptions.AccessGroupException;
 import com.backbase.stream.exceptions.LegalEntityException;
-import com.backbase.stream.legalentity.model.BaseProduct;
-import com.backbase.stream.legalentity.model.BaseProductGroup;
-import com.backbase.stream.legalentity.model.BatchProductGroup;
-import com.backbase.stream.legalentity.model.BusinessFunction;
-import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
-import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
-import com.backbase.stream.legalentity.model.JobProfileUser;
-import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityParticipant;
-import com.backbase.stream.legalentity.model.LegalEntityReference;
-import com.backbase.stream.legalentity.model.LegalEntityStatus;
-import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.ServiceAgreement;
-import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
-import com.backbase.stream.legalentity.model.User;
-import com.backbase.stream.legalentity.model.UserProfile;
+import com.backbase.stream.legalentity.model.*;
 import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
@@ -61,6 +46,15 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
+
+import javax.validation.Valid;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * Legal Entity Saga. This Service creates Legal Entities and their supporting objects from a {@link LegalEntity}
