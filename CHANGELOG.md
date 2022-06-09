@@ -12,24 +12,6 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 > 
 > **Migrate your CICD pipelines to the Service SDK standards**
 
-> :heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark: BREAKING CHANGES! :heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark:
-> You must now use `bb` intead of `dbs` as key to configure oauth2 client in Spring Security!
-
-```yaml
-spring:
-  security:
-    oauth2:
-      client:
-        registration:
-          bb:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          bb:
-            token-uri: http://token-converter:8080/oauth/token
-```
 
 ### Removed
 - Old Legal Entity Open API definitions
