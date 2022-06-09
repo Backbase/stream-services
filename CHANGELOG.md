@@ -30,7 +30,7 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
   - `stream-source-starter-parent`
 - Removed `stream-dbs-web-client` (replaced by `service-sdk-web-client`)
   
-### Changes
+### Changed
 - Replaced Stream SDK with Service SDK 14.1.0.
   - Upgrade Spring Boot 2.6.6
 
