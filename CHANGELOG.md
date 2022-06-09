@@ -12,7 +12,7 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 > 
 > **Migrate your CICD pipelines to the Service SDK standards**
 
-> :alert: This is a breaking release! :alert:
+> :heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark: BREAKING CHANGES! :heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark:
 > You must now use `bb` intead of `dbs` as key to configure oauth2 client in Spring Security!
 
 ```yaml
