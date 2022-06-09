@@ -16,5 +16,23 @@
     <name>Stream :: SDK :: HTTP Services Starter</name>
     <description>Parent for Stream HTTP Services</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.backbase.oss</groupId>
+                    <artifactId>boat-maven-plugin</artifactId>
+                    <version>0.15.8</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>
