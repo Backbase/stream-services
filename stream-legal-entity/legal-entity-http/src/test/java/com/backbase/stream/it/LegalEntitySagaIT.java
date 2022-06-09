@@ -52,7 +52,7 @@ public class LegalEntitySagaIT {
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add(
-                "spring.security.oauth2.client.provider.dbs.token-uri",
+                "spring.security.oauth2.client.provider.bb.token-uri",
                 () -> String.format("%s/oauth/token", wireMockServer.baseUrl())
         );
         registry.add(
