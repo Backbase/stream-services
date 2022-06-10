@@ -18,6 +18,7 @@ import com.backbase.stream.worker.model.UnitOfWork;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -53,12 +54,22 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
     public Mono<TransactionIngestResponse> ingestPull(TransactionIngestPullRequest ingestPullRequest) {
         return buildIntegrationRequest(ingestPullRequest)
                 .map(this::pullTransactions)
+                .map(f -> filterExisting(f, ingestPullRequest.getLastIngestedExternalIds()))
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(list -> handleSuccess(
                         ingestPullRequest.getArrangementId(), list))
                 .onErrorResume(e -> handleError(
                         ingestPullRequest.getArrangementId(), e))
                 .map(this::buildResponse);
+    }
+
+    private Flux<TransactionsPostRequestBody> filterExisting(Flux<TransactionsPostRequestBody> transactionsPostRequestBodyFlux,
+                                   List<String> lastIngestedExternalIds) {
+        if (CollectionUtils.isEmpty(lastIngestedExternalIds)) {
+            return transactionsPostRequestBodyFlux;
+        }
+
+        return transactionsPostRequestBodyFlux.filter(t -> !lastIngestedExternalIds.contains(t.getExternalId()));
     }
 
     private Mono<TransactionIngestPullRequest> buildIntegrationRequest(TransactionIngestPullRequest transactionIngestPullRequest) {
@@ -145,6 +156,11 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
             OffsetDateTime dateRangeStart = OffsetDateTime.parse(cursor.getLastTxnDate());
             request.setDateRangeStart(dateRangeStart);
         }
+
+        if (!CollectionUtils.isEmpty(cursor.getLastTxnIds())) {
+            request.setLastIngestedExternalIds(cursor.getLastTxnIds());
+        }
+
         return Mono.just(request);
     }
 

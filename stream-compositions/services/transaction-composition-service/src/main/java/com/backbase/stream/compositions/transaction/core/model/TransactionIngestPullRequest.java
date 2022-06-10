@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -18,5 +19,7 @@ public class TransactionIngestPullRequest {
     private OffsetDateTime dateRangeStart;
     private OffsetDateTime dateRangeEnd;
     private Integer billingCycles;
+
+    private List<String> lastIngestedExternalIds;
 }
 

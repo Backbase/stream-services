@@ -231,10 +231,8 @@ components:
           type: array
           description: ids of the last ingested transaction record
           items:
-            properties:
-              txnId:
-                type: string
-                description: id of the transaction ingested in previous execution
+            type: string
+            description: id of the transaction ingested in previous execution
         legalEntityId:
           type: string
           description: The internal legal entity id

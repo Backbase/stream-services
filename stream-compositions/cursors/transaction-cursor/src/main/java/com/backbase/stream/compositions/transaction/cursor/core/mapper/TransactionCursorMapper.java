@@ -6,6 +6,11 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Qualifier;
+import org.mapstruct.ReportingPolicy;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -15,10 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Qualifier;
-import org.mapstruct.ReportingPolicy;
 
 /**
  * The Mapper for transforming Model to Domain & Entity to Domain Model
@@ -56,7 +57,7 @@ public interface TransactionCursorMapper {
   }
 
   @WithTxnModelParser
-  default List<Object> convertLastTransToListFormat(String lastTxnIds) {
+  default List<String> convertLastTransToListFormat(String lastTxnIds) {
     if (Objects.nonNull(lastTxnIds)) {
       return Stream.of(lastTxnIds.split(",")).collect(Collectors.toList());
     }
@@ -71,9 +72,9 @@ public interface TransactionCursorMapper {
   }
 
   @WithTxnDomainParser
-  default String convertLastTransToStringFormat(List<Object> lastTxnIds) {
+  default String convertLastTransToStringFormat(List<String> lastTxnIds) {
     if (Objects.nonNull(lastTxnIds)) {
-      return lastTxnIds.stream().map(Object::toString).collect(Collectors.joining(","));
+      return String.join(",", lastTxnIds);
     }
     return null;
   }
