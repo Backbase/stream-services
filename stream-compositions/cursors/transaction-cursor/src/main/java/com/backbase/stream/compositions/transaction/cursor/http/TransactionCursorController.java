@@ -2,11 +2,7 @@ package com.backbase.stream.compositions.transaction.cursor.http;
 
 import com.backbase.stream.compositions.transaction.cursor.api.TransactionCursorApi;
 import com.backbase.stream.compositions.transaction.cursor.core.service.TransactionCursorService;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorDeleteRequest;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
+import com.backbase.stream.compositions.transaction.cursor.model.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +18,22 @@ public class TransactionCursorController implements TransactionCursorApi {
   private final TransactionCursorService transactionCursorService;
 
   @Override
+  @Deprecated
   public Mono<ResponseEntity<Void>> deleteCursor(
       Mono<TransactionCursorDeleteRequest> transactionCursorDeleteRequest,
       ServerWebExchange exchange) {
       log.debug("TransactionCursorController :: deleteCursor");
     return transactionCursorService.deleteCursor(transactionCursorDeleteRequest);
+  }
+
+  @Override
+  public Mono<ResponseEntity<Void>> deleteCursor(String arrangementId, ServerWebExchange exchange) {
+    return null;
+  }
+
+  @Override
+  public Mono<ResponseEntity<TransactionCursorUpsertResponse>> filterCursor(Mono<TransactionCursorFilterRequest> transactionCursorFilterRequest, ServerWebExchange exchange) {
+    return null;
   }
 
   @Override
