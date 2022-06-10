@@ -1,0 +1,2018 @@
+openapi: 3.0.3
+info:
+  title: Contacts service
+  description: Other services create contacts and retrieve or search for contacts.
+  version: 2.9.0
+  x-icon: contacts
+servers:
+- url: http://localhost:4010
+  description: Mock server
+- url: http://localhost:8080
+  description: Spring Boot default port
+- url: https://localhost:8081
+  description: "Best practice: use https"
+tags:
+- name: contacts
+paths:
+  /service-api/v2/contacts:
+    summary: Endpoints for working with contacts.
+    get:
+      tags:
+      - contacts
+      description: Retrieves list of all contacts.
+      operationId: getContacts
+      parameters:
+      - name: saId
+        in: query
+        description: The service agreement id that the user is acting in is taken
+          from claim in the JWT.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          example:
+            value: 54d4c741-51d1-415a-8523-d0d25141d7b2
+      - name: leId
+        in: query
+        description: The legal entity id that the user is acting in is taken from
+          claim in the JWT.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          example:
+            value: 5ea2659b-e2e7-4935-b686-190fa75d3f96
+      - name: from
+        in: query
+        description: Page Number. Skip over pages of elements by specifying a start
+          value for the query.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          default: 0
+        examples:
+          example:
+            value: 20
+      - name: size
+        in: query
+        description: Limit the number of elements on the response.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          format: int32
+          default: 10
+        examples:
+          example:
+            value: 80
+      - name: query
+        in: query
+        description: "The generic search term to search for contacts either by their\
+          \ name or alias or by one characteristic of their accounts (name, alias,\
+          \ accountNumber, IBAN, phoneNumber or email).\n"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          example:
+            value: john
+      - name: accountIdentifierTypes
+        in: query
+        description: "An array of account identifier types to return the matching\
+          \ contacts should have at least one account with the given account identfier\
+          \ types.\nThe default behavior is to return the matching contacts having\
+          \ accounts with any type of account identifier (accountNumber, IBAN, phoneNumber\
+          \ or email).\nBut when the specific account identifier types are requested\
+          \ then the matching contacts which have at least one account with the requested\
+          \ account identfier being not empty,\nand then matching the search term\
+          \ either by their name or alias or by one characteristic of their accounts\
+          \ (name, alias, requested account identifiers such as accountNumber, IBAN,\
+          \ phoneNumber or email)\nare returned.\n"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            $ref: '#/components/schemas/account-identifier-type'
+      responses:
+        "200":
+          description: List of contacts matching the query.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactsGetResponseBody'
+              examples:
+                getContactsResponse:
+                  $ref: '#/components/examples/getContactsResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        "404":
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+    post:
+      tags:
+      - contacts
+      summary: Creates a new contact.
+      description: |
+        Response 201 is a result of successful creation.
+        Response 202 will indicate contact request has been created and approval is required for having it available.
+      operationId: postContacts
+      requestBody:
+        description: |
+          Create a new contact. Response 201 is a result of successful creation.
+          Response 202 will indicate contact request has been created and approval is required for having it available.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactsPostRequestBody'
+            examples:
+              createContactRequest:
+                $ref: '#/components/examples/createContactRequest'
+      responses:
+        "201":
+          description: Contact has been created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactsPostResponseBody'
+              examples:
+                createContactResponse:
+                  $ref: '#/components/examples/createContactResponse'
+        "202":
+          description: ApprovalRequired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactsPostResponseBody'
+              examples:
+                createContactResponse:
+                  $ref: '#/components/examples/createContactResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /service-api/v2/contacts/{contactId}:
+    summary: Endpoints for working with contact by internal id.
+    get:
+      tags:
+      - contacts
+      description: Retrieves a contact by internal id.
+      operationId: getContactById
+      parameters:
+      - name: contactId
+        in: path
+        description: Internal id of the contact
+        required: true
+        style: simple
+        explode: false
+        schema:
+          $ref: '#/components/schemas/contact-id'
+      responses:
+        "200":
+          description: ContactItem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactGetResponseBody'
+              examples:
+                example:
+                  $ref: '#/components/examples/example'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        "404":
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+  /service-api/v2/contacts/payee-groups/check:
+    summary: Endpoints for checking if user having given business functions is entitled
+      to execute a payment with given arrangement and payee groups that contain given
+      contacts.
+    post:
+      tags:
+      - contacts
+      description: "Retrieves information about user entitlemet to execute a payment\
+        \ action defined by privilege (e.g. 'create, 'view', 'edit') with an arrangement\
+        \ id to payee groups containing given contact ids\nin context of business\
+        \ functions assigned to user.\n"
+      operationId: postCheckUserEntitlementToExecutePayment
+      parameters:
+      - name: reportNotEntitledPayments
+        in: query
+        description: Specifies if response should contain details of not entitled
+          payments. Default value is false.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      requestBody:
+        description: Retrieves payment entitlement
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactsPaymentEntitlementRequestBody'
+            examples:
+              example:
+                $ref: '#/components/examples/example-1'
+        required: true
+      responses:
+        "200":
+          description: Contacts payment entitlement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactsPaymentEntitlementResponseBody'
+              examples:
+                example:
+                  $ref: '#/components/examples/example-2'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        "404":
+          description: NotFound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+  /service-api/v2/contacts/externalId:
+    summary: Endpoints for working with contacts identified by external ID.
+    get:
+      tags:
+      - contacts
+      description: Retrieves list of contacts identified by external ID.
+      operationId: getContactsByExternalId
+      parameters:
+      - name: scope
+        in: query
+        description: "The scope which can be either Service Agreement (SA), Legal\
+          \ Entity (LE) or User (USER)"
+        required: true
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/AccessContextScope'
+        examples:
+          example:
+            value: SA
+      - name: contactExternalId
+        in: query
+        description: Reference of a contact ID from another (external) system
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          example:
+            value: 336d64ca-6eeb-11e8-adc0-fa7ae01bbebc
+      - name: externalServiceAgreementId
+        in: query
+        description: The external service agreement id. Mandatory if scope is SA.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          example:
+            value: 54d4c741-51d1-415a-8523-d0d25141d7b2
+      - name: externalLegalEntityId
+        in: query
+        description: The external legal entity id. Mandatory if scope is LE.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          example:
+            value: 5ea2659b-e2e7-4935-b686-190fa75d3f96
+      - name: externalUserId
+        in: query
+        description: User external Id. Mandatory if scope is USER.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          example:
+            value: 76d5be8b-e80d-4842-8ce6-ea67519e8f74
+      responses:
+        "200":
+          description: Retrieves contacts by external ids and Access Context.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactsByExternalIdGetResponseBody'
+              examples:
+                contactByIdAndAccessContexResponse:
+                  $ref: '#/components/examples/contactByIdAndAccessContexResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnauthorizedError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /service-api/v2/contacts/bulk:
+    summary: Endpoint for working with contacts in bulk.
+    post:
+      tags:
+      - contacts
+      description: Creates contacts in bulk.
+      operationId: postContactsBulk
+      requestBody:
+        description: Create new contacts in bulk
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactsBulkPostRequestBody'
+            examples:
+              createContactBulkRequest:
+                $ref: '#/components/examples/createContactBulkRequest'
+      responses:
+        "201":
+          description: No description available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactsBulkPostResponseBody'
+              examples:
+                createContactBulkResponse:
+                  $ref: '#/components/examples/createContactBulkResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /service-api/v2/contacts/bulk/delete:
+    summary: Endpoint for deleting contacts in bulk.
+    post:
+      tags:
+      - contacts
+      description: Deletes contacts in bulk.
+      operationId: postContactsBulkDelete
+      requestBody:
+        description: Delete contacts in bulk
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactsBulkDeletePostRequestBody'
+            examples:
+              deleteContactBulkRequest:
+                $ref: '#/components/examples/deleteContactBulkRequest'
+      responses:
+        "200":
+          description: All the requested contacts have been deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactsBulkDeletePostResponseBody'
+              examples:
+                createContactBulkResponse:
+                  $ref: '#/components/examples/createContactBulkResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+  /service-api/v2/contacts/internal-ids/filter:
+    summary: Endpoints for getting contacts internal ids.
+    post:
+      tags:
+      - contacts
+      description: Retrieves contacts external to internal id mapping.
+      operationId: postContactsInternalIdsFilter
+      parameters:
+      - name: saId
+        in: query
+        description: |
+          Service agreement to match the contacts (only in access context scope SA).
+          Contacts from other service agreements will not be included into mapping response even if they have the requested external ids.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          example:
+            value: 06bb18ba-ff0d-4056-908e-44e7e6a7d86d
+      requestBody:
+        description: External to internal contacts ids filter.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactsInternalIdsFilterPostRequestBody'
+            examples:
+              contactsExternalToInternalIdsFilterRequest:
+                $ref: '#/components/examples/contactsExternalToInternalIdsFilterRequest'
+      responses:
+        "200":
+          description: List of contacts filtered by the criteria.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactsInternalIdsFilterPostResponseBody'
+              examples:
+                contactsExternalToInternalIdsFilterResponse:
+                  $ref: '#/components/examples/contactsExternalToInternalIdsFilterResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+components:
+  schemas:
+    BadRequestError:
+      title: BadRequestError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/error-item'
+    UnauthorizedError:
+      title: UnauthorizedError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/error-item'
+    NotFoundError:
+      title: NotFoundError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/error-item'
+    InternalServerError:
+      title: InternalServerError
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+      description: Represents HTTP 500 Internal Server Error
+    AccountInformation:
+      type: object
+      properties:
+        name:
+          maxLength: 140
+          type: string
+          description: The name of an account
+        alias:
+          maxLength: 34
+          type: string
+          description: Name will be displayed if alias field is not filled
+        accountType:
+          maxLength: 10
+          type: string
+          description: "The type of the account, e.g. CHECKING/SAVINGS"
+        accountNumber:
+          maxLength: 34
+          type: string
+          description: "An account identifier. At least one of the account identifiers\
+            \ (accountNumber, IBAN, phoneNumber or email) is mandatory"
+        IBAN:
+          maxLength: 34
+          type: string
+          description: "An account identifier. At least one of the account identifiers\
+            \ (accountNumber, IBAN, phoneNumber or email) is mandatory"
+        phoneNumber:
+          $ref: '#/components/schemas/phone-number-identifier'
+        email:
+          $ref: '#/components/schemas/email-identifier'
+        BIC:
+          maxLength: 11
+          type: string
+          description: The Business Identifier Code as issued within the SWIFT domain
+        bankCode:
+          maxLength: 20
+          type: string
+          description: "The code assigned by a central bank, e.g. ABA RTN"
+        bankName:
+          maxLength: 140
+          type: string
+          description: Specifies the name of the bank where the account is issued
+        bankAddressLine1:
+          maxLength: 70
+          type: string
+          description: Bank address line 1
+        bankAddressLine2:
+          maxLength: 70
+          type: string
+          description: Bank address line 2
+        bankStreetName:
+          maxLength: 70
+          type: string
+          description: Bank street name
+        bankTown:
+          maxLength: 35
+          type: string
+          description: Bank city or town
+        bankPostCode:
+          maxLength: 16
+          type: string
+          description: Bank address post code
+        bankCountrySubDivision:
+          maxLength: 35
+          type: string
+          description: Bank country region or state
+        bankCountry:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        accountHolderAddressLine1:
+          maxLength: 70
+          type: string
+          description: Account address line 1
+        accountHolderAddressLine2:
+          maxLength: 70
+          type: string
+          description: Account address line 2
+        accountHolderStreetName:
+          maxLength: 70
+          type: string
+          description: Account holder street name
+        accountHolderTown:
+          maxLength: 35
+          type: string
+          description: Account holder city or town
+        accountHolderPostCode:
+          maxLength: 16
+          type: string
+          description: Account holder address post code
+        accountHolderCountrySubDivision:
+          maxLength: 35
+          type: string
+          description: Account holder country region or state
+        accountHolderCountry:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        additions:
+          $ref: '#/components/schemas/additions'
+    ContactsBulkDeletePostResponseBody:
+      properties:
+        successCount:
+          type: integer
+          description: The number of contacts processed successfully.
+        additions:
+          $ref: '#/components/schemas/Additions'
+    ContactsBulkDeletePostRequestBody:
+      required:
+      - accessContext
+      - externalContactIds
+      type: object
+      properties:
+        accessContext:
+          $ref: '#/components/schemas/ExternalAccessContext'
+        externalContactIds:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContactId'
+        additions:
+          $ref: '#/components/schemas/Additions'
+      description: Contacts within a context
+    ContactsBulkPostResponseBody:
+      type: object
+      properties:
+        successCount:
+          type: integer
+          description: The number of contacts processed successfully.
+        additions:
+          $ref: '#/components/schemas/Additions'
+      example:
+        successCount: 2
+    ContactsBulkPostRequestBody:
+      required:
+      - accessContext
+      - contacts
+      type: object
+      properties:
+        ingestMode:
+          $ref: '#/components/schemas/IngestMode'
+        accessContext:
+          $ref: '#/components/schemas/ExternalAccessContext'
+        contacts:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContact'
+        additions:
+          $ref: '#/components/schemas/Additions'
+      description: External contacts within same context
+    ContactsInternalIdsFilterPostRequestBody:
+      required:
+      - externalContactIds
+      type: object
+      properties:
+        externalContactIds:
+          maxItems: 10000
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContactId'
+      description: External to internal contacts ids filter.
+    ContactsInternalIdsFilterPostResponseBody:
+      type: object
+      additionalProperties:
+        minItems: 1
+        type: array
+        items:
+          $ref: '#/components/schemas/Id'
+      description: External to internal contacts ids filter.
+    ContactsByExternalIdGetResponseBody:
+      type: array
+      items:
+        $ref: '#/components/schemas/ContactsByExternalIdAndAccessContextGetResponseBodyItem'
+    ContactsByExternalIdAndAccessContextGetResponseBodyItem:
+      required:
+      - accounts
+      - id
+      - name
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        accounts:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountInformation'
+        accessContextScope:
+          $ref: '#/components/schemas/AccessContextScope'
+        name:
+          maxLength: 140
+          type: string
+          description: The name of a contact
+        alias:
+          maxLength: 80
+          type: string
+          description: Name will be displayed if alias field is not filled
+        category:
+          maxLength: 70
+          type: string
+          description: "Category to which the contact belongs to like employee, supplier."
+        contactPerson:
+          maxLength: 70
+          type: string
+          description: Contact person of the contact
+        phoneNumber:
+          maxLength: 30
+          type: string
+          description: Contact phone number of the contact
+        emailId:
+          maxLength: 255
+          type: string
+          description: Email-id of the contact
+          format: email
+        addressLine1:
+          maxLength: 70
+          type: string
+          description: Address line 1
+        addressLine2:
+          maxLength: 70
+          type: string
+          description: Address line 2
+        streetName:
+          maxLength: 70
+          type: string
+          description: Street name
+        town:
+          maxLength: 35
+          type: string
+          description: City or town
+        postCode:
+          maxLength: 16
+          type: string
+          description: Address post code
+        countrySubDivision:
+          maxLength: 35
+          type: string
+          description: Country region or state
+        country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        activeStatus:
+          $ref: '#/components/schemas/ActiveContactStatus'
+        additions:
+          $ref: '#/components/schemas/Additions'
+      description: ContactItem
+    ContactsGetResponseBody:
+      type: array
+      items:
+        $ref: '#/components/schemas/ContactGetResponseBody'
+    ContactGetResponseBody:
+      required:
+      - accounts
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/contact-id'
+        accounts:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/account-information'
+        accessContextScope:
+          $ref: '#/components/schemas/access-context-scope'
+        name:
+          maxLength: 140
+          type: string
+          description: The name of a contact
+        alias:
+          maxLength: 80
+          type: string
+          description: Name will be displayed if alias field is not filled
+        category:
+          maxLength: 70
+          type: string
+          description: "Category to which the contact belongs to like employee, supplier."
+        contactPerson:
+          maxLength: 70
+          type: string
+          description: Contact person of the contact
+        phoneNumber:
+          maxLength: 30
+          type: string
+          description: Contact phone number of the contact
+        emailId:
+          maxLength: 255
+          type: string
+          description: Email-id of the contact
+          format: email
+        addressLine1:
+          maxLength: 70
+          type: string
+          description: Address line 1
+        addressLine2:
+          maxLength: 70
+          type: string
+          description: Address line 2
+        streetName:
+          maxLength: 70
+          type: string
+          description: Street name
+        town:
+          maxLength: 35
+          type: string
+          description: City or town
+        postCode:
+          maxLength: 16
+          type: string
+          description: Address post code
+        countrySubDivision:
+          maxLength: 35
+          type: string
+          description: Country region or state
+        country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        activeStatus:
+          $ref: '#/components/schemas/active-contact-status'
+        additions:
+          $ref: '#/components/schemas/additions'
+      description: ContactItem
+    ContactsPostResponseBody:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        status:
+          $ref: '#/components/schemas/ActiveContactStatus'
+        additions:
+          $ref: '#/components/schemas/Additions'
+      description: Object that defines an id attribute only.
+    ContactsPostRequestBody:
+      required:
+      - accounts
+      - name
+      properties:
+        approved:
+          type: boolean
+          description: "When set to true, the created contact will also be approved\
+            \ by the user (bbId). If the user cannot approve the contact, it will\
+            \ not be created at all."
+        accessContext:
+          type: object
+          properties:
+            legalEntityId:
+              maxLength: 36
+              type: string
+              description: "The legal entity id, if this or the serviceAgreementId\
+                \ are not provided the scope will fall back to USER."
+            serviceAgreementId:
+              maxLength: 36
+              type: string
+              description: "The service agreement id, if this or the legalEntityId\
+                \ are not provided the scope will fall back to USER."
+          description: "Deprecated since 2.11.0. No replacement, context is taken\
+            \ from internal JWT."
+        accounts:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountInformation'
+        accessContextScope:
+          $ref: '#/components/schemas/AccessContextScope'
+        name:
+          maxLength: 140
+          type: string
+          description: The name of a contact
+        alias:
+          maxLength: 80
+          type: string
+          description: Name will be displayed if alias field is not filled
+        category:
+          maxLength: 70
+          type: string
+          description: "Category to which the contact belongs to like employee, supplier."
+        contactPerson:
+          maxLength: 70
+          type: string
+          description: Contact person of the contact
+        phoneNumber:
+          maxLength: 30
+          type: string
+          description: Contact phone number of the contact
+        emailId:
+          type: string
+          description: Email-id of the contact
+          format: email
+        addressLine1:
+          maxLength: 70
+          type: string
+          description: Address line 1
+        addressLine2:
+          maxLength: 70
+          type: string
+          description: Address line 2
+        streetName:
+          maxLength: 70
+          type: string
+          description: Street name
+        town:
+          maxLength: 35
+          type: string
+          description: City or town
+        postCode:
+          maxLength: 16
+          type: string
+          description: Address post code
+        countrySubDivision:
+          maxLength: 35
+          type: string
+          description: Country region or state
+        country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        activeStatus:
+          $ref: '#/components/schemas/ActiveContactStatus'
+        additions:
+          $ref: '#/components/schemas/Additions'
+      description: ContactItem for posting
+    ExternalAccessContext:
+      required:
+      - externalUserId
+      - scope
+      type: object
+      properties:
+        externalLegalEntityId:
+          $ref: '#/components/schemas/ExternalAccessGroupEntityId'
+        externalServiceAgreementId:
+          $ref: '#/components/schemas/ExternalAccessGroupEntityId'
+        externalUserId:
+          $ref: '#/components/schemas/ExternalAccessGroupEntityId'
+        scope:
+          $ref: '#/components/schemas/AccessContextScope'
+        additions:
+          $ref: '#/components/schemas/Additions'
+      description: Access context
+    ExternalAccountInformation:
+      properties:
+        externalId:
+          $ref: '#/components/schemas/ExternalContactId'
+        name:
+          maxLength: 140
+          type: string
+          description: The name of an account
+        alias:
+          maxLength: 34
+          type: string
+          description: Name will be displayed if alias field is not filled
+        accountType:
+          maxLength: 10
+          type: string
+          description: "The type of the account, e.g. CHECKING/SAVINGS"
+        accountNumber:
+          maxLength: 34
+          type: string
+          description: "An account identifier. At least one of the account identifiers\
+            \ (accountNumber, IBAN, phoneNumber or email) is mandatory"
+        IBAN:
+          maxLength: 34
+          type: string
+          description: "An account identifier. At least one of the account identifiers\
+            \ (accountNumber, IBAN, phoneNumber or email) is mandatory"
+        phoneNumber:
+          $ref: '#/components/schemas/phone-number-identifier'
+        email:
+          $ref: '#/components/schemas/email-identifier'
+        BIC:
+          maxLength: 11
+          type: string
+          description: The Business Identifier Code as issued within the SWIFT domain
+        bankCode:
+          maxLength: 20
+          type: string
+          description: "The code assigned by a central bank, e.g. ABA RTN"
+        bankName:
+          maxLength: 140
+          type: string
+          description: Specifies the name of the bank where the account is issued
+        bankAddressLine1:
+          maxLength: 70
+          type: string
+          description: Bank address line 1
+        bankAddressLine2:
+          maxLength: 70
+          type: string
+          description: Bank address line 2
+        bankStreetName:
+          maxLength: 70
+          type: string
+          description: Bank street name
+        bankTown:
+          maxLength: 35
+          type: string
+          description: Bank city or town
+        bankPostCode:
+          maxLength: 16
+          type: string
+          description: Bank address post code
+        bankCountrySubDivision:
+          maxLength: 35
+          type: string
+          description: Bank country region or state
+        bankCountry:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        accountHolderAddressLine1:
+          maxLength: 70
+          type: string
+          description: Account address line 1
+        accountHolderAddressLine2:
+          maxLength: 70
+          type: string
+          description: Account address line 2
+        accountHolderStreetName:
+          maxLength: 70
+          type: string
+          description: Account holder street name
+        accountHolderTown:
+          maxLength: 35
+          type: string
+          description: Account holder city or town
+        accountHolderPostCode:
+          maxLength: 16
+          type: string
+          description: Account holder address post code
+        accountHolderCountrySubDivision:
+          maxLength: 35
+          type: string
+          description: Account holder country region or state
+        accountHolderCountry:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        additions:
+          $ref: '#/components/schemas/Additions'
+    ExternalContact:
+      required:
+      - accounts
+      - externalId
+      - name
+      properties:
+        accounts:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalAccountInformation'
+        externalId:
+          $ref: '#/components/schemas/ExternalContactId'
+        accessContextScope:
+          $ref: '#/components/schemas/AccessContextScope'
+        name:
+          maxLength: 140
+          type: string
+          description: The name of a contact
+        alias:
+          maxLength: 80
+          type: string
+          description: Name will be displayed if alias field is not filled
+        category:
+          maxLength: 70
+          type: string
+          description: "Category to which the contact belongs to like employee, supplier."
+        contactPerson:
+          maxLength: 70
+          type: string
+          description: Contact person of the contact
+        phoneNumber:
+          maxLength: 30
+          type: string
+          description: Contact phone number of the contact
+        emailId:
+          maxLength: 255
+          type: string
+          description: Email-id of the contact
+          format: email
+        addressLine1:
+          maxLength: 70
+          type: string
+          description: Address line 1
+        addressLine2:
+          maxLength: 70
+          type: string
+          description: Address line 2
+        streetName:
+          maxLength: 70
+          type: string
+          description: Street name
+        town:
+          maxLength: 35
+          type: string
+          description: City or town
+        postCode:
+          maxLength: 16
+          type: string
+          description: Address post code
+        countrySubDivision:
+          maxLength: 35
+          type: string
+          description: Country region or state
+        country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        activeStatus:
+          $ref: '#/components/schemas/ActiveContactStatus'
+        additions:
+          $ref: '#/components/schemas/Additions'
+    ExternalAccessGroupEntityId:
+      maxLength: 64
+      minLength: 1
+      pattern: ^\S+$
+      type: string
+      description: External ID for entities in AccessGroup domain
+    ExternalContactId:
+      maxLength: 32
+      type: string
+      description: Reference of an ID from another (external) system.
+    Id:
+      maxLength: 36
+      type: string
+      description: Internally used unique identification of the contact
+    AccessContextScope:
+      type: string
+      description: "Access context scope of the contact, either ServiceAgreement (SA),\
+        \ LegalEntity (LE) or User (USER).\n"
+      enum:
+      - SA
+      - LE
+      - USER
+    IngestMode:
+      type: string
+      description: |
+        The way how contacts will be ingested into the system. UPSERT
+        mode will update the existing contacts (who are matched on externalId)
+        and create new contacts. Default way is creation only which does not require
+        this property.
+      enum:
+      - UPSERT
+      - CREATE
+    ActiveContactStatus:
+      type: string
+      description: |
+        The active status of a contact. When approvals is not enabled ACTIVE is the only value possible.
+        Otherwise following values mean:
+        ACTIVE - fully approved;
+        PENDING_APPROVAL - the contact needs further approval to become active.
+      enum:
+      - ACTIVE
+      - PENDING_APPROVAL
+    Additions:
+      title: Additions
+      type: object
+      additionalProperties:
+        type: string
+      description: Additional properties
+    ContactsPaymentEntitlementRequestBody:
+      required:
+      - paymentEntitlementDetails
+      - privilege
+      properties:
+        privilege:
+          $ref: '#/components/schemas/privilege'
+        paymentEntitlementDetails:
+          maxItems: 1000
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentEntitlementDetails'
+      description: Retrieves payment entitlement for contacts
+    ContactsPaymentEntitlementResponseBody:
+      required:
+      - entitled
+      properties:
+        entitled:
+          type: boolean
+        notEntitledPaymentDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentEntitlementDetails'
+      description: Contacts payment entitlement with optional information about not
+        entitled payments
+    PaymentEntitlementDetails:
+      required:
+      - arrangementId
+      - businessFunctions
+      - contactIds
+      properties:
+        businessFunctions:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/business-function'
+        arrangementId:
+          type: string
+        contactIds:
+          maxItems: 10000
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/contact-id'
+    account-identifier-type:
+      type: string
+      description: "Account Identifier type can be one of IBAN, ACCOUNT_NUMBER, PHONE_NUMBER,\
+        \ EMAIL"
+      enum:
+      - IBAN
+      - ACCOUNT_NUMBER
+      - PHONE_NUMBER
+      - EMAIL
+    contact-id:
+      maxLength: 36
+      type: string
+      description: Internally used unique identification of the contact
+    bad-request-error:
+      title: BadRequestError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/error-item'
+    unauthorized-error:
+      title: UnauthorizedError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/error-item'
+    not-found-error:
+      title: NotFoundError
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/error-item'
+    internal-server-error:
+      title: InternalServerError
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+      description: Represents HTTP 500 Internal Server Error
+    account-information:
+      type: object
+      properties:
+        name:
+          maxLength: 140
+          type: string
+          description: The name of an account
+        alias:
+          maxLength: 34
+          type: string
+          description: Name will be displayed if alias field is not filled
+        accountType:
+          maxLength: 10
+          type: string
+          description: "The type of the account, e.g. CHECKING/SAVINGS"
+        accountNumber:
+          maxLength: 34
+          type: string
+          description: "An account identifier. At least one of the account identifiers\
+            \ (accountNumber, IBAN, phoneNumber or email) is mandatory"
+        IBAN:
+          maxLength: 34
+          type: string
+          description: "An account identifier. At least one of the account identifiers\
+            \ (accountNumber, IBAN, phoneNumber or email) is mandatory"
+        phoneNumber:
+          $ref: '#/components/schemas/phone-number-identifier'
+        email:
+          $ref: '#/components/schemas/email-identifier'
+        BIC:
+          maxLength: 11
+          type: string
+          description: The Business Identifier Code as issued within the SWIFT domain
+        bankCode:
+          maxLength: 20
+          type: string
+          description: "The code assigned by a central bank, e.g. ABA RTN"
+        bankName:
+          maxLength: 140
+          type: string
+          description: Specifies the name of the bank where the account is issued
+        bankAddressLine1:
+          maxLength: 70
+          type: string
+          description: Bank address line 1
+        bankAddressLine2:
+          maxLength: 70
+          type: string
+          description: Bank address line 2
+        bankStreetName:
+          maxLength: 70
+          type: string
+          description: Bank street name
+        bankTown:
+          maxLength: 35
+          type: string
+          description: Bank city or town
+        bankPostCode:
+          maxLength: 16
+          type: string
+          description: Bank address post code
+        bankCountrySubDivision:
+          maxLength: 35
+          type: string
+          description: Bank country region or state
+        bankCountry:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        accountHolderAddressLine1:
+          maxLength: 70
+          type: string
+          description: Account address line 1
+        accountHolderAddressLine2:
+          maxLength: 70
+          type: string
+          description: Account address line 2
+        accountHolderStreetName:
+          maxLength: 70
+          type: string
+          description: Account holder street name
+        accountHolderTown:
+          maxLength: 35
+          type: string
+          description: Account holder city or town
+        accountHolderPostCode:
+          maxLength: 16
+          type: string
+          description: Account holder address post code
+        accountHolderCountrySubDivision:
+          maxLength: 35
+          type: string
+          description: Account holder country region or state
+        accountHolderCountry:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        additions:
+          $ref: '#/components/schemas/additions'
+    contact-get-response-body:
+      required:
+      - accounts
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/contact-id'
+        accounts:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/account-information'
+        accessContextScope:
+          $ref: '#/components/schemas/access-context-scope'
+        name:
+          maxLength: 140
+          type: string
+          description: The name of a contact
+        alias:
+          maxLength: 80
+          type: string
+          description: Name will be displayed if alias field is not filled
+        category:
+          maxLength: 70
+          type: string
+          description: "Category to which the contact belongs to like employee, supplier."
+        contactPerson:
+          maxLength: 70
+          type: string
+          description: Contact person of the contact
+        phoneNumber:
+          maxLength: 30
+          type: string
+          description: Contact phone number of the contact
+        emailId:
+          maxLength: 255
+          type: string
+          description: Email-id of the contact
+          format: email
+        addressLine1:
+          maxLength: 70
+          type: string
+          description: Address line 1
+        addressLine2:
+          maxLength: 70
+          type: string
+          description: Address line 2
+        streetName:
+          maxLength: 70
+          type: string
+          description: Street name
+        town:
+          maxLength: 35
+          type: string
+          description: City or town
+        postCode:
+          maxLength: 16
+          type: string
+          description: Address post code
+        countrySubDivision:
+          maxLength: 35
+          type: string
+          description: Country region or state
+        country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        activeStatus:
+          $ref: '#/components/schemas/active-contact-status'
+        additions:
+          $ref: '#/components/schemas/additions'
+      description: ContactItem
+    phone-number-identifier:
+      maxLength: 30
+      type: string
+      description: "A phone number account identifier. At least one of the account\
+        \ identifiers (accountNumber, IBAN, phoneNumber or email) is mandatory."
+    email-identifier:
+      maxLength: 255
+      type: string
+      description: "An email account identifier. At least one of the account identifiers\
+        \ (accountNumber, IBAN, phoneNumber or email) is mandatory."
+      format: email
+    access-context-scope:
+      type: string
+      description: "Access context scope of the contact, either ServiceAgreement (SA),\
+        \ LegalEntity (LE) or User (USER).\n"
+      enum:
+      - SA
+      - LE
+      - USER
+    ingest-mode:
+      type: string
+      description: |
+        The way how contacts will be ingested into the system. UPSERT
+        mode will update the existing contacts (who are matched on externalId)
+        and create new contacts. Default way is creation only which does not require
+        this property.
+      enum:
+      - UPSERT
+      - CREATE
+    active-contact-status:
+      type: string
+      description: |
+        The active status of a contact. When approvals is not enabled ACTIVE is the only value possible.
+        Otherwise following values mean:
+        ACTIVE - fully approved;
+        PENDING_APPROVAL - the contact needs further approval to become active.
+      enum:
+      - ACTIVE
+      - PENDING_APPROVAL
+    additions:
+      title: Additions
+      type: object
+      additionalProperties:
+        type: string
+      description: Additional properties
+    privilege:
+      type: string
+      description: "Privilege to perform an action (e.g. 'view', 'delete', etc.)"
+    business-function:
+      type: string
+      description: "Business function name (e.g. SEPA CT, Manage Legal Entities, etc.)"
+    error-item:
+      title: ErrorItem
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information.
+        key:
+          minLength: 1
+          type: string
+          description: "{capability-name}.api.{api-key-name}. For generated validation\
+            \ errors this is the path in the document the error resolves to. e.g.\
+            \ object name + '.' + field"
+        context:
+          type: object
+          additionalProperties:
+            type: string
+          description: Context can be anything used to construct localised messages.
+  examples:
+    getContactsResponse:
+      summary: getContactsResponse
+      value:
+      - id: 0855e686-d31e-4216-b3dd-5d66161d536d
+        name: John Doe
+        alias: John
+        category: Employee
+        contactPerson: Jane Doe
+        phoneNumber: "055512345678"
+        emailId: john@example.com
+        addressLine1: Backbase enterprise
+        addressLine2: ""
+        streetName: Jacob Bontiusplaats 9
+        town: Amsterdam
+        postCode: 1018 LL
+        countrySubDivision: North Holland
+        country: NL
+        accounts:
+        - name: Jane Doe
+          alias: Jane
+          accountType: SAVINGS
+          IBAN: FI21 1234 5600 0007 85
+          bankName: Test Bank
+          bankAddressLine1: QA Bank
+          bankAddressLine2: ""
+          bankStreetName: Jodenbreestraat 96
+          bankTown: Amsterdam
+          bankPostCode: 1011NS
+          bankCountrySubDivision: North Holland
+          bankCountry: NL
+          accountHolderAddressLine1: ""
+          accountHolderAddressLine2: ""
+          accountHolderStreetName: Woestduinstraat 114-3
+          accountHolderTown: Amsterdam
+          accountHolderPostCode: 1059 SP
+          accountHolderCountrySubDivision: North Holland
+          accountHolderCountry: NL
+        accessContextScope: SA
+        activeStatus: ACTIVE
+      - id: 0855e686-d31e-4216-b3dd-5d66161d536e
+        name: Jane Doe
+        alias: Jane
+        category: Manager
+        contactPerson: John Doe
+        phoneNumber: "055512345678"
+        emailId: jane@example.com
+        addressLine1: Backbase enterprise
+        addressLine2: ""
+        streetName: Jacob Bontiusplaats 9
+        town: Amsterdam
+        postCode: 1018 LL
+        countrySubDivision: North Holland
+        country: NL
+        accounts:
+        - name: Jane Doe
+          alias: Jane
+          accountType: SAVINGS
+          IBAN: FI21 1234 5600 0007 85
+          bankName: Test Bank
+          bankAddressLine1: Test Bank Co
+          bankAddressLine2: ""
+          bankStreetName: Jodenbreestraat 96
+          bankTown: Amsterdam
+          bankPostCode: 1011NS
+          bankCountrySubDivision: North Holland
+          bankCountry: NL
+        accessContextScope: LE
+        activeStatus: PENDING_APPROVAL
+    createContactRequest:
+      summary: createContactRequest
+      value:
+        name: John Doe
+        alias: John
+        category: Employee
+        contactPerson: Jane Doe
+        phoneNumber: "055512345678"
+        emailId: john@example.com
+        addressLine1: Backbase enterprise
+        addressLine2: ""
+        streetName: Jacob Bontiusplaats 9
+        town: Amsterdam
+        postCode: 1018 LL
+        countrySubDivision: North Holland
+        country: NL
+        accounts:
+        - name: Jane Doe
+          alias: Jane
+          accountType: SAVINGS
+          IBAN: FI21 1234 5600 0007 85
+          bankName: Test Bank
+          bankAddressLine1: Test Bank Co
+          bankAddressLine2: ""
+          bankStreetName: Jodenbreestraat 96
+          bankTown: Amsterdam
+          bankPostCode: 1011NS
+          bankCountrySubDivision: North Holland
+          bankCountry: NL
+          accountHolderAddressLine1: Backbase enterprise
+          accountHolderAddressLine2: ""
+          accountHolderStreetName: Jacob Bontiusplaats 9
+          accountHolderTown: Amsterdam
+          accountHolderPostCode: 1018 LL
+          accountHolderCountrySubDivision: North Holland
+          accountHolderCountry: NL
+        approved: true
+        accessContextScope: SA
+    createContactResponse:
+      summary: createContactResponse
+      value:
+        id: 0955e686-d31e-4216-b3dd-5d66161d536d
+        status: ACTIVE
+    example:
+      summary: example
+      value:
+        id: 0855e686-d31e-4216-b3dd-5d66161d536d
+        name: John Doe
+        alias: John
+        category: Employee
+        contactPerson: Jane Doe
+        phoneNumber: "055512345678"
+        emailId: john@example.com
+        addressLine1: Backbase enterprise
+        addressLine2: ""
+        streetName: Jacob Bontiusplaats 9
+        town: Amsterdam
+        postCode: 1018 LL
+        countrySubDivision: North Holland
+        country: NL
+        accounts:
+        - name: Jane Doe
+          alias: Jane
+          accountType: SAVINGS
+          IBAN: FI21 1234 5600 0007 85
+          bankName: Test Bank
+          bankAddressLine1: Test Bank Co
+          bankAddressLine2: ""
+          bankStreetName: Jodenbreestraat 96
+          bankTown: Amsterdam
+          bankPostCode: 1011NS
+          bankCountrySubDivision: North Holland
+          bankCountry: NL
+          accountHolderAddressLine1: Backbase enterprise
+          accountHolderAddressLine2: ""
+          accountHolderStreetName: Jacob Bontiusplaats 9
+          accountHolderTown: Amsterdam
+          accountHolderPostCode: 1018 LL
+          accountHolderCountrySubDivision: North Holland
+          accountHolderCountry: NL
+        accessContextScope: USER
+        activeStatus: ACTIVE
+    example-1:
+      summary: example-1
+      value:
+        privilege: create
+        paymentEntitlementDetails:
+        - businessFunctions:
+          - SEPA CT
+          - Domestic Payments
+          arrangementId: d0c8dd02-99be-46e9-8ff0-8021a71552a7
+          contactIds:
+          - 0955e686-d31e-4216-b3dd-5d66161d536d
+        - businessFunctions:
+          - Domestic Payments
+          arrangementId: d308ae19-d170-4967-b185-dceb8d356cfa
+          contactIds:
+          - 8553c9b8-6266-483f-925b-6cfee6b4f4bc
+          - 621e5084-c2ba-49ad-8eb7-eaeceaf43a75
+    example-2:
+      summary: example-2
+      value:
+        entitled: false
+        notEntitledPaymentDetails:
+        - businessFunctions:
+          - Domestic Payments
+          arrangementId: d308ae19-d170-4967-b185-dceb8d356cfa
+          contactIds:
+          - 8553c9b8-6266-483f-925b-6cfee6b4f4bc
+    contactByIdAndAccessContexResponse:
+      summary: contactByIdAndAccessContexResponse
+      value:
+      - id: 0855e686-d31e-4216-b3dd-5d66161d536d
+        name: John Doe
+        alias: John
+        category: Employee
+        contactPerson: Jane Doe
+        phoneNumber: "055512345678"
+        emailId: john@example.com
+        addressLine1: Backbase enterprise
+        addressLine2: ""
+        streetName: Jacob Bontiusplaats 9
+        town: Amsterdam
+        postCode: 1018 LL
+        countrySubDivision: North Holland
+        country: NL
+        accounts:
+        - name: Jane Doe
+          alias: Jane
+          accountType: SAVINGS
+          IBAN: FI21 1234 5600 0007 85
+          bankName: Test Bank
+          bankAddressLine1: QA Bank
+          bankAddressLine2: ""
+          bankStreetName: Jodenbreestraat 96
+          bankTown: Amsterdam
+          bankPostCode: 1011NS
+          bankCountrySubDivision: North Holland
+          bankCountry: NL
+          accountHolderAddressLine1: ""
+          accountHolderAddressLine2: ""
+          accountHolderStreetName: Woestduinstraat 114-3
+          accountHolderTown: Amsterdam
+          accountHolderPostCode: 1059 SP
+          accountHolderCountrySubDivision: North Holland
+          accountHolderCountry: NL
+        accessContextScope: SA
+        activeStatus: ACTIVE
+      - id: 0855e686-d31e-4216-b3dd-5d66161d536e
+        name: Jane Doe
+        alias: Jane
+        category: Manager
+        contactPerson: John Doe
+        phoneNumber: "055512345678"
+        emailId: jane@example.com
+        addressLine1: Backbase enterprise
+        addressLine2: ""
+        streetName: Jacob Bontiusplaats 9
+        town: Amsterdam
+        postCode: 1018 LL
+        countrySubDivision: North Holland
+        country: NL
+        accounts:
+        - name: Jane Doe
+          alias: Jane
+          accountType: SAVINGS
+          IBAN: FI21 1234 5600 0007 85
+          bankName: Test Bank
+          bankAddressLine1: Test Bank Co
+          bankAddressLine2: ""
+          bankStreetName: Jodenbreestraat 96
+          bankTown: Amsterdam
+          bankPostCode: 1011NS
+          bankCountrySubDivision: North Holland
+          bankCountry: NL
+        accessContextScope: LE
+        activeStatus: PENDING_APPROVAL
+    createContactBulkRequest:
+      summary: createContactBulkRequest
+      value:
+        accessContext:
+          externalLegalEntityId: 72feba38-f800-4243-bccc-5fd1368a4164
+          externalServiceAgreementId: 9f2bce5f-482a-460f-a5e7-e181de6591d1
+          externalUserId: 9f2bce5f-482a-460f-a5e7-e181de6591d1
+          scope: LE
+        contacts:
+        - name: John Doe
+          alias: John
+          category: Employee
+          contactPerson: Jane Doe
+          phoneNumber: "055512345678"
+          emailId: john@example.com
+          address:
+            addressLine1: Backbase enterprise
+            addressLine2: ""
+            streetName: Jacob Bontiusplaats 9
+            town: Amsterdam
+            postCode: 1018 LL
+            countrySubDivision: North Holland
+            country: NL
+          externalId: a8141b9e066211e8ba890ed5f89f718b
+          accounts:
+          - name: Current account
+            alias: Current
+            iban: NL29ABNA0499974219
+            bankName: Test Bank
+            bankAddress:
+              addressLine1: Test Bank Co
+              addressLine2: ""
+              streetName: Jodenbreestraat 96
+              town: Amsterdam
+              postCode: 1011NS
+              countrySubDivision: North Holland
+              country: NL
+            accountHolderAddress:
+              addressLine1: Backbase enterprise
+              addressLine2: ""
+              streetName: Jacob Bontiusplaats 9
+              town: Amsterdam
+              postCode: 1018 LL
+              countrySubDivision: North Holland
+              country: NL
+            externalId: aef1b0a2066211e8ba890ed5f89f718b
+          - name: Saving account
+            alias: Savings
+            iban: NL91ABNA0417164300
+            bankName: Test Bank
+            bankAddress:
+              addressLine1: Test Bank Co
+              addressLine2: ""
+              streetName: Jodenbreestraat 96
+              town: Amsterdam
+              postCode: 1011NS
+              countrySubDivision: North Holland
+              country: NL
+            accountHolderAddress:
+              addressLine1: Backbase enterprise
+              addressLine2: ""
+              streetName: Jacob Bontiusplaats 9
+              town: Amsterdam
+              postCode: 1018 LL
+              countrySubDivision: North Holland
+              country: NL
+            externalId: bef1b0a2066211e8ba890ed5f89f718c
+        - name: Jane Doe
+          alias: Jane
+          category: Employee
+          contactPerson: John Doe
+          phoneNumber: "055512345679"
+          emailId: jane@example.com
+          address:
+            addressLine1: Backbase enterprise
+            addressLine2: ""
+            streetName: Jacob Bontiusplaats 9
+            town: Amsterdam
+            postCode: 1018 LL
+            countrySubDivision: North Holland
+            country: NL
+          externalId: b8141b9e066211e8ba890ed5f89f718y
+          accounts:
+          - name: Saving account
+            alias: Savings
+            iban: NL02ABNA0123456789
+            bankName: Test Bank
+            bankAddress:
+              addressLine1: Test Bank Co
+              addressLine2: ""
+              streetName: Jodenbreestraat 96
+              town: Amsterdam
+              postCode: 1011NS
+              countrySubDivision: North Holland
+              country: NL
+            accountHolderAddress:
+              addressLine1: Backbase enterprise
+              addressLine2: ""
+              streetName: Jacob Bontiusplaats 9
+              town: Amsterdam
+              postCode: 1018 LL
+              countrySubDivision: North Holland
+              country: NL
+            externalId: zef1b0a2066211e8ba890ed5f89f718y
+    createContactBulkResponse:
+      summary: createContactBulkResponse
+      value:
+        successCount: 2
+    deleteContactBulkRequest:
+      summary: deleteContactBulkRequest
+      value:
+        accessContext:
+          externalLegalEntityId: 72feba38f8004243bccc5fd1368a4164
+          externalServiceAgreementId: 9f2bce5f482a460fa5e7e181de6591d1
+          externalUserId: 9f2bce5f482a460fa5e7e181de6591d1
+          scope: LE
+        externalContactIds:
+        - a8141b9e066211e8ba890ed5f89f718b
+        - b8141b9e066211e8ba890ed5f89f718y
+    contactsExternalToInternalIdsFilterRequest:
+      summary: contactsExternalToInternalIdsFilterRequest
+      value:
+        externalContactIds:
+        - external_contact_e93cd41c824c001
+        - external_contact_53c6de0733afb3d
+        - external_contact_8905bd06ba35216
+    contactsExternalToInternalIdsFilterResponse:
+      summary: contactsExternalToInternalIdsFilterResponse
+      value:
+        external_contact_e93cd41c824c001:
+        - 2e6ec42c-b783-4f97-92e8-245b629fb585
+        external_contact_53c6de0733afb3d:
+        - 40a6aac1-5f22-415e-9e4b-f714254eb034
+        external_contact_8905bd06ba35216:
+        - eda7f5de-d55c-4574-8a57-c2611b282ca6
+        - 0b7be175-3278-4649-8d0b-9ab438d62fbe

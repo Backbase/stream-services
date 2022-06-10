@@ -53,6 +53,11 @@ public class BackbaseStreamConfigurationProperties {
          */
         private String approvalsBaseUrl = "http://approval-service:8080";
 
+        /**
+         * Location of Contacts Service.
+         */
+        private String contactManagerBaseUrl = "http://contact-manager:8080";
+
     }
 
     @Data
