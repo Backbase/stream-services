@@ -10,8 +10,9 @@ import reactor.core.publisher.Hooks;
 @SpringBootApplication
 @ComponentScan("com.backbase.stream")
 public class LegalEntityCompositionApplication {
-    public static void main(String[] args) {
-        SpringApplication.run(LegalEntityCompositionApplication.class, args);
-        Hooks.onOperatorDebug();
-    }
+
+  public static void main(String[] args) {
+    SpringApplication.run(LegalEntityCompositionApplication.class, args);
+    Hooks.onOperatorDebug();
+  }
 }

@@ -9,5 +9,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class LegalEntityPushRequest {
-    private LegalEntity legalEntity;
+
+  private LegalEntity legalEntity;
 }
