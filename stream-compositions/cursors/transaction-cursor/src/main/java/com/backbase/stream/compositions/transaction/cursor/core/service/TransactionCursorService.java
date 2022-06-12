@@ -1,6 +1,5 @@
 package com.backbase.stream.compositions.transaction.cursor.core.service;
 
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorDeleteRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
@@ -25,7 +24,7 @@ public interface TransactionCursorService {
    * @return Response Entity
    */
   Mono<ResponseEntity<Void>> deleteCursor(
-      Mono<TransactionCursorDeleteRequest> transactionCursorDeleteRequest);
+      String transactionCursorDeleteRequest);
 
   /**
    * The Service to filter the cursor based on id

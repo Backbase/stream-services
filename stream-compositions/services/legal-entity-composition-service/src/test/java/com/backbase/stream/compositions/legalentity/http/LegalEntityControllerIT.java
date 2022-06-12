@@ -1,11 +1,5 @@
 package com.backbase.stream.compositions.legalentity.http;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.compositions.legalentity.api.model.LegalEntityPullIngestionRequest;
@@ -14,8 +8,6 @@ import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfi
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.streams.compositions.test.IntegrationTest;
 import com.google.gson.Gson;
-import java.io.IOException;
-import java.net.URI;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,6 +26,16 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 @SpringBootTest
 @DirtiesContext
@@ -106,7 +108,9 @@ class LegalEntityControllerIT extends IntegrationTest {
   @AfterEach
   void stopMockServer() {
     tokenConverterServer.stop();
+    while (!tokenConverterServer.hasStopped(3,100L, TimeUnit.MILLISECONDS)){}
     integrationServer.stop();
+    while (!integrationServer.hasStopped(3,100L, TimeUnit.MILLISECONDS)){}
   }
 
 

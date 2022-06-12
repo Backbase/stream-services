@@ -18,17 +18,9 @@ public class TransactionCursorController implements TransactionCursorApi {
   private final TransactionCursorService transactionCursorService;
 
   @Override
-  @Deprecated
-  public Mono<ResponseEntity<Void>> deleteCursor(
-      Mono<TransactionCursorDeleteRequest> transactionCursorDeleteRequest,
-      ServerWebExchange exchange) {
-      log.debug("TransactionCursorController :: deleteCursor");
-    return transactionCursorService.deleteCursor(transactionCursorDeleteRequest);
-  }
-
-  @Override
   public Mono<ResponseEntity<Void>> deleteCursor(String arrangementId, ServerWebExchange exchange) {
-    return null;
+    log.debug("TransactionCursorController :: deleteCursor");
+    return transactionCursorService.deleteCursor(arrangementId);
   }
 
   @Override

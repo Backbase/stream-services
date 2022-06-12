@@ -1,22 +1,20 @@
 package com.backbase.stream.compositions.transaction.cursor.core.mapper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class TransactionCursorMapperTest {
 
@@ -39,7 +37,7 @@ class TransactionCursorMapperTest {
 
   @Test
   void testMapper_Success() throws JsonProcessingException {
-    List<Object> txnList = mapper.convertLastTransToListFormat(getMockDomain().getLast_txn_ids());
+    List<String> txnList = mapper.convertLastTransToListFormat(getMockDomain().getLast_txn_ids());
     assertEquals(4, txnList.size());
 
     String txnIds = mapper
@@ -56,7 +54,7 @@ class TransactionCursorMapperTest {
 
   @Test
   void testMapper_Default() throws JsonProcessingException {
-    List<Object> txnNullList = mapper.convertLastTransToListFormat(null);
+    List<String> txnNullList = mapper.convertLastTransToListFormat(null);
     assertEquals(0, txnNullList.size());
 
     assertNull(mapper.convertLastTransToStringFormat(null));

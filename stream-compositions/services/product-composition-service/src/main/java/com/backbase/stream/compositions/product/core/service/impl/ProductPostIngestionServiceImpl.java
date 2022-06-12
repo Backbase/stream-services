@@ -94,7 +94,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     private Mono<ProductIngestResponse> ingestTransactionsAsync(ProductIngestResponse res) {
         return extractProducts(res.getProductGroup())
                 .map(this::buildTransactionPullRequest)
-                .doOnNext(transactionCompositionApi::pullTransactions)
+                .doOnNext(request -> transactionCompositionApi.pullTransactions(request).subscribe())
                 .doOnNext(t -> log.info("Async transaction ingestion called for arrangement: {}",
                         t.getArrangementId()))
                 .collectList()

@@ -15,11 +15,12 @@ import com.backbase.stream.compositions.product.client.model.ProductPullIngestio
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.User;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -42,9 +43,7 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
             res.getLegalEntity().getInternalId()))
         .flatMap(this::processChains)
         .doOnNext(this::processSuccessEvent)
-        .doOnNext(r -> {
-          log.debug("Ingested legal entity: {}", res.getLegalEntity());
-        });
+        .doOnNext(r -> log.debug("Ingested legal entity: {}", res.getLegalEntity()));
   }
 
   private Mono<LegalEntityResponse> processChains(LegalEntityResponse res) {
@@ -70,24 +69,21 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
     return buildProductPullRequest(res)
         .flatMap(productCompositionApi::pullIngestProduct)
         .onErrorResume(this::handleProductError)
-        .doOnSuccess(response -> {
-          log.debug("Response from Product Composition: {}",
-              response.getProductGgroup());
-        })
+        .doOnSuccess(response -> log.debug("Response from Product Composition: {}",
+              response.getProductGgroup()))
         .map(p -> res);
   }
 
   private Mono<LegalEntityResponse> ingestProductsAsync(LegalEntityResponse res) {
     return buildProductPullRequest(res)
-        .doOnNext(productCompositionApi::pullIngestProduct)
-        .doOnNext(t -> {
-          log.debug("Async product ingestion called");
-        })
+        .doOnNext(request -> productCompositionApi.pullIngestProduct(request).subscribe())
+        .doOnNext(t -> log.debug("Async product ingestion called"))
         .map(p -> res);
   }
 
+
   private void processSuccessEvent(LegalEntityResponse res) {
-    if (config.isCompletedEventEnabled()) {
+    if (Boolean.TRUE.equals(config.isCompletedEventEnabled())) {
       LegalEntityCompletedEvent event = new LegalEntityCompletedEvent()
           .withLegalEntity(mapper.mapStreamToEvent(res.getLegalEntity()));
       EnvelopedEvent<LegalEntityCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
@@ -98,7 +94,7 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
   public void handleFailure(Throwable error) {
     log.error("Legal entities ingestion failed. {}", error.getMessage());
-    if (config.isFailedEventEnabled()) {
+    if (Boolean.TRUE.equals(config.isFailedEventEnabled())) {
       LegalEntityFailedEvent event = new LegalEntityFailedEvent()
           .withEventId(UUID.randomUUID().toString())
           .withMessage(error.getMessage());

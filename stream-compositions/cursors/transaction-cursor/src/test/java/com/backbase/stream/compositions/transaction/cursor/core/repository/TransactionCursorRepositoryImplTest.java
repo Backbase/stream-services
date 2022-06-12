@@ -1,26 +1,8 @@
 package com.backbase.stream.compositions.transaction.cursor.core.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorDeleteRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
-import java.text.ParseException;
-import java.util.Optional;
-import java.util.stream.Stream;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.Root;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +11,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import java.text.ParseException;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("local")
@@ -93,7 +86,7 @@ class TransactionCursorRepositoryImplTest {
     when(entityManager.createQuery(criteriaDeleteQuery)).thenReturn(query);
     when(entityManager.createQuery(criteriaDeleteQuery).executeUpdate()).thenReturn(1);
 
-    int result = transactionCursorRepository.deleteCursor(new TransactionCursorDeleteRequest());
+    int result = transactionCursorRepository.deleteCursor("");
     assertEquals(1, result);
     verify(entityManager, times(1)).getCriteriaBuilder();
     verify(criteriaBuilder, times(1)).createCriteriaDelete(TransactionCursorEntity.class);

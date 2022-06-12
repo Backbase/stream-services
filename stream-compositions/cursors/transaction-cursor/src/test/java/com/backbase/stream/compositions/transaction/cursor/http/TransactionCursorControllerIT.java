@@ -1,18 +1,12 @@
 package com.backbase.stream.compositions.transaction.cursor.http;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import com.backbase.stream.compositions.transaction.cursor.core.config.TransactionCursorConfiguration;
 import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
 import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepository;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorDeleteRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
-import java.text.ParseException;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -27,6 +21,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.text.ParseException;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @DirtiesContext
 @ExtendWith({SpringExtension.class})
@@ -52,18 +52,15 @@ public class TransactionCursorControllerIT {
 
   @Test
   void deleteCursor_Success() {
-    TransactionCursorDeleteRequest transactionCursorDeleteRequest =
-        new TransactionCursorDeleteRequest().withId("f2c7dcd7-2ed9-45af-8813-a5d630c5d804")
-            .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq");
+    String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
 
     webTestClient
         .method(HttpMethod.DELETE)
-        .uri("/service-api/v2/cursor/delete")
-        .body(Mono.just(transactionCursorDeleteRequest), TransactionCursorDeleteRequest.class)
+        .uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
         .exchange()
         .expectStatus().isOk();
     Mockito.verify(transactionCursorRepository, Mockito.times(1))
-        .deleteCursor(transactionCursorDeleteRequest);
+        .deleteCursor(arrangementId);
   }
 
   @Test

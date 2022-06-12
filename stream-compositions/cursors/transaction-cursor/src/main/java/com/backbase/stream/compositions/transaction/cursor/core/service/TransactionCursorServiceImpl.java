@@ -3,18 +3,18 @@ package com.backbase.stream.compositions.transaction.cursor.core.service;
 import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
 import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepository;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorDeleteRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
-import java.text.ParseException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.text.ParseException;
 
 @Service
 @AllArgsConstructor
@@ -47,8 +47,8 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
    */
   @Override
   public Mono<ResponseEntity<Void>> deleteCursor(
-      Mono<TransactionCursorDeleteRequest> transactionCursorDeleteRequest) {
-    transactionCursorDeleteRequest.map(transactionCursorRepository::deleteCursor).subscribe();
+      String transactionCursorDeleteRequest) {
+    transactionCursorRepository.deleteCursor(transactionCursorDeleteRequest);
     return Mono.empty();
   }
 

@@ -1,22 +1,12 @@
 package com.backbase.stream.compositions.transaction.cursor.core.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
 import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
 import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepository;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
-import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorDeleteRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
-import java.text.ParseException;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +16,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.text.ParseException;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionCursorServiceImplTest {
@@ -65,7 +63,7 @@ class TransactionCursorServiceImplTest {
   void deleteCursor_success() {
     when(transactionCursorRepository.deleteCursor(any())).thenReturn(anyInt());
     Mono<ResponseEntity<Void>> responseEntity = transactionCursorService
-        .deleteCursor(Mono.just(new TransactionCursorDeleteRequest()));
+        .deleteCursor("");
     assertNotNull(responseEntity);
   }
 
