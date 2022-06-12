@@ -1,9 +1,5 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
@@ -22,20 +18,21 @@ import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.Validator;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import javax.validation.Validator;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LegalEntityIngestionServiceImplTest {
@@ -81,6 +78,12 @@ class LegalEntityIngestionServiceImplTest {
   @Tag("true")
   void ingestionInPullModeAsync_Success(TestInfo testInfo) {
     List<String> tags = new ArrayList<>(testInfo.getTags());
+    when(config.isCompletedEventEnabled()).thenReturn(Boolean.TRUE);
+    when(productCompositionApi.pullIngestProduct(any()))
+            .thenReturn(Mono.just(new ProductIngestionResponse()
+                    .withProductGgroup(
+                            (com.backbase.stream.compositions.product.client.model.ProductGroup) new com.backbase.stream.compositions.product.client.model.ProductGroup()
+                                    .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN"))))));
     Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
         Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
     StepVerifier.create(legalEntityIngestResponseMono)
