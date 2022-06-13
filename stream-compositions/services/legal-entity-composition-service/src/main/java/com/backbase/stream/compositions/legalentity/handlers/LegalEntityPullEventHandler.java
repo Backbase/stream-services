@@ -11,10 +11,12 @@ import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMappe
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -35,7 +37,8 @@ public class LegalEntityPullEventHandler implements EventHandler<LegalEntityPull
   public void handle(EnvelopedEvent<LegalEntityPullEvent> envelopedEvent) {
     legalEntityIngestionService.ingestPull(buildRequest(envelopedEvent.getEvent()))
         .doOnSuccess(this::handleResponse)
-        .doOnError(this::handleError);
+        .onErrorResume(this::handleError)
+            .subscribe();
   }
 
   /**
@@ -73,17 +76,17 @@ public class LegalEntityPullEventHandler implements EventHandler<LegalEntityPull
    *
    * @param ex Throwable
    */
-  private void handleError(Throwable ex) {
-    if (Boolean.FALSE.equals(configProperties.getEvents().getEnableFailed())) {
-      return;
+  private Mono<LegalEntityResponse> handleError(Throwable ex) {
+    if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
+      LegalEntityFailedEvent event = new LegalEntityFailedEvent()
+              .withEventId(UUID.randomUUID().toString())
+              .withMessage(ex.getMessage());
+
+      EnvelopedEvent<LegalEntityFailedEvent> envelopedEvent = new EnvelopedEvent<>();
+      envelopedEvent.setEvent(event);
+      eventBus.emitEvent(envelopedEvent);
     }
 
-    LegalEntityFailedEvent event = new LegalEntityFailedEvent()
-        .withEventId(UUID.randomUUID().toString())
-        .withMessage(ex.getMessage());
-
-    EnvelopedEvent<LegalEntityFailedEvent> envelopedEvent = new EnvelopedEvent<>();
-    envelopedEvent.setEvent(event);
-    eventBus.emitEvent(envelopedEvent);
+    return Mono.empty();
   }
 }
