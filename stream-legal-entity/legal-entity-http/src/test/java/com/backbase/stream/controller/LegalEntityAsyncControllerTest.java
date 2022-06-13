@@ -26,6 +26,7 @@ import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import java.net.URI;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ import reactor.core.publisher.Mono;
 @WebFluxTest(LegalEntityAsyncController.class)
 @AutoConfigureWebTestClient
 @Import({LegalEntityHttpConfiguration.class, LegalEntitySagaConfiguration.class,
-    UpdatedServiceAgreementSagaConfiguration.class})
+    UpdatedServiceAgreementSagaConfiguration.class, DbsWebClientConfiguration.class})
 class LegalEntityAsyncControllerTest {
 
     @MockBean
