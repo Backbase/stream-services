@@ -36,21 +36,20 @@ public class HeadersForwardingClientFilter implements ExchangeFilterFunction {
     }
 
     private ClientRequest enrichRequestWithAdditionalHeaders(ClientRequest originalRequest) {
-        ClientRequest additionalHeadersRequest = Optional.ofNullable(properties.getAdditionalHeaders())
+        return Optional.ofNullable(properties.getAdditionalHeaders())
             .map(additionalHeaders -> {
-                log.debug("Adding additional headers: {} from configuration  Request: {}", additionalHeaders,
+                log.debug("Adding additional headers: {} from configuration to Request: {}", additionalHeaders,
                     originalRequest.url());
                 return ClientRequest.from(originalRequest)
                     .headers(httpHeaders -> httpHeaders.addAll(additionalHeaders))
                     .build();
             })
             .orElse(originalRequest);
-        return additionalHeadersRequest;
     }
 
     private ClientRequest enrichRequestWithForwardedHeaders(ClientRequest additionalHeadersRequest,
         Optional<MultiValueMap<String, String>> forwardHeaders) {
-        ClientRequest forwardHeadersRequest = forwardHeaders.map(headers -> {
+        return forwardHeaders.map(headers -> {
                 log.debug("Adding additional headers: {} from Reactive subscriber context to Request: {}", headers,
                     additionalHeadersRequest.url());
                 return ClientRequest.from(additionalHeadersRequest)
@@ -58,7 +57,6 @@ public class HeadersForwardingClientFilter implements ExchangeFilterFunction {
                     .build();
             })
             .orElse(additionalHeadersRequest);
-        return forwardHeadersRequest;
     }
 
 }

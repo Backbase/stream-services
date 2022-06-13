@@ -12,7 +12,7 @@ public class SetupLegalEntityHierarchyTaskApplicationIT {
 
     @Test
     void contextLoads() {
-
+        // Triggers the CommandLineRunner which will run the boostrap task to be validated by the WireMock assertions.
     }
 
 }
