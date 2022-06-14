@@ -1,14 +1,20 @@
 package com.backbase.stream.compositions.product.http;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+
+import com.backbase.stream.compositions.product.api.model.ProductGroup;
+import com.backbase.stream.compositions.product.api.model.ProductIngestionResponse;
+import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
+import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
-import com.backbase.stream.compositions.product.api.model.ProductIngestionResponse;
-import com.backbase.stream.compositions.product.api.model.ProductGroup;
-import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
-import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,70 +23,70 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
-    @Mock
-    ProductGroupMapper mapper;
 
-    @Mock
-    ProductIngestionService productIngestionService;
+  @Mock
+  ProductGroupMapper mapper;
 
-    ProductController controller;
+  @Mock
+  ProductIngestionService productIngestionService;
 
-    @BeforeEach
-    void setUp() {
-        controller = new ProductController(
-                productIngestionService,
-                mapper);
+  ProductController controller;
 
-        lenient().when(mapper.mapCompositionToStream(any())).thenReturn(new com.backbase.stream.legalentity.model.ProductGroup());
-        lenient().when(mapper.mapStreamToComposition(any())).thenReturn(new ProductGroup());
-    }
+  @BeforeEach
+  void setUp() {
+    controller = new ProductController(
+        productIngestionService,
+        mapper);
 
-    @Test
-    void testPullIngestion_Success() {
-        Mono<ProductPullIngestionRequest> requestMono = Mono.just(
-                new ProductPullIngestionRequest().withLegalEntityExternalId("externalId"));
+    lenient().when(mapper.mapCompositionToStream(any()))
+        .thenReturn(new com.backbase.stream.legalentity.model.ProductGroup());
+    lenient().when(mapper.mapStreamToComposition(any())).thenReturn(new ProductGroup());
+  }
 
-        doAnswer(invocation -> {
-            ProductIngestPullRequest request = invocation.getArgument(0);
+  @Test
+  void testPullIngestion_Success() {
+    Mono<ProductPullIngestionRequest> requestMono = Mono.just(
+        new ProductPullIngestionRequest().withLegalEntityExternalId("externalId"));
 
-            return Mono.just(ProductIngestResponse.builder()
-                    .productGroup(
-                            new com.backbase.stream.legalentity.model.ProductGroup())
-                    .build());
-        }).when(productIngestionService).ingestPull(any());
+    doAnswer(invocation -> {
+      ProductIngestPullRequest request = invocation.getArgument(0);
 
-        ResponseEntity<ProductIngestionResponse> responseEntity = controller.pullIngestProduct(requestMono, null).block();
-        ProductIngestionResponse ingestionResponse = responseEntity.getBody();
-        assertNotNull(ingestionResponse);
-        assertNotNull(ingestionResponse.getProductGgroup());
-        verify(productIngestionService).ingestPull(any());
-    }
+      return Mono.just(ProductIngestResponse.builder()
+          .productGroup(
+              new com.backbase.stream.legalentity.model.ProductGroup())
+          .build());
+    }).when(productIngestionService).ingestPull(any());
 
-    @Test
-    void testPushIngestion_Success() {
-        Mono<ProductPushIngestionRequest> requestMono = Mono.just(
-                new ProductPushIngestionRequest().withProductGgroup(new ProductGroup()));
+    ResponseEntity<ProductIngestionResponse> responseEntity = controller
+        .pullIngestProduct(requestMono, null).block();
+    ProductIngestionResponse ingestionResponse = responseEntity.getBody();
+    assertNotNull(ingestionResponse);
+    assertNotNull(ingestionResponse.getProductGgroup());
+    verify(productIngestionService).ingestPull(any());
+  }
 
-        doAnswer(invocation -> {
-            ProductIngestPushRequest request = invocation.getArgument(0);
+  @Test
+  void testPushIngestion_Success() {
+    Mono<ProductPushIngestionRequest> requestMono = Mono.just(
+        new ProductPushIngestionRequest().withProductGgroup(new ProductGroup()));
 
-            return Mono.just(ProductIngestResponse.builder()
-                    .productGroup(
-                            new com.backbase.stream.legalentity.model.ProductGroup())
-                    .build());
-        }).when(productIngestionService).ingestPush(any());
+    doAnswer(invocation -> {
+      ProductIngestPushRequest request = invocation.getArgument(0);
 
-        ResponseEntity<ProductIngestionResponse> responseEntity = controller.pushIngestProduct(requestMono, null).block();
-        ProductIngestionResponse ingestionResponse = responseEntity.getBody();
-        assertNotNull(ingestionResponse);
-        assertNotNull(ingestionResponse.getProductGgroup());
-        verify(productIngestionService).ingestPush(any());
-    }
+      return Mono.just(ProductIngestResponse.builder()
+          .productGroup(
+              new com.backbase.stream.legalentity.model.ProductGroup())
+          .build());
+    }).when(productIngestionService).ingestPush(any());
+
+    ResponseEntity<ProductIngestionResponse> responseEntity = controller
+        .pushIngestProduct(requestMono, null).block();
+    ProductIngestionResponse ingestionResponse = responseEntity.getBody();
+    assertNotNull(ingestionResponse);
+    assertNotNull(ingestionResponse.getProductGgroup());
+    verify(productIngestionService).ingestPush(any());
+  }
 }
 
