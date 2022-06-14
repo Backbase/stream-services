@@ -264,7 +264,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-contact-manager-client-api-code</id>
+                        <id>generate-contact-manager-service-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
