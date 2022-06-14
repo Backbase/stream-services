@@ -1,18 +1,11 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.integration.client.LegalEntityIntegrationApi;
 import com.backbase.stream.compositions.legalentity.integration.client.model.LegalEntity;
 import com.backbase.stream.compositions.legalentity.integration.client.model.PullLegalEntityResponse;
-import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +13,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LegalEntityIntegrationServiceImplTest {
@@ -46,7 +47,7 @@ class LegalEntityIntegrationServiceImplTest {
         new com.backbase.stream.legalentity.model.LegalEntity().name(leName);
     List<String> membershipAccounts = Collections.singletonList("012");
     LegalEntityResponse res1 = new LegalEntityResponse(Boolean.TRUE, legalEntity2,
-        membershipAccounts);
+        membershipAccounts, null);
     Mono<PullLegalEntityResponse> res = Mono.just(new PullLegalEntityResponse()
         .withLegalEntity(legalEntity1).withMembershipAccounts(Collections.singletonList("012")));
 
@@ -77,7 +78,7 @@ class LegalEntityIntegrationServiceImplTest {
         new com.backbase.stream.legalentity.model.LegalEntity().name("Legal Entity 1");
     List<String> membershipAccounts = Collections.singletonList("012");
     LegalEntityResponse res1 = new LegalEntityResponse(Boolean.TRUE, legalEntity2,
-        membershipAccounts);
+        membershipAccounts, null);
     PullLegalEntityResponse getLegalEntityListResponse = new PullLegalEntityResponse()
         .withLegalEntity(legalEntity1);
 

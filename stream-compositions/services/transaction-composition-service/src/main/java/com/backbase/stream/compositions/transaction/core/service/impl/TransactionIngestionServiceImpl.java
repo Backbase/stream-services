@@ -63,9 +63,15 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
                 .map(this::buildResponse);
     }
 
+    /*
+        Filter by existing/already ingested external ids only works
+        - if the list is not empty
+        - if the filter is enabled in configuration
+     */
     private Flux<TransactionsPostRequestBody> filterExisting(Flux<TransactionsPostRequestBody> transactionsPostRequestBodyFlux,
                                    List<String> lastIngestedExternalIds) {
-        if (CollectionUtils.isEmpty(lastIngestedExternalIds)) {
+        if (!config.isTransactionIdsFilterEnabled() ||
+                CollectionUtils.isEmpty(lastIngestedExternalIds)) {
             return transactionsPostRequestBodyFlux;
         }
 
@@ -196,11 +202,16 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
 
     private void handleSuccess(String arrangementId, List<TransactionsPostResponseBody> transactions) {
         if (config.isCursorEnabled()) {
+            String lastTxnIds = null;
+            if (config.isTransactionIdsFilterEnabled()) {
+                log.info("Transaction Id based filter is enabled");
+                lastTxnIds = transactions.stream().map(TransactionsPostResponseBody::getExternalId)
+                        .collect(Collectors.joining(DELIMITER));
+            }
             patchCursor(arrangementId, buildPatchCursorRequest(
                     TransactionCursor.StatusEnum.SUCCESS,
                     OffsetDateTime.now().format(DateTimeFormatter.ofPattern(dateFormat)),
-                    transactions.stream().map(TransactionsPostResponseBody::getExternalId)
-                            .collect(Collectors.joining(DELIMITER))));
+                    lastTxnIds));
         }
 
         transactionPostIngestionService.handleSuccess(transactions);

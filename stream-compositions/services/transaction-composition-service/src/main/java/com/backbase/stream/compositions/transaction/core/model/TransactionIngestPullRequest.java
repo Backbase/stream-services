@@ -15,7 +15,7 @@ public class TransactionIngestPullRequest {
     private String externalArrangementId;
     private String legalEntityInternalId;
     private String arrangementId;
-    private Map<String, String> additionalParameters;
+    private Map<String, String> additions;
     private OffsetDateTime dateRangeStart;
     private OffsetDateTime dateRangeEnd;
     private Integer billingCycles;

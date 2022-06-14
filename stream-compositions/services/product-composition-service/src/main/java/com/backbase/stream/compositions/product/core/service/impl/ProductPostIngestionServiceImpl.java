@@ -80,7 +80,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<ProductIngestResponse> ingestTransactions(ProductIngestResponse res) {
         return extractProducts(res.getProductGroup())
-                .map(this::buildTransactionPullRequest)
+                .map(product -> buildTransactionPullRequest(product, res))
                 .flatMap(transactionCompositionApi::pullTransactions)
                 .onErrorResume(this::handleTransactionError)
                 .doOnNext(response -> {
@@ -93,7 +93,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<ProductIngestResponse> ingestTransactionsAsync(ProductIngestResponse res) {
         return extractProducts(res.getProductGroup())
-                .map(this::buildTransactionPullRequest)
+                .map(product -> buildTransactionPullRequest(product, res))
                 .doOnNext(request -> transactionCompositionApi.pullTransactions(request).subscribe())
                 .doOnNext(t -> log.info("Async transaction ingestion called for arrangement: {}",
                         t.getArrangementId()))
@@ -147,9 +147,10 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         return !excludeList.contains(product.getProductTypeExternalId());
     }
 
-    private TransactionPullIngestionRequest buildTransactionPullRequest(BaseProduct product) {
+    private TransactionPullIngestionRequest buildTransactionPullRequest(BaseProduct product, ProductIngestResponse res) {
         return new TransactionPullIngestionRequest()
                 .withLegalEntityInternalId(product.getLegalEntities().get(0).getInternalId())
+                .withAdditions(res.getAdditions())
                 .withArrangementId(product.getInternalId())
                         .withExternalArrangementId(product.getExternalId());
     }

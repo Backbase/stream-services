@@ -133,7 +133,7 @@ class LegalEntityIngestionServiceImplTest {
         .build();
 
     LegalEntityResponse res = new LegalEntityResponse(isProductChainEnabledFromRequest,
-        new com.backbase.stream.legalentity.model.LegalEntity().name("legalEntityName"), null);
+        new com.backbase.stream.legalentity.model.LegalEntity().name("legalEntityName"), null, null);
     when(legalEntityIntegrationService.pullLegalEntity(legalEntityIngestPullRequest))
         .thenReturn(Mono.just(res));
 

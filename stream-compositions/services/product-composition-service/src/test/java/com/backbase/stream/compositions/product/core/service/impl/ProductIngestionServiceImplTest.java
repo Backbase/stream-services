@@ -8,7 +8,6 @@ import com.backbase.stream.compositions.product.core.service.ProductIntegrationS
 import com.backbase.stream.compositions.product.core.service.ProductPostIngestionService;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.ProductGroupTask;
-import com.google.common.base.Verify;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Validator;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,7 +55,7 @@ class ProductIngestionServiceImplTest {
                 .legalEntityExternalId("externalId")
                 .build();
         com.backbase.stream.legalentity.model.ProductGroup productGroup = new com.backbase.stream.legalentity.model.ProductGroup();
-        ProductIngestResponse res = new ProductIngestResponse(productGroup);
+        ProductIngestResponse res = new ProductIngestResponse(productGroup, Collections.singletonMap("key", "value"));
 
         when(productIntegrationService.pullProductGroup(productIngestPullRequest))
                 .thenReturn(Mono.just(res));

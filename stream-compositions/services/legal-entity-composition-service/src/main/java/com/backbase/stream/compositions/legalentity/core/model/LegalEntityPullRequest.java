@@ -1,12 +1,13 @@
 package com.backbase.stream.compositions.legalentity.core.model;
 
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
-import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
+import java.util.Map;
 
 @Builder
 @AllArgsConstructor
@@ -30,7 +31,7 @@ public class LegalEntityPullRequest {
 
   private IdentityUserLinkStrategy identityUserLinkStrategy;
 
-  private Map<String, String> additionalParameters;
+  private Map<String, String> additions;
 
   private Boolean productChainEnabled;
 }

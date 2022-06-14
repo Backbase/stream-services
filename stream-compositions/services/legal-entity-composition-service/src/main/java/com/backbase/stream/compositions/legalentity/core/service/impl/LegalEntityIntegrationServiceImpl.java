@@ -30,6 +30,7 @@ public class LegalEntityIntegrationServiceImpl implements LegalEntityIntegration
         .map(mapper::mapResponseIntegrationToStream)
         .map(leRes -> {
           leRes.setProductChainEnabledFromRequest(ingestPullRequest.getProductChainEnabled());
+          leRes.setAdditions(ingestPullRequest.getAdditions());
           return leRes;
         })
         .onErrorResume(this::handleIntegrationError)

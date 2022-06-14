@@ -13,6 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -36,7 +38,7 @@ class ProductIntegrationServiceImplTest {
     void callIntegrationService_Success() throws UnsupportedOperationException {
         ProductGroup productGroup = new ProductGroup();
         com.backbase.stream.legalentity.model.ProductGroup productGroup1 = new com.backbase.stream.legalentity.model.ProductGroup();
-        ProductIngestResponse res = new ProductIngestResponse(productGroup1);
+        ProductIngestResponse res = new ProductIngestResponse(productGroup1, Collections.singletonMap("key", "value"));
 
         PullProductGroupResponse getProductGroupResponse = new PullProductGroupResponse().
                 productGroup(productGroup);

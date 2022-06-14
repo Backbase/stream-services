@@ -118,6 +118,7 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
         .withMembershipAccounts(res.getMembershipAccounts())
         .withUserExternalId(user.getExternalId())
         .withUserInternalId(user.getInternalId())
+        .withAdditions(res.getAdditions())
         .withReferenceJobRoleNames(jpUser.getReferenceJobRoleNames()));
   }
 

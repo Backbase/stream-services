@@ -19,6 +19,6 @@ public class ProductIngestPullRequest {
     private String userInternalId;
     private List<String> referenceJobRoleNames;
     private List<String> membershipAccounts;
-    private Map<String, String> additionalParameters;
+    private Map<String, String> additions;
 }
 

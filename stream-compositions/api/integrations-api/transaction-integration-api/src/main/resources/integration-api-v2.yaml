@@ -68,7 +68,7 @@ components:
           format: date-time
         billingCycles:
           type: integer
-        additionalParameters:
+        additions:
           type: object
           additionalProperties:
             type: string
