@@ -348,7 +348,7 @@ public class AccessGroupService {
             });
     }
 
-    private Flux<ServiceAgreementParticipantsGetResponseBody> getServiceAgreementParticipants(
+    public Flux<ServiceAgreementParticipantsGetResponseBody> getServiceAgreementParticipants(
         StreamTask streamTask, ServiceAgreement serviceAgreement) {
         return serviceAgreementsApi.getServiceAgreementParticipants(serviceAgreement.getInternalId())
             .onErrorResume(WebClientResponseException.NotFound.class, e -> Flux.empty())

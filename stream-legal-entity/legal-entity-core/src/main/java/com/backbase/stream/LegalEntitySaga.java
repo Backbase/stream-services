@@ -263,7 +263,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         return existingLegalEntity.switchIfEmpty(createNewLegalEntity);
     }
 
-    @SneakyThrows
     private Mono<LegalEntityTask> setupLimits(LegalEntityTask streamTask) {
         return Mono.just(streamTask)
             .flatMap(this::setupLegalEntityLimits)
@@ -280,9 +279,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             streamTask.info(LEGAL_ENTITY, PROCESS_LIMITS, FAILED, legalEntity.getInternalId(), legalEntity.getExternalId(), "Legal Entity: %s does not have any Participant with Limits in Service Agreement", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
-        return Flux.fromStream(serviceAgreement.getParticipants().stream()
-                .filter(Objects::nonNull))
-            .flatMapIterable(actual -> List.of(createLimitsTask(streamTask, actual.getExternalId(), serviceAgreement.getInternalId())))
+        return accessGroupService.getServiceAgreementParticipants(streamTask, serviceAgreement)
+            .flatMapIterable(participant -> List.of(createLimitsTask(streamTask, participant.getId(), serviceAgreement.getInternalId())))
             .concatMap(limitsTask -> limitsSaga.executeTask(limitsTask)
                 .onErrorResume(throwable -> {
                     String message = throwable.getMessage();
@@ -832,8 +830,11 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
             Mono<LegalEntityTask> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntity.getInternalId())
                 .flatMap(serviceAgreement -> {
-                    if (legalEntity.getMasterServiceAgreement() != null && legalEntity.getMasterServiceAgreement().getJobRoles() != null)
+                    if (legalEntity.getMasterServiceAgreement() != null && legalEntity.getMasterServiceAgreement().getJobRoles() != null) {
                         serviceAgreement.setJobRoles(legalEntity.getMasterServiceAgreement().getJobRoles());
+                        serviceAgreement.setLimit(legalEntity.getMasterServiceAgreement().getLimit());
+                        serviceAgreement.setParticipants(legalEntity.getMasterServiceAgreement().getParticipants());
+                    }
                     streamTask.getData().setMasterServiceAgreement(serviceAgreement);
                     streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Existing Service Agreement: %s found for Legal Entity: %s", serviceAgreement.getExternalId(), legalEntity.getExternalId());
                     return Mono.just(streamTask);
