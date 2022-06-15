@@ -1,6 +1,7 @@
 package com.backbase.stream.compositions.transaction.core.mapper;
 
 import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsPostRequestBody;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsPullEvent;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPullRequest;
 import com.backbase.stream.compositions.transaction.integration.client.model.PullIngestionRequest;
 import org.mapstruct.InjectionStrategy;
@@ -73,6 +74,15 @@ public interface TransactionMapper {
      */
     com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody mapPushEventToStream(
             TransactionsPostRequestBody transaction);
+
+    /**
+     * Maps pull event Transactions to Stream TransactionIngestPullRequest model.
+     *
+     * @param event Pull Event transaction
+     * @return Stream transaction pull object
+     */
+    TransactionIngestPullRequest mapPullEventToStream(
+            TransactionsPullEvent event);
 
     /**
      * Maps Stream Pull Ingestion Request to Integration.

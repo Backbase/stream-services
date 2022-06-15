@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,7 +41,7 @@ public class TransactionPostIngestionServiceImpl implements TransactionPostInges
     public Mono<List<TransactionsPostResponseBody>> handleFailure(Throwable error) {
         log.error("Transaction ingestion failed. {}", error.getMessage());
         if (Boolean.TRUE.equals(transactionConfigurationProperties.getEvents().getEnableFailed())) {
-            TransactionsFailedEvent event = new TransactionsFailedEvent().withEventId(UUID.randomUUID().toString())
+            TransactionsFailedEvent event = new TransactionsFailedEvent()
                     .withMessage(error.getMessage());
             EnvelopedEvent<TransactionsFailedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);

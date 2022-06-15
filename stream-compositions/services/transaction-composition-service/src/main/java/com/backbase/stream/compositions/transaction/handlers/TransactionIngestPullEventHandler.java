@@ -3,6 +3,7 @@ package com.backbase.stream.compositions.transaction.handlers;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
+import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.TransactionsCompletedEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.TransactionsFailedEvent;
 import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsPullEvent;
@@ -11,12 +12,13 @@ import com.backbase.stream.compositions.transaction.core.mapper.TransactionMappe
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPullRequest;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+
+import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
@@ -35,9 +37,8 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
      */
     @Override
     public void handle(EnvelopedEvent<TransactionsPullEvent> envelopedEvent) {
-        buildRequest(envelopedEvent.getEvent())
-            .flatMap(transactionIngestionService::ingestPull)
-            .doOnError(this::handleError)
+        transactionIngestionService.ingestPull(buildRequest(envelopedEvent.getEvent()))
+            .onErrorResume(this::handleError)
             .subscribe(this::handleResponse);
     }
 
@@ -52,8 +53,8 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
             return;
         }
         TransactionsCompletedEvent event = new TransactionsCompletedEvent()
-                .withTransactionIds(response.getTransactions().stream().map(resp -> resp.getId()).collect(Collectors.toList()));
-           // .withInternalArrangementId(response);     TODO - mapping!
+                .withTransactionIds(response.getTransactions().stream().map(TransactionsPostResponseBody::getId).collect(Collectors.toList()))
+                .withInternalArrangementId(response.getArrangementId());
 
         EnvelopedEvent<TransactionsCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);
@@ -65,7 +66,7 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
      *
      * @param ex Throwable
      */
-    private void handleError(Throwable ex) {
+    private Mono<TransactionIngestResponse> handleError(Throwable ex) {
         log.error("Error ingesting legal entity using the Pull event: {}", ex.getMessage());
 
         if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
@@ -76,6 +77,7 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
         }
+        return Mono.empty();
     }
 
     /**
@@ -84,9 +86,7 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
      * @param event ProductsIngestPullEvent
      * @return ProductIngestPullRequest
      */
-    private Mono<TransactionIngestPullRequest> buildRequest(TransactionsPullEvent event) {  // TODO - How event maps - It has list of externalArrangementIds?
-        return Mono.just(
-                TransactionIngestPullRequest.builder()
-                        .build());
+    private TransactionIngestPullRequest buildRequest(TransactionsPullEvent event) {
+        return mapper.mapPullEventToStream(event);
     }
 }

@@ -1,10 +1,5 @@
 package com.backbase.stream.compositions.transaction.handlers;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
@@ -12,17 +7,24 @@ import com.backbase.stream.compositions.events.ingress.event.spec.v1.Transaction
 import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties;
 import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties.Events;
 import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
+import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPullRequest;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionIngestPullEventHandlerTest {
@@ -66,7 +68,18 @@ class TransactionIngestPullEventHandlerTest {
 
 
   void testHandleEvent_Completed(Boolean isCompletedEvents) {
+    TransactionsPullEvent event = new TransactionsPullEvent()
+            .withArrangementId("arr1")
+            .withExternalArrangementId("extArr1")
+            .withLegalEntityInternalId("le1");
 
+    Mockito.when(mapper.mapPullEventToStream(any())).thenReturn(TransactionIngestPullRequest.builder()
+            .arrangementId(event.getArrangementId())
+            .legalEntityInternalId(event.getLegalEntityInternalId())
+            .externalArrangementId(event.getExternalArrangementId())
+            .dateRangeStart(event.getDateRangeStart() == null ? null : OffsetDateTime.parse(event.getDateRangeStart()))
+            .dateRangeEnd(event.getDateRangeEnd() == null ? null : OffsetDateTime.parse(event.getDateRangeEnd()))
+            .build());
     Mono<TransactionIngestResponse> responseMono = Mono.just(
         TransactionIngestResponse.builder()
             .transactions(List.of(new TransactionsPostResponseBody().id("1")
@@ -87,15 +100,26 @@ class TransactionIngestPullEventHandlerTest {
         eventBus);
 
     EnvelopedEvent<TransactionsPullEvent> envelopedEvent = new EnvelopedEvent<>();
-    envelopedEvent
-        .setEvent(new TransactionsPullEvent().withExternalArrangementIds(List.of("ext1", "ext2")));
+
+    envelopedEvent.setEvent(event);
 
     handler.handle(envelopedEvent);
     verify(transactionIngestionService).ingestPull(any());
   }
 
   void testHandleEvent_Failed(Boolean isFailedEvents) {
-    when(transactionIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
+    TransactionsPullEvent event = new TransactionsPullEvent()
+            .withArrangementId("arr1")
+            .withExternalArrangementId("extArr1")
+            .withLegalEntityInternalId("le1");
+    Mockito.when(mapper.mapPullEventToStream(any())).thenReturn(TransactionIngestPullRequest.builder()
+            .arrangementId(event.getArrangementId())
+            .legalEntityInternalId(event.getLegalEntityInternalId())
+            .externalArrangementId(event.getExternalArrangementId())
+            .dateRangeStart(event.getDateRangeStart() == null ? null : OffsetDateTime.parse(event.getDateRangeStart()))
+            .dateRangeEnd(event.getDateRangeEnd() == null ? null : OffsetDateTime.parse(event.getDateRangeEnd()))
+            .build());
+    when(transactionIngestionService.ingestPull(any())).thenReturn(Mono.error(new RuntimeException()));
 
     TransactionConfigurationProperties properties = new TransactionConfigurationProperties();
     Events events = new Events();
@@ -109,8 +133,7 @@ class TransactionIngestPullEventHandlerTest {
         eventBus);
 
     EnvelopedEvent<TransactionsPullEvent> envelopedEvent = new EnvelopedEvent<>();
-    TransactionsPullEvent event = new TransactionsPullEvent()
-        .withExternalArrangementIds(List.of("1", "2"));
+
     envelopedEvent.setEvent(event);
     handler.handle(envelopedEvent);
   }

@@ -60,7 +60,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
                         ingestPullRequest.getArrangementId(), list))
                 .onErrorResume(e -> handleError(
                         ingestPullRequest.getArrangementId(), e))
-                .map(this::buildResponse);
+                .map(list -> buildResponse(list, ingestPullRequest));
     }
 
     /*
@@ -80,12 +80,16 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
 
     private Mono<TransactionIngestPullRequest> buildIntegrationRequest(TransactionIngestPullRequest transactionIngestPullRequest) {
         OffsetDateTime currentTime = OffsetDateTime.now();
-        transactionIngestPullRequest.setDateRangeEnd(currentTime);
-        transactionIngestPullRequest.setDateRangeStart(
-                currentTime.minusDays(config.getDefaultStartOffsetInDays()));
+        OffsetDateTime dateRangeStartFromRequest = transactionIngestPullRequest.getDateRangeStart();
+        OffsetDateTime dateRangeEndFromRequest = transactionIngestPullRequest.getDateRangeEnd();
 
-        if (config.isCursorEnabled()) {
-            log.info("Transaction Cursor is enabled");
+        transactionIngestPullRequest.setDateRangeStart(dateRangeStartFromRequest == null
+                ? currentTime.minusDays(config.getDefaultStartOffsetInDays()) : dateRangeStartFromRequest);
+        transactionIngestPullRequest.setDateRangeEnd(dateRangeEndFromRequest == null
+                ? currentTime : dateRangeEndFromRequest);
+
+        if (dateRangeStartFromRequest == null && config.isCursorEnabled()) {
+            log.info("Transaction Cursor is enabled and Request has no Start Date");
             return getCursor(transactionIngestPullRequest)
                     .switchIfEmpty(createCursor(transactionIngestPullRequest));
         }
@@ -119,7 +123,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
                 .map(TransactionCursorResponse::getCursor)
                 .flatMap(cursor -> mapCursorToIntegrationRequest(request, cursor))
                 .doOnNext(r -> {
-                    log.info("DoOnNext:: {}", r.getArrangementId());
+                    log.info("Patch Transaction Cursor to IN_PROGRESS for :: {}", r.getArrangementId());
                     patchCursor(r.getArrangementId(),
                             buildPatchCursorRequest(
                                     TransactionCursor.StatusEnum.IN_PROGRESS, null, null));
@@ -194,9 +198,11 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
                 .collectList();
     }
 
-    private TransactionIngestResponse buildResponse(List<TransactionsPostResponseBody> transactions) {
+    private TransactionIngestResponse buildResponse(List<TransactionsPostResponseBody> transactions,
+                                                    TransactionIngestPullRequest ingestPullRequest) {
         return TransactionIngestResponse.builder()
                 .transactions(transactions)
+                .arrangementId(ingestPullRequest.getArrangementId())
                 .build();
     }
 
