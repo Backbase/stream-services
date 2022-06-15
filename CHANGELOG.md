@@ -3,6 +3,96 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.72.0]
+### Added
+- Support for LE limits
+```yaml
+name: Bory Breweries Ltd
+realmName: customer
+externalId: bory-brew-ltd
+legalEntityType: CUSTOMER
+limit:
+  currencyCode: USD
+  transactional: 10000
+  daily: 250000
+  weekly: 500000
+  monthly: 2000000
+  quarterly: 600000
+  yearly: 1200000
+```
+- Support for SA limits
+```yaml
+name: Bory Breweries Ltd
+realmName: customer
+externalId: bory-brew-ltd
+legalEntityType: CUSTOMER
+masterServiceAgreement:
+  limit:
+    currencyCode: USD
+    transactional: 10000
+    daily: 250000
+    weekly: 500000
+    monthly: 2000000
+    quarterly: 600000
+    yearly: 1200000
+```
+- Support for LE in SA limits
+```yaml
+name: Bory Breweries Ltd
+realmName: customer
+externalId: bory-brew-ltd
+legalEntityType: CUSTOMER
+masterServiceAgreement:
+  participants:
+    - externalId: bory-brew-ltd
+      sharingUsers: true
+      sharingAccounts: true
+      limit:
+        currencyCode: USD
+        transactional: 10000
+        daily: 250000
+        weekly: 500000
+        monthly: 2000000
+        quarterly: 600000
+        yearly: 1200000
+```
+- Support for Job role limits
+```yaml
+jobRoles:
+  - name: Custom Accounts and Payments
+    description: Custom Accounts and Payments
+    functionGroups:
+      - name: Products, payments, txn, contacts, actions, user profile, devices
+        functions:
+          - functionId: '1017'
+            name: US Domestic Wire
+            privileges:
+              - privilege: create
+                supportsLimit: true
+                limit:
+                  currencyCode: USD
+                  daily: 100000
+                  weekly: 400000
+                  transactional: 10000
+
+referenceJobRoles:
+  - name: admin
+    description: Admin
+    functionGroups:
+      - name: admin
+        functions:
+          - functionId: '1017'
+            name: US Domestic Wire
+            privileges:
+              - privilege: create
+                supportsLimit: true
+                limit:
+                  currencyCode: USD
+                  daily: 100000
+                  weekly: 400000
+                  transactional: 10000
+```
+
+## [2.72.0]
 ### Changed
 - Update Spring Boot to 2.5.14
 - Update Swagger Core to 2.2.0
