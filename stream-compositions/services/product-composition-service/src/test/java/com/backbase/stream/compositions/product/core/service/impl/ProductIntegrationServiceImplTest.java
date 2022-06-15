@@ -64,17 +64,4 @@ class ProductIntegrationServiceImplTest {
     StepVerifier.create(productIntegrationService.pullProductGroup(request)).expectError().verify();
   }
 
-  //@Test
-  void callIntegrationService_Empty() throws UnsupportedOperationException {
-    ProductIngestResponse productIngestResponse =
-        new ProductIngestResponse(new com.backbase.stream.legalentity.model.ProductGroup(), Map.of());
-    when(productIntegrationApi.pullProductGroup(any()))
-        .thenReturn(Mono.just(new PullProductGroupResponse().productGroup(new ProductGroup())));
-    when(productGroupMapper.mapResponseIntegrationToStream(any()))
-        .thenReturn(productIngestResponse);
-    ProductIngestPullRequest request = ProductIngestPullRequest.builder()
-        .legalEntityExternalId("externalId").build();
-    StepVerifier.create(productIntegrationService.pullProductGroup(request))
-        .expectNext(productIngestResponse).verifyComplete();
-  }
 }
