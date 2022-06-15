@@ -1,6 +1,6 @@
 spring:
   activemq:
-    broker-url: tcp://localhost:61616
+    broker-url: vm://activemq
   zipkin:
     enabled: false
   security:
@@ -28,10 +28,8 @@ sso:
           value: SIG_SECRET_KEY
 eureka:
   client:
-    enabled: true
-    serviceUrl.defaultZone: http://localhost:8080/registry/eureka
-server:
-  port: 9002
+    enabled: false
+
 backbase:
   mtls:
     enabled: false
@@ -62,3 +60,7 @@ backbase:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
+
+activemq:
+  store:
+    dir: /tmp
