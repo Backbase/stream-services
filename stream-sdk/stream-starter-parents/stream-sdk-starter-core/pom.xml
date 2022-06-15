@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-dependencies</artifactId>
-        <version>2.5.13</version>
+        <version>2.5.14</version>
         <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-sdk-starter-core</artifactId>
-    <version>2.71.0</version>
+    <version>2.72.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Starter Core</name>
     <description>Parent for all Stream SDK modules</description>
@@ -33,9 +33,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <source.version>11</source.version>
-        <spring-boot.version>2.5.13</spring-boot.version>
-        <spring-cloud.version>2020.0.4</spring-cloud.version>
-        <spring-cloud-function.version>3.1.7</spring-cloud-function.version>
+        <spring-boot.version>2.5.14</spring-boot.version>
+        <spring-cloud.version>2020.0.5</spring-cloud.version>
+        <spring-cloud-function.version>3.2.5</spring-cloud-function.version>
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <jackson-databind-nullable-version>0.2.0</jackson-databind-nullable-version>
         <swagger-annotations-version>1.5.23</swagger-annotations-version>
@@ -299,7 +299,7 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-test-support</artifactId>
-            <version>2.71.0</version>
+            <version>2.72.0</version>
             <scope>test</scope>
         </dependency>
 

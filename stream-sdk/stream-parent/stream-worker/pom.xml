@@ -5,20 +5,24 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-parent</artifactId>
-        <version>2.71.0</version>
+        <version>2.72.0</version>
     </parent>
 
     <artifactId>stream-worker</artifactId>
 
     <name>Stream :: SDK :: Unit Of Worker Support</name>
 
-    <properties>
-        <swagger-api.version>2.1.0</swagger-api.version>
-        <swagger-ui.version>3.24.3</swagger-ui.version>
-        <webjars-locator.version>0.38</webjars-locator.version>
-    </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
@@ -33,6 +37,12 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-sleuth</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

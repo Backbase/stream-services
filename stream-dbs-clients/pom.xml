@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>2.71.0</version>
+        <version>2.72.0</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -157,6 +157,18 @@
                             <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.service.v2.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-accesscontrol-integration-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.accesscontrol.api.integration.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
