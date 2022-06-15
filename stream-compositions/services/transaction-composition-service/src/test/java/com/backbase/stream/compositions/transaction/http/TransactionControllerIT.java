@@ -1,16 +1,11 @@
 package com.backbase.stream.compositions.transaction.http;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-
 import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
 import com.backbase.stream.TransactionService;
 import com.backbase.stream.compositions.transaction.api.model.TransactionPullIngestionRequest;
 import com.backbase.stream.compositions.transaction.api.model.TransactionPushIngestionRequest;
 import com.backbase.stream.compositions.transaction.api.model.TransactionsPostRequestBody;
+import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursor;
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorResponse;
 import com.backbase.stream.transaction.TransactionTask;
@@ -19,11 +14,7 @@ import com.backbase.streams.compositions.test.IntegrationTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
@@ -43,6 +34,19 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 
 @DirtiesContext
@@ -67,13 +71,13 @@ class TransactionControllerIT extends IntegrationTest {
   TransactionController transactionController;
 
   @Autowired
+  TransactionMapper transactionMapper;
+
+  @Autowired
   ObjectMapper objectMapper;
 
   @MockBean
   TransactionService transactionService;
-
-  @MockBean
-  TransactionTask transactionTask;
 
   static {
     System.setProperty("spring.application.name", "transaction-composition-service");
@@ -170,10 +174,18 @@ class TransactionControllerIT extends IntegrationTest {
     URI uri = URI.create("/service-api/v2/ingest/pull");
     WebTestClient webTestClient = WebTestClient.bindToController(transactionController).build();
 
+    Type typeOfObjectsList = TypeToken.getParameterized(ArrayList.class, TransactionsPostResponseBody.class).getType();
+
     List<TransactionsPostResponseBody> transactionsPostResponses = new Gson()
-        .fromJson(readContentFromClasspath("integration-data/response.json"), ArrayList.class);
-    when(transactionService.processTransactions(any())).thenReturn(Flux.just(new UnitOfWork<>()));
-    when(transactionTask.getResponse()).thenReturn(transactionsPostResponses);
+        .fromJson(readContentFromClasspath("integration-data/response.json"), typeOfObjectsList);
+
+    TransactionTask dbsResTask = new TransactionTask("id", null);
+    dbsResTask.setResponse(transactionsPostResponses);
+
+
+    when(transactionService.processTransactions(any())).thenReturn(
+            Flux.just(UnitOfWork.from("id", dbsResTask)));
+
     TransactionPullIngestionRequest pullIngestionRequest =
         new TransactionPullIngestionRequest()
             .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
@@ -183,7 +195,7 @@ class TransactionControllerIT extends IntegrationTest {
     webTestClient.post().uri(uri)
         .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
         .body(Mono.just(pullIngestionRequest), TransactionPullIngestionRequest.class).exchange()
-        .expectStatus().isOk();
+        .expectStatus().isCreated();
   }
 
   @Test
