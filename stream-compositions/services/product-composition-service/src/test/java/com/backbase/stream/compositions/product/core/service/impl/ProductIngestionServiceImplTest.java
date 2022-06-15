@@ -106,17 +106,17 @@ class ProductIngestionServiceImplTest {
 
   @Test
   @Tag("true")
-  void ingestionInPullModeAsync_success(TestInfo testInfo){
+  void ingestionInPullModeAsync_success(TestInfo testInfo) {
     executeIngestionWithPullMode(getTagInfo(testInfo));
   }
 
   @Test
   @Tag("false")
-  void ingestionInPullModeSync_success(TestInfo testInfo){
+  void ingestionInPullModeSync_success(TestInfo testInfo) {
     executeIngestionWithPullMode(getTagInfo(testInfo));
   }
 
-  Boolean getTagInfo(TestInfo testInfo){
+  Boolean getTagInfo(TestInfo testInfo) {
     String testConfig = testInfo.getTags().stream().findFirst().orElse("false");
     return Boolean.valueOf(testConfig);
   }
@@ -140,7 +140,7 @@ class ProductIngestionServiceImplTest {
 
     SavingsAccount account = new SavingsAccount();
     account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP")
-    .legalEntities(List.of(new LegalEntityReference().externalId("savInternalId")));
+        .legalEntities(List.of(new LegalEntityReference().externalId("savInternalId")));
     ProductGroup productGroup = new ProductGroup();
     productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
     productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
@@ -162,7 +162,8 @@ class ProductIngestionServiceImplTest {
                 .serviceAgreement(productGroup.getServiceAgreement()))));
     when(transactionCompositionApi.pullTransactions(any()))
         .thenReturn(Mono.just(new TransactionIngestionResponse()
-            .withTransactions(List.of(new TransactionsPostResponseBody().withId("id").withExternalId("externalId")))));
+            .withTransactions(List.of(
+                new TransactionsPostResponseBody().withId("id").withExternalId("externalId")))));
     Mono<ProductIngestResponse> productIngestResponse = productIngestionService
         .ingestPull(productIngestPullRequest);
     StepVerifier.create(productIngestResponse)
