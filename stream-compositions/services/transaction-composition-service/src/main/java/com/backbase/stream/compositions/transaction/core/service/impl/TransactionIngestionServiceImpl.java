@@ -43,7 +43,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
 
     private final TransactionConfigurationProperties config;
 
-
+    private final DateTimeFormatter offsetDateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     /**
      * Ingests transactions in pull mode.
@@ -163,7 +163,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
             TransactionIngestPullRequest request, TransactionCursor cursor) {
 
         if (cursor.getLastTxnDate() != null) {
-            OffsetDateTime dateRangeStart = OffsetDateTime.parse(cursor.getLastTxnDate());
+            OffsetDateTime dateRangeStart = OffsetDateTime.parse(cursor.getLastTxnDate(), offsetDateTimeFormatter);
             request.setDateRangeStart(dateRangeStart);
         }
 

@@ -43,9 +43,9 @@ class TransactionCompositionConfigurationTest {
   @BeforeEach
   void init() {
     TransactionConfigurationProperties.Cursor cursorConfig = new TransactionConfigurationProperties.Cursor();
-    cursorConfig.setBaseUrl("http://transaction-cursor");
+    cursorConfig.setBaseUrl("https://transaction-cursor");
 
-    Mockito.when(properties.getIntegrationBaseUrl()).thenReturn("http://transaction-integration");
+    Mockito.when(properties.getIntegrationBaseUrl()).thenReturn("https://transaction-integration");
     Mockito.when(properties.getCursor()).thenReturn(cursorConfig);
 
     transactionCursorClient = new com.backbase.stream.compositions.transaction.cursor.ApiClient
@@ -70,13 +70,13 @@ class TransactionCompositionConfigurationTest {
     assertNotNull(config.transactionIntegrationApi(transactionIntegrationClient));
     assertNotNull(config.transactionIntegrationApi(transactionIntegrationClient).getApiClient());
     assertNotNull(config.transactionIntegrationApi(transactionIntegrationClient).getApiClient().getBasePath());
-    assertEquals("http://transaction-integration",
+    assertEquals("https://transaction-integration",
             config.transactionIntegrationApi(transactionIntegrationClient).getApiClient().getBasePath());
 
     assertNotNull(config.transactionCursorApi(transactionCursorClient));
     assertNotNull(config.transactionCursorApi(transactionCursorClient).getApiClient());
     assertNotNull(config.transactionCursorApi(transactionCursorClient).getApiClient().getBasePath());
-    assertEquals("http://transaction-cursor",
+    assertEquals("https://transaction-cursor",
             config.transactionCursorApi(transactionCursorClient).getApiClient().getBasePath());
   }
 }
