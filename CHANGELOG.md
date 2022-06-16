@@ -21,6 +21,7 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
   - Legal Entity Sink
   - Product Sink
   - Transactions Sink
+  - Transactions HTTP
 - Removed Stream SDK Starters
   - `stream-aio-starter-parent` (replaced by `service-sdk-core-starter`)
   - `stream-batch-starter-parent` (replaced by `service-sdk-starter-core` + `spring-boot-starter-batch`)
