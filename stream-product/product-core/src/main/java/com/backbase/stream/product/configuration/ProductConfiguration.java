@@ -2,6 +2,7 @@ package com.backbase.stream.product.configuration;
 
 
 
+import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
@@ -9,6 +10,7 @@ import com.backbase.stream.product.service.ArrangementService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +34,7 @@ public class ProductConfiguration {
 
     @Bean
     public com.backbase.dbs.arrangement.api.service.ApiClient accountsApiClient(
-        WebClient dbsWebClient,
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
         com.backbase.dbs.arrangement.api.service.ApiClient apiClient =

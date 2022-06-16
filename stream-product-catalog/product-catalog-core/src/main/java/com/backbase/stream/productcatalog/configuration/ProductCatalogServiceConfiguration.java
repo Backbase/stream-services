@@ -1,11 +1,13 @@
 package com.backbase.stream.productcatalog.configuration;
 
+import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.productcatalog.ProductCatalogService;
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +43,8 @@ public class ProductCatalogServiceConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ApiClient.class)
-    public ApiClient accountPresentationClient(WebClient dbsClient,
+    public ApiClient accountPresentationClient(
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
         ApiClient apiClient = new ApiClient(dbsClient, objectMapper, dateFormat);

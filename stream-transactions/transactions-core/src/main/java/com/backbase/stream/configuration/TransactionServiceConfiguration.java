@@ -1,5 +1,6 @@
 package com.backbase.stream.configuration;
 
+import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.dbs.transaction.api.service.ApiClient;
 import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
 import com.backbase.stream.TransactionService;
@@ -13,6 +14,7 @@ import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepo
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -67,7 +69,7 @@ public class TransactionServiceConfiguration {
     @Bean
     public ApiClient transactionPresentationApiClient(ObjectMapper objectMapper,
         DateFormat dateFormat,
-        WebClient dbsWebClient,
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
         BackbaseStreamConfigurationProperties config) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(config.getDbs().getTransactionManagerBaseUrl());
