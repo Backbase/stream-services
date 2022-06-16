@@ -7,8 +7,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Support for LE limits
 ```yaml
 name: Bory Breweries Ltd
-realmName: customer
-externalId: bory-brew-ltd
 legalEntityType: CUSTOMER
 limit:
   currencyCode: USD
@@ -22,8 +20,6 @@ limit:
 - Support for SA limits
 ```yaml
 name: Bory Breweries Ltd
-realmName: customer
-externalId: bory-brew-ltd
 legalEntityType: CUSTOMER
 masterServiceAgreement:
   limit:
@@ -38,14 +34,25 @@ masterServiceAgreement:
 - Support for LE in SA limits
 ```yaml
 name: Bory Breweries Ltd
-realmName: customer
-externalId: bory-brew-ltd
 legalEntityType: CUSTOMER
 masterServiceAgreement:
   participants:
     - externalId: bory-brew-ltd
-      sharingUsers: true
-      sharingAccounts: true
+      limit:
+        currencyCode: USD
+        transactional: 10000
+        daily: 250000
+        weekly: 500000
+        monthly: 2000000
+        quarterly: 600000
+        yearly: 1200000
+```
+```yaml
+name: Bory Breweries Ltd
+legalEntityType: CUSTOMER
+customServiceAgreement:
+  participants:
+    - externalId: bory-brew-ltd
       limit:
         currencyCode: USD
         transactional: 10000
@@ -73,7 +80,8 @@ jobRoles:
                   daily: 100000
                   weekly: 400000
                   transactional: 10000
-
+```
+```yaml
 referenceJobRoles:
   - name: admin
     description: Admin

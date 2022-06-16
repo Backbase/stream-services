@@ -943,8 +943,11 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private boolean noLimitsInJobRole(List<? extends JobRole> jobRoles) {
         return CollectionUtils.isEmpty(jobRoles) || jobRoles.stream()
+            .filter(jobRole -> nonNull(jobRole.getFunctionGroups()))
             .flatMap(jobRole -> jobRole.getFunctionGroups().stream())
+            .filter(businessFunctionGroup -> nonNull(businessFunctionGroup.getFunctions()))
             .flatMap(businessFunctionGroup -> businessFunctionGroup.getFunctions().stream())
+            .filter(businessFunction -> nonNull(businessFunction.getPrivileges()))
             .flatMap(businessFunction -> businessFunction.getPrivileges().stream())
             .noneMatch(privilege -> nonNull(privilege.getLimit()));
     }

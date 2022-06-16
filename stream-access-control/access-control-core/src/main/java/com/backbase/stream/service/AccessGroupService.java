@@ -941,6 +941,7 @@ public class AccessGroupService {
 
         List<String> dataItems = Stream.concat(StreamUtils.getInternalProductIds(productGroup).stream(), StreamUtils.getCustomDataGroupItems(productGroup).stream())
             .collect(Collectors.toList());
+        log.info("Data Access Group data items: {}", dataItems);
         DataGroupItemSystemBase dataGroupItemSystemBase = new DataGroupItemSystemBase();
         dataGroupItemSystemBase.setName(productGroup.getName());
         dataGroupItemSystemBase.setDescription(productGroup.getDescription());
@@ -1332,7 +1333,9 @@ public class AccessGroupService {
             })
             .collectList()
             .map(idItems -> {
-                jobRole.setId(idItems.get(0).getResourceId());
+                if(!CollectionUtils.isEmpty(idItems) && idItems.get(0).getResourceId() != null) {
+                    jobRole.setId(idItems.get(0).getResourceId());
+                }
                 return jobRole;
             });
     }
