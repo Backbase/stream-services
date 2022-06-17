@@ -760,21 +760,19 @@ public class AccessGroupService {
                 .findFirst();
             List<String> arrangementsToAdd = new ArrayList<>();
             List<String> arrangementsToRemove = new ArrayList<>();
-            affectedArrangements.forEach(arrangement -> {
-                pg.ifPresent(p -> {
-                    boolean shouldBeInGroup = StreamUtils.getInternalProductIds(pg.get()).contains(arrangement);
-                    if (!dbsDataGroup.getItems().contains(arrangement) && shouldBeInGroup) {
-                        // ADD.
-                        log.debug("Arrangement item {} to be added to Data Group {}", arrangement, dbsDataGroup.getName());
-                        arrangementsToAdd.add(arrangement);
-                    }
-                    if (dbsDataGroup.getItems().contains(arrangement) && !shouldBeInGroup) {
-                        // remove.
-                        log.debug("Arrangement item {} to be removed from Data Group {}", arrangement, dbsDataGroup.getName());
-                        arrangementsToRemove.add(arrangement);
-                    }
-                });
-            });
+            affectedArrangements.forEach(arrangement -> pg.ifPresent(p -> {
+                boolean shouldBeInGroup = StreamUtils.getInternalProductIds(pg.get()).contains(arrangement);
+                if (!dbsDataGroup.getItems().contains(arrangement) && shouldBeInGroup) {
+                    // ADD.
+                    log.debug("Arrangement item {} to be added to Data Group {}", arrangement, dbsDataGroup.getName());
+                    arrangementsToAdd.add(arrangement);
+                }
+                if (dbsDataGroup.getItems().contains(arrangement) && !shouldBeInGroup) {
+                    // remove.
+                    log.debug("Arrangement item {} to be removed from Data Group {}", arrangement, dbsDataGroup.getName());
+                    arrangementsToRemove.add(arrangement);
+                }
+            }));
             if (!CollectionUtils.isEmpty(arrangementsToAdd)) {
                 batchUpdateRequest.add(new PresentationDataGroupItemPutRequestBody()
                     .dataGroupIdentifier(mapDataGroupId(dbsDataGroup.getId()))
