@@ -1,20 +1,22 @@
 package com.backbase.stream.compositions.transaction.cursor.core.mapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
 class TransactionCursorMapperTest {
 
@@ -37,12 +39,12 @@ class TransactionCursorMapperTest {
 
   @Test
   void testMapper_Success() throws JsonProcessingException {
-    List<String> txnList = mapper.convertLastTransToListFormat(getMockDomain().getLast_txn_ids());
+    List<String> txnList = mapper.convertLastTransToListFormat(getMockDomain().getLastTxnIds());
     assertEquals(4, txnList.size());
 
     String txnIds = mapper
         .convertLastTransToStringFormat(getMockModel().getCursor().getLastTxnIds());
-    assertEquals(txnIds, getMockDomain().getLast_txn_ids());
+    assertEquals(txnIds, getMockDomain().getLastTxnIds());
 
     Map<String, String> additionsMap = mapper
         .convertJsonToMapFormat(getMockDomain().getAdditions());
@@ -87,12 +89,12 @@ class TransactionCursorMapperTest {
   private TransactionCursorEntity getMockDomain() {
     TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
     transactionCursorEntity.setId("3337f8cc-d66d-41b3-a00e-f71ff15d93cq");
-    transactionCursorEntity.setArrangement_id("4337f8cc-d66d-41b3-a00e-f71ff15d93cq");
-    transactionCursorEntity.setExt_arrangement_id("5337f8cc-d66d-41b3-a00e-f71ff15d93cq");
-    transactionCursorEntity.setLegal_entity_id("test-ext-emp");
-    transactionCursorEntity.setLast_txn_date(Timestamp.from(Instant.now()));
+    transactionCursorEntity.setArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq");
+    transactionCursorEntity.setExtArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq");
+    transactionCursorEntity.setLegalEntityId("test-ext-emp");
+    transactionCursorEntity.setLastTxnDate(Timestamp.from(Instant.now()));
     transactionCursorEntity.setStatus(StatusEnum.IN_PROGRESS.getValue());
-    transactionCursorEntity.setLast_txn_ids("11,12,13,14");
+    transactionCursorEntity.setLastTxnIds("11,12,13,14");
     transactionCursorEntity.setAdditions("{\"key1\":\"val1\"}");
     return transactionCursorEntity;
   }

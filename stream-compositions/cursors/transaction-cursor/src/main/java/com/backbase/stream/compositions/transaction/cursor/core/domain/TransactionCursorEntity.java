@@ -23,44 +23,44 @@ public class TransactionCursorEntity {
     this.id = id;
   }
 
-  public String getArrangement_id() {
-    return arrangement_id;
+  public String getArrangementId() {
+    return arrangementId;
   }
 
-  public void setArrangement_id(String arrangement_id) {
-    this.arrangement_id = arrangement_id;
+  public void setArrangementId(String arrangementId) {
+    this.arrangementId = arrangementId;
   }
 
-  public String getExt_arrangement_id() {
-    return ext_arrangement_id;
+  public String getExtArrangementId() {
+    return extArrangementId;
   }
 
-  public void setExt_arrangement_id(String ext_arrangement_id) {
-    this.ext_arrangement_id = ext_arrangement_id;
+  public void setExtArrangementId(String extArrangementId) {
+    this.extArrangementId = extArrangementId;
   }
 
-  public Timestamp getLast_txn_date() {
-    return last_txn_date;
+  public Timestamp getLastTxnDate() {
+    return lastTxnDate;
   }
 
-  public void setLast_txn_date(Timestamp last_txn_date) {
-    this.last_txn_date = last_txn_date;
+  public void setLastTxnDate(Timestamp lastTxnDate) {
+    this.lastTxnDate = lastTxnDate;
   }
 
-  public String getLast_txn_ids() {
-    return last_txn_ids;
+  public String getLastTxnIds() {
+    return lastTxnIds;
   }
 
-  public void setLast_txn_ids(String last_txn_ids) {
-    this.last_txn_ids = last_txn_ids;
+  public void setLastTxnIds(String lastTxnIds) {
+    this.lastTxnIds = lastTxnIds;
   }
 
-  public String getLegal_entity_id() {
-    return legal_entity_id;
+  public String getLegalEntityId() {
+    return legalEntityId;
   }
 
-  public void setLegal_entity_id(String legal_entity_id) {
-    this.legal_entity_id = legal_entity_id;
+  public void setLegalEntityId(String legalEntityId) {
+    this.legalEntityId = legalEntityId;
   }
 
   public String getAdditions() {
@@ -101,35 +101,35 @@ public class TransactionCursorEntity {
       nullable = false,
       length = 36
   )
-  private String arrangement_id;
+  private String arrangementId;
 
   @Column(
       name = "ext_arrangement_id",
       nullable = false,
       length = 50
   )
-  private String ext_arrangement_id;
+  private String extArrangementId;
 
 
   @Column(
       name = "last_txn_date",
       nullable = false
   )
-  private Timestamp last_txn_date;
+  private Timestamp lastTxnDate;
 
   @Column(
       name = "last_txn_ids",
       nullable = false,
       length = 2600
   )
-  private String last_txn_ids;
+  private String lastTxnIds;
 
   @Column(
       name = "legal_entity_id",
       nullable = false,
       length = 36
   )
-  private String legal_entity_id;
+  private String legalEntityId;
 
   @Column(
       name = "additions",
