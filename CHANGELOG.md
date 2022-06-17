@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.73.0]
 ### Fixed
-Ability to add an arrangement in more than one product group
+- Fix to add an arrangement in more than one product group
 
 ## [2.72.0]
 ### Changed
