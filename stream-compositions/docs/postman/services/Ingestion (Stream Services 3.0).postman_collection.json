@@ -6,6 +6,258 @@
 	},
 	"item": [
 		{
+			"name": "Streams 3.0 Chaining",
+			"item": [
+				{
+					"name": "Ingest Legal Entity Service  (Employee - Pull Mode)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = JSON.parse(responseBody);",
+									"/*postman.setEnvironmentVariable(\"Emp_User_Internal_ID\", response.legalEntity.users[0].user.internalId);",
+									"postman.setEnvironmentVariable(\"Emp_User_External_ID\", response.legalEntity.users[0].user.externalId);",
+									"postman.setEnvironmentVariable(\"Emp_MSA_Internal_ID\", response.legalEntity.masterServiceAgreement.internalId);*/"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"legalEntityExternalId\": \"{{Employee_Legal_Entity}}\",\n    \"taxId\": \"7587771894\",\n    \"userExternalId\": \"Emp1\",\n    \"isAdmin\": false,\n    \"identityUserLinkStrategy\": \"CREATE_IN_IDENTITY\",\n    \"realmName\": \"{{Realm}}\",\n    \"parentLegalEntityExternalId\": \"{{Root_Legal_Entity}}\",\n    \"referenceJobRoleNames\": [\n        \"Flow Admin Role\"\n    ],\n    \"productChainEnabled\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{legal-entity-composition-url}}/service-api/v2/ingest/pull",
+							"host": [
+								"{{legal-entity-composition-url}}"
+							],
+							"path": [
+								"service-api",
+								"v2",
+								"ingest",
+								"pull"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ingest Legal Entity Service  (Corporate - Pull Mode)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = JSON.parse(responseBody);",
+									"/*postman.setEnvironmentVariable(\"Emp_User_Internal_ID\", response.legalEntity.users[0].user.internalId);",
+									"postman.setEnvironmentVariable(\"Emp_User_External_ID\", response.legalEntity.users[0].user.externalId);",
+									"postman.setEnvironmentVariable(\"Emp_MSA_Internal_ID\", response.legalEntity.masterServiceAgreement.internalId);*/"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"legalEntityExternalId\": \"{{Corporate_Legal_Entity}}\",\n    \"taxId\": \"7587771894\",\n    \"userExternalId\": \"Corp1\",\n    \"isAdmin\": false,\n    \"identityUserLinkStrategy\": \"CREATE_IN_IDENTITY\",\n    \"realmName\": \"{{Realm}}\",\n    \"parentLegalEntityExternalId\": \"{{Root_Legal_Entity}}\",\n    \"referenceJobRoleNames\": [\n        \"Business Banking Admin Role\"\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{legal-entity-composition-url}}/service-api/v2/ingest/pull",
+							"host": [
+								"{{legal-entity-composition-url}}"
+							],
+							"path": [
+								"service-api",
+								"v2",
+								"ingest",
+								"pull"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Integration Ingestion Services",
+			"item": [
+				{
+					"name": "Product Catalog Ingestion Integration Service",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"url": {
+							"raw": "{{product-catalog-ingestion-url}}/integration-api/v2/product-catalog",
+							"host": [
+								"{{product-catalog-ingestion-url}}"
+							],
+							"path": [
+								"integration-api",
+								"v2",
+								"product-catalog"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Legal Entity Ingestion Integration Service (Employee)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"legalEntityExternalId\": \"{{Employee_Legal_Entity}}\",\n    \"taxId\": \"7587771894\",\n    \"userExternalId\": \"Emp1\",\n    \"parentLegalEntityExternalId\": \"{{Root_Legal_Entity}}\",\n    \"realmName\": \"{{Realm}}\",\n    \"referenceJobRoleNames\": [\n        \"Flow Admin Role\"\n    ],\n    \"isAdmin\": false,\n    \"identityUserLinkStrategy\": \"CREATE_IN_IDENTITY\"\n}"
+						},
+						"url": {
+							"raw": "{{legal-entity-ingestion-url}}/integration-api/v2/legal-entity",
+							"host": [
+								"{{legal-entity-ingestion-url}}"
+							],
+							"path": [
+								"integration-api",
+								"v2",
+								"legal-entity"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Legal Entity Ingestion Integration Service (Corporate)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "default"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"legalEntityExternalId\": \"{{Corporate_Legal_Entity}}\",\n    \"taxId\": \"7587771894\",\n    \"userExternalId\": \"Corp1\",\n    \"parentLegalEntityExternalId\": \"{{Root_Legal_Entity}}\",\n    \"realmName\": \"{{Realm}}\",\n    \"referenceJobRoleNames\": [\n        \"Business Banking Admin Role\"\n    ],\n    \"isAdmin\": false,\n    \"identityUserLinkStrategy\": \"CREATE_IN_IDENTITY\"\n}"
+						},
+						"url": {
+							"raw": "{{legal-entity-ingestion-url}}/integration-api/v2/legal-entity",
+							"host": [
+								"{{legal-entity-ingestion-url}}"
+							],
+							"path": [
+								"integration-api",
+								"v2",
+								"legal-entity"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Product Ingestion Integration Service",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"legalEntityExternalId\": \"{{Corporate_Legal_Entity}}\",\n    \"legalEntityInternalId\": \"5028c4b28076fc48018076ff35fe0008\",\n    \"serviceAgreementExternalId\": \"sa_{{Corporate_Legal_Entity}}\",\n    \"serviceAgreementInternalId\": \"4028c4b28076fc48018076ff35fe0008\",\n    \"userExternalId\": \"Corp1\",\n    \"userInternalId\": \"2968c88a-59be-48ef-900e-9c46398ef0ed\",\n    \"referenceJobRoleNames\": [\n        \"Business Banking Admin Role\"\n    ],\n    \"membershipAccounts\": null,\n    \"additionalParameters\": {}\n}"
+						},
+						"url": {
+							"raw": "{{product-ingestion-url}}/integration-api/v2/product-group",
+							"host": [
+								"{{product-ingestion-url}}"
+							],
+							"path": [
+								"integration-api",
+								"v2",
+								"product-group"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Transactions Ingestion Integration Service",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"arrangementId\": \"7028c4b28076fc48018076ff35fe0008\",\n    \"externalArrangementId\": \"arra5028c4b\",\n    \"dateRangeStart\": {{$timestamp}},\n    \"dateRangeEnd\": {{$timestamp}},\n    \"billingCycles\": 5,\n    \"additionalParameters\": {}\n}"
+						},
+						"url": {
+							"raw": "{{transaction-ingestion-url}}/integration-api/v2/transactions",
+							"host": [
+								"{{transaction-ingestion-url}}"
+							],
+							"path": [
+								"integration-api",
+								"v2",
+								"transactions"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Login as Corporate Customer",
 			"item": [
 				{
@@ -43,12 +295,12 @@
 							"urlencoded": [
 								{
 									"key": "username",
-									"value": "Corporate_1111",
+									"value": "Corp1",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "Corporate_1111",
+									"value": "Corp1",
 									"type": "text"
 								},
 								{
@@ -233,12 +485,12 @@
 							"urlencoded": [
 								{
 									"key": "username",
-									"value": "Employee_01",
+									"value": "Emp1",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "Employee_01",
+									"value": "Emp1",
 									"type": "text"
 								},
 								{
@@ -475,226 +727,6 @@
 									"key": "resource",
 									"value": "process-definition:app-onboarding"
 								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Streams 3.0 Chaining",
-			"item": [
-				{
-					"name": "Ingest Legal Entity Service  (Employee - Pull Mode)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const response = JSON.parse(responseBody);",
-									"/*postman.setEnvironmentVariable(\"Emp_User_Internal_ID\", response.legalEntity.users[0].user.internalId);",
-									"postman.setEnvironmentVariable(\"Emp_User_External_ID\", response.legalEntity.users[0].user.externalId);",
-									"postman.setEnvironmentVariable(\"Emp_MSA_Internal_ID\", response.legalEntity.masterServiceAgreement.internalId);*/"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"legalEntityExternalId\": \"{{Employee_Legal_Entity}}\",\n    \"taxId\": \"7587771894\",\n    \"userExternalId\": \"Employee_01\",\n    \"isAdmin\": false,\n    \"identityUserLinkStrategy\": \"CREATE_IN_IDENTITY\",\n    \"realmName\": \"{{Realm}}\",\n    \"parentLegalEntityExternalId\": \"{{Root_Legal_Entity}}\",\n    \"referenceJobRoleNames\": [\n        \"Flow Admin Role\"\n    ],\n    \"productChainEnabled\": false\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{legal-entity-composition-url}}/service-api/v2/ingest/pull",
-							"host": [
-								"{{legal-entity-composition-url}}"
-							],
-							"path": [
-								"service-api",
-								"v2",
-								"ingest",
-								"pull"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Ingest Legal Entity Service  (Corporate - Pull Mode)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const response = JSON.parse(responseBody);",
-									"/*postman.setEnvironmentVariable(\"Emp_User_Internal_ID\", response.legalEntity.users[0].user.internalId);",
-									"postman.setEnvironmentVariable(\"Emp_User_External_ID\", response.legalEntity.users[0].user.externalId);",
-									"postman.setEnvironmentVariable(\"Emp_MSA_Internal_ID\", response.legalEntity.masterServiceAgreement.internalId);*/"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"legalEntityExternalId\": \"{{Corporate_Legal_Entity}}\",\n    \"taxId\": \"7587771894\",\n    \"userExternalId\": \"Corporate_01\",\n    \"isAdmin\": false,\n    \"identityUserLinkStrategy\": \"CREATE_IN_IDENTITY\",\n    \"realmName\": \"{{Realm}}\",\n    \"parentLegalEntityExternalId\": \"{{Root_Legal_Entity}}\",\n    \"referenceJobRoleNames\": [\n        \"Business Banking Admin Role\"\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{legal-entity-composition-url}}/service-api/v2/ingest/pull",
-							"host": [
-								"{{legal-entity-composition-url}}"
-							],
-							"path": [
-								"service-api",
-								"v2",
-								"ingest",
-								"pull"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Integration Ingestion Services",
-			"item": [
-				{
-					"name": "Product Catalog Ingestion Integration Service",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "GET",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "default"
-							}
-						],
-						"url": {
-							"raw": "{{product-catalog-ingestion-url}}/integration-api/v2/product-catalog",
-							"host": [
-								"{{product-catalog-ingestion-url}}"
-							],
-							"path": [
-								"integration-api",
-								"v2",
-								"product-catalog"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Legal Entity Ingestion Integration Service",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json",
-								"type": "default"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"legalEntityExternalId\": \"{{Employee_Legal_Entity}}\",\n    \"taxId\": \"7587771894\",\n    \"userExternalId\": \"Cat29\",\n    \"parentLegalEntityExternalId\": \"{{Root_Legal_Entity}}\",\n    \"realmName\": \"{{Realm}}\",\n    \"referenceJobRoleNames\": [\n        \"Flow Admin Role\"\n    ],\n    \"isAdmin\": false,\n    \"identityUserLinkStrategy\": \"CREATE_IN_IDENTITY\"\n}"
-						},
-						"url": {
-							"raw": "{{legal-entity-ingestion-url}}/integration-api/v2/legal-entity",
-							"host": [
-								"{{legal-entity-ingestion-url}}"
-							],
-							"path": [
-								"integration-api",
-								"v2",
-								"legal-entity"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Product Ingestion Integration Service",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"legalEntityExternalId\": \"{{Employee_Legal_Entity}}\",\n    \"legalEntityInternalId\": \"5028c4b28076fc48018076ff35fe0008\",\n    \"serviceAgreementExternalId\": \"sa_{{Employee_Legal_Entity}}\",\n    \"serviceAgreementInternalId\": \"4028c4b28076fc48018076ff35fe0008\",\n    \"userExternalId\": \"Corp1\",\n    \"userInternalId\": \"2968c88a-59be-48ef-900e-9c46398ef0ed\",\n    \"referenceJobRoleNames\": [\n        \"Business Banking Admin Role\"\n    ],\n    \"membershipAccounts\": null,\n    \"additionalParameters\": {}\n}"
-						},
-						"url": {
-							"raw": "{{product-ingestion-url}}/integration-api/v2/product-group",
-							"host": [
-								"{{product-ingestion-url}}"
-							],
-							"path": [
-								"integration-api",
-								"v2",
-								"product-group"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Transactions Ingestion Integration Service",
-					"request": {
-						"auth": {
-							"type": "noauth"
-						},
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"type": "text",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"arrangementId\": \"7028c4b28076fc48018076ff35fe0008\",\n    \"externalArrangementId\": \"arra5028c4b\",\n    \"dateRangeStart\": {{$timestamp}},\n    \"dateRangeEnd\": {{$timestamp}},\n    \"billingCycles\": 5,\n    \"additionalParameters\": {}\n}"
-						},
-						"url": {
-							"raw": "{{transaction-ingestion-url}}/integration-api/v2/transactions",
-							"host": [
-								"{{transaction-ingestion-url}}"
-							],
-							"path": [
-								"integration-api",
-								"v2",
-								"transactions"
 							]
 						}
 					},
