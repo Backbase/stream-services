@@ -99,6 +99,8 @@ referenceJobRoles:
                   weekly: 400000
                   transactional: 10000
 ```
+### Fixed
+- Fix to add an arrangement in more than one product group
 
 ## [2.72.0]
 ### Changed
