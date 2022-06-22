@@ -6,11 +6,6 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Qualifier;
-import org.mapstruct.ReportingPolicy;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -20,6 +15,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Qualifier;
+import org.mapstruct.ReportingPolicy;
 
 /**
  * The Mapper for transforming Model to Domain & Entity to Domain Model
@@ -30,24 +29,28 @@ import java.util.stream.Stream;
 public interface TransactionCursorMapper {
 
   @Mapping(target = "cursor.id", source = "transactionCursorEntity.id")
-  @Mapping(target = "cursor.arrangementId", source = "transactionCursorEntity.arrangement_id")
-  @Mapping(target = "cursor.extArrangementId", source = "transactionCursorEntity.ext_arrangement_id")
-  @Mapping(target = "cursor.lastTxnDate", source = "transactionCursorEntity.last_txn_date")
-  @Mapping(target = "cursor.lastTxnIds", source = "transactionCursorEntity.last_txn_ids", qualifiedBy = WithTxnModelParser.class)
-  @Mapping(target = "cursor.legalEntityId", source = "transactionCursorEntity.legal_entity_id")
+  @Mapping(target = "cursor.arrangementId", source = "transactionCursorEntity.arrangementId")
+  @Mapping(target = "cursor.extArrangementId", source = "transactionCursorEntity.extArrangementId")
+  @Mapping(target = "cursor.lastTxnDate", source = "transactionCursorEntity.lastTxnDate")
+  @Mapping(target = "cursor.lastTxnIds", source = "transactionCursorEntity.lastTxnIds", qualifiedBy = WithTxnModelParser.class)
+  @Mapping(target = "cursor.legalEntityId", source = "transactionCursorEntity.legalEntityId")
   @Mapping(target = "cursor.additions", source = "transactionCursorEntity.additions", qualifiedBy = WithJsonToMap.class)
   @Mapping(target = "cursor.status", source = "transactionCursorEntity.status")
   TransactionCursorResponse mapToModel(TransactionCursorEntity transactionCursorEntity);
 
   @Mapping(target = "id", source = "transactionCursorUpsertRequest.cursor.id")
-  @Mapping(target = "arrangement_id", source = "transactionCursorUpsertRequest.cursor.arrangementId")
-  @Mapping(target = "ext_arrangement_id", source = "transactionCursorUpsertRequest.cursor.extArrangementId")
-  @Mapping(target = "last_txn_ids", source = "transactionCursorUpsertRequest.cursor.lastTxnIds", qualifiedBy = WithTxnDomainParser.class)
-  @Mapping(target = "legal_entity_id", source = "transactionCursorUpsertRequest.cursor.legalEntityId")
+  @Mapping(target = "arrangementId", source = "transactionCursorUpsertRequest.cursor.arrangementId")
+  @Mapping(target = "extArrangementId", source = "transactionCursorUpsertRequest.cursor.extArrangementId")
+  @Mapping(target = "lastTxnIds", source = "transactionCursorUpsertRequest.cursor.lastTxnIds", qualifiedBy = WithTxnDomainParser.class)
+  @Mapping(target = "legalEntityId", source = "transactionCursorUpsertRequest.cursor.legalEntityId")
   @Mapping(target = "additions", source = "transactionCursorUpsertRequest.cursor.additions", qualifiedBy = WithMapToJson.class)
   @Mapping(target = "status", source = "transactionCursorUpsertRequest.cursor.status")
   TransactionCursorEntity mapToDomain(
       TransactionCursorUpsertRequest transactionCursorUpsertRequest);
+
+
+  List<TransactionCursorResponse> mapToListModel(
+      List<TransactionCursorEntity> transactionCursorEntity);
 
   @Qualifier
   @Target(ElementType.METHOD)

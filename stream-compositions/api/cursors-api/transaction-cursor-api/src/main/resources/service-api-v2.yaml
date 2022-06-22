@@ -111,8 +111,8 @@ paths:
       tags:
         - TransactionCursor
       summary: Deletes Transaction Cursor by arrangement id.
-      description: Patches Transaction Cursor by Arrangement Id.
-      operationId: deleteCursor
+      description: Delete Transaction Cursor by Arrangement Id.
+      operationId: deleteByArrangementId
       parameters:
         - name: arrangementId
           in: path
@@ -122,7 +122,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Transaction Cursor Patched.
+          description: Transaction Cursor Deleted.
         "400":
           description: BadRequest
           content:
@@ -181,12 +181,14 @@ paths:
             schema:
               $ref: '#/components/schemas/TransactionCursorFilterRequest'
       responses:
-        "201":
-          description: Transaction Cursor Upserted.
+        "200":
+          description: Transaction Cursor Filtered.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TransactionCursorUpsertResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionCursorResponse'
         "400":
           description: BadRequest
           content:
