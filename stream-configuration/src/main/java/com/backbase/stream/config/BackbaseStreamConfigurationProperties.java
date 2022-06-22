@@ -58,6 +58,11 @@ public class BackbaseStreamConfigurationProperties {
          */
         private String portfolioBaseUrl = "http://portfolio:8080";
 
+        /**
+         * Location of Contacts Service.
+         */
+        private String contactManagerBaseUrl = "http://contact-manager:8080";
+
     }
 
     @Data

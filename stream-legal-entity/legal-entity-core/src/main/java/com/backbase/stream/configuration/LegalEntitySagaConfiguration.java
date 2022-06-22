@@ -3,6 +3,7 @@ package com.backbase.stream.configuration;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.LegalEntityUnitOfWorkExecutor;
+import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.legalentity.repository.LegalEntityUnitOfWorkRepository;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.product.BatchProductIngestionSaga;
@@ -26,7 +27,8 @@ import org.springframework.context.annotation.Import;
     ProductConfiguration.class,
     AccessControlConfiguration.class,
     ProductIngestionSagaConfiguration.class,
-    LimitsServiceConfiguration.class
+    LimitsServiceConfiguration.class,
+        ContactsServiceConfiguration.class
 })
 @EnableConfigurationProperties(
     {LegalEntitySagaConfigurationProperties.class}
@@ -41,6 +43,7 @@ public class LegalEntitySagaConfiguration {
         ProductIngestionSaga productIngestionSaga,
         BatchProductIngestionSaga batchProductIngestionSaga,
         LimitsSaga limitsSaga,
+        ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
         ObjectMapper objectMapper) {
         return new LegalEntitySaga(
@@ -49,7 +52,9 @@ public class LegalEntitySagaConfiguration {
             userProfileService,
             accessGroupService,
             productIngestionSaga,
-            batchProductIngestionSaga, limitsSaga, sinkConfigurationProperties
+            batchProductIngestionSaga, limitsSaga,
+                contactsSaga,
+                sinkConfigurationProperties
         );
     }
 
