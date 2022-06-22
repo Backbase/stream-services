@@ -48,7 +48,7 @@ backbase:
       identity-integration-base-url: http://localhost:8181/identity-integration-service
     transaction-cursor:
       transaction-id-persistence:
-        enabled: false
+        enabled: true
 
 logging:
   level:
