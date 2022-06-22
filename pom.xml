@@ -35,6 +35,8 @@
 
         <module>stream-approvals</module>
         <module>stream-portfolio</module>
+        <module>stream-contacts</module>
+
     </modules>
 
     <properties>
