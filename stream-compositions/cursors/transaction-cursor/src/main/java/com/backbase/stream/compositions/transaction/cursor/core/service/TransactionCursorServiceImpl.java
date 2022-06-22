@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.transaction.cursor.core.service;
 
+import com.backbase.stream.compositions.transaction.cursor.core.config.TransactionCursorConfigurationProperties;
 import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
 import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepository;
@@ -8,13 +9,16 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
-import java.text.ParseException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.text.ParseException;
+
+import static java.util.Collections.emptyList;
 
 @Service
 @AllArgsConstructor
@@ -23,6 +27,7 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
 
   private final TransactionCursorRepository transactionCursorRepository;
   private final TransactionCursorMapper mapper;
+  private final TransactionCursorConfigurationProperties transactionCursorConfigurationProperties;
 
   /**
    * The Service to filter the cursor based on arrangementId
@@ -76,11 +81,11 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
   @Override
   public Mono<ResponseEntity<TransactionCursorUpsertResponse>> upsertCursor(
       Mono<TransactionCursorUpsertRequest> transactionCursorUpsertRequest) {
-    return transactionCursorUpsertRequest.map(mapper::mapToDomain)
+
+    return transactionCursorUpsertRequest.map(this::mapToDomain)
         .flatMap(transactionCursorRepository::upsertCursor)
         .doOnNext(id -> log.info("Id is {}", id))
-        .map(id -> new ResponseEntity<>(new TransactionCursorUpsertResponse().withId(id),
-            HttpStatus.CREATED));
+        .map(id -> new ResponseEntity<>(new TransactionCursorUpsertResponse().withId(id), HttpStatus.CREATED));
   }
 
   /**
@@ -92,22 +97,26 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
    * @return Response Entity
    */
   @Override
-  public Mono<ResponseEntity<Void>> patchByArrangementId(String arrangementId,
-      Mono<TransactionCursorPatchRequest> transactionCursorPatchRequest) {
-    transactionCursorPatchRequest.map(transactionCursorPatchReq
-        -> {
+  public Mono<ResponseEntity<Void>> patchByArrangementId(
+          String arrangementId,
+          Mono<TransactionCursorPatchRequest> transactionCursorPatchRequest) {
+
+    transactionCursorPatchRequest.map(transactionCursorPatchReq -> {
       try {
-        return transactionCursorRepository
-            .patchByArrangementId(arrangementId, transactionCursorPatchReq);
+        if (isTransactionIdPersistenceDisabled()) {
+          log.info("Transaction Id persistence is disabled");
+          transactionCursorPatchReq.setLastTxnIds(null);
+        }
+
+        return transactionCursorRepository.patchByArrangementId(arrangementId, transactionCursorPatchReq);
       } catch (ParseException parseException) {
         throw new RuntimeException(parseException);
       }
     }).onErrorResume(throwable -> {
-      log
-          .error("TransactionCursorServiceImpl patchByArrangementId Exception: {}",
-              throwable.getMessage());
+      log.error("TransactionCursorServiceImpl patchByArrangementId Exception: {}", throwable.getMessage());
       return Mono.error(throwable);
     }).subscribe();
+
     return Mono.empty();
   }
 
@@ -120,6 +129,19 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
   private Mono<ResponseEntity<TransactionCursorResponse>> mapModelToResponse(
       TransactionCursorEntity response) {
     return Mono.just(new ResponseEntity<>(mapper.mapToModel(response), HttpStatus.OK));
+  }
+
+  private boolean isTransactionIdPersistenceDisabled() {
+    return !transactionCursorConfigurationProperties.getTransactionIdPersistence().isEnabled();
+  }
+
+  private TransactionCursorEntity mapToDomain(TransactionCursorUpsertRequest request) {
+    if (isTransactionIdPersistenceDisabled()) {
+      log.info("Transaction Id persistence is disabled");
+      request.getCursor().setLastTxnIds(emptyList());
+    }
+
+    return mapper.mapToDomain(request);
   }
 
 }

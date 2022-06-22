@@ -46,6 +46,9 @@ backbase:
       arrangement-manager-base-url: http://localhost:8082/arrangement-manager
     identity:
       identity-integration-base-url: http://localhost:8181/identity-integration-service
+    transaction-cursor:
+      transaction-id-persistence:
+        enabled: false
 
 logging:
   level:

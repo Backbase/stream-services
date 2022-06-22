@@ -45,6 +45,9 @@ backbase:
       arrangement-manager-base-url: http://arrangement-manager-nextgen:8080
     identity:
       identity-integration-base-url: http://identity-integration-service:8080
+    transaction-cursor:
+      transaction-id-persistence:
+        enabled: false
 
 logging:
   level:
