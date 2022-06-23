@@ -56,7 +56,7 @@ backbase:
           enableFailed: true
         cursor:
           enabled: true
-          transactionIdsFilterEnabled: false
+          transactionIdsFilterEnabled: true
           base-url: http://localhost:9005
 
 eureka:
