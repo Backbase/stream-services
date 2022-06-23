@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-## [2.73.0]
+## [2.74.0]
 ### Added
 - Support for LE limits
 ```yaml
@@ -98,6 +98,33 @@ referenceJobRoles:
                   daily: 100000
                   weekly: 400000
                   transactional: 10000
+```
+- Support for User Job role limits
+```yaml
+referenceJobRoles:
+  - name: Domestic Payments
+    description: Domestic Payments
+    functionGroups:
+      - name: Products, payments, txn, contacts, actions, user profile, devices
+        functions:
+          - functionId: '1017'
+            name: US Domestic Wire
+            privileges:
+              - privilege: approve
+                limit:
+                  currencyCode: USD
+                  transactional: 15000
+productGroups:
+  - internalId: bblicdag1
+    name: My business salary account
+    description: The account of my business I use for salary payments
+    users:
+      - user:
+          externalId: hhsa01
+          fullName: Henk Hurry
+          supportsLimit: true
+        referenceJobRoleNames:
+          - Domestic Payments
 ```
 ### Fixed
 - Fix to add an arrangement in more than one product group

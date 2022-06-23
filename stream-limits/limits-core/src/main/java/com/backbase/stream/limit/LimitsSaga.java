@@ -37,9 +37,9 @@ public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
     public Mono<LimitsTask> executeTask(LimitsTask limitsTask) {
         CreateLimitRequestBody item = limitsTask.getData();
 
-        log.info("Started ingestion of limits {}",
+        log.info("Started ingestion of limits {} for user {}",
             item.getEntities().stream().map(entity -> entity.getEtype() + COLON + SPACE + entity.getEref())
-                .collect(Collectors.joining(COMMA + SPACE)));
+                .collect(Collectors.joining(COMMA + SPACE)), item.getUserBBID());
         return limitsApi.postLimitsRetrieval(mapper.map(item))
             .collectList()
             .flatMap(limitsRetrievalPostResponseBody -> {

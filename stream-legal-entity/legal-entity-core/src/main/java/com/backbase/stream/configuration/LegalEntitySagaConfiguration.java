@@ -6,7 +6,6 @@ import com.backbase.stream.LegalEntityUnitOfWorkExecutor;
 import com.backbase.stream.legalentity.repository.LegalEntityUnitOfWorkRepository;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.product.BatchProductIngestionSaga;
-import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.ProductIngestionSagaConfiguration;
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.service.AccessGroupService;
@@ -38,7 +37,6 @@ public class LegalEntitySagaConfiguration {
         UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
-        ProductIngestionSaga productIngestionSaga,
         BatchProductIngestionSaga batchProductIngestionSaga,
         LimitsSaga limitsSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
@@ -48,7 +46,6 @@ public class LegalEntitySagaConfiguration {
             userService,
             userProfileService,
             accessGroupService,
-            productIngestionSaga,
             batchProductIngestionSaga, limitsSaga, sinkConfigurationProperties
         );
     }

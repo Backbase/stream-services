@@ -2,12 +2,14 @@ package com.backbase.stream;
 
 import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
 import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.limit.api.service.v2.model.Entity;
 import com.backbase.dbs.limit.api.service.v2.model.PeriodicLimitsBounds;
@@ -42,7 +44,6 @@ import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
-import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
@@ -54,11 +55,16 @@ import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -105,6 +111,15 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     public static final String SETUP_SERVICE_AGREEMENT = "setup-service-agreement";
     private static final String BATCH_PRODUCT_GROUP_ID = "batch_product_group_task-";
 
+    private static final String LEGAL_ENTITY_E_TYPE = "LE";
+    private static final String SERVICE_AGREEMENT_E_TYPE = "SA";
+    private static final String FUNCTION_GROUP_E_TYPE = "FAG";
+    private static final String FUNCTION_E_TYPE = "FUN";
+    private static final String PRIVILEGE_E_TYPE = "PRV";
+    private static final String JOB_ROLE_LIMITS = "job-role-limits";
+    private static final String USER_JOB_ROLE_LIMITS = "user-job-role-limits";
+    private static final String LEGAL_ENTITY_LIMITS = "legal-entity-limits";
+
     private final BusinessFunctionGroupMapper businessFunctionGroupMapper = Mappers.getMapper(BusinessFunctionGroupMapper.class);
     private final UserProfileMapper userProfileMapper = Mappers.getMapper(UserProfileMapper.class);
 
@@ -121,7 +136,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
-        ProductIngestionSaga productIngestionSaga,
         BatchProductIngestionSaga batchProductIngestionSaga, LimitsSaga limitsSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
@@ -143,8 +157,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::createJobRoles)
             .flatMap(this::processJobProfiles)
             .flatMap(this::setupAdministratorPermissions)
-            .flatMap(this::setupLimits)
             .flatMap(this::processProducts)
+            .flatMap(this::setupLimits)
             .flatMap(this::processSubsidiaries);
     }
 
@@ -377,10 +391,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     .flatMap(list -> {
                         log.info("Assigning {} Business Function Groups to Job Profile User: {}", list.size(), jobProfileUser.getUser().getExternalId());
                         jobProfileUser.setBusinessFunctionGroups(list);
-                        list.forEach(bfg -> {
-                            streamTask.info(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, "assigned", legalEntity.getExternalId(), legalEntity.getInternalId(), "Assigned Business Function Group: %s with functions: %s to Service Agreement: %s", bfg.getName(),
-                                ofNullable(bfg.getFunctions()).orElse(Collections.singletonList(new BusinessFunction().name("<not loaded>"))).stream().map(BusinessFunction::getFunctionCode).collect(Collectors.joining(", ")), serviceAgreement.getExternalId());
-                        });
+                        list.forEach(bfg -> streamTask.info(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, "assigned", legalEntity.getExternalId(), legalEntity.getInternalId(), "Assigned Business Function Group: %s with functions: %s to Service Agreement: %s", bfg.getName(),
+                            ofNullable(bfg.getFunctions()).orElse(Collections.singletonList(new BusinessFunction().name("<not loaded>"))).stream().map(BusinessFunction::getFunctionCode).collect(Collectors.joining(", ")), serviceAgreement.getExternalId()));
                         return setupUserPermissions(streamTask, jobProfileUser);
                     })
                     .map(actual -> jobProfileUser);
@@ -612,14 +624,16 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         if (legalEntity.getCustomServiceAgreement() != null) {
 
             return setupCustomServiceAgreement(streamTask, legalEntity);
-        } else if (legalEntity.getMasterServiceAgreement() == null || StringUtils.isEmpty(legalEntity.getMasterServiceAgreement().getInternalId())) {
+        } else if (legalEntity.getMasterServiceAgreement() == null || StringUtils.hasLength(legalEntity.getMasterServiceAgreement().getInternalId())) {
 
             Mono<LegalEntityTask> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntity.getInternalId())
                 .flatMap(serviceAgreement -> {
-                    if (legalEntity.getMasterServiceAgreement() != null && legalEntity.getMasterServiceAgreement().getJobRoles() != null) {
-                        serviceAgreement.setJobRoles(legalEntity.getMasterServiceAgreement().getJobRoles());
+                    if (legalEntity.getMasterServiceAgreement() != null ) {
                         serviceAgreement.setLimit(legalEntity.getMasterServiceAgreement().getLimit());
                         serviceAgreement.setParticipants(legalEntity.getMasterServiceAgreement().getParticipants());
+                        if(legalEntity.getMasterServiceAgreement().getJobRoles() != null) {
+                            serviceAgreement.setJobRoles(legalEntity.getMasterServiceAgreement().getJobRoles());
+                        }
                     }
                     streamTask.getData().setMasterServiceAgreement(serviceAgreement);
                     streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Existing Service Agreement: %s found for Legal Entity: %s", serviceAgreement.getExternalId(), legalEntity.getExternalId());
@@ -782,17 +796,18 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::setupLegalEntityLimits)
             .flatMap(this::setupServiceAgreementLimits)
             .flatMap(this::setupServiceAgreementParticipantLimits)
+            .flatMap(this::retrieveUsersInternalIds)
             .flatMap(this::setupJobRoleLimits);
     }
 
     private Mono<LegalEntityTask> setupLegalEntityLimits(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
-        if(Objects.isNull(legalEntity.getLimit())) {
+        if(isNull(legalEntity.getLimit())) {
             streamTask.info(LEGAL_ENTITY, PROCESS_LIMITS, FAILED, legalEntity.getInternalId(), legalEntity.getExternalId(), "Legal Entity: %s does not have any Legal Entity limits defined", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
 
-        return limitsSaga.executeTask(createLimitsTask(streamTask, legalEntity.getInternalId(), null))
+        return limitsSaga.executeTask(createLimitsTask(streamTask, null, legalEntity.getInternalId(), legalEntity.getLimit()))
             .flatMap(limitsTask -> requireNonNull(Mono.just(streamTask)))
             .then(Mono.just(streamTask));
     }
@@ -800,40 +815,40 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private Mono<LegalEntityTask> setupServiceAgreementLimits(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
         ServiceAgreement serviceAgreement = retrieveServiceAgreement(legalEntity);
-        if(Objects.isNull(serviceAgreement.getLimit())) {
+        if(isNull(serviceAgreement.getLimit())) {
             streamTask.info(LEGAL_ENTITY, PROCESS_LIMITS, FAILED, legalEntity.getInternalId(), legalEntity.getExternalId(), "Legal Entity: %s does not have any Service Agreement limits defined", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
-        return limitsSaga.executeTask(createLimitsTask(streamTask, null, serviceAgreement.getInternalId()))
+        return limitsSaga.executeTask(createLimitsTask(streamTask,  serviceAgreement, null, serviceAgreement.getLimit()))
             .flatMap(limitsTask -> requireNonNull(Mono.just(streamTask)))
             .then(Mono.just(streamTask));
     }
 
-    private LimitsTask createLimitsTask(LegalEntityTask streamTask, String legalEntityId, String saId) {
+    private LimitsTask createLimitsTask(LegalEntityTask streamTask, ServiceAgreement serviceAgreement, String legalEntityId, Limit limit) {
 
-        var limit = streamTask.getLegalEntity().getLimit();
         var limitData = new CreateLimitRequestBody();
         var entities = new ArrayList<Entity>();
-        ofNullable(legalEntityId).ifPresent(le -> entities.add(new Entity().etype("LE").eref(le)));
-        ofNullable(saId).ifPresent(sa -> entities.add(new Entity().etype("SA").eref(sa)));
+        ofNullable(legalEntityId).ifPresent(le -> entities.add(new Entity().etype(LEGAL_ENTITY_E_TYPE).eref(le)));
+        ofNullable(serviceAgreement).ifPresent(sa -> entities.add(new Entity().etype(SERVICE_AGREEMENT_E_TYPE).eref(sa.getInternalId())));
         limitData.entities(entities);
         limitData.periodicLimitsBounds(periodicLimits(limit))
             .transactionalLimitsBound(transactionalLimits(limit))
             .currency(limit.getCurrencyCode());
 
-        return new LimitsTask(streamTask.getId() + "-" + "legal-entity-limits", limitData);
+        return new LimitsTask(streamTask.getId() + "-" + LEGAL_ENTITY_LIMITS, limitData);
     }
 
     private Mono<LegalEntityTask> setupServiceAgreementParticipantLimits(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
         ServiceAgreement serviceAgreement = retrieveServiceAgreement(legalEntity);
-        if(Objects.isNull(serviceAgreement.getParticipants())
+        if(isNull(serviceAgreement.getParticipants())
             || serviceAgreement.getParticipants().stream().noneMatch(legalEntityParticipant -> legalEntityParticipant.getLimit() != null)) {
             streamTask.info(LEGAL_ENTITY, PROCESS_LIMITS, FAILED, legalEntity.getInternalId(), legalEntity.getExternalId(), "Legal Entity: %s does not have any Participant with Limits in Service Agreement", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
         return accessGroupService.getServiceAgreementParticipants(streamTask, serviceAgreement)
-            .flatMapIterable(participant -> List.of(createLimitsTask(streamTask, participant.getId(), serviceAgreement.getInternalId())))
+            .filter(participant ->  serviceAgreement.getParticipants().stream().filter(p -> p.getExternalId().equalsIgnoreCase(participant.getExternalId())).anyMatch(legalEntityParticipant -> legalEntityParticipant.getLimit() != null))
+            .flatMapIterable(participant -> List.of(createLimitsTask(streamTask, serviceAgreement, participant.getId(), getLimits(serviceAgreement, participant))))
             .flatMap(limitsSaga::executeTask)
             .map(limitsTask -> streamTask.addHistory(limitsTask.getHistory()))
             .collectList()
@@ -846,6 +861,13 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 }
                 return streamTask;
             });
+    }
+
+    private Limit getLimits(ServiceAgreement serviceAgreement, ServiceAgreementParticipantsGetResponseBody participant) {
+        return serviceAgreement.getParticipants().stream()
+            .filter(legalEntityParticipant -> legalEntityParticipant.getExternalId().equalsIgnoreCase(participant.getExternalId()))
+            .map(LegalEntityParticipant::getLimit)
+            .findFirst().orElseGet(Limit::new);
     }
 
     @NotNull
@@ -861,16 +883,32 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             return Mono.just(streamTask);
         }
 
+        Map<String, Set<String>> userJobRoleMap = new HashMap<>();
+        if (legalEntity.getProductGroups() != null) {
+            legalEntity.getProductGroups().stream()
+                .flatMap(productGroup -> productGroup.getUsers().stream())
+                .filter(jobProfileUser -> nonNull(jobProfileUser.getUser()) && nonNull(
+                    jobProfileUser.getUser().getSupportsLimit()) && !isEmpty(jobProfileUser.getReferenceJobRoleNames()))
+                .forEach(jobProfileUser -> jobProfileUser.getReferenceJobRoleNames().forEach(jobRoleName -> {
+                        if(userJobRoleMap.get(jobRoleName) != null) {
+                            var users = userJobRoleMap.get(jobRoleName);
+                            users.add(jobProfileUser.getUser().getInternalId());
+                            userJobRoleMap.put(jobRoleName, users);
+                        } else {
+                            userJobRoleMap.put(jobRoleName, new HashSet<>(List.of(jobProfileUser.getUser().getInternalId())));
+                        }
+                    }));
+        }
+
         return Flux.fromStream(Stream.of(serviceAgreement.getJobRoles(), legalEntity.getReferenceJobRoles())
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream))
-            .flatMapIterable(actual -> createLimitsTask(streamTask, actual, serviceAgreement))
+            .flatMapIterable(actual -> createLimitsTask(streamTask, actual, serviceAgreement, userJobRoleMap))
             .concatMap(limitsSaga::executeTask)
             .map(limitsTask -> streamTask.addHistory(limitsTask.getHistory()))
             .collectList()
             .map(tasks -> {
                 boolean failed = tasks.stream().anyMatch(StreamTask::isFailed);
-
                 if (failed) {
                     streamTask.setState(StreamTask.State.FAILED);
                 } else {
@@ -880,31 +918,73 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             });
     }
 
-    private List<LimitsTask> createLimitsTask(LegalEntityTask streamTask, JobRole actual,
-        ServiceAgreement serviceAgreement) {
+    private Mono<LegalEntityTask> retrieveUsersInternalIds(LegalEntityTask streamTask) {
+        var le = streamTask.getData();
+        if(le.getProductGroups() == null || le.getProductGroups().stream().allMatch(productGroup -> Objects.isNull(productGroup.getUsers()))) {
+            return Mono.just(streamTask);
+        }
 
-        return actual.getFunctionGroups().stream()
+        var users = le.getProductGroups().stream().flatMap(productGroup -> productGroup.getUsers().stream()).collect(Collectors.toSet());
+        return Flux.fromIterable(users)
+            .flatMap(jpu -> accessGroupService.getUserByExternalId(jpu.getUser().getExternalId(), true))
+            .collectList()
+            .flatMap(internalUsers -> {
+                Map<String, GetUser> usersByExternalId =
+                    internalUsers.stream().collect(Collectors.toMap(GetUser::getExternalId, Function.identity(), (a1, a2) -> a1));
+                users.forEach(jp -> {
+                    String externalId = jp.getUser().getExternalId();
+                    GetUser internalUser = usersByExternalId.get(externalId);
+                    if (internalUser != null) {
+                        jp.getUser().setInternalId(internalUser.getId());
+                    }
+                });
+                return Mono.just(streamTask);
+            });
+    }
+
+    private List<LimitsTask> createLimitsTask(LegalEntityTask streamTask, JobRole actual,
+        ServiceAgreement serviceAgreement, Map<String, Set<String>> userJobRoleMap) {
+
+        List<LimitsTask> userJobRoleLimits = new ArrayList<>();
+            if(!CollectionUtils.isEmpty(userJobRoleMap) && userJobRoleMap.containsKey(actual.getName())) {
+                userJobRoleMap.get(actual.getName()).forEach(userId -> userJobRoleLimits.addAll(actual.getFunctionGroups().stream()
+                    .filter(this::limitsExist)
+                    .flatMap(businessFunctionGroup -> businessFunctionGroup.getFunctions().stream()
+                        .flatMap(businessFunction -> businessFunction.getPrivileges().stream()
+                            .filter(privilege -> nonNull(privilege.getLimit()))
+                            .filter(privilege -> nonNull(privilege.getLimit().getCurrencyCode()))
+                            .filter(this::atLeastOneLimitExist)
+                            .map(privilege -> getCreateLimitRequestBody(serviceAgreement,
+                                businessFunction, privilege, actual.getId(), userId))))
+                    .map(limitData -> new LimitsTask(streamTask.getId() + "-" + USER_JOB_ROLE_LIMITS, limitData))
+                    .collect(Collectors.toList())));
+            }
+
+        var jobRoleLimits = actual.getFunctionGroups().stream()
             .filter(this::limitsExist)
             .flatMap(businessFunctionGroup -> businessFunctionGroup.getFunctions().stream()
                 .flatMap(businessFunction -> businessFunction.getPrivileges().stream()
-                    .filter(privilege -> nonNull(privilege.getSupportsLimit()) && privilege.getSupportsLimit())
                     .filter(privilege -> nonNull(privilege.getLimit()))
                     .filter(privilege -> nonNull(privilege.getLimit().getCurrencyCode()))
                     .filter(this::atLeastOneLimitExist)
                     .map(privilege -> getCreateLimitRequestBody(serviceAgreement,
-                        businessFunction, privilege, actual.getId()))))
-            .map(limitData -> new LimitsTask(streamTask.getId() + "-" + "job-role-limits", limitData))
+                        businessFunction, privilege, actual.getId(), null))))
+            .map(limitData -> new LimitsTask(streamTask.getId() + "-" + JOB_ROLE_LIMITS, limitData))
+            .collect(Collectors.toList());
+
+        return Stream.concat(jobRoleLimits.stream(), userJobRoleLimits.stream())
             .collect(Collectors.toList());
     }
 
     @NotNull
     private CreateLimitRequestBody getCreateLimitRequestBody(ServiceAgreement serviceAgreement,
-        BusinessFunction businessFunction, Privilege privilege, String fagId) {
+        BusinessFunction businessFunction, Privilege privilege, String fagId, String userId) {
         CreateLimitRequestBody request = new CreateLimitRequestBody();
-        request.entities(List.of(new Entity().etype("SA").eref(serviceAgreement.getInternalId()),
-            new Entity().etype("FAG").eref(fagId),
-            new Entity().etype("FUN").eref(businessFunction.getFunctionId()),
-            new Entity().etype("PRV").eref(privilege.getPrivilege().toLowerCase())));
+        request.setUserBBID(userId);
+        request.entities(List.of(new Entity().etype(SERVICE_AGREEMENT_E_TYPE).eref(serviceAgreement.getInternalId()),
+            new Entity().etype(FUNCTION_GROUP_E_TYPE).eref(fagId),
+            new Entity().etype(FUNCTION_E_TYPE).eref(businessFunction.getFunctionId()),
+            new Entity().etype(PRIVILEGE_E_TYPE).eref(privilege.getPrivilege().toLowerCase())));
         request.periodicLimitsBounds(periodicLimits(privilege.getLimit()))
             .transactionalLimitsBound(transactionalLimits(privilege.getLimit()))
             .currency(privilege.getLimit().getCurrencyCode());
@@ -920,10 +1000,12 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private PeriodicLimitsBounds periodicLimits(Limit limit) {
 
         var periodicLimits = new PeriodicLimitsBounds();
-        ofNullable(limit.getDaily()).ifPresent(periodicLimits::setDaily);
-        ofNullable(limit.getWeekly()).ifPresent(periodicLimits::setWeekly);
-        ofNullable(limit.getMonthly()).ifPresent(periodicLimits::setMonthly);
-        ofNullable(limit.getQuarterly()).ifPresent(periodicLimits::setDaily);
+        ofNullable(limit).ifPresent(l -> {
+            ofNullable(l.getDaily()).ifPresent(periodicLimits::setDaily);
+            ofNullable(l.getWeekly()).ifPresent(periodicLimits::setWeekly);
+            ofNullable(l.getMonthly()).ifPresent(periodicLimits::setMonthly);
+            ofNullable(l.getQuarterly()).ifPresent(periodicLimits::setDaily);
+        });
 
         return periodicLimits;
     }

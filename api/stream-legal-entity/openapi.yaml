@@ -1042,6 +1042,8 @@ components:
           $ref: '#/components/schemas/PhoneNumber'
         fullName:
           type: string
+        supportsLimit:
+          type: boolean
         limit:
           $ref: '#/components/schemas/Limit'
         additions:
