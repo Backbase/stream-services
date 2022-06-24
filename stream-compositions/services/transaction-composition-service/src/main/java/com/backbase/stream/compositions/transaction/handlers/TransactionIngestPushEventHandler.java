@@ -21,8 +21,8 @@ public class TransactionIngestPushEventHandler implements EventHandler<Transacti
     @Override
     public void handle(EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
         buildRequest(envelopedEvent)
-        .flatMap(transactionIngestionService::ingestPush)
-        .subscribe();
+            .flatMap(transactionIngestionService::ingestPush)
+            .subscribe();
     }
 
     /**
@@ -33,10 +33,10 @@ public class TransactionIngestPushEventHandler implements EventHandler<Transacti
      */
     private Mono<TransactionIngestPushRequest> buildRequest(EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
         return Mono.just(
-                TransactionIngestPushRequest.builder()
-                        .transactions(Collections.singletonList(
-                                mapper.mapPushEventToStream(
-                                        envelopedEvent.getEvent().getTransactionsPostRequestBody())))
-                        .build());
+            TransactionIngestPushRequest.builder()
+                .transactions(Collections.singletonList(
+                    mapper.mapPushEventToStream(
+                        envelopedEvent.getEvent().getTransactionsPostRequestBody())))
+                .build());
     }
 }

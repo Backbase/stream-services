@@ -150,4 +150,3 @@ class LegalEntityControllerIT extends IntegrationTest {
         .expectStatus().is5xxServerError();
   }
 }
-

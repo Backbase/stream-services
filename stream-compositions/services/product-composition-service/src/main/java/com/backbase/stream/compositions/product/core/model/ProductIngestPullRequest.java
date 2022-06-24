@@ -21,4 +21,3 @@ public class ProductIngestPullRequest {
     private List<String> membershipAccounts;
     private Map<String, String> additions;
 }
-

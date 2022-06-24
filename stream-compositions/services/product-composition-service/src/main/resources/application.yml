@@ -50,4 +50,3 @@ backbase:
         cursor:
           enabled: false
           base-url: http://product-cursor:8080
-

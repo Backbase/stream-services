@@ -28,7 +28,7 @@ public interface TransactionMapper {
 
     String YYYY_MM_DD_T_HH_MM_SS_SSSXX = "yyyy-MM-dd'T'HH:mm:ss.SSSXX";
     DateTimeFormatter formatter =
-            DateTimeFormatter.ofPattern(YYYY_MM_DD_T_HH_MM_SS_SSSXX);
+        DateTimeFormatter.ofPattern(YYYY_MM_DD_T_HH_MM_SS_SSSXX);
 
     /**
      * Maps composition TransactionsPostRequestBody to dbs TransactionsPostRequestBody model.
@@ -37,7 +37,7 @@ public interface TransactionMapper {
      * @return DBS transaction
      */
     com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody mapIntegrationToStream(
-            com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody transaction);
+        com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody transaction);
 
     /**
      * Maps integration TransactionsPostRequestBody to composition TransactionsPostRequestBody model.
@@ -46,7 +46,7 @@ public interface TransactionMapper {
      * @return Composition transaction
      */
     com.backbase.stream.compositions.transaction.api.model.TransactionsPostRequestBody mapIntegrationToComposition(
-            com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody transaction);
+        com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody transaction);
 
     /**
      * Maps composition TransactionsPostRequestBody to dbs TransactionsPostRequestBody model.
@@ -55,7 +55,7 @@ public interface TransactionMapper {
      * @return DBS transaction
      */
     com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody mapCompositionToStream(
-            com.backbase.stream.compositions.transaction.api.model.TransactionsPostRequestBody transaction);
+        com.backbase.stream.compositions.transaction.api.model.TransactionsPostRequestBody transaction);
 
     /**
      * Maps dbs TransactionsPostRequestBody to composition TransactionsPostRequestBody model.
@@ -64,7 +64,7 @@ public interface TransactionMapper {
      * @return Composition transaction
      */
     com.backbase.stream.compositions.transaction.api.model.TransactionsPostResponseBody mapStreamToComposition(
-            com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody transaction);
+        com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody transaction);
 
     /**
      * Maps event Transactions to dbs TransactionsPostRequestBody model.
@@ -73,7 +73,7 @@ public interface TransactionMapper {
      * @return Stream transaction
      */
     com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody mapPushEventToStream(
-            TransactionsPostRequestBody transaction);
+        TransactionsPostRequestBody transaction);
 
     /**
      * Maps pull event Transactions to Stream TransactionIngestPullRequest model.
@@ -82,7 +82,7 @@ public interface TransactionMapper {
      * @return Stream transaction pull object
      */
     TransactionIngestPullRequest mapPullEventToStream(
-            TransactionsPullEvent event);
+        TransactionsPullEvent event);
 
     /**
      * Maps Stream Pull Ingestion Request to Integration.

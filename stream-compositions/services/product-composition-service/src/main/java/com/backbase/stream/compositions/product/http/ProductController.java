@@ -28,18 +28,18 @@ public class ProductController implements ProductCompositionApi {
 
     @Override
     public Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProduct(
-            @Valid Mono<ProductPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+        @Valid Mono<ProductPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
         return pullIngestionRequest.map(this::buildPullRequest)
-                .flatMap(productIngestionService::ingestPull)
-                .map(this::mapIngestionToResponse);
+            .flatMap(productIngestionService::ingestPull)
+            .map(this::mapIngestionToResponse);
     }
 
     @Override
     public Mono<ResponseEntity<ProductIngestionResponse>> pushIngestProduct(
-            @Valid Mono<ProductPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+        @Valid Mono<ProductPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
         return pushIngestionRequest.map(this::buildPushRequest)
-                .flatMap(productIngestionService::ingestPush)
-                .map(this::mapIngestionToResponse);
+            .flatMap(productIngestionService::ingestPush)
+            .map(this::mapIngestionToResponse);
     }
 
     /**
@@ -50,17 +50,17 @@ public class ProductController implements ProductCompositionApi {
      */
     private ProductIngestPullRequest buildPullRequest(ProductPullIngestionRequest request) {
         return ProductIngestPullRequest
-                .builder()
-                .legalEntityInternalId(request.getLegalEntityInternalId())
-                .legalEntityExternalId(request.getLegalEntityExternalId())
-                .serviceAgreementExternalId(request.getServiceAgreementExternalId())
-                .serviceAgreementInternalId(request.getServiceAgreementInternalId())
-                .userExternalId(request.getUserExternalId())
-                .userInternalId(request.getUserInternalId())
-                .membershipAccounts(request.getMembershipAccounts())
-                .additions(request.getAdditions())
-                .referenceJobRoleNames(request.getReferenceJobRoleNames())
-                .build();
+            .builder()
+            .legalEntityInternalId(request.getLegalEntityInternalId())
+            .legalEntityExternalId(request.getLegalEntityExternalId())
+            .serviceAgreementExternalId(request.getServiceAgreementExternalId())
+            .serviceAgreementInternalId(request.getServiceAgreementInternalId())
+            .userExternalId(request.getUserExternalId())
+            .userInternalId(request.getUserInternalId())
+            .membershipAccounts(request.getMembershipAccounts())
+            .additions(request.getAdditions())
+            .referenceJobRoleNames(request.getReferenceJobRoleNames())
+            .build();
     }
 
     /**
@@ -71,8 +71,8 @@ public class ProductController implements ProductCompositionApi {
      */
     private ProductIngestPushRequest buildPushRequest(ProductPushIngestionRequest request) {
         return ProductIngestPushRequest.builder()
-                .productGroup(mapper.mapCompositionToStream(request.getProductGgroup()))
-                .build();
+            .productGroup(mapper.mapCompositionToStream(request.getProductGgroup()))
+            .build();
     }
 
     /**
@@ -83,8 +83,8 @@ public class ProductController implements ProductCompositionApi {
      */
     private ResponseEntity<ProductIngestionResponse> mapIngestionToResponse(ProductIngestResponse response) {
         return new ResponseEntity<>(
-                new ProductIngestionResponse()
-                        .withProductGgroup(mapper.mapStreamToComposition(response.getProductGroup())),
-                HttpStatus.CREATED);
+            new ProductIngestionResponse()
+                .withProductGgroup(mapper.mapStreamToComposition(response.getProductGroup())),
+            HttpStatus.CREATED);
     }
 }

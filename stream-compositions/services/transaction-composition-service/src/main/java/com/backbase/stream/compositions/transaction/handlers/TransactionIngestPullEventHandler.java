@@ -53,8 +53,8 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
             return;
         }
         TransactionsCompletedEvent event = new TransactionsCompletedEvent()
-                .withTransactionIds(response.getTransactions().stream().map(TransactionsPostResponseBody::getId).collect(Collectors.toList()))
-                .withInternalArrangementId(response.getArrangementId());
+            .withTransactionIds(response.getTransactions().stream().map(TransactionsPostResponseBody::getId).collect(Collectors.toList()))
+            .withInternalArrangementId(response.getArrangementId());
 
         EnvelopedEvent<TransactionsCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);

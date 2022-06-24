@@ -80,10 +80,10 @@ class LegalEntityIngestionServiceImplTest {
     List<String> tags = new ArrayList<>(testInfo.getTags());
     when(config.isCompletedEventEnabled()).thenReturn(Boolean.TRUE);
     when(productCompositionApi.pullIngestProduct(any()))
-            .thenReturn(Mono.just(new ProductIngestionResponse()
-                    .withProductGgroup(
-                            (com.backbase.stream.compositions.product.client.model.ProductGroup) new com.backbase.stream.compositions.product.client.model.ProductGroup()
-                                    .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN"))))));
+        .thenReturn(Mono.just(new ProductIngestionResponse()
+            .withProductGgroup(
+                (com.backbase.stream.compositions.product.client.model.ProductGroup) new com.backbase.stream.compositions.product.client.model.ProductGroup()
+                    .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN"))))));
     Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
         Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
     StepVerifier.create(legalEntityIngestResponseMono)

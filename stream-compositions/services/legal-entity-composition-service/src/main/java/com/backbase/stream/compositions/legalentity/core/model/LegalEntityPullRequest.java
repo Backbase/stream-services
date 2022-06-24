@@ -35,4 +35,3 @@ public class LegalEntityPullRequest {
 
   private Boolean productChainEnabled;
 }
-

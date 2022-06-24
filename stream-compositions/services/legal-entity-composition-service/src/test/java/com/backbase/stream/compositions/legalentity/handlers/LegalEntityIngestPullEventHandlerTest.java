@@ -52,7 +52,7 @@ class LegalEntityIngestPullEventHandlerTest {
   @Test
   void testHandleEvent_Completed() {
     LegalEntityResponse res = LegalEntityResponse
-            .builder().legalEntity(new LegalEntity().name("Legal Entity")).build();
+        .builder().legalEntity(new LegalEntity().name("Legal Entity")).build();
     Mono<LegalEntityResponse> responseMono = Mono.just(res);
 
     when(legalEntityIngestionService.ingestPull(any()))
@@ -82,7 +82,7 @@ class LegalEntityIngestPullEventHandlerTest {
         .thenReturn(legalEntityPullRequest);
 
     when(legalEntityIngestionService.ingestPull(any()))
-            .thenReturn(Mono.error(new RuntimeException("test error")));
+        .thenReturn(Mono.error(new RuntimeException("test error")));
     configProperties.getEvents().setEnableFailed(Boolean.TRUE);
 
     EnvelopedEvent<LegalEntityPullEvent> envelopedEvent = new EnvelopedEvent<>();

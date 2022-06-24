@@ -194,15 +194,15 @@ components:
           type: string
           description: A unique identifier for the product coming from the core banking system.
         productTypeExternalId:
-            title: External ID of the Product Type as setup in Product Summary
-            maxLength: 64
-            minLength: 1
-            pattern: ^[^\r\n]{1,64}$
-            type: string
+          title: External ID of the Product Type as setup in Product Summary
+          maxLength: 64
+          minLength: 1
+          pattern: ^[^\r\n]{1,64}$
+          type: string
 
     CurrentAccount:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
     SavingsAccount:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'

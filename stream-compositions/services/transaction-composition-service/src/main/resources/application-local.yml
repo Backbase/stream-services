@@ -56,7 +56,7 @@ backbase:
           enableFailed: true
         cursor:
           enabled: true
-          transactionIdsFilterEnabled: true
+          transactionIdsFilterEnabled: false
           base-url: http://localhost:9005
 
 eureka:
@@ -163,4 +163,3 @@ bootstrap:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
-

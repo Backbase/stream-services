@@ -89,4 +89,3 @@ class ProductControllerTest {
     verify(productIngestionService).ingestPush(any());
   }
 }
-

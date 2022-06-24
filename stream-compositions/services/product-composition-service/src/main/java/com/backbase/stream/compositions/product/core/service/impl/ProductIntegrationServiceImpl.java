@@ -24,12 +24,12 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
      */
     public Mono<ProductIngestResponse> pullProductGroup(ProductIngestPullRequest ingestPullRequest) {
         return productIntegrationApi
-                .pullProductGroup(
-                        mapper.mapStreamToIntegration(ingestPullRequest))
-                .map(mapper::mapResponseIntegrationToStream)
-                .map(pir -> pir.withAdditions(ingestPullRequest.getAdditions()))
-                .onErrorResume(this::handleIntegrationError)
-                .flatMap(this::handleIntegrationResponse);
+            .pullProductGroup(
+                mapper.mapStreamToIntegration(ingestPullRequest))
+            .map(mapper::mapResponseIntegrationToStream)
+            .map(pir -> pir.withAdditions(ingestPullRequest.getAdditions()))
+            .onErrorResume(this::handleIntegrationError)
+            .flatMap(this::handleIntegrationResponse);
     }
 
     private Mono<ProductIngestResponse> handleIntegrationResponse(ProductIngestResponse res) {
