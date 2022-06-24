@@ -552,6 +552,12 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     }
 
     private Mono<LegalEntityTask> postUserContacts(LegalEntityTask streamTask, List<ExternalContact> externalContacts, String externalUserId) {
+        if (isEmpty(externalContacts)) {
+            log.info("Creating Contacts for User {}", externalUserId);
+            streamTask.info(USER, PROCESS_CONTACTS, FAILED, externalUserId, null,
+                    "User: %s does not have any Contacts", externalUserId);
+            return Mono.just(streamTask);
+        }
         LegalEntity legalEntity = streamTask.getData();
         log.info("Creating Contacts for User {}", externalUserId);
         return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(),
