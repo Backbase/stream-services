@@ -139,7 +139,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private final LimitsSaga limitsSaga;
     private final ContactsSaga contactsSaga;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
-    private final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
+    private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
 
     public LegalEntitySaga(LegalEntityService legalEntityService,
         UserService userService,
