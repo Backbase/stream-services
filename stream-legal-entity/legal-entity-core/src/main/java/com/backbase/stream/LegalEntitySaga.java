@@ -539,7 +539,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                             upsertedUser.getExternalId()))
                         .findFirst().get().getUser();
                     inputUser.setInternalId(upsertedUser.getInternalId());
-                    postUserContacts(streamTask, jobProfileUser.getContacts(), inputUser.getExternalId()).block();
+                    postUserContacts(streamTask, jobProfileUser.getContacts(), inputUser.getExternalId())                                   ;
                     return upsertUserProfile(inputUser)
                         .map(userProfile -> {
                             log.info("User Profile upserted for: {}", userProfile.getUserName());
