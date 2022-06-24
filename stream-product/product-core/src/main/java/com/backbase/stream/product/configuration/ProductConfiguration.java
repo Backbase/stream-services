@@ -1,7 +1,6 @@
 package com.backbase.stream.product.configuration;
 
 
-
 import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
