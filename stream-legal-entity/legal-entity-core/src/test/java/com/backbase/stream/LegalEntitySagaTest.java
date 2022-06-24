@@ -1,6 +1,7 @@
 package com.backbase.stream;
 
 import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
+import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -8,12 +9,15 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
+import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.api.service.v2.model.Realm;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.exceptions.LegalEntityException;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
+import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CurrentAccount;
 import com.backbase.stream.legalentity.model.EmailAddress;
@@ -24,11 +28,15 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.LegalEntityType;
+import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.PhoneNumber;
+import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.limit.LimitsSaga;
+import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
@@ -36,6 +44,7 @@ import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.time.Duration;
 import java.util.Arrays;
@@ -55,6 +64,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,6 +88,9 @@ class LegalEntitySagaTest {
     @Mock
     private BatchProductIngestionSaga batchProductIngestionSaga;
 
+    @Mock
+    private LimitsSaga limitsSaga;
+
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
         getLegalEntitySagaConfigurationProperties();
@@ -95,7 +108,7 @@ class LegalEntitySagaTest {
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
         productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-            .description("somePgDescription").savingAccounts(Collections.singletonList(account));
+            .description("somePgDescription").savingAccounts(singletonList(account));
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
@@ -103,12 +116,12 @@ class LegalEntitySagaTest {
         JobProfileUser regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
             .externalId(regularUserExId));
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
-        JobRole jobRole = new JobRole().functionGroups(Collections.singletonList(functionGroup)).name("someJobRole");
+        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
         ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
         LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).addAdministratorsItem(adminUser)
-            .parentExternalId(leParentExternalId).customServiceAgreement(customSa).users(Collections.singletonList(regularUser))
-            .productGroups(Collections.singletonList(productGroup)).subsidiaries(Collections.singletonList(
+            .parentExternalId(leParentExternalId).customServiceAgreement(customSa).users(singletonList(regularUser))
+            .productGroups(singletonList(productGroup)).subsidiaries(singletonList(
                     new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
             ));
 
@@ -151,16 +164,21 @@ class LegalEntitySagaTest {
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
         productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-            .description("somePgDescription").savingAccounts(Collections.singletonList(account));
+            .description("somePgDescription").savingAccounts(singletonList(account));
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-        BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
-        JobRole jobRole = new JobRole().functionGroups(Collections.singletonList(functionGroup)).name("someJobRole");
-        ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
-        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).customServiceAgreement(customSa)
-            .parentExternalId(leExternalId).productGroups(Collections.singletonList(productGroup));
+        Limit limit = new Limit().currencyCode("GBP").transactional(BigDecimal.valueOf(10000));
+        BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup")
+            .addFunctionsItem(new BusinessFunction().functionId("1071").name("US Domestic Wire")
+                .addPrivilegesItem(new Privilege().privilege("create").limit(limit)));
+        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
+        ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole)
+            .participants(Collections.singletonList(new LegalEntityParticipant().externalId(leExternalId)
+                .users(List.of("externalUserId")).limit(limit))).creatorLegalEntity(leExternalId).limit(limit);
+        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).limit(limit)
+            .customServiceAgreement(customSa).parentExternalId(leExternalId).productGroups(singletonList(productGroup));
 
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
@@ -172,12 +190,16 @@ class LegalEntitySagaTest {
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
         when(accessGroupService.updateServiceAgreementRegularUsers(eq(task), eq(customSa), any()))
             .thenReturn(Mono.just(customSa));
+        when(accessGroupService.getServiceAgreementParticipants(any(), any()))
+            .thenReturn(Flux.just(new ServiceAgreementParticipantsGetResponseBody().externalId(customSaExId)));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
             .thenReturn(productGroupTaskMono);
         when(userService.setupRealm(task.getLegalEntity()))
             .thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(task.getLegalEntity()))
             .thenReturn(Mono.just(new LegalEntity()));
+        when(limitsSaga.executeTask(any(LimitsTask.class)))
+            .thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
 
         Mono<LegalEntityTask> result = legalEntitySaga.executeTask(task);
         result.block();
@@ -196,16 +218,16 @@ class LegalEntitySagaTest {
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
         productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-            .description("somePgDescription").savingAccounts(Collections.singletonList(account));
+            .description("somePgDescription").savingAccounts(singletonList(account));
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
-        JobRole jobRole = new JobRole().functionGroups(Collections.singletonList(functionGroup)).name("someJobRole");
+        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
         ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
         LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).parentExternalId(leExternalId)
-            .activateSingleServiceAgreement(false).masterServiceAgreement(sa).productGroups(Collections.singletonList(productGroup));
+            .activateSingleServiceAgreement(false).masterServiceAgreement(sa).productGroups(singletonList(productGroup));
 
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
@@ -247,15 +269,15 @@ class LegalEntitySagaTest {
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
         productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-            .description("somePgDescription").savingAccounts(Collections.singletonList(account));
+            .description("somePgDescription").savingAccounts(singletonList(account));
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
-        JobRole jobRole = new JobRole().functionGroups(Collections.singletonList(functionGroup)).name("someJobRole");
+        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
         LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).parentExternalId(leExternalId)
-            .productGroups(Collections.singletonList(productGroup));
+            .productGroups(singletonList(productGroup));
         ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
 
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
@@ -310,7 +332,7 @@ class LegalEntitySagaTest {
                 (ProductGroup) new ProductGroup()
                     .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
                     .name("Default PG")
-                    .users(Collections.singletonList(
+                    .users(singletonList(
                         new JobProfileUser()
                             .user(
                                 new User()
@@ -318,9 +340,9 @@ class LegalEntitySagaTest {
                                     .fullName("John Doe")
                                     .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
                             )
-                            .referenceJobRoleNames(Collections.singletonList("Private - Read only"))
+                            .referenceJobRoleNames(singletonList("Private - Read only"))
                     ))
-                    .currentAccounts(Collections.singletonList(
+                    .currentAccounts(singletonList(
                         (CurrentAccount) new CurrentAccount()
                             .BBAN("01318000")
                             .externalId("7155000")
@@ -331,7 +353,7 @@ class LegalEntitySagaTest {
                 (ProductGroup) new ProductGroup()
                     .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
                     .name("Mixed PG")
-                    .users(Collections.singletonList(
+                    .users(singletonList(
                         new JobProfileUser()
                             .user(
                                 new User()
@@ -339,9 +361,9 @@ class LegalEntitySagaTest {
                                     .fullName("John Doe")
                                     .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
                             )
-                            .referenceJobRoleNames(Collections.singletonList("Private - Full access"))
+                            .referenceJobRoleNames(singletonList("Private - Full access"))
                     ))
-                    .currentAccounts(Collections.singletonList(
+                    .currentAccounts(singletonList(
                         (CurrentAccount) new CurrentAccount()
                             .BBAN("01318001")
                             .externalId("7155001")
@@ -350,7 +372,7 @@ class LegalEntitySagaTest {
                             .currency("GBP")
                     ))
             ))
-            .users(Collections.singletonList(
+            .users(singletonList(
                 new JobProfileUser()
                     .user(
                         new User()
@@ -371,12 +393,12 @@ class LegalEntitySagaTest {
                     .externalId("Service_Agreement_Id")
                     .name("Service Agreement")
                     .description("Custom Service Agreement")
-                    .participants(Collections.singletonList(
+                    .participants(singletonList(
                         new LegalEntityParticipant()
                             .externalId("user-external-id")
                             .sharingUsers(true)
                             .sharingAccounts(true)
-                            .users(Collections.singletonList("john.doe"))
+                            .users(singletonList("john.doe"))
                     ))
                     .status(LegalEntityStatus.ENABLED)
                     .isMaster(false)
@@ -538,7 +560,7 @@ class LegalEntitySagaTest {
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
         productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-                .description("somePgDescription").savingAccounts(Collections.singletonList(account));
+                .description("somePgDescription").savingAccounts(singletonList(account));
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
@@ -546,20 +568,20 @@ class LegalEntitySagaTest {
         JobProfileUser regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
                 .externalId(regularUserExId));
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
-        JobRole jobRole = new JobRole().functionGroups(Collections.singletonList(functionGroup)).name("someJobRole");
+        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
         ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
         LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).name("Model Bank")
                 .addAdministratorsItem(adminUser).parentExternalId(leParentExternalId)
-                .customServiceAgreement(customSa).users(Collections.singletonList(regularUser))
-                .productGroups(Collections.singletonList(productGroup)).subsidiaries(Collections.singletonList(
+                .customServiceAgreement(customSa).users(singletonList(regularUser))
+                .productGroups(singletonList(productGroup)).subsidiaries(singletonList(
                         new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
                 ));
 
         LegalEntity newLE = new LegalEntity().internalId(leInternalId).externalId(leExternalId).name("New Model Bank")
                 .addAdministratorsItem(adminUser).parentExternalId(leParentExternalId)
-                .customServiceAgreement(customSa).users(Collections.singletonList(regularUser))
-                .productGroups(Collections.singletonList(productGroup)).subsidiaries(Collections.singletonList(
+                .customServiceAgreement(customSa).users(singletonList(regularUser))
+                .productGroups(singletonList(productGroup)).subsidiaries(singletonList(
                         new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
                 ));
 
@@ -606,7 +628,7 @@ class LegalEntitySagaTest {
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
         productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-                .description("somePgDescription").savingAccounts(Collections.singletonList(account));
+                .description("somePgDescription").savingAccounts(singletonList(account));
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
@@ -616,13 +638,13 @@ class LegalEntitySagaTest {
         JobProfileUser oldRegularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
                 .externalId(regularUserExId).fullName("Old Name Regular User"));
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
-        JobRole jobRole = new JobRole().functionGroups(Collections.singletonList(functionGroup)).name("someJobRole");
+        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
         ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId).fullName("Admin");
         LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).name("Model Bank")
                 .addAdministratorsItem(adminUser).parentExternalId(leParentExternalId)
-                .customServiceAgreement(customSa).users(Collections.singletonList(newRegularUser))
-                .productGroups(Collections.singletonList(productGroup)).subsidiaries(Collections.singletonList(
+                .customServiceAgreement(customSa).users(singletonList(newRegularUser))
+                .productGroups(singletonList(productGroup)).subsidiaries(singletonList(
                         new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
                 ));
 

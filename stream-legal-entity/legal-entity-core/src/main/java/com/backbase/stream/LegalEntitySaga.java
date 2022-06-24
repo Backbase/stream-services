@@ -44,6 +44,7 @@ import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
+import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
@@ -55,14 +56,12 @@ import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -136,6 +135,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
+        ProductIngestionSaga productIngestionSaga,
         BatchProductIngestionSaga batchProductIngestionSaga, LimitsSaga limitsSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
@@ -157,8 +157,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::createJobRoles)
             .flatMap(this::processJobProfiles)
             .flatMap(this::setupAdministratorPermissions)
-            .flatMap(this::processProducts)
             .flatMap(this::setupLimits)
+            .flatMap(this::processProducts)
             .flatMap(this::processSubsidiaries);
     }
 
@@ -624,7 +624,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         if (legalEntity.getCustomServiceAgreement() != null) {
 
             return setupCustomServiceAgreement(streamTask, legalEntity);
-        } else if (legalEntity.getMasterServiceAgreement() == null || StringUtils.hasLength(legalEntity.getMasterServiceAgreement().getInternalId())) {
+        } else if (legalEntity.getMasterServiceAgreement() == null || StringUtils.isEmpty(legalEntity.getMasterServiceAgreement().getInternalId())) {
 
             Mono<LegalEntityTask> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntity.getInternalId())
                 .flatMap(serviceAgreement -> {
@@ -886,6 +886,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         Map<String, Set<String>> userJobRoleMap = new HashMap<>();
         if (legalEntity.getProductGroups() != null) {
             legalEntity.getProductGroups().stream()
+                .filter(productGroup -> nonNull(productGroup.getUsers()))
                 .flatMap(productGroup -> productGroup.getUsers().stream())
                 .filter(jobProfileUser -> nonNull(jobProfileUser.getUser()) && nonNull(
                     jobProfileUser.getUser().getSupportsLimit()) && !isEmpty(jobProfileUser.getReferenceJobRoleNames()))
@@ -920,7 +921,10 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private Mono<LegalEntityTask> retrieveUsersInternalIds(LegalEntityTask streamTask) {
         var le = streamTask.getData();
-        if(le.getProductGroups() == null || le.getProductGroups().stream().allMatch(productGroup -> Objects.isNull(productGroup.getUsers()))) {
+        if(le.getProductGroups() == null || le.getProductGroups().stream().allMatch(productGroup -> Objects.isNull(productGroup.getUsers()))
+            || le.getProductGroups().stream().filter(productGroup -> nonNull(productGroup.getUsers()))
+            .flatMap(productGroup -> productGroup.getUsers().stream())
+            .noneMatch(jobProfileUser -> nonNull(jobProfileUser) && nonNull(jobProfileUser.getUser()) && nonNull(jobProfileUser.getUser().getSupportsLimit()) && jobProfileUser.getUser().getSupportsLimit())) {
             return Mono.just(streamTask);
         }
 
