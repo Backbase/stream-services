@@ -126,6 +126,8 @@ productGroups:
         referenceJobRoleNames:
           - Domestic Payments
 ```
+
+## [2.73.0]
 ### Fixed
 - Fix to add an arrangement in more than one product group
 
