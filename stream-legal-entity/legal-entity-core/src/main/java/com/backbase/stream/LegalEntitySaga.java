@@ -203,7 +203,12 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private Mono<LegalEntityTask> postServiceAgreementContacts(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
         ServiceAgreement serviceAgreement = getServiceAgreement(legalEntity);
-        if((serviceAgreement == null) || isEmpty(serviceAgreement.getContacts())) {
+        if (serviceAgreement == null) {
+            streamTask.info(SERVICE_AGREEMENT, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
+                    "Legal Entity %s does not have any Service Agreement", legalEntity.getExternalId());
+            return Mono.just(streamTask);
+        }
+        if (isEmpty(serviceAgreement.getContacts())) {
             streamTask.info(SERVICE_AGREEMENT, PROCESS_CONTACTS, FAILED, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
                     "Master Service Agreement: %s does not have any Contacts defined", serviceAgreement.getExternalId());
             return Mono.just(streamTask);
@@ -239,7 +244,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private String getUserExternalId(List<JobProfileUser> users) {
         Optional<JobProfileUser> optionalUser = users.stream().findFirst();
-        return (optionalUser.isPresent()) ? optionalUser.get().getUser().getExternalId() : null;
+        return optionalUser.map(jobProfileUser -> jobProfileUser.getUser().getExternalId()).orElse(null);
     }
 
     private ServiceAgreement getServiceAgreement(LegalEntity legalEntity) {
