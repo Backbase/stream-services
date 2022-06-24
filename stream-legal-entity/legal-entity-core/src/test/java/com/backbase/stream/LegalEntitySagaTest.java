@@ -32,6 +32,7 @@ import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.legalentity.model.ReferenceJobRole;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
@@ -313,7 +314,7 @@ class LegalEntitySagaTest {
 
     /**
      * Intention of this test is to verify that {@link ProductGroupTask} are processed in order at
-     * {@link LegalEntitySaga#processProducts(LegalEntityTask)} (in short that .concatMap is used instead of .flatMap).
+     *  (in short that .concatMap is used instead of .flatMap).
      * Otherwise it may happen that during permission assignment at
      * {@link AccessGroupService#assignPermissionsBatch(BatchProductGroupTask, Map)} there will be stale set of
      * permissions which will lead to state when not all of desired applied
@@ -321,6 +322,7 @@ class LegalEntitySagaTest {
     @Test
     void productGroupsProcessedSequentially() {
         // Given
+        Limit limit = new Limit().currencyCode("GBP").transactional(BigDecimal.valueOf(10000));
         LegalEntity legalEntity = new LegalEntity()
             .name("Legal Entity")
             .externalId("100000")
@@ -328,6 +330,11 @@ class LegalEntitySagaTest {
             .parentExternalId("parent-100000")
             .legalEntityType(LegalEntityType.CUSTOMER)
             .realmName("customer-bank")
+            .referenceJobRoles(Collections.singletonList((ReferenceJobRole) new ReferenceJobRole()
+                .name("Job Role with Limits").functionGroups(Collections.singletonList(new BusinessFunctionGroup()
+                    .name("someFunctionGroup")
+                .addFunctionsItem(new BusinessFunction().functionId("1071").name("US Domestic Wire")
+                    .addPrivilegesItem(new Privilege().privilege("create").limit(limit)))))))
             .productGroups(Arrays.asList(
                 (ProductGroup) new ProductGroup()
                     .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
@@ -338,9 +345,10 @@ class LegalEntitySagaTest {
                                 new User()
                                     .externalId("john.doe")
                                     .fullName("John Doe")
+                                    .supportsLimit(true)
                                     .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
                             )
-                            .referenceJobRoleNames(singletonList("Private - Read only"))
+                            .referenceJobRoleNames(List.of("Private - Read only", "Job Role with Limits"))
                     ))
                     .currentAccounts(singletonList(
                         (CurrentAccount) new CurrentAccount()
@@ -435,6 +443,10 @@ class LegalEntitySagaTest {
             .thenReturn(Mono.empty());
         when(accessGroupService.getFunctionGroupsForServiceAgreement("101"))
             .thenReturn(Mono.empty());
+        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(new JobRole()));
+        when(accessGroupService.getUserByExternalId("john.doe", true))
+            .thenReturn(Mono.just(new GetUser().externalId("john.doe").id("internalId")));
+        when(limitsSaga.executeTask(any())).thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
             .thenAnswer((Answer<Mono<ProductGroupTask>>) invocationOnMock -> {
                 ProductGroupTask productGroupTask = invocationOnMock.getArgument(0);
