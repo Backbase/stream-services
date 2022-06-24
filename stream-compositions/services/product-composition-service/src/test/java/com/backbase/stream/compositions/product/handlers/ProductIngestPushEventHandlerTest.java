@@ -1,5 +1,9 @@
 package com.backbase.stream.compositions.product.handlers;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPushEvent;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
@@ -12,36 +16,33 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-
 @ExtendWith(MockitoExtension.class)
 class ProductIngestPushEventHandlerTest {
-    @Mock
-    private ProductIngestionService productCatalogIngestionService;
 
-    @Mock
-    ProductGroupMapper mapper;
+  @Mock
+  private ProductIngestionService productCatalogIngestionService;
 
-    @Test
-    void testHandleEvent_Completed() {
-        ProductGroup productGroup = new ProductGroup();
+  @Mock
+  ProductGroupMapper mapper;
 
-        Mono<ProductIngestResponse> responseMono = Mono.just(
-                ProductIngestResponse
-                        .builder().productGroup(productGroup).build());
+  @Test
+  void testHandleEvent_Completed() {
+    ProductGroup productGroup = new ProductGroup();
 
-        lenient().when(productCatalogIngestionService.ingestPush(any())).thenReturn(responseMono);
+    Mono<ProductIngestResponse> responseMono = Mono.just(
+        ProductIngestResponse
+            .builder().productGroup(productGroup).build());
 
-        ProductPushEventHandler handler = new ProductPushEventHandler(
-                productCatalogIngestionService,
-                mapper);
+    lenient().when(productCatalogIngestionService.ingestPush(any())).thenReturn(responseMono);
 
-        EnvelopedEvent<ProductPushEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(new ProductPushEvent());
+    ProductPushEventHandler handler = new ProductPushEventHandler(
+        productCatalogIngestionService,
+        mapper);
 
-        handler.handle(envelopedEvent);
-        verify(productCatalogIngestionService).ingestPush(any());
-    }
+    EnvelopedEvent<ProductPushEvent> envelopedEvent = new EnvelopedEvent<>();
+    envelopedEvent.setEvent(new ProductPushEvent());
+
+    handler.handle(envelopedEvent);
+    verify(productCatalogIngestionService).ingestPush(any());
+  }
 }

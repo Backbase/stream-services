@@ -27,10 +27,15 @@ public class TransactionConfigurationProperties {
     @NoArgsConstructor
     public static class Cursor {
         private Boolean enabled = Boolean.FALSE;
+        private Boolean transactionIdsFilterEnabled = Boolean.FALSE;
         private String baseUrl = "http://product-cursor:9000";
     }
 
     public final boolean isCursorEnabled() {
         return Boolean.TRUE.equals(cursor.getEnabled());
+    }
+
+    public final boolean isTransactionIdsFilterEnabled() {
+        return Boolean.TRUE.equals(cursor.getTransactionIdsFilterEnabled());
     }
 }

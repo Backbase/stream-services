@@ -9,7 +9,10 @@ import com.backbase.stream.compositions.productcatalog.core.service.ProductCatal
 import com.backbase.stream.compositions.productcatalog.handlers.ProductCatalogIngestPullEventHandler;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
+import java.util.List;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,7 +32,34 @@ class ProductCatalogIngestPullEventHandlerTest {
     EventBus eventBus;
 
     @Test
-    void testHandleEvent_Completed() {
+    @Tag("true")
+    void testEnableHandleEvent_Completed(TestInfo testInfo){
+        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+        testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
+    }
+
+    @Test
+    @Tag("false")
+    void testDisableHandleEvent_Completed(TestInfo testInfo){
+        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+        testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
+    }
+
+    @Test
+    @Tag("true")
+    void testEnableHandleEvent_Failed(TestInfo testInfo){
+        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+        testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
+    }
+
+    @Test
+    @Tag("false")
+    void testDisableHandleEvent_Failed(TestInfo testInfo){
+        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+        testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
+    }
+
+    void testHandleEvent_Completed(Boolean isCompletedEvents) {
         ProductCatalog productCatalog = new ProductCatalog();
 
         Mono<ProductCatalogIngestResponse> responseMono = Mono.just(
@@ -38,7 +68,7 @@ class ProductCatalogIngestPullEventHandlerTest {
 
         lenient().when(productCatalogIngestionService.ingestPull(any())).thenReturn(responseMono);
         ProductCatalogConfigurationProperties properties = new ProductCatalogConfigurationProperties();
-
+        properties.setEnableCompletedEvents(isCompletedEvents);
         ProductCatalogIngestPullEventHandler handler = new ProductCatalogIngestPullEventHandler(
                 properties,
                 productCatalogIngestionService,
@@ -52,10 +82,10 @@ class ProductCatalogIngestPullEventHandlerTest {
         verify(productCatalogIngestionService).ingestPull(any());
     }
 
-    @Test
-    void testHandleEvent_Failed() {
+    void testHandleEvent_Failed(Boolean isFailedEvents) {
         when(productCatalogIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
         ProductCatalogConfigurationProperties properties = new ProductCatalogConfigurationProperties();
+        properties.setEnableFailedEvents(isFailedEvents);
         ProductCatalogIngestPullEventHandler handler = new ProductCatalogIngestPullEventHandler(
                 properties,
                 productCatalogIngestionService,

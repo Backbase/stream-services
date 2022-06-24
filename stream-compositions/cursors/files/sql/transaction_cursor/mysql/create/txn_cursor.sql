@@ -3,7 +3,7 @@ CREATE TABLE `transaction_cursor`.`txn_cursor` (
   `arrangement_id` VARCHAR(36) NOT NULL,
   `ext_arrangement_id` VARCHAR(50) NOT NULL,
   `last_txn_date` DATETIME NULL,
-  `last_txn_ids` VARCHAR(2600) NULL,
+  `last_txn_ids` VARCHAR(4000) NULL,
   `legal_entity_id` VARCHAR(36) NOT NULL,
   `additions` LONGTEXT CHARACTER SET 'utf8' NULL,
   `status` VARCHAR(45) NULL,

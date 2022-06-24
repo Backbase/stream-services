@@ -51,4 +51,5 @@ backbase:
           enableFailed: true
         cursor:
           enabled: true
+          transactionIdsFilterEnabled: false
           base-url: http://transaction-cursor:8080

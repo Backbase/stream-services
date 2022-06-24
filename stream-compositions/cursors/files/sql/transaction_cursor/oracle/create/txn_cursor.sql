@@ -3,7 +3,7 @@ CREATE TABLE txn_cursor (
   arrangement_id    VARCHAR2(36) NOT NULL,
   ext_arrangement_id    VARCHAR2(50) NOT NULL,
   last_txn_date TIMESTAMP NOT NULL,
-  last_txn_ids  VARCHAR2(2600) NOT NULL,
+  last_txn_ids  VARCHAR2(4000) NOT NULL,
   legal_entity_id   VARCHAR2(36) NOT NULL,
   additions NCLOB NULL,
   status    VARCHAR2(45) NULL,

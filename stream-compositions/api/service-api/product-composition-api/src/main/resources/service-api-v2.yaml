@@ -106,7 +106,7 @@ components:
           type: array
           items:
             type: string
-        additionalParameters:
+        additions:
           type: object
           additionalProperties:
             type: string
