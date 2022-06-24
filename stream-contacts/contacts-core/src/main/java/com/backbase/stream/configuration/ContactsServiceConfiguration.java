@@ -54,7 +54,8 @@ public class ContactsServiceConfiguration {
     @Bean
     public ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor(
             ContactsUnitOfWorkRepository repository, ContactsSaga saga,
-            ContactsWorkerConfigurationProperties configurationProperties) {
+            ContactsWorkerConfigurationProperties configurationProperties
+    ) {
         return new ContactsUnitOfWorkExecutor(repository, saga, configurationProperties);
     }
 
