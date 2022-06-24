@@ -6,10 +6,12 @@ import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostResponseBod
 import com.backbase.stream.contact.ContactsTask;
 import com.backbase.stream.contact.ContactsUnitOfWorkExecutor;
 import com.backbase.stream.worker.model.UnitOfWork;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
 import java.util.stream.Stream;
 
+@Slf4j
 public class ContactsService {
 
     private ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor;
@@ -21,6 +23,7 @@ public class ContactsService {
     public Flux<ContactsBulkPostResponseBody> createBulkContacts(Flux<ContactsBulkPostRequestBody> items) {
         Flux<ContactsBulkPostRequestBody> cleanItems = items.map(item -> {
             String userId = item.getAccessContext().getExternalUserId();
+            log.info("User id {}", userId);
             return item;
         });
         Flux<UnitOfWork<ContactsTask>> unitOfWorkFlux = contactsUnitOfWorkExecutor.prepareUnitOfWork(cleanItems);
