@@ -1007,6 +1007,10 @@ components:
             $ref: '#/components/schemas/BusinessFunctionGroup'
         approvalStatus:
           $ref: '#/components/schemas/ApprovalStatus'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContact'
       required:
         - user
     LegalEntityType:
