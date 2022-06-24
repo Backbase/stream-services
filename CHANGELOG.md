@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [2.74.0]
+### Fixed
+- Fix allowing empty product-groups to be created.
+
 ## [2.73.0]
 ### Fixed
 - Fix to add an arrangement in more than one product group

@@ -115,10 +115,6 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                     streamTask.warn(BATCH_PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group must have users assigned to it!");
                     throw new StreamTaskException(streamTask, "Product Group must have users assigned to it!");
                 }
-                if (StreamUtils.getInternalProductIds(productGroup).isEmpty() && (customDataGroupItems == null || customDataGroupItems.isEmpty())) {
-                    streamTask.warn(BATCH_PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product group must have products or Custom Data Group Items assigned to it!");
-                    throw new StreamTaskException(streamTask, "Product group must have products or Custom Data Group Items assigned to it!");
-                }
                 if (customDataGroupItems != null && !customDataGroupItems.isEmpty() && productGroup.getProductGroupType() == null) {
                     streamTask.warn(BATCH_PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group with Custom Data Group Items must have a Product Group Defined!");
                     throw new StreamTaskException(streamTask, "Product Group with Custom Data Group Items must have a Product Group Defined!");
