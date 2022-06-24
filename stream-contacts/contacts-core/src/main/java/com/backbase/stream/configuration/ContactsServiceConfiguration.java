@@ -1,7 +1,7 @@
 package com.backbase.stream.configuration;
 
+import com.backbase.dbs.contact.api.service.ApiClient;
 import com.backbase.dbs.contact.api.service.v2.ContactsApi;
-import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
@@ -10,7 +10,7 @@ import com.backbase.stream.contact.repository.ContactsUnitOfWorkRepository;
 import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -25,39 +25,26 @@ import java.text.DateFormat;
     BackbaseStreamConfigurationProperties.class,
     ContactsWorkerConfigurationProperties.class
 })
-@RequiredArgsConstructor
+@AllArgsConstructor
 @Import({DbsWebClientConfiguration.class})
 public class ContactsServiceConfiguration {
 
     private final BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties;
 
     @Bean
-    public ContactsApi contactsApi(com.backbase.dbs.contact.api.service.ApiClient contactApiClient) {
+    public ContactsApi contactsApi(ApiClient contactApiClient) {
         return new ContactsApi(contactApiClient);
     }
 
     @Bean
-    protected com.backbase.dbs.contact.api.service.ApiClient contactApiClient(WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
-        com.backbase.dbs.contact.api.service.ApiClient apiClient = createApiClient(dbsWebClient, objectMapper, dateFormat);
+    protected ApiClient contactApiClient(WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
+        ApiClient apiClient = createApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getContactManagerBaseUrl());
         return apiClient;
     }
 
-    com.backbase.dbs.contact.api.service.ApiClient createApiClient(WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.dbs.contact.api.service.ApiClient(dbsWebClient, objectMapper, dateFormat);
-    }
-
-    @Bean
-    public UserManagementApi userManagementApi(
-        ObjectMapper objectMapper,
-        DateFormat dateFormat,
-        WebClient dbsWebClient,
-        BackbaseStreamConfigurationProperties configurationProperties
-    ) {
-        com.backbase.dbs.user.api.service.ApiClient apiClient = new com.backbase.dbs.user.api.service.ApiClient(
-            dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(configurationProperties.getDbs().getUserManagerBaseUrl());
-        return new UserManagementApi(apiClient);
+    ApiClient createApiClient(WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new ApiClient(dbsWebClient, objectMapper, dateFormat);
     }
 
     @Bean
@@ -79,8 +66,7 @@ public class ContactsServiceConfiguration {
     @Bean
     public ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor(
             ContactsUnitOfWorkRepository repository, ContactsSaga saga,
-            ContactsWorkerConfigurationProperties configurationProperties
-    ) {
+            ContactsWorkerConfigurationProperties configurationProperties) {
         return new ContactsUnitOfWorkExecutor(repository, saga, configurationProperties);
     }
 
