@@ -7,7 +7,6 @@ import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.limit.api.service.v2.model.LimitsRetrievalPostResponseBody;
 import com.backbase.stream.mapper.LimitsMapper;
 import com.backbase.stream.worker.StreamTaskExecutor;
-import com.backbase.stream.worker.exception.StreamTaskException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -23,13 +22,11 @@ public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
     public static final String LIMIT = "limit";
     public static final String CREATE = "create";
     public static final String SUCCESS = "success";
-    public static final String ERROR = "error";
     public static final String COLON = ":";
     public static final String COMMA = ",";
     public static final String SPACE = " ";
     public static final String CREATED_SUCCESSFULLY = "Limit created successfully";
     public static final String UPDATED_SUCCESSFULLY = "Limit updated successfully";
-    public static final String FAILED_TO_INGEST_LIMITS = "Failed to ingest limits";
     private final LimitsServiceApi limitsApi;
     private final LimitsMapper mapper = Mappers.getMapper(LimitsMapper.class);
 
@@ -64,11 +61,6 @@ public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
                 limitsTask.info(LIMIT, CREATE, SUCCESS, item.getUserBBID(), responseBody.getUuid(),
                     UPDATED_SUCCESSFULLY);
                 return limitsTask;
-            })
-            .onErrorResume(throwable -> {
-                limitsTask.error(LIMIT, CREATE, ERROR, item.getUserBBID(), null, throwable,
-                    "Failed to ingest limit " + throwable.getMessage(), FAILED_TO_INGEST_LIMITS);
-                return Mono.error(new StreamTaskException(limitsTask, throwable, FAILED_TO_INGEST_LIMITS));
             });
     }
 
@@ -79,11 +71,6 @@ public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
                 limitsTask.info(LIMIT, CREATE, SUCCESS, item.getUserBBID(), createLimitResponse.getUuid(),
                     CREATED_SUCCESSFULLY);
                 return limitsTask;
-            })
-            .onErrorResume(throwable -> {
-                limitsTask.error(LIMIT, CREATE, ERROR, item.getUserBBID(), null, throwable,
-                    "Failed to ingest limit " + throwable.getMessage(), FAILED_TO_INGEST_LIMITS);
-                return Mono.error(new StreamTaskException(limitsTask, throwable, FAILED_TO_INGEST_LIMITS));
             });
     }
 
