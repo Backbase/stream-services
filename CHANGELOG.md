@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-### [2.75.0]
+## [2.75.0]
 Clean up of many old components and replaced Stream SDK with Service SDK 14
 > By moving to Service SDK, pipelines can now be configured like any other Backbase service using the Service SDK
 >
@@ -678,3 +678,4 @@ backbase:
 [2.7.0]: https://github.com/Backbase/stream-services/compare/2.6.0...2.7.0
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
 [2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
+[2.75.0]: https://github.com/Backbase/stream-services/compare/2.74.0...2.75.0
