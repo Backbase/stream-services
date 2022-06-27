@@ -1,0 +1,12 @@
+{
+  "request": {
+    "method": "PUT",
+    "url": "/access-control/service-api/v2/accessgroups/users/permissions/user-permissions"
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

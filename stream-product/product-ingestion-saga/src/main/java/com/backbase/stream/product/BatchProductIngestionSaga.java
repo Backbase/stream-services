@@ -37,7 +37,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -114,10 +113,6 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 if (productGroup.getUsers() == null) {
                     streamTask.warn(BATCH_PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group must have users assigned to it!");
                     throw new StreamTaskException(streamTask, "Product Group must have users assigned to it!");
-                }
-                if (StreamUtils.getInternalProductIds(productGroup).isEmpty() && (customDataGroupItems == null || customDataGroupItems.isEmpty())) {
-                    streamTask.warn(BATCH_PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product group must have products or Custom Data Group Items assigned to it!");
-                    throw new StreamTaskException(streamTask, "Product group must have products or Custom Data Group Items assigned to it!");
                 }
                 if (customDataGroupItems != null && !customDataGroupItems.isEmpty() && productGroup.getProductGroupType() == null) {
                     streamTask.warn(BATCH_PRODUCT_GROUP, VALIDATE, REJECTED, name, null, "Product Group with Custom Data Group Items must have a Product Group Defined!");
@@ -326,18 +321,15 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 });
     }
 
-    @NotNull
     private String prettyPrintProductGroups(BatchProductGroupTask streamTask) {
         return streamTask.getData().getProductGroups().stream().map(BaseProductGroup::getName).collect(Collectors.joining(","));
     }
 
 
-    @NotNull
     private String prettyPrintUsers(List<JobProfileUser> profileUsers) {
         return profileUsers.stream().map(jobProfileUser -> jobProfileUser.getUser().getExternalId()).collect(Collectors.joining(","));
     }
 
-    @NotNull
     private String prettyPrintBusinessGroups(List<BusinessFunctionGroup> businessFunctionGroups) {
         return businessFunctionGroups.stream().map(BusinessFunctionGroup::getName).collect(Collectors.joining(","));
     }

@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-approvals</artifactId>
-        <version>2.73.0</version>
+        <version>2.74.0</version>
     </parent>
 
     <artifactId>approvals-core</artifactId>
@@ -13,23 +13,21 @@
     <packaging>jar</packaging>
     <name>Stream :: Approval Core</name>
 
+    <properties>
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+    </properties>
+
     <dependencies>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>approval-model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-worker</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
             <artifactId>access-control-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>approval-model</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -41,7 +39,7 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-dbs-web-client</artifactId>
+            <artifactId>stream-worker</artifactId>
             <version>${project.version}</version>
         </dependency>
 

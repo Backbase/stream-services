@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>2.73.0</version>
+        <version>2.74.0</version>
     </parent>
 
     <artifactId>stream-legal-entity</artifactId>
@@ -15,10 +15,7 @@
 
     <modules>
         <module>legal-entity-core</module>
-        <module>legal-entity-http</module>
-        <module>legal-entity-sink</module>
         <module>legal-entity-bootstrap-task</module>
-        <module>legal-entity-generator-core</module>
-        <module>legal-entity-generator-source</module>
+        <module>legal-entity-http</module>
     </modules>
 </project>

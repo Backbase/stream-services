@@ -36,7 +36,7 @@ public class BackbaseStreamConfigurationProperties {
         /**
          * Location of Limits Presentation Service.
          */
-        private String limitsManagerBaseUrl = "http://limits-manager:8080";
+        private String limitsManagerBaseUrl = "http://limit:8080";
 
         /**
          * The location of DBS User Presentation Service.
