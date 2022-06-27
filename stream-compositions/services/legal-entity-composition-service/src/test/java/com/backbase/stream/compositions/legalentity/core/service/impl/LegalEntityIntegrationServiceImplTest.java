@@ -16,6 +16,7 @@ import reactor.test.StepVerifier;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -78,7 +79,7 @@ class LegalEntityIntegrationServiceImplTest {
         new com.backbase.stream.legalentity.model.LegalEntity().name("Legal Entity 1");
     List<String> membershipAccounts = Collections.singletonList("012");
     LegalEntityResponse res1 = new LegalEntityResponse(Boolean.TRUE, legalEntity2,
-        membershipAccounts, null);
+        membershipAccounts, Map.of("test", "test"));
     PullLegalEntityResponse getLegalEntityListResponse = new PullLegalEntityResponse()
         .withLegalEntity(legalEntity1);
 
@@ -87,9 +88,11 @@ class LegalEntityIntegrationServiceImplTest {
     when(legalEntityMapper.mapResponseIntegrationToStream(any())).thenReturn(res1);
 
     LegalEntityResponse legalEntityResponse = legalEntityIntegrationService.pullLegalEntity(
-        LegalEntityPullRequest.builder().legalEntityExternalId("externalId").build()).block();
+        LegalEntityPullRequest.builder().legalEntityExternalId("externalId").productChainEnabled(Boolean.TRUE).additions(Map.of("test", "test")).build()).block();
 
     assertEquals("Legal Entity 1", legalEntityResponse.getLegalEntity().getName());
+    assertEquals(true, legalEntityResponse.getProductChainEnabledFromRequest());
+    assertEquals(1, legalEntityResponse.getAdditions().size());
   }
 
 
