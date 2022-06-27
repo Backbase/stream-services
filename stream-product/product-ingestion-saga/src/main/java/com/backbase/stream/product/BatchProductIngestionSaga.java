@@ -198,7 +198,8 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .collectList()
                 .thenReturn(batchProductGroupTask)
                 .flatMap(task -> {
-                    if (task.getIngestionMode().equals(BatchProductGroupTask.IngestionMode.REPLACE)) {
+                    if (task.isDeleteArrangementsInReplaceMode() &&
+                            task.getIngestionMode().equals(BatchProductGroupTask.IngestionMode.REPLACE)) {
                         // Remove arrangements which are not provided in product group.
                         return accessGroupService.getArrangementInternalIdsForServiceAgreement(task.getData().getServiceAgreement().getInternalId())
                                 //  find arrangements which are not present in product groups, but available in dbs.
