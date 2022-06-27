@@ -35,6 +35,12 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
+            <artifactId>limits-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
             <artifactId>product-catalog-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -73,12 +79,6 @@
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>limits-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <dependency>

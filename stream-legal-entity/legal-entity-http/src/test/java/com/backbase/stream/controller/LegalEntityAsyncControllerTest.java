@@ -8,6 +8,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
+import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.config.LegalEntityHttpConfiguration;
 import com.backbase.stream.configuration.LegalEntitySagaConfiguration;
@@ -70,6 +72,12 @@ class LegalEntityAsyncControllerTest {
 
     @MockBean
     private com.backbase.identity.integration.api.service.ApiClient identityApiClient;
+
+    @MockBean
+    private LimitsServiceApi limitsApi;
+
+    @MockBean
+    private UserManagementApi userManagementApi;
 
     @MockBean
     private AccessGroupService accessGroupService;
