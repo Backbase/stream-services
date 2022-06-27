@@ -271,6 +271,11 @@ public class LegalEntitySagaIT {
         );
 
         wireMockServer.stubFor(
+                WireMock.post("/access-control/service-api/v2/accessgroups/data-groups")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.CREATED.value()))
+        );
+
+        wireMockServer.stubFor(
                 WireMock.get("/access-control/service-api/v2/accesscontrol/accessgroups/data-groups?serviceAgreementId=500001&includeItems=true")
                 .willReturn(WireMock.aResponse()
                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
@@ -301,6 +306,32 @@ public class LegalEntitySagaIT {
             .bodyValue(legalEntityTask.getLegalEntity())
             .exchange()
             .expectStatus().isEqualTo(200);
+
+        // Then
+        wireMockServer.verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v2/legalentities/500000"))
+                .withHeader("X-TID", WireMock.equalTo("tenant-id")));
+
+        Assertions.assertTrue(wireMockServer.findAllUnmatchedRequests().isEmpty());
+    }
+
+    @Test
+    void legalEntitySagaEmptyProductGroup() {
+        // Given
+        setupWireMock();
+        LegalEntityTask legalEntityTask = defaultLegalEntityTask();
+        ProductGroup productGroup = new ProductGroup();
+        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
+                .description("somePgDescription").savingAccounts(Collections.emptyList());
+        legalEntityTask.getLegalEntity().productGroups(Collections.singletonList(productGroup));
+
+        // When
+        webTestClient.post()
+                .uri("/legal-entity")
+                .header("Content-Type", "application/json")
+                .header("X-TID", "tenant-id")
+                .bodyValue(legalEntityTask.getLegalEntity())
+                .exchange()
+                .expectStatus().isEqualTo(200);
 
         // Then
         wireMockServer.verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v2/legalentities/500000"))
