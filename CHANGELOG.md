@@ -2,20 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-## [2.74.0]
-### Fixed
-- Fix allowing empty product-groups to be created.
 
-## [2.73.0]
-### Fixed
-- Fix to add an arrangement in more than one product group
-
-### [2.73.0]
+### [2.75.0]
 Clean up of many old components and replaced Stream SDK with Service SDK 14
 > By moving to Service SDK, pipelines can now be configured like any other Backbase service using the Service SDK
-> 
+>
 > **Migrate your CICD pipelines to the Service SDK standards**
-
 
 ### Removed
 - Old Legal Entity Open API definitions
@@ -36,11 +28,18 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
   - `stream-source-starter-parent`
 - Removed `stream-dbs-web-client` (replaced by `service-sdk-web-client`)
   - The OAuth2 client (provider and registration) initially defined as `dbs` is now called `bb`, hence the token converter configuration should to be updated (e.g. `spring.security.oauth2.client.provider.bb.token-uri=http://token-converter:8080/oauth/token`).
-  
+
 ### Changed
 - Replaced Stream SDK with Service SDK 14.1.0.
   - Upgrade Spring Boot 2.6.6
 
+## [2.74.0]
+### Fixed
+- Fix allowing empty product-groups to be created.
+
+## [2.73.0]
+### Fixed
+- Fix to add an arrangement in more than one product group
 
 ## [2.72.0]
 ### Changed
