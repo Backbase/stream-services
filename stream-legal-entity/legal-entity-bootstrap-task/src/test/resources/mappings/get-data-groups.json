@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/access-control/service-api/v2/accesscontrol/accessgroups/data-groups",
+    "queryParameters": {
+      "serviceAgreementId": {
+        "matches": "[\\w-]+"
+      },
+      "includeItems": {
+        "matches": "[\\w-]+"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "name": "name",
+      "items": [
+        "item"
+      ]
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

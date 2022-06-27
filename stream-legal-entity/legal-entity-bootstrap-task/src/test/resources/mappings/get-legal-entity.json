@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPathPattern": "/access-control/service-api/v2/legalentities/([\\w-]+)"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+      "id": "internal-id",
+      "externalId": "external-id"
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

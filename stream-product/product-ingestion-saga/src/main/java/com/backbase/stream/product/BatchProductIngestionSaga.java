@@ -37,7 +37,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -322,18 +321,15 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 });
     }
 
-    @NotNull
     private String prettyPrintProductGroups(BatchProductGroupTask streamTask) {
         return streamTask.getData().getProductGroups().stream().map(BaseProductGroup::getName).collect(Collectors.joining(","));
     }
 
 
-    @NotNull
     private String prettyPrintUsers(List<JobProfileUser> profileUsers) {
         return profileUsers.stream().map(jobProfileUser -> jobProfileUser.getUser().getExternalId()).collect(Collectors.joining(","));
     }
 
-    @NotNull
     private String prettyPrintBusinessGroups(List<BusinessFunctionGroup> businessFunctionGroups) {
         return businessFunctionGroups.stream().map(BusinessFunctionGroup::getName).collect(Collectors.joining(","));
     }

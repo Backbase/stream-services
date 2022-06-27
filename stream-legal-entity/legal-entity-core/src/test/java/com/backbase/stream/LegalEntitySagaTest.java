@@ -43,8 +43,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -671,7 +671,6 @@ class LegalEntitySagaTest {
         return users;
     }
 
-    @NotNull
     private LegalEntityTask mockLegalEntityTask(LegalEntity legalEntity) {
         LegalEntityTask task = Mockito.mock(LegalEntityTask.class);
         when(task.getData()).thenReturn(legalEntity);
@@ -680,7 +679,6 @@ class LegalEntitySagaTest {
         return task;
     }
 
-    @NotNull
     private LegalEntitySagaConfigurationProperties getLegalEntitySagaConfigurationProperties() {
         LegalEntitySagaConfigurationProperties sagaConfiguration =  new LegalEntitySagaConfigurationProperties();
         sagaConfiguration.setUseIdentityIntegration(true);

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -14,19 +13,11 @@
     <packaging>jar</packaging>
     <name>Stream :: Access Control Core</name>
 
+    <properties>
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+    </properties>
+
     <dependencies>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-configuration</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-worker</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
@@ -35,9 +26,8 @@
         </dependency>
 
         <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-dbs-clients</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
         </dependency>
 
         <dependency>
@@ -47,9 +37,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-dbs-web-client</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -57,36 +47,32 @@
             <artifactId>spring-data-commons</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>stream-configuration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>stream-dbs-clients</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- TEST -->
-
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>stream-test-support</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>stream-worker</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

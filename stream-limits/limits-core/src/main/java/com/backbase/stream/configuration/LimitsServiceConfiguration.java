@@ -1,5 +1,6 @@
 package com.backbase.stream.configuration;
 
+import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.dbs.limit.api.service.ApiClient;
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
@@ -8,16 +9,15 @@ import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.limit.LimitsUnitOfWorkExecutor;
 import com.backbase.stream.limit.repository.LimitsUnitOfWorkRepository;
-import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @EnableConfigurationProperties({
@@ -26,14 +26,13 @@ import org.springframework.web.reactive.function.client.WebClient;
 })
 @AllArgsConstructor
 @Configuration
-@Import({DbsWebClientConfiguration.class})
 public class LimitsServiceConfiguration {
 
     @Bean
     public LimitsServiceApi limitsApi(
         ObjectMapper objectMapper,
         DateFormat dateFormat,
-        WebClient dbsWebClient,
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
         BackbaseStreamConfigurationProperties configurationProperties
     ) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat)
@@ -45,7 +44,7 @@ public class LimitsServiceConfiguration {
     public UserManagementApi userManagementApi(
         ObjectMapper objectMapper,
         DateFormat dateFormat,
-        WebClient dbsWebClient,
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
         BackbaseStreamConfigurationProperties configurationProperties
     ) {
         com.backbase.dbs.user.api.service.ApiClient apiClient = new com.backbase.dbs.user.api.service.ApiClient(

@@ -22,11 +22,12 @@ public class StreamTaskException extends RuntimeException {
         this.task = task;
     }
 
-    public StreamTaskException(StreamTask task, String message, String resolution) {
-        super(message);
-        this.task = task;
-    }
 
+    /**
+     * Generic exception thrown when StreamTask fails to execute.
+     * @param streamTask The Stream Task
+     * @param throwable The cause
+     */
     public StreamTaskException(StreamTask streamTask, Throwable throwable) {
         super(throwable);
         this.task = streamTask;

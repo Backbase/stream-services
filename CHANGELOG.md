@@ -10,6 +10,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - Fix to add an arrangement in more than one product group
 
+### [2.73.0]
+Clean up of many old components and replaced Stream SDK with Service SDK 14
+> By moving to Service SDK, pipelines can now be configured like any other Backbase service using the Service SDK
+> 
+> **Migrate your CICD pipelines to the Service SDK standards**
+
+
+### Removed
+- Old Legal Entity Open API definitions
+- Stream Transactions Open API Spec
+- Removed Spring Cloud Data Flow components as nobody uses it
+  - Stream Cursor Source
+  - Legal Entity Sink
+  - Product Sink
+  - Transactions Sink
+  - Transactions HTTP
+- Removed Stream SDK Starters
+  - `stream-aio-starter-parent` (replaced by `service-sdk-core-starter`)
+  - `stream-batch-starter-parent` (replaced by `service-sdk-starter-core` + `spring-boot-starter-batch`)
+  - `stream-generated-client-starter-parent`
+  - `stream-processor-starter-parent`
+  - `stream-sdk-starter-core`(replaced by `service-sdk-starter-core`)
+  - `stream-sink-starter-parent`
+  - `stream-source-starter-parent`
+- Removed `stream-dbs-web-client` (replaced by `service-sdk-web-client`)
+  - The OAuth2 client (provider and registration) initially defined as `dbs` is now called `bb`, hence the token converter configuration should to be updated (e.g. `spring.security.oauth2.client.provider.bb.token-uri=http://token-converter:8080/oauth/token`).
+  
+### Changed
+- Replaced Stream SDK with Service SDK 14.1.0.
+  - Upgrade Spring Boot 2.6.6
+
+
 ## [2.72.0]
 ### Changed
 - Update Spring Boot to 2.5.14

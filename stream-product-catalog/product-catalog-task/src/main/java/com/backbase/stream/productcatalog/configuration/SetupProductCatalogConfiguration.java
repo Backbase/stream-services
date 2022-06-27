@@ -32,19 +32,11 @@ public class SetupProductCatalogConfiguration {
     @Bean
     public CommandLineRunner commandLineRunner() {
         return args -> {
-
             ProductCatalog productCatalog = productCatalogConfigurationProperties.getProductCatalog();
-            if (productCatalog != null) {
-                log.info("Setting up Product Catalog");
-                productCatalogService.setupProductCatalog(productCatalog);
-            } else {
-                log.info("No Product Catalog Configured");
-            }
+            log.info("Setting up Product Catalog");
+            productCatalogService.setupProductCatalog(productCatalog);
             log.info("Finished setting up Product Catalog");
-
-            System.exit(0);
         };
-
 
     }
 

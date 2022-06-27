@@ -1,0 +1,17 @@
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          bb:
+            token-uri: http://localhost:10000/oauth/token
+
+backbase:
+  stream:
+    client:
+      additional-headers:
+        X-TID: tenant1
+    dbs:
+      user-manager-base-url: http://localhost:10000/user-manager
+      access-control-base-url: http://localhost:10000/access-control
+      arrangement-manager-base-url: http://localhost:10000/arrangement-manager

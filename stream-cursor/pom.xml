@@ -18,6 +18,5 @@
         <module>cursor-store</module>
         <module>cursor-publishers</module>
         <module>cursor-http</module>
-        <module>cursor-source</module>
     </modules>
 </project>

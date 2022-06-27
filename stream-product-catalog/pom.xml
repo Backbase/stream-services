@@ -15,7 +15,7 @@
 
     <modules>
         <module>product-catalog-core</module>
-        <module>product-catalog-http</module>
         <module>product-catalog-task</module>
+        <module>product-catalog-http</module>
     </modules>
 </project>
