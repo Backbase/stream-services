@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 
 /**
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Slf4j
 @Configuration
+@PropertySource("classpath:web-client.properties")
 @EnableConfigurationProperties(DbsWebClientConfigurationProperties.class)
 public class DbsWebClientConfiguration {
 
@@ -42,6 +44,5 @@ public class DbsWebClientConfiguration {
     public InterServiceWebClientCustomizer webClientCustomizer(DbsWebClientConfigurationProperties properties) {
         return webClientBuilder -> webClientBuilder.filter(new HeadersForwardingClientFilter(properties));
     }
-
 
 }
