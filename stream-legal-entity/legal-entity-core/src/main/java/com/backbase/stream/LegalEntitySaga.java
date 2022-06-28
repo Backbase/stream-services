@@ -178,7 +178,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private Mono<LegalEntityTask> postContacts(LegalEntityTask streamTask) {
         return Mono.just(streamTask)
                 .flatMap(this::postLegalEntityContacts)
-                .flatMap(this::postServiceAgreementContacts);
+                .flatMap(this::postServiceAgreementContacts)
+                .flatMap(this::postUserContacts);
     }
 
     private Mono<LegalEntityTask> postLegalEntityContacts(LegalEntityTask streamTask) {
@@ -532,7 +533,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .map(streamTask::data);
     }
 
-    private Mono<LegalEntityTask> setupUsers(LegalEntityTask streamTask) {
+    private Mono<LegalEntityTask>  setupUsers(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
         Flux<JobProfileUser> jobProfileUsers = Flux.fromStream(nullableCollectionToStream(legalEntity.getUsers()));
 
@@ -554,6 +555,17 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 }))
             .collectList()
             .thenReturn(streamTask);
+    }
+
+    private Mono<LegalEntityTask> postUserContacts(LegalEntityTask streamTask) {
+        LegalEntity legalEntity = streamTask.getData();
+        Flux<JobProfileUser> jobProfileUsers = Flux.fromStream(nullableCollectionToStream(legalEntity.getUsers()));
+        return jobProfileUsers
+                        .flatMap(jobProfileUser -> {
+                            return postUserContacts(streamTask, jobProfileUser.getContacts(), jobProfileUser.getUser().getExternalId())                                   ;
+                        })
+                .collectList()
+                .thenReturn(streamTask);
     }
 
     private Mono<LegalEntityTask> postUserContacts(LegalEntityTask streamTask, List<ExternalContact> externalContacts, String externalUserId) {
