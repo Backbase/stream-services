@@ -13,6 +13,8 @@ public class BatchProductGroupTask extends StreamTask {
 
     private IngestionMode ingestionMode = IngestionMode.UPDATE;
 
+    private boolean deleteArrangementsInReplaceMode = true;
+
     private BatchProductGroup batchProductGroup;
 
     public BatchProductGroupTask(String id, BatchProductGroup batchProductGroup, IngestionMode ingestionMode) {
