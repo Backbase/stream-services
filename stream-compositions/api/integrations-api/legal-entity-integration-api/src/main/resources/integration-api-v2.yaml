@@ -77,6 +77,10 @@ components:
           description: Indicates if the user is an administrator on the Legal Entity
         identityUserLinkStrategy:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/IdentityUserLinkStrategy'
+        additions:
+          type: object
+          additionalProperties:
+            type: string
 
     PullLegalEntityResponse:
       type: object

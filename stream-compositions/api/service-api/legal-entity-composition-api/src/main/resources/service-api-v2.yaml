@@ -113,6 +113,10 @@ components:
         productChainEnabled:
           type: boolean
           description: Flag to indicate if Product Ingestion should follow Legal Entity Ingestion
+        additions:
+          type: object
+          additionalProperties:
+            type: string
 
     LegalEntityPushIngestionRequest:
       type: object

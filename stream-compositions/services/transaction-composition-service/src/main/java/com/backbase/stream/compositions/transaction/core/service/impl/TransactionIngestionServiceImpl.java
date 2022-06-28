@@ -18,6 +18,7 @@ import com.backbase.stream.worker.model.UnitOfWork;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -42,7 +43,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
 
     private final TransactionConfigurationProperties config;
 
-
+    private final DateTimeFormatter offsetDateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     /**
      * Ingests transactions in pull mode.
@@ -53,22 +54,42 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
     public Mono<TransactionIngestResponse> ingestPull(TransactionIngestPullRequest ingestPullRequest) {
         return buildIntegrationRequest(ingestPullRequest)
                 .map(this::pullTransactions)
+                .map(f -> filterExisting(f, ingestPullRequest.getLastIngestedExternalIds()))
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(list -> handleSuccess(
                         ingestPullRequest.getArrangementId(), list))
                 .onErrorResume(e -> handleError(
                         ingestPullRequest.getArrangementId(), e))
-                .map(this::buildResponse);
+                .map(list -> buildResponse(list, ingestPullRequest));
+    }
+
+    /*
+        Filter by existing/already ingested external ids only works
+        - if the list is not empty
+        - if the filter is enabled in configuration
+     */
+    private Flux<TransactionsPostRequestBody> filterExisting(Flux<TransactionsPostRequestBody> transactionsPostRequestBodyFlux,
+                                   List<String> lastIngestedExternalIds) {
+        if (!config.isTransactionIdsFilterEnabled() ||
+                CollectionUtils.isEmpty(lastIngestedExternalIds)) {
+            return transactionsPostRequestBodyFlux;
+        }
+
+        return transactionsPostRequestBodyFlux.filter(t -> !lastIngestedExternalIds.contains(t.getExternalId()));
     }
 
     private Mono<TransactionIngestPullRequest> buildIntegrationRequest(TransactionIngestPullRequest transactionIngestPullRequest) {
         OffsetDateTime currentTime = OffsetDateTime.now();
-        transactionIngestPullRequest.setDateRangeEnd(currentTime);
-        transactionIngestPullRequest.setDateRangeStart(
-                currentTime.minusDays(config.getDefaultStartOffsetInDays()));
+        OffsetDateTime dateRangeStartFromRequest = transactionIngestPullRequest.getDateRangeStart();
+        OffsetDateTime dateRangeEndFromRequest = transactionIngestPullRequest.getDateRangeEnd();
 
-        if (config.isCursorEnabled()) {
-            log.info("Transaction Cursor is enabled");
+        transactionIngestPullRequest.setDateRangeStart(dateRangeStartFromRequest == null
+                ? currentTime.minusDays(config.getDefaultStartOffsetInDays()) : dateRangeStartFromRequest);
+        transactionIngestPullRequest.setDateRangeEnd(dateRangeEndFromRequest == null
+                ? currentTime : dateRangeEndFromRequest);
+
+        if (dateRangeStartFromRequest == null && config.isCursorEnabled()) {
+            log.info("Transaction Cursor is enabled and Request has no Start Date");
             return getCursor(transactionIngestPullRequest)
                     .switchIfEmpty(createCursor(transactionIngestPullRequest));
         }
@@ -102,7 +123,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
                 .map(TransactionCursorResponse::getCursor)
                 .flatMap(cursor -> mapCursorToIntegrationRequest(request, cursor))
                 .doOnNext(r -> {
-                    log.info("DoOnNext:: {}", r.getArrangementId());
+                    log.info("Patch Transaction Cursor to IN_PROGRESS for :: {}", r.getArrangementId());
                     patchCursor(r.getArrangementId(),
                             buildPatchCursorRequest(
                                     TransactionCursor.StatusEnum.IN_PROGRESS, null, null));
@@ -142,9 +163,14 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
             TransactionIngestPullRequest request, TransactionCursor cursor) {
 
         if (cursor.getLastTxnDate() != null) {
-            OffsetDateTime dateRangeStart = OffsetDateTime.parse(cursor.getLastTxnDate());
+            OffsetDateTime dateRangeStart = OffsetDateTime.parse(cursor.getLastTxnDate(), offsetDateTimeFormatter);
             request.setDateRangeStart(dateRangeStart);
         }
+
+        if (!CollectionUtils.isEmpty(cursor.getLastTxnIds())) {
+            request.setLastIngestedExternalIds(cursor.getLastTxnIds());
+        }
+
         return Mono.just(request);
     }
 
@@ -172,19 +198,26 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
                 .collectList();
     }
 
-    private TransactionIngestResponse buildResponse(List<TransactionsPostResponseBody> transactions) {
+    private TransactionIngestResponse buildResponse(List<TransactionsPostResponseBody> transactions,
+                                                    TransactionIngestPullRequest ingestPullRequest) {
         return TransactionIngestResponse.builder()
                 .transactions(transactions)
+                .arrangementId(ingestPullRequest.getArrangementId())
                 .build();
     }
 
     private void handleSuccess(String arrangementId, List<TransactionsPostResponseBody> transactions) {
         if (config.isCursorEnabled()) {
+            String lastTxnIds = null;
+            if (config.isTransactionIdsFilterEnabled()) {
+                log.info("Transaction Id based filter is enabled");
+                lastTxnIds = transactions.stream().map(TransactionsPostResponseBody::getExternalId)
+                        .collect(Collectors.joining(DELIMITER));
+            }
             patchCursor(arrangementId, buildPatchCursorRequest(
                     TransactionCursor.StatusEnum.SUCCESS,
                     OffsetDateTime.now().format(DateTimeFormatter.ofPattern(dateFormat)),
-                    transactions.stream().map(TransactionsPostResponseBody::getExternalId)
-                            .collect(Collectors.joining(DELIMITER))));
+                    lastTxnIds));
         }
 
         transactionPostIngestionService.handleSuccess(transactions);

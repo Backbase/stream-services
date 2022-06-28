@@ -1,17 +1,35 @@
 package com.backbase.stream.compositions.product.http;
 
-import com.backbase.stream.compositions.product.ProductCompositionApplication;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
 import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
+import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
+import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
+import com.backbase.stream.compositions.transaction.client.model.TransactionsPostResponseBody;
+import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.product.BatchProductIngestionSaga;
+import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.streams.compositions.test.IntegrationTest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
@@ -27,101 +45,159 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-import java.net.URI;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-
-@Disabled
 @DirtiesContext
-@SpringBootTest(classes = {ProductCompositionApplication.class})
+@SpringBootTest
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
+@Slf4j
 class ProductControllerIT extends IntegrationTest {
-    private static final int TOKEN_CONVERTER_PORT = 10000;
-    private static final int INTEGRATION_SERVICE_PORT = 18000;
-    private ClientAndServer integrationServer;
-    private ClientAndServer tokenConverterServer;
-    private MockServerClient integrationServerClient;
-    private MockServerClient tokenConverterServerClient;
-    private static BrokerService broker;
 
-    @MockBean
-    @Qualifier("batchProductIngestionSaga")
-    BatchProductIngestionSaga batchProductIngestionSaga;
+  private static final int TOKEN_CONVERTER_PORT = 10000;
+  private static final int INTEGRATION_SERVICE_PORT = 18000;
+  private static final int TRANSACTION_SERVICE_PORT = 12000;
+  private ClientAndServer integrationServer;
+  private ClientAndServer tokenConverterServer;
+  private ClientAndServer transactionServer;
+  private MockServerClient integrationServerClient;
+  private MockServerClient tokenConverterServerClient;
+  private MockServerClient transactionServerClient;
+  private static BrokerService broker;
 
-    @Autowired
-    ProductController productController;
+  @MockBean
+  @Qualifier("batchProductIngestionSaga")
+  BatchProductIngestionSaga batchProductIngestionSaga;
 
-    @BeforeAll
-    static void initActiveMqBroker() throws Exception {
-        broker = new BrokerService();
-        broker.setBrokerName("activemq");
-        broker.setPersistent(false);
-        broker.start();
-        broker.waitUntilStarted();
+  @Autowired
+  ProductController productController;
+
+  @Autowired
+  ObjectMapper objectMapper;
+
+  static {
+    System.setProperty("spring.application.name", "product-composition-service");
+  }
+
+  @BeforeAll
+  static void initActiveMqBroker() throws Exception {
+    broker = new BrokerService();
+    broker.setBrokerName("activemq");
+    broker.setPersistent(false);
+    broker.start();
+    broker.waitUntilStarted();
+  }
+
+  @BeforeEach
+  void initializeTokenConverterServer() throws IOException {
+    tokenConverterServer = startClientAndServer(TOKEN_CONVERTER_PORT);
+    tokenConverterServerClient = new MockServerClient("localhost", TOKEN_CONVERTER_PORT);
+    tokenConverterServerClient.when(
+        request()
+            .withMethod("POST")
+            .withPath("/oauth/token"))
+        .respond(
+            response()
+                .withStatusCode(200)
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withBody(readContentFromClasspath("token-converter-data/token.json"))
+        );
+  }
+
+  @BeforeEach
+  void initializeIntegrationServer() throws IOException {
+    integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
+    integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
+    integrationServerClient.when(
+        request()
+            .withMethod("POST")
+            .withPath("/integration-api/v2/product-group"))
+        .respond(
+            response()
+                .withStatusCode(200)
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withBody(readContentFromClasspath("integration-data/response.json"))
+        );
+  }
+
+  @BeforeEach
+  void initializeTransactionServer() throws JsonProcessingException {
+    transactionServer = startClientAndServer(TRANSACTION_SERVICE_PORT);
+    transactionServerClient = new MockServerClient("localhost", TRANSACTION_SERVICE_PORT);
+    transactionServerClient.when(
+        request()
+            .withMethod("POST")
+            .withPath("/service-api/v2/ingest/pull"))
+        .respond(
+            response()
+                .withStatusCode(200)
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withBody(
+                    objectMapper.writeValueAsString(new TransactionIngestionResponse()
+                        .withTransactions(List.of(new TransactionsPostResponseBody().withId("id")
+                            .withExternalId("externalId"))))
+                ));
+  }
+
+  @AfterEach
+  void stopMockServer() {
+    tokenConverterServer.stop();
+    while (!tokenConverterServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
     }
-
-    @BeforeEach
-    void initializeTokenConverterServer() throws IOException {
-        tokenConverterServer = startClientAndServer(TOKEN_CONVERTER_PORT);
-        tokenConverterServerClient = new MockServerClient("localhost", TOKEN_CONVERTER_PORT);
-        tokenConverterServerClient.when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/oauth/token"))
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withContentType(MediaType.APPLICATION_JSON)
-                                .withBody(readContentFromClasspath("token-converter-data/token.json"))
-                );
+    integrationServer.stop();
+    while (!integrationServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
     }
-
-    @BeforeEach
-    void initializeIntegrationServer() throws IOException {
-        integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
-        integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
-        integrationServerClient.when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/integration-api/v2/product-group"))
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withContentType(MediaType.APPLICATION_JSON)
-                                .withBody(readContentFromClasspath("integration-data/response.json"))
-                );
+    transactionServer.stop();
+    while (!transactionServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
     }
+  }
 
-    @AfterEach
-    void stopMockServer() {
-        tokenConverterServer.stop();
-        integrationServer.stop();
-    }
+  @Test
+  void pullIngestProduct_Success() throws Exception {
 
-    @Test
-    void pullIngestLegalEntity_Success() throws Exception {
-        ProductGroup productGroup = new Gson()
-                .fromJson(readContentFromClasspath("integration-data/response.json"), ProductGroup.class);
+    ProductGroup productGroup = new Gson()
+        .fromJson(readContentFromClasspath("integration-data/response.json"), ProductGroup.class);
+    productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
 
-        when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
-                .thenReturn(Mono.just(new ProductGroupTask(productGroup)));
+    ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
+    Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-        ProductPullIngestionRequest pullIngestionRequest =
-                new ProductPullIngestionRequest()
-                        .withLegalEntityExternalId("leId")
-                        .withServiceAgreementExternalId("saExId")
-                        .withServiceAgreementInternalId("saId")
-                        .withUserExternalId("userId");
+    when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+        .thenReturn(productGroupTaskMono);
 
-        URI uri = URI.create("/service-api/v2/pull-ingestion");
-        WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+    when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
+        .thenReturn(Mono.just(new BatchProductGroupTask()
+            .data(new BatchProductGroup().productGroups(List.of(productGroup))
+                .serviceAgreement(productGroup.getServiceAgreement()))));
 
-        webTestClient.post().uri(uri).body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class).exchange().expectStatus().isCreated();
-    }
+    ProductPullIngestionRequest pullIngestionRequest =
+        new ProductPullIngestionRequest()
+            .withLegalEntityExternalId("leId")
+            .withServiceAgreementExternalId("saExId")
+            .withServiceAgreementInternalId("saId")
+            .withUserExternalId("userId")
+            .withReferenceJobRoleNames(List.of("Admin Role"))
+            .withMembershipAccounts(null)
+            .withAdditions(Map.of());
+
+    URI uri = URI.create("/service-api/v2/ingest/pull");
+    WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+
+    webTestClient.post().uri(uri)
+        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+        .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class).exchange()
+        .expectStatus().isCreated();
+  }
+
+  @Test
+  void pushIngestProduct_Success() throws Exception {
+    ProductPushIngestionRequest pushIngestionRequest = new ProductPushIngestionRequest()
+        .withProductGgroup(new com.backbase.stream.compositions.product.api.model.ProductGroup());
+    URI uri = URI.create("/service-api/v2/ingest/push");
+    WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+
+    webTestClient.post().uri(uri)
+        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+        .body(Mono.just(pushIngestionRequest), ProductPushIngestionRequest.class).exchange()
+        .expectStatus().is5xxServerError();
+  }
+
 }

@@ -34,10 +34,10 @@ class TransactionCursorControllerTest {
 
   @Test
   void testDeleteCursor_success() {
-    when(transactionCursorService.deleteCursor(any()))
+    when(transactionCursorService.deleteByArrangementId(any()))
         .thenReturn(Mono.empty());
-    transactionCursorController.deleteCursor(any(), null);
-    verify(transactionCursorService).deleteCursor(any());
+    transactionCursorController.deleteByArrangementId(any(), null);
+    verify(transactionCursorService).deleteByArrangementId(any());
   }
 
   @Test

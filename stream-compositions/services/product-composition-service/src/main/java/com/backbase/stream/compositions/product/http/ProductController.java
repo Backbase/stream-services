@@ -58,7 +58,7 @@ public class ProductController implements ProductCompositionApi {
                 .userExternalId(request.getUserExternalId())
                 .userInternalId(request.getUserInternalId())
                 .membershipAccounts(request.getMembershipAccounts())
-                .additionalParameters(request.getAdditionalParameters())
+                .additions(request.getAdditions())
                 .referenceJobRoleNames(request.getReferenceJobRoleNames())
                 .build();
     }

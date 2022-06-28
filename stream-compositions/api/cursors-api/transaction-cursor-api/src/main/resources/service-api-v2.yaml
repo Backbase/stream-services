@@ -107,6 +107,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InternalServerError'
+    delete:
+      tags:
+        - TransactionCursor
+      summary: Deletes Transaction Cursor by arrangement id.
+      description: Delete Transaction Cursor by Arrangement Id.
+      operationId: deleteByArrangementId
+      parameters:
+        - name: arrangementId
+          in: path
+          required: true
+          description: internal id of the arrangement
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transaction Cursor Deleted.
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
   /service-api/v2/cursor/upsert:
     post:
       tags:
@@ -139,22 +167,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InternalServerError'
-  /service-api/v2/cursor/delete:
-    delete:
+  /service-api/v2/cursor/filter:
+    post:
       tags:
         - TransactionCursor
-      summary: Deletes Transaction Cursor by id or arrangement id.
-      description: Patches Transaction Cursor by Id or Arrangement Id.
-      operationId: deleteCursor
+      summary: Filters the Transaction Cursor records.
+      description: Filters the Transaction Cursor records.
+      operationId: filterCursor
       requestBody:
-        description: Delete Transaction Cursor
+        description: Filter Transaction Cursors
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TransactionCursorDeleteRequest'
+              $ref: '#/components/schemas/TransactionCursorFilterRequest'
       responses:
         "200":
-          description: Transaction Cursor Patched.
+          description: Transaction Cursor Filtered.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionCursorResponse'
         "400":
           description: BadRequest
           content:
@@ -167,6 +201,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InternalServerError'
+
 components:
   schemas:
     BadRequest:
@@ -198,10 +233,8 @@ components:
           type: array
           description: ids of the last ingested transaction record
           items:
-            properties:
-              txnId:
-                type: string
-                description: id of the transaction ingested in previous execution
+            type: string
+            description: id of the transaction ingested in previous execution
         legalEntityId:
           type: string
           description: The internal legal entity id
@@ -245,13 +278,13 @@ components:
         lastTxnIds:
           type: string
 
-    TransactionCursorDeleteRequest:
+    TransactionCursorFilterRequest:
       type: object
-      description: Use one of id or arrangement id to delete the corresponding cursor
+      description: Filter cursors by the last ingested date and status
       properties:
-        id:
+        lastTxnDate:
           type: string
-        arrangementId:
+        status:
           type: string
 
     InternalServerError:

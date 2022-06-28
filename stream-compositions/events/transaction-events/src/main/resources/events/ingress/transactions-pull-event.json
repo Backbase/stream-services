@@ -2,15 +2,24 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "externalArrangementIds": {
-      "description": "list of external arrangement ids",
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+    "arrangementId": {
+      "type": "string"
+    },
+    "externalArrangementId": {
+      "type": "string"
+    },
+    "legalEntityInternalId": {
+      "type": "string"
+    },
+    "dateRangeStart": {
+      "type": "string"
+    },
+    "dateRangeEnd": {
+      "type": "string"
+    },
+    "billingCycles": {
+      "type": "integer"
     }
-  },
-  "required": [
-    "externalArrangementIds"
-  ]
+
+  }
 }

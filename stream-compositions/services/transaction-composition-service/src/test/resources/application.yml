@@ -44,21 +44,22 @@ backbase:
       authentication:
         required-scope: api:service
   stream:
-    legalentity:
-      sink:
-        useIdentityIntegration: true
     dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
-    identity:
-      identity-integration-base-url: http://identity-integration-service:8080
-
+      user-manager-base-url: http://localhost:8086/user-manager
+      access-control-base-url: http://localhost:8086/access-control
+      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+      transaction-manager-base-url: http://localhost:8083/transaction-manager
     compositions:
-      product:
-        enable-completed-events: false
-        enable-failed-events: true
-        product-integration-url: http://localhost:18000
+      transaction:
+        defaultStartOffsetInDays: 30
+        integration-base-url: http://localhost:18000
+        events:
+          enableCompleted: true
+          enableFailed: true
+        cursor:
+          enabled: true
+          transactionIdsFilterEnabled: false
+          base-url: http://localhost:12000
 
 logging:
   level:

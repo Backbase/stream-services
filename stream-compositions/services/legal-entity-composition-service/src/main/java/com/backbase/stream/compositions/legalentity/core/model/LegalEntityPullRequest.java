@@ -1,34 +1,40 @@
 package com.backbase.stream.compositions.legalentity.core.model;
 
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
+import lombok.Setter;
 
-@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class LegalEntityPullRequest {
-    private String legalEntityExternalId;
 
-    private String taxId;
+  private String legalEntityExternalId;
 
-    private String userExternalId;
+  private String taxId;
 
-    private String parentLegalEntityExternalId;
+  private String userExternalId;
 
-    private String realmName;
+  private String parentLegalEntityExternalId;
 
-    private List<String> referenceJobRoleNames;
+  private String realmName;
 
-    private Boolean isAdmin;
+  private List<String> referenceJobRoleNames;
 
-    private IdentityUserLinkStrategy identityUserLinkStrategy;
+  private Boolean isAdmin;
 
-    private Map<String, String> additionalParameters;
+  private IdentityUserLinkStrategy identityUserLinkStrategy;
 
-    private Boolean productChainEnabled;
+  private Map<String, String> additions;
+
+  private Boolean productChainEnabled;
 }
 

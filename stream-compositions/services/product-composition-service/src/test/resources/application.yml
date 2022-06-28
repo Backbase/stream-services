@@ -1,6 +1,6 @@
 spring:
   activemq:
-    broker-url: tcp://localhost:61616
+    broker-url: vm://activemq
   zipkin:
     enabled: false
   security:
@@ -14,7 +14,7 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+            token-uri: http://localhost:10000/oauth/token
   main:
     allow-bean-definition-overriding: true
 sso:
@@ -28,10 +28,8 @@ sso:
           value: SIG_SECRET_KEY
 eureka:
   client:
-    enabled: true
-    serviceUrl.defaultZone: http://localhost:8080/registry/eureka
-server:
-  port: 9002
+    enabled: false
+
 backbase:
   mtls:
     enabled: false
@@ -45,11 +43,11 @@ backbase:
       arrangement-manager-base-url: http://localhost:8082/arrangement-manager
     compositions:
       product:
-        integration-base-url: http://localhost:9999
+        integration-base-url: http://localhost:18000
         chains:
           transaction-composition:
             enabled: true
-            base-url: http://localhost:9003
+            base-url: http://localhost:12000
             async: false
             excludeProductTypeExternalIds:
         events:
@@ -61,4 +59,8 @@ backbase:
 
 logging:
   level:
-    com.backbase.stream.compositions: INFO
+    com.backbase.stream.compositions: DEBUG
+
+activemq:
+  store:
+    dir: /tmp

@@ -21,7 +21,8 @@ public class TransactionIngestPushEventHandler implements EventHandler<Transacti
     @Override
     public void handle(EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
         buildRequest(envelopedEvent)
-        .map(transactionIngestionService::ingestPush);
+        .flatMap(transactionIngestionService::ingestPush)
+        .subscribe();
     }
 
     /**

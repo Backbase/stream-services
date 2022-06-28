@@ -59,7 +59,7 @@ public class TransactionController implements TransactionCompositionApi {
                 .externalArrangementId(request.getExternalArrangementId())
                 .dateRangeStart(request.getDateRangeStart())
                 .dateRangeEnd(request.getDateRangeEnd())
-                .additionalParameters(request.getAdditionalParameters())
+                .additions(request.getAdditions())
                 .build();
     }
 
