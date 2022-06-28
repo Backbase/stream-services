@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-legal-entity</artifactId>
-        <version>2.75.0</version>
+        <version>2.76.0</version>
     </parent>
 
     <artifactId>legal-entity-core</artifactId>
@@ -30,6 +30,12 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>limits-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -74,6 +80,7 @@
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>service-sdk-starter-test</artifactId>

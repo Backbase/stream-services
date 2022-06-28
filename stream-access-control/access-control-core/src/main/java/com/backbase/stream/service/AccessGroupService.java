@@ -349,7 +349,7 @@ public class AccessGroupService {
             });
     }
 
-    private Flux<ServiceAgreementParticipantsGetResponseBody> getServiceAgreementParticipants(
+    public Flux<ServiceAgreementParticipantsGetResponseBody> getServiceAgreementParticipants(
         StreamTask streamTask, ServiceAgreement serviceAgreement) {
         return serviceAgreementsApi.getServiceAgreementParticipants(serviceAgreement.getInternalId())
             .onErrorResume(WebClientResponseException.NotFound.class, e -> Flux.empty())
@@ -942,6 +942,7 @@ public class AccessGroupService {
 
         List<String> dataItems = Stream.concat(StreamUtils.getInternalProductIds(productGroup).stream(), StreamUtils.getCustomDataGroupItems(productGroup).stream())
             .collect(Collectors.toList());
+        log.info("Data Access Group data items: {}", dataItems);
         DataGroupItemSystemBase dataGroupItemSystemBase = new DataGroupItemSystemBase();
         dataGroupItemSystemBase.setName(productGroup.getName());
         dataGroupItemSystemBase.setDescription(productGroup.getDescription());
@@ -1332,7 +1333,12 @@ public class AccessGroupService {
                     "Failed to setup Job Role: " + badRequest.getResponseBodyAsString()));
             })
             .collectList()
-            .map(idItems -> jobRole);
+            .map(idItems -> {
+                if(!CollectionUtils.isEmpty(idItems) && idItems.get(0).getResourceId() != null) {
+                    jobRole.setId(idItems.get(0).getResourceId());
+                }
+                return jobRole;
+            });
     }
 
     private Mono<List<BatchResponseItemExtended>> updateBatchBusinessFunctionGroup(StreamTask streamTask,

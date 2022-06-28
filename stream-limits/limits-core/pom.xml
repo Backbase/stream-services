@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-limits</artifactId>
-        <version>2.75.0</version>
+        <version>2.76.0</version>
     </parent>
 
     <artifactId>limits-core</artifactId>
@@ -33,6 +33,18 @@
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-worker</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>service-sdk-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>2.75.0</version>
+    <version>2.76.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
@@ -30,9 +30,8 @@
         <module>stream-cursor</module>
 
         <module>stream-product-catalog</module>
-
-        <module>stream-legal-entity</module>
         <module>stream-limits</module>
+        <module>stream-legal-entity</module>
 
         <module>stream-approvals</module>
         <module>stream-portfolio</module>
