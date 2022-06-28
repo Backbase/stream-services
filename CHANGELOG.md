@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.76.0]
+### Added
+- Support for updating Portfolio Capability data. Example([stream-portfolio/readme.md](stream-portfolio/readme.md#Bootstrap Ingestion Configuration))
+
 ## [2.75.0]
 Clean up of many old components and replaced Stream SDK with Service SDK 14
 > By moving to Service SDK, pipelines can now be configured like any other Backbase service using the Service SDK
