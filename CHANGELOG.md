@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.77.0]
+### Added
+- Support for updating Portfolio Capability data. Example([stream-portfolio/readme.md](stream-portfolio/readme.md#Bootstrap Ingestion Configuration))
+
 ## [2.76.0]
 ### Added
 - Support for LE limits
@@ -125,10 +129,6 @@ productGroups:
         referenceJobRoleNames:
           - Domestic Payments
 ```
-
-## [2.76.0]
-### Added
-- Support for updating Portfolio Capability data. Example([stream-portfolio/readme.md](stream-portfolio/readme.md#Bootstrap Ingestion Configuration))
 
 ## [2.75.0]
 Clean up of many old components and replaced Stream SDK with Service SDK 14
