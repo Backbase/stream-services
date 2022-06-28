@@ -1042,6 +1042,8 @@ components:
           $ref: '#/components/schemas/PhoneNumber'
         fullName:
           type: string
+        supportsLimit:
+          type: boolean
         limit:
           $ref: '#/components/schemas/Limit'
         additions:
@@ -1177,6 +1179,8 @@ components:
       title: Limit
       type: object
       properties:
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
         transactional:
           $ref: '#/components/schemas/TransactionalLimit'
         daily:
@@ -1405,6 +1409,8 @@ components:
             $ref: '#/components/schemas/JobRole'
         creatorLegalEntity:
           $ref: '#/components/schemas/ExternalIdentifier'
+        limit:
+          $ref: '#/components/schemas/Limit'
         additions:
           type: object
           additionalProperties:
@@ -1427,6 +1433,8 @@ components:
         - sharingUsers
       type: object
       properties:
+        internalId:
+          $ref: '#/components/schemas/InternalIdentifier'
         externalId:
           $ref: '#/components/schemas/ExternalIdentifier'
         sharingUsers:
@@ -1450,6 +1458,8 @@ components:
           enum:
             - "ADD"
             - "REMOVE"
+        limit:
+          $ref: '#/components/schemas/Limit'
     LegalEntityStatus:
       type: string
       description: Status of the entity
@@ -1693,59 +1703,23 @@ components:
         currencyCode:
           $ref: '#/components/schemas/CurrencyCode'
     TransactionalLimit:
-      type: object
-      description: "Transactional Limit"
-      properties:
-        amount:
-          type: number
-          format: double
-        currencyCode:
-          $ref: '#/components/schemas/CurrencyCode'
+      type: number
+      format: double
     DailyLimit:
-      type: object
-      description: "Daily Limit"
-      properties:
-        amount:
-          type: number
-          format: double
-        currencyCode:
-          $ref: '#/components/schemas/CurrencyCode'
+      type: number
+      format: double
     WeeklyLimit:
-      type: object
-      description: "Weekly Limit"
-      properties:
-        amount:
-          type: number
-          format: double
-        currencyCode:
-          $ref: '#/components/schemas/CurrencyCode'
+      type: number
+      format: double
     MonthlyLimit:
-      type: object
-      description: "Monthly Limit"
-      properties:
-        amount:
-          type: number
-          format: double
-        currencyCode:
-          $ref: '#/components/schemas/CurrencyCode'
+      type: number
+      format: double
     QuarterlyLimit:
-      type: object
-      description: "Quarterly Limit"
-      properties:
-        amount:
-          type: number
-          format: double
-        currencyCode:
-          $ref: '#/components/schemas/CurrencyCode'
+      type: number
+      format: double
     YearlyLimit:
-      type: object
-      description: "Yearly Limit"
-      properties:
-        amount:
-          type: number
-          format: double
-        currencyCode:
-          $ref: '#/components/schemas/CurrencyCode'
+      type: number
+      format: double
 
     ProductState:
       type: object
