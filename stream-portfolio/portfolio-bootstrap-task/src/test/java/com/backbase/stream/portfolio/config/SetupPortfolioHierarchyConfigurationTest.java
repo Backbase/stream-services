@@ -9,7 +9,6 @@ import com.backbase.stream.portfolio.PortfolioSaga;
 import com.backbase.stream.portfolio.PortfolioTask;
 import com.backbase.stream.portfolio.model.WealthBundle;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,7 +34,7 @@ class SetupPortfolioHierarchyConfigurationTest {
         when(bootstrapConfigurationProperties.getWealthBundles()).thenReturn(List.of(wealthBundle));
         when(portfolioSaga.executeTask(any(PortfolioTask.class))).thenReturn(Mono.empty());
 
-        Assertions.assertEquals(0, configuration.execute());
+        configuration.execute();
 
         verify(portfolioSaga).executeTask(
             Mockito.argThat(portfolioTask -> portfolioTask.getData().equals(wealthBundle)));
@@ -44,7 +43,7 @@ class SetupPortfolioHierarchyConfigurationTest {
     @Test
     void commandLineRunnerNoData() {
 
-        Assertions.assertEquals(1, configuration.execute());
+        configuration.execute();
 
         verify(portfolioSaga, never()).executeTask(any());
     }
