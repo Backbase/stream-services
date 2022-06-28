@@ -1,0 +1,60 @@
+required:
+  - code
+  - name
+  - iban
+type: object
+properties:
+  code:
+    type: string
+    description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+  name:
+    type: string
+    description: Name of a portfolio.
+  alias:
+    type: string
+    description: Alias of a portfolio.
+  iban:
+    type: string
+    description: Account ID or an IBAN, where applicable.
+  riskLevel:
+    type: string
+    description: Risk level of a portfolio.
+  valuation:
+    $ref: money.yaml
+    description: Valuation of a portfolio, expressed as a monetary amount.
+  ytdPerformance:
+    type: number
+    description: Year-to-date performance of a portflio, expressed as a percentage.
+  ytdPerformanceValue:
+    $ref: money.yaml
+    description: Year-to-date performance of a portfolio, expressed as a monetary amount.
+  mtdPerformance:
+    type: number
+    description: Month-to-date performance of a portflio, expressed as a percentage.
+  mtdPerformanceValue:
+    $ref: money.yaml
+    description: Month-to-date performance of a portfolio, expressed as a monetary amount.
+  inValue:
+    $ref: money.yaml
+    description: Incoming cash for the period of time.
+  outValue:
+    $ref: money.yaml
+    description: Outgoing cash for the period of time.
+  netValue:
+    $ref: money.yaml
+    description: Net cash for the period of time.
+  managers:
+    type: array
+    description: List of managers associated with a portfolio.
+    items:
+      $ref: portfolio-manager.yaml
+  attorneys:
+    type: array
+    description: List of attorneys associated with a portfolio.
+    items:
+      $ref: portfolio-attorney.yaml
+  additions:
+    description: Additional properties.
+    type: object
+    additionalProperties:
+      type: string

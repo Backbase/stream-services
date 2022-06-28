@@ -1,0 +1,17 @@
+# Stream config
+
+spring:
+  zipkin:
+    enabled: false
+  autoconfigure:
+    exclude:
+     - com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration
+
+backbase:
+  stream:
+    dbs:
+      portfolio-base-url: http://portfolio:8080
+
+logging:
+  level:
+    root: INFO

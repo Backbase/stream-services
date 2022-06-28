@@ -1,0 +1,14 @@
+required:
+  - id
+  - name
+type: object
+properties:
+  id:
+    type: string
+    description: ID of attorney, associated with the aggregate portfolio, characterising total wealth of the end-user.
+  name:
+    type: string
+    description: Name of attorney, associated with the aggregate portfolio, characterising total wealth of the end-user.
+  link:
+    type: string
+    description: Link to connect with the attorney, for example, email address or hyperlink to an external system.

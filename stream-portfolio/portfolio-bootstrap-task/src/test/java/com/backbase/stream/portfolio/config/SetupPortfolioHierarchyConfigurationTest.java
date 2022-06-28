@@ -1,0 +1,52 @@
+package com.backbase.stream.portfolio.config;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.backbase.stream.portfolio.PortfolioSaga;
+import com.backbase.stream.portfolio.PortfolioTask;
+import com.backbase.stream.portfolio.model.WealthBundle;
+import java.util.List;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+
+@ExtendWith(MockitoExtension.class)
+class SetupPortfolioHierarchyConfigurationTest {
+
+    @Mock
+    private PortfolioSaga portfolioSaga;
+    @Mock
+    private BootstrapConfigurationProperties bootstrapConfigurationProperties;
+    @InjectMocks
+    SetupPortfolioHierarchyConfiguration configuration;
+
+    @Test
+    void commandLineRunner() {
+        WealthBundle wealthBundle = new WealthBundle();
+
+        when(bootstrapConfigurationProperties.getWealthBundles()).thenReturn(List.of(wealthBundle));
+        when(portfolioSaga.executeTask(any(PortfolioTask.class))).thenReturn(Mono.empty());
+
+        Assertions.assertEquals(0, configuration.execute());
+
+        verify(portfolioSaga).executeTask(
+            Mockito.argThat(portfolioTask -> portfolioTask.getData().equals(wealthBundle)));
+    }
+
+    @Test
+    void commandLineRunnerNoData() {
+
+        Assertions.assertEquals(1, configuration.execute());
+
+        verify(portfolioSaga, never()).executeTask(any());
+    }
+
+}

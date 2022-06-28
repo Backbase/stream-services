@@ -14,7 +14,6 @@
 
     <properties>
         <sonar.skip>true</sonar.skip>
-        <japicmp.skip>true</japicmp.skip>
     </properties>
 
     <dependencyManagement>
@@ -154,6 +153,14 @@
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase</groupId>
+                                    <artifactId>portfolio</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
                             </artifactItems>
                             <includes>**/*.yaml, **/*.json</includes>
                         </configuration>
@@ -287,7 +294,36 @@
                             <modelPackage>com.backbase.identity.integration.api.service.v1.model</modelPackage>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-portfolio-instrument-integration-api-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-instrument-integration-inbound-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.portfolio.instrument.integration.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.portfolio.instrument.integration.api.service.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-portfolio-integration-api-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-integration-inbound-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.portfolio.integration.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.portfolio.api.service.integration.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
 
         </plugins>

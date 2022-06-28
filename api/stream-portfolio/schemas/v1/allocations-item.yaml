@@ -1,0 +1,27 @@
+required:
+  - classifierType
+  - classifierName
+  - allocationPct
+  - valuation
+type: object
+properties:
+  classifierType:
+    type: string
+    description: Classifier type defines the allocation type; can be either CURRENCY or ASSET_CLASS.
+    enum:
+      - CURRENCY
+      - ASSET_CLASS
+  classifierName:
+    type: string
+    description: Classifier name denotes the name of the selected classifier type; can be either an asset class name or a currency name, specified in ISO 4217 format.
+  allocationPct:
+    type: number
+    description: Allocation in percent for the given item.
+  valuation:
+    $ref: money.yaml
+    description: Valuation of the item in the given currency.
+  additions:
+    description: Additional properties.
+    type: object
+    additionalProperties:
+      type: string

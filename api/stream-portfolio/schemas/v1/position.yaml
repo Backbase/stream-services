@@ -1,0 +1,65 @@
+required:
+  - externalId
+  - instrumentId
+  - portfolioCode
+type: object
+properties:
+  externalId:
+    type: string
+    description: Portfolio external id.
+  instrumentId:
+    type: string
+    description: Instrument external id.
+  absolutePerformance:
+    $ref: money.yaml
+    description: Absolute price change for an instrument during a period of time.
+  relativePerformance:
+    type: number
+    description: Relative price change over a period of time, expressed as a percentage.
+  purchasePrice:
+    $ref: money.yaml
+    description: Purchase price of an instrument.
+  unrealizedPLPct:
+    type: number
+    description: Unrealized current profit or loss on an open position, expressed as a percentage.
+  unrealizedPL:
+    $ref: money.yaml
+    description: Unrealized current profit or loss on an open position, expressed as an absolute number.
+  todayPLPct:
+    type: number
+    description: Today profit or loss on an open position, expressed as a percentage.
+  todayPL:
+    $ref: money.yaml
+    description: Today profit or loss on an open position, expressed as an absolute number.
+  accruedInterest:
+    $ref: money.yaml
+    description: Accrued interest on bond holdings.
+  quantity:
+    type: number
+    description: Position quantity; amount of instrument units in a portfolio.
+  valuation:
+    $ref: money.yaml
+    description: Valuation of a position item in a portfolio.
+  costPrice:
+    $ref: money.yaml
+    description: Instrument price used in the last transaction, expressed in the currency of instrument denomination.
+  costExchangeRate:
+    $ref: money.yaml
+    description: Exchange rate used in the last transaction on an instrument position.
+  percentAssetClass:
+    type: number
+    description: Share of the instrument position in an asset class, expressed as a percentage.
+  percentPortfolio:
+    type: number
+    description: Share of the instrument position in a portfolio, expressed as a percentage.
+  percentParent:
+    type: number
+    description: Share of the instrument position across all the portfolios, expressed as a percentage.
+  positionType:
+    type: string
+    description: A type of the position the given transaction belongs to. E.g. Cash position or Security.
+  additions:
+    description: Additional properties.
+    type: object
+    additionalProperties:
+      type: string

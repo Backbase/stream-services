@@ -35,7 +35,7 @@
         <module>stream-limits</module>
 
         <module>stream-approvals</module>
-
+        <module>stream-portfolio</module>
     </modules>
 
     <properties>

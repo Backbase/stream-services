@@ -1,0 +1,49 @@
+required:
+  - price
+type: object
+properties:
+  price:
+    $ref: money.yaml
+  buyPrice:
+    deprecated: true
+    $ref: money.yaml
+  sellPrice:
+    deprecated: true
+    $ref: money.yaml
+  pricePerformance:
+    type: number
+    description: Instrument price change over a period of time, expressed as a percentage
+  pricePerformanceAbs:
+    $ref: money.yaml
+    description: Instrument price change over a period of time, expressed as an absolute value in money
+  askPrice:
+    description: The amount
+    type: number
+  bidPrice:
+    description: The amount
+    type: number
+  askVolume:
+    type: number
+    description: Volume
+  bidVolume:
+    type: number
+    description: Volume
+  totalVolume:
+    type: number
+    description: Volume
+  openPrice:
+    type: number
+    description: Price
+  closePrice:
+    type: number
+    description: Price
+  lowPrice:
+    type: number
+    description: Price
+  highPrice:
+    type: number
+    description: Price
+  week52Range:
+    $ref: range.yaml
+  dayRange:
+    $ref: range.yaml
