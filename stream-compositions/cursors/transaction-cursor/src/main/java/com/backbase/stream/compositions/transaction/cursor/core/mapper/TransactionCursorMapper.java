@@ -29,24 +29,28 @@ import org.mapstruct.ReportingPolicy;
 public interface TransactionCursorMapper {
 
   @Mapping(target = "cursor.id", source = "transactionCursorEntity.id")
-  @Mapping(target = "cursor.arrangementId", source = "transactionCursorEntity.arrangement_id")
-  @Mapping(target = "cursor.extArrangementId", source = "transactionCursorEntity.ext_arrangement_id")
-  @Mapping(target = "cursor.lastTxnDate", source = "transactionCursorEntity.last_txn_date")
-  @Mapping(target = "cursor.lastTxnIds", source = "transactionCursorEntity.last_txn_ids", qualifiedBy = WithTxnModelParser.class)
-  @Mapping(target = "cursor.legalEntityId", source = "transactionCursorEntity.legal_entity_id")
+  @Mapping(target = "cursor.arrangementId", source = "transactionCursorEntity.arrangementId")
+  @Mapping(target = "cursor.extArrangementId", source = "transactionCursorEntity.extArrangementId")
+  @Mapping(target = "cursor.lastTxnDate", source = "transactionCursorEntity.lastTxnDate")
+  @Mapping(target = "cursor.lastTxnIds", source = "transactionCursorEntity.lastTxnIds", qualifiedBy = WithTxnModelParser.class)
+  @Mapping(target = "cursor.legalEntityId", source = "transactionCursorEntity.legalEntityId")
   @Mapping(target = "cursor.additions", source = "transactionCursorEntity.additions", qualifiedBy = WithJsonToMap.class)
   @Mapping(target = "cursor.status", source = "transactionCursorEntity.status")
   TransactionCursorResponse mapToModel(TransactionCursorEntity transactionCursorEntity);
 
   @Mapping(target = "id", source = "transactionCursorUpsertRequest.cursor.id")
-  @Mapping(target = "arrangement_id", source = "transactionCursorUpsertRequest.cursor.arrangementId")
-  @Mapping(target = "ext_arrangement_id", source = "transactionCursorUpsertRequest.cursor.extArrangementId")
-  @Mapping(target = "last_txn_ids", source = "transactionCursorUpsertRequest.cursor.lastTxnIds", qualifiedBy = WithTxnDomainParser.class)
-  @Mapping(target = "legal_entity_id", source = "transactionCursorUpsertRequest.cursor.legalEntityId")
+  @Mapping(target = "arrangementId", source = "transactionCursorUpsertRequest.cursor.arrangementId")
+  @Mapping(target = "extArrangementId", source = "transactionCursorUpsertRequest.cursor.extArrangementId")
+  @Mapping(target = "lastTxnIds", source = "transactionCursorUpsertRequest.cursor.lastTxnIds", qualifiedBy = WithTxnDomainParser.class)
+  @Mapping(target = "legalEntityId", source = "transactionCursorUpsertRequest.cursor.legalEntityId")
   @Mapping(target = "additions", source = "transactionCursorUpsertRequest.cursor.additions", qualifiedBy = WithMapToJson.class)
   @Mapping(target = "status", source = "transactionCursorUpsertRequest.cursor.status")
   TransactionCursorEntity mapToDomain(
       TransactionCursorUpsertRequest transactionCursorUpsertRequest);
+
+
+  List<TransactionCursorResponse> mapToListModel(
+      List<TransactionCursorEntity> transactionCursorEntity);
 
   @Qualifier
   @Target(ElementType.METHOD)
@@ -56,7 +60,7 @@ public interface TransactionCursorMapper {
   }
 
   @WithTxnModelParser
-  default List<Object> convertLastTransToListFormat(String lastTxnIds) {
+  default List<String> convertLastTransToListFormat(String lastTxnIds) {
     if (Objects.nonNull(lastTxnIds)) {
       return Stream.of(lastTxnIds.split(",")).collect(Collectors.toList());
     }
@@ -71,9 +75,9 @@ public interface TransactionCursorMapper {
   }
 
   @WithTxnDomainParser
-  default String convertLastTransToStringFormat(List<Object> lastTxnIds) {
+  default String convertLastTransToStringFormat(List<String> lastTxnIds) {
     if (Objects.nonNull(lastTxnIds)) {
-      return lastTxnIds.stream().map(Object::toString).collect(Collectors.joining(","));
+      return String.join(",", lastTxnIds);
     }
     return null;
   }

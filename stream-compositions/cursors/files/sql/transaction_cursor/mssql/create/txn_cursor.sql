@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[txn_cursor]
     [arrangement_id] [nvarchar](36) NULL,
     [ext_arrangement_id] [nvarchar](50) NULL,
     [last_txn_date] [datetime] NULL,
-    [last_txn_ids] [nvarchar](2600) NULL,
+    [last_txn_ids] [nvarchar](4000) NULL,
     [legal_entity_id] [nvarchar](36) NULL,
     [additions] [nvarchar](max) NULL,
     [status] [nvarchar](45) NULL,

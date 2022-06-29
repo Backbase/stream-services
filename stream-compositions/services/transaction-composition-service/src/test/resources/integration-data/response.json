@@ -1,8 +1,47 @@
 [
   {
-    "id": "1"
-  },
-  {
-    "id": "2"
+    "externalId": "externalId",
+    "externalArrangementId": "externalArrangementId",
+    "reference": null,
+    "description": "Transfer To Share 30",
+    "typeGroup": "Withdrawal",
+    "type": "Withdrawal",
+    "category": null,
+    "bookingDate": [
+      2022,
+      5,
+      17
+    ],
+    "valueDate": null,
+    "creditDebitIndicator": "DBIT",
+    "transactionAmountCurrency": {
+      "amount": "14.78",
+      "currencyCode": "USD",
+      "additions": null
+    },
+    "instructedAmountCurrency": {
+      "amount": "14.78",
+      "currencyCode": "USD",
+      "additions": null
+    },
+    "currencyExchangeRate": null,
+    "counterPartyName": null,
+    "counterPartyAccountNumber": null,
+    "counterPartyBIC": null,
+    "counterPartyCountry": null,
+    "counterPartyCity": null,
+    "counterPartyAddress": null,
+    "counterPartyBankName": null,
+    "creditorId": null,
+    "mandateReference": null,
+    "billingStatus": "BILLED",
+    "checkSerialNumber": null,
+    "sequenceNumber": "4929534",
+    "runningBalance": 1240.71,
+    "creationTime": null,
+    "checkImageAvailability": "UNAVAILABLE",
+    "enrichmentIndicator": null,
+    "disputeStatus": null,
+    "batchOrderId": null
   }
 ]

@@ -55,8 +55,6 @@ public class ProductCatalogIngestionServiceImpl implements ProductCatalogIngesti
 
     private void handleSuccess(ProductCatalog productCatalog) {
         log.info("Product catalog ingestion completed");
-        if (log.isDebugEnabled()) {
-            log.debug("Ingested product catalog: {}", productCatalog);
-        }
+        log.debug("Ingested product catalog: {}", productCatalog);
     }
 }

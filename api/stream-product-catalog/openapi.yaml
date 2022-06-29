@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Backbase Stream API
+  title: Product Catalog API
   version: 1.0.0
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"

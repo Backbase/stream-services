@@ -46,9 +46,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .flatMap(this::processChains)
                 .doOnNext(this::processSuccessEvent)
                 .doOnNext(r -> {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Ingested products: {}", res.getProductGroup());
-                    }
+                    log.debug("Ingested products: {}", res.getProductGroup());
                 });
     }
 
@@ -68,9 +66,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         Mono<ProductIngestResponse> transactionChainMono;
 
         if (!config.isTransactionChainEnabled()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Transaction Chain is disabled");
-            }
+            log.debug("Transaction Chain is disabled");
             transactionChainMono = Mono.just(res);
         } else if (config.isTransactionChainAsync()) {
             transactionChainMono = ingestTransactionsAsync(res);
@@ -84,14 +80,12 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<ProductIngestResponse> ingestTransactions(ProductIngestResponse res) {
         return extractProducts(res.getProductGroup())
-                .map(this::buildTransactionPullRequest)
+                .map(product -> buildTransactionPullRequest(product, res))
                 .flatMap(transactionCompositionApi::pullTransactions)
                 .onErrorResume(this::handleTransactionError)
                 .doOnNext(response -> {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Response from Transaction Composition: {}",
-                                response.getTransactions());
-                    }
+                    log.debug("Response from Transaction Composition: {}",
+                            response.getTransactions());
                 })
                 .collectList()
                 .map(p -> res);
@@ -99,8 +93,8 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<ProductIngestResponse> ingestTransactionsAsync(ProductIngestResponse res) {
         return extractProducts(res.getProductGroup())
-                .map(this::buildTransactionPullRequest)
-                .doOnNext(transactionCompositionApi::pullTransactions)
+                .map(product -> buildTransactionPullRequest(product, res))
+                .doOnNext(request -> transactionCompositionApi.pullTransactions(request).subscribe())
                 .doOnNext(t -> log.info("Async transaction ingestion called for arrangement: {}",
                         t.getArrangementId()))
                 .collectList()
@@ -153,9 +147,10 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         return !excludeList.contains(product.getProductTypeExternalId());
     }
 
-    private TransactionPullIngestionRequest buildTransactionPullRequest(BaseProduct product) {
+    private TransactionPullIngestionRequest buildTransactionPullRequest(BaseProduct product, ProductIngestResponse res) {
         return new TransactionPullIngestionRequest()
                 .withLegalEntityInternalId(product.getLegalEntities().get(0).getInternalId())
+                .withAdditions(res.getAdditions())
                 .withArrangementId(product.getInternalId())
                         .withExternalArrangementId(product.getExternalId());
     }

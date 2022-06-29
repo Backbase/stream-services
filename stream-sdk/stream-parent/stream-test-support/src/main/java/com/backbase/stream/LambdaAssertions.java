@@ -1,4 +1,4 @@
-package com.backbase.stream.test;
+package com.backbase.stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

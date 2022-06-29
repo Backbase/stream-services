@@ -1,4 +1,5 @@
-server.port: 7083
+server:
+  port: 9003
 
 spring:
   activemq:
@@ -49,21 +50,19 @@ backbase:
       arrangement-manager-base-url: http://localhost:8082/arrangement-manager
     compositions:
       product:
-        enable-completed-event: true
-        enable-failed-event: false
-        integration-base-url: http://localhost:5083
+        integration-base-url: http://localhost:7003
         chains:
           transaction-composition:
-            enableOnComplete: false
-            enableOnFailure: false
-            base-url: http://localhost:9003
+            enabled: true
+            base-url: http://localhost:9004
             async: false
+            excludeProductTypeExternalIds:
         events:
           enableCompleted: false
           enableFailed: true
         cursor:
           enabled: false
-          base-url: http://localhost:9999
+          base-url: http://localhost:9005
 
 logging:
   level:

@@ -36,7 +36,7 @@ backbase:
       identity-integration-base-url: http://identity-integration-service:8080
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:9999
+        integration-base-url: http://legal-entity-integration:8080
         chains:
           product-composition:
             enabled: true
@@ -47,7 +47,7 @@ backbase:
           enableFailed: true
         cursor:
           enabled: false
-          base-url: http://localhost:9999
+          base-url: http://legal-entity-cursor:8080
 bootstrap:
   enabled: false
   # This is just an example. Replace it with data corresponding to your bank
@@ -123,7 +123,3 @@ bootstrap:
           identityLinkStrategy: "IDENTITY_AGNOSTIC"
         referenceJobRoleNames:
           - "Entitlements - Manager"
-
-logging:
-  level:
-    com.backbase.stream.compositions: INFO

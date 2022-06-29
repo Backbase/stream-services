@@ -1,4 +1,5 @@
-server.port: 7081
+server:
+  port: 9001
 
 spring:
   activemq:
@@ -47,21 +48,20 @@ backbase:
       identity-integration-base-url: http://localhost:8181/identity-integration-service
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:5081
+        integration-base-url: http://localhost:7001
         chains:
           product-composition:
-            enableOnComplete: true
-            enableOnFailure: false
-            base-url: http://localhost:7083/product-composition-service
+            enabled: true
+            base-url: http://localhost:9003
             async: false
         events:
           enableCompleted: false
           enableFailed: false
         cursor:
           enabled: false
-          base-url: http://localhost:7089/transaction-cursor-service
+          base-url: http://localhost:9005
 bootstrap:
-  enabled: true
+  enabled: false
   # This is just an example. Replace it with data corresponding to your bank
   legalEntity:
     name: "ACME Bank"

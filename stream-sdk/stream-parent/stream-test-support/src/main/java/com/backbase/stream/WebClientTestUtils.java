@@ -1,4 +1,4 @@
-package com.backbase.stream.test;
+package com.backbase.stream;
 
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;

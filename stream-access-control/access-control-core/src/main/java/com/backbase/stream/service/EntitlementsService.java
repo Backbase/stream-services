@@ -79,10 +79,8 @@ public class EntitlementsService {
      */
     public Flux<AccountArrangementItem> getProductsForInternalLegalEntityId(String legalEntityId) {
         return legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntityId)
-            .flux()
-            .flatMap(sa -> accessGroupService.getDataGroupItemIdsByServiceAgreementId(sa.getInternalId())
+            .flatMapMany(sa -> accessGroupService.getDataGroupItemIdsByServiceAgreementId(sa.getInternalId())
                 .flatMap(arrangementService::getArrangement)
-                .flatMap(Mono::just)
             );
     }
 
