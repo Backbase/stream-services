@@ -53,6 +53,11 @@ public class BackbaseStreamConfigurationProperties {
          */
         private String approvalsBaseUrl = "http://approval-service:8080";
 
+        /**
+         * The location of Portfolio Service.
+         */
+        private String portfolioBaseUrl = "http://portfolio:8080";
+
     }
 
     @Data

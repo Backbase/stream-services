@@ -1,0 +1,47 @@
+required:
+  - itemType
+  - externalId
+  - name
+type: object
+properties:
+  itemType:
+    type: string
+    description: |
+      Portfolio positions can be optionally represented as a hierachy of entities - non-mandatory collections,
+      grouped into sub-portfolios, asset classes, regions and countries.
+      Itemtype is used to denote the type of a collection, positions are expected to be grouped into, for example, asset class.
+      Collection is a hierarchy type.
+    enum:
+      - SUB_PORTFOLIO
+      - ASSET_CLASS
+      - REGION
+      - COUNTRY
+  externalId:
+    type: string
+    description: An external id of the item to link a hierarchy entity to a system entity.
+  name:
+    type: string
+    description: Name of a hierarchy item.
+  percentOfParent:
+    type: number
+    description: Percent of parent shows allocation share of the hierarchy item across all existing client account, expressed as a percentage.
+  percentOfPortfolio:
+    type: number
+    description: Share of a hierarchy item in a portfolio, expressed as a percentage.
+  performance:
+    type: number
+    description: Performance of a hierarchy item, expressed as a percentage.
+  unrealizedPL:
+    $ref: money.yaml
+    description: Unrealized current profit or loss on a hierarchy item, expressed as an absolute number.
+  valuation:
+    $ref: money.yaml
+    description: Valuation of a hierarchy item, expressed as a monetary amount.
+  accruedInterest:
+    $ref: money.yaml
+    description: Accrued interest on a hierarchy item.
+  items:
+    type: array
+    description: List of items in a portfolio positions hierarchy.
+    items:
+      $ref: portfolio-positions-hierarchy.yaml

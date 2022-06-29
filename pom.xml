@@ -34,7 +34,7 @@
         <module>stream-legal-entity</module>
 
         <module>stream-approvals</module>
-
+        <module>stream-portfolio</module>
     </modules>
 
     <properties>

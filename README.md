@@ -14,6 +14,7 @@ Currently, the following DBS services are exposed as Stream Components:
 * [Stream-Cursor](stream-cursor/readme.md) (Lib, Rest, Source)  → The Stream Cursor Source is listening to predefined DBS events such as On Login. For each login event, it will retrieve a list of products from entitlements and creates an Ingestion Cursor per product. Cursors can be stored in a RDBMS and published on a HTTP Web Socket or Spring Cloud Dataflow Source. Requires RDBMS, Access Control, Product Summary and Transactions. Login Event received from Authentication Starter or Identity (with Audit Events enabled)
 * [Stream Transactions](stream-transactions) (Lib, Rest) → Allows ingestion into DBS in a controlled way with support for retry, rate limiting and configurable batch sizes. 
 * [Stream DBS Clients](stream-dbs-clients/readme.md) -> The Stream DBS Clients are generated from Backbase OOTB specs and provide a reactive interface to interact with DBS services.
+* [Stream Portfolio](stream-portfolio) (Lib) → Allows ingestion into DBS in a controlled way.
 
 ## Stream API Documentation
 
@@ -25,6 +26,7 @@ You can find listed here the API specification containing the opinionated model 
 | stream-audit           | [openapi.yaml](api/stream-audit/openapi.yaml)           | [Audit](https://engineering.backbase.com/stream-services/api/stream-audit/index.html)                             |
 | stream-approvals       | [openapi.yaml](api/stream-approvals/openapi.yaml)       | [Ingest Approval API](https://engineering.backbase.com/stream-services/api/stream-approvals/index.html)           |
 | stream-product-catalog | [openapi.yaml](api/stream-product-catalog/openapi.yaml) | [Product Catalog API](https://engineering.backbase.com/stream-services/api/stream-product-catalog/index.html)     |
+| stream-portfolio       | [openapi.yaml](api/stream-portfolio/openapi.yaml)    | [Portfolio Ingestion API](https://engineering.backbase.com/stream-services/api/stream-portfolio/index.html)    |
 
 ## Supported DBS versions
 
