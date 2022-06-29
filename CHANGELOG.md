@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [2.77.0]
+## [2.78.0]
 ### Added
 - Support for updating Portfolio Capability data. Example([stream-portfolio/readme.md](stream-portfolio/readme.md#Bootstrap Ingestion Configuration))
 
