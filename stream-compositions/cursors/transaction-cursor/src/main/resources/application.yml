@@ -6,7 +6,7 @@ spring:
   datasource:
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:root}
-    url: jdbc:mysql://localhost:3306/transaction_cursor?useSSL=false
+    url: jdbc:mysql://localhost:3306/transaction_cursor?createDatabaseIfNotExist=true&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
   zipkin:
     enabled: false
@@ -26,6 +26,7 @@ spring:
     allow-bean-definition-overriding: true
   liquibase:
     enabled: true
+    change-log: db/changelog/db.changelog-persistence.xml
 
 
 backbase:
