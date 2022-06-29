@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
@@ -22,7 +23,7 @@ class SetupPortfolioHierarchyConfigurationTest {
 
     @Mock
     private PortfolioSaga portfolioSaga;
-    @Mock
+    @Spy
     private BootstrapConfigurationProperties bootstrapConfigurationProperties;
     @InjectMocks
     SetupPortfolioHierarchyConfiguration configuration;
