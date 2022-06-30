@@ -20,7 +20,7 @@
                 <constraints nullable="false" />
             </column>
             <column name="last_txn_date" type="datetime" remarks="Last Transaction Date" />
-            <column name="last_txn_ids" type="varchar(2600)" remarks="Last Transaction IDs" />
+            <column name="last_txn_ids" type="varchar(4000)" remarks="Last Transaction IDs" />
             <column name="legal_entity_id" type="varchar(36)" remarks="Legal Entity ID" >
                 <constraints nullable="false" />
             </column>
