@@ -217,13 +217,17 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             if (participants.isPresent()) {
                 LegalEntityParticipant participant = participants.get();
                 if (!isEmpty(participant.getUsers())) {
-                    return participant.getUsers().stream().findFirst().get();
+                    return getOptionalUserId(participant.getUsers().stream().findFirst());
                 } else if (!isEmpty(participant.getAdmins())) {
-                    return participant.getAdmins().stream().findFirst().get();
+                    return getOptionalUserId(participant.getAdmins().stream().findFirst());
                 }
             }
         }
         return null;
+    }
+
+    private String getOptionalUserId(Optional<String> optionalUserId) {
+        return optionalUserId.isPresent() ? optionalUserId.get() : null;
     }
 
     private ContactsTask createContactsTask(String streamTaskId, String externalLegalEntityId, String externalServiceAgreementId, String externalUserId, AccessContextScope scope, List<ExternalContact> contacts) {
