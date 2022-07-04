@@ -212,7 +212,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         if (!isEmpty(serviceAgreement.getParticipants())) {
             Optional<LegalEntityParticipant> participants = serviceAgreement.getParticipants()
                     .stream()
-                    .filter(legalEntityParticipant -> legalEntityParticipant.getSharingUsers())
+                    .filter(LegalEntityParticipant::getSharingUsers)
                     .findFirst();
             if (participants.isPresent()) {
                 LegalEntityParticipant participant = participants.get();
@@ -567,9 +567,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         LegalEntity legalEntity = streamTask.getData();
         Flux<JobProfileUser> jobProfileUsers = Flux.fromStream(nullableCollectionToStream(legalEntity.getUsers()));
         return jobProfileUsers
-                        .flatMap(jobProfileUser -> {
-                            return postUserContacts(streamTask, jobProfileUser.getContacts(), jobProfileUser.getUser().getExternalId())                                   ;
-                        })
+                        .flatMap(jobProfileUser -> postUserContacts(streamTask, jobProfileUser.getContacts(), jobProfileUser.getUser().getExternalId()))
                 .collectList()
                 .thenReturn(streamTask);
     }
