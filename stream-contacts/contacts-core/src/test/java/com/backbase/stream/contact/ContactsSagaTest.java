@@ -41,7 +41,7 @@ class ContactsSagaTest {
         result.block();
 
         // Then
-        verify(contactsApi).postContacts(any());
+        verify(contactsApi).postContactsBulk(any());
     }
 
     private ContactsTask createTask() {
