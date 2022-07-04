@@ -189,14 +189,21 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     "Legal Entity: %s does not have any Contacts defined", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
+        ServiceAgreement serviceAgreement = getServiceAgreement(legalEntity);
+        if (serviceAgreement == null) {
+            streamTask.info(SERVICE_AGREEMENT, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
+                    "Legal Entity %s does not have any Service Agreement", legalEntity.getExternalId());
+            return Mono.just(streamTask);
+        }
         log.info("Creating Contacts for Legal Entity Id {}", legalEntity.getExternalId());
-        String externalUserId = getUserExternalId(legalEntity.getUsers());
+        String externalUserId =                                                                                                                                                                                                 getUserExternalId(legalEntity.getUsers());
         if (externalUserId == null) {
             streamTask.info(LEGAL_ENTITY, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
                     "Legal Entity: %s does not have any Users", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
-        return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(), null, externalUserId, AccessContextScope.LE, legalEntity.getContacts()))
+        return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(), serviceAgreement.getExternalId(), externalUserId, AccessContextScope.LE, legalEntity.getContacts()))
+
                 .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
                 .then(Mono.just(streamTask));
     }
@@ -217,13 +224,34 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         log.info("Creating Contacts for Service Agreement Id {}", serviceAgreement.getExternalId());
         String externalUserId = getUserExternalId(legalEntity.getUsers());
         if (externalUserId == null) {
-            streamTask.info(LEGAL_ENTITY, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
-                    "Legal Entity: %s does not have any Users", legalEntity.getExternalId());
-            return Mono.just(streamTask);
+            externalUserId = getParticipantUser(serviceAgreement);
+            if (externalUserId == null) {
+                streamTask.info(LEGAL_ENTITY, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
+                        "Legal Entity: %s does not have any Users", legalEntity.getExternalId());
+                return Mono.just(streamTask);
+            }
         }
         return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(), serviceAgreement.getExternalId(), externalUserId, AccessContextScope.SA, serviceAgreement.getContacts()))
                 .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
                 .then(Mono.just(streamTask));
+    }
+
+    private String getParticipantUser(ServiceAgreement serviceAgreement) {
+        if (!isEmpty(serviceAgreement.getParticipants())) {
+            Optional<LegalEntityParticipant> participants = serviceAgreement.getParticipants()
+                    .stream()
+                    .filter(legalEntityParticipant -> legalEntityParticipant.getSharingUsers())
+                    .findFirst();
+            if (participants.isPresent()) {
+                LegalEntityParticipant participant = participants.get();
+                if (!isEmpty(participant.getUsers())) {
+                    return participant.getUsers().stream().findFirst().get();
+                } else if (!isEmpty(participant.getAdmins())) {
+                    return participant.getAdmins().stream().findFirst().get();
+                }
+            }
+        }
+        return null;
     }
 
     private ContactsTask createContactsTask(String streamTaskId, String externalLegalEntityId, String externalServiceAgreementId, String externalUserId, AccessContextScope scope, List<ExternalContact> contacts) {
@@ -244,6 +272,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     }
 
     private String getUserExternalId(List<JobProfileUser> users) {
+        if (users == null) {
+            return null;
+        }
         Optional<JobProfileUser> optionalUser = users.stream().findFirst();
         return optionalUser.map(jobProfileUser -> jobProfileUser.getUser().getExternalId()).orElse(null);
     }
@@ -545,7 +576,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                             upsertedUser.getExternalId()))
                         .findFirst().get().getUser();
                     inputUser.setInternalId(upsertedUser.getInternalId());
-                    postUserContacts(streamTask, jobProfileUser.getContacts(), inputUser.getExternalId())                                   ;
                     return upsertUserProfile(inputUser)
                         .map(userProfile -> {
                             log.info("User Profile upserted for: {}", userProfile.getUserName());
