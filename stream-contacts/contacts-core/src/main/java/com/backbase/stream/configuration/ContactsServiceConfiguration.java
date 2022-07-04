@@ -28,14 +28,6 @@ public class ContactsServiceConfiguration {
 
     private final BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties;
 
-    /*
-    @Bean
-    public ContactsApi contactsApi(ApiClient contactApiClient) {
-        return new ContactsApi(contactApiClient);
-    }
-
-     */
-
     @Bean
     protected ContactsApi contactsApi(WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
