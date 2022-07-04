@@ -5,10 +5,8 @@ import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostResponseBod
 import com.backbase.stream.worker.model.StreamTask;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
 @Data
 public class ContactsTask extends StreamTask {
 
