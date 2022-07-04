@@ -4,10 +4,12 @@ import com.backbase.dbs.contact.api.service.v2.ContactsApi;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Slf4j
+@RequiredArgsConstructor
 public class ContactsSaga implements StreamTaskExecutor<ContactsTask> {
 
     public static final String ENTITY = "contact";
@@ -16,11 +18,7 @@ public class ContactsSaga implements StreamTaskExecutor<ContactsTask> {
     public static final String ERROR = "error";
     public static final String CREATED_SUCCESSFULLY = "Contact created successfully";
     public static final String FAILED_TO_INGEST_CONTACTS = "Failed to ingest contacts";
-    private ContactsApi contactsApi;
-
-    public ContactsSaga(ContactsApi contactsApi) {
-        this.contactsApi = contactsApi;
-    }
+    private final ContactsApi contactsApi;
 
     @Override
     public Mono<ContactsTask> executeTask(ContactsTask contactsTask) {
