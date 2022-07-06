@@ -16,7 +16,6 @@ import org.springframework.context.annotation.PropertySource;
  */
 @Slf4j
 @Configuration
-@PropertySource("classpath:web-client.properties")
 @EnableConfigurationProperties(DbsWebClientConfigurationProperties.class)
 public class DbsWebClientConfiguration {
 
