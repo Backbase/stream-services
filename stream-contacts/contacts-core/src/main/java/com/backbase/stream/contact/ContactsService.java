@@ -1,20 +1,20 @@
-package com.backbase.stream;
+package com.backbase.stream.contact;
 
 
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostResponseBody;
-import com.backbase.stream.contact.ContactsTask;
-import com.backbase.stream.contact.ContactsUnitOfWorkExecutor;
 import com.backbase.stream.worker.model.UnitOfWork;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.stream.Stream;
 
 @Slf4j
+@Service
 public class ContactsService {
 
-    private ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor;
+    private final ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor;
 
     public ContactsService(ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor) {
         this.contactsUnitOfWorkExecutor = contactsUnitOfWorkExecutor;

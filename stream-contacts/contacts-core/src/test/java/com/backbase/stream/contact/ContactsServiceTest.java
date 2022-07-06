@@ -1,6 +1,5 @@
 package com.backbase.stream.contact;
 
-import com.backbase.dbs.contact.api.service.v2.ContactsApi;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostResponseBody;
@@ -8,72 +7,67 @@ import com.backbase.dbs.contact.api.service.v2.model.ExternalAccessContext;
 import com.backbase.dbs.contact.api.service.v2.model.ExternalAccountInformation;
 import com.backbase.dbs.contact.api.service.v2.model.ExternalContact;
 import com.backbase.dbs.contact.api.service.v2.model.IngestMode;
+import com.backbase.stream.worker.model.UnitOfWork;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ContactsSagaTest {
+class ContactsServiceTest {
 
     @InjectMocks
-    private ContactsSaga contactsSaga;
+    private ContactsService contactsService;
 
     @Mock
-    private ContactsApi contactsApi;
+    private ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor;
 
     @Test
-    void test_executeTask() {
-        // Given
-        ContactsTask contactsTask = createTask();
-        when(contactsApi.postContactsBulk(any())).thenReturn(Mono.empty());
+    void test_createBulkContacts() {
+        List<ContactsTask> streamTasks = new ArrayList<ContactsTask>();
+        ContactsTask task = new ContactsTask("1", getMockContactsBulkRequest());
+        task.setResponse(getMockResponse());
+        streamTasks.add(task);
+        UnitOfWork<ContactsTask> unitOfWork = new UnitOfWork<>();
+        unitOfWork.setStreamTasks(streamTasks);
 
-        // When
-        Mono<ContactsTask> result = contactsSaga.executeTask(contactsTask);
-        result.block();
+        when(contactsUnitOfWorkExecutor.prepareUnitOfWork(any(Flux.class))).thenReturn(Flux.just(unitOfWork));
 
-        // Then
-        verify(contactsApi).postContactsBulk(any());
+        Flux<ContactsBulkPostResponseBody> response = contactsService.createBulkContacts(Flux.just(getMockContactsBulkRequest()));
+        verify(contactsUnitOfWorkExecutor).prepareUnitOfWork(any(Flux.class));
     }
 
-    @Test
-    void test_executeTaskReturnResponse() {
-        // Given
-        ContactsTask contactsTask = createTask();
-        when(contactsApi.postContactsBulk(any())).thenReturn(Mono.just(getMockResponse()));
 
-        // When
-        ContactsTask result = contactsSaga.executeTask(contactsTask).block();
-
-        // Then
-        assertEquals(result.getResponse().getSuccessCount(), 2);
-        assertEquals(result.getName(), "contact");
-    }
-
-    private ContactsTask createTask() {
+    private ContactsBulkPostRequestBody getMockContactsBulkRequest() {
         var request = new ContactsBulkPostRequestBody();
         request.setIngestMode(IngestMode.UPSERT);
+
         ExternalAccessContext accessContext = new ExternalAccessContext();
         accessContext.setScope(AccessContextScope.LE);
+        accessContext.setExternalUserId("USER1");
         request.setAccessContext(accessContext);
+
         ExternalContact contact = new ExternalContact();
         contact.setName("TEST1");
         contact.setExternalId("TEST101");
+
         ExternalAccountInformation account = new ExternalAccountInformation();
         account.setName("TESTACC1");
         account.setExternalId("TESTACC101");
         contact.setAccounts(Collections.singletonList(account));
         request.setContacts(Collections.singletonList(contact));
-        return new ContactsTask("1", request);
+
+        return request;
     }
 
     private ContactsBulkPostResponseBody getMockResponse() {
