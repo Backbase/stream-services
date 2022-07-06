@@ -168,14 +168,13 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             return Mono.just(streamTask);
         }
         log.info("Creating Contacts for Legal Entity Id {}", legalEntity.getExternalId());
-        String externalUserId =                                                                                                                                                                                                 getUserExternalId(legalEntity.getUsers());
+        String externalUserId =  getUserExternalId(legalEntity.getUsers());
         if (externalUserId == null) {
             streamTask.info(LEGAL_ENTITY, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
                     "Legal Entity: %s does not have any Users", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
         return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(), serviceAgreement.getExternalId(), externalUserId, AccessContextScope.LE, legalEntity.getContacts()))
-
                 .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
                 .then(Mono.just(streamTask));
     }
