@@ -18,6 +18,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.Collections;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,16 +41,18 @@ class ContactsUnitOfWorkTest {
         when(streamWorkerConfiguration.getTaskExecutors()).thenReturn(1);
         this.contactsUnitOfWorkExecutor = new ContactsUnitOfWorkExecutor(repository, streamTaskExecutor, streamWorkerConfiguration);
         contactsUnitOfWorkExecutor.prepareUnitOfWork(Collections.singletonList(getContactsBulkPostRequestBody()));
+        verify(streamWorkerConfiguration).getTaskExecutors();
     }
 
     @Test
-    void test_executeTask2() {
+    void test_executeTaskReturnResponse() {
         when(streamWorkerConfiguration.getTaskExecutors()).thenReturn(1);
         when(streamWorkerConfiguration.getBufferSize()).thenReturn(2);
         this.contactsUnitOfWorkExecutor = new ContactsUnitOfWorkExecutor(repository, streamTaskExecutor, streamWorkerConfiguration);
 
         Flux<ContactsBulkPostRequestBody> contactsBulkPostRequestBodyFlux = Flux.just(getContactsBulkPostRequestBody());
         contactsUnitOfWorkExecutor.prepareUnitOfWork(contactsBulkPostRequestBodyFlux);
+        verify(streamWorkerConfiguration).getBufferSize();
     }
 
     private ContactsBulkPostRequestBody getContactsBulkPostRequestBody() {
