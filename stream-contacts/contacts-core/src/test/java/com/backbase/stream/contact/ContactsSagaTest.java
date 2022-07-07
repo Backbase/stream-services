@@ -55,8 +55,8 @@ class ContactsSagaTest {
         ContactsTask result = contactsSaga.executeTask(contactsTask).block();
 
         // Then
-        assertEquals(result.getResponse().getSuccessCount(), 2);
-        assertEquals(result.getName(), "contact");
+        assertEquals(2, result.getResponse().getSuccessCount());
+        assertEquals("contact",  result.getName());
     }
 
     private ContactsTask createTask() {
