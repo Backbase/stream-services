@@ -251,6 +251,7 @@ components:
           enum:
             - ARRANGEMENTS
             - JOURNEYS
+            - REPOSITORIES
         name:
           maxLength: 128
           minLength: 1

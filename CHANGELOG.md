@@ -1,6 +1,34 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.80.0]
+### Added
+- Support for creating data group of type `REPOSITORIES`.
+```yaml
+referenceJobRoles:
+  - name: Custom Engagement Template Viewer
+    description: View Custom Engagement Default Templates
+    functionGroups:
+      - name: Custom Engagement Template Viewer
+        functions:
+          - functionId: '1100'
+            name: Manage Content
+            privileges:
+              - privilege: view
+productGroups:
+  - name: Repository_Group_Template_Custom
+    description: Repository group that provides view access to the repository where custom engagement default templates are stored
+    productGroupType: REPOSITORIES
+    customDataGroupItems:
+      - internalId: template-custom
+    users:
+      - user:
+          externalId: emp-john
+          fullName: John Doe
+        referenceJobRoleNames:
+          - Custom Engagement Template Viewer
+```
+
 ## [2.78.0]
 ### Added
 - Support for updating Portfolio Capability data. Example([stream-portfolio/readme.md](stream-portfolio/readme.md#Bootstrap Ingestion Configuration))
