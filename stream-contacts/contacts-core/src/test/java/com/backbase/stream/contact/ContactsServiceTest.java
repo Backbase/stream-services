@@ -47,7 +47,6 @@ class ContactsServiceTest {
         verify(contactsUnitOfWorkExecutor).prepareUnitOfWork(any(Flux.class));
     }
 
-
     private ContactsBulkPostRequestBody getMockContactsBulkRequest() {
         var request = new ContactsBulkPostRequestBody();
         request.setIngestMode(IngestMode.UPSERT);

@@ -702,15 +702,15 @@ class LegalEntitySagaTest {
                         new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
                 ));
 
-        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
-        when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
+        when(accessGroupService.getServiceAgreementByExternalId(customSaExId)).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(customSa), any())).thenReturn(Mono.just(customSa));
-        when(userService.getUserByExternalId(eq(regularUserExId))).thenReturn(Mono.just(regularUser.getUser()));
-        when(userService.getUserByExternalId(eq(adminExId))).thenReturn(Mono.just(adminUser));
+        when(userService.getUserByExternalId(regularUserExId)).thenReturn(Mono.just(regularUser.getUser()));
+        when(userService.getUserByExternalId(adminExId)).thenReturn(Mono.just(adminUser));
         when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
@@ -769,14 +769,14 @@ class LegalEntitySagaTest {
 
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
-        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
-        when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
+        when(accessGroupService.getServiceAgreementByExternalId(customSaExId)).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(customSa), any())).thenReturn(Mono.just(customSa));
-        when(userService.getUserByExternalId(eq(adminExId))).thenReturn(Mono.just(adminUser));
+        when(userService.getUserByExternalId(adminExId)).thenReturn(Mono.just(adminUser));
         when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
