@@ -13,6 +13,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.Functiongroupupdate;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.IdItem;
