@@ -29,6 +29,9 @@ productGroups:
           - Custom Engagement Template Viewer
 ```
 
+### Fixed
+- (176)[https://github.com/Backbase/stream-services/issues/176]: Update Job Role does not consider the 207 multi-status response
+
 ## [2.78.0]
 ### Added
 - Support for updating Portfolio Capability data. Example([stream-portfolio/readme.md](stream-portfolio/readme.md#Bootstrap Ingestion Configuration))
