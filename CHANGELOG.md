@@ -30,7 +30,7 @@ productGroups:
 ```
 
 ### Fixed
-- (176)[https://github.com/Backbase/stream-services/issues/176]: Update Job Role does not consider the 207 multi-status response
+- [176](https://github.com/Backbase/stream-services/issues/176): Update Job Role does not consider the 207 multi-status response
 
 ## [2.78.0]
 ### Added
