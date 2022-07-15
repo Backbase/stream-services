@@ -1,0 +1,120 @@
+openapi: 3.0.3
+info:
+  title: Account Statement Persistence
+  description: Account Statement Persistence
+  version: 2.0.0
+  x-icon: account-statement
+servers:
+  - url: http://localhost:9001/api/v1
+    description: local test
+tags:
+  - name: Retail
+paths:
+  /service-api/v1/account-statement:
+    post:
+      summary: Adds data to persistence layer
+      description: Adds data to persistence layer
+      tags:
+        - account-statement-persistence-controller
+      operationId: accountStatementPersistencePost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountStatementPersistenceRequestList'
+        required: true
+      responses:
+        "200":
+          description: Response with ingestionProcessId to track processing by logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatementPersistenceResponseList'
+  /service-api/v1/account-statement/{legalEntityId}:
+    parameters:
+      - $ref: '#/components/parameters/legalEntityIdPathParam'
+    get:
+      summary: Get Data from persistence layer
+      description: Get Data from persistence layer
+      tags:
+        - account-statement-persistence-controller
+      operationId: accountStatementPersistenceGet
+      responses:
+        "200":
+          description: Response with ingestionProcessId to track processing by logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountStatementPersistenceResponseList'
+components:
+  parameters:
+    legalEntityIdPathParam:
+      name: legalEntityId
+      description: legal Entity Id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    AccountStatementPersistenceRequestList:
+      type: object
+      properties:
+        accountStatements:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountStatementPersistenceRequest'
+    AccountStatementPersistenceRequest:
+      type: object
+      required:
+        - legal_entity_id
+        - external_account_number
+        - docs
+      properties:
+        legal_entity_id:
+          type: string
+        external_account_number:
+          type: string
+        docs:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountStatementDocs'
+    AccountStatementDocs:
+      type: object
+      required:
+        - date
+        - description
+        - category
+        - doc_id
+      properties:
+        date:
+          type: date
+        description:
+          type: string
+        doc_id:
+          type: string
+        category:
+          type: string
+    AccountStatementPersistenceResponseList:
+      type: object
+      properties:
+        accountStatements:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountStatementPersistenceResponse'
+    AccountStatementPersistenceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        legal_entity_id:
+          type: string
+        external_account_number:
+          type: string
+        date:
+          type: date
+        description:
+          type: string
+        category:
+          type: string
+        doc_id:
+          type: string

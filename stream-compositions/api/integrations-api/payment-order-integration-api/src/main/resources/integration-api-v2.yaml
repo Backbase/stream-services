@@ -1,0 +1,71 @@
+openapi: 3.0.3
+info:
+  title: Payment Order Integration API
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/service-api/v1
+    description: The server
+tags:
+  - name: PaymentOrderIntegration
+paths:
+  /integration-api/v2/payment-order:
+    get:
+      tags:
+        - PaymentOrderIntegration
+      summary: Pulls payment order.
+      description: Pulls payment order.
+      operationId: pullPaymentOrder
+
+      parameters:
+        - in: query
+          name: additionalParameters
+          schema:
+            type: object
+            additionalProperties:
+              type: string
+
+      responses:
+        "201":
+          description: Payment Order successfully returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PullPaymentOrderResponse'
+
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    PullPaymentOrderResponse:
+      type: object
+      properties:
+        paymentOrder:
+          $ref: '../../../../../../../api/stream-payment-order/openapi.yaml#/components/schemas/PaymentOrder'
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+

@@ -7,26 +7,26 @@ info:
     backgroundColor: "#FFFFFF"
     altText: "Backbase logo"
 servers:
-  - url: http://stream-payment-order-http.proto.backbasecloud.com/
+  - url: http://stream-product-catalog-http.proto.backbasecloud.com/
     description: The server
 paths:
   ###############################################
-  ## Payment Order
+  ## Product Catalog
   ###############################################
-  /product-catalog:
+  /payment-order:
     get:
-      summary: Get Product Catalog
-      operationId: getProductCatalog
+      summary: Get Payment Order
+      operationId: getPaymentOrder
       tags:
-        - product-catalog
-      description: Assemble Product Catalog
+        - payment-order
+      description: Assemble Payment Order
       responses:
         200:
-          description: The created product type
+          description: The created payment type
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductCatalog'
+                $ref: '#/components/schemas/PaymentOrder'
         default:
           description: The
           content:
