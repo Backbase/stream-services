@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.backbase.stream.compositions</groupId>
+        <artifactId>services</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>payment-order-composition-service</artifactId>
+    <version>3.0.0-SNAPSHOT</version>
+
+    <packaging>jar</packaging>
+
+    <name>Stream :: Compositions :: Services :: Payment Orders</name>
+
+    <dependencies>
+        <!-- Service SDK dependencies -->
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>events</artifactId>
+        </dependency>
+
+        <!-- Spring dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>payment-order-composition-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>payment-order-integration-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Streams dependencies -->
+<!--        todo-->
+<!--        <dependency>-->
+<!--            <groupId>com.backbase.stream.compositions.events</groupId>-->
+<!--            <artifactId>transaction-events</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>payment-order-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>com.backbase.stream.compositions</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-broker</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq.tooling</groupId>
+            <artifactId>activemq-junit</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-kahadb-store</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>payment-order-core</artifactId>
+            <version>3.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>com.backbase.oss</groupId>-->
+<!--                <artifactId>boat-maven-plugin</artifactId>-->
+<!--                <version>${boat-maven-plugin.version}</version>-->
+<!--                <configuration>-->
+<!--                    <output>${project.build.directory}/generated-sources/api</output>-->
+<!--                    <generateSupportingFiles>true</generateSupportingFiles>-->
+<!--                    <strictSpec>true</strictSpec>-->
+<!--                    <generateApiTests>false</generateApiTests>-->
+<!--                    <generateModelTests>false</generateModelTests>-->
+<!--                    <configOptions>-->
+<!--                        <dateLibrary>java8</dateLibrary>-->
+<!--                        <interfaceOnly>true</interfaceOnly>-->
+<!--                        <skipDefaultInterface>true</skipDefaultInterface>-->
+<!--                        <useBeanValidation>true</useBeanValidation>-->
+<!--                        <useClassLevelBeanValidation>false</useClassLevelBeanValidation>-->
+<!--                        <useTags>true</useTags>-->
+<!--                        <java8>true</java8>-->
+<!--                        <useOptional>false</useOptional>-->
+<!--                    </configOptions>-->
+<!--                    <input />-->
+<!--                    <model />-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>generate-payment-order-composition-api-code</id>-->
+<!--                        <phase>generate-sources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>generate</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <inputSpec>${project.basedir}/../../api/service-api/payment-order-composition-api/src/main/resources/service-api-v2.yaml</inputSpec>-->
+<!--                            <generatorName>spring</generatorName>-->
+<!--                            <additionalProperties>useWithModifiers=true</additionalProperties>-->
+<!--                            <configOptions>-->
+<!--                                <library>spring-boot</library>-->
+<!--                                <apiPackage>com.backbase.stream.compositions.paymentorder.api</apiPackage>-->
+<!--                                <modelPackage>com.backbase.stream.compositions.paymentorder.api.model</modelPackage>-->
+<!--                                <reactive>true</reactive>-->
+<!--                                <performBeanValidation>true</performBeanValidation>-->
+<!--                                <skipDefaultInterface>true</skipDefaultInterface>-->
+<!--                            </configOptions>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>generate-payment-order-integration-client-code</id>-->
+<!--                        <phase>generate-sources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>generate-webclient-embedded</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <inputSpec>${project.basedir}/../../api/integrations-api/payment-order-integration-api/src/main/resources/integration-api-v2.yaml</inputSpec>-->
+<!--                            <apiPackage>com.backbase.stream.compositions.paymentorder.integration.client</apiPackage>-->
+<!--                            <modelPackage>com.backbase.stream.compositions.paymentorder.integration.client.model</modelPackage>-->
+<!--                            <additionalProperties>useWithModifiers=true</additionalProperties>-->
+<!--                            <configOptions>-->
+<!--                                <library>spring-boot</library>-->
+<!--                                <reactive>true</reactive>-->
+<!--                                <performBeanValidation>true</performBeanValidation>-->
+<!--                            </configOptions>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
+<!--        </plugins>-->
+    </build>
+
+</project>

@@ -9,24 +9,22 @@ tags:
   - name: PaymentOrderIntegration
 paths:
   /integration-api/v2/payment-order:
-    get:
+    post:
       tags:
         - PaymentOrderIntegration
-      summary: Pulls payment order.
-      description: Pulls payment order.
-      operationId: pullPaymentOrder
-
-      parameters:
-        - in: query
-          name: additionalParameters
-          schema:
-            type: object
-            additionalProperties:
-              type: string
+      summary: Pulls Payment Orders for the Arrangement and either date range of number of billing cycles.
+      description: Pulls payment orders.
+      operationId: pullPaymentOrders
+      requestBody:
+        description: Push Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PullIngestionRequest'
 
       responses:
-        "201":
-          description: Payment Order successfully returned.
+        "200":
+          description: Transactions sucessfully returned.
           content:
             application/json:
               schema:
@@ -55,12 +53,6 @@ components:
         message:
           type: string
 
-    PullPaymentOrderResponse:
-      type: object
-      properties:
-        paymentOrder:
-          $ref: '../../../../../../../api/stream-payment-order/openapi.yaml#/components/schemas/PaymentOrder'
-
     InternalServerError:
       required:
         - message
@@ -68,4 +60,31 @@ components:
       properties:
         message:
           type: string
+
+    PullIngestionRequest:
+      type: object
+      properties:
+        arrangementId:
+          type: string
+        externalArrangementId:
+          type: string
+        dateRangeStart:
+          type: string
+          format: date-time
+        dateRangeEnd:
+          type: string
+          format: date-time
+        billingCycles:
+          type: integer
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+
+    PullPaymentOrderResponse:
+      type: object
+      properties:
+        paymentOrder:
+          $ref: '../../../target/yaml/payment/payment-order-service-api-v2.3.0.yaml#/components/schemas/PaymentOrderPostResponse'
+
 
