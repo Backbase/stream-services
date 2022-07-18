@@ -1333,11 +1333,18 @@ public class AccessGroupService {
                     "Failed to setup Job Role: " + badRequest.getResponseBodyAsString()));
             })
             .collectList()
-            .map(idItems -> {
+            .flatMap(idItems -> {
                 if(!CollectionUtils.isEmpty(idItems) && idItems.get(0).getResourceId() != null) {
+                    BatchResponseItemExtended item = idItems.get(0);
+                    if (!item.getStatus().equals(HTTP_STATUS_OK)) {
+                        streamTask.error(JOB_ROLE, "ingest-reference-job-role", FAILED,
+                                item.getExternalServiceAgreementId(), item.getResourceId(),
+                                "Failed up setup Job Role - status: {}, errors: {}", item.getStatus(), item.getErrors());
+                        return Mono.error(new StreamTaskException(streamTask, "Failed to setup Job Role - status: " + item.getStatus() + ", errors: " + item.getErrors()));
+                    }
                     jobRole.setId(idItems.get(0).getResourceId());
                 }
-                return jobRole;
+                return Mono.just(jobRole);
             });
     }
 
