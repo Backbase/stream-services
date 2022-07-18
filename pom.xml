@@ -38,7 +38,6 @@
         <module>stream-approvals</module>
         <module>stream-compositions</module>
         <module>stream-payment-order</module>
-        <module>stream-compositions/services/payment-order-composition-service</module>
 
     </modules>
 

@@ -20,6 +20,7 @@
         <module>product-composition-service</module>
         <module>product-catalog-composition-service</module>
         <module>transaction-composition-service</module>
+        <module>payment-order-composition-service</module>
     </modules>
 
     <dependencies>

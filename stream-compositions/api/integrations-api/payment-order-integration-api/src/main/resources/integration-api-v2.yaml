@@ -86,5 +86,3 @@ components:
       properties:
         paymentOrder:
           $ref: '../../../target/yaml/payment/payment-order-service-api-v2.3.0.yaml#/components/schemas/PaymentOrderPostResponse'
-
-
