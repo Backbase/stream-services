@@ -1,0 +1,12 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/user-manager/service-api/v2/users/identities/realms"
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

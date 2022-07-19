@@ -3,7 +3,6 @@ package com.backbase.stream.config;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.worker.model.StreamTask;
 import java.util.Collections;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -24,7 +23,7 @@ import reactor.core.publisher.Flux;
 public class SetupLegalEntityHierarchyConfiguration {
 
     private final LegalEntitySaga legalEntitySaga;
-    private BootstrapConfigurationProperties bootstrapConfigurationProperties;
+    private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
 
     @Bean
     public CommandLineRunner commandLineRunner() {
@@ -32,22 +31,17 @@ public class SetupLegalEntityHierarchyConfiguration {
     }
 
     private void run(String... args) {
-
         LegalEntity legalEntity = bootstrapConfigurationProperties.getLegalEntity();
-        if (legalEntity == null) {
-            log.error("Failed to load Legal Entity Structure");
-            System.exit(1);
-        } else {
-            log.info("Bootstrapping Root Legal Entity Structure: {}", legalEntity.getName());
-            List<LegalEntity> aggregates = Collections.singletonList(bootstrapConfigurationProperties.getLegalEntity());
+        log.info("Bootstrapping Root Legal Entity Structure: {}", legalEntity.getName());
 
-            Flux.fromIterable(aggregates)
-                .map(LegalEntityTask::new)
-                .flatMap(legalEntitySaga::executeTask)
-                .collectList()
-                .block();
-            log.info("Finished bootstrapping Legal Entity Structure");
-            System.exit(0);
-        }
+        List<LegalEntity> aggregates = Collections.singletonList(bootstrapConfigurationProperties.getLegalEntity());
+
+        Flux.fromIterable(aggregates)
+            .map(LegalEntityTask::new)
+            .flatMap(legalEntitySaga::executeTask)
+            .collectList()
+            .block();
+
+        log.info("Finished bootstrapping Legal Entity Structure");
     }
 }

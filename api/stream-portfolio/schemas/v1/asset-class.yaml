@@ -1,0 +1,11 @@
+required:
+  - code
+  - name
+type: object
+properties:
+  name:
+    type: string
+    description: Name of an asset class.
+  code:
+    type: string
+    description: Unique code of an asset class that will be used as an identifier.

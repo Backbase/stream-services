@@ -1,7 +1,209 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [2.80.0]
+### Added
+- Support for creating data group of type `REPOSITORIES`.
+```yaml
+referenceJobRoles:
+  - name: Custom Engagement Template Viewer
+    description: View Custom Engagement Default Templates
+    functionGroups:
+      - name: Custom Engagement Template Viewer
+        functions:
+          - functionId: '1100'
+            name: Manage Content
+            privileges:
+              - privilege: view
+productGroups:
+  - name: Repository_Group_Template_Custom
+    description: Repository group that provides view access to the repository where custom engagement default templates are stored
+    productGroupType: REPOSITORIES
+    customDataGroupItems:
+      - internalId: template-custom
+    users:
+      - user:
+          externalId: emp-john
+          fullName: John Doe
+        referenceJobRoleNames:
+          - Custom Engagement Template Viewer
+```
+
+### Fixed
+- [176](https://github.com/Backbase/stream-services/issues/176): Update Job Role does not consider the 207 multi-status response
+
+## [2.78.0]
+### Added
+- Support for updating Portfolio Capability data. Example([stream-portfolio/readme.md](stream-portfolio/readme.md#Bootstrap Ingestion Configuration))
+
+## [2.76.0]
+### Added
+- Support for LE limits
+```yaml
+name: Bory Breweries Ltd
+legalEntityType: CUSTOMER
+limit:
+  currencyCode: USD
+  transactional: 10000
+  daily: 250000
+  weekly: 500000
+  monthly: 2000000
+  quarterly: 600000
+  yearly: 1200000
+```
+- Support for SA limits
+```yaml
+name: Bory Breweries Ltd
+legalEntityType: CUSTOMER
+masterServiceAgreement:
+  limit:
+    currencyCode: USD
+    transactional: 10000
+    daily: 250000
+    weekly: 500000
+    monthly: 2000000
+    quarterly: 600000
+    yearly: 1200000
+```
+- Support for LE in SA limits
+```yaml
+name: Bory Breweries Ltd
+legalEntityType: CUSTOMER
+masterServiceAgreement:
+  participants:
+    - externalId: bory-brew-ltd
+      limit:
+        currencyCode: USD
+        transactional: 10000
+        daily: 250000
+        weekly: 500000
+        monthly: 2000000
+        quarterly: 600000
+        yearly: 1200000
+```
+```yaml
+name: Bory Breweries Ltd
+legalEntityType: CUSTOMER
+customServiceAgreement:
+  participants:
+    - externalId: bory-brew-ltd
+      limit:
+        currencyCode: USD
+        transactional: 10000
+        daily: 250000
+        weekly: 500000
+        monthly: 2000000
+        quarterly: 600000
+        yearly: 1200000
+```
+- Support for Job role limits
+```yaml
+jobRoles:
+  - name: Custom Accounts and Payments
+    description: Custom Accounts and Payments
+    functionGroups:
+      - name: Products, payments, txn, contacts, actions, user profile, devices
+        functions:
+          - functionId: '1017'
+            name: US Domestic Wire
+            privileges:
+              - privilege: create
+                supportsLimit: true
+                limit:
+                  currencyCode: USD
+                  daily: 100000
+                  weekly: 400000
+                  transactional: 10000
+```
+```yaml
+referenceJobRoles:
+  - name: admin
+    description: Admin
+    functionGroups:
+      - name: admin
+        functions:
+          - functionId: '1017'
+            name: US Domestic Wire
+            privileges:
+              - privilege: create
+                supportsLimit: true
+                limit:
+                  currencyCode: USD
+                  daily: 100000
+                  weekly: 400000
+                  transactional: 10000
+```
+- Support for User Job role limits
+```yaml
+referenceJobRoles:
+  - name: Domestic Payments
+    description: Domestic Payments
+    functionGroups:
+      - name: Products, payments, txn, contacts, actions, user profile, devices
+        functions:
+          - functionId: '1017'
+            name: US Domestic Wire
+            privileges:
+              - privilege: approve
+                limit:
+                  currencyCode: USD
+                  transactional: 15000
+productGroups:
+  - internalId: bblicdag1
+    name: My business salary account
+    description: The account of my business I use for salary payments
+    users:
+      - user:
+          externalId: hhsa01
+          fullName: Henk Hurry
+          supportsLimit: true
+        referenceJobRoleNames:
+          - Domestic Payments
+```
+
+## [2.75.0]
+Clean up of many old components and replaced Stream SDK with Service SDK 14
+> By moving to Service SDK, pipelines can now be configured like any other Backbase service using the Service SDK
+>
+> **Migrate your CICD pipelines to the Service SDK standards**
+
+### Removed
+- Old Legal Entity Open API definitions
+- Stream Transactions Open API Spec
+- Removed Spring Cloud Data Flow components as nobody uses it
+  - Stream Cursor Source
+  - Legal Entity Sink
+  - Product Sink
+  - Transactions Sink
+  - Transactions HTTP
+- Removed Stream SDK Starters
+  - `stream-aio-starter-parent` (replaced by `service-sdk-core-starter`)
+  - `stream-batch-starter-parent` (replaced by `service-sdk-starter-core` + `spring-boot-starter-batch`)
+  - `stream-generated-client-starter-parent`
+  - `stream-processor-starter-parent`
+  - `stream-sdk-starter-core`(replaced by `service-sdk-starter-core`)
+  - `stream-sink-starter-parent`
+  - `stream-source-starter-parent`
+- Removed `stream-dbs-web-client` (replaced by `service-sdk-web-client`)
+  - The OAuth2 client (provider and registration) initially defined as `dbs` is now called `bb`, hence the token converter configuration should to be updated (e.g. `spring.security.oauth2.client.provider.bb.token-uri=http://token-converter:8080/oauth/token`).
+
+### Changed
+- Replaced Stream SDK with Service SDK 14.1.0.
+  - Upgrade Spring Boot 2.6.6
+
+## [2.74.0]
+### Fixed
+- Fix allowing empty product-groups to be created.
+
+## [2.73.0]
+### Fixed
+- Fix to add an arrangement in more than one product group
+
+## [2.72.0]
+### Changed
+- Update Spring Boot to 2.5.14
+- Update Swagger Core to 2.2.0
+- Update bcprov-jdk15on to 1.70 
 
 ## [2.71.0]
 ### Added
@@ -12,7 +214,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - Fix for issue https://github.com/Backbase/stream-services/issues/138
 
-## [2.70.0]
+## [2.71.0]
 ### Changed
 - Upgraded to DBS 2022.04
 - Upgrade Spring Boot to 2.15.13
@@ -643,4 +845,5 @@ backbase:
 [2.8.0]: https://github.com/Backbase/stream-services/compare/2.7.0...2.8.0
 [2.7.0]: https://github.com/Backbase/stream-services/compare/2.6.0...2.7.0
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
-[2.70.1]: https://github.com/Backbase/stream-services/compare/2.70.0...2.70.1
+[2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
+[2.75.0]: https://github.com/Backbase/stream-services/compare/2.74.0...2.75.0

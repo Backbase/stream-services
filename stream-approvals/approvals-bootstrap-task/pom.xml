@@ -15,6 +15,10 @@
     <packaging>jar</packaging>
     <name>Stream :: Approvals Bootstrap Task</name>
 
+    <properties>
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -26,6 +30,12 @@
             <groupId>com.backbase.stream</groupId>
             <artifactId>approvals-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

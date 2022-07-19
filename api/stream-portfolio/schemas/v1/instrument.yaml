@@ -1,0 +1,73 @@
+required:
+  - id
+  - name
+  - price
+  - currency
+  - subAssetClassCode
+  - country
+type: object
+properties:
+  id:
+    type: string
+    description: Instrument external id.
+  name:
+    type: string
+    description: Name of an instrument.
+  instrumentNameLong:
+    type: string
+    description: The long name of the instrument the given transaction is related to.
+  code:
+    type: string
+    description: Official code to identify an instrument, can be ISIN, CUSIP etc.
+  instrumentCodeCustom:
+    type: string
+    description: The instrument internal or custom code used within the bank.
+  priceData:
+    $ref: instrument-prices.yaml
+  price:
+    $ref: money.yaml
+    deprecated: true
+    description: Use `priceData`. Instrument price.
+  buyPrice:
+    $ref: money.yaml
+    deprecated: true
+    description: Use `priceData`.
+  sellPrice:
+    $ref: money.yaml
+    deprecated: true
+    description: Use `priceData`.
+  subAssetClassCode:
+    type: string
+    description: Sub asset class code.
+  country:
+    type: string
+    description: Country of instrument registration.
+  ticker:
+    type: string
+    description: Symbol used to uniquely identify publicly traded shares of a partilcular stock on a particular stock market.
+  exchange:
+    type: string
+    description: Exchange details for an instrument.
+  pricePerformance:
+    type: number
+    deprecated: true
+    description: Use `priceData`. Instrument price change over a period of time, expressed as a percentage
+  pricePerformanceAbs:
+    $ref: money.yaml
+    deprecated: true
+    description: Use `priceData`. Instrument price change over a period of time, expressed as an absolute value in money.
+  about:
+    description: about
+    $ref: instrument-about.yaml
+  canTrade:
+    type: boolean
+    default: true
+    description: Mark instruments as tradeable. Default true.
+  keyStatistics:
+    description: Key statistics.
+    $ref: key-statistics.yaml
+  additions:
+    description: Additional properties.
+    type: object
+    additionalProperties:
+      type: string

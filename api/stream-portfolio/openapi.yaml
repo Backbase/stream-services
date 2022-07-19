@@ -1,0 +1,181 @@
+openapi: 3.0.1
+info:
+  title: Portfolio Ingestion API
+  description: Ingestion Saga for Portfolio
+  version: 0.0.1
+  x-logo:
+    url: "https://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
+    backgroundColor: "#FFFFFF"
+    altText: "Backbase logo"
+servers:
+  - url: https://portfolio-http.proto.backbasecloud.com/
+    description: The server
+tags:
+- name: portfolios
+paths:
+  ###############################################
+  ## Portfolio
+  ###############################################
+  /portfolios:
+    post:
+      tags:
+        - portfolio
+      summary: Create Wealth of Portfolios
+      operationId: createPortfolioBundlee
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/WealthBundle'
+      responses:
+        200:
+          description: The created legal entity and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WealthBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    RegionBundle:
+      type: object
+      properties:
+        region:
+          $ref: schemas/v1/region.yaml
+        countries:
+          type: array
+          items:
+            $ref: schemas/v1/country.yaml
+    AssetClassBundle:
+      type: object
+      properties:
+        assetClass:
+          $ref: schemas/v1/asset-class.yaml
+        subAssetClasses:
+          type: array
+          items:
+            $ref: schemas/v1/sub-asset-class.yaml
+    InstrumentBundle:
+      type: object
+      properties:
+        instrument:
+          $ref: schemas/v1/instrument.yaml
+        history-prices:
+          type: array
+          items:
+            $ref: schemas/v1/instrument-history-price.yaml
+    PortfolioBundle:
+      type: object
+      properties:
+        portfolio:
+          $ref: schemas/v1/portfolio.yaml
+        subPortfolios:
+          type: array
+          items:
+            $ref: schemas/v1/sub-portfolio.yaml
+        allocations:
+          type: array
+          items:
+            $ref: schemas/v1/allocation.yaml
+        hierarchies:
+          type: array
+          items:
+            $ref: schemas/v1/portfolio-positions-hierarchy.yaml
+        cumulative-performances:
+          type: array
+          items:
+            $ref: schemas/v1/portfolio-cumulative-performances.yaml
+        benchmark:
+          $ref: schemas/v1/portfolio-benchmark.yaml
+        valuations:
+          type: array
+          items:
+            $ref: schemas/v1/portfolio-valuation.yaml
+    PositionBundle:
+      type: object
+      properties:
+        portfolioId:
+          type: string
+          description: Unique identificator for a portfolio (Portfolio code)
+        subPortfolioId:
+          type: string
+          description: Unique identificator for a sub-portfolio
+        position:
+          $ref: schemas/v1/position.yaml
+        transaction-categories:
+          type: array
+          items:
+            $ref: schemas/v1/transaction-category.yaml
+        transactions:
+          type: array
+          items:
+            $ref: schemas/v1/position-transaction.yaml
+    WealthBundle:
+      type: object
+      properties:
+        regions:
+          description: Region Bundle (regions and countries)
+          type: array
+          items:
+            $ref: '#/components/schemas/RegionBundle'
+        assetClasses:
+          description: Asset Class Bundle (asset and sub-asset classes)
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetClassBundle'
+        instruments:
+          description: Instruments and Hstory Prices
+          type: array
+          items:
+            $ref: '#/components/schemas/InstrumentBundle'
+        portfolios:
+          description: Portfolios and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/PortfolioBundle'
+        positions:
+          description: Portfolio Positions and Transactions
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionBundle'
+        aggregate-portfolios:
+          description: Aggregate Portfolios
+          type: array
+          items:
+            $ref: schemas/v1/aggregate-portfolio.yaml
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Default Message. Any further information.
+              key:
+                type: string
+                description: '{capability-name}.api.{api-key-name}. For generated
+                      validation errors this is the path in the document the error resolves
+                      to. e.g. object name + ''.'' + field'
+              context:
+                type: object
+                description: Context can be anything used to construct localised messages.
+                x-java-type: java.util.Map<String,String>
+            description: A validation error

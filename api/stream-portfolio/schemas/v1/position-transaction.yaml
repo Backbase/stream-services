@@ -1,0 +1,81 @@
+required:
+  - transactionId
+type: object
+properties:
+  transactionId:
+    type: string
+    description: Unique transaction ID to identify a transaction.
+  transactionDate:
+    type: string
+    description: The date on which the transaction was booked.
+    format: date-time
+  valueDate:
+    type: string
+    description: The date when transaction was executed.
+    format: date-time
+  transactionCategory:
+    type: string
+    description: Transaction Category key.
+  exchange:
+    type: string
+    description: The marketplace where the transaction was executed.
+  orderType:
+    type: string
+    description: Type of the order.
+  counterpartyName:
+    type: string
+    description: A name of the transaction counterparty.
+  counterpartyAccount:
+    type: string
+    description: The account id of the transaction counterparty.
+  quantity:
+    type: number
+    description: The number of units in the transaction operation.
+  price:
+    $ref: money.yaml
+    description: The price of one unit of transaction instrument in the instrument currency.
+  amount:
+    $ref: money.yaml
+    description: The amount of the transaction (price*quantity) in the client reference currency.
+  amountGross:
+    $ref: money.yaml
+    description: The gross amount (price*quantity) of the transaction in the given curency. Usually it includes taxes and fees.
+  fxRate:
+    $ref: money.yaml
+    description: The currency exchange rate (FX) applied to the transaction on the transaction date.
+  localTaxes:
+    $ref: money.yaml
+    description: Local taxes in the given currency applied to the transaction.
+  localFees:
+    $ref: money.yaml
+    description: Local fees in the given currency applied to the transaction.
+  foreignTaxes:
+    $ref: money.yaml
+    description: Foreign taxes in the given currency applied to the transaction.
+  foreignFees:
+    $ref: money.yaml
+    description: Foreign fees in the given currency applied to the transaction.
+  officialCode:
+    type: string
+    description: Official code to identify the instrument.
+  ISIN:
+    type: string
+    description: The instrument international code.
+  balanceAsset:
+    $ref: money.yaml
+    description: The quantitative balance state after transaction.
+  balanceAmount:
+    $ref: money.yaml
+    description: The amount balance state after transaction in the client reference currency.
+  statusId:
+    type: string
+    description: A status identificator of the transaction. String type to be able to accomodate both numerical and string statuses.
+  statusName:
+    type: string
+    description: A name or description of the transaction status. E.g. Live, Pending
+  statusAbbr:
+    type: string
+    description: The abbreviation of the transaction status the way it must be displayed on the UI.
+  notes:
+    type: string
+    description: The description or notes related to the operation.

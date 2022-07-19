@@ -13,6 +13,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.Functiongroupupdate;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.IdItem;
@@ -30,6 +31,7 @@ import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -236,6 +238,84 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                         .addPrivilegesItem("view")
                         .addPrivilegesItem("edit")))
             ));
+    }
+
+    @Test
+    void updateJobRoleItemStatusIs400() {
+        final String saInternalId = "someSaInternalId";
+        final String saExternalId = "someSaExternalId";
+        final String description = "someDescription";
+        final String name = "someName";
+        final String validFromDate = "2021-03-08";
+        final String validFromTime = "00:00:00";
+        final String validUntilDate = "2022-03-08";
+        final String validUntilTime = "23:59:59";
+
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
+                LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+
+        // participants
+        serviceAgreement
+                .addParticipantsItem(new LegalEntityParticipant().externalId("p1").sharingAccounts(true)
+                        .sharingUsers(true).action(LegalEntityParticipant.ActionEnum.ADD))
+                .addParticipantsItem(new LegalEntityParticipant().externalId("p2").sharingAccounts(false)
+                        .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.REMOVE))
+                .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
+                        .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
+
+        Mockito.when(functionGroupApi.getFunctionGroups(saInternalId))
+                .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
+                        .name("jobRole").id("1")
+                        .addPermissionsItem(new Permission().functionId("101")
+                                .addAssignedPrivilegesItem(new Privilege().privilege("view"))
+                                .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
+                )));
+
+        JobRole jobRole = new JobRole()
+                .name("jobRole")
+                .addFunctionGroupsItem(new BusinessFunctionGroup()
+                        .name("fg1")
+                        .addFunctionsItem(new BusinessFunction()
+                                .name("name1")
+                                .functionId("101")
+                                .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
+                        )
+                )
+                .addFunctionGroupsItem(new BusinessFunctionGroup().name("fg2")
+                        .addFunctionsItem(new BusinessFunction()
+                                .name("name2")
+                                .functionId("102")
+                                .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
+                                .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
+                        ));
+
+        Mockito.when(functionGroupsApi.putFunctionGroupsUpdate(any()))
+                .thenReturn(Flux.just(new BatchResponseItemExtended()
+                        .resourceId("4028db307522bfbb017523171c9d0007")
+                        .status(BatchResponseItemExtended.StatusEnum.HTTP_STATUS_BAD_REQUEST)
+                        .addErrorsItem("You cannot manage this entity, while the referenced service agreement has a pending change.")
+                ));
+
+        Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
+
+        Assertions.assertThrows(StreamTaskException.class, listMono::block);
+
+        Mockito.verify(functionGroupsApi)
+                .putFunctionGroupsUpdate(Collections.singletonList(new PresentationFunctionGroupPutRequestBody()
+                        .identifier(new PresentationIdentifier().idIdentifier("1"))
+                        .functionGroup(new Functiongroupupdate()
+                                .name("jobRole")
+                                .description("jobRole")
+                                .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
+                                        .functionName("name1")
+                                        .addPrivilegesItem("view"))
+                                .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
+                                        .functionName("name2")
+                                        .addPrivilegesItem("view")
+                                        .addPrivilegesItem("edit")))
+                ));
     }
 
     @Test

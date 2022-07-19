@@ -17,6 +17,7 @@
         <module>legal-entity-model</module>
         <module>product-catalog-model</module>
         <module>approval-model</module>
+        <module>portfolio-model</module>
     </modules>
 
     <build>
@@ -24,7 +25,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <inherited>false</inherited>
                 <executions>
                     <execution>
                         <id>assembly-specs-package</id>
@@ -39,6 +39,7 @@
                         </configuration>
                     </execution>
                 </executions>
+                <inherited>false</inherited>
             </plugin>
         </plugins>
     </build>

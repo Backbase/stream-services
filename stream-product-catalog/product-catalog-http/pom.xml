@@ -19,6 +19,7 @@
     <properties>
         <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-product-catalog/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
     </properties>
 
     <dependencies>
@@ -26,7 +27,13 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-catalog-core</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

@@ -1,0 +1,12 @@
+required:
+  - code
+  - name
+type: object
+properties:
+  name:
+    type: string
+    description: Name of a region.
+  code:
+    type: string
+    description: International code of a region.
+    maxLength: 12

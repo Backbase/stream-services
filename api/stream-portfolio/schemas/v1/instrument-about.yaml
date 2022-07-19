@@ -1,0 +1,14 @@
+type: object
+properties:
+  about:
+    type: string
+    description:
+  address:
+    type: string
+    description:
+  phoneNumber:
+    type: string
+    description:
+  link:
+    type: string
+    description:

@@ -1,0 +1,65 @@
+required:
+  - id
+type: object
+properties:
+  id:
+    type: string
+    description: Unique identificator for an aggregate portfolio, used to identify aggregate portfolio at a bank or an investment firm.
+  name:
+    type: string
+    description: Name of an aggregate portfolio, characterising total wealth of the end-user.
+  portfoliosCount:
+    type: string
+    description: Portfolio count; number of portfolios comprising the aggregate portfolio.
+  riskLevel:
+    type: string
+    description: Risk level characterising the aggregate portfolio.
+  valuation:
+    $ref: money.yaml
+    description: Valuation of the aggregate portfolio.
+  ytdPerformance:
+    type: number
+    description: Year-to-date performance of the aggregate portfolio, expressed as a percentage.
+  ytdPerformanceValue:
+    $ref: money.yaml
+    description: Year-to-date performance value of the aggregate portfolio, expressed as a monetary amount.
+  mtdPerformance:
+    type: number
+    description: Month-to-date performance value of the aggregate portfolio, expressed as a percentage.
+  mtdPerformanceValue:
+    $ref: money.yaml
+    description: Month-to-date performance value of the aggregate portfolio, expressed as a monetary amount.
+  inValue:
+    $ref: money.yaml
+    description: Incoming cash for the period of time.
+  outValue:
+    $ref: money.yaml
+    description: Outgoing cash for the period of time.
+  netValue:
+    $ref: money.yaml
+    description: Net cash for the period of time.
+  portfolios:
+    type: array
+    description: List of portfolio IDs comprising the aggregate portfolio.
+    items:
+      type: string
+  allocations:
+    type: array
+    description: List of assets in the aggregate portfolio.
+    items:
+      $ref: aggregate-allocations.yaml
+  managers:
+    type: array
+    description: List of managers associated with an aggregate portfolio, characterising total wealth of the end-user.
+    items:
+      $ref: portfolio-manager.yaml
+  attorneys:
+    type: array
+    description: List of attorneys associated with an aggregate portfolio, characterising total wealth of the end user.
+    items:
+      $ref: portfolio-attorney.yaml
+  additions:
+    description: Additional properties.
+    type: object
+    additionalProperties:
+      type: string

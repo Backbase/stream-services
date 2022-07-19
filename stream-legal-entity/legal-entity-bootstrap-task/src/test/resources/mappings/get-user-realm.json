@@ -1,0 +1,18 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/user-manager/service-api/v2/users/identities/realms",
+    "headers": {
+      "X-TID": {
+        "contains": "tenant1"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {},
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

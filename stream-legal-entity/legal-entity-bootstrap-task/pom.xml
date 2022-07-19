@@ -15,6 +15,11 @@
     <packaging>jar</packaging>
     <name>Stream :: Legal Entity Bootstrap Task</name>
 
+    <properties>
+        <wiremock-jre8.version>2.33.2</wiremock-jre8.version>
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+    </properties>
+
     <dependencies>
 
         <dependency>
@@ -25,7 +30,7 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-core</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -34,6 +39,18 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
+            <version>${wiremock-jre8.version}</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
