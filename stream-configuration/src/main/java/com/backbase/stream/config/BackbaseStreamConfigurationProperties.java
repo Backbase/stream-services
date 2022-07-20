@@ -9,8 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 public class BackbaseStreamConfigurationProperties {
 
-    private DbsConnectionProperties dbs;
-    private IdentityConnectionProperties identity;
+    private DbsConnectionProperties dbs = new DbsConnectionProperties();
+    private IdentityConnectionProperties identity = new IdentityConnectionProperties();
 
     @Data
     @NoArgsConstructor
@@ -21,7 +21,7 @@ public class BackbaseStreamConfigurationProperties {
         /**
          * The location of Access Group Presentation Service.
          */
-        private String accessControlBaseUrl  = "http://access-control:8080";
+        private String accessControlBaseUrl = "http://access-control:8080";
 
         /**
          * The location of Accounts Presentation Service.
