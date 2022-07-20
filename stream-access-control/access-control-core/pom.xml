@@ -69,6 +69,12 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
+            <artifactId>stream-test-support</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
             <artifactId>stream-worker</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -82,12 +88,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-test-support</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockito.version}</version>
@@ -95,6 +95,5 @@
         </dependency>
 
     </dependencies>
-
 
 </project>

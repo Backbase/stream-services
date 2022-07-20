@@ -1,18 +1,6 @@
 spring:
   zipkin:
     enabled: false
-  security:
-    oauth2:
-      client:
-        registration:
-          dbs:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          dbs:
-            token-uri: http://token-converter:8080/oauth/token
   main:
     allow-bean-definition-overriding: true
 backbase:

@@ -10,18 +10,6 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
   zipkin:
     enabled: false
-  security:
-    oauth2:
-      client:
-        registration:
-          dbs:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          dbs:
-            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   main:
     allow-bean-definition-overriding: true
   liquibase:
@@ -30,13 +18,6 @@ spring:
 
 
 backbase:
-  security:
-    http:
-      enabled: false
-      adapter:
-        enabled: false
-      mtls:
-        enabled: false
   stream:
     legalentity:
       sink:

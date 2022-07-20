@@ -1,29 +1,8 @@
-server:
-  port: 9001
-
 spring:
-  activemq:
-    broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
-  security:
-    oauth2:
-      client:
-        registration:
-          dbs:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          dbs:
-            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   main:
     allow-bean-definition-overriding: true
-eureka:
-  client:
-    enabled: true
-    serviceUrl.defaultZone: http://localhost:8080/registry/eureka
 
 backbase:
   security:
@@ -31,42 +10,39 @@ backbase:
       enabled: true
       adapter:
         enabled: true
-    service-api:
-      authentication:
-        required-scope: api:service
   stream:
     legalentity:
       sink:
         useIdentityIntegration: true
         userProfileEnabled: true
     dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      user-profile-manager-base-url: http://localhost:8086/user-profile-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
+      user-profile-manager-base-url: http://user-profile-manager:8080
     identity:
-      identity-integration-base-url: http://localhost:8181/identity-integration-service
+      identity-integration-base-url: http://identity-integration-service:8080
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:7001
+        integration-base-url: http://legal-entity-integration:8080
         chains:
           product-composition:
             enabled: true
-            base-url: http://localhost:9003
+            base-url: http://product-composition:8080
             async: false
         events:
-          enableCompleted: false
-          enableFailed: false
+          enableCompleted: true
+          enableFailed: true
         cursor:
           enabled: false
-          base-url: http://localhost:9005
+          base-url: http://legal-entity-cursor:8080
 bootstrap:
   enabled: false
   # This is just an example. Replace it with data corresponding to your bank
   legalEntity:
-    name: "ACME Bank"
+    name: "Bank"
     realmName: "backbase"
-    externalId: "ACME"
+    externalId: "BANK"
     legalEntityType: "BANK"
     referenceJobRoles:
       - name: Entitlements - Manager
@@ -135,7 +111,3 @@ bootstrap:
           identityLinkStrategy: "IDENTITY_AGNOSTIC"
         referenceJobRoleNames:
           - "Entitlements - Manager"
-
-logging:
-  level:
-    com.backbase.stream.compositions: DEBUG

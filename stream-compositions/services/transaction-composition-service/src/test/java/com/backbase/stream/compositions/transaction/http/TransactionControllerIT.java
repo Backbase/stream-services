@@ -56,14 +56,11 @@ import static org.mockserver.model.HttpResponse.response;
 @Slf4j
 class TransactionControllerIT extends IntegrationTest {
 
-  private static final int TOKEN_CONVERTER_PORT = 10000;
   private static final int INTEGRATION_SERVICE_PORT = 18000;
   private static final int TRANSACTION_CURSOR_SERVICE_PORT = 12000;
   private ClientAndServer integrationServer;
-  private ClientAndServer tokenConverterServer;
   private ClientAndServer transactionCursorServer;
   private MockServerClient integrationServerClient;
-  private MockServerClient tokenConverterServerClient;
   private MockServerClient transactionCursorServerClient;
   private static BrokerService broker;
 
@@ -90,22 +87,6 @@ class TransactionControllerIT extends IntegrationTest {
     broker.setPersistent(false);
     broker.start();
     broker.waitUntilStarted();
-  }
-
-  @BeforeEach
-  void initializeTokenConverterServer() throws IOException {
-    tokenConverterServer = startClientAndServer(TOKEN_CONVERTER_PORT);
-    tokenConverterServerClient = new MockServerClient("localhost", TOKEN_CONVERTER_PORT);
-    tokenConverterServerClient.when(
-        request()
-            .withMethod("POST")
-            .withPath("/oauth/token"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(readContentFromClasspath("token-converter-data/token.json"))
-        );
   }
 
   @BeforeEach
@@ -157,9 +138,6 @@ class TransactionControllerIT extends IntegrationTest {
 
   @AfterEach
   void stopMockServer() {
-    tokenConverterServer.stop();
-    while (!tokenConverterServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
-    }
     integrationServer.stop();
     while (!integrationServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
     }

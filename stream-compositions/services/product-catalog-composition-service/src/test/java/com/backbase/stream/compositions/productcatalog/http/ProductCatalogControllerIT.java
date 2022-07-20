@@ -1,7 +1,6 @@
 package com.backbase.stream.compositions.productcatalog.http;
 
 import com.backbase.stream.compositions.productcatalog.ProductCatalogCompositionApplication;
-import com.backbase.stream.compositions.productcatalog.http.ProductCatalogController;
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalogPushIngestionRequest;
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
@@ -11,7 +10,6 @@ import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
@@ -40,12 +38,9 @@ import static org.mockserver.model.HttpResponse.response;
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
 class ProductCatalogControllerIT extends IntegrationTest {
-    private static final int TOKEN_CONVERTER_PORT = 10000;
     private static final int INTEGRATION_SERVICE_PORT = 18000;
     private ClientAndServer integrationServer;
-    private ClientAndServer tokenConverterServer;
     private MockServerClient integrationServerClient;
-    private MockServerClient tokenConverterServerClient;
     private static BrokerService broker;
 
     @MockBean
@@ -61,22 +56,6 @@ class ProductCatalogControllerIT extends IntegrationTest {
         broker.setPersistent(false);
         broker.start();
         broker.waitUntilStarted();
-    }
-
-    @BeforeEach
-    void initializeTokenConverterServer() throws IOException {
-        tokenConverterServer = startClientAndServer(TOKEN_CONVERTER_PORT);
-        tokenConverterServerClient = new MockServerClient("localhost", TOKEN_CONVERTER_PORT);
-        tokenConverterServerClient.when(
-                request()
-                        .withMethod("POST")
-                        .withPath("/oauth/token"))
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withContentType(MediaType.APPLICATION_JSON)
-                                .withBody(readContentFromClasspath("token-converter-data/token.json"))
-                );
     }
 
     @BeforeEach
@@ -97,7 +76,6 @@ class ProductCatalogControllerIT extends IntegrationTest {
 
     @AfterEach
     void stopMockServer() {
-        tokenConverterServer.stop();
         integrationServer.stop();
     }
 

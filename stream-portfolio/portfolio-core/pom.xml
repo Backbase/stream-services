@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-portfolio</artifactId>
-        <version>2.81.0</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>portfolio-core</artifactId>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>portfolio-model</artifactId>
-            <version>${project.version}</version>
+            <version>2.81.0</version>
         </dependency>
 
         <dependency>

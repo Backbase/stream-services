@@ -43,12 +43,9 @@ import static org.mockserver.model.HttpResponse.response;
 @ExtendWith({SpringExtension.class})
 class LegalEntityControllerIT extends IntegrationTest {
 
-  private static final int TOKEN_CONVERTER_PORT = 10000;
   private static final int INTEGRATION_SERVICE_PORT = 18000;
   private ClientAndServer integrationServer;
-  private ClientAndServer tokenConverterServer;
   private MockServerClient integrationServerClient;
-  private MockServerClient tokenConverterServerClient;
   private static BrokerService broker;
 
   @Autowired
@@ -63,6 +60,8 @@ class LegalEntityControllerIT extends IntegrationTest {
 
   static {
     System.setProperty("spring.application.name", "legal-entity-composition-service");
+    System.setProperty("DBS_TOKEN_URI", "http://localhost:10000/oauth/token");
+
   }
   @BeforeAll
   static void initActiveMqBroker() throws Exception {
@@ -71,22 +70,6 @@ class LegalEntityControllerIT extends IntegrationTest {
     broker.setPersistent(false);
     broker.start();
     broker.waitUntilStarted();
-  }
-
-  @BeforeEach
-  void initializeTokenConverterServer() throws IOException {
-    tokenConverterServer = startClientAndServer(TOKEN_CONVERTER_PORT);
-    tokenConverterServerClient = new MockServerClient("localhost", TOKEN_CONVERTER_PORT);
-    tokenConverterServerClient.when(
-        request()
-            .withMethod("POST")
-            .withPath("/oauth/token"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(readContentFromClasspath("token-converter-data/token.json"))
-        );
   }
 
   @BeforeEach
@@ -107,10 +90,8 @@ class LegalEntityControllerIT extends IntegrationTest {
 
   @AfterEach
   void stopMockServer() {
-    tokenConverterServer.stop();
-    while (!tokenConverterServer.hasStopped(3,100L, TimeUnit.MILLISECONDS)){}
     integrationServer.stop();
-    while (!integrationServer.hasStopped(3,100L, TimeUnit.MILLISECONDS)){}
+    while (!integrationServer.hasStopped(5,100L, TimeUnit.MILLISECONDS)){}
   }
 
 

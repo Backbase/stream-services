@@ -56,12 +56,6 @@
       <version>${project.version}</version>
     </dependency>
 
-    <!-- Third party dependencies -->
-    <dependency>
-      <groupId>org.mapstruct</groupId>
-      <artifactId>mapstruct-processor</artifactId>
-    </dependency>
-
     <!-- Test dependencies -->
     <dependency>
       <groupId>com.backbase.stream.compositions</groupId>
@@ -85,6 +79,12 @@
       <artifactId>activemq-kahadb-store</artifactId>
       <version>${activemq.version}</version>
       <scope>test</scope>
+    </dependency>
+
+    <!-- Third party dependencies -->
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct-processor</artifactId>
     </dependency>
   </dependencies>
 
