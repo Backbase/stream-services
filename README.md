@@ -1,7 +1,7 @@
 [![Build Stream Services](https://github.com/Backbase/stream-services/actions/workflows/build.yml/badge.svg)](https://github.com/Backbase/stream-services/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.backbase.stream%3Astream-services&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.backbase.stream%3Astream-services)
 # Stream Services
-Stream Services are the "out-of-the-box" components that talk to DBS and are responsible for orchestrating calls to DBS. 
+Stream Services are an Open-Source accelerator to connect with Backbase "out-of-the-box" components that talk to DBS and are responsible for orchestrating calls to DBS. 
 The orchestration of calling different services is written in a functional programming style on project reactor enabling resiliency and scalability. 
 Stream Services are packaged as libraries that can be included in any project, REST Service and/or Spring Cloud Data Flow Applications.
 
@@ -37,6 +37,9 @@ You can find listed here the API specification containing the opinionated model 
 | 2021.07 (2.21.0.x) | 2.44.0 to 2.48.0                                                       |
 | 2.20.x             | 2.23.0 to 2.43.0                                                       |
 | 2.19.x             | 2.1.0 to 2.22.0                                                        |
+
+## Software License Terms
+Please see the license terms here: https://github.com/Backbase/stream-services/blob/master/LICENSE.txt
 
 ## Contributing
 You are welcome to provide bug fixes and new features in the form of pull requests. If you'd like to contribute, please be mindful of the following guidelines:
