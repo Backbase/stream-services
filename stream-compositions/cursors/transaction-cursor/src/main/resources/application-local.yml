@@ -18,18 +18,17 @@ spring:
 
 
 backbase:
+  communication:
+    http:
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   stream:
-    legalentity:
-      sink:
-        useIdentityIntegration: true
-        userProfileEnabled: true
     dbs:
       user-manager-base-url: http://localhost:8086/user-manager
       user-profile-manager-base-url: http://localhost:8086/user-profile-manager
       access-control-base-url: http://localhost:8086/access-control
       arrangement-manager-base-url: http://localhost:8082/arrangement-manager
-    identity:
-      identity-integration-base-url: http://localhost:8181/identity-integration-service
 
 logging:
   level:

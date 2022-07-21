@@ -23,14 +23,11 @@ eureka:
     serviceUrl.defaultZone: http://localhost:8080/registry/eureka
 
 backbase:
-  mtls:
-    enabled: false
-  security:
+  communication:
     http:
-      enabled: true
-    service-api:
-      authentication:
-        required-scope: api:service
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   stream:
     dbs:
       user-manager-base-url: http://localhost:8086/user-manager
