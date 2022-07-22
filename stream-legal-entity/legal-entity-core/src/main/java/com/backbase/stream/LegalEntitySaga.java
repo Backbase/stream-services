@@ -163,13 +163,13 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         }
         ServiceAgreement serviceAgreement = getServiceAgreement(legalEntity);
         log.info("Creating Contacts for Legal Entity Id {}", legalEntity.getExternalId());
-        String externalUserId =  getUserExternalId(legalEntity.getUsers());
-        if (externalUserId == null) {
+        Optional<String> externalUserOptional = getUserExternalId(legalEntity.getUsers());
+        if (externalUserOptional.isEmpty()) {
             streamTask.info(LEGAL_ENTITY, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
                     "Legal Entity: %s does not have any Users", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
-        return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(), serviceAgreement.getExternalId(), externalUserId, AccessContextScope.LE, legalEntity.getContacts()))
+        return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(), serviceAgreement.getExternalId(), externalUserOptional.get(), AccessContextScope.LE, legalEntity.getContacts()))
                 .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
                 .then(Mono.just(streamTask));
     }
@@ -183,14 +183,17 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             return Mono.just(streamTask);
         }
         log.info("Creating Contacts for Service Agreement Id {}", serviceAgreement.getExternalId());
-        String externalUserId = getUserExternalId(legalEntity.getUsers());
-        if (externalUserId == null) {
+        Optional<String> externalUserOptional = getUserExternalId(legalEntity.getUsers());
+        String externalUserId;
+        if (externalUserOptional.isEmpty()) {
             externalUserId = getParticipantUser(serviceAgreement);
             if (externalUserId == null) {
                 streamTask.info(LEGAL_ENTITY, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
                         "Legal Entity: %s does not have any Users", legalEntity.getExternalId());
                 return Mono.just(streamTask);
             }
+        } else {
+            externalUserId = externalUserOptional.get();
         }
         return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(), serviceAgreement.getExternalId(), externalUserId, AccessContextScope.SA, serviceAgreement.getContacts()))
                 .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
@@ -205,10 +208,10 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     .findFirst();
             if (participants.isPresent()) {
                 LegalEntityParticipant participant = participants.get();
-                if (!isEmpty(participant.getUsers())) {
-                    return getOptionalUserId(participant.getUsers().stream().findFirst());
-                } else if (!isEmpty(participant.getAdmins())) {
+                if (!isEmpty(participant.getAdmins())) {
                     return getOptionalUserId(participant.getAdmins().stream().findFirst());
+                } else if (!isEmpty(participant.getUsers())) {
+                    return getOptionalUserId(participant.getUsers().stream().findFirst());
                 }
             }
         }
@@ -236,12 +239,12 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         return accessContext;
     }
 
-    private String getUserExternalId(List<JobProfileUser> users) {
-        if (users == null) {
-            return null;
+    private Optional<String> getUserExternalId(List<JobProfileUser> users) {
+        if (CollectionUtils.isEmpty(users)) {
+            return Optional.empty();
         }
         Optional<JobProfileUser> optionalUser = users.stream().findFirst();
-        return optionalUser.map(jobProfileUser -> jobProfileUser.getUser().getExternalId()).orElse(null);
+        return optionalUser.map(jobProfileUser -> Optional.ofNullable(jobProfileUser.getUser().getExternalId())).orElse(Optional.empty());
     }
 
     private ServiceAgreement getServiceAgreement(LegalEntity legalEntity) {
