@@ -1,6 +1,49 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+
+## [2.84.0]
+### Added
+- Contacts Support Added for Legal Entity, Service Agreement and Users 
+- Usage Sample of Bootstrap json to be added to Legal Entity, Service Agreement and User 
+```yaml
+  "contacts": [
+    {
+      "category": "Employee",
+      "externalId": "a8141b9e06621c312001",
+      "addressLine1": "410 7th St",
+      "addressLine2": "",
+      "streetName": "",
+      "postCode": 93950,
+      "town": "Pacific Grove",
+      "countrySubDivision": "CA",
+      "country": "US",
+      "name": "Beatrice D. Ma",
+      "contactPerson": "N/A",
+      "phoneNumber": "530 676 8602",
+      "Email": "be@mail.com",
+      "accounts": [
+        {
+          "externalId": "a8141b9e06632d362001",
+          "name": "Checking USD 2247",
+          "alias": "My account",
+          "accountNumber": "9948772699182247",
+          "bankName": "CitiBank",
+          "bankAddressLine1": "736 Levy Court",
+          "bankAddressLine2": "",
+          "bankStreetName": "",
+          "bankPostCode": "01720",
+          "bankTown": "Acton",
+          "bankCountrySubDivision": "MA",
+          "bankCountry": "US",
+          "BIC": "CITIUS33",
+          "bankCode": "11103093"
+        }
+      ]
+    }
+  ]
+```
+
 ## [2.82.0]
 ### Fixed
 - Adding fallback to default settings for services endpoints.
