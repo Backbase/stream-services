@@ -49,9 +49,9 @@ bootstrap:
   enabled: false
   # This is just an example. Replace it with data corresponding to your bank
   legalEntity:
-    name: "Bank"
+    name: "ACME Bank"
     realmName: "backbase"
-    externalId: "BANK"
+    externalId: "ACME"
     legalEntityType: "BANK"
     referenceJobRoles:
       - name: Entitlements - Manager
