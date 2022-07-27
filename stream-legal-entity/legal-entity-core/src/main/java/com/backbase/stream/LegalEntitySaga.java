@@ -1,15 +1,11 @@
 package com.backbase.stream;
 
-import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
-import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
-import static java.util.Optional.ofNullable;
-import static org.springframework.util.CollectionUtils.isEmpty;
-
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
+import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
+import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
+import com.backbase.dbs.contact.api.service.v2.model.ExternalAccessContext;
+import com.backbase.dbs.contact.api.service.v2.model.IngestMode;
 import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.limit.api.service.v2.model.Entity;
 import com.backbase.dbs.limit.api.service.v2.model.PeriodicLimitsBounds;
@@ -18,29 +14,14 @@ import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
+import com.backbase.stream.contact.ContactsSaga;
+import com.backbase.stream.contact.ContactsTask;
 import com.backbase.stream.exceptions.AccessGroupException;
 import com.backbase.stream.exceptions.LegalEntityException;
-import com.backbase.stream.legalentity.model.BaseProduct;
-import com.backbase.stream.legalentity.model.BaseProductGroup;
-import com.backbase.stream.legalentity.model.BatchProductGroup;
-import com.backbase.stream.legalentity.model.BusinessFunction;
-import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
-import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
-import com.backbase.stream.legalentity.model.JobProfileUser;
-import com.backbase.stream.legalentity.model.JobRole;
-import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityParticipant;
-import com.backbase.stream.legalentity.model.LegalEntityReference;
-import com.backbase.stream.legalentity.model.LegalEntityStatus;
-import com.backbase.stream.legalentity.model.Limit;
-import com.backbase.stream.legalentity.model.Privilege;
-import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.ServiceAgreement;
-import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
-import com.backbase.stream.legalentity.model.User;
-import com.backbase.stream.legalentity.model.UserProfile;
+import com.backbase.stream.legalentity.model.*;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
+import com.backbase.stream.mapper.ExternalContactMapper;
 import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
@@ -55,20 +36,6 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
@@ -79,6 +46,19 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
+
+import javax.validation.Valid;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
+import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
+import static java.util.Objects.*;
+import static java.util.Optional.ofNullable;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * Legal Entity Saga. This Service creates Legal Entities and their supporting objects from a {@link LegalEntity}
@@ -105,6 +85,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     public static final String PROCESS_PRODUCTS = "process-products";
     public static final String PROCESS_JOB_PROFILES = "process-job-profiles";
     public static final String PROCESS_LIMITS = "process-limits";
+    public static final String PROCESS_CONTACTS = "process-contacts";
     public static final String REJECTED = "rejected";
     public static final String UPSERT = "upsert";
     public static final String SETUP_SERVICE_AGREEMENT = "setup-service-agreement";
@@ -128,8 +109,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private final AccessGroupService accessGroupService;
     private final BatchProductIngestionSaga batchProductIngestionSaga;
     private final LimitsSaga limitsSaga;
-
+    private final ContactsSaga contactsSaga;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
+    private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
 
     public LegalEntitySaga(LegalEntityService legalEntityService,
         UserService userService,
@@ -137,6 +119,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         AccessGroupService accessGroupService,
         ProductIngestionSaga productIngestionSaga,
         BatchProductIngestionSaga batchProductIngestionSaga, LimitsSaga limitsSaga,
+                           ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
@@ -144,6 +127,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         this.accessGroupService = accessGroupService;
         this.batchProductIngestionSaga = batchProductIngestionSaga;
         this.limitsSaga = limitsSaga;
+        this.contactsSaga = contactsSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
     }
 
@@ -159,7 +143,114 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::setupAdministratorPermissions)
             .flatMap(this::setupLimits)
             .flatMap(this::processProducts)
+            .flatMap(this::postContacts)
             .flatMap(this::processSubsidiaries);
+    }
+
+    private Mono<LegalEntityTask> postContacts(LegalEntityTask streamTask) {
+        return Mono.just(streamTask)
+                .flatMap(this::postLegalEntityContacts)
+                .flatMap(this::postServiceAgreementContacts)
+                .flatMap(this::postUserContacts);
+    }
+
+    private Mono<LegalEntityTask> postLegalEntityContacts(LegalEntityTask streamTask) {
+        LegalEntity legalEntity = streamTask.getData();
+        if (isEmpty(legalEntity.getContacts())) {
+            streamTask.info(LEGAL_ENTITY, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
+                    "Legal Entity: %s does not have any Contacts defined", legalEntity.getExternalId());
+            return Mono.just(streamTask);
+        }
+        ServiceAgreement serviceAgreement = getServiceAgreement(legalEntity);
+        log.info("Creating Contacts for Legal Entity Id {}", legalEntity.getExternalId());
+        Optional<String> externalUserOptional = getUserExternalId(legalEntity.getUsers());
+        if (externalUserOptional.isEmpty()) {
+            streamTask.info(LEGAL_ENTITY, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
+                    "Legal Entity: %s does not have any Users", legalEntity.getExternalId());
+            return Mono.just(streamTask);
+        }
+        return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(), serviceAgreement.getExternalId(), externalUserOptional.get(), AccessContextScope.LE, legalEntity.getContacts()))
+                .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
+                .then(Mono.just(streamTask));
+    }
+
+    private Mono<LegalEntityTask> postServiceAgreementContacts(LegalEntityTask streamTask) {
+        LegalEntity legalEntity = streamTask.getData();
+        ServiceAgreement serviceAgreement = getServiceAgreement(legalEntity);
+        if (isEmpty(serviceAgreement.getContacts())) {
+            streamTask.info(SERVICE_AGREEMENT, PROCESS_CONTACTS, FAILED, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
+                    "Master Service Agreement: %s does not have any Contacts defined", serviceAgreement.getExternalId());
+            return Mono.just(streamTask);
+        }
+        log.info("Creating Contacts for Service Agreement Id {}", serviceAgreement.getExternalId());
+        Optional<String> externalUserOptional = getUserExternalId(legalEntity.getUsers());
+        String externalUserId;
+        if (externalUserOptional.isEmpty()) {
+            externalUserId = getParticipantUser(serviceAgreement);
+            if (externalUserId == null) {
+                streamTask.info(LEGAL_ENTITY, PROCESS_CONTACTS, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(),
+                        "Legal Entity: %s does not have any Users", legalEntity.getExternalId());
+                return Mono.just(streamTask);
+            }
+        } else {
+            externalUserId = externalUserOptional.get();
+        }
+        return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(), serviceAgreement.getExternalId(), externalUserId, AccessContextScope.SA, serviceAgreement.getContacts()))
+                .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
+                .then(Mono.just(streamTask));
+    }
+
+    private String getParticipantUser(ServiceAgreement serviceAgreement) {
+        if (!isEmpty(serviceAgreement.getParticipants())) {
+            Optional<LegalEntityParticipant> participants = serviceAgreement.getParticipants()
+                    .stream()
+                    .filter(LegalEntityParticipant::getSharingUsers)
+                    .findFirst();
+            if (participants.isPresent()) {
+                LegalEntityParticipant participant = participants.get();
+                if (!isEmpty(participant.getAdmins())) {
+                    return getOptionalUserId(participant.getAdmins().stream().findFirst());
+                } else if (!isEmpty(participant.getUsers())) {
+                    return getOptionalUserId(participant.getUsers().stream().findFirst());
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getOptionalUserId(Optional<String> optionalUserId) {
+        return optionalUserId.isPresent() ? optionalUserId.get() : null;
+    }
+
+    private ContactsTask createContactsTask(String streamTaskId, String externalLegalEntityId, String externalServiceAgreementId, String externalUserId, AccessContextScope scope, List<ExternalContact> contacts) {
+        var contactData = new ContactsBulkPostRequestBody();
+        contactData.setIngestMode(IngestMode.UPSERT);
+        contactData.setAccessContext(createExternalAccessContext(externalLegalEntityId, externalServiceAgreementId, externalUserId, scope));
+        contactData.setContacts(externalContactMapper.toMapList(contacts));
+        return new ContactsTask(streamTaskId + "-" + "contacts-task", contactData);
+    }
+
+    private ExternalAccessContext createExternalAccessContext(String externalLegalEntityId, String externalServiceAgreementId, String externalUserId, AccessContextScope scope) {
+        ExternalAccessContext accessContext = new ExternalAccessContext();
+        accessContext.setExternalLegalEntityId(externalLegalEntityId);
+        accessContext.setExternalServiceAgreementId(externalServiceAgreementId);
+        accessContext.setExternalUserId(externalUserId);
+        accessContext.setScope(scope);
+        return accessContext;
+    }
+
+    private Optional<String> getUserExternalId(List<JobProfileUser> users) {
+        if (CollectionUtils.isEmpty(users)) {
+            return Optional.empty();
+        }
+        Optional<JobProfileUser> optionalUser = users.stream().findFirst();
+        return optionalUser.map(jobProfileUser -> Optional.ofNullable(jobProfileUser.getUser().getExternalId())).orElse(Optional.empty());
+    }
+
+    private ServiceAgreement getServiceAgreement(LegalEntity legalEntity) {
+        return legalEntity.getMasterServiceAgreement() != null?
+                legalEntity.getMasterServiceAgreement() :
+                legalEntity.getCustomServiceAgreement();
     }
 
     @Override
@@ -441,7 +532,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .map(streamTask::data);
     }
 
-    private Mono<LegalEntityTask> setupUsers(LegalEntityTask streamTask) {
+    private Mono<LegalEntityTask>  setupUsers(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
         Flux<JobProfileUser> jobProfileUsers = Flux.fromStream(nullableCollectionToStream(legalEntity.getUsers()));
 
@@ -462,6 +553,30 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 }))
             .collectList()
             .thenReturn(streamTask);
+    }
+
+    private Mono<LegalEntityTask> postUserContacts(LegalEntityTask streamTask) {
+        LegalEntity legalEntity = streamTask.getData();
+        Flux<JobProfileUser> jobProfileUsers = Flux.fromStream(nullableCollectionToStream(legalEntity.getUsers()));
+        return jobProfileUsers
+                        .flatMap(jobProfileUser -> postUserContacts(streamTask, jobProfileUser.getContacts(), jobProfileUser.getUser().getExternalId()))
+                .collectList()
+                .thenReturn(streamTask);
+    }
+
+    private Mono<LegalEntityTask> postUserContacts(LegalEntityTask streamTask, List<ExternalContact> externalContacts, String externalUserId) {
+        if (isEmpty(externalContacts)) {
+            log.info("Creating Contacts for User {}", externalUserId);
+            streamTask.info(USER, PROCESS_CONTACTS, FAILED, externalUserId, null,
+                    "User: %s does not have any Contacts", externalUserId);
+            return Mono.just(streamTask);
+        }
+        LegalEntity legalEntity = streamTask.getData();
+        log.info("Creating Contacts for User {}", externalUserId);
+        return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(),
+                null, externalUserId, AccessContextScope.USER, externalContacts))
+                .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
+                .then(Mono.just(streamTask));
     }
 
     private Mono<UserProfile> upsertUserProfile(User user) {
