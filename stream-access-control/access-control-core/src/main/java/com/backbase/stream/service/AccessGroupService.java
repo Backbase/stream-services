@@ -64,13 +64,14 @@ import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Access Group Service provide access to Access Control, Data Groups and Function Groups from a single service.
@@ -348,7 +349,7 @@ public class AccessGroupService {
             });
     }
 
-    private Flux<ServiceAgreementParticipantsGetResponseBody> getServiceAgreementParticipants(
+    public Flux<ServiceAgreementParticipantsGetResponseBody> getServiceAgreementParticipants(
         StreamTask streamTask, ServiceAgreement serviceAgreement) {
         return serviceAgreementsApi.getServiceAgreementParticipants(serviceAgreement.getInternalId())
             .onErrorResume(WebClientResponseException.NotFound.class, e -> Flux.empty())
@@ -760,8 +761,8 @@ public class AccessGroupService {
                 .findFirst();
             List<String> arrangementsToAdd = new ArrayList<>();
             List<String> arrangementsToRemove = new ArrayList<>();
-            affectedArrangements.forEach(arrangement -> {
-                boolean shouldBeInGroup = pg.isPresent() && StreamUtils.getInternalProductIds(pg.get()).contains(arrangement);
+            affectedArrangements.forEach(arrangement -> pg.ifPresent(p -> {
+                boolean shouldBeInGroup = StreamUtils.getInternalProductIds(pg.get()).contains(arrangement);
                 if (!dbsDataGroup.getItems().contains(arrangement) && shouldBeInGroup) {
                     // ADD.
                     log.debug("Arrangement item {} to be added to Data Group {}", arrangement, dbsDataGroup.getName());
@@ -772,7 +773,7 @@ public class AccessGroupService {
                     log.debug("Arrangement item {} to be removed from Data Group {}", arrangement, dbsDataGroup.getName());
                     arrangementsToRemove.add(arrangement);
                 }
-            });
+            }));
             if (!CollectionUtils.isEmpty(arrangementsToAdd)) {
                 batchUpdateRequest.add(new PresentationDataGroupItemPutRequestBody()
                     .dataGroupIdentifier(mapDataGroupId(dbsDataGroup.getId()))
@@ -941,6 +942,7 @@ public class AccessGroupService {
 
         List<String> dataItems = Stream.concat(StreamUtils.getInternalProductIds(productGroup).stream(), StreamUtils.getCustomDataGroupItems(productGroup).stream())
             .collect(Collectors.toList());
+        log.info("Data Access Group data items: {}", dataItems);
         DataGroupItemSystemBase dataGroupItemSystemBase = new DataGroupItemSystemBase();
         dataGroupItemSystemBase.setName(productGroup.getName());
         dataGroupItemSystemBase.setDescription(productGroup.getDescription());
@@ -1331,7 +1333,19 @@ public class AccessGroupService {
                     "Failed to setup Job Role: " + badRequest.getResponseBodyAsString()));
             })
             .collectList()
-            .map(idItems -> jobRole);
+            .flatMap(idItems -> {
+                if(!CollectionUtils.isEmpty(idItems) && idItems.get(0).getResourceId() != null) {
+                    BatchResponseItemExtended item = idItems.get(0);
+                    if (!item.getStatus().equals(HTTP_STATUS_OK)) {
+                        streamTask.error(JOB_ROLE, "ingest-reference-job-role", FAILED,
+                                item.getExternalServiceAgreementId(), item.getResourceId(),
+                                "Failed up setup Job Role - status: {}, errors: {}", item.getStatus(), item.getErrors());
+                        return Mono.error(new StreamTaskException(streamTask, "Failed to setup Job Role - status: " + item.getStatus() + ", errors: " + item.getErrors()));
+                    }
+                    jobRole.setId(idItems.get(0).getResourceId());
+                }
+                return Mono.just(jobRole);
+            });
     }
 
     private Mono<List<BatchResponseItemExtended>> updateBatchBusinessFunctionGroup(StreamTask streamTask,

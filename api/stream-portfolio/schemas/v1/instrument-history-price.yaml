@@ -1,0 +1,22 @@
+required:
+  - price
+  - currency
+  - date
+  - priceType
+type: object
+properties:
+  price:
+    $ref: money.yaml
+    description: Instrument price.
+  date:
+    type: string
+    description: Date for the instrument price.
+    format: date
+  priceType:
+    type: string
+    description: Type of the price. Can be opening, closing, minimal or maximal.
+    enum:
+      - OPEN
+      - CLOSE
+      - HIGH
+      - LOW

@@ -1,0 +1,17 @@
+required:
+  - dateFrom
+  - dateTo
+  - valuePct
+type: object
+properties:
+  dateFrom:
+    type: string
+    format: date-time
+    description: Date in UTC denoting the start of the period from which the data is ingested into the system.
+  dateTo:
+    type: string
+    format: date-time
+    description: Date in UTC denoting the end of the period until which the data is ingested into the system.
+  valuePct:
+    type: number
+    description: Percentage value of the cumulative performance.

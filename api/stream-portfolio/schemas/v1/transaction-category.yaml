@@ -1,0 +1,13 @@
+required:
+  - key
+type: object
+properties:
+  key:
+    type: string
+    description: Transaction Category key.
+  alias:
+    type: string
+    description: Transaction Category default alias.
+  description:
+    type: string
+    description: Transaction Category description

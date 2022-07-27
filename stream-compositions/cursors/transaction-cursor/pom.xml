@@ -83,10 +83,9 @@
     </dependency>
 
     <!-- Third party dependencies -->
-
     <dependency>
-      <groupId>org.mapstruct</groupId>
-      <artifactId>mapstruct-processor</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
       <groupId>org.liquibase</groupId>
@@ -117,6 +116,11 @@
       <artifactId>activemq-kahadb-store</artifactId>
       <version>${activemq.version}</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct-processor</artifactId>
     </dependency>
   </dependencies>
 

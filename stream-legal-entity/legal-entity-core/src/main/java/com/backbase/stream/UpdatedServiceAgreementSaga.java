@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.cloud.sleuth.annotation.SpanTag;
@@ -304,7 +303,6 @@ public class UpdatedServiceAgreementSaga implements StreamTaskExecutor<UpdatedSe
 
     }
 
-    @NotNull
     private List<JobProfileUser> getUserProfiles(UpdatedServiceAgreement sa) {
         return Stream.of(sa.getSaUsers(), sa.getSaAdmins())
             .filter(Objects::nonNull)

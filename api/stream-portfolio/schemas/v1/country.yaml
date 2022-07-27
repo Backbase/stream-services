@@ -1,0 +1,12 @@
+required:
+  - code
+  - name
+type: object
+properties:
+  name:
+    type: string
+    description: Name of a country.
+  code:
+    type: string
+    description: International code of a country.
+    maxLength: 12

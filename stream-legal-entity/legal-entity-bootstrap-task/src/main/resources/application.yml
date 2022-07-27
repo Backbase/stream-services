@@ -2,28 +2,12 @@
 spring:
   zipkin:
     enabled: false
-  security:
-    oauth2:
-      client:
-        registration:
-          dbs:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          dbs:
-            token-uri: http://token-converter:8080/oauth/token
-
-backbase:
-  stream:
-    dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
 
 ---
 spring:
-  profiles: moustache-bank
+  config:
+    activate:
+      on-profile: moustache-bank
   cloud:
     kubernetes:
       discovery:
@@ -113,7 +97,12 @@ bootstrap:
     users:
       - user:
           externalId: "admin"
+          fullName: "Backbase Root Admin"
           identityLinkStrategy: "CREATE_IN_IDENTITY"
+          emailAddress:
+            address: "bbadmin@email.com"
+          mobileNumber:
+            number: "1234567890"
         referenceJobRoleNames:
           - "Entitlements - Manager"
     subsidiaries:
@@ -137,7 +126,12 @@ bootstrap:
             users:
               - user:
                   externalId: "sara"
+                  fullName: "Sara Jones"
                   identityLinkStrategy: "CREATE_IN_IDENTITY"
+                  emailAddress:
+                    address: "sara@email.com"
+                  mobileNumber:
+                    number: "1234567890"
                 referenceJobRoleNames:
                   - "Retail User - USA"
             productGroups:

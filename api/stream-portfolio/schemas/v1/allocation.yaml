@@ -1,0 +1,41 @@
+required:
+  - allocationType
+  - classifierType
+  - classifierName
+  - allocationPct
+  - valuation
+  - allocations
+type: object
+properties:
+  allocationType:
+    type: string
+    description: Allocation type denotes how the portfolio instruments are allocated in a portfolio; can be either BY_CURRENCY or BY_ASSET_CLASS.
+  classifierType:
+    type: string
+    description: Classifier type defines the allocation type; can be either CURRENCY or ASSET_CLASS.
+  classifierName:
+    type: string
+    description: Classifier name denotes the name of the selected classifier type; can be either an asset class name or a currency name, specified in ISO 4217 format.
+  allocationMaxPct:
+    type: number
+    description: Maximum allocation percentage that the item can amount to in a portfolio.
+  allocationMinPct:
+    type: number
+    description: Minimum allocation percentage that the item can be equal to in a portfolio.
+  allocationPct:
+    type: number
+    description: Allocation in percent for the given item.
+  valuation:
+    $ref: money.yaml
+    description: Valuation of the item in the given currency.
+  allocations:
+    type: array
+    description: The list of allocations.
+    items:
+      $ref: allocations-item.yaml
+    minItems: 1
+  additions:
+    description: Additional properties.
+    type: object
+    additionalProperties:
+      type: string
