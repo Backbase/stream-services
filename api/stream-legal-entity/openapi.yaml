@@ -998,6 +998,10 @@ components:
           $ref: '#/components/schemas/ServiceAgreement'
         customServiceAgreement:
           $ref: '#/components/schemas/ServiceAgreement'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContact'
         additions:
           type: object
           additionalProperties:
@@ -1026,6 +1030,10 @@ components:
             $ref: '#/components/schemas/BusinessFunctionGroup'
         approvalStatus:
           $ref: '#/components/schemas/ApprovalStatus'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContact'
       required:
         - user
     LegalEntityType:
@@ -1434,6 +1442,10 @@ components:
           $ref: '#/components/schemas/ExternalIdentifier'
         limit:
           $ref: '#/components/schemas/Limit'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContact'
         additions:
           type: object
           additionalProperties:
@@ -1927,6 +1939,224 @@ components:
           type: object
           additionalProperties:
             type: string
+
+    ExternalContact:
+      description: 'External Contacts'
+      type: object
+      required:
+        - accounts
+        - externalId
+        - name
+      properties:
+        accounts:
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalAccountInformation'
+        externalId:
+          $ref: '#/components/schemas/ExternalContactId'
+        accessContextScope:
+          $ref: '#/components/schemas/AccessContextScope'
+        name:
+          maxLength: 140
+          type: string
+          description: The name of a contact
+        alias:
+          maxLength: 80
+          type: string
+          description: Name will be displayed if alias field is not filled
+        category:
+          maxLength: 70
+          type: string
+          description: "Category to which the contact belongs to like employee, supplier."
+        contactPerson:
+          maxLength: 70
+          type: string
+          description: Contact person of the contact
+        phoneNumber:
+          maxLength: 30
+          type: string
+          description: Contact phone number of the contact
+        emailId:
+          maxLength: 255
+          type: string
+          description: Email-id of the contact
+          format: email
+        addressLine1:
+          maxLength: 70
+          type: string
+          description: Address line 1
+        addressLine2:
+          maxLength: 70
+          type: string
+          description: Address line 2
+        streetName:
+          maxLength: 70
+          type: string
+          description: Street name
+        town:
+          maxLength: 35
+          type: string
+          description: City or town
+        postCode:
+          maxLength: 16
+          type: string
+          description: Address post code
+        countrySubDivision:
+          maxLength: 35
+          type: string
+          description: Country region or state
+        country:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        activeStatus:
+          $ref: '#/components/schemas/ActiveContactStatus'
+        additions:
+          $ref: '#/components/schemas/Additions'
+
+    ExternalAccountInformation:
+      properties:
+        externalId:
+          $ref: '#/components/schemas/ExternalContactId'
+        name:
+          maxLength: 140
+          type: string
+          description: The name of an account
+        alias:
+          maxLength: 34
+          type: string
+          description: Name will be displayed if alias field is not filled
+        accountType:
+          maxLength: 10
+          type: string
+          description: "The type of the account, e.g. CHECKING/SAVINGS"
+        accountNumber:
+          maxLength: 34
+          type: string
+          description: "An account identifier. At least one of the account identifiers\
+            \ (accountNumber, IBAN, phoneNumber or email) is mandatory"
+        IBAN:
+          maxLength: 34
+          type: string
+          description: "An account identifier. At least one of the account identifiers\
+            \ (accountNumber, IBAN, phoneNumber or email) is mandatory"
+        phoneNumber:
+          $ref: '#/components/schemas/phone-number-identifier'
+        email:
+          $ref: '#/components/schemas/email-identifier'
+        BIC:
+          maxLength: 11
+          type: string
+          description: The Business Identifier Code as issued within the SWIFT domain
+        bankCode:
+          maxLength: 20
+          type: string
+          description: "The code assigned by a central bank, e.g. ABA RTN"
+        bankName:
+          maxLength: 140
+          type: string
+          description: Specifies the name of the bank where the account is issued
+        bankAddressLine1:
+          maxLength: 70
+          type: string
+          description: Bank address line 1
+        bankAddressLine2:
+          maxLength: 70
+          type: string
+          description: Bank address line 2
+        bankStreetName:
+          maxLength: 70
+          type: string
+          description: Bank street name
+        bankTown:
+          maxLength: 35
+          type: string
+          description: Bank city or town
+        bankPostCode:
+          maxLength: 16
+          type: string
+          description: Bank address post code
+        bankCountrySubDivision:
+          maxLength: 35
+          type: string
+          description: Bank country region or state
+        bankCountry:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        accountHolderAddressLine1:
+          maxLength: 70
+          type: string
+          description: Account address line 1
+        accountHolderAddressLine2:
+          maxLength: 70
+          type: string
+          description: Account address line 2
+        accountHolderStreetName:
+          maxLength: 70
+          type: string
+          description: Account holder street name
+        accountHolderTown:
+          maxLength: 35
+          type: string
+          description: Account holder city or town
+        accountHolderPostCode:
+          maxLength: 16
+          type: string
+          description: Account holder address post code
+        accountHolderCountrySubDivision:
+          maxLength: 35
+          type: string
+          description: Account holder country region or state
+        accountHolderCountry:
+          maxLength: 2
+          minLength: 2
+          type: string
+          description: ISO Country Code
+        additions:
+          $ref: '#/components/schemas/Additions'
+    ExternalContactId:
+      maxLength: 32
+      type: string
+      description: Reference of an ID from another (external) system.
+    AccessContextScope:
+      type: string
+      description: "Access context scope of the contact, either ServiceAgreement (SA),\
+        \ LegalEntity (LE) or User (USER).\n"
+      enum:
+        - SA
+        - LE
+    ActiveContactStatus:
+      type: string
+      description: |
+        The active status of a contact. When approvals is not enabled ACTIVE is the only value possible.
+        Otherwise following values mean:
+        ACTIVE - fully approved;
+        PENDING_APPROVAL - the contact needs further approval to become active.
+      enum:
+        - ACTIVE
+        - PENDING_APPROVAL
+    phone-number-identifier:
+      maxLength: 30
+      type: string
+      description: "A phone number account identifier. At least one of the account\
+        \ identifiers (accountNumber, IBAN, phoneNumber or email) is mandatory."
+    email-identifier:
+      maxLength: 255
+      type: string
+      description: "An email account identifier. At least one of the account identifiers\
+        \ (accountNumber, IBAN, phoneNumber or email) is mandatory."
+      format: email
+    Additions:
+      title: Additions
+      type: object
+      additionalProperties:
+        type: string
+      description: Additional properties
+
     ###############################################
     ## Additional Data Group Items
     ###############################################

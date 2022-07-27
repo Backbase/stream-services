@@ -29,6 +29,12 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
+            <artifactId>contacts-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-model</artifactId>
             <version>${project.version}</version>
         </dependency>

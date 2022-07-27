@@ -1,26 +1,25 @@
 package com.backbase.stream;
 
-import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
-import static java.util.Collections.singletonList;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
+import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
+import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
+import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostResponseBody;
+import com.backbase.dbs.contact.api.service.v2.model.ExternalAccessContext;
+import com.backbase.dbs.contact.api.service.v2.model.IngestMode;
 import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.api.service.v2.model.Realm;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
-import com.backbase.stream.exceptions.LegalEntityException;
+import com.backbase.stream.contact.ContactsSaga;
+import com.backbase.stream.contact.ContactsTask;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CurrentAccount;
 import com.backbase.stream.legalentity.model.EmailAddress;
+import com.backbase.stream.legalentity.model.ExternalAccountInformation;
+import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
@@ -45,16 +44,7 @@ import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -63,10 +53,26 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
+import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LegalEntitySagaTest {
@@ -92,19 +98,25 @@ class LegalEntitySagaTest {
     @Mock
     private LimitsSaga limitsSaga;
 
+    @Mock
+    private ContactsSaga contactsSaga;
+
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
         getLegalEntitySagaConfigurationProperties();
 
+    String leExternalId = "someLeExternalId";
+    String leParentExternalId = "someParentLeExternalId";
+    String leInternalId = "someLeInternalId";
+    String adminExId = "someAdminExId";
+    String regularUserExId = "someRegularUserExId";
+    String customSaExId = "someCustomSaExId";
+    LegalEntity legalEntity;
+    ServiceAgreement customSa;
+    JobProfileUser regularUser;
+
     @Test
     void customServiceAgreementCreation() {
-        String leExternalId = "someLeExternalId";
-        String leParentExternalId = "someParentLeExternalId";
-        String leInternalId = "someLeInternalId";
-        String adminExId = "someAdminExId";
-        String regularUserExId = "someRegularUserExId";
-        String customSaExId = "someCustomSaExId";
-
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
@@ -114,13 +126,13 @@ class LegalEntitySagaTest {
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-        JobProfileUser regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
+        regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
             .externalId(regularUserExId));
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
         JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
-        ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
+        customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
-        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).addAdministratorsItem(adminUser)
+        legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).addAdministratorsItem(adminUser)
             .parentExternalId(leParentExternalId).customServiceAgreement(customSa).users(singletonList(regularUser))
             .productGroups(singletonList(productGroup)).subsidiaries(singletonList(
                     new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
@@ -157,10 +169,6 @@ class LegalEntitySagaTest {
 
     @Test
     void customServiceAgreementCreationNoUsersOrAdministrators() {
-        String leExternalId = "someLeExternalId";
-        String leInternalId = "someLeInternalId";
-        String customSaExId = "someCustomSaExId";
-
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
@@ -175,10 +183,10 @@ class LegalEntitySagaTest {
             .addFunctionsItem(new BusinessFunction().functionId("1071").name("US Domestic Wire")
                 .addPrivilegesItem(new Privilege().privilege("create").limit(limit)));
         JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
-        ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole)
+        customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole)
             .participants(Collections.singletonList(new LegalEntityParticipant().externalId(leExternalId)
                 .users(List.of("externalUserId")).limit(limit))).creatorLegalEntity(leExternalId).limit(limit);
-        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).limit(limit)
+        legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).limit(limit)
             .customServiceAgreement(customSa).parentExternalId(leExternalId).productGroups(singletonList(productGroup));
 
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
@@ -211,10 +219,6 @@ class LegalEntitySagaTest {
 
     @Test
     void masterServiceAgreementCreation() {
-        String leExternalId = "someLeExternalId";
-        String leInternalId = "someLeInternalId";
-        String customSaExId = "someCustomSaExId";
-
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
@@ -227,7 +231,7 @@ class LegalEntitySagaTest {
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
         JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
         ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
-        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).parentExternalId(leExternalId)
+        legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).parentExternalId(leExternalId)
             .activateSingleServiceAgreement(false).masterServiceAgreement(sa).productGroups(singletonList(productGroup));
 
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
@@ -262,10 +266,6 @@ class LegalEntitySagaTest {
 
     @Test
     void masterServiceAgreementCreation_activateSingleServiceAgreement() {
-        String leExternalId = "someLeExternalId";
-        String leInternalId = "someLeInternalId";
-        String customSaExId = "someCustomSaExId";
-
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
@@ -277,7 +277,7 @@ class LegalEntitySagaTest {
 
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
         JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
-        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).parentExternalId(leExternalId)
+        legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).parentExternalId(leExternalId)
             .productGroups(singletonList(productGroup));
         ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
 
@@ -323,7 +323,7 @@ class LegalEntitySagaTest {
     void productGroupsProcessedSequentially() {
         // Given
         Limit limit = new Limit().currencyCode("GBP").transactional(BigDecimal.valueOf(10000));
-        LegalEntity legalEntity = new LegalEntity()
+        legalEntity = new LegalEntity()
             .name("Legal Entity")
             .externalId("100000")
             .internalId("100001")
@@ -447,6 +447,7 @@ class LegalEntitySagaTest {
         when(accessGroupService.getUserByExternalId("john.doe", true))
             .thenReturn(Mono.just(new GetUser().externalId("john.doe").id("internalId")));
         when(limitsSaga.executeTask(any())).thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
+ //       when(contactsSaga.executeTask(any())).thenReturn(Mono.just(new ContactsTask("1", new ContactsBulkPostRequestBody())));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
             .thenAnswer((Answer<Mono<ProductGroupTask>>) invocationOnMock -> {
                 ProductGroupTask productGroupTask = invocationOnMock.getArgument(0);
@@ -475,11 +476,7 @@ class LegalEntitySagaTest {
 
     @Test
     void deleteLegalEntity_usersPrefixedWithRemovedNotProcessed() {
-        String leExternalId = "someLeExternalId";
-        String leInternalId = "someLeInternalId";
-        String customSaExId = "someCustomSaExId";
-
-        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId)
+        legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId)
             .parentExternalId(leExternalId);
         ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).creatorLegalEntity(leExternalId);
 
@@ -514,11 +511,7 @@ class LegalEntitySagaTest {
 
     @Test
     void deleteLegalEntity_processesPaginatedListOfUsers() {
-        String leExternalId = "someLeExternalId";
-        String leInternalId = "someLeInternalId";
-        String customSaExId = "someCustomSaExId";
-
-        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId)
+        legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId)
             .parentExternalId(leExternalId);
         ServiceAgreement sa = new ServiceAgreement().externalId(customSaExId).creatorLegalEntity(leExternalId);
 
@@ -561,13 +554,6 @@ class LegalEntitySagaTest {
 
     @Test
     void updateLegalEntityName() {
-        String leExternalId = "someLeExternalId";
-        String leParentExternalId = "someParentLeExternalId";
-        String leInternalId = "someLeInternalId";
-        String adminExId = "someAdminExId";
-        String regularUserExId = "someRegularUserExId";
-        String customSaExId = "someCustomSaExId";
-
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
@@ -577,13 +563,13 @@ class LegalEntitySagaTest {
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-        JobProfileUser regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
+        regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
                 .externalId(regularUserExId));
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
         JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
-        ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
+        customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
-        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).name("Model Bank")
+        legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).name("Model Bank")
                 .addAdministratorsItem(adminUser).parentExternalId(leParentExternalId)
                 .customServiceAgreement(customSa).users(singletonList(regularUser))
                 .productGroups(singletonList(productGroup)).subsidiaries(singletonList(
@@ -629,13 +615,6 @@ class LegalEntitySagaTest {
 
     @Test
     void updateUserName() {
-        String leExternalId = "someLeExternalId";
-        String leParentExternalId = "someParentLeExternalId";
-        String leInternalId = "someLeInternalId";
-        String adminExId = "someAdminExId";
-        String regularUserExId = "someRegularUserExId";
-        String customSaExId = "someCustomSaExId";
-
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
         ProductGroup productGroup = new ProductGroup();
@@ -651,9 +630,9 @@ class LegalEntitySagaTest {
                 .externalId(regularUserExId).fullName("Old Name Regular User"));
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
         JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
-        ServiceAgreement customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
+        customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId).fullName("Admin");
-        LegalEntity legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).name("Model Bank")
+        legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).name("Model Bank")
                 .addAdministratorsItem(adminUser).parentExternalId(leParentExternalId)
                 .customServiceAgreement(customSa).users(singletonList(newRegularUser))
                 .productGroups(singletonList(productGroup)).subsidiaries(singletonList(
@@ -694,6 +673,172 @@ class LegalEntitySagaTest {
         verify(userService).updateUser(eq(newRegularUser.getUser()));
     }
 
+    void getMockLegalEntity() {
+        SavingsAccount account = new SavingsAccount();
+        account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
+        ProductGroup productGroup = new ProductGroup();
+        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
+                .description("somePgDescription").savingAccounts(singletonList(account));
+
+        ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
+        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
+
+        regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
+                .externalId(regularUserExId));
+        BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
+        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
+        customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
+        User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
+
+        legalEntity = new LegalEntity()
+                .internalId(leInternalId)
+                .externalId(leExternalId)
+                .addAdministratorsItem(adminUser)
+                .parentExternalId(leParentExternalId)
+                .customServiceAgreement(customSa)
+                .users(singletonList(regularUser))
+                .productGroups(singletonList(productGroup))
+                .subsidiaries(singletonList(
+                        new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
+                ));
+
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
+        when(accessGroupService.getServiceAgreementByExternalId(customSaExId)).thenReturn(Mono.empty());
+        when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
+        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(customSa), any())).thenReturn(Mono.just(customSa));
+        when(userService.getUserByExternalId(regularUserExId)).thenReturn(Mono.just(regularUser.getUser()));
+        when(userService.getUserByExternalId(adminExId)).thenReturn(Mono.just(adminUser));
+        when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());
+        when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
+        when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
+        when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
+        when(userService.updateUser(any())).thenReturn(Mono.just(regularUser.getUser()));
+    }
+
+    @Test
+    void test_PostLegalContacts() {
+        getMockLegalEntity();
+        LegalEntityTask task = mockLegalEntityTask(legalEntity);
+        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.LE));
+
+        LegalEntityTask result = legalEntitySaga.executeTask(task).block();
+
+        Assertions.assertNotNull(result);
+
+        ExternalContact contact = getMockExternalContact();
+        legalEntity.setContacts(Collections.singletonList(contact));
+        result = legalEntitySaga.executeTask(task).block();
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(leExternalId, result.getData().getContacts().get(0).getExternalId());
+    }
+
+    @Test
+    void test_PostLegalContacts_NoUser() {
+        SavingsAccount account = new SavingsAccount();
+        account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
+        ProductGroup productGroup = new ProductGroup();
+        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
+                .description("somePgDescription").savingAccounts(singletonList(account));
+
+        ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
+        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
+
+        regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
+                .externalId(regularUserExId));
+        BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
+        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
+        customSa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole).creatorLegalEntity(leExternalId);
+        User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
+
+        ExternalContact contact = getMockExternalContact();
+
+        legalEntity = new LegalEntity()
+                .internalId(leInternalId)
+                .externalId(leExternalId)
+                .addAdministratorsItem(adminUser)
+                .parentExternalId(leParentExternalId)
+                .customServiceAgreement(customSa)
+                .productGroups(singletonList(productGroup))
+                .contacts(Collections.singletonList(contact))
+                .subsidiaries(singletonList(
+                        new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
+                ));
+
+        LegalEntityTask task = mockLegalEntityTask(legalEntity);
+
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
+        when(accessGroupService.getServiceAgreementByExternalId(customSaExId)).thenReturn(Mono.empty());
+        when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
+        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(customSa), any())).thenReturn(Mono.just(customSa));
+        when(userService.getUserByExternalId(adminExId)).thenReturn(Mono.just(adminUser));
+        when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());
+        when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
+        when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
+        when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
+        when(userService.updateUser(any())).thenReturn(Mono.just(regularUser.getUser()));
+
+        LegalEntityTask result = legalEntitySaga.executeTask(task).block();
+
+        Assertions.assertNotNull(result);
+    }
+
+    @Test
+    void test_PostSAContacts() {
+        getMockLegalEntity();
+        LegalEntityTask task = mockLegalEntityTask(legalEntity);
+        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.SA));
+
+        LegalEntityTask result = legalEntitySaga.executeTask(task).block();
+
+        Assertions.assertNotNull(result);
+
+        ExternalContact contact = getMockExternalContact();
+        customSa.setContacts(Collections.singletonList(contact));
+        result = legalEntitySaga.executeTask(task).block();
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(leExternalId, result.getData().getCustomServiceAgreement().getContacts().get(0).getExternalId());
+
+        LegalEntityParticipant participant = new LegalEntityParticipant()
+                .externalId(leExternalId)
+                .sharingUsers(true)
+                .users(singletonList("USER1"));
+        customSa.setParticipants(singletonList(participant));
+        result = legalEntitySaga.executeTask(task).block();
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("USER1", result.getData().getCustomServiceAgreement().getParticipants().get(0).getUsers().get(0));
+
+        participant = participant.users(null).admins(singletonList("ADMIN1"));
+        customSa.setParticipants(singletonList(participant));
+        result = legalEntitySaga.executeTask(task).block();
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals("ADMIN1", result.getData().getCustomServiceAgreement().getParticipants().get(0).getAdmins().get(0));
+    }
+
+
+    @Test
+    void test_PostUserContacts() {
+        getMockLegalEntity();
+        LegalEntityTask task = mockLegalEntityTask(legalEntity);
+
+        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
+
+        LegalEntityTask result = legalEntitySaga.executeTask(task).block();
+
+        Assertions.assertNotNull(result);
+
+        ExternalContact contact = getMockExternalContact();
+        regularUser.setContacts(Collections.singletonList(contact));
+        result = legalEntitySaga.executeTask(task).block();
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(leExternalId, result.getData().getUsers().get(0).getContacts().get(0).getExternalId());
+    }
+
     private List<GetUser> getUsers(int amount) {
         List<GetUser> users = new ArrayList<>();
 
@@ -717,5 +862,52 @@ class LegalEntitySagaTest {
         LegalEntitySagaConfigurationProperties sagaConfiguration =  new LegalEntitySagaConfigurationProperties();
         sagaConfiguration.setUseIdentityIntegration(true);
         return sagaConfiguration;
+    }
+
+
+    private ExternalContact getMockExternalContact() {
+        ExternalAccountInformation externalAccount = new ExternalAccountInformation()
+                .name("ACC1")
+                .externalId("ACCEXT1")
+                .accountNumber("12345");
+        return new ExternalContact()
+                .name("Sam")
+                .externalId(leExternalId)
+                .accounts(Collections.singletonList(externalAccount));
+    }
+
+    private ContactsBulkPostRequestBody getMockContactsBulkRequest(AccessContextScope accessContextScope) {
+        var request = new ContactsBulkPostRequestBody();
+        request.setIngestMode(IngestMode.UPSERT);
+
+        ExternalAccessContext accessContext = new ExternalAccessContext();
+        accessContext.setScope(accessContextScope);
+        accessContext.setExternalUserId("USER1");
+        request.setAccessContext(accessContext);
+
+        com.backbase.dbs.contact.api.service.v2.model.ExternalContact contact = new com.backbase.dbs.contact.api.service.v2.model.ExternalContact();
+        contact.setName("TEST1");
+        contact.setExternalId("TEST101");
+
+        com.backbase.dbs.contact.api.service.v2.model.ExternalAccountInformation account = new com.backbase.dbs.contact.api.service.v2.model.ExternalAccountInformation();
+        account.setName("TESTACC1");
+        account.setExternalId("TESTACC101");
+        contact.setAccounts(Collections.singletonList(account));
+        request.setContacts(Collections.singletonList(contact));
+
+        return request;
+    }
+
+    private Mono<ContactsTask> getContactsTask(AccessContextScope accessContextScope) {
+        ContactsTask task = new ContactsTask("TEST1", getMockContactsBulkRequest(accessContextScope));
+        task.setResponse(getMockResponse());
+        return Mono.just(task);
+    }
+
+    private ContactsBulkPostResponseBody getMockResponse() {
+        ContactsBulkPostResponseBody responseBody = new ContactsBulkPostResponseBody();
+        responseBody.setSuccessCount(2);
+        return responseBody;
+
     }
 }

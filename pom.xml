@@ -37,6 +37,8 @@
         <module>stream-compositions</module>
 
         <module>stream-portfolio</module>
+        <module>stream-contacts</module>
+
     </modules>
 
     <properties>

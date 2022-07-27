@@ -1,6 +1,7 @@
 package com.backbase.stream.controller;
 
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.contact.api.service.v2.ContactsApi;
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
@@ -22,8 +23,6 @@ import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.webclient.DbsWebClientConfiguration;
-import java.net.URI;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +79,9 @@ class LegalEntityAsyncControllerTest {
 
     @MockBean
     private LimitsServiceApi limitsApi;
+
+    @MockBean
+    private ContactsApi contactsApi;
 
     @MockBean
     private UserManagementApi userManagementApi;
