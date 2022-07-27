@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>stream-starter-parents</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Starter Parents</name>
     <description>Parent for all Stream SDK modules</description>

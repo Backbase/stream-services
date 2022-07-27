@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>approvals-bootstrap-task</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
     <name>Stream :: Approvals Bootstrap Task</name>

@@ -44,32 +44,6 @@ class BackbaseStreamConfigurationPropertiesTest {
     }
 
     @Test
-    void shouldDoProperEquals_DbsNotNull() {
-        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
-            new BackbaseStreamConfigurationProperties();
-
-        backbaseStreamConfigurationProperties1.setDbs(new DbsConnectionProperties());
-
-        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties2 =
-            new BackbaseStreamConfigurationProperties();
-
-        Assertions.assertNotEquals(backbaseStreamConfigurationProperties1, backbaseStreamConfigurationProperties2);
-    }
-
-    @Test
-    void shouldDoProperEquals_IdentityNotNull() {
-        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
-            new BackbaseStreamConfigurationProperties();
-
-        backbaseStreamConfigurationProperties1.setIdentity(new IdentityConnectionProperties());
-
-        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties2 =
-            new BackbaseStreamConfigurationProperties();
-
-        Assertions.assertNotEquals(backbaseStreamConfigurationProperties1, backbaseStreamConfigurationProperties2);
-    }
-
-    @Test
     void shouldDoProperEquals_OneObject_Default() {
         BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
             new BackbaseStreamConfigurationProperties();
@@ -113,7 +87,7 @@ class BackbaseStreamConfigurationPropertiesTest {
 
         DbsConnectionProperties dbs = backbaseStreamConfigurationProperties.getDbs();
 
-        Assertions.assertNull(dbs);
+        Assertions.assertNotNull(dbs);
     }
 
     @Test
@@ -384,7 +358,7 @@ class BackbaseStreamConfigurationPropertiesTest {
 
         IdentityConnectionProperties identity = backbaseStreamConfigurationProperties.getIdentity();
 
-        Assertions.assertNull(identity);
+        Assertions.assertNotNull(identity);
     }
 
     @Test

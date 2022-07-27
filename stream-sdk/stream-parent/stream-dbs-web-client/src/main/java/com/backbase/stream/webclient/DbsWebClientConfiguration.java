@@ -13,9 +13,12 @@ import org.springframework.context.annotation.PropertySource;
 
 /**
  * DBS Web Client Configuration to be used by Stream Services that communicate with DBS.
+ *
+ * We are overriding here the default token converter port in the URI to be compliant with most clustered environments.
  */
 @Slf4j
 @Configuration
+@PropertySource("classpath:web-client.properties")
 @EnableConfigurationProperties(DbsWebClientConfigurationProperties.class)
 public class DbsWebClientConfiguration {
 
