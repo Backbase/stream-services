@@ -160,6 +160,9 @@ customServiceAgreement:
       BIC: BOFAUS6H
       bankCode: '121000358'
 ```
+## [2.84.0]
+### Fixed
+- Adding Custom Role Permission Issue
 
 ## [2.82.0]
 ### Fixed
