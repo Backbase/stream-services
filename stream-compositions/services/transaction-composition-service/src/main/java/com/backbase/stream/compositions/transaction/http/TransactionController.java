@@ -29,7 +29,8 @@ public class TransactionController implements TransactionCompositionApi {
 
     @Override
     public Mono<ResponseEntity<TransactionIngestionResponse>> pullTransactions(Mono<TransactionPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-        return pullIngestionRequest.map(this::buildPullRequest)
+        return pullIngestionRequest
+                .map(this::buildPullRequest)
                 .flatMap(transactionIngestionService::ingestPull)
                 .map(this::mapIngestionToResponse);
     }
@@ -40,7 +41,8 @@ public class TransactionController implements TransactionCompositionApi {
     @Override
     public Mono<ResponseEntity<TransactionIngestionResponse>> pushIngestTransactions(
             @Valid Mono<TransactionPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-        return pushIngestionRequest.map(this::buildPushRequest)
+        return pushIngestionRequest
+                .map(this::buildPushRequest)
                 .flatMap(transactionIngestionService::ingestPush)
                 .map(this::mapIngestionToResponse);
     }

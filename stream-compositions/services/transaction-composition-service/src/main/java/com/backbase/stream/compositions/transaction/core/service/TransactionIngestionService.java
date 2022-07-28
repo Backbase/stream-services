@@ -8,18 +8,18 @@ import reactor.core.publisher.Mono;
 public interface TransactionIngestionService {
 
     /**
-     * Ingests legal Entities in pull mode.
+     * Ingests Transactions in pull mode.
      *
      * @param ingestPullRequest Ingest pull request
-     * @return LegalEntityIngestResponse
+     * @return TransactionIngestResponse
      */
     Mono<TransactionIngestResponse> ingestPull(TransactionIngestPullRequest ingestPullRequest);
 
     /**
-     * Ingests product group in push mode.
+     * Ingests Transactions in push mode.
      *
      * @param ingestPushRequest Ingest push request
-     * @return ProductIngestResponse
+     * @return TransactionIngestResponse
      */
     Mono<TransactionIngestResponse> ingestPush(TransactionIngestPushRequest ingestPushRequest);
 }
