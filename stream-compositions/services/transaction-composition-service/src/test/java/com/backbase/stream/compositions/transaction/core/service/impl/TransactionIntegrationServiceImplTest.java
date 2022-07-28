@@ -1,13 +1,13 @@
-package com.backbase.stream.compositions.paymentorders.core.service.impl;
+package com.backbase.stream.compositions.transaction.core.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.compositions.paymentorders.core.mapper.TransactionMapper;
+import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPullRequest;
-import com.backbase.stream.compositions.paymentorders.integration.client.TransactionIntegrationApi;
-import com.backbase.stream.compositions.paymentorders.integration.client.model.PullTransactionsResponse;
-import com.backbase.stream.compositions.paymentorders.integration.client.model.TransactionsPostRequestBody;
+import com.backbase.stream.compositions.transaction.integration.client.TransactionIntegrationApi;
+import com.backbase.stream.compositions.transaction.integration.client.model.PullTransactionsResponse;
+import com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody;
 import java.util.List;
 import java.util.Map;
 

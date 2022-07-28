@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.paymentorders.handlers;
+package com.backbase.stream.compositions.transaction.handlers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verify;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
 import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsPushEvent;
-import com.backbase.stream.compositions.paymentorders.core.mapper.TransactionMapper;
+import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
 import java.util.List;

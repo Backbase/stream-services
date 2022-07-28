@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.paymentorders.core.mapper;
+package com.backbase.stream.compositions.transaction.core.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.paymentorders.handlers;
+package com.backbase.stream.compositions.transaction.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
@@ -6,7 +6,7 @@ import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRespons
 import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsPullEvent;
 import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties;
 import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties.Events;
-import com.backbase.stream.compositions.paymentorders.core.mapper.TransactionMapper;
+import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPullRequest;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;

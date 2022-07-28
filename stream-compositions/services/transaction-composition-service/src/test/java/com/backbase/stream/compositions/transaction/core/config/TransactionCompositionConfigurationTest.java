@@ -1,8 +1,8 @@
-package com.backbase.stream.compositions.paymentorders.core.config;
+package com.backbase.stream.compositions.transaction.core.config;
 
-import com.backbase.stream.compositions.paymentorders.cursor.client.TransactionCursorApi;
-import com.backbase.stream.compositions.paymentorders.integration.ApiClient;
-import com.backbase.stream.compositions.paymentorders.integration.client.TransactionIntegrationApi;
+import com.backbase.stream.compositions.transaction.cursor.client.TransactionCursorApi;
+import com.backbase.stream.compositions.transaction.integration.ApiClient;
+import com.backbase.stream.compositions.transaction.integration.client.TransactionIntegrationApi;
 import com.backbase.stream.compositions.transaction.core.config.TransactionCompositionConfiguration;
 import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +36,7 @@ class TransactionCompositionConfigurationTest {
 
   private ApiClient transactionIntegrationClient;
 
-  private com.backbase.stream.compositions.paymentorders.cursor.ApiClient transactionCursorClient;
+  private com.backbase.stream.compositions.transaction.cursor.ApiClient transactionCursorClient;
 
   private TransactionCursorApi transactionCursorApi;
 
@@ -50,7 +50,7 @@ class TransactionCompositionConfigurationTest {
     Mockito.when(properties.getIntegrationBaseUrl()).thenReturn("https://transaction-integration");
     Mockito.when(properties.getCursor()).thenReturn(cursorConfig);
 
-    transactionCursorClient = new com.backbase.stream.compositions.paymentorders.cursor.ApiClient
+    transactionCursorClient = new com.backbase.stream.compositions.transaction.cursor.ApiClient
             (webClient, objectMapper, dateFormat);
     transactionCursorClient.setBasePath(properties.getCursor().getBaseUrl());
 

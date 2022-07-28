@@ -1,13 +1,13 @@
-package com.backbase.stream.compositions.paymentorders.http;
+package com.backbase.stream.compositions.transaction.http;
 
 import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
 import com.backbase.stream.TransactionService;
-import com.backbase.stream.compositions.paymentorders.api.model.TransactionPullIngestionRequest;
-import com.backbase.stream.compositions.paymentorders.api.model.TransactionPushIngestionRequest;
-import com.backbase.stream.compositions.paymentorders.api.model.TransactionsPostRequestBody;
-import com.backbase.stream.compositions.paymentorders.core.mapper.TransactionMapper;
-import com.backbase.stream.compositions.paymentorders.cursor.client.model.TransactionCursor;
-import com.backbase.stream.compositions.paymentorders.cursor.client.model.TransactionCursorResponse;
+import com.backbase.stream.compositions.transaction.api.model.TransactionPullIngestionRequest;
+import com.backbase.stream.compositions.transaction.api.model.TransactionPushIngestionRequest;
+import com.backbase.stream.compositions.transaction.api.model.TransactionsPostRequestBody;
+import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
+import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursor;
+import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.http.TransactionController;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.worker.model.UnitOfWork;
