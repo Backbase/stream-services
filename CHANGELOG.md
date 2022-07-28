@@ -6,42 +6,149 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Contacts Support Added for Legal Entity, Service Agreement and Users 
 - Usage Sample of Bootstrap json to be added to Legal Entity, Service Agreement and User 
+
+- Contacts Support for LE Contacts
 ```yaml
-  "contacts": [
-    {
-      "category": "Employee",
-      "externalId": "a8141b9e06621c312001",
-      "addressLine1": "410 7th St",
-      "addressLine2": "",
-      "streetName": "",
-      "postCode": 93950,
-      "town": "Pacific Grove",
-      "countrySubDivision": "CA",
-      "country": "US",
-      "name": "Beatrice D. Ma",
-      "contactPerson": "N/A",
-      "phoneNumber": "530 676 8602",
-      "Email": "be@mail.com",
-      "accounts": [
-        {
-          "externalId": "a8141b9e06632d362001",
-          "name": "Checking USD 2247",
-          "alias": "My account",
-          "accountNumber": "9948772699182247",
-          "bankName": "CitiBank",
-          "bankAddressLine1": "736 Levy Court",
-          "bankAddressLine2": "",
-          "bankStreetName": "",
-          "bankPostCode": "01720",
-          "bankTown": "Acton",
-          "bankCountrySubDivision": "MA",
-          "bankCountry": "US",
-          "BIC": "CITIUS33",
-          "bankCode": "11103093"
-        }
-      ]
-    }
-  ]
+name: ABC Company
+legalEntityType: CUSTOMER
+contacts:
+    - category: Employee
+      externalId: a8141b9e06621c312001
+      addressLine1: 410 7th St
+      addressLine2: ''
+      streetName: ''
+      postCode: 93950
+      town: Pacific Grove
+      countrySubDivision: CA
+      country: US
+      name: Beatrice D. Ma
+      contactPerson: N/A
+      phoneNumber: 530 676 8602
+      Email: be@mail.com
+      accounts:
+      - externalId: a8141b9e06632d362001
+        name: Checking USD 2247
+        alias: My account
+        accountNumber: '9948772699182247'
+        bankName: CitiBank
+        bankAddressLine1: 736 Levy Court
+        bankAddressLine2: ''
+        bankStreetName: ''
+        bankPostCode: '01720'
+        bankTown: Acton
+        bankCountrySubDivision: MA
+        bankCountry: US
+        BIC: CITIUS33
+        bankCode: '11103093'
+```
+
+- Contacts Support for User Contacts
+```yaml
+name: John
+realmName: customer
+externalId: john
+legalEntityType: CUSTOMER
+users:
+- user:
+    externalId: john99
+    fullName: John Doe
+  referenceJobRoleNames:
+  - Retail Customer
+  contacts:
+  - category: Employee
+    externalId: a8141b9e06621c12001
+    addressLine1: 736 Levy Court
+    addressLine2: ''
+    streetName: ''
+    postCode: '01720'
+    town: Acton
+    countrySubDivision: MA
+    country: US
+    name: Barbara P. Dolan
+    contactPerson: N/A
+    phoneNumber: 617 509 6995
+    Email: Barbara@barb.com
+    accounts:
+    - externalId: a8141b9e06632d62001
+      name: Checking USD 0023
+      alias: ''
+      accountNumber: '9249194950590023'
+      bankName: CitiBank
+      bankAddressLine1: 736 Levy Court
+      bankAddressLine2: ''
+      bankStreetName: ''
+      bankPostCode: '01720'
+      bankTown: Acton
+      bankCountrySubDivision: MA
+      bankCountry: US
+      BIC: CITIUS33
+      bankCode: '11103093'
+    - externalId: a8141b9e06632d62002
+      name: Checking USD 4858
+      alias: ''
+      accountNumber: '1445192940594858'
+      bankName: CitiBank
+      bankAddressLine1: 736 Levy Court
+      bankAddressLine2: ''
+      bankStreetName: ''
+      bankPostCode: '01720'
+      bankTown: Acton
+      bankCountrySubDivision: MA
+      bankCountry: US
+      BIC: CITIUS33
+      bankCode: '11103093'
+```
+
+- Contacts Support for Service Agreement
+```yaml
+name: Bory Coffee Company Ltd
+customServiceAgreement:
+  externalId: salary_bory_csa
+  name: Salary Services for Bory Coffee Company
+  description: Custom Service Agreement Between Salary Services and Bory Coffee Company
+  status: ENABLED
+  isMaster: 'false'
+  participants:
+  - externalId: bory-coffee-ltd
+    sharingUsers: false
+    sharingAccounts: true
+    admins:
+    - kristelcfo
+  - externalId: salary-services-ltd
+    sharingUsers: true
+    sharingAccounts: false
+    users:
+    - hhsa01
+    - fbsa02
+  contacts:
+  - category: Employee
+    externalId: a8141b9e06621c512001
+    addressLine1: 02 Meadows Dr,
+    addressLine2: ''
+    streetName: ''
+    postCode: 30010
+    town: Columbus
+    countrySubDivision: GA
+    country: US
+    name: Troy M. Hazard
+    contactPerson: N/A
+    phoneNumber: 530 676 5523
+    Email: Tr@mail.com
+    accounts:
+    - externalId: a8141b9e06632d562001
+      name: Checking USD 0022
+      alias: ''
+      accountNumber: '2512948500122022'
+      bankName: Bank of America
+      bankAddressLine1: 50 Georgia St
+      bankAddressLine2: ''
+      bankStreetName: ''
+      bankPostCode: '30102'
+      bankTown: Atlanta
+      bankCountrySubDivision: GA
+      bankCountry: US
+      BIC: BOFAUS6H
+      bankCode: '121000358'
 ```
 
 ## [2.82.0]
