@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    task:
+      events:
+        enabled: false
+  zipkin:
+    enabled: false
