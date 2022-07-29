@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.85.0]
+### Added
+- Deploying task executables and http services as docker images using `repo.backbase.com/backbase-stream-images` registry. 
+> e.g. `repo.backbase.com/backbase-stream-images/legal-entity-bootstrap-task:2.85.0`
+
+### Fixed
+- Logging configuration was broken in some modules given wrong dependency scope for `stream-test-support`.
+
+### Changed
+- Segregating `moustache-bank` profile in `moustache-bank-subsidiaries` to support ingesting the root legal entity without any dependency on product service.
 
 ## [2.84.0]
 ### Added

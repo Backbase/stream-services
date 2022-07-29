@@ -53,12 +53,6 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>product-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
             <artifactId>product-ingestion-saga</artifactId>
             <version>${project.version}</version>
         </dependency>
