@@ -2,7 +2,6 @@
 * Module Path -> ./stream-services/stream-compositions/services/transaction-composition-service
 * Build the service -> mvn clean install
 * For Local environment set up, run the local profile -> mvn spring-boot:run -Dspring-boot.run.profiles=local
-* For Mock environment set up, run the mock profile -> mvn spring-boot:run -Dspring-boot.run.profiles=mock
 
 ## Configuration Properties
 
