@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.86.0]
+### Fixed
+- Custom Job Role Mapping Issue is fixed by adding missing mapping of BusinessFunction object of BusinessFunctionGroupMapper class
+
 ## [2.85.0]
 ### Added
 - Deploying task executables and http services as docker images using `repo.backbase.com/backbase-stream-images` registry. 
