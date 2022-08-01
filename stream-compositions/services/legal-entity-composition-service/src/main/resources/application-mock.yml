@@ -33,7 +33,7 @@ backbase:
       identity-integration-base-url: http://localhost:8181/identity-integration-service
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:7001
+        integration-base-url: http://localhost:9999
         chains:
           product-composition:
             enabled: true
@@ -354,7 +354,7 @@ bootstrap:
     administrators:
       - externalId: "admin"
         fullName: "Root Admin"
-        identityLinkStrategy: "IMPORT_FROM_IDENTIY"
+        identityLinkStrategy: "IDENTITY_AGNOSTIC"
         emailAddress:
           address: "bbadmin@email.com"
         mobileNumber:
@@ -363,7 +363,7 @@ bootstrap:
       - user:
           externalId: "admin"
           fullName: "Root Admin"
-          identityLinkStrategy: "IMPORT_FROM_IDENTIY"
+          identityLinkStrategy: "IDENTITY_AGNOSTIC"
           emailAddress:
             address: "bbadmin@email.com"
           mobileNumber:

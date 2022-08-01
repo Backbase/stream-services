@@ -1,4 +1,5 @@
-server.port: 9004
+server:
+  port: 9003
 
 spring:
   activemq:
@@ -7,8 +8,6 @@ spring:
     enabled: false
   main:
     allow-bean-definition-overriding: true
-  codec:
-    max-in-memory-size: 10MB
 sso:
   jwt:
     internal:
@@ -18,9 +17,12 @@ sso:
         key:
           type: ENV
           value: SIG_SECRET_KEY
-backbase:
-  activemq:
+eureka:
+  client:
     enabled: true
+    serviceUrl.defaultZone: http://localhost:8080/registry/eureka
+
+backbase:
   communication:
     http:
       client-secret: bb-secret
@@ -31,29 +33,22 @@ backbase:
       user-manager-base-url: http://localhost:8086/user-manager
       access-control-base-url: http://localhost:8086/access-control
       arrangement-manager-base-url: http://localhost:8082/arrangement-manager
-      transaction-manager-base-url: http://localhost:8083/transaction-manager
     compositions:
-      transaction:
-        defaultStartOffsetInDays: 30
-        integration-base-url: http://localhost:7004
+      product:
+        integration-base-url: http://localhost:9999
+        chains:
+          transaction-composition:
+            enabled: true
+            base-url: http://localhost:9004
+            async: false
+            excludeProductTypeExternalIds:
         events:
-          enableCompleted: true
+          enableCompleted: false
           enableFailed: true
         cursor:
-          enabled: true
-          transactionIdsFilterEnabled: true
+          enabled: false
           base-url: http://localhost:9005
-
-eureka:
-  instance:
-    metadata-map:
-      public: true
-      role: live
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8080/registry/eureka/
 
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
-
