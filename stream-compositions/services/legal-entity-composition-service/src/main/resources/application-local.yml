@@ -33,7 +33,7 @@ backbase:
       identity-integration-base-url: http://localhost:8181/identity-integration-service
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:9999
+        integration-base-url: http://localhost:7001
         chains:
           product-composition:
             enabled: true
@@ -45,71 +45,316 @@ backbase:
         cursor:
           enabled: false
           base-url: http://localhost:9005
+
 bootstrap:
-  enabled: false
-  # This is just an example. Replace it with data corresponding to your bank
+  enabled: true
+  # This is an Backbase OOTB Configuration. Please update as per project requirements
   legalEntity:
-    name: "ACME Bank"
+    name: "Bank"
     realmName: "backbase"
-    externalId: "ACME"
+    externalId: "model-bank"
     legalEntityType: "BANK"
+    subsidiaries:
+      - name: "SME Onboarding Employees"
+        realmName: "backbase"
+        externalId: "sme-employees"
+        parentExternalId: "model-bank"
+        legalEntityType: "CUSTOMER"
+      - name: "US Onboarding Employees"
+        realmName: "backbase"
+        externalId: "uso-employees"
+        parentExternalId: "model-bank"
+        legalEntityType: "CUSTOMER"
+      - name: "Model Bank Corporate Customer"
+        realmName: "backbase"
+        externalId: "model-bank-corp"
+        parentExternalId: "model-bank"
+        legalEntityType: "CUSTOMER"
+      - name: "Model Bank Retail Customer"
+        realmName: "backbase"
+        externalId: "model-bank-ret"
+        parentExternalId: "model-bank"
+        legalEntityType: "CUSTOMER"
     referenceJobRoles:
-      - name: Entitlements - Manager
-        description: Full Entitlements administration.
+      - name: Senior Payment Specialist
+        description: Senior Payment Specialist
         functionGroups:
-          - name: "Manage Entitlements"
+          - name: "Senior Payment Specialist - Basic Functions"
             functions:
-              - functionId: "1019"
-                functionCode: "manage.data.groups"
+              - functionId: "1051"
+                functionCode: "manage.devices"
+                name: "Manage Devices"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1107"
+                functionCode: "general.notification.preferences"
+                name: "General Notification Preferences"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
                   - privilege: "edit"
-                  - privilege: "delete"
-                  - privilege: "approve"
-              - functionId: "1020"
-                functionCode: "manage.function.groups"
+              - functionId: "1016"
+                functionCode: "manage.statements"
+                name: "Manage Statements"
                 privileges:
                   - privilege: "view"
-                  - privilege: "create"
-                  - privilege: "edit"
-                  - privilege: "delete"
-                  - privilege: "approve"
-      - name: Retail User - USA
-        description: Retail User Permissions for USA
-        functionGroups:
-          - name: "Products, payments, txn, contacts"
-            functions:
               - functionId: "1006"
                 functionCode: "product.summary"
-                privileges:
-                  - privilege: "view"
-              - functionId: "1003"
-                functionCode: "transactions"
+                name: "Product Summary"
                 privileges:
                   - privilege: "view"
                   - privilege: "edit"
-              - functionId: "1017"
-                functionCode: "us.domestic.wire"
+              - functionId: "1065"
+                functionCode: "stop.checks"
+                name: "Stop Checks"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
-              - functionId: "1018"
-                functionCode: "us.foreign.wire"
+              - functionId: "1003"
+                functionCode: "transactions"
+                name: "Transactions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+          - name: "Senior Payment Specialist - Move Money Functions"
+            functions:
+              - functionId: "1095"
+                functionCode: "batch.templates"
+                name: "Batch Templates"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
+                  - privilege: "approve"
               - functionId: "1005"
                 functionCode: "contacts"
+                name: "Contacts"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
                   - privilege: "edit"
                   - privilege: "delete"
+                  - privilege: "approve"
+              - functionId: "1071"
+                functionCode: "payment.templates"
+                name: "Payment Templates"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+          - name: "Senior Payment Specialist - Payment Type Functions"
+            functions:
+              - functionId: "1098"
+                functionCode: "batch.list.confidential"
+                name: "Batch - List Confidential"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1099"
+                functionCode: "batch.manage.confidential"
+                name: "Batch - Manage Confidential"
+                privileges:
+                  - privilege: "execute"
+              - functionId: "1067"
+                functionCode: "batch.ach.credit"
+                name: "Batch - ACH Credit"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "approve"
+                  - privilege: "cancel"
+              - functionId: "1069"
+                functionCode: "batch.ach.debit"
+                name: "Batch - ACH Debit"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "approve"
+                  - privilege: "cancel"
+              - functionId: "1115"
+                functionCode: "batch.upload.mappings"
+                name: "Batch Upload Mappings"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1079"
+                functionCode: "batch.intracompany.payments"
+                name: "Batch - Intracompany Payments"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "approve"
+                  - privilege: "cancel"
+              - functionId: "1044"
+                functionCode: "us.domestic.wire.intc"
+                name: "US Domestic Wire - Intracompany"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+                  - privilege: "cancel"
+              - functionId: "1017"
+                functionCode: "us.domestic.wire"
+                name: "US Domestic Wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+                  - privilege: "cancel"
+      - name: Bank Back Office Support
+        description: Bank Back Office Support
+        functionGroups:
+          - name: "Bank Back Office Support - Flow Functions"
+            functions:
+              - functionId: "1058"
+                functionCode: "flow.case.changelog"
+                name: "Access Case Changelog"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1059"
+                functionCode: "flow.case.statistics"
+                name: "Access Case Statistics"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1059"
+                functionCode: "flow.case.statistics"
+                name: "Access Case Statistics"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1077"
+                functionCode: "flow.collection"
+                name: "Access Collections"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1061"
+                functionCode: "flow.journey.definitions"
+                name: "Access Journey Definitions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1072"
+                functionCode: "flow.task.statistics"
+                name: "Access Task Statistics"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1055"
+                functionCode: "flow.case.archive"
+                name: "Archive Case"
+                privileges:
+                  - privilege: "execute"
+              - functionId: "1062"
+                functionCode: "flow.task.assign"
+                name: "Assign Task"
+                privileges:
+                  - privilege: "execute"
+              - functionId: "1054"
+                functionCode: "flow.case"
+                name: "Manage Case"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1054"
+                functionCode: "flow.case"
+                name: "Manage Case"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1057"
+                functionCode: "flow.case.comment"
+                name: "Manage Case Comments"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1056"
+                functionCode: "flow.case.document"
+                name: "Manage Case Documents"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "delete"
+              - functionId: "1064"
+                functionCode: "flow.task"
+                name: "Manage Task"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "execute"
+              - functionId: "1063"
+                functionCode: "flow.task.dates"
+                name: "Manage Task Dates"
+                privileges:
+                  - privilege: "edit"
+          - name: "Bank Back Office Support - Identity Functions"
+            functions:
+              - functionId: "1049"
+                functionCode: "lock.user"
+                name: "Lock User"
+                privileges:
+                  - privilege: "create"
+              - functionId: "1050"
+                functionCode: "unlock.user"
+                name: "Unlock User"
+                privileges:
+                  - privilege: "create"
+                  - privilege: "approve"
+              - functionId: "1066"
+                functionCode: "manage.other.users.devices"
+                name: "Manage Other User's Devices"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1084"
+                functionCode: "revoke.access"
+                name: "Revoke access"
+                privileges:
+                  - privilege: "create"
+              - functionId: "1108"
+                functionCode: "manage.own.profile"
+                name: "Manage Own Profile"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+                  - privilege: "approve"
+          - name: "Bank Back Office Support - Message & Notification Functions"
+            functions:
+              - functionId: "1030"
+                functionCode: "manage.notifications"
+                name: "Manage Notifications"
+                privileges:
+                  - privilege: "create"
+                  - privilege: "approve"
+              - functionId: "1031"
+                functionCode: "manage.topics"
+                name: "Manage Topics"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1038"
+                functionCode: "manage.messages"
+                name: "Manage Messages"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
     administrators:
       - externalId: "admin"
-        fullName: "Backbase Root Admin"
-        identityLinkStrategy: "IDENTITY_AGNOSTIC"
+        fullName: "Root Admin"
+        identityLinkStrategy: "IMPORT_FROM_IDENTIY"
         emailAddress:
           address: "bbadmin@email.com"
         mobileNumber:
@@ -117,9 +362,78 @@ bootstrap:
     users:
       - user:
           externalId: "admin"
-          identityLinkStrategy: "IDENTITY_AGNOSTIC"
+          fullName: "Root Admin"
+          identityLinkStrategy: "IMPORT_FROM_IDENTIY"
+          emailAddress:
+            address: "bbadmin@email.com"
+          mobileNumber:
+            number: "1234567890"
+          userProfile:
+            externalId: "admin"
+            userId: "admin"
+            profileUrl: "Admin Profile Url"
+            userName: "Root Admin"
+            active: true
+            userType: "User Type"
         referenceJobRoleNames:
-          - "Entitlements - Manager"
+          - "Bank Back Office Support"
+          - "Senior Payment Specialist"
+    productGroups:
+      - name: "SME Flow On-boarding - group"
+        description: "All tasks for SME Flow On-boarding journey"
+        productGroupType: "ARRANGEMENTS"
+        customDataGroupItems:
+          - internalId: "case-definition:sme"
+          - internalId: "case-definition:app-onboarding"
+          - internalId: "process-definition:archive-case"
+          - internalId: "process-definition:data-gathering"
+          - internalId: "process-definition:docs-gathering"
+          - internalId: "process-definition:kyc"
+          - internalId: "process-definition:kyb"
+          - internalId: "process-definition:aml"
+          - internalId: "process-definition:company-lookup"
+          - internalId: "process-definition:br-process"
+          - internalId: "process-definition:doc-req-setup"
+          - internalId: "process-definition:manual-review"
+          - internalId: "process-definition:aml"
+          - internalId: "process-definition:company-lookup"
+          - internalId: "process-definition:br-process"
+          - internalId: "process-definition:doc-req-setup"
+          - internalId: "process-definition:manual-review"
+          - internalId: "process-definition:idv"
+          - internalId: "process-definition:risk-assessment"
+          - internalId: "process-definition:pdf-generation"
+          - internalId: "process-definition:esignature"
+          - internalId: "decision-definition:age-verification"
+          - internalId: "decision-definition:company-lookup"
+          - internalId: "decision-definition:decide-on-bizrel"
+          - internalId: "decision-definition:fileset"
+          - internalId: "decision-definition:handle-process"
+          - internalId: "decision-definition:decide-on-kyb"
+          - internalId: "decision-definition:decide-on-kyc"
+          - internalId: "decision-definition:business-license"
+          - internalId: "decision-definition:aml-check"
+      - name: "US Flow On-boarding - group"
+        description: "All tasks for US Flow On-boarding journey"
+        productGroupType: "ARRANGEMENTS"
+        customDataGroupItems:
+          - internalId: "case-definition:onboarding"
+          - internalId: "process-definition:us-onboarding"
+          - internalId: "process-definition:aml"
+          - internalId: "process-definition:idv"
+          - internalId: "process-definition:archive-case"
+          - internalId: "process-definition:citizenship"
+          - internalId: "process-definition:data-gat-complete"
+          - internalId: "process-definition:co-applicant"
+          - internalId: "decision-definition:age-verification"
+          - internalId: "decision-definition:aml-check"
+          - internalId: "decision-definition:idv-check-full"
+          - internalId: "decision-definition:idv-check-id"
+          - internalId: "decision-definition:handle-process"
+          - internalId: "decision-definition:decide-on-kyb"
+          - internalId: "decision-definition:decide-on-kyc"
+          - internalId: "decision-definition:kyx-check-full"
+          - internalId: "decision-definition:kyx-check-id"
 
 logging:
   level:
