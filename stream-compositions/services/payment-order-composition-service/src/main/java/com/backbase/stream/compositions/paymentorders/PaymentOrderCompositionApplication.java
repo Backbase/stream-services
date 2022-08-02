@@ -9,7 +9,6 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ComponentScan("com.backbase.stream")
 public class PaymentOrderCompositionApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(PaymentOrderCompositionApplication.class, args);
     }

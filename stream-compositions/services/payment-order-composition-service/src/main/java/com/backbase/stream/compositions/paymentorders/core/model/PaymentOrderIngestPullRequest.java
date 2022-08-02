@@ -1,0 +1,25 @@
+package com.backbase.stream.compositions.paymentorders.core.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+
+@Data
+@Builder
+@AllArgsConstructor
+public class PaymentOrderIngestPullRequest {
+    private String externalArrangementId;
+    private String legalEntityInternalId;
+    private String arrangementId;
+    private Map<String, String> additions;
+    private OffsetDateTime dateRangeStart;
+    private OffsetDateTime dateRangeEnd;
+    private Integer billingCycles;
+
+    private List<String> lastIngestedExternalIds;
+}
+

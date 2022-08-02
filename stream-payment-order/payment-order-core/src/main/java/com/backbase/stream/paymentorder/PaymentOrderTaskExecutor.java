@@ -4,8 +4,10 @@ import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
 import com.backbase.stream.worker.StreamTaskExecutor;
+import com.backbase.stream.worker.exception.StreamTaskException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -27,7 +30,30 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
     public Mono<PaymentOrderTask> executeTask(PaymentOrderTask streamTask) {
         List<PaymentOrderPostRequest> paymentOrderPostRequestList = streamTask.getData();
 
-        Flux.fromIterable(paymentOrderPostRequestList)
+        String externalIds = streamTask.getData().stream().map(PaymentOrderPostRequest::getBankReferenceId)
+                .collect(Collectors.joining(","));
+
+        var newPayments =
+                persistNewScheduledTransfers(paymentOrderPostRequestList);
+
+        return newPayments.
+                onErrorResume(WebClientResponseException.class, throwable -> {
+                    streamTask.error("payments", "post", "failed", externalIds, null, throwable,
+                            throwable.getResponseBodyAsString(), "Failed to ingest payment order");
+                    return Mono.error(new StreamTaskException(streamTask, throwable,
+                            "Failed to Ingest Payment Order: " + throwable.getMessage()));
+                })
+                .map(transactionIds -> {
+                    streamTask.error("payments", "post", "success", externalIds, transactionIds.stream().map(
+                            PaymentOrderPostResponse::getId).collect(Collectors.joining(",")), "Ingested Transactions");
+                    streamTask.setResponse(transactionIds);
+                    return streamTask;
+                });
+    }
+
+    public Mono<List<PaymentOrderPostResponse>> persistNewScheduledTransfers(
+            List<PaymentOrderPostRequest> paymentOrderPostRequestList) {
+        return Flux.fromIterable(paymentOrderPostRequestList)
                 .limitRate(1)
                 .delayElements(Duration.ofMillis(10))
                 .flatMap(this::persistNewPaymentOrder)
@@ -36,7 +62,6 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                 .doOnSuccess(transferResults ->
                         log.debug("Successfully persisted: {} new scheduled transfers.",
                                 transferResults.size()));
-        return null;
     }
 
 
@@ -52,8 +77,12 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
      * @return A Mono with the service api response.
      */
     private Mono<PaymentOrderPostResponse> persistNewPaymentOrder(PaymentOrderPostRequest newPaymentOrderRequest) {
+
+        System.out.println("posting new pmt :: persistNewPaymentOrder");
+
         return paymentOrdersApi.postPaymentOrder(
-                addRecordIdAndBankReferenceId(newPaymentOrderRequest));
+                    addRecordIdAndBankReferenceId(newPaymentOrderRequest));
+
     }
 
 

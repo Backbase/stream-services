@@ -22,13 +22,14 @@ import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepo
 import java.text.DateFormat;
 
 @EnableConfigurationProperties({
-        BackbaseStreamConfigurationProperties.class,
-        PaymentOrderWorkerConfigurationProperties.class
+    BackbaseStreamConfigurationProperties.class,
+    PaymentOrderWorkerConfigurationProperties.class
 })
 @AllArgsConstructor
 @Configuration
 @Import({DbsWebClientConfiguration.class})
 public class PaymentOrderServiceConfiguration {
+
 
     @Bean
     public PaymentOrderTaskExecutor paymentOrderTaskExecutor(ApiClient paymentOrderApiClient) {
@@ -70,7 +71,8 @@ public class PaymentOrderServiceConfiguration {
                                            WebClient dbsWebClient,
                                            BackbaseStreamConfigurationProperties config) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(config.getDbs().getPaymentOrderBaseUrl());
+        System.out.println("connecting to DBS with : " + config.getDbs().getPaymentOrderBaseUrl());
+        apiClient.setBasePath("http://localhost:8090/payment-order-service");
         return apiClient;
     }
 }

@@ -17,9 +17,9 @@ import com.backbase.stream.compositions.product.core.model.ProductIngestResponse
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
 import com.backbase.stream.compositions.product.core.service.ProductPostIngestionService;
-import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
-import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
-import com.backbase.stream.compositions.transaction.client.model.TransactionsPostResponseBody;
+import com.backbase.stream.compositions.paymentorders.client.TransactionCompositionApi;
+import com.backbase.stream.compositions.paymentorders.client.model.TransactionIngestionResponse;
+import com.backbase.stream.compositions.paymentorders.client.model.TransactionsPostResponseBody;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.LegalEntityReference;

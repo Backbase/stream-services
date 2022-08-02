@@ -9,9 +9,9 @@ import com.backbase.stream.compositions.product.core.config.ProductConfiguration
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductPostIngestionService;
-import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
-import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
-import com.backbase.stream.compositions.transaction.client.model.TransactionPullIngestionRequest;
+import com.backbase.stream.compositions.paymentorders.client.TransactionCompositionApi;
+import com.backbase.stream.compositions.paymentorders.client.model.TransactionIngestionResponse;
+import com.backbase.stream.compositions.paymentorders.client.model.TransactionPullIngestionRequest;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import lombok.AllArgsConstructor;
