@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.86.1]
+### Fixed
+- Added qualifier for WebClient in ContactsServiceConfiguration.
+
 ## [2.86.0]
 ### Fixed
 - Custom Job Role Mapping Issue is fixed by adding missing mapping of BusinessFunction object of BusinessFunctionGroupMapper class
@@ -1009,3 +1013,4 @@ backbase:
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
 [2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
 [2.75.0]: https://github.com/Backbase/stream-services/compare/2.74.0...2.75.0
+[2.86.1]: https://github.com/Backbase/stream-services/compare/2.86.0...2.86.1
