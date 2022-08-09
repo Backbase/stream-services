@@ -88,5 +88,50 @@
         </plugins>
       </build>
     </profile>
+    <profile>
+      <id>init-database</id>
+      <properties>
+        <liquibase.enabled>true</liquibase.enabled>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>sql-maven-plugin</artifactId>
+            <inherited>false</inherited>
+            <version>1.5</version>
+            <configuration>
+              <printResultSet>false</printResultSet>
+            </configuration>
+            <executions>
+              <execution>
+                <id>create-db-transactions_cursor</id>
+                <phase>initialize</phase>
+                <goals>
+                  <goal>execute</goal>
+                </goals>
+                <configuration>
+                  <driver>com.mysql.jdbc.Driver</driver>
+                  <url>jdbc:mysql://localhost:3306/?useSSL=false</url>
+                  <username>root</username>
+                  <password>root</password>
+                  <forceMojoExecution>true</forceMojoExecution>
+                  <sqlCommand>
+                    CREATE DATABASE IF NOT EXISTS transaction_cursor;
+                  </sqlCommand>
+                </configuration>
+              </execution>
+            </executions>
+            <dependencies>
+              <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.41</version>
+              </dependency>
+            </dependencies>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
   </profiles>
 </project>
