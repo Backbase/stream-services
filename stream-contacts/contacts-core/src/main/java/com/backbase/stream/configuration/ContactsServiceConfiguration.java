@@ -15,6 +15,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.beans.factory.annotation.Qualifier;
+import com.backbase.buildingblocks.webclient.WebClientConstants;
 
 import java.text.DateFormat;
 
@@ -29,7 +31,7 @@ public class ContactsServiceConfiguration {
     private final BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties;
 
     @Bean
-    protected ContactsApi contactsApi(WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
+    protected ContactsApi contactsApi(@Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getContactManagerBaseUrl());
         return new ContactsApi(apiClient);
