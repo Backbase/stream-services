@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -35,22 +34,12 @@ public class PaymentOrderController implements PaymentOrderCompositionApi {
 
     PaymentOrderMapper paymentOrderMapper;
 
-    @RequestMapping(value = "/service-api/v1/test",
-            produces = { "application/json" },
-            method = RequestMethod.GET)
-    public String getTest() {
-
-        return "test response;";
-    }
-
     @Override
     public Mono<ResponseEntity<PaymentOrderIngestionResponse>> pullPaymentOrder(
             @ApiParam(value = "Pull Ingestion Request"  )
             @Valid
             @RequestBody(required = false) Mono<PaymentOrderPullIngestionRequest> paymentOrderPullIngestionRequest,
             ServerWebExchange exchange) {
-
-        System.out.println("triggering payment ingestion");
 
         return paymentOrderPullIngestionRequest
                 .map(this::buildPullRequest)

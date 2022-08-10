@@ -15,10 +15,10 @@ public interface PaymentOrderIngestionService {
     Mono<PaymentOrderIngestResponse> ingestPull(PaymentOrderIngestPullRequest ingestPullRequest);
 
 //    /**
-//     * Ingests Transactions in push mode.
+//     * Ingests Payment Order in push mode.
 //     *
 //     * @param ingestPushRequest Ingest push request
-//     * @return TransactionIngestResponse
+//     * @return PaymentOrderIngestResponse
 //     */
-//    Mono<TransactionIngestResponse> ingestPush(TransactionIngestPushRequest ingestPushRequest);
+//    Mono<PaymentOrderIngestResponse> ingestPush(PaymentOrderIngestPullRequest ingestPushRequest);
 }

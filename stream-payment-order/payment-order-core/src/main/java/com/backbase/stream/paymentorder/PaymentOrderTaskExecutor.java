@@ -78,8 +78,6 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
      */
     private Mono<PaymentOrderPostResponse> persistNewPaymentOrder(PaymentOrderPostRequest newPaymentOrderRequest) {
 
-        System.out.println("posting new pmt :: persistNewPaymentOrder");
-
         return paymentOrdersApi.postPaymentOrder(
                     addRecordIdAndBankReferenceId(newPaymentOrderRequest));
 
