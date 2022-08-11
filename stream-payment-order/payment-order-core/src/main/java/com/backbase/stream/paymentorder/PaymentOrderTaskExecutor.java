@@ -45,7 +45,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                 })
                 .map(transactionIds -> {
                     streamTask.error("payments", "post", "success", externalIds, transactionIds.stream().map(
-                            PaymentOrderPostResponse::getId).collect(Collectors.joining(",")), "Ingested Transactions");
+                            PaymentOrderPostResponse::getId).collect(Collectors.joining(",")), "Ingested Payment Order");
                     streamTask.setResponse(transactionIds);
                     return streamTask;
                 });
