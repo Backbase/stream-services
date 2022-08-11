@@ -1,8 +1,8 @@
-package com.backbase.stream.compositions.paymentorders.cursor.core.mapper;
+package com.backbase.stream.compositions.transaction.cursor.core.mapper;
 
-import com.backbase.stream.compositions.paymentorders.cursor.core.domain.TransactionCursorEntity;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorResponse;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorUpsertRequest;
+import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

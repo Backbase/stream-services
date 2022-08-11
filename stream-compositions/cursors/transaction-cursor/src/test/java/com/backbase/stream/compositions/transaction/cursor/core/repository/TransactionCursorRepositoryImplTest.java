@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.paymentorders.cursor.core.repository;
+package com.backbase.stream.compositions.transaction.cursor.core.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -8,10 +8,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.compositions.paymentorders.cursor.core.domain.TransactionCursorEntity;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursor.StatusEnum;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorFilterRequest;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorPatchRequest;
+import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorFilterRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

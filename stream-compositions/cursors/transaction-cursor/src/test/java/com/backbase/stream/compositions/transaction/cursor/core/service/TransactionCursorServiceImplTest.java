@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.paymentorders.cursor.core.service;
+package com.backbase.stream.compositions.transaction.cursor.core.service;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -6,14 +6,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.compositions.paymentorders.cursor.core.domain.TransactionCursorEntity;
-import com.backbase.stream.compositions.paymentorders.cursor.core.mapper.TransactionCursorMapper;
-import com.backbase.stream.compositions.paymentorders.cursor.core.repository.TransactionCursorRepository;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursor;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursor.StatusEnum;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorPatchRequest;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorUpsertRequest;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorUpsertResponse;
+import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
+import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
+import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepository;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
 import java.text.ParseException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;

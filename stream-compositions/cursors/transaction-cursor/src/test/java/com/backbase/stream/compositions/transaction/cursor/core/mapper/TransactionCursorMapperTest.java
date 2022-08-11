@@ -1,15 +1,15 @@
-package com.backbase.stream.compositions.paymentorders.cursor.core.mapper;
+package com.backbase.stream.compositions.transaction.cursor.core.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.backbase.stream.compositions.paymentorders.cursor.core.domain.TransactionCursorEntity;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursor;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursor.StatusEnum;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorResponse;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorUpsertRequest;
+import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.sql.Timestamp;
 import java.time.Instant;

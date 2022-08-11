@@ -1,6 +1,6 @@
-package com.backbase.stream.compositions.paymentorders.cursor.core.config;
+package com.backbase.stream.compositions.transaction.cursor.core.config;
 
-import com.backbase.stream.compositions.paymentorders.cursor.core.mapper.TransactionCursorMapper;
+import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
 import lombok.AllArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.context.annotation.Bean;

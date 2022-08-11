@@ -1,5 +1,12 @@
 package com.backbase.stream.compositions.paymentorders.http;
 
+import java.util.stream.Collectors;
+import javax.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ServerWebExchange;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.compositions.paymentorder.api.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderIngestionResponse;
@@ -11,17 +18,7 @@ import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderI
 import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import javax.validation.Valid;
-import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor

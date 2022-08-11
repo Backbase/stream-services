@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.paymentorders.cursor.core.domain;
+package com.backbase.stream.compositions.transaction.cursor.core.domain;
 
 import java.sql.Timestamp;
 import javax.persistence.Column;

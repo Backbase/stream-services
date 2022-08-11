@@ -1,6 +1,6 @@
-package com.backbase.stream.compositions.paymentorders.cursor.core.repository;
+package com.backbase.stream.compositions.transaction.cursor.core.repository;
 
-import com.backbase.stream.compositions.paymentorders.cursor.core.domain.TransactionCursorEntity;
+import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
 import java.sql.SQLException;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;

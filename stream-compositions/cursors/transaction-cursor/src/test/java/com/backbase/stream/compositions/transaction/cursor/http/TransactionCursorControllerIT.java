@@ -1,18 +1,18 @@
-package com.backbase.stream.compositions.paymentorders.cursor.http;
+package com.backbase.stream.compositions.transaction.cursor.http;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.compositions.paymentorders.cursor.core.config.TransactionCursorConfiguration;
-import com.backbase.stream.compositions.paymentorders.cursor.core.domain.TransactionCursorEntity;
-import com.backbase.stream.compositions.paymentorders.cursor.core.mapper.TransactionCursorMapper;
-import com.backbase.stream.compositions.paymentorders.cursor.core.repository.TransactionCursorRepository;
-import com.backbase.stream.compositions.paymentorders.cursor.core.repository.TransactionCursorRepositoryImpl;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursor;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursor.StatusEnum;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorFilterRequest;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorPatchRequest;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorUpsertRequest;
+import com.backbase.stream.compositions.transaction.cursor.core.config.TransactionCursorConfiguration;
+import com.backbase.stream.compositions.transaction.cursor.core.domain.TransactionCursorEntity;
+import com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper;
+import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepository;
+import com.backbase.stream.compositions.transaction.cursor.core.repository.TransactionCursorRepositoryImpl;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor.StatusEnum;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorFilterRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import java.util.Optional;
 import javax.persistence.EntityManager;
 import org.junit.jupiter.api.Test;

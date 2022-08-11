@@ -1,12 +1,12 @@
-package com.backbase.stream.compositions.paymentorders.cursor.http;
+package com.backbase.stream.compositions.transaction.cursor.http;
 
-import com.backbase.stream.compositions.paymentorders.cursor.api.TransactionCursorApi;
-import com.backbase.stream.compositions.paymentorders.cursor.core.service.TransactionCursorService;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorFilterRequest;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorPatchRequest;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorResponse;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorUpsertRequest;
-import com.backbase.stream.compositions.paymentorders.cursor.model.TransactionCursorUpsertResponse;
+import com.backbase.stream.compositions.transaction.cursor.api.TransactionCursorApi;
+import com.backbase.stream.compositions.transaction.cursor.core.service.TransactionCursorService;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorFilterRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
+import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

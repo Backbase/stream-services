@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @ConfigurationProperties("backbase.stream.compositions.product")
 public class ProductConfigurationProperties {
-    private String integrationBaseUrl = "http://product-ingestion-integration:8080";
+    private String integrationBaseUrl = "http://localhost:7091";
     private Chains chains;
     private Events events;
     private Cursor cursor;

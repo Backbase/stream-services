@@ -1,6 +1,8 @@
 server.port: 9004
 
 spring:
+  activemq:
+    broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
   security:
@@ -14,7 +16,7 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://token-converter:8080/oauth/token
+            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   main:
     allow-bean-definition-overriding: true
   codec:

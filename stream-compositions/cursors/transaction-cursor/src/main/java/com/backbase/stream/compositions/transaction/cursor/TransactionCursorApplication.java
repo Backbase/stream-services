@@ -1,4 +1,4 @@
-package com.backbase.stream.compositions.paymentorders.cursor;
+package com.backbase.stream.compositions.transaction.cursor;
 
 
 import org.springframework.boot.SpringApplication;
@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.backbase.stream"})
 @EntityScan({"com.backbase.stream.compositions.transaction.cursor.core.domain"})
-@EnableJpaRepositories({"com.backbase.stream.compositions.paymentorders.cursor.core.repository"})
+@EnableJpaRepositories({"com.backbase.stream.compositions.transaction.cursor.core.repository"})
 public class TransactionCursorApplication {
 
   public static void main(String[] args) {
