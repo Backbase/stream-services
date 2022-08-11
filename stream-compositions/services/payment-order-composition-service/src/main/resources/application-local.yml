@@ -49,16 +49,12 @@ backbase:
       transaction-manager-base-url: http://localhost:8083/transaction-manager
       payment-order-service-base-url: http://localhost:8090/payment-order-service
     compositions:
-      transaction:
+      paymentorder:
         defaultStartOffsetInDays: 30
         integration-base-url: http://localhost:7004
         events:
           enableCompleted: true
           enableFailed: true
-        cursor:
-          enabled: true
-          transactionIdsFilterEnabled: true
-          base-url: http://localhost:9005
 
 eureka:
   instance:

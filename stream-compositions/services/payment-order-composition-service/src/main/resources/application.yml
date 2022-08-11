@@ -48,7 +48,7 @@ backbase:
       transaction-manager-base-url: http://transaction-manager:8080
       payment-order-service-base-url: http://payment-order-service:8090
     compositions:
-      transaction:
+      paymentorder:
         defaultStartOffsetInDays: 30
         integration-base-url: http://payment-order-integration:8080
         events:
