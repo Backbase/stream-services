@@ -58,6 +58,11 @@ backbase:
             base-url: http://localhost:9004
             async: false
             excludeProductTypeExternalIds:
+          payment-order-composition:
+            enabled: true
+            base-url: http://localhost:9005
+            async: false
+            excludeProductTypeExternalIds:
         events:
           enableCompleted: true
           enableFailed: true
