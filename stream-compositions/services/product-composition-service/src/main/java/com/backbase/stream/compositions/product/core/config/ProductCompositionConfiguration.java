@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.product.core.config;
 
 import com.backbase.stream.compositions.integration.product.ApiClient;
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
+import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -42,11 +43,28 @@ public class ProductCompositionConfiguration {
     }
 
     @Bean
+    @Primary
+    public PaymentOrderCompositionApi paymentOrderCompositionApi(
+            com.backbase.stream.compositions.paymentorder.ApiClient paymentOrderClient) {
+        return new PaymentOrderCompositionApi(paymentOrderClient);
+    }
+
+    @Bean
     public com.backbase.stream.compositions.transaction.ApiClient transactionClient(
             WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
         com.backbase.stream.compositions.transaction.ApiClient apiClient =
                 new com.backbase.stream.compositions.transaction.ApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(productConfigurationProperties.getChains().getTransactionComposition().getBaseUrl());
+
+        return apiClient;
+    }
+
+    @Bean
+    public com.backbase.stream.compositions.paymentorder.ApiClient paymentOrderClient(
+            WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
+        com.backbase.stream.compositions.paymentorder.ApiClient apiClient =
+                new com.backbase.stream.compositions.paymentorder.ApiClient(dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(productConfigurationProperties.getChains().getPaymentOrderComposition().getBaseUrl());
 
         return apiClient;
     }

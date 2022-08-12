@@ -6,10 +6,14 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
+import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
+import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
+import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderPostResponse;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Chains;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Events;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.TransactionComposition;
+import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.PaymentOrderComposition;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
@@ -69,6 +73,9 @@ class ProductIngestionServiceImplTest {
   @Mock
   TransactionCompositionApi transactionCompositionApi;
 
+  @Mock
+  PaymentOrderCompositionApi paymentOrderCompositionApi;
+
   ProductGroupMapper mapper = Mappers.getMapper(ProductGroupMapper.class);
 
 
@@ -76,7 +83,7 @@ class ProductIngestionServiceImplTest {
   void setUp() {
 
     productPostIngestionService = new ProductPostIngestionServiceImpl(eventBus, config,
-        transactionCompositionApi, mapper);
+        transactionCompositionApi, paymentOrderCompositionApi, mapper);
 
     productIngestionService = new ProductIngestionServiceImpl(
         batchProductIngestionSaga,
@@ -132,6 +139,10 @@ class ProductIngestionServiceImplTest {
     transactionComposition.setAsync(isAsync);
     transactionComposition.setEnabled(Boolean.TRUE);
     chains.setTransactionComposition(transactionComposition);
+    PaymentOrderComposition paymentOrderComposition = new PaymentOrderComposition();
+    paymentOrderComposition.setAsync(isAsync);
+    paymentOrderComposition.setEnabled(Boolean.TRUE);
+    chains.setPaymentOrderComposition(paymentOrderComposition);
     config.setChains(chains);
 
     ProductIngestPullRequest productIngestPullRequest = ProductIngestPullRequest.builder()
@@ -164,6 +175,11 @@ class ProductIngestionServiceImplTest {
         .thenReturn(Mono.just(new TransactionIngestionResponse()
             .withTransactions(List.of(
                 new TransactionsPostResponseBody().withId("id").withExternalId("externalId")))));
+    //todo
+//    when(paymentOrderCompositionApi.pullPaymentOrder((any()))
+//            .thenReturn(Mono.just(new PaymentOrderIngestionResponse()
+//                    .withPayment(List.of(
+//                            new PaymentOrderPostResponse().withId("id"))))));
     Mono<ProductIngestResponse> productIngestResponse = productIngestionService
         .ingestPull(productIngestPullRequest);
     StepVerifier.create(productIngestResponse)

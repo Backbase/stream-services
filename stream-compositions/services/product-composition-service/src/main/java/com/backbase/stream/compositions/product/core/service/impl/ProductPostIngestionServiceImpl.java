@@ -5,6 +5,7 @@ import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
 import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
 import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
+import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
@@ -35,6 +36,8 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     private final ProductConfigurationProperties config;
 
     private final TransactionCompositionApi transactionCompositionApi;
+
+    private final PaymentOrderCompositionApi paymentOrderCompositionApi;
 
     private final ProductGroupMapper mapper;
 

@@ -6,6 +6,8 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
+import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderPostResponse;
 import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
 import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
 import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
@@ -55,12 +57,15 @@ class ProductControllerIT extends IntegrationTest {
   private static final int TOKEN_CONVERTER_PORT = 10000;
   private static final int INTEGRATION_SERVICE_PORT = 18000;
   private static final int TRANSACTION_SERVICE_PORT = 12000;
+  private static final int PAYMENT_ORDER_SERVICE_PORT = 13000;
   private ClientAndServer integrationServer;
   private ClientAndServer tokenConverterServer;
   private ClientAndServer transactionServer;
+  private ClientAndServer paymentOrderServer;
   private MockServerClient integrationServerClient;
   private MockServerClient tokenConverterServerClient;
   private MockServerClient transactionServerClient;
+  private MockServerClient paymentOrderServerClient;
   private static BrokerService broker;
 
   @MockBean
@@ -137,6 +142,24 @@ class ProductControllerIT extends IntegrationTest {
                 ));
   }
 
+  @BeforeEach
+  void initializePaymentOrderServer() throws JsonProcessingException {
+    paymentOrderServer = startClientAndServer(PAYMENT_ORDER_SERVICE_PORT);
+    paymentOrderServerClient = new MockServerClient("localhost", PAYMENT_ORDER_SERVICE_PORT);
+    paymentOrderServerClient.when(
+                    request()
+                            .withMethod("POST")
+                            .withPath("/service-api/v2/ingest/pull"))
+            .respond(
+                    response()
+                            .withStatusCode(200)
+                            .withContentType(MediaType.APPLICATION_JSON)
+                            .withBody(
+                                    objectMapper.writeValueAsString(new PaymentOrderIngestionResponse()
+                                            .withPayment(List.of(new PaymentOrderPostResponse().withId("id"))))
+                            ));
+  }
+
   @AfterEach
   void stopMockServer() {
     tokenConverterServer.stop();
@@ -147,6 +170,9 @@ class ProductControllerIT extends IntegrationTest {
     }
     transactionServer.stop();
     while (!transactionServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
+    }
+    paymentOrderServer.stop();
+    while (!paymentOrderServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
     }
   }
 

@@ -38,6 +38,7 @@ public class ProductConfigurationProperties {
     @NoArgsConstructor
     public static class Chains {
         private TransactionComposition transactionComposition;
+        private PaymentOrderComposition paymentOrderComposition;
     }
     @Data
     public static abstract class BaseComposition {
@@ -48,6 +49,12 @@ public class ProductConfigurationProperties {
     @NoArgsConstructor
     @Data
     public static class TransactionComposition extends BaseComposition {
+        private List<String> excludeProductTypeExternalIds = new ArrayList<>();
+    }
+
+    @NoArgsConstructor
+    @Data
+    public static class PaymentOrderComposition extends BaseComposition {
         private List<String> excludeProductTypeExternalIds = new ArrayList<>();
     }
 
@@ -65,5 +72,13 @@ public class ProductConfigurationProperties {
 
     public boolean isTransactionChainAsync() {
         return Boolean.TRUE.equals(chains.getTransactionComposition().getAsync());
+    }
+
+    public boolean isPaymentOrderChainEnabled() {
+        return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getEnabled());
+    }
+
+    public boolean isPaymentOrderChainAsync() {
+        return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getAsync());
     }
 }
