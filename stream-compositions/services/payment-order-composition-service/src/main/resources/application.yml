@@ -50,7 +50,11 @@ backbase:
     compositions:
       paymentorder:
         defaultStartOffsetInDays: 30
-        integration-base-url: http://payment-order-integration:8080
+        integration-base-url: http://localhost:7041
         events:
           enableCompleted: true
           enableFailed: true
+
+#logging:
+#  level:
+#    root: DEBUG

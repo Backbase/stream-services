@@ -1,18 +1,4 @@
-server.port: 7081
-
-# API Registry client configuration
-eureka:
-  instance:
-    metadata-map:
-      public: true
-      role: live
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8080/registry/eureka/
-
 spring:
-  activemq:
-    broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
   security:
@@ -26,7 +12,7 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+            token-uri: http://token-converter:8080/oauth/token
   main:
     allow-bean-definition-overriding: true
 
@@ -42,19 +28,19 @@ backbase:
         useIdentityIntegration: true
         userProfileEnabled: true
     dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
       user-profile-manager-base-url: http://user-profile-manager:8080
     identity:
-      identity-integration-base-url: http://localhost:8181/identity-integration-service
+      identity-integration-base-url: http://identity-integration-service:8080
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:9197
+        integration-base-url: http://legal-entity-integration:8080
         chains:
           product-composition:
             enabled: true
-            base-url: http://localhost:7082
+            base-url: http://product-composition:8080
             async: false
         events:
           enableCompleted: true
@@ -71,331 +57,62 @@ bootstrap:
     externalId: "BANK"
     legalEntityType: "BANK"
     referenceJobRoles:
-      - name: Admin Role
-        description: Admin Role Entitlements
+      - name: Entitlements - Manager
+        description: Full Entitlements administration.
         functionGroups:
-          - name: "Audit"
-            functions:
-              - functionId: "1013"
-                functionCode: "audit"
-                privileges:
-                  - privilege: "view"
-          - name: "Entitlements"
+          - name: "Manage Entitlements"
             functions:
               - functionId: "1019"
                 functionCode: "manage.data.groups"
                 privileges:
-                  - privilege: "approve"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
                   - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
               - functionId: "1020"
                 functionCode: "manage.function.groups"
                 privileges:
-                  - privilege: "approve"
+                  - privilege: "view"
                   - privilege: "create"
+                  - privilege: "edit"
                   - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-          - name: "Legal Entity"
-            functions:
-              - functionId: "1011"
-                functionCode: "manage.legalentities"
-                privileges:
-                  - privilege: "create"
-          - name: "Limits"
-            functions:
-              - functionId: "1040"
-                functionCode: "manage.global.limits"
-                privileges:
                   - privilege: "approve"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1012"
-                functionCode: "manage.limits"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1014"
-                functionCode: "manage.shadow.limits"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-          - name: "Service Agreement"
-            functions:
-              - functionId: "1009"
-                functionCode: "assign.permissions"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "create"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1007"
-                functionCode: "assign.users"
-                privileges:
-                  - privilege: "create"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1028"
-                functionCode: "manage.service.agreements"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-          - name: "User"
-            functions:
-              - functionId: "1010"
-                functionCode: "manage.users"
-                privileges:
-                  - privilege: "view"
-      - name: Retail Member Role
-        description: Retail Member Entitlements
+      - name: Retail User - USA
+        description: Retail User Permissions for USA
         functionGroups:
-          - name: "Account Statements"
-            functions:
-              - functionId: "1016"
-                functionCode: "manage.statements"
-                privileges:
-                  - privilege: "view"
-          - name: "Actions"
-            functions:
-              - functionId: "1029"
-                functionCode: "manage.actions.recipes"
-                privileges:
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "execute"
-                  - privilege: "view"
-          - name: "Device"
-            functions:
-              - functionId: "1051"
-                functionCode: "manage.devices"
-                privileges:
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-          - name: "Legal Entity"
-            functions:
-              - functionId: "1011"
-                functionCode: "manage.legalentities"
-                privileges:
-                  - privilege: "create"
-                  - privilege: "view"
-          - name: "Payments"
-            functions:
-              - functionId: "1053"
-                functionCode: "a2a.transfer"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "cancel"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1101"
-                functionCode: "loans.payment"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "cancel"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1091"
-                functionCode: "remote.deposit.capture"
-                privileges:
-                  - privilege: "create"
-              - functionId: "1065"
-                functionCode: "stop.checks"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "cancel"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1044"
-                functionCode: "us.domestic.wire.intc"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "cancel"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1082"
-                functionCode: "manage.arrangement.alias"
-                privileges:
-                  - privilege: "edit"
-          - name: "Products Summary"
+          - name: "Products, payments, txn, contacts"
             functions:
               - functionId: "1006"
                 functionCode: "product.summary"
                 privileges:
-                  - privilege: "edit"
                   - privilege: "view"
-          - name: "Transactions"
-            functions:
               - functionId: "1003"
                 functionCode: "transactions"
                 privileges:
-                  - privilege: "edit"
                   - privilege: "view"
-          - name: "User"
-            functions:
-              - functionId: "1078"
-                functionCode: "manage.authorized.users"
+                  - privilege: "edit"
+              - functionId: "1017"
+                functionCode: "us.domestic.wire"
                 privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1018"
+                functionCode: "us.foreign.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1005"
+                functionCode: "contacts"
+                privileges:
+                  - privilege: "view"
                   - privilege: "create"
                   - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1010"
-                functionCode: "manage.users"
-                privileges:
-                  - privilege: "view"
-      - name: MSR Role
-        description: MSR Role Entitlements
-        functionGroups:
-          - name: "Actions"
-            functions:
-              - functionId: "1027"
-                functionCode: "access.actions.history"
-                privileges:
-                  - privilege: "execute"
-              - functionId: "1029"
-                functionCode: "manage.actions.recipes"
-                privileges:
-                  - privilege: "create"
                   - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "execute"
-                  - privilege: "view"
-          - name: "Audit"
-            functions:
-              - functionId: "1013"
-                functionCode: "audit"
-                privileges:
-                  - privilege: "view"
-          - name: "Comments"
-            functions:
-              - functionId: "1080"
-                functionCode: "manage.employee.comments"
-                privileges:
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-          - name: "Device"
-            functions:
-              - functionId: "1066"
-                functionCode: "manage.other.users.devices"
-                privileges:
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-          - name: "Employee"
-            functions:
-              - functionId: "1076"
-                functionCode: "act.on.behalf.of"
-                privileges:
-                  - privilege: "execute"
-              - functionId: "1075"
-                functionCode: "emulate"
-                privileges:
-                  - privilege: "execute"
-                  - privilege: "view"
-          - name: "Identities"
-            functions:
-              - functionId: "1093"
-                functionCode: "identity.impersonation"
-                privileges:
-                  - privilege: "execute"
-              - functionId: "1049"
-                functionCode: "lock.user"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "create"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1034"
-                functionCode: "manage.identities"
-                privileges:
-                  - privilege: "create"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1084"
-                functionCode: "revoke.access"
-                privileges:
-                  - privilege: "create"
-              - functionId: "1050"
-                functionCode: "unlock.user"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "create"
-                  - privilege: "edit"
-                  - privilege: "view"
-          - name: "Legal Entity"
-            functions:
-              - functionId: "1011"
-                functionCode: "manage.legalentities"
-                privileges:
-                  - privilege: "create"
-                  - privilege: "view"
-          - name: "Message Center"
-            functions:
-              - functionId: "1038"
-                functionCode: "manage.messages"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-              - functionId: "1031"
-                functionCode: "manage.topics"
-                privileges:
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "execute"
-                  - privilege: "view"
-              - functionId: "1039"
-                functionCode: "supervise.messages"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "create"
-                  - privilege: "delete"
-                  - privilege: "edit"
-                  - privilege: "view"
-          - name: "Notifications"
-            functions:
-              - functionId: "1030"
-                functionCode: "manage.notifications"
-                privileges:
-                  - privilege: "approve"
-                  - privilege: "create"
-          - name: "Support Access"
-            functions:
-              - functionId: "1036"
-                functionCode: "support.access.payments"
-                privileges:
-                  - privilege: "view"
     administrators:
       - externalId: "admin"
-        fullName: "Retail Root Admin"
-        identityLinkStrategy: "CREATE_IN_IDENTITY"
+        fullName: "Backbase Root Admin"
+        identityLinkStrategy: "IDENTITY_AGNOSTIC"
         emailAddress:
           address: "bbadmin@email.com"
         mobileNumber:
@@ -403,11 +120,6 @@ bootstrap:
     users:
       - user:
           externalId: "admin"
-          fullName: "Retail Root Admin"
-          identityLinkStrategy: "CREATE_IN_IDENTITY"
-          emailAddress:
-            address: "bbadmin@email.com"
-          mobileNumber:
-            number: "1234567890"
+          identityLinkStrategy: "IDENTITY_AGNOSTIC"
         referenceJobRoleNames:
           - "Entitlements - Manager"

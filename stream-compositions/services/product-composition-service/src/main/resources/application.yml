@@ -1,18 +1,4 @@
-server.port: 7082
-
-# API Registry client configuration
-eureka:
-  instance:
-    metadata-map:
-      public: true
-      role: live
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8080/registry/eureka/
-
 spring:
-  activemq:
-    broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
   security:
@@ -26,7 +12,7 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+            token-uri: http://token-converter:8080/oauth/token
   main:
     allow-bean-definition-overriding: true
 sso:
@@ -46,16 +32,16 @@ backbase:
       enabled: true
   stream:
     dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
     compositions:
       product:
-        integration-base-url: http://localhost:7091
+        integration-base-url: http://product-integration:8080
         chains:
           transaction-composition:
             enabled: true
-            base-url: http://localhost:9004
+            base-url: http://transaction-composition:8080
             async: false
             excludeProductTypeExternalIds:
           payment-order-composition:
@@ -69,8 +55,4 @@ backbase:
         cursor:
           enabled: false
           base-url: http://product-cursor:8080
-
-logging:
-  level:
-    com.backbase.stream.compositions: DEBUG
 
