@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.paymentorders.core.service.impl;
 
+import org.springframework.stereotype.Service;
 import com.backbase.stream.compositions.paymentorder.integration.client.PaymentOrderIntegrationApi;
 import com.backbase.stream.compositions.paymentorder.integration.client.model.PaymentOrderPostRequest;
 import com.backbase.stream.compositions.paymentorder.integration.client.model.PullPaymentOrderResponse;
@@ -11,7 +12,6 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
