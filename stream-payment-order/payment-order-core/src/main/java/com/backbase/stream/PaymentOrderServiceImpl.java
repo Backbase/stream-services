@@ -27,8 +27,6 @@ public class PaymentOrderServiceImpl implements PaymentOrderService{
     @Override
     public Flux<UnitOfWork<PaymentOrderTask>> processPaymentOrder(Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux) {
 
-        System.out.println("processing payment order:: processPaymentOrder");
-
         Flux<UnitOfWork<PaymentOrderTask>> unitOfWorkFlux = paymentOrderUnitOfWorkExecutor
                 .prepareUnitOfWork(paymentOrderPostRequestFlux);
         return unitOfWorkFlux.

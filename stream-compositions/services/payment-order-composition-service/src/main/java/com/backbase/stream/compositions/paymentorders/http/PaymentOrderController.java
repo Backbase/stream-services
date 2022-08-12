@@ -69,7 +69,6 @@ public class PaymentOrderController implements PaymentOrderCompositionApi {
      * @return IngestionResponse
      */
     private ResponseEntity<PaymentOrderIngestionResponse> mapIngestionToResponse(PaymentOrderIngestResponse response) {
-        System.out.println("mapping ingestion to response!!!!!!");
         return new ResponseEntity<>(
                 new PaymentOrderIngestionResponse()
                         .withPayment(
