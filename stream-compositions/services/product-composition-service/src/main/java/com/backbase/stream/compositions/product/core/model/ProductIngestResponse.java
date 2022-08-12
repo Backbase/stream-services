@@ -5,11 +5,15 @@ import lombok.*;
 
 import java.util.Map;
 
-@Setter
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class ProductIngestResponse {
+
+    public ProductIngestResponse(ProductGroup productGroup, Map<String, String> additions) {
+        this.productGroup = productGroup;
+        this.additions = additions;
+    }
 
     private String legalEntityExternalId;
     private String legalEntityInternalId;

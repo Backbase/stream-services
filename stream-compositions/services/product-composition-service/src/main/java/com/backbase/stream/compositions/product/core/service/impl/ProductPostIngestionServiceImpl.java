@@ -114,14 +114,13 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     }
 
     private Mono<ProductIngestResponse> ingestPaymentOrder(ProductIngestResponse res) {
-        return buildPaymentOrderPullRequest(product, res))
+        return Mono.just(buildPaymentOrderPullRequest(res))
                 .flatMap(paymentOrderCompositionApi::pullPaymentOrder)
                 .onErrorResume(this::handlePaymentOrderError)
                 .doOnNext(response -> {
                     log.debug("Response from Payment Order Composition: {}",
                             response.getPayment());
                 })
-                .collectList()
                 .map(p -> res);
     }
 
@@ -136,12 +135,10 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     }
 
     private Mono<ProductIngestResponse> ingestPaymentOrderAsync(ProductIngestResponse res) {
-        return extractProducts(res.getProductGroup())
-                .map(product -> buildPaymentOrderPullRequest(product, res))
+        return Mono.just(buildPaymentOrderPullRequest(res))
                 .doOnNext(request -> paymentOrderCompositionApi.pullPaymentOrder(request).subscribe())
-                .doOnNext(t -> log.info("Async payment order ingestion called for arrangement: {}",
-                        t.getArrangementId()))
-                .collectList()
+                .doOnNext(t -> log.info("Async payment order ingestion called for Legal Entity: {}",
+                        t.getLegalEntityExternalId()))
                 .map(p -> res);
     }
 
@@ -204,12 +201,12 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                         .withExternalArrangementId(product.getExternalId());
     }
 
-    private PaymentOrderPullIngestionRequest buildPaymentOrderPullRequest(BaseProduct product, ProductIngestResponse res) {
+    private PaymentOrderPullIngestionRequest buildPaymentOrderPullRequest(ProductIngestResponse res) {
         return new PaymentOrderPullIngestionRequest()
-                .withLegalEntityInternalId(product.getLegalEntities().get(0).getInternalId())
-                .withAdditions(res.getAdditions())
-                .withArrangementId(product.getInternalId())
-                .withExternalArrangementId(product.getExternalId());
+                .withLegalEntityInternalId(res.getLegalEntityInternalId())
+                .withLegalEntityExternalId(res.getLegalEntityExternalId())
+                .withInternalUserId(res.getUserInternalId())
+                .withMemberNumber(res.getUserExternalId())
+                .withAdditions(res.getAdditions());
     }
-
 }

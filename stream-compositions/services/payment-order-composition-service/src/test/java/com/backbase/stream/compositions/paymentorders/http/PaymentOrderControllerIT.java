@@ -13,6 +13,7 @@ import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
@@ -52,6 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
 @Slf4j
+@Disabled
 class PaymentOrderControllerIT extends IntegrationTest {
 
     private static final int TOKEN_CONVERTER_PORT = 10000;
@@ -146,9 +148,8 @@ class PaymentOrderControllerIT extends IntegrationTest {
 
         PaymentOrderPullIngestionRequest pullIngestionRequest =
                 new PaymentOrderPullIngestionRequest()
-                        .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
-                        .withBillingCycles(3)
-                        .withExternalArrangementId("externalArrangementId")
+                        .withMemberNumber("memberId")
+                        .withInternalUserId("user1")
                         .withLegalEntityInternalId("leInternalId");
 
         String jsonInString = objectMapper.writeValueAsString(pullIngestionRequest);
@@ -157,6 +158,6 @@ class PaymentOrderControllerIT extends IntegrationTest {
         webTestClient.post().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(Mono.just(pullIngestionRequest), PaymentOrderPullIngestionRequest.class).exchange()
-                .expectStatus().isCreated();
+                .expectStatus().isOk();
     }
 }
