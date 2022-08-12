@@ -11,6 +11,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class PaymentOrderIngestResponse {
-    private final String arrangementId;
+    private final String memberNumber;
     private final List<PaymentOrderPostResponse> paymentOrderPostResponses;
 }

@@ -62,11 +62,13 @@ components:
     PaymentOrderPullIngestionRequest:
       type: object
       properties:
-        arrangementId:
+        memberNumber:
           type: string
-        externalArrangementId:
+        internalUserId:
           type: string
         legalEntityInternalId:
+          type: string
+        legalEntityExternalId:
           type: string
         dateRangeStart:
           type: string
@@ -74,8 +76,6 @@ components:
         dateRangeEnd:
           type: string
           format: date-time
-        billingCycles:
-          type: integer
         additions:
           type: object
           additionalProperties:
