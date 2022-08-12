@@ -38,9 +38,9 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
 //                .map(f -> filterExisting(f, ingestPullRequest.getLastIngestedExternalIds()))
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(list -> handleSuccess(
-                        ingestPullRequest.getArrangementId(), list))
+                        ingestPullRequest.getMemberNumber(), list))
                 .onErrorResume(e -> handleError(
-                        ingestPullRequest.getArrangementId(), e))
+                        ingestPullRequest.getMemberNumber(), e))
                 .map(list -> buildResponse(list, ingestPullRequest));
     }
 
@@ -77,7 +77,7 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
                                                     PaymentOrderIngestPullRequest ingestPullRequest) {
         return PaymentOrderIngestResponse.builder()
                 .paymentOrderPostResponses(paymentOrderPostResponses)
-                .arrangementId(ingestPullRequest.getArrangementId())
+                .memberNumber(ingestPullRequest.getMemberNumber())
                 .build();
     }
 

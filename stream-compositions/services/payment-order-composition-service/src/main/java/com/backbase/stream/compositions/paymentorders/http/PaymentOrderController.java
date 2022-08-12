@@ -53,9 +53,10 @@ public class PaymentOrderController implements PaymentOrderCompositionApi {
     private PaymentOrderIngestPullRequest buildPullRequest(PaymentOrderPullIngestionRequest request) {
         return PaymentOrderIngestPullRequest
                 .builder()
-                .arrangementId(request.getArrangementId())
+                .memberNumber(request.getMemberNumber())
                 .legalEntityInternalId(request.getLegalEntityInternalId())
-                .externalArrangementId(request.getExternalArrangementId())
+                .legalEntityExternalId(request.getLegalEntityExternalId())
+                .internalUserId(request.getInternalUserId())
                 .dateRangeStart(request.getDateRangeStart())
                 .dateRangeEnd(request.getDateRangeEnd())
                 .additions(request.getAdditions())

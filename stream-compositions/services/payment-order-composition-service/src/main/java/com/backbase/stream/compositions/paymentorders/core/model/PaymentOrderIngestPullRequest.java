@@ -12,14 +12,14 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 public class PaymentOrderIngestPullRequest {
-    private String externalArrangementId;
+
+    private String internalUserId;
     private String legalEntityInternalId;
-    private String arrangementId;
+    private String legalEntityExternalId;
+    private String memberNumber;
     private Map<String, String> additions;
     private OffsetDateTime dateRangeStart;
     private OffsetDateTime dateRangeEnd;
-    private Integer billingCycles;
 
-    private List<String> lastIngestedExternalIds;
 }
 
