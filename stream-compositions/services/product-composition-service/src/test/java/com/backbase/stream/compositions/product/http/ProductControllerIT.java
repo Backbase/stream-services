@@ -8,8 +8,8 @@ import static org.mockserver.model.HttpResponse.response;
 
 import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
 import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
-import com.backbase.stream.compositions.paymentorders.client.model.TransactionIngestionResponse;
-import com.backbase.stream.compositions.paymentorders.client.model.TransactionsPostResponseBody;
+import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
+import com.backbase.stream.compositions.transaction.client.model.TransactionsPostResponseBody;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;

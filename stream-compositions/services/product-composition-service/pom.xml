@@ -166,8 +166,8 @@
               <inputSpec>
                 ${project.basedir}/../../api/service-api/transaction-composition-api/src/main/resources/service-api-v2.yaml
               </inputSpec>
-              <apiPackage>com.backbase.stream.compositions.paymentorders.client</apiPackage>
-              <modelPackage>com.backbase.stream.compositions.paymentorders.client.model</modelPackage>
+              <apiPackage>com.backbase.stream.compositions.transaction.client</apiPackage>
+              <modelPackage>com.backbase.stream.compositions.transaction.client.model</modelPackage>
               <additionalProperties>useWithModifiers=true</additionalProperties>
               <configOptions>
                 <reactive>true</reactive>

@@ -2,7 +2,7 @@ package com.backbase.stream.compositions.product.core.config;
 
 import com.backbase.stream.compositions.integration.product.ApiClient;
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
-import com.backbase.stream.compositions.paymentorders.client.TransactionCompositionApi;
+import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -37,15 +37,15 @@ public class ProductCompositionConfiguration {
     @Bean
     @Primary
     public TransactionCompositionApi transactionCompositionApi(
-            com.backbase.stream.compositions.paymentorders.ApiClient transactionClient) {
+            com.backbase.stream.compositions.transaction.ApiClient transactionClient) {
         return new TransactionCompositionApi(transactionClient);
     }
 
     @Bean
-    public com.backbase.stream.compositions.paymentorders.ApiClient transactionClient(
+    public com.backbase.stream.compositions.transaction.ApiClient transactionClient(
             WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
-        com.backbase.stream.compositions.paymentorders.ApiClient apiClient =
-                new com.backbase.stream.compositions.paymentorders.ApiClient(dbsWebClient, objectMapper, dateFormat);
+        com.backbase.stream.compositions.transaction.ApiClient apiClient =
+                new com.backbase.stream.compositions.transaction.ApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(productConfigurationProperties.getChains().getTransactionComposition().getBaseUrl());
 
         return apiClient;
