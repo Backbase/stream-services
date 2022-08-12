@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.product.core.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -175,11 +176,9 @@ class ProductIngestionServiceImplTest {
         .thenReturn(Mono.just(new TransactionIngestionResponse()
             .withTransactions(List.of(
                 new TransactionsPostResponseBody().withId("id").withExternalId("externalId")))));
-    //todo
-//    when(paymentOrderCompositionApi.pullPaymentOrder((any()))
-//            .thenReturn(Mono.just(new PaymentOrderIngestionResponse()
-//                    .withPayment(List.of(
-//                            new PaymentOrderPostResponse().withId("id"))))));
+    doReturn(Mono.just(new PaymentOrderIngestionResponse()
+            .withPayment(List.of(
+                    new PaymentOrderPostResponse().withId("id"))))).when(paymentOrderCompositionApi).pullPaymentOrder(any());
     Mono<ProductIngestResponse> productIngestResponse = productIngestionService
         .ingestPull(productIngestPullRequest);
     StepVerifier.create(productIngestResponse)

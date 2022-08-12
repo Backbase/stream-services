@@ -6,6 +6,8 @@ import com.backbase.buildingblocks.presentation.errors.InternalServerErrorExcept
 import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
 import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
+import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
+import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderPullIngestionRequest;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
@@ -46,7 +48,8 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         return Mono.just(res)
                 .doOnNext(r -> log.info("Product ingestion completed successfully for SA {}",
                         res.getProductGroup().getServiceAgreement().getInternalId()))
-                .flatMap(this::processChains)
+                .flatMap(this::processTransactionChains)
+                .flatMap(this::processPaymentOrderChains)
                 .doOnNext(this::processSuccessEvent)
                 .doOnNext(r -> {
                     log.debug("Ingested products: {}", res.getProductGroup());
@@ -65,7 +68,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         }
     }
 
-    private Mono<ProductIngestResponse> processChains(ProductIngestResponse res) {
+    private Mono<ProductIngestResponse> processTransactionChains(ProductIngestResponse res) {
         Mono<ProductIngestResponse> transactionChainMono;
 
         if (!config.isTransactionChainEnabled()) {
@@ -78,6 +81,22 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         }
 
         return transactionChainMono;
+
+    }
+
+    private Mono<ProductIngestResponse> processPaymentOrderChains(ProductIngestResponse res) {
+        Mono<ProductIngestResponse> paymentOrderChainMono;
+
+        if (!config.isPaymentOrderChainEnabled()) {
+            log.debug("Payment Order Chain is disabled");
+            paymentOrderChainMono = Mono.just(res);
+        } else if (config.isPaymentOrderChainAsync()) {
+            paymentOrderChainMono = ingestPaymentOrderAsync(res);
+        } else {
+            paymentOrderChainMono = ingestPaymentOrder(res);
+        }
+
+        return paymentOrderChainMono;
 
     }
 
@@ -94,11 +113,34 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .map(p -> res);
     }
 
+    private Mono<ProductIngestResponse> ingestPaymentOrder(ProductIngestResponse res) {
+        return extractProducts(res.getProductGroup())
+                .map(product -> buildPaymentOrderPullRequest(product, res))
+                .flatMap(paymentOrderCompositionApi::pullPaymentOrder)
+                .onErrorResume(this::handlePaymentOrderError)
+                .doOnNext(response -> {
+                    log.debug("Response from Payment Order Composition: {}",
+                            response.getPayment());
+                })
+                .collectList()
+                .map(p -> res);
+    }
+
     private Mono<ProductIngestResponse> ingestTransactionsAsync(ProductIngestResponse res) {
         return extractProducts(res.getProductGroup())
                 .map(product -> buildTransactionPullRequest(product, res))
                 .doOnNext(request -> transactionCompositionApi.pullTransactions(request).subscribe())
                 .doOnNext(t -> log.info("Async transaction ingestion called for arrangement: {}",
+                        t.getArrangementId()))
+                .collectList()
+                .map(p -> res);
+    }
+
+    private Mono<ProductIngestResponse> ingestPaymentOrderAsync(ProductIngestResponse res) {
+        return extractProducts(res.getProductGroup())
+                .map(product -> buildPaymentOrderPullRequest(product, res))
+                .doOnNext(request -> paymentOrderCompositionApi.pullPaymentOrder(request).subscribe())
+                .doOnNext(t -> log.info("Async payment order ingestion called for arrangement: {}",
                         t.getArrangementId()))
                 .collectList()
                 .map(p -> res);
@@ -116,6 +158,11 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
         log.error("Error while calling Transaction Composition: {}", t.getMessage());
+        return Mono.error(new InternalServerErrorException(t.getMessage()));
+    }
+
+    private Mono<PaymentOrderIngestionResponse> handlePaymentOrderError(Throwable t) {
+        log.error("Error while calling Payment Order Composition: {}", t.getMessage());
         return Mono.error(new InternalServerErrorException(t.getMessage()));
     }
 
@@ -156,5 +203,13 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .withAdditions(res.getAdditions())
                 .withArrangementId(product.getInternalId())
                         .withExternalArrangementId(product.getExternalId());
+    }
+
+    private PaymentOrderPullIngestionRequest buildPaymentOrderPullRequest(BaseProduct product, ProductIngestResponse res) {
+        return new PaymentOrderPullIngestionRequest()
+                .withLegalEntityInternalId(product.getLegalEntities().get(0).getInternalId())
+                .withAdditions(res.getAdditions())
+                .withArrangementId(product.getInternalId())
+                .withExternalArrangementId(product.getExternalId());
     }
 }
