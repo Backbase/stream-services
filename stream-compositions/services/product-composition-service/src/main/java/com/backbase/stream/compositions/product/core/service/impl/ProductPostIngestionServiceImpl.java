@@ -114,8 +114,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     }
 
     private Mono<ProductIngestResponse> ingestPaymentOrder(ProductIngestResponse res) {
-        return extractProducts(res.getProductGroup())
-                .map(product -> buildPaymentOrderPullRequest(product, res))
+        return buildPaymentOrderPullRequest(product, res))
                 .flatMap(paymentOrderCompositionApi::pullPaymentOrder)
                 .onErrorResume(this::handlePaymentOrderError)
                 .doOnNext(response -> {
@@ -212,4 +211,5 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .withArrangementId(product.getInternalId())
                 .withExternalArrangementId(product.getExternalId());
     }
+
 }
