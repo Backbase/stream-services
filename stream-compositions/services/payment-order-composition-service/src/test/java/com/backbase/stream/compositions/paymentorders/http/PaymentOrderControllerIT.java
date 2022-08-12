@@ -53,7 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
 @Slf4j
-@Disabled
+@Disabled //todo fix IT test
 class PaymentOrderControllerIT extends IntegrationTest {
 
     private static final int TOKEN_CONVERTER_PORT = 10000;
