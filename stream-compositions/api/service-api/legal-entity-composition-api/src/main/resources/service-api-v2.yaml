@@ -90,6 +90,9 @@ components:
         legalEntityExternalId:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/externalId'
           description: The Legal Entity External Identifier. This is usually the pivot for the entity (a person or a company) in the Bank's core
+        legalEntityInternalId:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/internalId'
+          description: The Legal Entity Internal Identifier. This is usually the pivot for the entity (a person or a company) in DBS
         taxId:
           type: string
           description: The Tax ID associated with the legal entity

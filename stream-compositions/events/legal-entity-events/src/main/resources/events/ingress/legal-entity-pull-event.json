@@ -5,6 +5,9 @@
     "legalEntityExternalId": {
       "type": "string"
     },
+    "legalEntityInternalId": {
+      "type": "string"
+    },
     "taxId": {
       "type": "string"
     },
