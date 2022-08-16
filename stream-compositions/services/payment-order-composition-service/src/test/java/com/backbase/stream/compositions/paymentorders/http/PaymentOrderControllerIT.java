@@ -53,7 +53,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
 @Slf4j
-@Disabled //todo fix IT test
 class PaymentOrderControllerIT extends IntegrationTest {
 
     private static final int TOKEN_CONVERTER_PORT = 10000;
@@ -102,21 +101,21 @@ class PaymentOrderControllerIT extends IntegrationTest {
                 );
     }
 
-//    @BeforeEach
-//    void initializeIntegrationServer() throws IOException {
-//        integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
-//        integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
-//        integrationServerClient.when(
-//                        request()
-//                                .withMethod("POST")
-//                                .withPath("/integration-api/v2/transactions"))
-//                .respond(
-//                        response()
-//                                .withStatusCode(200)
-//                                .withContentType(MediaType.APPLICATION_JSON)
-//                                .withBody(readContentFromClasspath("integration-data/response.json"))
-//                );
-//    }
+    @BeforeEach
+    void initializeIntegrationServer() throws IOException {
+        integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
+        integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
+        integrationServerClient.when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/integration-api/v2/payment-order"))
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withContentType(MediaType.APPLICATION_JSON)
+                                .withBody(readContentFromClasspath("integration-data/response.json"))
+                );
+    }
 
     @AfterEach
     void stopMockServer() {
