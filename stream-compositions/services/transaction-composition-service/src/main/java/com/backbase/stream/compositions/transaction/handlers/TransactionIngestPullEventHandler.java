@@ -38,8 +38,8 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
     @Override
     public void handle(EnvelopedEvent<TransactionsPullEvent> envelopedEvent) {
         transactionIngestionService.ingestPull(buildRequest(envelopedEvent.getEvent()))
-            .onErrorResume(this::handleError)
-            .subscribe(this::handleResponse);
+                .onErrorResume(this::handleError)
+                .subscribe(this::handleResponse);
     }
 
 
@@ -71,7 +71,7 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
 
         if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
             TransactionsFailedEvent event = new TransactionsFailedEvent()
-                .withMessage(ex.getMessage());
+                    .withMessage(ex.getMessage());
 
             EnvelopedEvent<TransactionsFailedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);

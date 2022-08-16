@@ -45,7 +45,7 @@ public class TransactionCompositionConfiguration {
 
     @Bean
     public com.backbase.stream.compositions.transaction.cursor.ApiClient transactionCursorClient(
-            ) {
+    ) {
         com.backbase.stream.compositions.transaction.cursor.ApiClient apiClient =
                 new com.backbase.stream.compositions.transaction.cursor.ApiClient();
         apiClient.setBasePath(transactionConfigurationProperties.getCursor().getBaseUrl());

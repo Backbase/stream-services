@@ -43,92 +43,94 @@ import static org.mockserver.model.HttpResponse.response;
 @ExtendWith({SpringExtension.class})
 class LegalEntityControllerIT extends IntegrationTest {
 
-  private static final int INTEGRATION_SERVICE_PORT = 18000;
-  private ClientAndServer integrationServer;
-  private MockServerClient integrationServerClient;
-  private static BrokerService broker;
+    private static final int INTEGRATION_SERVICE_PORT = 18000;
+    private ClientAndServer integrationServer;
+    private MockServerClient integrationServerClient;
+    private static BrokerService broker;
 
-  @Autowired
-  LegalEntityConfiguration legalEntityConfiguration;
-
-
-  @Autowired
-  LegalEntityController legalEntityController;
-
-  @MockBean
-  private LegalEntitySaga legalEntitySaga;
-
-  static {
-    System.setProperty("spring.application.name", "legal-entity-composition-service");
-    System.setProperty("DBS_TOKEN_URI", "http://localhost:10000/oauth/token");
-
-  }
-  @BeforeAll
-  static void initActiveMqBroker() throws Exception {
-    broker = new BrokerService();
-    broker.setBrokerName("activemq");
-    broker.setPersistent(false);
-    broker.start();
-    broker.waitUntilStarted();
-  }
-
-  @BeforeEach
-  void initializeIntegrationServer() throws IOException {
-    integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
-    integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
-    integrationServerClient.when(
-        request()
-            .withMethod("POST")
-            .withPath("/integration-api/v2/legal-entity"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(readContentFromClasspath("integration-data/response.json"))
-        );
-  }
-
-  @AfterEach
-  void stopMockServer() {
-    integrationServer.stop();
-    while (!integrationServer.hasStopped(5,100L, TimeUnit.MILLISECONDS)){}
-  }
+    @Autowired
+    LegalEntityConfiguration legalEntityConfiguration;
 
 
-  @Test
-  void pullIngestLegalEntity_Success() throws Exception {
-    LegalEntity legalEntity = new Gson()
-        .fromJson(readContentFromClasspath("integration-data/legal-entity.json"),
-            LegalEntity.class);
+    @Autowired
+    LegalEntityController legalEntityController;
 
-    when(legalEntitySaga.executeTask(any()))
-        .thenReturn(Mono.just(new LegalEntityTask(legalEntity)));
+    @MockBean
+    private LegalEntitySaga legalEntitySaga;
 
-    URI uri = URI.create("/service-api/v2/ingest/pull");
-    LegalEntityPullIngestionRequest pullIngestionRequest =
-        new LegalEntityPullIngestionRequest().withLegalEntityExternalId("externalId");
+    static {
+        System.setProperty("spring.application.name", "legal-entity-composition-service");
+        System.setProperty("DBS_TOKEN_URI", "http://localhost:10000/oauth/token");
 
-    WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
-    webTestClient.post().uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pullIngestionRequest), LegalEntityPullIngestionRequest.class).exchange()
-        .expectStatus().isCreated()
-        .expectHeader().valueEquals("Content-Type", "application/json")
-        .expectBody().jsonPath("$.legalEntity.name").isEqualTo("Test Legal Entity");
-  }
+    }
 
-  @Test
-  void pushIngestLegalEntity_Fail() {
-    URI uri = URI.create("/service-api/v2/ingest/push");
+    @BeforeAll
+    static void initActiveMqBroker() throws Exception {
+        broker = new BrokerService();
+        broker.setBrokerName("activemq");
+        broker.setPersistent(false);
+        broker.start();
+        broker.waitUntilStarted();
+    }
 
-    LegalEntityPushIngestionRequest pushIngestionRequest = Mockito
-        .mock(LegalEntityPushIngestionRequest.class);
+    @BeforeEach
+    void initializeIntegrationServer() throws IOException {
+        integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
+        integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
+        integrationServerClient.when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/integration-api/v2/legal-entity"))
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withContentType(MediaType.APPLICATION_JSON)
+                                .withBody(readContentFromClasspath("integration-data/response.json"))
+                );
+    }
 
-    WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
-    webTestClient.post().uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pushIngestionRequest), LegalEntityPushIngestionRequest.class).exchange()
-        .expectStatus().is5xxServerError();
-  }
+    @AfterEach
+    void stopMockServer() {
+        integrationServer.stop();
+        while (!integrationServer.hasStopped(5, 100L, TimeUnit.MILLISECONDS)) {
+        }
+    }
+
+
+    @Test
+    void pullIngestLegalEntity_Success() throws Exception {
+        LegalEntity legalEntity = new Gson()
+                .fromJson(readContentFromClasspath("integration-data/legal-entity.json"),
+                        LegalEntity.class);
+
+        when(legalEntitySaga.executeTask(any()))
+                .thenReturn(Mono.just(new LegalEntityTask(legalEntity)));
+
+        URI uri = URI.create("/service-api/v2/ingest/pull");
+        LegalEntityPullIngestionRequest pullIngestionRequest =
+                new LegalEntityPullIngestionRequest().withLegalEntityExternalId("externalId");
+
+        WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
+        webTestClient.post().uri(uri)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Mono.just(pullIngestionRequest), LegalEntityPullIngestionRequest.class).exchange()
+                .expectStatus().isCreated()
+                .expectHeader().valueEquals("Content-Type", "application/json")
+                .expectBody().jsonPath("$.legalEntity.name").isEqualTo("Test Legal Entity");
+    }
+
+    @Test
+    void pushIngestLegalEntity_Fail() {
+        URI uri = URI.create("/service-api/v2/ingest/push");
+
+        LegalEntityPushIngestionRequest pushIngestionRequest = Mockito
+                .mock(LegalEntityPushIngestionRequest.class);
+
+        WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
+        webTestClient.post().uri(uri)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Mono.just(pushIngestionRequest), LegalEntityPushIngestionRequest.class).exchange()
+                .expectStatus().is5xxServerError();
+    }
 }
 
