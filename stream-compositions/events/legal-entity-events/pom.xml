@@ -36,6 +36,7 @@
             <plugin>
                 <groupId>com.backbase.codegen</groupId>
                 <artifactId>jsonschema-events-maven-plugin</artifactId>
+                <version>${ssdk.version}</version>
                 <executions>
                     <execution>
                         <id>generate-ingress-events</id>

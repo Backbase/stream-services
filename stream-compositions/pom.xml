@@ -25,6 +25,7 @@
         <mockito.version>3.6.28</mockito.version>
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
+        <ssdk.version>14.1.1</ssdk.version>
     </properties>
 
     <packaging>pom</packaging>
