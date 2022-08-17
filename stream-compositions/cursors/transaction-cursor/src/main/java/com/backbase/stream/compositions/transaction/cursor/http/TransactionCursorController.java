@@ -23,8 +23,9 @@ public class TransactionCursorController implements TransactionCursorApi {
     private final TransactionCursorService transactionCursorService;
 
     @Override
-    public Mono<ResponseEntity<Void>> deleteByArrangementId(String arrangementId,
-                                                            ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Void>> deleteByArrangementId(
+            String arrangementId,
+            ServerWebExchange exchange) {
         log.debug("TransactionCursorController :: deleteByArrangementId");
         return transactionCursorService.deleteByArrangementId(arrangementId);
     }
@@ -39,8 +40,9 @@ public class TransactionCursorController implements TransactionCursorApi {
 
 
     @Override
-    public Mono<ResponseEntity<TransactionCursorResponse>> getByArrangementId(String arrangementId,
-                                                                              ServerWebExchange exchange) {
+    public Mono<ResponseEntity<TransactionCursorResponse>> getByArrangementId(
+            String arrangementId,
+            ServerWebExchange exchange) {
         log.debug("TransactionCursorController :: getByArrangementId {} ", arrangementId);
         return transactionCursorService.findByArrangementId(arrangementId);
     }
@@ -53,9 +55,10 @@ public class TransactionCursorController implements TransactionCursorApi {
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> patchByArrangementId(String arrangementId,
-                                                           Mono<TransactionCursorPatchRequest> transactionCursorPatchRequest,
-                                                           ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Void>> patchByArrangementId(
+            String arrangementId,
+            Mono<TransactionCursorPatchRequest> transactionCursorPatchRequest,
+            ServerWebExchange exchange) {
         log.debug("TransactionCursorController :: patchByArrangementId {} ", arrangementId);
         return transactionCursorService
                 .patchByArrangementId(arrangementId, transactionCursorPatchRequest);
