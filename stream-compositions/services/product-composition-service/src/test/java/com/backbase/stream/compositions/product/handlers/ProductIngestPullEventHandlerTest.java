@@ -22,6 +22,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+
 @ExtendWith(MockitoExtension.class)
 class ProductIngestPullEventHandlerTest {
 
@@ -67,7 +69,7 @@ class ProductIngestPullEventHandlerTest {
 
         Mono<ProductIngestResponse> responseMono = Mono.just(
                 ProductIngestResponse
-                        .builder().productGroup(productGroup).build());
+                        .builder().productGroups(Arrays.asList(productGroup)).build());
 
         lenient().when(productIngestionService.ingestPull(any())).thenReturn(responseMono);
         ProductConfigurationProperties properties = new ProductConfigurationProperties();

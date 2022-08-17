@@ -169,7 +169,7 @@ class ProductControllerIT extends IntegrationTest {
     @Test
     void pushIngestProduct_Success() throws Exception {
         ProductPushIngestionRequest pushIngestionRequest = new ProductPushIngestionRequest()
-                .withProductGgroup(new com.backbase.stream.compositions.product.api.model.ProductGroup());
+                .withProductGroup(new com.backbase.stream.compositions.product.api.model.ProductGroup());
         URI uri = URI.create("/service-api/v2/ingest/push");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 

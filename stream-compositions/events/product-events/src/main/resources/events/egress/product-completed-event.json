@@ -2,9 +2,11 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "productGroup": {
-      "type": "object",
-      "$ref": "../product-group.json"
+    "productGroups": {
+      "type": "array",
+      "items": {
+        "$ref": "../product-group.json"
+      }
     }
   }
 }

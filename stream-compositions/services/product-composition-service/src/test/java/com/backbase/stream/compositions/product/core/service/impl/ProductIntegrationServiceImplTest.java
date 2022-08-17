@@ -10,6 +10,7 @@ import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -41,10 +42,10 @@ class ProductIntegrationServiceImplTest {
     void callIntegrationService_Success() throws UnsupportedOperationException {
         ProductGroup productGroup = new ProductGroup();
         com.backbase.stream.legalentity.model.ProductGroup productGroup1 = new com.backbase.stream.legalentity.model.ProductGroup();
-        ProductIngestResponse res = new ProductIngestResponse(productGroup1, Map.of());
+        ProductIngestResponse res = new ProductIngestResponse("id1", "id2", Arrays.asList(productGroup1), Map.of());
 
         PullProductGroupResponse getProductGroupResponse = new PullProductGroupResponse().
-                productGroup(productGroup);
+                productGroups(Arrays.asList(productGroup));
         when(productIntegrationApi.pullProductGroup(any()))
                 .thenReturn(Mono.just(getProductGroupResponse));
 
@@ -65,5 +66,4 @@ class ProductIntegrationServiceImplTest {
                 .legalEntityExternalId("externalId").build();
         StepVerifier.create(productIntegrationService.pullProductGroup(request)).expectError().verify();
     }
-
 }

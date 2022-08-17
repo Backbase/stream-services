@@ -30,11 +30,11 @@ import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.validation.Validator;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -153,7 +153,7 @@ class ProductIngestionServiceImplTest {
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
         when(productIntegrationService.pullProductGroup(productIngestPullRequest))
-                .thenReturn(Mono.just(new ProductIngestResponse(productGroup, Map.of())));
+                .thenReturn(Mono.just(new ProductIngestResponse("id1", "id2", Arrays.asList(productGroup), Map.of())));
 
         lenient().when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
                 .thenReturn(productGroupTaskMono);
@@ -176,8 +176,6 @@ class ProductIngestionServiceImplTest {
     @Test
     void ingestionInPushMode_Unsupported() {
         ProductIngestPushRequest request = ProductIngestPushRequest.builder().build();
-        assertThrows(UnsupportedOperationException.class, () -> {
-            productIngestionService.ingestPush(request);
-        });
+        assertThrows(UnsupportedOperationException.class, () -> productIngestionService.ingestPush(request));
     }
 }

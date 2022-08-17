@@ -114,14 +114,16 @@ components:
     ProductPushIngestionRequest:
       type: object
       properties:
-        productGgroup:
+        productGroup:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
 
     ProductIngestionResponse:
       type: object
       properties:
-        productGgroup:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+        productGroups:
+          type: array
+          items:
+            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
 
     InternalServerError:
       required:

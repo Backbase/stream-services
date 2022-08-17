@@ -10,6 +10,7 @@ import com.backbase.stream.compositions.product.core.service.ProductIntegrationS
 import com.backbase.stream.compositions.product.core.service.ProductPostIngestionService;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,7 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      */
     public Mono<ProductIngestResponse> ingestPull(ProductIngestPullRequest ingestPullRequest) {
         return pullProductGroup(ingestPullRequest)
+                .map(response -> this.setServiceAgreementIds(ingestPullRequest, response))
                 .flatMap(this::validate)
                 .flatMap(this::sendToDbs)
                 .flatMap(productPostIngestionService::handleSuccess)
@@ -57,6 +59,21 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      */
     public Mono<ProductIngestResponse> ingestPush(ProductIngestPushRequest ingestPushRequest) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Sets service agreements ids from request to response.
+     *
+     * @param request  ProductIngestPullRequest
+     * @param response ProductIngestResponse
+     * @return ProductIngestResponse
+     */
+    private ProductIngestResponse setServiceAgreementIds(
+            ProductIngestPullRequest request, ProductIngestResponse response) {
+        response.setServiceAgreementInternalId(request.getServiceAgreementInternalId());
+        response.setServiceAgreementExternalId(request.getServiceAgreementExternalId());
+
+        return response;
     }
 
     /**
@@ -77,24 +94,30 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @return Ingested product group
      */
     private Mono<ProductIngestResponse> sendToDbs(ProductIngestResponse res) {
-        return batchProductIngestionSaga.process(buildBatchTask(res.getProductGroup()))
+        return batchProductIngestionSaga.process(buildBatchTask(res))
                 .map(BatchProductGroupTask::getData)
                 .map(pg -> ProductIngestResponse.builder()
-                        .productGroup((ProductGroup) pg.getProductGroups().get(0))
+                        .productGroups(pg.getProductGroups().stream().map(g -> (ProductGroup) g).collect(Collectors.toList()))
                         .build());
     }
 
-    private BatchProductGroupTask buildBatchTask(ProductGroup productGroup) {
+    private BatchProductGroupTask buildBatchTask(ProductIngestResponse res) {
         BatchProductGroup bpg = new BatchProductGroup();
-        bpg.addProductGroupsItem(productGroup);
-        bpg.setServiceAgreement(productGroup.getServiceAgreement());
-        return new BatchProductGroupTask(productGroup.getServiceAgreement().getInternalId(),
+
+        for (ProductGroup productGroup : res.getProductGroups()) {
+            bpg.addProductGroupsItem(productGroup);
+        }
+
+        bpg.setServiceAgreement(new ServiceAgreement()
+                .internalId(res.getServiceAgreementInternalId())
+                .externalId(res.getServiceAgreementExternalId()));
+
+        return new BatchProductGroupTask(res.getServiceAgreementInternalId(),
                 bpg, BatchProductGroupTask.IngestionMode.UPDATE);
     }
 
-
     private Mono<ProductIngestResponse> validate(ProductIngestResponse res) {
-        Set<ConstraintViolation<ProductGroup>> violations = validator.validate(res.getProductGroup());
+        Set<ConstraintViolation<List<ProductGroup>>> violations = validator.validate(res.getProductGroups());
 
         if (!CollectionUtils.isEmpty(violations)) {
             List<Error> errors = violations.stream().map(c -> new Error()

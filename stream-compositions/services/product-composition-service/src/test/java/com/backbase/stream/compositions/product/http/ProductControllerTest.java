@@ -23,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
 
@@ -54,8 +56,7 @@ class ProductControllerTest {
             ProductIngestPullRequest request = invocation.getArgument(0);
 
             return Mono.just(ProductIngestResponse.builder()
-                    .productGroup(
-                            new com.backbase.stream.legalentity.model.ProductGroup())
+                    .productGroups(Arrays.asList(new com.backbase.stream.legalentity.model.ProductGroup()))
                     .build());
         }).when(productIngestionService).ingestPull(any());
 
@@ -63,21 +64,20 @@ class ProductControllerTest {
                 .pullIngestProduct(requestMono, null).block();
         ProductIngestionResponse ingestionResponse = responseEntity.getBody();
         assertNotNull(ingestionResponse);
-        assertNotNull(ingestionResponse.getProductGgroup());
+        assertNotNull(ingestionResponse.getProductGroups());
         verify(productIngestionService).ingestPull(any());
     }
 
     @Test
     void testPushIngestion_Success() {
         Mono<ProductPushIngestionRequest> requestMono = Mono.just(
-                new ProductPushIngestionRequest().withProductGgroup(new ProductGroup()));
+                new ProductPushIngestionRequest().withProductGroup(new ProductGroup()));
 
         doAnswer(invocation -> {
             ProductIngestPushRequest request = invocation.getArgument(0);
 
             return Mono.just(ProductIngestResponse.builder()
-                    .productGroup(
-                            new com.backbase.stream.legalentity.model.ProductGroup())
+                    .productGroups(Arrays.asList(new com.backbase.stream.legalentity.model.ProductGroup()))
                     .build());
         }).when(productIngestionService).ingestPush(any());
 
@@ -85,8 +85,7 @@ class ProductControllerTest {
                 .pushIngestProduct(requestMono, null).block();
         ProductIngestionResponse ingestionResponse = responseEntity.getBody();
         assertNotNull(ingestionResponse);
-        assertNotNull(ingestionResponse.getProductGgroup());
+        assertNotNull(ingestionResponse.getProductGroups());
         verify(productIngestionService).ingestPush(any());
     }
 }
-
