@@ -1,15 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [2.86.1]
+## [2.86.1](https://github.com/Backbase/stream-services/compare/2.86.0...2.86.1)
 ### Fixed
 - Added qualifier for WebClient in ContactsServiceConfiguration.
 
-## [2.86.0]
+## [2.86.0](https://github.com/Backbase/stream-services/compare/2.85.0...2.86.0)
 ### Fixed
 - Custom Job Role Mapping Issue is fixed by adding missing mapping of BusinessFunction object of BusinessFunctionGroupMapper class
 
-## [2.85.0]
+## [2.85.0](https://github.com/Backbase/stream-services/compare/2.84.0...2.85.0)
 ### Added
 - Deploying task executables and http services as docker images using `repo.backbase.com/backbase-stream-images` registry. 
 > e.g. `repo.backbase.com/backbase-stream-images/legal-entity-bootstrap-task:2.85.0`
@@ -20,7 +20,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Segregating `moustache-bank` profile in `moustache-bank-subsidiaries` to support ingesting the root legal entity without any dependency on product service.
 
-## [2.84.0]
+## [2.84.0](https://github.com/Backbase/stream-services/compare/2.83.0...2.84.0)
 ### Added
 - Contacts Support Added for Legal Entity, Service Agreement and Users 
 - Usage Sample of Bootstrap json to be added to Legal Entity, Service Agreement and User 
@@ -168,7 +168,7 @@ customServiceAgreement:
       BIC: BOFAUS6H
       bankCode: '121000358'
 ```
-## [2.84.0]
+## [2.83.0]
 ### Fixed
 - Adding Custom Role Permission Issue
 
@@ -1013,4 +1013,4 @@ backbase:
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
 [2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
 [2.75.0]: https://github.com/Backbase/stream-services/compare/2.74.0...2.75.0
-[2.86.1]: https://github.com/Backbase/stream-services/compare/2.86.0...2.86.1
+

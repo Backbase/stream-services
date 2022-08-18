@@ -16,6 +16,10 @@ Currently, the following DBS services are exposed as Stream Components:
 * [Stream DBS Clients](stream-dbs-clients/readme.md) -> The Stream DBS Clients are generated from Backbase OOTB specs and provide a reactive interface to interact with DBS services.
 * [Stream Portfolio](stream-portfolio) (Lib) → Allows ingestion into DBS in a controlled way.
 
+## Release Notes
+
+All notable changes to this project are documented in the [CHANGELOG.md](CHANGELOG.md) file.
+
 ## Stream API Documentation
 
 You can find listed here the API specification containing the opinionated model of the supported Stream Services
@@ -28,7 +32,7 @@ You can find listed here the API specification containing the opinionated model 
 | stream-product-catalog | [openapi.yaml](api/stream-product-catalog/openapi.yaml) | [Product Catalog API](https://engineering.backbase.com/stream-services/api/stream-product-catalog/index.html)     |
 | stream-portfolio       | [openapi.yaml](api/stream-portfolio/openapi.yaml)    | [Portfolio Ingestion API](https://engineering.backbase.com/stream-services/api/stream-portfolio/index.html)    |
 
-## Supported DBS versions
+## Supported Banking Services versions
 
 | DBS version        | Stream [version](https://github.com/Backbase/stream-services/releases) |
 |--------------------|------------------------------------------------------------------------|
@@ -39,15 +43,7 @@ You can find listed here the API specification containing the opinionated model 
 | 2.19.x             | 2.1.0 to 2.22.0                                                        |
 
 ## Software License Terms
-Please see the license terms here: https://github.com/Backbase/stream-services/blob/master/LICENSE.txt
+Please see the license terms [here](LICENSE.txt).
 
 ## Contributing
-You are welcome to provide bug fixes and new features in the form of pull requests. If you'd like to contribute, please be mindful of the following guidelines:
-
-- All changes should be properly tested for common scenarios (i.e. if changing Legal Entity SAGA, test that your change doesn't affect in non-intended ways to LE ingestion and update).
-- Try to avoid reformat of files that change the indentation, tabs to spaces etc., as this makes reviewing diffs much more difficult.
-- Please make one change/feature per pull request.
-- Use descriptive PR description and commit messages.
-- Together with your changes, submit updated [CHANGELOG.md](CHANGELOG.md) in your PR using the next desired version as reference.
-- After your pull request gets approved and integrated, GitHub actions will bump the `MINOR` version and deploy it to Backbase maven repository. *(e.g. 2.45.0 -> 2.46.0)*
-    * For small fixes and patches utilize the `hotfix/` branch prefix, so once it is integrated the pipelines will automatically bump the `PATCH` version instead of the `MINOR`. *(e.g. 2.46.0 -> 2.46.1)*
+This is an open-source project! Please check our contribution guidelines [here](CONTRIBUTING.md).
