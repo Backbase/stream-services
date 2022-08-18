@@ -72,7 +72,7 @@ public class PaymentOrderServiceConfiguration {
                                            BackbaseStreamConfigurationProperties config) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
         System.out.println("connecting to DBS with : " + config.getDbs().getPaymentOrderBaseUrl());
-        apiClient.setBasePath("http://localhost:8090/payment-order-service");
+        apiClient.setBasePath("http://payment-order-service:8080");
         return apiClient;
     }
 }
