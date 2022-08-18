@@ -44,7 +44,6 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      */
     public Mono<ProductIngestResponse> ingestPull(ProductIngestPullRequest ingestPullRequest) {
         return pullProductGroup(ingestPullRequest)
-                .map(response -> this.setServiceAgreementIds(ingestPullRequest, response))
                 .flatMap(this::validate)
                 .flatMap(this::sendToDbs)
                 .flatMap(productPostIngestionService::handleSuccess)
@@ -59,21 +58,6 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      */
     public Mono<ProductIngestResponse> ingestPush(ProductIngestPushRequest ingestPushRequest) {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Sets service agreements ids from request to response.
-     *
-     * @param request  ProductIngestPullRequest
-     * @param response ProductIngestResponse
-     * @return ProductIngestResponse
-     */
-    private ProductIngestResponse setServiceAgreementIds(
-            ProductIngestPullRequest request, ProductIngestResponse response) {
-        response.setServiceAgreementInternalId(request.getServiceAgreementInternalId());
-        response.setServiceAgreementExternalId(request.getServiceAgreementExternalId());
-
-        return response;
     }
 
     /**

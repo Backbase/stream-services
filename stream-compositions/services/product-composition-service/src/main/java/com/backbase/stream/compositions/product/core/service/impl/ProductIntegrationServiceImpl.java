@@ -25,12 +25,27 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
      */
     public Mono<ProductIngestResponse> pullProductGroup(ProductIngestPullRequest ingestPullRequest) {
         return productIntegrationApi
-                .pullProductGroup(
-                        mapper.mapStreamToIntegration(ingestPullRequest))
+                .pullProductGroup(mapper.mapStreamToIntegration(ingestPullRequest))
                 .map(mapper::mapResponseIntegrationToStream)
+                .map(response -> this.setServiceAgreementIds(ingestPullRequest, response))
                 .map(pir -> pir.withAdditions(ingestPullRequest.getAdditions()))
                 .onErrorResume(this::handleIntegrationError)
                 .flatMap(this::handleIntegrationResponse);
+    }
+
+    /**
+     * Sets service agreements ids from request to response.
+     *
+     * @param request  ProductIngestPullRequest
+     * @param response ProductIngestResponse
+     * @return ProductIngestResponse
+     */
+    private ProductIngestResponse setServiceAgreementIds(
+            ProductIngestPullRequest request, ProductIngestResponse response) {
+        response.setServiceAgreementInternalId(request.getServiceAgreementInternalId());
+        response.setServiceAgreementExternalId(request.getServiceAgreementExternalId());
+
+        return response;
     }
 
     private Mono<ProductIngestResponse> handleIntegrationResponse(ProductIngestResponse res) {
