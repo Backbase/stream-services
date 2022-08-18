@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
+@Disabled
 @SpringBootTest(classes = LegalEntityHttpApplication.class)
 @ContextConfiguration(classes = {LegalEntitySagaIT.TestConfiguration.class})
 @TestPropertySource(properties = {"spring.config.location=classpath:application-it.yml"})
