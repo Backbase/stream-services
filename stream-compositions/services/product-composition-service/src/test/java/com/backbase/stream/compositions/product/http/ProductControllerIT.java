@@ -43,7 +43,6 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-@Disabled
 @DirtiesContext
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -129,7 +128,6 @@ class ProductControllerIT extends IntegrationTest {
 
     @Test
     void pullIngestProduct_Success() throws Exception {
-
         ProductGroup productGroup = new Gson()
                 .fromJson(readContentFromClasspath("integration-data/response.json"), ProductGroup.class);
         productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
@@ -160,7 +158,7 @@ class ProductControllerIT extends IntegrationTest {
 
         webTestClient.post().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class).exchange()
+                .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class). exchange()
                 .expectStatus().isCreated();
     }
 
@@ -176,5 +174,4 @@ class ProductControllerIT extends IntegrationTest {
                 .body(Mono.just(pushIngestionRequest), ProductPushIngestionRequest.class).exchange()
                 .expectStatus().is5xxServerError();
     }
-
 }

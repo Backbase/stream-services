@@ -37,7 +37,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
-@Disabled
 @SpringBootTest(classes = LegalEntityHttpApplication.class)
 @ContextConfiguration(classes = {LegalEntitySagaIT.TestConfiguration.class})
 @TestPropertySource(properties = {"spring.config.location=classpath:application-it.yml"})
