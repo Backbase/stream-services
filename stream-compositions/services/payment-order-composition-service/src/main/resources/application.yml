@@ -16,7 +16,7 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+            token-uri: http://token-converter:8080/oauth/token
   main:
     allow-bean-definition-overriding: true
   codec:
