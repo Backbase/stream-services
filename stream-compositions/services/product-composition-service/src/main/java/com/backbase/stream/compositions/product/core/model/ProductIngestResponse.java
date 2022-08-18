@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 public class ProductIngestResponse {
