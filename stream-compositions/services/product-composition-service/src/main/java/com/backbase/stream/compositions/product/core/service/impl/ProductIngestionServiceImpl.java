@@ -103,7 +103,6 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
 
     private BatchProductGroupTask buildBatchTask(ProductIngestResponse res) {
         BatchProductGroup bpg = new BatchProductGroup();
-
         res.getProductGroups().forEach(bpg::addProductGroupsItem);
 
         bpg.setServiceAgreement(new ServiceAgreement()
