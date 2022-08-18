@@ -123,27 +123,34 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Flux<BaseProduct> extractProducts(List<ProductGroup> productGroups) {
         return Flux.concat(
-                        Flux.fromIterable(
-                                ofNullable(productGroups.stream().flatMap(group -> productStream(group.getLoans())).collect(Collectors.toList()))
-                                        .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(
-                                ofNullable(productGroups.stream().flatMap(group -> productStream(group.getTermDeposits())).collect(Collectors.toList()))
-                                        .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(
-                                ofNullable(productGroups.stream().flatMap(group -> productStream(group.getCurrentAccounts())).collect(Collectors.toList()))
-                                        .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(
-                                ofNullable(productGroups.stream().flatMap(group -> productStream(group.getSavingAccounts())).collect(Collectors.toList()))
-                                        .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(
-                                ofNullable(productGroups.stream().flatMap(group -> productStream(group.getCreditCards())).collect(Collectors.toList()))
-                                        .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(
-                                ofNullable(productGroups.stream().flatMap(group -> productStream(group.getInvestmentAccounts())).collect(Collectors.toList()))
-                                        .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(
-                                ofNullable(productGroups.stream().flatMap(group -> productStream(group.getCustomProducts())).collect(Collectors.toList()))
-                                        .orElseGet(Collections::emptyList)))
+                        Flux.fromIterable(Optional.of(productGroups.stream()
+                                        .flatMap(group -> productStream(group.getLoans()))
+                                        .collect(Collectors.toList()))
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.of(productGroups.stream()
+                                        .flatMap(group -> productStream(group.getTermDeposits()))
+                                        .collect(Collectors.toList()))
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.of(productGroups.stream()
+                                        .flatMap(group -> productStream(group.getCurrentAccounts()))
+                                        .collect(Collectors.toList()))
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.of(productGroups.stream()
+                                        .flatMap(group -> productStream(group.getSavingAccounts()))
+                                        .collect(Collectors.toList()))
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.of(productGroups.stream()
+                                        .flatMap(group -> productStream(group.getCreditCards()))
+                                        .collect(Collectors.toList()))
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.of(productGroups.stream()
+                                        .flatMap(group -> productStream(group.getInvestmentAccounts()))
+                                        .collect(Collectors.toList()))
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.of(productGroups.stream()
+                                        .flatMap(group -> productStream(group.getCustomProducts()))
+                                        .collect(Collectors.toList()))
+                                .orElseGet(Collections::emptyList)))
                 .filter(this::excludeProducts);
     }
 
