@@ -6,7 +6,7 @@ import lombok.*;
 import java.util.List;
 import java.util.Map;
 
-@Data
+@Getter
 @Builder
 @AllArgsConstructor
 public class ProductIngestResponse {
