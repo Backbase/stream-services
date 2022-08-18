@@ -117,7 +117,7 @@
             </goals>
             <configuration>
               <inputSpec>
-                ${project.basedir}/../../api/integrations-api/legal-entity-integration-api/src/main/resources/integration-api-v2.yaml
+                ${project.basedir}/../../api/integrations-api/legal-entity-integration-api/src/main/resources/service-api-v2.yaml
               </inputSpec>
               <apiPackage>com.backbase.stream.compositions.legalentity.integration.client
               </apiPackage>
