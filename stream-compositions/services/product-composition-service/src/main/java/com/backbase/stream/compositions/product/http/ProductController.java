@@ -18,6 +18,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -71,7 +72,7 @@ public class ProductController implements ProductCompositionApi {
      */
     private ProductIngestPushRequest buildPushRequest(ProductPushIngestionRequest request) {
         return ProductIngestPushRequest.builder()
-                .productGroup(mapper.mapCompositionToStream(request.getProductGgroup()))
+                .productGroup(mapper.mapCompositionToStream(request.getProductGroup()))
                 .build();
     }
 
@@ -84,7 +85,10 @@ public class ProductController implements ProductCompositionApi {
     private ResponseEntity<ProductIngestionResponse> mapIngestionToResponse(ProductIngestResponse response) {
         return new ResponseEntity<>(
                 new ProductIngestionResponse()
-                        .withProductGgroup(mapper.mapStreamToComposition(response.getProductGroup())),
+                        .withProductGroups(
+                                response.getProductGroups().stream()
+                                        .map(group -> mapper.mapStreamToComposition(group))
+                                        .collect(Collectors.toList())),
                 HttpStatus.CREATED);
     }
 }

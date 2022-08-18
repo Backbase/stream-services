@@ -16,10 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.broker.BrokerService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
@@ -131,7 +128,6 @@ class ProductControllerIT extends IntegrationTest {
 
     @Test
     void pullIngestProduct_Success() throws Exception {
-
         ProductGroup productGroup = new Gson()
                 .fromJson(readContentFromClasspath("integration-data/response.json"), ProductGroup.class);
         productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
@@ -162,14 +158,14 @@ class ProductControllerIT extends IntegrationTest {
 
         webTestClient.post().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class).exchange()
+                .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class). exchange()
                 .expectStatus().isCreated();
     }
 
     @Test
     void pushIngestProduct_Success() throws Exception {
         ProductPushIngestionRequest pushIngestionRequest = new ProductPushIngestionRequest()
-                .withProductGgroup(new com.backbase.stream.compositions.product.api.model.ProductGroup());
+                .withProductGroup(new com.backbase.stream.compositions.product.api.model.ProductGroup());
         URI uri = URI.create("/service-api/v2/ingest/push");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
@@ -178,5 +174,4 @@ class ProductControllerIT extends IntegrationTest {
                 .body(Mono.just(pushIngestionRequest), ProductPushIngestionRequest.class).exchange()
                 .expectStatus().is5xxServerError();
     }
-
 }

@@ -16,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+
 @ExtendWith(MockitoExtension.class)
 class ProductIngestPushEventHandlerTest {
 
@@ -31,7 +33,7 @@ class ProductIngestPushEventHandlerTest {
 
         Mono<ProductIngestResponse> responseMono = Mono.just(
                 ProductIngestResponse
-                        .builder().productGroup(productGroup).build());
+                        .builder().productGroups(Arrays.asList(productGroup)).build());
 
         lenient().when(productCatalogIngestionService.ingestPush(any())).thenReturn(responseMono);
 

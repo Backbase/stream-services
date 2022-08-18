@@ -70,7 +70,7 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
                 .flatMap(productCompositionApi::pullIngestProduct)
                 .onErrorResume(this::handleProductError)
                 .doOnSuccess(response -> log.debug("Response from Product Composition: {}",
-                        response.getProductGgroup()))
+                        response.getProductGroups()))
                 .map(p -> res);
     }
 

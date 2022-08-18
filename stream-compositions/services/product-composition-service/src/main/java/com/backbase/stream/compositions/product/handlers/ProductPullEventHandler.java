@@ -17,6 +17,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.util.stream.Collectors;
+
 @Component
 @AllArgsConstructor
 @Slf4j
@@ -63,7 +65,10 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
             return;
         }
         ProductCompletedEvent event = new ProductCompletedEvent()
-                .withProductGroup(mapper.mapStreamToEvent(response.getProductGroup()));
+                .withProductGroups(
+                        response.getProductGroups().stream()
+                                .map( productGroup -> mapper.mapStreamToEvent(productGroup))
+                                .collect(Collectors.toList()));
 
         EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);

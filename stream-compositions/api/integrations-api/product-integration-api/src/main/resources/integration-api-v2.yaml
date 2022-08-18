@@ -82,8 +82,10 @@ components:
     PullProductGroupResponse:
       type: object
       properties:
-        productGroup:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+        productGroups:
+          type: array
+          items:
+            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
 
     Product:
       type: object

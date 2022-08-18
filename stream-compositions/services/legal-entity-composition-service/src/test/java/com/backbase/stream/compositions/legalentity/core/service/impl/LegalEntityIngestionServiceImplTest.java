@@ -28,6 +28,7 @@ import reactor.test.StepVerifier;
 
 import javax.validation.Validator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -81,9 +82,11 @@ class LegalEntityIngestionServiceImplTest {
         when(config.isCompletedEventEnabled()).thenReturn(Boolean.TRUE);
         when(productCompositionApi.pullIngestProduct(any()))
                 .thenReturn(Mono.just(new ProductIngestionResponse()
-                        .withProductGgroup(
-                                (com.backbase.stream.compositions.product.client.model.ProductGroup) new com.backbase.stream.compositions.product.client.model.ProductGroup()
-                                        .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN"))))));
+                        .withProductGroups(
+                                Arrays.asList((com.backbase.stream.compositions.product.client.model.ProductGroup)
+                                        new com.backbase.stream.compositions.product.client.model.ProductGroup()
+                                                .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN")))))));
+
         Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
                 Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
         StepVerifier.create(legalEntityIngestResponseMono)
@@ -97,9 +100,11 @@ class LegalEntityIngestionServiceImplTest {
         when(config.isCompletedEventEnabled()).thenReturn(Boolean.TRUE);
         when(productCompositionApi.pullIngestProduct(any()))
                 .thenReturn(Mono.just(new ProductIngestionResponse()
-                        .withProductGgroup(
-                                (com.backbase.stream.compositions.product.client.model.ProductGroup) new com.backbase.stream.compositions.product.client.model.ProductGroup()
-                                        .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN"))))));
+                        .withProductGroups(
+                                Arrays.asList((com.backbase.stream.compositions.product.client.model.ProductGroup)
+                                        new com.backbase.stream.compositions.product.client.model.ProductGroup()
+                                                .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN")))))));
+
         Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
                 Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
         StepVerifier.create(legalEntityIngestResponseMono)
