@@ -118,20 +118,20 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Flux<BaseProduct> extractProducts(ProductGroup productGroup) {
         return Flux.concat(
-                Flux.fromIterable(Optional.ofNullable(productGroup.getLoans())
-                        .orElseGet(Collections::emptyList)),
-                Flux.fromIterable(Optional.ofNullable(productGroup.getTermDeposits())
-                        .orElseGet(Collections::emptyList)),
-                Flux.fromIterable(Optional.ofNullable(productGroup.getCurrentAccounts())
-                        .orElseGet(Collections::emptyList)),
-                Flux.fromIterable(Optional.ofNullable(productGroup.getSavingAccounts())
-                        .orElseGet(Collections::emptyList)),
-                Flux.fromIterable(Optional.ofNullable(productGroup.getCreditCards())
-                        .orElseGet(Collections::emptyList)),
-                Flux.fromIterable(Optional.ofNullable(productGroup.getInvestmentAccounts())
-                        .orElseGet(Collections::emptyList)),
-                Flux.fromIterable(Optional.ofNullable(productGroup.getCustomProducts())
-                        .orElseGet(Collections::emptyList)))
+                        Flux.fromIterable(Optional.ofNullable(productGroup.getLoans())
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.ofNullable(productGroup.getTermDeposits())
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.ofNullable(productGroup.getCurrentAccounts())
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.ofNullable(productGroup.getSavingAccounts())
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.ofNullable(productGroup.getCreditCards())
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.ofNullable(productGroup.getInvestmentAccounts())
+                                .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(Optional.ofNullable(productGroup.getCustomProducts())
+                                .orElseGet(Collections::emptyList)))
                 .filter(this::excludeProducts);
     }
 
@@ -152,6 +152,6 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .withLegalEntityInternalId(product.getLegalEntities().get(0).getInternalId())
                 .withAdditions(res.getAdditions())
                 .withArrangementId(product.getInternalId())
-                        .withExternalArrangementId(product.getExternalId());
+                .withExternalArrangementId(product.getExternalId());
     }
 }

@@ -9,7 +9,9 @@ import com.backbase.stream.compositions.productcatalog.core.service.ProductCatal
 import com.backbase.stream.compositions.productcatalog.handlers.ProductCatalogIngestPullEventHandler;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
+
 import java.util.List;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -33,28 +35,28 @@ class ProductCatalogIngestPullEventHandlerTest {
 
     @Test
     @Tag("true")
-    void testEnableHandleEvent_Completed(TestInfo testInfo){
+    void testEnableHandleEvent_Completed(TestInfo testInfo) {
         String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
         testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
     }
 
     @Test
     @Tag("false")
-    void testDisableHandleEvent_Completed(TestInfo testInfo){
+    void testDisableHandleEvent_Completed(TestInfo testInfo) {
         String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
         testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
     }
 
     @Test
     @Tag("true")
-    void testEnableHandleEvent_Failed(TestInfo testInfo){
+    void testEnableHandleEvent_Failed(TestInfo testInfo) {
         String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
         testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
     }
 
     @Test
     @Tag("false")
-    void testDisableHandleEvent_Failed(TestInfo testInfo){
+    void testDisableHandleEvent_Failed(TestInfo testInfo) {
         String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
         testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
     }

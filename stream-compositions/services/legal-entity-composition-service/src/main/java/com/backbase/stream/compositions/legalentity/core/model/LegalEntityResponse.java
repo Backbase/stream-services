@@ -15,8 +15,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class LegalEntityResponse {
 
-  private Boolean productChainEnabledFromRequest;
-  private LegalEntity legalEntity;
-  private List<String> membershipAccounts;
-  private Map<String, String> additions;
+    private Boolean productChainEnabledFromRequest;
+    private LegalEntity legalEntity;
+    private List<String> membershipAccounts;
+    private Map<String, String> additions;
 }

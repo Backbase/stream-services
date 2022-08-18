@@ -9,7 +9,9 @@ import com.backbase.stream.compositions.integration.product.model.PullProductGro
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+
 import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,47 +23,47 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class ProductIntegrationServiceImplTest {
 
-  @Mock
-  private ProductIntegrationApi productIntegrationApi;
+    @Mock
+    private ProductIntegrationApi productIntegrationApi;
 
-  @Mock
-  private ProductGroupMapper productGroupMapper;
+    @Mock
+    private ProductGroupMapper productGroupMapper;
 
-  private ProductIntegrationServiceImpl productIntegrationService;
+    private ProductIntegrationServiceImpl productIntegrationService;
 
-  @BeforeEach
-  void setUp() {
-    productIntegrationService = new ProductIntegrationServiceImpl(productIntegrationApi,
-        productGroupMapper);
-  }
+    @BeforeEach
+    void setUp() {
+        productIntegrationService = new ProductIntegrationServiceImpl(productIntegrationApi,
+                productGroupMapper);
+    }
 
-  @Test
-  void callIntegrationService_Success() throws UnsupportedOperationException {
-    ProductGroup productGroup = new ProductGroup();
-    com.backbase.stream.legalentity.model.ProductGroup productGroup1 = new com.backbase.stream.legalentity.model.ProductGroup();
-    ProductIngestResponse res = new ProductIngestResponse(productGroup1, Map.of());
+    @Test
+    void callIntegrationService_Success() throws UnsupportedOperationException {
+        ProductGroup productGroup = new ProductGroup();
+        com.backbase.stream.legalentity.model.ProductGroup productGroup1 = new com.backbase.stream.legalentity.model.ProductGroup();
+        ProductIngestResponse res = new ProductIngestResponse(productGroup1, Map.of());
 
-    PullProductGroupResponse getProductGroupResponse = new PullProductGroupResponse().
-        productGroup(productGroup);
-    when(productIntegrationApi.pullProductGroup(any()))
-        .thenReturn(Mono.just(getProductGroupResponse));
+        PullProductGroupResponse getProductGroupResponse = new PullProductGroupResponse().
+                productGroup(productGroup);
+        when(productIntegrationApi.pullProductGroup(any()))
+                .thenReturn(Mono.just(getProductGroupResponse));
 
-    ProductIngestPullRequest request = ProductIngestPullRequest.builder()
-        .legalEntityExternalId("externalId").build();
+        ProductIngestPullRequest request = ProductIngestPullRequest.builder()
+                .legalEntityExternalId("externalId").build();
 
-    StepVerifier.create(productIntegrationService.pullProductGroup(request))
-        .expectNext(res)
-        .expectComplete();
-  }
+        StepVerifier.create(productIntegrationService.pullProductGroup(request))
+                .expectNext(res)
+                .expectComplete();
+    }
 
-  @Test
-  void callIntegrationService_Failure() throws UnsupportedOperationException {
-    when(productIntegrationApi.pullProductGroup(any()))
-        .thenReturn(Mono.error(new RuntimeException("error")));
+    @Test
+    void callIntegrationService_Failure() throws UnsupportedOperationException {
+        when(productIntegrationApi.pullProductGroup(any()))
+                .thenReturn(Mono.error(new RuntimeException("error")));
 
-    ProductIngestPullRequest request = ProductIngestPullRequest.builder()
-        .legalEntityExternalId("externalId").build();
-    StepVerifier.create(productIntegrationService.pullProductGroup(request)).expectError().verify();
-  }
+        ProductIngestPullRequest request = ProductIngestPullRequest.builder()
+                .legalEntityExternalId("externalId").build();
+        StepVerifier.create(productIntegrationService.pullProductGroup(request)).expectError().verify();
+    }
 
 }

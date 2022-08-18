@@ -36,7 +36,7 @@ class ProductCatalogIntegrationServiceImplTest {
         when(productCatalogIntegrationApi.pullProductCatalog(any()))
                 .thenReturn(Mono.just(pullProductGroupResponse));
 
-        ProductCatalogIngestPullRequest ingestPullRequest =ProductCatalogIngestPullRequest.builder().build();
+        ProductCatalogIngestPullRequest ingestPullRequest = ProductCatalogIngestPullRequest.builder().build();
         Mono<ProductCatalog> productCatalogMono = productCatalogIntegrationService.pullProductCatalog(ingestPullRequest);
         assertEquals(productCatalog, productCatalogMono.block());
     }
@@ -46,7 +46,7 @@ class ProductCatalogIntegrationServiceImplTest {
         when(productCatalogIntegrationApi.pullProductCatalog(any()))
                 .thenReturn(Mono.empty());
 
-        ProductCatalogIngestPullRequest ingestPullRequest =ProductCatalogIngestPullRequest.builder().build();
+        ProductCatalogIngestPullRequest ingestPullRequest = ProductCatalogIngestPullRequest.builder().build();
         Mono<ProductCatalog> legalEntities = productCatalogIntegrationService.pullProductCatalog(ingestPullRequest);
 
         assertEquals(null, legalEntities.block());

@@ -12,6 +12,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "bootstrap", ignoreInvalidFields = true)
 public class BootstrapConfigurationProperties {
 
-  private Boolean enabled;
-  private LegalEntity legalEntity;
+    private Boolean enabled;
+    private LegalEntity legalEntity;
 }

@@ -39,12 +39,14 @@ public class ProductConfigurationProperties {
     public static class Chains {
         private TransactionComposition transactionComposition;
     }
+
     @Data
     public static abstract class BaseComposition {
         private Boolean enabled = Boolean.FALSE;
         private String baseUrl = "http://localhost:9003/";
         private Boolean async = Boolean.FALSE;
     }
+
     @NoArgsConstructor
     @Data
     public static class TransactionComposition extends BaseComposition {

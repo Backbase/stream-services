@@ -25,86 +25,86 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class ProductIngestPullEventHandlerTest {
 
-  @Mock
-  private ProductIngestionService productIngestionService;
+    @Mock
+    private ProductIngestionService productIngestionService;
 
-  @Mock
-  ProductGroupMapper mapper;
+    @Mock
+    ProductGroupMapper mapper;
 
-  @Mock
-  EventBus eventBus;
+    @Mock
+    EventBus eventBus;
 
-  @Test
-  @Tag("true")
-  void testEnableHandleEvent_Completed(TestInfo testInfo) {
-    String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
-    testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
-  }
+    @Test
+    @Tag("true")
+    void testEnableHandleEvent_Completed(TestInfo testInfo) {
+        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+        testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
+    }
 
-  @Test
-  @Tag("false")
-  void testDisableHandleEvent_Completed(TestInfo testInfo) {
-    String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
-    testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
-  }
+    @Test
+    @Tag("false")
+    void testDisableHandleEvent_Completed(TestInfo testInfo) {
+        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+        testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
+    }
 
-  @Test
-  @Tag("true")
-  void testEnableHandleEvent_Failed(TestInfo testInfo) {
-    String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
-    testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
-  }
+    @Test
+    @Tag("true")
+    void testEnableHandleEvent_Failed(TestInfo testInfo) {
+        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+        testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
+    }
 
-  @Test
-  @Tag("false")
-  void testDisableHandleEvent_Failed(TestInfo testInfo) {
-    String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
-    testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
-  }
+    @Test
+    @Tag("false")
+    void testDisableHandleEvent_Failed(TestInfo testInfo) {
+        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+        testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
+    }
 
-  void testHandleEvent_Completed(Boolean isCompletedEvents) {
-    ProductGroup productGroup = new ProductGroup();
+    void testHandleEvent_Completed(Boolean isCompletedEvents) {
+        ProductGroup productGroup = new ProductGroup();
 
-    Mono<ProductIngestResponse> responseMono = Mono.just(
-        ProductIngestResponse
-            .builder().productGroup(productGroup).build());
+        Mono<ProductIngestResponse> responseMono = Mono.just(
+                ProductIngestResponse
+                        .builder().productGroup(productGroup).build());
 
-    lenient().when(productIngestionService.ingestPull(any())).thenReturn(responseMono);
-    ProductConfigurationProperties properties = new ProductConfigurationProperties();
-    Events events = new Events();
-    events.setEnableCompleted(isCompletedEvents);
-    properties.setEvents(events);
+        lenient().when(productIngestionService.ingestPull(any())).thenReturn(responseMono);
+        ProductConfigurationProperties properties = new ProductConfigurationProperties();
+        Events events = new Events();
+        events.setEnableCompleted(isCompletedEvents);
+        properties.setEvents(events);
 
-    ProductPullEventHandler handler = new ProductPullEventHandler(
-        properties,
-        productIngestionService,
-        mapper,
-        eventBus);
+        ProductPullEventHandler handler = new ProductPullEventHandler(
+                properties,
+                productIngestionService,
+                mapper,
+                eventBus);
 
-    EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
-    envelopedEvent.setEvent(new ProductPullEvent());
+        EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(new ProductPullEvent());
 
-    handler.handle(envelopedEvent);
-    verify(productIngestionService).ingestPull(any());
-  }
+        handler.handle(envelopedEvent);
+        verify(productIngestionService).ingestPull(any());
+    }
 
-  void testHandleEvent_Failed(Boolean isFailedEvents) {
-    when(productIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
+    void testHandleEvent_Failed(Boolean isFailedEvents) {
+        when(productIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
 
-    ProductConfigurationProperties properties = new ProductConfigurationProperties();
-    Events events = new Events();
-    events.setEnableFailed(isFailedEvents);
-    properties.setEvents(events);
+        ProductConfigurationProperties properties = new ProductConfigurationProperties();
+        Events events = new Events();
+        events.setEnableFailed(isFailedEvents);
+        properties.setEvents(events);
 
-    ProductPullEventHandler handler = new ProductPullEventHandler(
-        properties,
-        productIngestionService,
-        mapper,
-        eventBus);
+        ProductPullEventHandler handler = new ProductPullEventHandler(
+                properties,
+                productIngestionService,
+                mapper,
+                eventBus);
 
-    EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
-    ProductPullEvent event = new ProductPullEvent().withLegalEntityExternalId("externalId");
-    envelopedEvent.setEvent(event);
-    handler.handle(envelopedEvent);
-  }
+        EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
+        ProductPullEvent event = new ProductPullEvent().withLegalEntityExternalId("externalId");
+        envelopedEvent.setEvent(event);
+        handler.handle(envelopedEvent);
+    }
 }

@@ -6,11 +6,11 @@ import reactor.core.publisher.Mono;
 
 public interface LegalEntityIntegrationService {
 
-  /**
-   * Pulls legal entity from external integration service.
-   *
-   * @param ingestPullRequest LegalEntityIngestPullRequest
-   * @return LegalEntity
-   */
-  Mono<LegalEntityResponse> pullLegalEntity(LegalEntityPullRequest ingestPullRequest);
+    /**
+     * Pulls legal entity from external integration service.
+     *
+     * @param ingestPullRequest LegalEntityIngestPullRequest
+     * @return LegalEntity
+     */
+    Mono<LegalEntityResponse> pullLegalEntity(LegalEntityPullRequest ingestPullRequest);
 }
