@@ -96,7 +96,7 @@ class TransactionControllerIT extends IntegrationTest {
         integrationServerClient.when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/integration-api/v2/transactions"))
+                                .withPath("/service-api/v2/transactions"))
                 .respond(
                         response()
                                 .withStatusCode(200)

@@ -80,7 +80,7 @@ class LegalEntityControllerIT extends IntegrationTest {
         integrationServerClient.when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/integration-api/v2/legal-entity"))
+                                .withPath("/service-api/v2/legal-entity"))
                 .respond(
                         response()
                                 .withStatusCode(200)
