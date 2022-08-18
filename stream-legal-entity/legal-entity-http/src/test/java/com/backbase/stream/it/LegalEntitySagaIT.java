@@ -379,5 +379,4 @@ public class LegalEntitySagaIT {
             return WebClient.builder();
         }
     }
-
 }
