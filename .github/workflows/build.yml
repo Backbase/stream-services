@@ -45,10 +45,18 @@ jobs:
 
       - name: Get version from POM
         run: |
-          VERSION_PARTS=($(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | tr "." "\n"))
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          VERSION_PARTS=($(echo $VERSION | tr "." "\n"))
           echo "MAJOR=${VERSION_PARTS[0]}" >> $GITHUB_ENV
           echo "MINOR=${VERSION_PARTS[1]}" >> $GITHUB_ENV
           echo "PATCH=${VERSION_PARTS[2]}" >> $GITHUB_ENV
+          echo "BUILD_VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Setup Snapshot Build version
+        if: contains(env.PATCH, 'SNAPSHOT')
+        run: |
+          BUILD_VERSION="${MAJOR}.${MINOR}.$(echo $PATCH | awk 'BEGIN { FS = "-" } ; { print $1 }')-rc${GITHUB_RUN_NUMBER}"
+          echo "BUILD_VERSION=${BUILD_VERSION}" >> $GITHUB_ENV
 
       - name: Setup release version
         if: contains(github.ref, 'master')
@@ -96,4 +104,4 @@ jobs:
 
       - name: Upload to Repo
         if: "contains(github.ref, 'master') || contains(github.ref, 'support/') || contains(github.ref, 'develop')" # In case of develop branch it will upload the snapshot version
-        run: mvn deploy -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
+        run: mvn deploy -Pdocker-image,no-scs,no-jdbc,no-latest-tag -Ddocker.default.tag=${{ env.BUILD_VERSION }} -Ddocker.repo.url=repo.backbase.com -Ddocker.repo.project=backbase-stream-images -Ddocker.default.tag= -Djib.to.auth.username=${{ secrets.REPO_USERNAME }} -Djib.to.auth.password=${{ secrets.REPO_PASSWORD }} -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
