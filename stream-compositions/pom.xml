@@ -26,6 +26,7 @@
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
         <ssdk.version>14.1.1</ssdk.version>
+        <jib.container.volumes>/tmp</jib.container.volumes>
     </properties>
 
     <packaging>pom</packaging>
