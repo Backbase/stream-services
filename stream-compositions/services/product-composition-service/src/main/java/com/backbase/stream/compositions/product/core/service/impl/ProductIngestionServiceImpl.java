@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.product.core.service.impl;
 
 import com.backbase.buildingblocks.presentation.errors.BadRequestException;
 import com.backbase.buildingblocks.presentation.errors.Error;
+import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public class ProductIngestionServiceImpl implements ProductIngestionService {
     private final BatchProductIngestionSaga batchProductIngestionSaga;
     private final ProductIntegrationService productIntegrationService;
+    private final ProductConfigurationProperties config;
 
     private final Validator validator;
 
@@ -94,7 +96,7 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
                 .externalId(res.getServiceAgreementExternalId()));
 
         return new BatchProductGroupTask(res.getServiceAgreementInternalId(),
-                bpg, BatchProductGroupTask.IngestionMode.UPDATE);
+                bpg, config.getIngestionMode());
     }
 
     private Mono<ProductIngestResponse> validate(ProductIngestResponse res) {

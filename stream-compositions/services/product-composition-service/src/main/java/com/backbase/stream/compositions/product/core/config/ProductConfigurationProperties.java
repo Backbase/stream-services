@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.product.core.config;
 
+import com.backbase.stream.product.task.BatchProductGroupTask;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +19,7 @@ public class ProductConfigurationProperties {
     private Chains chains;
     private Events events;
     private Cursor cursor;
-
+    private BatchProductGroupTask.IngestionMode ingestionMode = BatchProductGroupTask.IngestionMode.UPDATE;
 
     @Data
     @NoArgsConstructor
