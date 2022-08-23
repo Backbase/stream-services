@@ -17,6 +17,10 @@
     <name>Stream :: SDK :: HTTP Services Starter</name>
     <description>Parent for Stream HTTP Services</description>
 
+    <properties>
+        <jib.container.volumes>/tmp</jib.container.volumes>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.security</groupId>

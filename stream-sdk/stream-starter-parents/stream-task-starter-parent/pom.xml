@@ -14,7 +14,11 @@
     <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Task Starter</name>
-    <description>Parent for Spring Cloud Stream Data Flow Task</description>
+    <description>Parent for Stream Executable Tasks</description>
+
+    <properties>
+        <jib.container.volumes>/tmp</jib.container.volumes>
+    </properties>
 
     <dependencies>
         <dependency>

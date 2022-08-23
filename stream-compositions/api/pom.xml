@@ -15,6 +15,12 @@
 
     <name>Stream :: Compositions :: API</name>
 
+    <properties>
+        <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
+        <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
+        <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.backbase.stream</groupId>
