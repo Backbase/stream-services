@@ -13,9 +13,7 @@ import lombok.NoArgsConstructor;
  * <p>
  * Ingestion mode for each of those can be configured separately.
  */
-@Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class BatchProductIngestionMode {
 
@@ -27,7 +25,7 @@ public class BatchProductIngestionMode {
      * @return True, if function groups should be replaced (function groups not existing in batch will be REMOVED from DBS).
      * Otherwise, they should be just updated.
      */
-    public Boolean isFunctionGroupsReplaceEnabled() {
+    public boolean isFunctionGroupsReplaceEnabled() {
         return functionGroupsMode == FunctionGroupsMode.REPLACE;
     }
 
@@ -35,7 +33,7 @@ public class BatchProductIngestionMode {
      * @return True, if data groups should be replaced (data group and data group items not existing in batch will be REMOVED from DBS).
      * Otherwise, they should be just updated.
      */
-    public Boolean isDataGroupsReplaceEnabled() {
+    public boolean isDataGroupsReplaceEnabled() {
         return dataGroupIngestionMode == DataGroupsMode.REPLACE;
     }
 
@@ -43,7 +41,7 @@ public class BatchProductIngestionMode {
      * @return True, if arrangements should be replaced (arrangements not existing in batch will be REMOVED from DBS).
      * Otherwise, they should be just updated.
      */
-    public Boolean isArrangementsReplaceEnabled() {
+    public boolean isArrangementsReplaceEnabled() {
         return arrangementsMode == ArrangementsMode.REPLACE;
     }
 
