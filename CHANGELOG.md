@@ -5,8 +5,8 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Replaced `BatchProductGroupTask.IngestionMode` with more flexible `BatchProductIngestionMode`. New class keeps ingestion modes separately for 
 each main resource involved in BatchProductIngestionSaga processing: function groups, data groups and arrangements. Two preset modes have been 
-created: `BatchProductIngestionMode.upsert`and `BatchProductIngestionMode.replace` (equivalent of previous `UPDATE` and `REPLACE`, 
-respectively), but new ones can be composed of any combination of "sub modes".
+created: `BatchProductIngestionMode.upsert()`and `BatchProductIngestionMode.replace()` (equivalent of previous `UPDATE` and `REPLACE`, 
+respectively), but new ones can be composed of any "sub modes" combination.
 
 ## [2.86.1](https://github.com/Backbase/stream-services/compare/2.86.0...2.86.1)
 ### Fixed
