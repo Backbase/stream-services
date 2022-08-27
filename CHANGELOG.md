@@ -8,6 +8,8 @@ each main resource involved in BatchProductIngestionSaga processing: function gr
 created: `BatchProductIngestionMode.upsert()`and `BatchProductIngestionMode.replace()` (equivalent of previous `UPDATE` and `REPLACE`, 
 respectively), but new ones can be composed of any "sub modes" combination.
 
+### Removed
+- Removed `BatchProductGroupTask.deleteArrangementsInReplaceMode` flag, as it can be expressed now by `BatchProductIngestionMode.arrangementsMode`
 ## [2.86.1](https://github.com/Backbase/stream-services/compare/2.86.0...2.86.1)
 ### Fixed
 - Added qualifier for WebClient in ContactsServiceConfiguration.
