@@ -511,7 +511,7 @@ public class AccessGroupService {
 
         return Mono.just(request)
             .flatMap(userPermissionsRequest -> {
-                if (task.getIngestionMode().equals(BatchProductGroupTask.IngestionMode.REPLACE)) {
+                if (task.getIngestionMode().isFunctionGroupsReplaceEnabled()) {
                     task.info(ACCESS_GROUP, "assign-permissions", "", "", null, "Replacing assigned permissions for users: %s with: %s", prettyPrintExternalIds(userPermissionsRequest), prettyPrintDataGroups(userPermissionsRequest));
                     return Mono.just(userPermissionsRequest);
                 }
@@ -745,7 +745,7 @@ public class AccessGroupService {
             .map(StreamUtils::getInternalProductIds)
             .flatMap(List::stream)
             .collect(Collectors.toSet());
-        if (BatchProductGroupTask.IngestionMode.REPLACE.equals(task.getIngestionMode())) {
+        if (task.getIngestionMode().isDataGroupsReplaceEnabled()) {
             // if REPLACE mode, existing products (not sent in the request) also need to be added to the set of affected arrangements.
             affectedArrangements.addAll(existingDataGroups.stream()
                 .map(DataGroupItem::getItems)
