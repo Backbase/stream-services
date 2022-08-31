@@ -1,5 +1,9 @@
 # Stream config
 spring:
+  cloud:
+    task:
+      events:
+        enabled: false
   zipkin:
     enabled: false
 
@@ -8,13 +12,6 @@ spring:
   config:
     activate:
       on-profile: moustache-bank
-  cloud:
-    kubernetes:
-      discovery:
-        # Set to false if using Eureka for service discovery
-        enabled: true
-  zipkin:
-    enabled: false
 
 backbase:
   stream:
@@ -22,11 +19,7 @@ backbase:
       sink:
         useIdentityIntegration: true
 
-logging:
-  level:
-    root: INFO
-
-# Legal Entity Structure Configuration
+# Root Legal Entity Structure Configuration
 bootstrap:
   legalEntity:
     name: "Moustache Bank"
@@ -40,6 +33,7 @@ bootstrap:
           - name: "Manage Entitlements"
             functions:
               - functionId: "1019"
+                name: "Manage Data Groups"
                 functionCode: "manage.data.groups"
                 privileges:
                   - privilege: "view"
@@ -48,6 +42,7 @@ bootstrap:
                   - privilege: "delete"
                   - privilege: "approve"
               - functionId: "1020"
+                name: "Manage Function Groups"
                 functionCode: "manage.function.groups"
                 privileges:
                   - privilege: "view"
@@ -61,25 +56,30 @@ bootstrap:
           - name: "Products, payments, txn, contacts"
             functions:
               - functionId: "1006"
+                name: "Product Summary"
                 functionCode: "product.summary"
                 privileges:
                   - privilege: "view"
               - functionId: "1003"
+                name: "Transactions"
                 functionCode: "transactions"
                 privileges:
                   - privilege: "view"
                   - privilege: "edit"
               - functionId: "1017"
+                name: "US Domestic Wire"
                 functionCode: "us.domestic.wire"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
               - functionId: "1018"
+                name: "US Foreign Wire"
                 functionCode: "us.foreign.wire"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
               - functionId: "1005"
+                name: "Contacts"
                 functionCode: "contacts"
                 privileges:
                   - privilege: "view"
@@ -105,6 +105,16 @@ bootstrap:
             number: "1234567890"
         referenceJobRoleNames:
           - "Entitlements - Manager"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "moustache-bank & moustache-bank-subsidiaries"
+
+# Subsidiaries Legal Entity Structure Configuration
+bootstrap:
+  legalEntity:
     subsidiaries:
       - name: "Moustache Bank USA"
         realmName: "backbase"

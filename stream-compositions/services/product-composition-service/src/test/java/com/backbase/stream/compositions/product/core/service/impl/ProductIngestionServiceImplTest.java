@@ -83,6 +83,7 @@ class ProductIngestionServiceImplTest {
         productIngestionService = new ProductIngestionServiceImpl(
                 batchProductIngestionSaga,
                 productIntegrationService,
+                config,
                 validator,
                 productPostIngestionService);
     }
