@@ -88,7 +88,7 @@ class ProductControllerIT extends IntegrationTest {
         integrationServerClient.when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/integration-api/v2/product-group"))
+                                .withPath("/service-api/v2/product-group"))
                 .respond(
                         response()
                                 .withStatusCode(200)

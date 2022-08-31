@@ -65,7 +65,7 @@ class ProductCatalogControllerIT extends IntegrationTest {
         integrationServerClient.when(
                 request()
                         .withMethod("GET")
-                        .withPath("/integration-api/v2/product-catalog"))
+                        .withPath("/service-api/v2/product-catalog"))
                 .respond(
                         response()
                                 .withStatusCode(200)
