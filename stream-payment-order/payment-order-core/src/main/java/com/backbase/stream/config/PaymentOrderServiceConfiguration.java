@@ -4,6 +4,7 @@ import com.backbase.dbs.paymentorder.api.service.ApiClient;
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.PaymentOrderServiceImpl;
+import com.backbase.stream.mappers.PaymentOrderTypeMapper;
 import com.backbase.stream.paymentorder.PaymentOrderTask;
 import com.backbase.stream.paymentorder.PaymentOrderTaskExecutor;
 import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
@@ -30,11 +31,13 @@ import java.text.DateFormat;
 @Import({DbsWebClientConfiguration.class})
 public class PaymentOrderServiceConfiguration {
 
+    private final PaymentOrderTypeMapper paymentOrderTypeMapper;
+
 
     @Bean
     public PaymentOrderTaskExecutor paymentOrderTaskExecutor(ApiClient paymentOrderApiClient) {
         PaymentOrdersApi paymentOrdersApi = new PaymentOrdersApi(paymentOrderApiClient);
-        return new PaymentOrderTaskExecutor(paymentOrdersApi);
+        return new PaymentOrderTaskExecutor(paymentOrdersApi, paymentOrderTypeMapper);
     }
 
     @Bean
@@ -71,8 +74,8 @@ public class PaymentOrderServiceConfiguration {
                                            WebClient dbsWebClient,
                                            BackbaseStreamConfigurationProperties config) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-        System.out.println("connecting to DBS with : " + config.getDbs().getPaymentOrderBaseUrl());
-        apiClient.setBasePath("http://payment-order-service:8080");
+        // todo - make this configurable
+        apiClient.setBasePath("http://localhost:8090/payment-order-service");
         return apiClient;
     }
 }

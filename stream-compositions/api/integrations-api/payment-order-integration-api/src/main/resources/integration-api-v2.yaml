@@ -74,8 +74,6 @@ components:
         dateRangeEnd:
           type: string
           format: date-time
-        billingCycles:
-          type: integer
         additions:
           type: object
           additionalProperties:

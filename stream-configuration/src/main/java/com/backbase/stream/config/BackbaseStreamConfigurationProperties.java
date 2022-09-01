@@ -56,7 +56,8 @@ public class BackbaseStreamConfigurationProperties {
         /**
          * The location of DBS User Profile Manager Service.
          */
-        private String paymentOrderBaseUrl = "http://payment-order-service/:8080";
+        //todo fix this
+        private String paymentOrderBaseUrl = "http://payment-order-service/:8090";
     }
 
     @Data

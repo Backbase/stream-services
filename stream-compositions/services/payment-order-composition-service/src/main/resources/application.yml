@@ -1,4 +1,4 @@
-server.port: 8080
+server.port: 9005
 
 spring:
   activemq:
@@ -16,7 +16,7 @@ spring:
             client-authentication-method: post
         provider:
           dbs:
-            token-uri: http://token-converter:8080/oauth/token
+            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   main:
     allow-bean-definition-overriding: true
   codec:
@@ -30,8 +30,9 @@ sso:
         key:
           type: ENV
           value: SIG_SECRET_KEY
-
 backbase:
+  activemq:
+    enabled: true
   mtls:
     enabled: false
   security:
@@ -42,19 +43,34 @@ backbase:
         required-scope: api:service
   stream:
     dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
-      transaction-manager-base-url: http://transaction-manager:8080
-      payment-order-service-base-url: http://payment-order-service:8090
+      user-manager-base-url: http://localhost:8086/user-manager
+      access-control-base-url: http://localhost:8086/access-control
+      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+      transaction-manager-base-url: http://localhost:8083/transaction-manager
+      payment-order-service-base-url: http://localhost:8090/payment-order-service
     compositions:
       paymentorder:
         defaultStartOffsetInDays: 30
-        integration-base-url: http://localhost:7041
+        integration-base-url: http://localhost:7004
         events:
           enableCompleted: true
           enableFailed: true
 
-#logging:
-#  level:
-#    root: DEBUG
+eureka:
+  instance:
+    metadata-map:
+      public: true
+      role: live
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8080/registry/eureka/
+
+bootstrap:
+  enabled: false
+  # This is just na example. Replace arrangementId from your project database reference
+#  paymentorder:
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG
+
