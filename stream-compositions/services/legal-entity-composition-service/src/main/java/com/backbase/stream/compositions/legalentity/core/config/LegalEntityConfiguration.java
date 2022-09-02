@@ -1,10 +1,12 @@
 package com.backbase.stream.compositions.legalentity.core.config;
 
+import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.stream.compositions.legalentity.integration.client.LegalEntityIntegrationApi;
 import com.backbase.stream.compositions.product.ApiClient;
 import com.backbase.stream.compositions.product.client.ProductCompositionApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,8 +30,8 @@ public class LegalEntityConfiguration {
     @Bean
     @Primary
     public LegalEntityIntegrationApi legalEntityIntegrationApi(
-            com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient2) {
-        return new LegalEntityIntegrationApi(legalEntityClient2);
+            com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient) {
+        return new LegalEntityIntegrationApi(legalEntityClient);
     }
 
     @Bean
@@ -39,8 +41,11 @@ public class LegalEntityConfiguration {
     }
 
     @Bean
-    public ApiClient productClient() {
-        ApiClient apiClient = new ApiClient();
+    public ApiClient productClient(
+            @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+            ObjectMapper objectMapper,
+            DateFormat dateFormat) {
+        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(
                 legalEntityConfigurationProperties.getChains().getProductComposition().getBaseUrl());
 
@@ -48,27 +53,10 @@ public class LegalEntityConfiguration {
     }
 
     @Bean
-    public com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient1() {
-        com.backbase.stream.compositions.legalentity.integration.ApiClient apiClient =
-                new com.backbase.stream.compositions.legalentity.integration.ApiClient();
-        apiClient.setBasePath(legalEntityConfigurationProperties.getIntegrationBaseUrl());
-
-        return apiClient;
-    }
-
-    @Bean
-    @Primary
-    WebClient dbsWebclient() {
-        WebClient.Builder builder = WebClient.builder();
-        builder.defaultHeader("Content-Type", new String[]{MediaType.APPLICATION_JSON.toString()});
-        builder.defaultHeader("Accept", new String[]{MediaType.APPLICATION_JSON.toString()});
-        return builder.build();
-    }
-
-    @Bean
-    public com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient2(
-            WebClient dbsWebClient,
-            ObjectMapper objectMapper, DateFormat dateFormat) {
+    public com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient(
+            @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+            ObjectMapper objectMapper,
+            DateFormat dateFormat) {
         com.backbase.stream.compositions.legalentity.integration.ApiClient apiClient =
                 new com.backbase.stream.compositions.legalentity.integration.ApiClient(
                         dbsWebClient, objectMapper, dateFormat);

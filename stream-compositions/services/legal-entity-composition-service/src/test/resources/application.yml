@@ -27,7 +27,13 @@ sso:
           type: ENV
           value: SIG_SECRET_KEY
 
+
 backbase:
+  communication:
+    http:
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://localhost:17000/oauth/token
   stream:
     legalentity:
       sink:
@@ -134,6 +140,7 @@ bootstrap:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
+    org.mockserver: DEBUG
 
 activemq:
   store:
