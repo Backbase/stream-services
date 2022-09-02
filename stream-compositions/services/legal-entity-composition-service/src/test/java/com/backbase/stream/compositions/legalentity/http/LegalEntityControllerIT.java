@@ -51,7 +51,6 @@ class LegalEntityControllerIT extends IntegrationTest {
     @Autowired
     LegalEntityConfiguration legalEntityConfiguration;
 
-
     @Autowired
     LegalEntityController legalEntityController;
 
@@ -60,8 +59,6 @@ class LegalEntityControllerIT extends IntegrationTest {
 
     static {
         System.setProperty("spring.application.name", "legal-entity-composition-service");
-        System.setProperty("DBS_TOKEN_URI", "http://localhost:10000/oauth/token");
-
     }
 
     @BeforeAll
@@ -95,7 +92,6 @@ class LegalEntityControllerIT extends IntegrationTest {
         while (!integrationServer.hasStopped(5, 100L, TimeUnit.MILLISECONDS)) {
         }
     }
-
 
     @Test
     void pullIngestLegalEntity_Success() throws Exception {
@@ -133,4 +129,3 @@ class LegalEntityControllerIT extends IntegrationTest {
                 .expectStatus().is5xxServerError();
     }
 }
-
