@@ -47,35 +47,23 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         paymentOrderIngestContext.corePaymentOrder(corePaymentOrderPostRequestList);
         paymentOrderIngestContext.accountNumber("tblade");
 
-        //todo once lists are finalized - send them to the right DBS service (post, update, delete)
-        var paymentsContext = buildPaymentOrderIngestContext(paymentOrderIngestContext)
-                .flatMap(this::updatePaymentOrder)
-                .flatMap(this::persistNewPaymentOrders)
-                .flatMap(this::deletePaymentOrder);
-
-
-
-//        var updatePayments = updateExistingScheduledTransfers(createFakeUpdateList());
-
         String externalIds = streamTask.getData().stream().map(PaymentOrderPostRequest::getBankReferenceId)
                 .collect(Collectors.joining(","));
 
-        //todo this is for payment context
-//        var paymentsContext =
-//                buildPaymentOrderIngestContext(paymentOrderIngestContext);
-////                persistNewPaymentOrders(paymentOrderIngestContext);
-
-        return paymentsContext
+        //todo once lists are finalized - send them to the right DBS service (post, update, delete)
+        return buildPaymentOrderIngestContext(paymentOrderIngestContext)
+                .flatMap(this::updatePaymentOrder)
+                .flatMap(this::persistNewPaymentOrders)
+                .flatMap(this::deletePaymentOrder)
                 .onErrorResume(WebClientResponseException.class, throwable -> {
                     streamTask.error("payments", "post", "failed", externalIds, null, throwable,
                             throwable.getResponseBodyAsString(), "Failed to ingest payment order");
                     return Mono.error(new StreamTaskException(streamTask, throwable,
                             "Failed to Ingest Payment Order: " + throwable.getMessage()));
                 })
-                .map(transactionIds -> {
-                    streamTask.error("payments", "post", "success", externalIds, transactionIds.accountNumber(), "Ingested Payment Order");
-//                            .map(PaymentOrderPostResponse::getId).collect(Collectors.joining(",")), "Ingested Payment Order");
-                    streamTask.setResponse(transactionIds);
+                .map(paymentOrderContext -> {
+                    streamTask.error("payments", "post", "success", externalIds, paymentOrderContext.accountNumber(), "Ingested Payment Order");
+                    streamTask.setResponse(paymentOrderContext);
                     return streamTask;
                 });
 
@@ -128,21 +116,23 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
 
     public Mono<PaymentOrderIngestContext> buildNewList(PaymentOrderIngestContext paymentOrderIngestContext) {
 
-        List<PaymentOrderPutRequest> updatePaymentOrders = new ArrayList<>();
-        List<PaymentOrderPostRequest> newPaymentOrders = new ArrayList<>();
+        List<PaymentOrderPostRequest> newPaymentOrder = new ArrayList<>();
+        List<PaymentOrderPutRequest> updatePaymentOrder = new ArrayList<>();
+        List<String> deletePaymentOrder = new ArrayList<>();
 
         paymentOrderIngestContext.corePaymentOrder().forEach(corePayment -> {
                     if(paymentOrderIngestContext.existingPaymentOrder().contains(corePayment.getBankReferenceId())) {
-                        updatePaymentOrders.add(paymentOrderTypeMapper.mapPaymentOrderPostRequest(corePayment));
+                        updatePaymentOrder.add(paymentOrderTypeMapper.mapPaymentOrderPostRequest(corePayment));
                     } else {
-                        newPaymentOrders.add(corePayment);
+                        newPaymentOrder.add(corePayment);
                     }
                 });
 
-        //todo build logic for delete
 
-        paymentOrderIngestContext.updatePaymentOrder(updatePaymentOrders);
-        paymentOrderIngestContext.newPaymentOrder(newPaymentOrders);
+        paymentOrderIngestContext.updatePaymentOrder(updatePaymentOrder);
+        paymentOrderIngestContext.newPaymentOrder(newPaymentOrder);
+        //todo build logic for delete
+        paymentOrderIngestContext.deletePaymentOrder(deletePaymentOrder);
         return Mono.just(paymentOrderIngestContext);
     }
 

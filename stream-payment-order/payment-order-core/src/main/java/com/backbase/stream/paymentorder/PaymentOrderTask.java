@@ -23,10 +23,6 @@ public class PaymentOrderTask extends StreamTask {
     private PaymentOrderIngestContext response;
 //    private List<PaymentOrderPostResponse> response;
 
-    //todo remove
-    private List<PaymentOrderPostResponse> responseNew;
-    private List<UpdateStatusPut> responseUpdate;
-
     @Override
     public String getName() {
         return "paymentorder";
