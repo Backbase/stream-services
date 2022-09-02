@@ -73,11 +73,17 @@ public class PaymentOrderController implements PaymentOrderCompositionApi {
     private ResponseEntity<PaymentOrderIngestionResponse> mapIngestionToResponse(PaymentOrderIngestResponse response) {
         return new ResponseEntity<>(
                 new PaymentOrderIngestionResponse()
-                        .withPayment(
-                                response.getPaymentOrderIngestContext().newAddedPaymentOrders()
+                        .withNewPaymentOrder(
+                                response.getPaymentOrderIngestContext().newPaymentOrderResponse()
                                         .stream()
-                                        .map(paymentOrderMapper::mapStreamToComposition)
-                                        .collect(Collectors.toList())),
+                                        .map(paymentOrderMapper::mapStreamNewPaymentOrderToComposition)
+                                        .collect(Collectors.toList()))
+                        .withUpdatedPaymentOrder(
+                                response.getPaymentOrderIngestContext().updatedPaymentOrderResponse()
+                                        .stream()
+                                        .map(paymentOrderMapper::mapStreamUpdatePaymentOrderToComposition)
+                                        .collect(Collectors.toList())
+                        ),
                 HttpStatus.CREATED);
     }
 

@@ -16,15 +16,17 @@ import java.util.List;
 public class PaymentOrderIngestContext {
 
     private String accountNumber;
-    private List<PaymentOrderPostRequest> corePaymentOrders = new ArrayList<>();
-    private List<GetPaymentOrderResponse> existingPaymentOrders = new ArrayList<>();
+    private List<PaymentOrderPostRequest> corePaymentOrder = new ArrayList<>();
+    private List<GetPaymentOrderResponse> existingPaymentOrder = new ArrayList<>();
 
 
-    private List<PaymentOrderPostRequest> newPaymentOrders = new ArrayList<>();
-    private List<PaymentOrderPutRequest> updatePaymentOrders = new ArrayList<>();
-    // deletePaymentOrders = new ArrayList<>();
+    private List<PaymentOrderPostRequest> newPaymentOrder = new ArrayList<>();
+    private List<PaymentOrderPutRequest> updatePaymentOrder = new ArrayList<>();
+    // we only need the internal Ids of the payment orders we need to delete
+    private List<String> deletePaymentOrder = new ArrayList<>();
 
-    //todo should we carry responses in the context?
-    private List<UpdateStatusPut> updatedPaymentOrders = new ArrayList<>();
-    private List<PaymentOrderPostResponse> newAddedPaymentOrders = new ArrayList<>();
+    private List<PaymentOrderPostResponse> newPaymentOrderResponse = new ArrayList<>();
+    private List<UpdateStatusPut> updatedPaymentOrderResponse = new ArrayList<>();
+    private List<String> deletePaymentOrderResponse = new ArrayList<>();
+
 }

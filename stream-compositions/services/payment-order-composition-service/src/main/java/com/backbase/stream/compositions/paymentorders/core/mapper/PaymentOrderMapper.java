@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.paymentorders.core.mapper;
 
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.model.UpdateStatusPut;
 import com.backbase.stream.compositions.paymentorder.integration.client.model.PullIngestionRequest;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPullRequest;
 import org.mapstruct.InjectionStrategy;
@@ -63,7 +64,9 @@ public interface PaymentOrderMapper {
 //    com.backbase.stream.compositions.paymentorders.api.model.PaymentOrderPostResponse mapStreamToComposition(
 //            com.backbase.dbs.transaction.api.service.v2.model.PaymentOrderPostResponseBody paymentOrderPostResponseBody);
 
-     com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse mapStreamToComposition(PaymentOrderPostResponse paymentOrderPostResponse);
+     com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse mapStreamNewPaymentOrderToComposition(PaymentOrderPostResponse paymentOrderPostResponse);
+
+    com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse mapStreamUpdatePaymentOrderToComposition(UpdateStatusPut paymentOrderPostResponse);
 
 //    /**
 //     * Maps event Transactions to dbs TransactionsPostRequestBody model.

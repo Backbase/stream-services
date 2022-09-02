@@ -13,7 +13,6 @@ import com.backbase.stream.mappers.PaymentOrderTypeMapper;
 import com.backbase.stream.model.PaymentOrderIngestContext;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -22,8 +21,6 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.io.File;
-import java.net.URL;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -47,12 +44,12 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
 
         PaymentOrderIngestContext paymentOrderIngestContext = new PaymentOrderIngestContext();
         List<PaymentOrderPostRequest> corePaymentOrderPostRequestList = streamTask.getData();
-        paymentOrderIngestContext.corePaymentOrders(corePaymentOrderPostRequestList);
+        paymentOrderIngestContext.corePaymentOrder(corePaymentOrderPostRequestList);
         paymentOrderIngestContext.accountNumber("tblade");
 
         //todo once lists are finalized - send them to the right DBS service (post, update, delete)
         var paymentsContext = buildPaymentOrderIngestContext(paymentOrderIngestContext)
-                .flatMap(this::updateExistingScheduledTransfers)
+                .flatMap(this::updatePaymentOrder)
                 .flatMap(this::persistNewPaymentOrders);
 
 
@@ -133,8 +130,8 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         List<PaymentOrderPutRequest> updatePaymentOrders = new ArrayList<>();
         List<PaymentOrderPostRequest> newPaymentOrders = new ArrayList<>();
 
-        paymentOrderIngestContext.corePaymentOrders().forEach(corePayment -> {
-                    if(paymentOrderIngestContext.existingPaymentOrders().contains(corePayment.getBankReferenceId())) {
+        paymentOrderIngestContext.corePaymentOrder().forEach(corePayment -> {
+                    if(paymentOrderIngestContext.existingPaymentOrder().contains(corePayment.getBankReferenceId())) {
                         updatePaymentOrders.add(paymentOrderTypeMapper.mapPaymentOrderPostRequest(corePayment));
                     } else {
                         newPaymentOrders.add(corePayment);
@@ -143,8 +140,8 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
 
         //todo build logic for delete
 
-        paymentOrderIngestContext.updatePaymentOrders(updatePaymentOrders);
-        paymentOrderIngestContext.newPaymentOrders(newPaymentOrders);
+        paymentOrderIngestContext.updatePaymentOrder(updatePaymentOrders);
+        paymentOrderIngestContext.newPaymentOrder(newPaymentOrders);
         return Mono.just(paymentOrderIngestContext);
     }
 
@@ -190,7 +187,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                     }
                     return listOfPayments;
                 })
-                .map(getPaymentOrderResponses -> paymentOrderIngestContext.existingPaymentOrders(getPaymentOrderResponses))
+                .map(getPaymentOrderResponses -> paymentOrderIngestContext.existingPaymentOrder(getPaymentOrderResponses))
                 .doOnSuccess(result ->
                         log.debug("Successfully fetched dbs scheduled payment orders"));
     }
@@ -205,7 +202,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
     public Mono<PaymentOrderIngestContext> persistNewPaymentOrders(
             PaymentOrderIngestContext paymentOrderIngestContext) {
 
-        List<PaymentOrderPostRequest> paymentOrderPostRequestList = paymentOrderIngestContext.newPaymentOrders();
+        List<PaymentOrderPostRequest> paymentOrderPostRequestList = paymentOrderIngestContext.newPaymentOrder();
 
         return Flux.fromIterable(paymentOrderPostRequestList)
                 .limitRate(1)
@@ -213,10 +210,10 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                 .flatMap(this::persistNewPaymentOrder)
                 .doOnNext(response -> log.debug("Saved new Payment Order: {}", response))
                 .collectList()
-                .map(paymentOrderPostResponses -> paymentOrderIngestContext.newAddedPaymentOrders(paymentOrderPostResponses))
+                .map(paymentOrderPostResponses -> paymentOrderIngestContext.newPaymentOrderResponse(paymentOrderPostResponses))
                 .doOnSuccess(paymentOrderResult ->
                         log.debug("Successfully persisted: {} new scheduled transfers.",
-                                paymentOrderResult.newAddedPaymentOrders().size()));
+                                paymentOrderResult.newPaymentOrderResponse().size()));
     }
 
     /**
@@ -225,10 +222,10 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
      * @param paymentOrderIngestContext Holds details of current payment ingestion.
      * @return The response from the api. Mono<List<UpdateStatusPut>>
      */
-    public Mono<PaymentOrderIngestContext> updateExistingScheduledTransfers(
+    public Mono<PaymentOrderIngestContext> updatePaymentOrder(
             PaymentOrderIngestContext paymentOrderIngestContext) {
 
-        return Flux.fromIterable(paymentOrderIngestContext.updatePaymentOrders())
+        return Flux.fromIterable(paymentOrderIngestContext.updatePaymentOrder())
                 .limitRate(1)
                 .delayElements(Duration.ofMillis(100))
                 .flatMap(request -> updatePaymentOrderStatus(
@@ -239,12 +236,32 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                 ))
                 .doOnNext(response -> log.debug("Updated Payment Order status: {}", response))
                 .collectList()
-                .map(paymentOrderIngestContext::updatedPaymentOrders)
+                .map(paymentOrderIngestContext::updatedPaymentOrderResponse)
                 .onErrorContinue((t, o) -> log.error(String.format("Update status failed: %s", o), t))
                 .doOnSuccess(paymentOrderResult ->
                         log.debug("Successfully persisted: {} Payment Order updates.",
-                                paymentOrderResult.updatedPaymentOrders().size()));
+                                paymentOrderResult.updatedPaymentOrderResponse().size()));
     }
+
+    /**
+     * Submit request to update a payment status.
+     *
+     * @param paymentOrderIngestContext Holds details of current payment ingestion.
+     * @return The response from the api. Mono<List<UpdateStatusPut>>
+     */
+//    public Mono<PaymentOrderIngestContext> deletePaymentOrder(
+//            PaymentOrderIngestContext paymentOrderIngestContext) {
+//
+//        return Flux.fromIterable(paymentOrderIngestContext.deletePaymentOrder())
+//                .limitRate(1)
+//                .delayElements(Duration.ofMillis(100))
+//                .flatMap(internalPaymentOrderId -> deletePaymentOrder(
+//                        internalPaymentOrderId))
+//                .doOnNext(response -> log.debug("Deleted Payment Order status: {}", response))
+//                .onErrorContinue((t, o) -> log.error(String.format("Update status failed: %s", o), t))
+//                .doOnSuccess(paymentOrderResult ->
+//                        log.debug("Successfully deleted items: {} Payment Order updates."));
+//    }
 
     @Override
     public Mono<PaymentOrderTask> rollBack(PaymentOrderTask streamTask) {
