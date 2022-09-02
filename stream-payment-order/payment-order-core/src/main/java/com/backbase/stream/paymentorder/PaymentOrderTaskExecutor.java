@@ -50,7 +50,8 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         //todo once lists are finalized - send them to the right DBS service (post, update, delete)
         var paymentsContext = buildPaymentOrderIngestContext(paymentOrderIngestContext)
                 .flatMap(this::updatePaymentOrder)
-                .flatMap(this::persistNewPaymentOrders);
+                .flatMap(this::persistNewPaymentOrders)
+                .flatMap(this::deletePaymentOrder);
 
 
 
@@ -249,19 +250,21 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
      * @param paymentOrderIngestContext Holds details of current payment ingestion.
      * @return The response from the api. Mono<List<UpdateStatusPut>>
      */
-//    public Mono<PaymentOrderIngestContext> deletePaymentOrder(
-//            PaymentOrderIngestContext paymentOrderIngestContext) {
-//
-//        return Flux.fromIterable(paymentOrderIngestContext.deletePaymentOrder())
-//                .limitRate(1)
-//                .delayElements(Duration.ofMillis(100))
-//                .flatMap(internalPaymentOrderId -> deletePaymentOrder(
-//                        internalPaymentOrderId))
-//                .doOnNext(response -> log.debug("Deleted Payment Order status: {}", response))
-//                .onErrorContinue((t, o) -> log.error(String.format("Update status failed: %s", o), t))
-//                .doOnSuccess(paymentOrderResult ->
-//                        log.debug("Successfully deleted items: {} Payment Order updates."));
-//    }
+    public Mono<PaymentOrderIngestContext> deletePaymentOrder(
+            PaymentOrderIngestContext paymentOrderIngestContext) {
+
+        return Flux.fromIterable(paymentOrderIngestContext.deletePaymentOrder())
+                .limitRate(1)
+                .delayElements(Duration.ofMillis(100))
+                .flatMap(internalPaymentOrderId -> deletePaymentOrder(
+                        internalPaymentOrderId))
+                .doOnNext(response -> log.debug("Deleted Payment Order status: {}", response))
+                .collectList()
+                .map(paymentOrderIngestContext::deletePaymentOrderResponse)
+                .onErrorContinue((t, o) -> log.error(String.format("Update status failed: %s", o), t))
+                .doOnSuccess(paymentOrderResult ->
+                        log.debug("Successfully deleted items: {} Payment Order updates."));
+    }
 
     @Override
     public Mono<PaymentOrderTask> rollBack(PaymentOrderTask streamTask) {
@@ -308,8 +311,9 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
      * @param internalPaymentOrderId   The DBS internal Payment Order id.
      * @return A Mono with the response from the service api.
      */
-    private Mono<Void> deletePaymentOrder(String internalPaymentOrderId) {
-        return paymentOrdersApi.deletePaymentOrder(internalPaymentOrderId);
+    private Mono<String> deletePaymentOrder(String internalPaymentOrderId) {
+        paymentOrdersApi.deletePaymentOrder(internalPaymentOrderId);
+        return Mono.just(internalPaymentOrderId);
     }
 
     /**
