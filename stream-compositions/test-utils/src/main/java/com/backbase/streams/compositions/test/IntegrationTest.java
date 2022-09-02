@@ -7,6 +7,7 @@ import com.backbase.buildingblocks.jwt.core.token.JsonWebTokenClaimsSet;
 import com.backbase.buildingblocks.jwt.core.type.JsonWebTokenTypeFactory;
 import com.backbase.buildingblocks.jwt.internal.token.InternalJwtClaimsSet;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+@Slf4j
 @Setter
 public abstract class IntegrationTest {
     private static final int TOKEN_CONVERTER_SERVICE_PORT = 17000;
@@ -51,11 +53,11 @@ public abstract class IntegrationTest {
     }
 
     @BeforeEach
-    public final void startTokenConverterServer() throws JsonWebTokenException, IOException {
+    public final void startTokenConverterServer() throws IOException {
         tokenConverterServer = startClientAndServer(TOKEN_CONVERTER_SERVICE_PORT);
         tokenConverterServerClient = new MockServerClient("localhost", TOKEN_CONVERTER_SERVICE_PORT);
         tokenConverterServerClient.when(
-                        request()
+                request()
                                 .withMethod("POST")
                                 .withPath("/oauth/token"))
                 .respond(
@@ -76,6 +78,7 @@ public abstract class IntegrationTest {
     public final void stopTokenConverterServer() {
         tokenConverterServer.stop();
         while (!tokenConverterServer.hasStopped(5, 100L, TimeUnit.MILLISECONDS)) {
+            log.debug("Waiting for token converter mock server shutdown ...");
         }
     }
 

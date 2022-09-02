@@ -49,6 +49,13 @@ class AbstractIntegrationTest {
         SampleIT test = new SampleIT();
         assertTrue(test.readContentFromClasspath("test.json").startsWith("{}"));
     }
+
+    @Test
+    void testTokenConverterServer() throws IOException {
+        SampleIT test = new SampleIT();
+        test.startTokenConverterServer();
+        test.stopTokenConverterServer();
+    }
 }
 
 class SampleIT extends IntegrationTest {
