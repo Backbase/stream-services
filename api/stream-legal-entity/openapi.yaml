@@ -371,6 +371,14 @@ components:
               description: Name that describes the specific product state.
         currency:
           $ref: '#/components/schemas/CurrencyCode'
+        amountInArrear:
+          $ref: '#/components/schemas/AmountInArrear'
+        overdueSince:
+          $ref: '#/components/schemas/OverdueSince'
+        debitCardsItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebitCardItem'
         usersPreferences:
           type: array
           items:
@@ -409,10 +417,6 @@ components:
           $ref: '#/components/schemas/CreditLimitExpiryDate'
         accruedInterest:
           $ref: '#/components/schemas/AccruedInterest'
-        debitCardsItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/DebitCardItem'
         accountHolderName:
           $ref: '#/components/schemas/AccountHolderName'
         startDate:
@@ -449,10 +453,6 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         accruedInterest:
           $ref: '#/components/schemas/AccruedInterest'
-        debitCardsItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/DebitCardItem'
         IBAN:
           $ref: '#/components/schemas/IBAN'
         BBAN:
@@ -529,10 +529,6 @@ components:
           $ref: '#/components/schemas/CreditAccount'
         debitAccount:
           $ref: '#/components/schemas/DebitAccount'
-        debitCardsItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/DebitCardItem'
         startDate:
           $ref: '#/components/schemas/StartDate'
         validThru:
@@ -619,8 +615,6 @@ components:
           $ref: '#/components/schemas/OutstandingPayment'
         monthlyInstalmentAmount:
           $ref: '#/components/schemas/MonthlyInstalmentAmount'
-        amountInArrear:
-          $ref: '#/components/schemas/AmountInArrear'
         interestSettlementAccount:
           $ref: '#/components/schemas/InterestSettlementAccount'
         minimumPayment:
@@ -744,10 +738,6 @@ components:
           $ref: '#/components/schemas/CreditLimitExpiryDate'
         accruedInterest:
           $ref: '#/components/schemas/AccruedInterest'
-        debitCardsItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/DebitCardItem'
         accountHolderName:
           $ref: '#/components/schemas/AccountHolderName'
         startDate:
@@ -822,8 +812,7 @@ components:
           $ref: '#/components/schemas/OutstandingPrincipalAmount'
         monthlyInstalmentAmount:
           $ref: '#/components/schemas/MonthlyInstalmentAmount'
-        amountInArrear:
-          $ref: '#/components/schemas/AmountInArrear'
+
     DebitCardItem:
       type: object
       properties:
@@ -1577,6 +1566,10 @@ components:
     RemainingCredit:
       type: number
       description: Amount of money the user is available to use from the Credit limit of the account
+    OverdueSince:
+      type: string
+      format: date-time
+      description: The date in which the arrangement has been overdue since.
     OutstandingPayment:
       type: number
       description: Outstanding payment refers to the outstanding [unpaid] balance, i.e., the current amount due.
