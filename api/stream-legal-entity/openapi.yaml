@@ -1568,7 +1568,7 @@ components:
       description: Amount of money the user is available to use from the Credit limit of the account
     OverdueSince:
       type: string
-      format: date-time
+      format: date
       description: The date in which the arrangement has been overdue since.
     OutstandingPayment:
       type: number
