@@ -120,6 +120,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         List<PaymentOrderPutRequest> updatePaymentOrder = new ArrayList<>();
         List<String> deletePaymentOrder = new ArrayList<>();
 
+        // build update payment list
         paymentOrderIngestContext.corePaymentOrder().forEach(corePayment -> {
                     if(paymentOrderIngestContext.existingPaymentOrder().contains(corePayment.getBankReferenceId())) {
                         updatePaymentOrder.add(paymentOrderTypeMapper.mapPaymentOrderPostRequest(corePayment));
@@ -128,10 +129,16 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                     }
                 });
 
+        // build delete payment list
+        paymentOrderIngestContext.existingPaymentOrder().forEach(existingPaymentOrder -> {
+            if(!paymentOrderIngestContext.corePaymentOrder().contains(existingPaymentOrder.getBankReferenceId())) {
+                deletePaymentOrder.add(existingPaymentOrder.getId());
+            }
+        });
+
 
         paymentOrderIngestContext.updatePaymentOrder(updatePaymentOrder);
         paymentOrderIngestContext.newPaymentOrder(newPaymentOrder);
-        //todo build logic for delete
         paymentOrderIngestContext.deletePaymentOrder(deletePaymentOrder);
         return Mono.just(paymentOrderIngestContext);
     }
