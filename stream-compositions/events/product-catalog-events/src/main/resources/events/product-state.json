@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "externalStateId": {
+      "description": "External product state id",
+      "type": "string"
+    },
+    "state": {
+      "description": "Product state ",
+      "type": "string"
+    }
+  },
+  "required": [
+    "externalStateId",
+    "state"
+  ]
+}

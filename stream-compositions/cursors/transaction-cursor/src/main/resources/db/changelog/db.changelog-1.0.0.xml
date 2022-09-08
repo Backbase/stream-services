@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="initial_001" context="initial" author="backbase">
+        <comment>create the txn_cursor table</comment>
+        <createTable tableName="txn_cursor" remarks="Table to store the transaction cursor">
+            <column name="id" type="varchar(36)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_txn_cursor"/>
+            </column>
+            <column name="arrangement_id" type="varchar(36)" remarks="Arrangement ID" >
+                <constraints nullable="false" unique="true" uniqueConstraintName="arrangement_id_UNIQUE"/>
+            </column>
+            <column name="ext_arrangement_id" type="varchar(50)" remarks="External Arrangement ID" >
+                <constraints nullable="false" />
+            </column>
+            <column name="last_txn_date" type="datetime" remarks="Last Transaction Date" />
+            <column name="last_txn_ids" type="varchar(4000)" remarks="Last Transaction IDs" />
+            <column name="legal_entity_id" type="varchar(36)" remarks="Legal Entity ID" >
+                <constraints nullable="false" />
+            </column>
+            <column name="additions" type="clob" remarks="Additions" />
+            <column name="status" type="varchar(45)" remarks="Status" />
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

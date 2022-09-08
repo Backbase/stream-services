@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-parent</artifactId>
-        <version>2.88.0</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>stream-openapi-support</artifactId>
@@ -13,9 +13,9 @@
     <name>Stream :: SDK :: Open API Support</name>
 
     <properties>
+        <swagger-api.version>2.1.0</swagger-api.version>
         <swagger-ui.version>3.24.3</swagger-ui.version>
         <webjars-locator.version>0.45</webjars-locator.version>
-        <jackson.version>2.10.3</jackson.version>
     </properties>
 
     <dependencies>

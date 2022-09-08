@@ -1,0 +1,135 @@
+openapi: 3.0.3
+info:
+  title: Product composition API
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/service-api/v2
+    description: The server
+tags:
+  - name: ProductComposition
+paths:
+  /service-api/v2/ingest/pull:
+    post:
+      tags:
+        - ProductComposition
+      summary: Ingests products (in pull mode).
+      description: Ingests products (in pull mode).
+      operationId: pullIngestProduct
+      requestBody:
+        description: Product Pull Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductPullIngestionRequest'
+      responses:
+        "201":
+          description: Products ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductIngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+  /service-api/v2/ingest/push:
+    post:
+      tags:
+        - ProductComposition
+      summary: Ingests products (in push mode).
+      description: Ingests poducts (in push mode).
+      operationId: pushIngestProduct
+      requestBody:
+        description: Push Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductPushIngestionRequest'
+      responses:
+        "201":
+          description: Products ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductIngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    ProductPullIngestionRequest:
+      type: object
+      properties:
+        legalEntityExternalId:
+          type: string
+        legalEntityInternalId:
+          type: string
+        serviceAgreementExternalId:
+          type: string
+        serviceAgreementInternalId:
+          type: string
+        userExternalId:
+          type: string
+        userInternalId:
+          type: string
+        referenceJobRoleNames:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
+          description: The reference job roles that should get assigned to the user
+        membershipAccounts:
+          type: array
+          items:
+            type: string
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+
+    ProductPushIngestionRequest:
+      type: object
+      properties:
+        productGroup:
+          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+
+    ProductIngestionResponse:
+      type: object
+      properties:
+        productGroups:
+          type: array
+          items:
+            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+

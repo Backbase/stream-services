@@ -1,6 +1,12 @@
 spring:
   zipkin:
     enabled: false
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
+        enable-api: false
+      enabled: false
   security:
     oauth2:
       client:
