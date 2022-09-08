@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.0](https://github.com/Backbase/stream-services/compare/2.88.0...3.0.0)
+### Added
+- We welcome [Stream Compositions](stream-compositions)! More details can be found in the [confluence page](https://backbase.atlassian.net/wiki/spaces/ES/pages/3481894959/Stream+Services+3.0).
+
 ## [2.86.1](https://github.com/Backbase/stream-services/compare/2.86.0...2.86.1)
 ### Fixed
 - Added qualifier for WebClient in ContactsServiceConfiguration.
@@ -437,11 +441,6 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 ### Fixed
 - JUnit and Hibernate Validator dependency update to address security vulnerabilities.
 
-## [3.0.0] 
-### Removed
-- Sources, Processors and Sinks for Stream Components
-- Removed obsolete Stream SDK modules in preparation to support ServiceSDK
-- Removed generators. Test data generation to be done using `space-generator`
 ## [2.62.0]
 ### Fixed
 - Legal Entity Saga: linkLegalEntityToRealm method executed multiple times ( when multiple users are ingested): `unique constraint (PK_LE_ASSIGN_REALM) violated`
@@ -467,12 +466,6 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
             .map(LegalEntityTask::getData)
             .doOnNext(actual -> log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
  ```
-## [3.0.0] 
-### Removed
-- Sources, Processors and Sinks for Stream Components
-- Removed obsolete Stream SDK modules in preparation to support ServiceSDK
-- Removed generators. Test data generation to be done using `space-generator`
-
 ## [2.51.0]
 ### Maintenance
 - Update to 2021.10
