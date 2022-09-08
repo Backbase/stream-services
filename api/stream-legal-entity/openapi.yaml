@@ -541,10 +541,6 @@ components:
           $ref: '#/components/schemas/PanSuffix'
         productNumber:
           $ref: '#/components/schemas/ProductNumber'
-        debitCardsItems:
-          type: array
-          items:
-            $ref: '#/components/schemas/DebitCardItem'
         startDate:
           $ref: '#/components/schemas/StartDate'
         validThru:
