@@ -1,8 +1,6 @@
 package com.backbase.stream.paymentorder;
 
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.UpdateStatusPut;
 import com.backbase.stream.model.PaymentOrderIngestContext;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.List;
@@ -21,7 +19,6 @@ public class PaymentOrderTask extends StreamTask {
 
     private List<PaymentOrderPostRequest> data;
     private PaymentOrderIngestContext response;
-//    private List<PaymentOrderPostResponse> response;
 
     @Override
     public String getName() {

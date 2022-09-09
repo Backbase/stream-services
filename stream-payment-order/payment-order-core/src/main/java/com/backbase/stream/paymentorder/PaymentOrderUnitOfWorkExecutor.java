@@ -1,7 +1,6 @@
 package com.backbase.stream.paymentorder;
 
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.UnitOfWorkExecutor;
 import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;

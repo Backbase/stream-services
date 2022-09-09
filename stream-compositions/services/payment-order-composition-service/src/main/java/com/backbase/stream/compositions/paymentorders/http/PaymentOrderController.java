@@ -69,7 +69,6 @@ public class PaymentOrderController implements PaymentOrderCompositionApi {
      * @param response PaymentOrderIngestResponse
      * @return IngestionResponse
      */
-    //todo with payment context
     private ResponseEntity<PaymentOrderIngestionResponse> mapIngestionToResponse(PaymentOrderIngestResponse response) {
         return new ResponseEntity<>(
                 new PaymentOrderIngestionResponse()
@@ -86,15 +85,4 @@ public class PaymentOrderController implements PaymentOrderCompositionApi {
                         ),
                 HttpStatus.CREATED);
     }
-
-//    private ResponseEntity<PaymentOrderIngestionResponse> mapIngestionToResponse(PaymentOrderIngestResponse response) {
-//        return new ResponseEntity<>(
-//                new PaymentOrderIngestionResponse()
-//                        .withPayment(
-//                                response.getPaymentOrderPostResponses()
-//                                        .stream()
-//                                        .map(paymentOrderMapper::mapStreamToComposition)
-//                                        .collect(Collectors.toList())),
-//                HttpStatus.CREATED);
-//    }
 }

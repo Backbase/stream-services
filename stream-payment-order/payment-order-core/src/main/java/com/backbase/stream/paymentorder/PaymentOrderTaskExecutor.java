@@ -13,6 +13,7 @@ import com.backbase.stream.mappers.PaymentOrderTypeMapper;
 import com.backbase.stream.model.PaymentOrderIngestContext;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -50,11 +51,10 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         String externalIds = streamTask.getData().stream().map(PaymentOrderPostRequest::getBankReferenceId)
                 .collect(Collectors.joining(","));
 
-        //todo once lists are finalized - send them to the right DBS service (post, update, delete)
         return buildPaymentOrderIngestContext(paymentOrderIngestContext)
-                .flatMap(this::updatePaymentOrder)
+//                .flatMap(this::updatePaymentOrder)
                 .flatMap(this::persistNewPaymentOrders)
-                .flatMap(this::deletePaymentOrder)
+//                .flatMap(this::deletePaymentOrder)
                 .onErrorResume(WebClientResponseException.class, throwable -> {
                     streamTask.error("payments", "post", "failed", externalIds, null, throwable,
                             throwable.getResponseBodyAsString(), "Failed to ingest payment order");
@@ -66,42 +66,6 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                     streamTask.setResponse(paymentOrderContext);
                     return streamTask;
                 });
-
-
-        //todo test with single list
-//        var newPayments =
-//                persistNewScheduledTransfers(paymentOrderPostRequestList);
-//
-//        return newPayments.
-//                onErrorResume(WebClientResponseException.class, throwable -> {
-//                    streamTask.error("payments", "post", "failed", externalIds, null, throwable,
-//                            throwable.getResponseBodyAsString(), "Failed to ingest payment order");
-//                    return Mono.error(new StreamTaskException(streamTask, throwable,
-//                            "Failed to Ingest Payment Order: " + throwable.getMessage()));
-//                })
-//                .map(transactionIds -> {
-//                    streamTask.error("payments", "post", "success", externalIds, transactionIds.stream().map(
-//                            PaymentOrderPostResponse::getId).collect(Collectors.joining(",")), "Ingested Payment Order");
-//                    streamTask.setResponse(transactionIds);
-//                    return streamTask;
-//                });
-    }
-
-    public Mono<List<PaymentOrderPostResponse>> persistNewScheduledTransfers(
-            List<PaymentOrderPostRequest> paymentOrderPostRequestList) {
-
-        PaymentOrderIngestContext paymentOrderIngestContext = new PaymentOrderIngestContext();
-
-        return Flux.fromIterable(paymentOrderPostRequestList)
-                .map(s -> s.bankReferenceId("B"))
-                .limitRate(1)
-                .delayElements(Duration.ofMillis(10))
-                .flatMap(this::persistNewPaymentOrder)
-                .doOnNext(response -> log.debug("Saved new Transfer: {}", response))
-                .collectList()
-                .doOnSuccess(transferResults ->
-                        log.debug("Successfully persisted: {} new scheduled transfers.",
-                                transferResults.size()));
     }
 
     public Mono<PaymentOrderIngestContext> buildPaymentOrderIngestContext(PaymentOrderIngestContext paymentOrderIngestContext) {
@@ -142,20 +106,6 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         paymentOrderIngestContext.deletePaymentOrder(deletePaymentOrder);
         return Mono.just(paymentOrderIngestContext);
     }
-
-//    /**
-//     * Gets products related to the payments and already persisted scheduled payment orders.
-//     * Note: Gets all transfers related data to be able to map and ingest the incoming transfers.
-//     * @param paymentOrderIngestContext Holds all the Ingestion details.
-//     * @return The Payment Order ingestion context
-//     */
-//    public Mono<PaymentOrderIngestContext> getPersistedOrders(PaymentOrderIngestContext paymentOrderIngestContext) {
-//
-//        return getPersistedScheduledTransfers(paymentOrderIngestContext)
-//                .map(paymentOrderIngestContext::existingPaymentOrders)
-//                .doOnError(throwable -> log.error("Error getting all data to ingest transfers: {}", throwable.getMessage()))
-//                .doOnSuccess(response -> log.info("Fetched scheduled payment data from dbs successfully"));
-//    }
 
     /**
      * Gets the list of payments that are persisted in DBS for a specific user.
@@ -324,6 +274,20 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         paymentOrderPostFilterRequest.setCreatedBy(accessNumber);
         paymentOrderPostFilterRequest.setStatuses(
                 List.of(READY, ACCEPTED, PROCESSED, CANCELLED, REJECTED, CANCELLATION_PENDING));
+
+        // todo testing remove
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonInString = mapper.writeValueAsString(paymentOrderPostFilterRequest);
+
+            System.out.println("-----------");
+            System.out.println(jsonInString);
+            System.out.println("-----------");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+
         return paymentOrdersApi.postFilterPaymentOrders(
                 null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, Integer.MAX_VALUE, null,
