@@ -119,7 +119,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .onErrorResume(this::handlePaymentOrderError)
                 .doOnNext(response -> {
                     log.debug("Response from Payment Order Composition: {}",
-                            response.getPayment());
+                            response.getNewPaymentOrder());
                 })
                 .map(p -> res);
     }

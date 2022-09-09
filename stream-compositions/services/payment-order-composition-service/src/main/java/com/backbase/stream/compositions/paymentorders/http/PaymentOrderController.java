@@ -82,6 +82,11 @@ public class PaymentOrderController implements PaymentOrderCompositionApi {
                                         .stream()
                                         .map(paymentOrderMapper::mapStreamUpdatePaymentOrderToComposition)
                                         .collect(Collectors.toList())
+                        )
+                        .withDeletedPaymentOrder(
+                                response.getPaymentOrderIngestContext().deletePaymentOrderResponse()
+                                        .stream()
+                                        .collect(Collectors.toList())
                         ),
                 HttpStatus.CREATED);
     }
