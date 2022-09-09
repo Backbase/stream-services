@@ -76,6 +76,11 @@ jobs:
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-PR-$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')"
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
+      - name: Setup docker tag version
+        if: "env.NEW_VERSION != null"
+        run: |
+          echo "DOCKER_TAG_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
+
       - name: Setup snapshot docker tag with execution number
         if: "env.NEW_VERSION == null && contains(env.PATCH, 'SNAPSHOT')"
         run: |
