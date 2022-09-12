@@ -75,7 +75,6 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
 
         return getPersistedScheduledTransfers(paymentOrderIngestContext)
                 .flatMap(this::buildNewList)
-                .flatMap(this::debugPrintPaymentOrderIngestContext)
                 .map(response -> {
                     log.debug("Ingestion context successfully build and ready for add, update and delete");
                     return response;
