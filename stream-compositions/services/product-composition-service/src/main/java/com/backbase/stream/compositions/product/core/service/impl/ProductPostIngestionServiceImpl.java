@@ -118,7 +118,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .flatMap(paymentOrderCompositionApi::pullPaymentOrder)
                 .onErrorResume(this::handlePaymentOrderError)
                 .doOnNext(response -> {
-                    log.debug("Response from Payment Order Composition: {}",
+                    log.debug("Response from Payment Order Composition: {} ",
                             response.getNewPaymentOrder());
                 })
                 .map(p -> res);

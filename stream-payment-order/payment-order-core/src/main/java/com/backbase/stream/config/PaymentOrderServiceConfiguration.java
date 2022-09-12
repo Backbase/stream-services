@@ -11,12 +11,16 @@ import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
 import com.backbase.stream.paymentorder.repository.PaymentOrderUnitOfWorkRepository;
 import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
+import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
 
@@ -77,5 +81,13 @@ public class PaymentOrderServiceConfiguration {
         // todo - make this configurable
         apiClient.setBasePath("http://localhost:8090/payment-order-service");
         return apiClient;
+    }
+
+    @Bean
+    @Primary
+    public Jackson2ObjectMapperBuilder customObjectMapper() {
+        return new Jackson2ObjectMapperBuilder()
+                // other configs are possible
+                .modules(new JsonNullableModule(), new JavaTimeModule());
     }
 }

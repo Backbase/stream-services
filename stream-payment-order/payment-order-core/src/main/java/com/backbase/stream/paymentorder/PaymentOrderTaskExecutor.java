@@ -14,6 +14,9 @@ import com.backbase.stream.model.PaymentOrderIngestContext;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -72,6 +75,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
 
         return getPersistedScheduledTransfers(paymentOrderIngestContext)
                 .flatMap(this::buildNewList)
+                .flatMap(this::debugPrintPaymentOrderIngestContext)
                 .map(response -> {
                     log.debug("Ingestion context successfully build and ready for add, update and delete");
                     return response;
@@ -101,8 +105,8 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         });
 
 
-        paymentOrderIngestContext.updatePaymentOrder(updatePaymentOrder);
         paymentOrderIngestContext.newPaymentOrder(newPaymentOrder);
+        paymentOrderIngestContext.updatePaymentOrder(updatePaymentOrder);
         paymentOrderIngestContext.deletePaymentOrder(deletePaymentOrder);
         return Mono.just(paymentOrderIngestContext);
     }
@@ -119,20 +123,8 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         List<GetPaymentOrderResponse> listOfPayments = new ArrayList<>();
 
         return getPayments(paymentOrderIngestContext.accountNumber())
-                .expand(response -> {
-                    var totalEle = response.getTotalElements().intValue();
-                    if (totalEle==0) {
-                        // stop the loop
-                        return Mono.empty();
-                    }
-                    return getPayments(paymentOrderIngestContext.accountNumber());
-                })
-                .map(PaymentOrderPostFilterResponse::getPaymentOrders)
-                .collectList()
                 .map(response -> {
-                    for (List<GetPaymentOrderResponse> responseList : response) {
-                        listOfPayments.addAll(responseList);
-                    }
+                        listOfPayments.addAll(response.getPaymentOrders());
                     return listOfPayments;
                 })
                 .map(getPaymentOrderResponses -> paymentOrderIngestContext.existingPaymentOrder(getPaymentOrderResponses))
@@ -274,19 +266,6 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         paymentOrderPostFilterRequest.setCreatedBy(accessNumber);
         paymentOrderPostFilterRequest.setStatuses(
                 List.of(READY, ACCEPTED, PROCESSED, CANCELLED, REJECTED, CANCELLATION_PENDING));
-
-        // todo testing remove
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonInString = mapper.writeValueAsString(paymentOrderPostFilterRequest);
-
-            System.out.println("-----------");
-            System.out.println(jsonInString);
-            System.out.println("-----------");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
 
         return paymentOrdersApi.postFilterPaymentOrders(
                 null, null, null, null, null, null, null, null, null, null, null,
