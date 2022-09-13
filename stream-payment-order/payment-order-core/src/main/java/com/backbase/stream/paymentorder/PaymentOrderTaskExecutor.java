@@ -55,9 +55,9 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                 .collect(Collectors.joining(","));
 
         return buildPaymentOrderIngestContext(paymentOrderIngestContext)
-//                .flatMap(this::updatePaymentOrder)
                 .flatMap(this::persistNewPaymentOrders)
-//                .flatMap(this::deletePaymentOrder)
+                .flatMap(this::updatePaymentOrder)
+                .flatMap(this::deletePaymentOrder)
                 .onErrorResume(WebClientResponseException.class, throwable -> {
                     streamTask.error("payments", "post", "failed", externalIds, null, throwable,
                             throwable.getResponseBodyAsString(), "Failed to ingest payment order");
@@ -75,10 +75,60 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
 
         return getPersistedScheduledTransfers(paymentOrderIngestContext)
                 .flatMap(this::buildNewList)
+                .flatMap(this::debugPrintPaymentOrderIngestContext)
                 .map(response -> {
                     log.debug("Ingestion context successfully build and ready for add, update and delete");
                     return response;
                 });
+    }
+
+    public Mono<PaymentOrderIngestContext> debugPrintPaymentOrderIngestContext(PaymentOrderIngestContext paymentOrderIngestContext) {
+        try {
+
+            ObjectMapper mapper = JsonMapper.builder()
+                    .addModule(new JavaTimeModule())
+                    .build();
+
+            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+
+
+            System.out.println("-----core pmt order test------");
+            if (!paymentOrderIngestContext.corePaymentOrder().isEmpty()) {
+                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.corePaymentOrder()));
+            }
+            System.out.println("***************");
+
+            System.out.println("-----existing pmt order test------");
+            if (!paymentOrderIngestContext.existingPaymentOrder().isEmpty()) {
+                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.existingPaymentOrder()));
+            }
+            System.out.println("***************");
+
+            System.out.println("-----new pmt order test------");
+            if (!paymentOrderIngestContext.newPaymentOrder().isEmpty()) {
+                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.newPaymentOrder()));
+            }
+            System.out.println("***************");
+
+            System.out.println("-----update pmt order test------");
+            if (!paymentOrderIngestContext.updatePaymentOrder().isEmpty()) {
+                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.updatePaymentOrder()));
+            }
+            System.out.println("***************");
+
+            System.out.println("-----delete pmt order test------");
+            if (!paymentOrderIngestContext.deletePaymentOrder().isEmpty()) {
+                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.deletePaymentOrder()));
+            }
+            System.out.println("***************");
+            System.out.println("-----------");
+
+            return Mono.just(paymentOrderIngestContext);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return Mono.just(paymentOrderIngestContext);
+        }
     }
 
     public Mono<PaymentOrderIngestContext> buildNewList(PaymentOrderIngestContext paymentOrderIngestContext) {
@@ -87,22 +137,40 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         List<PaymentOrderPutRequest> updatePaymentOrder = new ArrayList<>();
         List<String> deletePaymentOrder = new ArrayList<>();
 
-        // build update payment list
-        paymentOrderIngestContext.corePaymentOrder().forEach(corePayment -> {
-                    if(paymentOrderIngestContext.existingPaymentOrder().contains(corePayment.getBankReferenceId())) {
-                        updatePaymentOrder.add(paymentOrderTypeMapper.mapPaymentOrderPostRequest(corePayment));
-                    } else {
-                        newPaymentOrder.add(corePayment);
-                    }
-                });
+        // list of all the bank ref ids in core
+        List<String> coreBankRefIds = new ArrayList<>();
+        for (PaymentOrderPostRequest coreBankRefId : paymentOrderIngestContext.corePaymentOrder() ) {
+            coreBankRefIds.add(coreBankRefId.getBankReferenceId());
+        }
 
-        // build delete payment list
-        paymentOrderIngestContext.existingPaymentOrder().forEach(existingPaymentOrder -> {
-            if(!paymentOrderIngestContext.corePaymentOrder().contains(existingPaymentOrder.getBankReferenceId())) {
-                deletePaymentOrder.add(existingPaymentOrder.getId());
+        // list of all the bank ref ids in DBS (existing)
+        List<String> existingBankRefIds = new ArrayList<>();
+        for (GetPaymentOrderResponse existingBankRefId : paymentOrderIngestContext.existingPaymentOrder() ) {
+            existingBankRefIds.add(existingBankRefId.getBankReferenceId());
+        }
+
+        // build new payment list (Bank ref is in core, but not in DBS)
+        paymentOrderIngestContext.corePaymentOrder().forEach(corePaymentOrder -> {
+
+            if(!existingBankRefIds.contains(corePaymentOrder.getBankReferenceId())) {
+                newPaymentOrder.add(corePaymentOrder);
             }
         });
 
+        // build update payment list (Bank ref is in core and DBS)
+        paymentOrderIngestContext.corePaymentOrder().forEach(corePaymentOrder -> {
+            if(existingBankRefIds.contains(corePaymentOrder.getBankReferenceId())) {
+                updatePaymentOrder.add(paymentOrderTypeMapper.mapPaymentOrderPostRequest(corePaymentOrder));
+            }
+        });
+
+        // build delete payment list (Bank ref is in DBS, but not in core)
+        paymentOrderIngestContext.existingPaymentOrder().forEach(existingPaymentOrder -> {
+
+            if(!coreBankRefIds.contains(existingPaymentOrder.getBankReferenceId())) {
+                deletePaymentOrder.add(existingPaymentOrder.getId());
+            }
+        });
 
         paymentOrderIngestContext.newPaymentOrder(newPaymentOrder);
         paymentOrderIngestContext.updatePaymentOrder(updatePaymentOrder);
@@ -165,8 +233,8 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
             PaymentOrderIngestContext paymentOrderIngestContext) {
 
         return Flux.fromIterable(paymentOrderIngestContext.updatePaymentOrder())
-                .limitRate(1)
-                .delayElements(Duration.ofMillis(100))
+//                .limitRate(1)
+//                .delayElements(Duration.ofMillis(100))
                 .flatMap(request -> updatePaymentOrderStatus(
                         request.getBankReferenceId(),
                         request.getStatus(),
@@ -192,8 +260,11 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
             PaymentOrderIngestContext paymentOrderIngestContext) {
 
         return Flux.fromIterable(paymentOrderIngestContext.deletePaymentOrder())
-                .limitRate(1)
-                .delayElements(Duration.ofMillis(100))
+//                .limitRate(1)
+//                .delayElements(Duration.ofMillis(100))
+                .doOnNext(internalPaymentOrderId -> {
+                    System.out.println("deleting this payment: " + internalPaymentOrderId);
+                })
                 .flatMap(internalPaymentOrderId -> deletePaymentOrder(
                         internalPaymentOrderId))
                 .doOnNext(response -> log.debug("Deleted Payment Order status: {}", response))
@@ -235,11 +306,24 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                                                      Status status,
                                                      String bankStatus,
                                                      LocalDate nextExecutionDate) {
+        ObjectMapper mapper = JsonMapper.builder()
+                .addModule(new JavaTimeModule())
+                .build();
+
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+
         var updatePaymentStatus = new UpdateStatusPut()
                 .bankReferenceId(bankReferenceId)
                 .status(status)
                 .bankStatus(bankStatus)
                 .nextExecutionDate(nextExecutionDate);
+        try {
+            System.out.println("+++++UPDATE+++++");
+            System.out.println(mapper.writeValueAsString(updatePaymentStatus));
+            System.out.println("++++++++++");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         return paymentOrdersApi.putUpdateStatus(updatePaymentStatus);
     }
 
