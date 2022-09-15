@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Map;
 
 @Data
@@ -13,10 +11,11 @@ import java.util.Map;
 @AllArgsConstructor
 public class PaymentOrderIngestPullRequest {
 
+    private String memberNumber;
     private String internalUserId;
     private String legalEntityInternalId;
     private String legalEntityExternalId;
-    private String memberNumber;
+    private String serviceAgreementInternalId;
     private Map<String, String> additions;
     private String dateRangeStart;
     private String dateRangeEnd;

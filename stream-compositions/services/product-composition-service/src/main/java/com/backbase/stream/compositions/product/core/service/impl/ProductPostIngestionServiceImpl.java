@@ -207,6 +207,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .withLegalEntityExternalId(res.getLegalEntityExternalId())
                 .withInternalUserId(res.getUserInternalId())
                 .withMemberNumber(res.getUserExternalId())
+                .withServiceAgreementInternalId(res.getProductGroup().getServiceAgreement().getInternalId())
                 .withAdditions(res.getAdditions());
     }
 }
