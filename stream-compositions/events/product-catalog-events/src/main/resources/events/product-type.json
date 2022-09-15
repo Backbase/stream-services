@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "externalId": {
+      "description": "External id",
+      "type": "string"
+    },
+    "externalTypeId": {
+      "description": "Product type id",
+      "type": "string"
+    },
+    "externalProductId": {
+      "description": "External product id",
+      "type": "string"
+    },
+    "externalProductKindId": {
+      "description": "External product kind id",
+      "type": "string"
+    },
+    "productKindName": {
+      "description": "Product kind name",
+      "type": "string"
+    },
+    "externalProductTypeId": {
+      "description": "External product type id",
+      "type": "string"
+    },
+    "productTypeName": {
+      "description": "Product type name",
+      "type": "string"
+    },
+    "typeName": {
+      "description": "Type name",
+      "type": "string"
+    },
+    "productKind": {
+      "type": "object",
+      "$ref": "./product-kind.json"
+    }
+  },
+  "required": [
+    "externalId",
+    "externalTypeId",
+    "externalProductId",
+    "externalProductKindId",
+    "productKindName",
+    "externalProductTypeId",
+    "productTypeName",
+    "typeName",
+    "productKind"
+  ]
+}

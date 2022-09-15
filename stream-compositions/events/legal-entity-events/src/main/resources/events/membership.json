@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "Unique identifier for the membership",
+      "type": "string"
+    },
+    "taxId": {
+      "description": "Tax id of the individual or corporation used for membership identification",
+      "type": "string"
+    },
+    "name": {
+      "description": "Name associated with the membership",
+      "type": "string"
+    },
+    "type": {
+      "description": "Type associated with the membership",
+      "enum": ["RETAIL", "SME", "CORPORATE"],
+      "type": "string"
+    }
+  }
+}

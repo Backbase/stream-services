@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -377,5 +378,4 @@ public class LegalEntitySagaIT {
             return WebClient.builder();
         }
     }
-
 }
