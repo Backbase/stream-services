@@ -73,4 +73,5 @@ bootstrap:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
+    org.apache.http.wire: DEBUG
 

@@ -7,6 +7,7 @@ import com.backbase.stream.compositions.paymentorder.integration.client.model.Pu
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPullRequest;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.stereotype.Component;
 
 
@@ -35,6 +36,7 @@ public interface PaymentOrderMapper {
 
      com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse mapStreamNewPaymentOrderToComposition(PaymentOrderPostResponse paymentOrderPostResponse);
 
+    @Mapping(target="id", source="bankReferenceId")
     com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse mapStreamUpdatePaymentOrderToComposition(UpdateStatusPut paymentOrderPostResponse);
 
     /**

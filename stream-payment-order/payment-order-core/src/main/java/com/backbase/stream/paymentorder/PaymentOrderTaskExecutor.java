@@ -25,7 +25,6 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,14 +41,13 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
     private final PaymentOrdersApi paymentOrdersApi;
     private final PaymentOrderTypeMapper paymentOrderTypeMapper;
 
-    //TODO
     @Override
     public Mono<PaymentOrderTask> executeTask(PaymentOrderTask streamTask) {
 
         PaymentOrderIngestContext paymentOrderIngestContext = new PaymentOrderIngestContext();
         List<PaymentOrderPostRequest> corePaymentOrderPostRequestList = streamTask.getData();
         paymentOrderIngestContext.corePaymentOrder(corePaymentOrderPostRequestList);
-        paymentOrderIngestContext.accountNumber("tblade");
+        paymentOrderIngestContext.internalUserId(corePaymentOrderPostRequestList.get(0).getInternalUserId());
 
         String externalIds = streamTask.getData().stream().map(PaymentOrderPostRequest::getBankReferenceId)
                 .collect(Collectors.joining(","));
@@ -65,7 +63,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                             "Failed to Ingest Payment Order: " + throwable.getMessage()));
                 })
                 .map(paymentOrderContext -> {
-                    streamTask.error("payments", "post", "success", externalIds, paymentOrderContext.accountNumber(), "Ingested Payment Order");
+                    streamTask.error("payments", "post", "success", externalIds, paymentOrderContext.internalUserId(), "Ingested Payment Order");
                     streamTask.setResponse(paymentOrderContext);
                     return streamTask;
                 });
@@ -74,8 +72,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
     public Mono<PaymentOrderIngestContext> buildPaymentOrderIngestContext(PaymentOrderIngestContext paymentOrderIngestContext) {
 
         return getPersistedScheduledTransfers(paymentOrderIngestContext)
-                .flatMap(this::buildNewList)
-                .flatMap(this::debugPrintPaymentOrderIngestContext)
+                .flatMap(this::buildIngestPaymentOrderList)
                 .map(response -> {
                     log.debug("Ingestion context successfully build and ready for add, update and delete");
                     return response;
@@ -123,6 +120,15 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
             System.out.println("***************");
             System.out.println("-----------");
 
+            System.out.println("-----updatedPaymentOrderResponse test------");
+            if (!paymentOrderIngestContext.updatedPaymentOrderResponse().isEmpty()) {
+                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.updatedPaymentOrderResponse()));
+            } else {
+                System.out.println("WE HAVE NO UPDATES!!");
+            }
+            System.out.println("***************");
+            System.out.println("-----------");
+
             return Mono.just(paymentOrderIngestContext);
 
         } catch (Exception ex) {
@@ -131,7 +137,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         }
     }
 
-    public Mono<PaymentOrderIngestContext> buildNewList(PaymentOrderIngestContext paymentOrderIngestContext) {
+    public Mono<PaymentOrderIngestContext> buildIngestPaymentOrderList(PaymentOrderIngestContext paymentOrderIngestContext) {
 
         List<PaymentOrderPostRequest> newPaymentOrder = new ArrayList<>();
         List<PaymentOrderPutRequest> updatePaymentOrder = new ArrayList<>();
@@ -189,7 +195,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
 
         List<GetPaymentOrderResponse> listOfPayments = new ArrayList<>();
 
-        return getPayments(paymentOrderIngestContext.accountNumber())
+        return getPayments(paymentOrderIngestContext.internalUserId())
                 .map(response -> {
                         listOfPayments.addAll(response.getPaymentOrders());
                     return listOfPayments;
@@ -212,8 +218,6 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
         List<PaymentOrderPostRequest> paymentOrderPostRequestList = paymentOrderIngestContext.newPaymentOrder();
 
         return Flux.fromIterable(paymentOrderPostRequestList)
-                .limitRate(1)
-                .delayElements(Duration.ofMillis(10))
                 .flatMap(this::persistNewPaymentOrder)
                 .doOnNext(response -> log.debug("Saved new Payment Order: {}", response))
                 .collectList()
@@ -233,8 +237,6 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
             PaymentOrderIngestContext paymentOrderIngestContext) {
 
         return Flux.fromIterable(paymentOrderIngestContext.updatePaymentOrder())
-//                .limitRate(1)
-//                .delayElements(Duration.ofMillis(100))
                 .flatMap(request -> updatePaymentOrderStatus(
                         request.getBankReferenceId(),
                         request.getStatus(),
@@ -243,7 +245,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                 ))
                 .doOnNext(response -> log.debug("Updated Payment Order status: {}", response))
                 .collectList()
-                .map(paymentOrderIngestContext::updatedPaymentOrderResponse)
+                .map(updateStatusPuts -> paymentOrderIngestContext.updatedPaymentOrderResponse(updateStatusPuts))
                 .onErrorContinue((t, o) -> log.error(String.format("Update status failed: %s", o), t))
                 .doOnSuccess(paymentOrderResult ->
                         log.debug("Successfully persisted: {} Payment Order updates.",
@@ -260,13 +262,6 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
             PaymentOrderIngestContext paymentOrderIngestContext) {
 
         return Flux.fromIterable(paymentOrderIngestContext.deletePaymentOrder())
-//                .limitRate(1)
-//                .delayElements(Duration.ofMillis(100))
-                .doOnNext(internalPaymentOrderId -> {
-                    System.out.println("deleting this payment: " + internalPaymentOrderId);
-                })
-                .flatMap(internalPaymentOrderId -> deletePaymentOrder(
-                        internalPaymentOrderId))
                 .doOnNext(response -> log.debug("Deleted Payment Order status: {}", response))
                 .collectList()
                 .map(paymentOrderIngestContext::deletePaymentOrderResponse)
@@ -306,24 +301,12 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                                                      Status status,
                                                      String bankStatus,
                                                      LocalDate nextExecutionDate) {
-        ObjectMapper mapper = JsonMapper.builder()
-                .addModule(new JavaTimeModule())
-                .build();
-
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
         var updatePaymentStatus = new UpdateStatusPut()
                 .bankReferenceId(bankReferenceId)
                 .status(status)
                 .bankStatus(bankStatus)
                 .nextExecutionDate(nextExecutionDate);
-        try {
-            System.out.println("+++++UPDATE+++++");
-            System.out.println(mapper.writeValueAsString(updatePaymentStatus));
-            System.out.println("++++++++++");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
         return paymentOrdersApi.putUpdateStatus(updatePaymentStatus);
     }
 
@@ -333,26 +316,24 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
      * @param internalPaymentOrderId   The DBS internal Payment Order id.
      * @return A Mono with the response from the service api.
      */
-    private Mono<String> deletePaymentOrder(String internalPaymentOrderId) {
-        paymentOrdersApi.deletePaymentOrder(internalPaymentOrderId);
-        return Mono.just(internalPaymentOrderId);
+    private Mono<Void> deletePaymentOrder(String internalPaymentOrderId) {
+        return paymentOrdersApi.deletePaymentOrder(internalPaymentOrderId);
     }
 
     /**
      * Calls the payment order service to retrieve existing payments.
      *
-     * @param accessNumber   The user's external id.
+     * @param internalUserId   The user's internal id that came with the Payments.
      * @return A Mono with the response from the service api.
      */
-    private Mono<PaymentOrderPostFilterResponse> getPayments(String accessNumber) {
+    private Mono<PaymentOrderPostFilterResponse> getPayments(String internalUserId) {
         var paymentOrderPostFilterRequest = new PaymentOrderPostFilterRequest();
-        paymentOrderPostFilterRequest.setCreatedBy(accessNumber);
         paymentOrderPostFilterRequest.setStatuses(
                 List.of(READY, ACCEPTED, PROCESSED, CANCELLED, REJECTED, CANCELLATION_PENDING));
 
         return paymentOrdersApi.postFilterPaymentOrders(
                 null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, Integer.MAX_VALUE, null,
+                internalUserId, null, null, Integer.MAX_VALUE, null,
                 null, paymentOrderPostFilterRequest);
     }
 

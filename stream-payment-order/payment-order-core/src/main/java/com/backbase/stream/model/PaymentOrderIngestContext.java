@@ -15,7 +15,7 @@ import java.util.List;
 @Accessors(fluent = true)
 public class PaymentOrderIngestContext {
 
-    private String accountNumber;
+    private String internalUserId;
     private List<PaymentOrderPostRequest> corePaymentOrder = new ArrayList<>();
     private List<GetPaymentOrderResponse> existingPaymentOrder = new ArrayList<>();
 

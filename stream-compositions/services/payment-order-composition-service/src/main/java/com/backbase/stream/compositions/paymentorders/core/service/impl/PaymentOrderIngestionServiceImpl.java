@@ -10,6 +10,10 @@ import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderI
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderPostIngestionService;
 import com.backbase.stream.model.PaymentOrderIngestContext;
 import com.backbase.stream.worker.model.UnitOfWork;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,10 +38,8 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
         return buildIntegrationRequest(ingestPullRequest)
                 .map(this::pullPaymentOrder)
                 .flatMap(this::sendToDbs)
-                .doOnSuccess(paymentOrderIngestContext -> handleSuccess(
-                        paymentOrderIngestContext.accountNumber(), paymentOrderIngestContext))
-                .onErrorResume(e -> handleError(
-                        ingestPullRequest.getMemberNumber(), e))
+                .doOnSuccess(this::handleSuccess)
+                .onErrorResume(e -> handleError(e))
                 .map(paymentOrderIngestContext -> buildResponse(paymentOrderIngestContext, ingestPullRequest));
     }
 
@@ -65,7 +67,7 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
                 .flatMap(x -> Mono.just(x.getResponse()));
     }
 
-    private PaymentOrderIngestResponse buildResponse(PaymentOrderIngestContext paymentOrderIngestContext,//List<PaymentOrderPostResponse> paymentOrderPostResponses,
+    private PaymentOrderIngestResponse buildResponse(PaymentOrderIngestContext paymentOrderIngestContext,
                                                     PaymentOrderIngestPullRequest ingestPullRequest) {
         return PaymentOrderIngestResponse.builder()
                 .paymentOrderIngestContext(paymentOrderIngestContext)
@@ -73,13 +75,13 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
                 .build();
     }
 
-    private void handleSuccess(String arrangementId, PaymentOrderIngestContext paymentOrderIngestContext) {//List<PaymentOrderPostResponse> paymentOrderPostResponses) {
+    private void handleSuccess(PaymentOrderIngestContext paymentOrderIngestContext) {
         // if we add cursor in the future, this needs to be updated to success here
         paymentOrderPostIngestionService.handleSuccess(paymentOrderIngestContext);
         log.debug("Ingested payment orders: {}", paymentOrderIngestContext);
     }
 
-    private Mono<PaymentOrderIngestContext> handleError(String arrangementId, Throwable e) { //Mono<List<PaymentOrderPostResponse>> handleError(String arrangementId, Throwable e) {
+    private Mono<PaymentOrderIngestContext> handleError(Throwable e) {
         // if we add cursor in the future, this needs to be updated to failure here
         log.debug("Ingested payment orders: {}", e.getMessage());
         return paymentOrderPostIngestionService.handleFailure(e);
