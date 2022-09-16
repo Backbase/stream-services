@@ -6,10 +6,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.AllocationClassifierType;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioAllocationsParentItem;
-import com.backbase.portfolio.api.service.integration.v1.model.PortfolioAllocationsParentItem.ClassifierTypeEnum;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioAllocationsPutRequest;
-import com.backbase.portfolio.api.service.integration.v1.model.PortfolioBenchmarkChartDataPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioBenchmarkPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesPutRequest;
@@ -55,7 +54,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
@@ -194,7 +192,7 @@ class PortfolioIntegrationServiceTest {
             .code(subPortfolioCode));
         verify(portfolioManagementApi).putPortfolioAllocations(portfolioId, new PortfolioAllocationsPutRequest()
             .addAllocationsItem(new PortfolioAllocationsParentItem()
-                .classifierType(ClassifierTypeEnum.ASSET_CLASS)));
+                .classifierType(AllocationClassifierType.ASSET_CLASS)));
         verify(portfolioPositionsHierarchyManagementApi).putPortfolioPositionsHierarchy(portfolioId,
             new PortfolioPositionsHierarchyPutRequest().addItemsItem(new PortfolioPositionsHierarchyItem()
                 .itemType(ItemTypeEnum.ASSET_CLASS)));
