@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [3.1.0](https://github.com/Backbase/stream-services/compare/2.88.0...3.0.0)
+## [3.1.0](https://github.com/Backbase/stream-services/compare/3.0.0...3.1.0)
 - Upgraded to DBS 2022.09
 
 ## [3.0.0](https://github.com/Backbase/stream-services/compare/2.88.0...3.0.0)
