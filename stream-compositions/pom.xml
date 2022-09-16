@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.backbase.buildingblocks</groupId>
+        <artifactId>service-sdk-starter-reactive</artifactId>
+        <version>14.1.1</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.backbase.stream</groupId>
+    <artifactId>stream-compositions</artifactId>
+    <version>3.0.0</version>
+
+    <properties>
+        <backbase-bom.version>2021.10</backbase-bom.version>
+        <boat-maven-plugin.version>0.15.3</boat-maven-plugin.version>
+        <activemq.version>5.16.3</activemq.version>
+        <testcontainers.version>1.12.5</testcontainers.version>
+        <mock.server.version>5.11.2</mock.server.version>
+        <gson.version>2.8.9</gson.version>
+        <mockito.version>3.6.28</mockito.version>
+        <skip.integration.tests>false</skip.integration.tests>
+        <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
+        <ssdk.version>14.1.1</ssdk.version>
+        <jib.container.volumes>/tmp</jib.container.volumes>
+    </properties>
+
+    <packaging>pom</packaging>
+    <name>Stream :: Compositions</name>
+
+    <modules>
+        <module>api</module>
+        <module>events</module>
+        <module>services</module>
+        <module>test-utils</module>
+        <module>cursors</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <SIG_SECRET_KEY>JWTSecretKeyDontUseInProduction!</SIG_SECRET_KEY>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <configuration>
+                            <skipTests>${skip.integration.tests}</skipTests>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <destFile>${coverage.reports.dir}/jacoco.exec</destFile>
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!-- Ensures that the code coverage report for unit tests is created after unit tests have been run. -->
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <dataFile>${coverage.reports.dir}/jacoco.exec</dataFile>
+                            <!-- Sets the output directory for the code coverage report. -->
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-ut</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>pre-integration-test</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <destFile>${coverage.reports.dir}/jacoco-it.exec</destFile>
+                            <propertyName>failsafeArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-integration-test</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Sets the path to the file which contains the execution data. -->
+                            <dataFile>${coverage.reports.dir}/jacoco-it.exec</dataFile>
+                            <!-- Sets the output directory for the code coverage report. -->
+                            <outputDirectory>${project.reporting.outputDirectory}/jacoco-it</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar-maven-plugin.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>mac-m1</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-resolver-dns-native-macos</artifactId>
+                    <classifier>osx-aarch_64</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,73 @@
+spring:
+  zipkin:
+    enabled: false
+  main:
+    allow-bean-definition-overriding: true
+backbase:
+  mtls:
+    enabled: false
+  security:
+    http:
+      enabled: true
+    service-api:
+      authentication:
+        required-scope: api:service
+  stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+    dbs:
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
+    identity:
+      identity-integration-base-url: http://identity-integration-service:8080
+    compositions:
+      product-catalog:
+        enable-completed-events: false
+        enable-failed-events: true
+        product-catalog-integration-url: http://product-catalog-ingestion-integration:8080
+
+bootstrap:
+  enabled: false
+  # This is just na example. Replace it with data corresponding to your project
+  product-catalog:
+
+    productTypes:
+      - productTypeName: Certificate of Deposit
+        typeName: Certificate of Deposit
+        externalProductKindId: kind6
+        productKindName: Term Deposit
+        externalProductId: CD
+        externalId: CD
+        externalProductTypeId: CD
+        externalTypeId: CD
+      - productTypeName: Checking Account
+        typeName: Checking Account
+        externalProductKindId: kind1
+        productKindName: Checking Account
+        externalProductId: checking-account
+        externalId: checking-account
+        externalProductTypeId: checking-account
+        externalTypeId: checking-account
+      - productTypeName: Savings Account
+        typeName: Savings Account
+        externalProductKindId: kind2
+        productKindName: Savings Account
+        externalProductId: savings-account
+        externalId: savings-account
+        externalProductTypeId: savings-account
+        externalTypeId: savings-account
+      - productTypeName: Loan
+        typeName: Loan
+        externalProductKindId: kind3
+        productKindName: Loan Account
+        externalProductId: loan-account
+        externalId: loan-account
+        externalProductTypeId: loan-account
+        externalTypeId: loan-account
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG
+    org.mockserver: DEBUG

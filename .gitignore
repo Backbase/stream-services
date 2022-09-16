@@ -10,3 +10,6 @@ target
 **/*.log
 bin
 .DS_Store
+
+*.versionsBackup
+**/src/main/resources/lib
