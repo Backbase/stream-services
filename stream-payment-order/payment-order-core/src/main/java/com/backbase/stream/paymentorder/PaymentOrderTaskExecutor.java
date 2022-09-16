@@ -79,6 +79,8 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                 });
     }
 
+
+    // todo remove this debug code before merging
     public Mono<PaymentOrderIngestContext> debugPrintPaymentOrderIngestContext(PaymentOrderIngestContext paymentOrderIngestContext) {
         try {
 
@@ -262,6 +264,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
             PaymentOrderIngestContext paymentOrderIngestContext) {
 
         return Flux.fromIterable(paymentOrderIngestContext.deletePaymentOrder())
+                .flatMap(request -> deletePaymentOrder(request))
                 .doOnNext(response -> log.debug("Deleted Payment Order status: {}", response))
                 .collectList()
                 .map(paymentOrderIngestContext::deletePaymentOrderResponse)
@@ -316,8 +319,9 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
      * @param internalPaymentOrderId   The DBS internal Payment Order id.
      * @return A Mono with the response from the service api.
      */
-    private Mono<Void> deletePaymentOrder(String internalPaymentOrderId) {
-        return paymentOrdersApi.deletePaymentOrder(internalPaymentOrderId);
+    private Mono<String> deletePaymentOrder(String internalPaymentOrderId) {
+        paymentOrdersApi.deletePaymentOrder(internalPaymentOrderId);
+        return Mono.just(internalPaymentOrderId);
     }
 
     /**
