@@ -8,9 +8,6 @@ properties:
   classifierType:
     type: string
     description: Classifier type defines the allocation type; can be either CURRENCY or ASSET_CLASS.
-    enum:
-      - CURRENCY
-      - ASSET_CLASS
   classifierName:
     type: string
     description: Classifier name denotes the name of the selected classifier type; can be either an asset class name or a currency name, specified in ISO 4217 format.

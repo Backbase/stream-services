@@ -42,7 +42,7 @@
     </modules>
 
     <properties>
-        <backbase-bom.version>2022.04.5</backbase-bom.version>
+        <backbase-bom.version>2022.09</backbase-bom.version>
         <ssdk.version>14.1.1</ssdk.version>
         <boat-maven-plugin.version>0.15.8</boat-maven-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
