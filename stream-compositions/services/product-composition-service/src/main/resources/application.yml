@@ -56,3 +56,11 @@ backbase:
           enabled: false
           base-url: http://product-cursor:8080
 
+logging:
+  level:
+    #    root: DEBUG
+    com:
+      backbase:
+        dbs: DEBUG
+        buildingblocks: DEBUG
+
