@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 
-## [3.2.0](https://github.com/Backbase/stream-services/compare/3.0.0...3.2.0)
+## [3.2.0](https://github.com/Backbase/stream-services/compare/3.1.0...3.2.0)
 ### Added
 - Add support for Entitlement Wizard Metadata.
 
