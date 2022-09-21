@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+
+## [3.2.0](https://github.com/Backbase/stream-services/compare/3.0.0...3.2.0)
+### Added
+- Add support for Entitlement Wizard Metadata.
+
+
 ## [3.0.0](https://github.com/Backbase/stream-services/compare/2.88.0...3.0.0)
 ### Added
 - We welcome [Stream Compositions](stream-compositions)! More details can be found in the [confluence page](https://backbase.atlassian.net/wiki/spaces/ES/pages/3481894959/Stream+Services+3.0).
