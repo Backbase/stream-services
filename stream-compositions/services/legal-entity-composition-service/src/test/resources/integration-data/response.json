@@ -1,4 +1,5 @@
 {
+  "membershipAccounts": [],
   "legalEntity": {
     "name": "Test Legal Entity",
     "internalId": null,

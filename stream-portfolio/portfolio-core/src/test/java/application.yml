@@ -1,0 +1,10 @@
+# Stream config
+
+backbase:
+  stream:
+    dbs:
+      portfolio-base-url: http://portfolio:8080
+
+logging:
+  level:
+    root: INFO

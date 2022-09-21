@@ -4,27 +4,32 @@
 
     <parent>
         <groupId>com.backbase.stream</groupId>
-        <artifactId>stream-batch-starter-parent</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
-        <relativePath>../../stream-sdk/stream-starter-parents/stream-batch-starter-parent</relativePath>
+        <artifactId>stream-parent</artifactId>
+        <version>3.1.0</version>
+        <relativePath>../../stream-sdk/stream-parent</relativePath>
     </parent>
 
     <artifactId>transactions-item-writer</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
 
     <packaging>jar</packaging>
     <name>Stream :: Transactions Item Writer for Spring Batch</name>
 
     <properties>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
     </properties>
 
     <dependencies>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-batch</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>transactions-core</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>

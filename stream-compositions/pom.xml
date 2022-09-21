@@ -13,10 +13,10 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.1.0</version>
 
     <properties>
-        <backbase-bom.version>2021.10</backbase-bom.version>
+        <backbase-bom.version>2022.09</backbase-bom.version>
         <boat-maven-plugin.version>0.15.3</boat-maven-plugin.version>
         <activemq.version>5.16.3</activemq.version>
         <testcontainers.version>1.12.5</testcontainers.version>
@@ -25,6 +25,8 @@
         <mockito.version>3.6.28</mockito.version>
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
+        <ssdk.version>14.1.1</ssdk.version>
+        <jib.container.volumes>/tmp</jib.container.volumes>
     </properties>
 
     <packaging>pom</packaging>
@@ -125,4 +127,23 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>mac-m1</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-resolver-dns-native-macos</artifactId>
+                    <classifier>osx-aarch_64</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

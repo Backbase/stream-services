@@ -1,0 +1,90 @@
+type: object
+properties:
+  exchangeRate:
+    type: number
+    description: Current currency exchange rate, if an instrument is denominated in a currency different from a user's reference currency.
+  changeInNetAssetValue:
+    type: number
+    description: Change in the net asset value of a fund during the day.
+  fundStatus:
+    type: string
+    description: Status of a fund.
+  totalAssets:
+    type: number
+    description: Total amount of securities in a fund.
+  trailingTwelveMonthsYield:
+    type: number
+    description: A trailing twelve months yield, percentage of income the fund portfolio returned to investors over the past 12 months.
+  oneYearReturn:
+    type: number
+    description: Dividend percentage paid over the past 1 year period.
+  effectiveDuration:
+    type: number
+    description: Effective duration of bonds comprising a fund portfolio.
+  portfolioAssetsAllocation:
+    type: string
+    description: Type of securitites in a fund portfolio.
+  turnover:
+    type: number
+    description: Turnover of a fund; percentage at which a fund replaces its investment holdings on a yearly basis.
+  creditRating:
+    type: string
+    description: Credit rating of a bond issuer.
+  priceToEarningsRatio:
+    type: number
+    description: Ratio that measures current share price relative to its earnings-per-share.
+  estPriceToEarningsRatio:
+    type: number
+    description: Forward price to earnings ratio that uses forecasted earnings to measure price to earnings ratio.
+  priceToEarningsToGrowthRatio:
+    type: number
+    description: Price to earnings-to-growth ratio; ratio that represents correlation between the company's market value and its projected earnings growth.
+  sharesOutstanding:
+    type: number
+    description: Amount of company's stock currently held by all its shareholders.
+  priceToBookRatio:
+    type: number
+    description: Ratio that compares a company's market value to its book value.
+  earningsPerShare:
+    type: number
+    description: Earnings per share; ratio that indicates how much money the company makes for each share of stock.
+  dividendYield:
+    type: number
+    description: Ratio that shows how much a company pays out in dividends each year relative to its stock price.
+  lastDividendReported:
+    type: number
+    description: Amount the company paid to shareholders per share.
+  nextEarningsAnnouncement:
+    type: string
+    format: date
+    description: Date when next earnings will be publicly announced by the company.
+  coupon:
+    type: number
+    description: Coupon of a bond.
+  maturity:
+    type: string
+    format: date
+    description: Maturity of a bond.
+  yieldToMaturity:
+    type: number
+    description: Yield to maturity of a bond.
+  duration:
+    type: number
+    description: Duration of a bond.
+  couponFrequency:
+    type: string
+    description: Frequency of coupon payments for a bond.
+  unrealizedPLPct:
+    type: number
+    description: Unrealized current profit or loss on an instrument, expressed as a percentage.
+  unrealizedPL:
+    type: number
+    description: Unrealized current profit or loss on an instrument, expressed as an absolute number.
+  accruedInterestOnBond:
+    type: number
+    description: Accrued interest on bond holdings.
+  additionalKeyStatistics:
+    description: This field will be used for custom 'Key Statistics'
+    type: object
+    additionalProperties:
+      type: string

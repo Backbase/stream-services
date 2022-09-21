@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/arrangement-manager/service-api/v2/arrangements/batch"
+  },
+  "response": {
+    "status": 207,
+    "jsonBody": [
+      {
+        "resourceId": "021000021",
+        "arrangementId": "arrangement-id",
+        "status": 200
+      },
+      {
+        "resourceId": "021000022",
+        "arrangementId": "arrangement-id",
+        "status": 200
+      },
+      {
+        "resourceId": "021000023",
+        "arrangementId": "arrangement-id",
+        "status": 200
+      }
+    ],
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

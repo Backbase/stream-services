@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.1.0</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -31,9 +30,29 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-core</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-dbs-web-client</artifactId>
@@ -43,21 +62,10 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>1.6.0</version>
         </dependency>
         <dependency>
-            <groupId>org.openapitools</groupId>
-            <artifactId>jackson-databind-nullable</artifactId>
-            <version>0.2.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.springfox</groupId>
-            <artifactId>springfox-core</artifactId>
-            <version>3.0.0</version>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
     </dependencies>
 
@@ -68,6 +76,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>unpack</id>
@@ -157,6 +166,22 @@
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase</groupId>
+                                    <artifactId>portfolio</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.dbs.contact</groupId>
+                                    <artifactId>contact-manager</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
                             </artifactItems>
                             <includes>**/*.yaml, **/*.json</includes>
                         </configuration>
@@ -168,13 +193,14 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
+                <version>0.15.8</version>
                 <executions>
                     <execution>
                         <id>generate-accesscontrol-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.service.v2</apiPackage>
@@ -182,11 +208,23 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-arrangement-manager-client-api-code</id>
+                        <id>generate-accesscontrol-integration-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.accesscontrol.api.integration.v2.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-arrangement-manager-client-api-code</id>
                         <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.arrangement.api.service.v2</apiPackage>
@@ -195,10 +233,10 @@
                     </execution>
                     <execution>
                         <id>generate-user-manager-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.api.service.v2</apiPackage>
@@ -207,10 +245,10 @@
                     </execution>
                     <execution>
                         <id>generate-user-profile-manager-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.profile.api.service.v2</apiPackage>
@@ -219,10 +257,10 @@
                     </execution>
                     <execution>
                         <id>generate-transaction-manager-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
@@ -231,10 +269,10 @@
                     </execution>
                     <execution>
                         <id>generate-payment-order-service-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <typeMappings>
                                 <typeMapping>OffsetDateTime=java.lang.String</typeMapping>
@@ -249,10 +287,10 @@
                     </execution>
                     <execution>
                         <id>generate-audit-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/audit/audit-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.audit.api.service.v2</apiPackage>
@@ -261,10 +299,10 @@
                     </execution>
                     <execution>
                         <id>generate-limit-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/limit/limit-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.limit.api.service.v2</apiPackage>
@@ -273,10 +311,10 @@
                     </execution>
                     <execution>
                         <id>generate-approval-service-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.approval.api.service.v2</apiPackage>
@@ -285,14 +323,50 @@
                     </execution>
                     <execution>
                         <id>generate-identity-integration-client-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <inputSpec>${project.build.directory}/yaml/identity/identity-integration-outbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.identity.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.identity.integration.api.service.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-portfolio-instrument-integration-api-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-instrument-integration-inbound-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.portfolio.instrument.integration.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.portfolio.instrument.integration.api.service.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-portfolio-integration-api-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-integration-inbound-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.portfolio.integration.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.portfolio.api.service.integration.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-contact-manager-service-api-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/yaml/contact-manager/contact-manager-service-api-v2*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.contact.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.contact.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                 </executions>

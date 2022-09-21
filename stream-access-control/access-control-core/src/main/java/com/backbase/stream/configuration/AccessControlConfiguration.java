@@ -1,5 +1,6 @@
 package com.backbase.stream.configuration;
 
+import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupApi;
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -104,7 +106,7 @@ public class AccessControlConfiguration {
 
     @Bean
     public com.backbase.dbs.user.api.service.ApiClient usersApiClient(
-        WebClient dbsWebClient,
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
         com.backbase.dbs.user.api.service.ApiClient apiClient =
@@ -116,7 +118,7 @@ public class AccessControlConfiguration {
 
     @Bean
     public com.backbase.dbs.user.profile.api.service.ApiClient userProfileApiClient(
-        WebClient dbsWebClient,
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
         com.backbase.dbs.user.profile.api.service.ApiClient apiClient =
@@ -128,7 +130,7 @@ public class AccessControlConfiguration {
 
     @Bean
     public com.backbase.dbs.accesscontrol.api.service.ApiClient accessControlApiClient(
-        WebClient dbsWebClient,
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
         com.backbase.dbs.accesscontrol.api.service.ApiClient apiClient =
@@ -141,7 +143,7 @@ public class AccessControlConfiguration {
     @Bean
     @ConditionalOnProperty(value = "backbase.stream.legalentity.sink.use-identity-integration")
     public com.backbase.identity.integration.api.service.ApiClient identityApiClient(
-        WebClient dbsWebClient,
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
         ObjectMapper objectMapper,
         DateFormat dateFormat) {
         if (backbaseStreamConfigurationProperties.getIdentity() == null

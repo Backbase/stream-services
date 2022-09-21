@@ -1,126 +1,121 @@
 package com.backbase.stream.webclient;
 
-import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
+import com.backbase.buildingblocks.webclient.WebClientConstants;
+import com.backbase.stream.webclient.filter.HeadersForwardingClientFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.oauth2.client.AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.ClientCredentialsReactiveOAuth2AuthorizedClientProvider;
-import org.springframework.security.oauth2.client.InMemoryReactiveOAuth2AuthorizedClientService;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.InMemoryReactiveClientRegistrationRepository;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
-import java.text.DateFormat;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Collections;
-import java.util.List;
 
 
 @Slf4j
-@Disabled
+@SpringJUnitConfig
 public class DbsWebClientConfigurationTest {
 
-    private static final int PORT = 12378;
+    ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 
     @Test
-    public void testDateFormat() {
-        DbsWebClientConfiguration dbsWebClientConfiguration = new DbsWebClientConfiguration();
-        DateFormat dateFormat = dbsWebClientConfiguration.dateFormat();
-        Assertions.assertEquals( dateFormat.getClass(), StdDateFormat.class);
-    }
-
-    @Test
-    public void testObjectMapper() throws JsonProcessingException {
-        DbsWebClientConfiguration dbsWebClientConfiguration = new DbsWebClientConfiguration();
-        DateFormat dateFormat = dbsWebClientConfiguration.dateFormat();
-        ObjectMapper objectMapper = dbsWebClientConfiguration.objectMapper(dateFormat);
-        String o = "com.fasterxml.jackson.datatype.jsr310.JavaTimeModule";
-        Assertions.assertTrue(objectMapper.getRegisteredModuleIds().contains(o));
-
-        LocalDateTime localDateTime = LocalDateTime.of(1980, 6, 11, 12, 32);
-        String expected = "\"1980-06-11T12:32:00\"";
-        String actual = objectMapper.writeValueAsString(localDateTime);
-        Assertions.assertEquals("Date Format is Wrong", expected, actual);
-
-        ZoneOffset zoneOffset = ZoneOffset.of("-02:00");
-        OffsetDateTime offsetDateTime = OffsetDateTime.of(localDateTime, zoneOffset);
-        expected = "\"1980-06-11T12:32:00-02:00\"";
-        actual = objectMapper.writeValueAsString(offsetDateTime);
-
-        System.out.println(offsetDateTime);
-        Assertions.assertEquals( expected, actual);
-    }
-
-    @Test
-    public void testWebClient() {
-
-        String tokenUri = "http://localhost:" + PORT + "/api/token-converter/oauth/token";
-
-        ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("dbs")
-            .clientAuthenticationMethod(ClientAuthenticationMethod.POST)
-            .clientId("bb-client")
-            .clientSecret("bb-secret")
-            .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-            .tokenUri(tokenUri)
-            .build();
-
-        DbsWebClientConfiguration dbsWebClientConfiguration = new DbsWebClientConfiguration();
-        DateFormat dateFormat = dbsWebClientConfiguration.dateFormat();
-        ObjectMapper objectMapper = dbsWebClientConfiguration.objectMapper(dateFormat);
-
-        List<ClientRegistration> registrations = Collections.singletonList(clientRegistration);
-        InMemoryReactiveClientRegistrationRepository registrationRepository = new InMemoryReactiveClientRegistrationRepository(registrations);
-
-        InMemoryReactiveOAuth2AuthorizedClientService clientService = new
-            InMemoryReactiveOAuth2AuthorizedClientService(registrationRepository);
-
-        AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager oAuth2AuthorizedClientManager = new AuthorizedClientServiceReactiveOAuth2AuthorizedClientManager(
-            registrationRepository,
-            clientService);
-        ClientCredentialsReactiveOAuth2AuthorizedClientProvider clientProvider =
-            new ClientCredentialsReactiveOAuth2AuthorizedClientProvider();
-
-
-        oAuth2AuthorizedClientManager.setAuthorizedClientProvider(clientProvider);
-
-        WebClient.Builder builder = WebClient.builder();
-
-        WebClient webClient = dbsWebClientConfiguration.dbsWebClient(
-            objectMapper,
-            oAuth2AuthorizedClientManager,
-            builder,
-            new DbsWebClientConfigurationProperties());
-
-        Assertions.assertNotNull(webClient);
-
-        String testUrl = "http://localhost:" + PORT + "/hello-world";
-        Mono<ClientResponse> exchange = webClient.get().uri(testUrl)
-            .exchange()
-            .doOnNext(clientResponse -> {
-                log.info("Client Response Status: " + clientResponse.rawStatusCode());
-            })
-            .onErrorResume(HttpClientErrorException.class, error -> {
-                log.error("Client Error Response: " + error.getResponseBodyAsString());
-                return Mono.error(error);
+    public void webClientCustomizerTest() {
+        contextRunner
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(DbsWebClientConfiguration.class)
+            .run(context -> {
+                assertThat(context).hasSingleBean(WebClient.class);
+                assertThat(context).getBean(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME)
+                    .extracting("builder.filters")
+                    .asList()
+                    .anyMatch(HeadersForwardingClientFilter.class::isInstance);
             });
+    }
 
-        StepVerifier.create(exchange)
-            .expectNextCount(1)
-            .verifyComplete();
+    @Test
+    public void shouldCreateFallbackClientRegistrationWithOverriddenTokenUriTest() {
+        contextRunner
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(DbsWebClientConfiguration.class)
+            .run(context -> {
+                var tokenUri = context.getBean(ReactiveClientRegistrationRepository.class)
+                    .findByRegistrationId(WebClientConstants.DEFAULT_REGISTRATION_ID)
+                    .block()
+                    .getProviderDetails()
+                    .getTokenUri();
+                Assertions.assertEquals("http://token-converter:8080/oauth/token", tokenUri);
+            });
+    }
 
+    @Test
+    public void shouldCreateFallbackClientRegistrationWithCustomEnvVarTest() {
+        contextRunner
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(DbsWebClientConfiguration.class)
+            .withSystemProperties("DBS_TOKEN_URI=http://my-custom-endpoint/oauth/token")
+            .run(context -> {
+                var tokenUri = context.getBean(ReactiveClientRegistrationRepository.class)
+                    .findByRegistrationId(WebClientConstants.DEFAULT_REGISTRATION_ID)
+                    .block()
+                    .getProviderDetails()
+                    .getTokenUri();
+                Assertions.assertEquals("http://my-custom-endpoint/oauth/token", tokenUri);
+            });
+    }
+
+    @Test
+    public void shouldNotCreateFallbackClientRegistrationTest() {
+        contextRunner
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(DbsWebClientConfiguration.class)
+            .withPropertyValues(
+                "spring.security.oauth2.client.registration.bb.authorization-grant-type=client_credentials",
+                "spring.security.oauth2.client.registration.bb.client-id=bb-client",
+                "spring.security.oauth2.client.registration.bb.client-secret=bb-secret",
+                "spring.security.oauth2.client.registration.bb.client-authentication-method=post",
+                "spring.security.oauth2.client.provider.bb.token-uri=http://my-custom-endpoint/oauth/token")
+            .run(context -> {
+                var tokenUri = context.getBean(ReactiveClientRegistrationRepository.class)
+                    .findByRegistrationId(WebClientConstants.DEFAULT_REGISTRATION_ID)
+                    .block()
+                    .getProviderDetails()
+                    .getTokenUri();
+                Assertions.assertEquals("http://my-custom-endpoint/oauth/token", tokenUri);
+            });
+    }
+
+    @Test
+    public void shouldUseCustomRegistrationTest() {
+        contextRunner
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(DbsWebClientConfiguration.class)
+            .withPropertyValues(
+                "spring.security.oauth2.client.registration.dbs.authorization-grant-type=client_credentials",
+                "spring.security.oauth2.client.registration.dbs.client-id=bb-client",
+                "spring.security.oauth2.client.registration.dbs.client-secret=bb-secret",
+                "spring.security.oauth2.client.registration.dbs.client-authentication-method=post",
+                "spring.security.oauth2.client.provider.dbs.token-uri=http://my-custom-endpoint/oauth/token")
+            .run(context -> {
+                var repository = context.getBean(ReactiveClientRegistrationRepository.class);
+                var defaultRegistration = repository.findByRegistrationId(WebClientConstants.DEFAULT_REGISTRATION_ID)
+                    .blockOptional();
+                Assertions.assertTrue(defaultRegistration.isEmpty(),
+                    "It should not create the default registration id.");
+
+                var tokenUri = repository.findByRegistrationId("dbs")
+                    .block()
+                    .getProviderDetails()
+                    .getTokenUri();
+                Assertions.assertEquals("http://my-custom-endpoint/oauth/token", tokenUri);
+            });
     }
 
 }

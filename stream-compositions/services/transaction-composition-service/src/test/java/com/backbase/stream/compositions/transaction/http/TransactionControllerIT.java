@@ -18,10 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.broker.BrokerService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
@@ -49,7 +46,6 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-
 @DirtiesContext
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -57,163 +53,141 @@ import static org.mockserver.model.HttpResponse.response;
 @Slf4j
 class TransactionControllerIT extends IntegrationTest {
 
-  private static final int TOKEN_CONVERTER_PORT = 10000;
-  private static final int INTEGRATION_SERVICE_PORT = 18000;
-  private static final int TRANSACTION_CURSOR_SERVICE_PORT = 12000;
-  private ClientAndServer integrationServer;
-  private ClientAndServer tokenConverterServer;
-  private ClientAndServer transactionCursorServer;
-  private MockServerClient integrationServerClient;
-  private MockServerClient tokenConverterServerClient;
-  private MockServerClient transactionCursorServerClient;
-  private static BrokerService broker;
+    private static final int INTEGRATION_SERVICE_PORT = 18000;
+    private static final int TRANSACTION_CURSOR_SERVICE_PORT = 12000;
+    private ClientAndServer integrationServer;
+    private ClientAndServer transactionCursorServer;
+    private MockServerClient integrationServerClient;
+    private MockServerClient transactionCursorServerClient;
+    private static BrokerService broker;
 
-  @Autowired
-  TransactionController transactionController;
+    @Autowired
+    TransactionController transactionController;
 
-  @Autowired
-  TransactionMapper transactionMapper;
+    @Autowired
+    TransactionMapper transactionMapper;
 
-  @Autowired
-  ObjectMapper objectMapper;
+    @Autowired
+    ObjectMapper objectMapper;
 
-  @MockBean
-  TransactionService transactionService;
+    @MockBean
+    TransactionService transactionService;
 
-  static {
-    System.setProperty("spring.application.name", "transaction-composition-service");
-  }
-
-  @BeforeAll
-  static void initActiveMqBroker() throws Exception {
-    broker = new BrokerService();
-    broker.setBrokerName("activemq");
-    broker.setPersistent(false);
-    broker.start();
-    broker.waitUntilStarted();
-  }
-
-  @BeforeEach
-  void initializeTokenConverterServer() throws IOException {
-    tokenConverterServer = startClientAndServer(TOKEN_CONVERTER_PORT);
-    tokenConverterServerClient = new MockServerClient("localhost", TOKEN_CONVERTER_PORT);
-    tokenConverterServerClient.when(
-        request()
-            .withMethod("POST")
-            .withPath("/oauth/token"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(readContentFromClasspath("token-converter-data/token.json"))
-        );
-  }
-
-  @BeforeEach
-  void initializeIntegrationServer() throws IOException {
-    integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
-    integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
-    integrationServerClient.when(
-        request()
-            .withMethod("POST")
-            .withPath("/integration-api/v2/transactions"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(readContentFromClasspath("integration-data/response.json"))
-        );
-  }
-
-  @BeforeEach
-  void initializeTransactionCursorServer() throws JsonProcessingException {
-    transactionCursorServer = startClientAndServer(TRANSACTION_CURSOR_SERVICE_PORT);
-    transactionCursorServerClient = new MockServerClient("localhost",
-        TRANSACTION_CURSOR_SERVICE_PORT);
-    transactionCursorServerClient.when(
-        request()
-            .withMethod("GET")
-            .withPath("/service-api/v2/cursor/arrangement/4337f8cc-d66d-41b3-a00e-f71ff15d93cg"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(
-                    objectMapper.writeValueAsString(new TransactionCursorResponse()
-                        .withCursor(new TransactionCursor().withId("1")
-                            .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg"))
-                    )
-                ));
-
-    transactionCursorServerClient.when(
-        request()
-            .withMethod("PATCH")
-            .withPath("/service-api/v2/cursor/arrangement/4337f8cc-d66d-41b3-a00e-f71ff15d93cg"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON));
-
-  }
-
-  @AfterEach
-  void stopMockServer() {
-    tokenConverterServer.stop();
-    while (!tokenConverterServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
+    static {
+        System.setProperty("spring.application.name", "transaction-composition-service");
     }
-    integrationServer.stop();
-    while (!integrationServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
+
+    @BeforeAll
+    static void initActiveMqBroker() throws Exception {
+        broker = new BrokerService();
+        broker.setBrokerName("activemq");
+        broker.setPersistent(false);
+        broker.start();
+        broker.waitUntilStarted();
     }
-    transactionCursorServer.stop();
-    while (!transactionCursorServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
+
+    @BeforeEach
+    void initializeIntegrationServer() throws IOException {
+        integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
+        integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
+        integrationServerClient.when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/service-api/v2/transactions"))
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withContentType(MediaType.APPLICATION_JSON)
+                                .withBody(readContentFromClasspath("integration-data/response.json"))
+                );
     }
-  }
 
-  @Test
-  void pullIngestTransactions_Success() throws Exception {
+    @BeforeEach
+    void initializeTransactionCursorServer() throws JsonProcessingException {
+        transactionCursorServer = startClientAndServer(TRANSACTION_CURSOR_SERVICE_PORT);
+        transactionCursorServerClient = new MockServerClient("localhost",
+                TRANSACTION_CURSOR_SERVICE_PORT);
+        transactionCursorServerClient.when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/service-api/v2/cursor/arrangement/4337f8cc-d66d-41b3-a00e-f71ff15d93cg"))
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withContentType(MediaType.APPLICATION_JSON)
+                                .withBody(
+                                        objectMapper.writeValueAsString(new TransactionCursorResponse()
+                                                .withCursor(new TransactionCursor().withId("1")
+                                                        .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg"))
+                                        )
+                                ));
 
-    URI uri = URI.create("/service-api/v2/ingest/pull");
-    WebTestClient webTestClient = WebTestClient.bindToController(transactionController).build();
+        transactionCursorServerClient.when(
+                        request()
+                                .withMethod("PATCH")
+                                .withPath("/service-api/v2/cursor/arrangement/4337f8cc-d66d-41b3-a00e-f71ff15d93cg"))
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withContentType(MediaType.APPLICATION_JSON));
 
-    Type typeOfObjectsList = TypeToken.getParameterized(ArrayList.class, TransactionsPostResponseBody.class).getType();
+    }
 
-    List<TransactionsPostResponseBody> transactionsPostResponses = new Gson()
-        .fromJson(readContentFromClasspath("integration-data/response.json"), typeOfObjectsList);
+    @AfterEach
+    void stopMockServer() {
+        integrationServer.stop();
+        while (!integrationServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
+        }
+        transactionCursorServer.stop();
+        while (!transactionCursorServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
+        }
+    }
 
-    TransactionTask dbsResTask = new TransactionTask("id", null);
-    dbsResTask.setResponse(transactionsPostResponses);
+    @Test
+    void pullIngestTransactions_Success() throws Exception {
+
+        URI uri = URI.create("/service-api/v2/ingest/pull");
+        WebTestClient webTestClient = WebTestClient.bindToController(transactionController).build();
+
+        Type typeOfObjectsList = TypeToken.getParameterized(ArrayList.class, TransactionsPostResponseBody.class).getType();
+
+        List<TransactionsPostResponseBody> transactionsPostResponses = new Gson()
+                .fromJson(readContentFromClasspath("integration-data/response.json"), typeOfObjectsList);
+
+        TransactionTask dbsResTask = new TransactionTask("id", null);
+        dbsResTask.setResponse(transactionsPostResponses);
 
 
-    when(transactionService.processTransactions(any())).thenReturn(
-            Flux.just(UnitOfWork.from("id", dbsResTask)));
+        when(transactionService.processTransactions(any())).thenReturn(
+                Flux.just(UnitOfWork.from("id", dbsResTask)));
 
-    TransactionPullIngestionRequest pullIngestionRequest =
-        new TransactionPullIngestionRequest()
-            .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
-            .withBillingCycles(3)
-            .withExternalArrangementId("externalArrangementId")
-            .withLegalEntityInternalId("leInternalId");
-    webTestClient.post().uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pullIngestionRequest), TransactionPullIngestionRequest.class).exchange()
-        .expectStatus().isCreated();
-  }
+        TransactionPullIngestionRequest pullIngestionRequest =
+                new TransactionPullIngestionRequest()
+                        .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
+                        .withBillingCycles(3)
+                        .withExternalArrangementId("externalArrangementId")
+                        .withLegalEntityInternalId("leInternalId");
+        webTestClient.post().uri(uri)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Mono.just(pullIngestionRequest), TransactionPullIngestionRequest.class).exchange()
+                .expectStatus().isCreated();
+    }
 
-  @Test
-  void pushIngestTransactions_Success() throws Exception {
+    @Test
+    void pushIngestTransactions_Success() throws Exception {
 
-    URI uri = URI.create("/service-api/v2/ingest/push");
-    WebTestClient webTestClient = WebTestClient.bindToController(transactionController).build();
+        URI uri = URI.create("/service-api/v2/ingest/push");
+        WebTestClient webTestClient = WebTestClient.bindToController(transactionController).build();
 
-    TransactionPushIngestionRequest pushIngestionRequest =
-        new TransactionPushIngestionRequest()
-            .withTransactions(List.of(new TransactionsPostRequestBody().withType("type1").
-                withArrangementId("1234").withReference("ref")
-                .withExternalArrangementId("externalArrId")));
+        TransactionPushIngestionRequest pushIngestionRequest =
+                new TransactionPushIngestionRequest()
+                        .withTransactions(List.of(new TransactionsPostRequestBody().withType("type1").
+                                withArrangementId("1234").withReference("ref")
+                                .withExternalArrangementId("externalArrId")));
 
-    webTestClient.post().uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pushIngestionRequest), TransactionPushIngestionRequest.class).exchange()
-        .expectStatus().is4xxClientError();
-  }
+        webTestClient.post().uri(uri)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Mono.just(pushIngestionRequest), TransactionPushIngestionRequest.class).exchange()
+                .expectStatus().is4xxClientError();
+    }
 }

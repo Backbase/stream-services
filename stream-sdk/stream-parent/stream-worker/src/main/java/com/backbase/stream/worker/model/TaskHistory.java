@@ -26,6 +26,10 @@ public class TaskHistory {
         ERROR
     }
 
+    /**
+     * To String method.
+     * @return A human-readable string
+     */
     public String toDisplayString() {
         String entityType = entity != null ? entity.toLowerCase() : "";
         if(errorMessage == null) {

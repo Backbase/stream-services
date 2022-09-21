@@ -11,12 +11,14 @@ spring:
     oauth2:
       client:
         registration:
-          dbs:
+          bb:
             authorization-grant-type: client_credentials
             client-id: bb-client
             client-secret: bb-secret
             client-authentication-method: post
-
+        provider:
+          bb:
+            token-uri: http://localhost:10000/oauth/token
 logging:
   level:
     root: INFO

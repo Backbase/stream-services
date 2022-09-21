@@ -1,18 +1,6 @@
 spring:
   zipkin:
     enabled: false
-  security:
-    oauth2:
-      client:
-        registration:
-          dbs:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          dbs:
-            token-uri: http://localhost:10000/oauth/token
   main:
     allow-bean-definition-overriding: true
   activemq:
@@ -39,15 +27,13 @@ sso:
           type: ENV
           value: SIG_SECRET_KEY
 
+
 backbase:
-  security:
+  communication:
     http:
-      enabled: true
-      adapter:
-        enabled: true
-    service-api:
-      authentication:
-        required-scope: api:service
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://localhost:17000/oauth/token
   stream:
     legalentity:
       sink:
@@ -154,6 +140,7 @@ bootstrap:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
+    org.mockserver: DEBUG
 
 activemq:
   store:

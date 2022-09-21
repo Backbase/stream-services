@@ -1,9 +1,11 @@
 package com.backbase.stream.compositions.productcatalog.core.config;
 
+import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.stream.compositions.integration.productcatalog.ApiClient;
 import com.backbase.stream.compositions.integration.productcatalog.api.ProductCatalogIntegrationApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +37,7 @@ public class ProductCatalogConfiguration {
 
     @Bean
     public ApiClient productCatalogClient(
-            WebClient dbsWebClient,
+            @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
             ObjectMapper objectMapper,
             DateFormat dateFormat) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);

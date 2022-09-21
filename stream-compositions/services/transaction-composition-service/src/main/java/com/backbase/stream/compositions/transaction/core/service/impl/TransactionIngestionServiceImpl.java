@@ -69,7 +69,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
         - if the filter is enabled in configuration
      */
     private Flux<TransactionsPostRequestBody> filterExisting(Flux<TransactionsPostRequestBody> transactionsPostRequestBodyFlux,
-                                   List<String> lastIngestedExternalIds) {
+                                                             List<String> lastIngestedExternalIds) {
         if (!config.isTransactionIdsFilterEnabled() ||
                 CollectionUtils.isEmpty(lastIngestedExternalIds)) {
             return transactionsPostRequestBodyFlux;
@@ -114,7 +114,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
      * @return Flux<TransactionsPostRequestBody>
      */
     private Flux<TransactionsPostRequestBody> pullTransactions(TransactionIngestPullRequest request) {
-       return transactionIntegrationService.pullTransactions(request)
+        return transactionIntegrationService.pullTransactions(request)
                 .map(mapper::mapIntegrationToStream);
     }
 

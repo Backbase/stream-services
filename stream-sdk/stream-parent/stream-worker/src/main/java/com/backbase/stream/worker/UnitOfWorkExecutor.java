@@ -26,6 +26,12 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
 
     protected final StreamWorkerConfiguration streamWorkerConfiguration;
 
+    /**
+     * Unit of Work Executor that schedules work.
+     * @param repository The list of units of work to execute
+     * @param streamTaskExecutor The executors
+     * @param streamWorkerConfiguration The concurrency configuration
+     */
     public UnitOfWorkExecutor(UnitOfWorkRepository<T, String> repository, StreamTaskExecutor<T> streamTaskExecutor,
         StreamWorkerConfiguration streamWorkerConfiguration) {
         this.repository = repository;
@@ -34,6 +40,9 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
         this.streamWorkerConfiguration = streamWorkerConfiguration;
     }
 
+    /**
+     * Register a Unit Of Work to be executed.
+     */
     public Mono<UnitOfWork<T>> register(UnitOfWork<T> unitOfWork) {
         log.info("Registering Unit Of Work: {}", unitOfWork.getUnitOfOWorkId());
         unitOfWork.setRegisteredAt(OffsetDateTime.now());
@@ -42,6 +51,11 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
         return repository.save(unitOfWork);
     }
 
+    /**
+     * Get a Unit Of Work from repository.
+     * @param unitOfWorkId Id of UnitOfWork
+     * @return The UnitOfWork
+     */
     public Mono<UnitOfWork<T>> retrieve(String unitOfWorkId) {
         return repository.findById(unitOfWorkId);
     }
@@ -75,6 +89,11 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
     }
 
 
+    /**
+     * Execute Unit Of Work.
+     * @param unitOfWork Unit Of Work that can be subscribed to.
+     * @return Mono of Unit Of Work
+     */
     @NewSpan
     public Mono<UnitOfWork<T>> executeUnitOfWork(UnitOfWork<T> unitOfWork) {
         return Mono.just(unitOfWork)
@@ -92,7 +111,11 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
         return repository.save(unitOfWork);
     }
 
-
+    /**
+     * Execute Unit Of Work.
+     * @param unitOfWork The Unit Of Work
+     * @return Unit Of Work that can be subscribed to.
+     */
     public Mono<UnitOfWork<T>> executeTasks(UnitOfWork<T> unitOfWork) {
         return Flux.fromIterable(unitOfWork.getStreamTasks())
             .publishOn(taskExecutor)

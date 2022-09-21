@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.backbase.stream.compositions</groupId>
     <artifactId>services</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.1.0</version>
   </parent>
 
   <artifactId>legal-entity-composition-service</artifactId>
@@ -16,26 +16,6 @@
   <name>Stream :: Compositions :: Services :: Legal Entity</name>
 
   <dependencies>
-
-    <!-- Service SDK dependencies -->
-    <dependency>
-      <groupId>com.backbase.buildingblocks</groupId>
-      <artifactId>events</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.backbase.buildingblocks</groupId>
-      <artifactId>service-sdk-starter-eureka-client</artifactId>
-    </dependency>
-
-    <!-- Spring dependencies -->
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-webflux</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
 
     <!-- Streams dependencies -->
     <dependency>
@@ -68,42 +48,20 @@
       <artifactId>product-composition-api</artifactId>
       <version>${project.version}</version>
     </dependency>
-
-    <!-- Third party dependencies -->
-    <dependency>
-      <groupId>org.mapstruct</groupId>
-      <artifactId>mapstruct-processor</artifactId>
-    </dependency>
-
-    <!-- Test dependencies -->
-    <dependency>
-      <groupId>com.backbase.stream.compositions</groupId>
-      <artifactId>test-utils</artifactId>
-      <version>${project.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>activemq-broker</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.activemq.tooling</groupId>
-      <artifactId>activemq-junit</artifactId>
-      <version>${activemq.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>activemq-kahadb-store</artifactId>
-      <version>${activemq.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
     <finalName>${project.artifactId}</finalName>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <DBS_TOKEN_URI>http://localhost:10000/oauth/token</DBS_TOKEN_URI>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
       <!-- Generate models and clients from unpacked OpenAPI specs -->
       <plugin>
         <groupId>com.backbase.oss</groupId>
@@ -159,7 +117,7 @@
             </goals>
             <configuration>
               <inputSpec>
-                ${project.basedir}/../../api/integrations-api/legal-entity-integration-api/src/main/resources/integration-api-v2.yaml
+                ${project.basedir}/../../api/integrations-api/legal-entity-integration-api/src/main/resources/service-api-v2.yaml
               </inputSpec>
               <apiPackage>com.backbase.stream.compositions.legalentity.integration.client
               </apiPackage>

@@ -1,0 +1,28 @@
+# Stream config
+spring:
+  cloud:
+    task:
+      events:
+        enabled: false
+  zipkin:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: moustache-bank
+
+bootstrap:
+  product-catalog:
+    productTypes:
+      - productKindName: "currentAccount"
+        productTypeName: "current-account"
+        typeName: "Current Account"
+        externalProductKindId: "kind1"
+        externalProductId: "current-account"
+      - productKindName: "savingsAccount"
+        productTypeName: "savings-account"
+        typeName: "Savings Accounts"
+        externalProductKindId: "kind2"
+        externalProductId: "savings-account"

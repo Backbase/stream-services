@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.1.0</version>
     </parent>
 
     <artifactId>product-catalog-composition-service</artifactId>
@@ -14,25 +14,7 @@
     <name>Stream :: Compositions :: Services :: Product Catalog</name>
 
     <dependencies>
-        <!-- Service SDK dependencies -->
-        <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>events</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-        </dependency>
 
-        <!-- Spring dependencies -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.backbase.stream.compositions.api</groupId>
             <artifactId>product-catalog-composition-api</artifactId>
@@ -54,31 +36,6 @@
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-catalog-core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>com.backbase.stream.compositions</groupId>
-            <artifactId>test-utils</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-broker</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq.tooling</groupId>
-            <artifactId>activemq-junit</artifactId>
-            <version>${activemq.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-kahadb-store</artifactId>
-            <version>${activemq.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -162,7 +119,7 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/product-catalog-integration-api/integration-api-v2.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/product-catalog-integration-api/service-api-v2.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.stream.compositions.integration.productcatalog.api</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.integration.productcatalog.model</modelPackage>
                         </configuration>

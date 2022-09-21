@@ -44,32 +44,6 @@ class BackbaseStreamConfigurationPropertiesTest {
     }
 
     @Test
-    void shouldDoProperEquals_DbsNotNull() {
-        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
-            new BackbaseStreamConfigurationProperties();
-
-        backbaseStreamConfigurationProperties1.setDbs(new DbsConnectionProperties());
-
-        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties2 =
-            new BackbaseStreamConfigurationProperties();
-
-        Assertions.assertNotEquals(backbaseStreamConfigurationProperties1, backbaseStreamConfigurationProperties2);
-    }
-
-    @Test
-    void shouldDoProperEquals_IdentityNotNull() {
-        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
-            new BackbaseStreamConfigurationProperties();
-
-        backbaseStreamConfigurationProperties1.setIdentity(new IdentityConnectionProperties());
-
-        BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties2 =
-            new BackbaseStreamConfigurationProperties();
-
-        Assertions.assertNotEquals(backbaseStreamConfigurationProperties1, backbaseStreamConfigurationProperties2);
-    }
-
-    @Test
     void shouldDoProperEquals_OneObject_Default() {
         BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties1 =
             new BackbaseStreamConfigurationProperties();
@@ -113,7 +87,7 @@ class BackbaseStreamConfigurationPropertiesTest {
 
         DbsConnectionProperties dbs = backbaseStreamConfigurationProperties.getDbs();
 
-        Assertions.assertNull(dbs);
+        Assertions.assertNotNull(dbs);
     }
 
     @Test
@@ -236,16 +210,16 @@ class BackbaseStreamConfigurationPropertiesTest {
     @Test
     void shouldNotEqualsDbs_TwoObjects_Different_LimitsManagerBaseUrlNull() {
         DbsConnectionProperties dbs1 = new DbsConnectionProperties();
-        
+
         // dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
         // dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
         // dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
         dbs1.setLimitsManagerBaseUrl(null);
         // dbs1.setUserManagerBaseUrl("http://test-user-manager:8181");
         // dbs1.setUserProfileManagerBaseUrl("http://test-user-profile-manager:8181");
-        
+
         DbsConnectionProperties dbs2 = new DbsConnectionProperties();
-        
+
         Assertions.assertNotEquals(dbs1, dbs2);
     }
 
@@ -267,16 +241,16 @@ class BackbaseStreamConfigurationPropertiesTest {
     @Test
     void shouldNotEqualsDbs_TwoObjects_Different_UserManagerBaseUrlNull() {
         DbsConnectionProperties dbs1 = new DbsConnectionProperties();
-        
+
         // dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
         // dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
         // dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
         // dbs1.setLimitsManagerBaseUrl("http://test-limits-manager:8181");
         dbs1.setUserManagerBaseUrl(null);
         // dbs1.setUserProfileManagerBaseUrl("http://test-user-profile-manager:8181");
-        
+
         DbsConnectionProperties dbs2 = new DbsConnectionProperties();
-        
+
         Assertions.assertNotEquals(dbs1, dbs2);
     }
 
@@ -298,16 +272,16 @@ class BackbaseStreamConfigurationPropertiesTest {
     @Test
     void shouldNotEqualsDbs_TwoObjects_Different_UserProfileManagerBaseUrlNull() {
         DbsConnectionProperties dbs1 = new DbsConnectionProperties();
-        
+
         // dbs1.setAccessControlBaseUrl("http://test-access-control:8181");
         // dbs1.setArrangementManagerBaseUrl("http://test-arrangement-manager:8181");
         // dbs1.setTransactionManagerBaseUrl("http://test-transaction-manager:8181");
         // dbs1.setLimitsManagerBaseUrl("http://test-limits-manager:8181");
         // dbs1.setUserManagerBaseUrl("http://test-user-manager:8181");
         dbs1.setUserProfileManagerBaseUrl(null);
-        
+
         DbsConnectionProperties dbs2 = new DbsConnectionProperties();
-        
+
         Assertions.assertNotEquals(dbs1, dbs2);
     }
 
@@ -342,18 +316,18 @@ class BackbaseStreamConfigurationPropertiesTest {
 
         Assertions.assertNotEquals(0, dbs.hashCode());
     }
-    
+
     @Test
     void shouldGetHashCodeDbs_props_null() {
         DbsConnectionProperties dbs = new DbsConnectionProperties();
-        
+
         dbs.setAccessControlBaseUrl(null);
         dbs.setArrangementManagerBaseUrl(null);
         dbs.setLimitsManagerBaseUrl(null);
         dbs.setTransactionManagerBaseUrl(null);
         dbs.setUserManagerBaseUrl(null);
         dbs.setUserProfileManagerBaseUrl(null);
-        
+
         Assertions.assertNotEquals(0, dbs.hashCode());
     }
 
@@ -363,7 +337,7 @@ class BackbaseStreamConfigurationPropertiesTest {
 
         Assertions.assertNotNull(dbs.toString());
     }
-    
+
     @Test
     void shouldGetToStringDbs_props_null() {
         DbsConnectionProperties dbs = new DbsConnectionProperties();
@@ -373,7 +347,7 @@ class BackbaseStreamConfigurationPropertiesTest {
         dbs.setTransactionManagerBaseUrl(null);
         dbs.setUserManagerBaseUrl(null);
         dbs.setUserProfileManagerBaseUrl(null);
-        
+
         Assertions.assertNotNull(dbs.toString());
     }
 
@@ -384,7 +358,7 @@ class BackbaseStreamConfigurationPropertiesTest {
 
         IdentityConnectionProperties identity = backbaseStreamConfigurationProperties.getIdentity();
 
-        Assertions.assertNull(identity);
+        Assertions.assertNotNull(identity);
     }
 
     @Test
@@ -443,13 +417,13 @@ class BackbaseStreamConfigurationPropertiesTest {
 
         Assertions.assertNotEquals(0, identity.hashCode());
     }
-    
+
     @Test
     void shouldGetHashCodeIdentity_props_null() {
         IdentityConnectionProperties identity = new IdentityConnectionProperties();
-        
+
         identity.setIdentityIntegrationBaseUrl(null);
-        
+
         Assertions.assertNotEquals(0, identity.hashCode());
     }
 
@@ -532,7 +506,7 @@ class BackbaseStreamConfigurationPropertiesTest {
 
         String limitsManagerBaseUrl = dbsConnectionProperties.getLimitsManagerBaseUrl();
 
-        Assertions.assertEquals("http://limits-manager:8080", limitsManagerBaseUrl);
+        Assertions.assertEquals("http://limit:8080", limitsManagerBaseUrl);
     }
 
     @Test

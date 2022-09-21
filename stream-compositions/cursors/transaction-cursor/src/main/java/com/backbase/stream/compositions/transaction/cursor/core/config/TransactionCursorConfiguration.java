@@ -15,15 +15,15 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @AllArgsConstructor
 public class TransactionCursorConfiguration {
 
-  @Bean
-  public TransactionCursorMapper mapper() {
-    return Mappers.getMapper(TransactionCursorMapper.class);
-  }
+    @Bean
+    public TransactionCursorMapper mapper() {
+        return Mappers.getMapper(TransactionCursorMapper.class);
+    }
 
-  @Bean
-  public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-    return http
-        .csrf().disable()
-        .build();
-  }
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        return http
+                .csrf().disable()
+                .build();
+    }
 }

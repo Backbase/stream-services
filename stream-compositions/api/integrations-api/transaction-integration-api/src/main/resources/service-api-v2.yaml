@@ -1,0 +1,91 @@
+openapi: 3.0.3
+info:
+  title: Transaction Integration API
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/integration-api/v1
+    description: The server
+tags:
+  - name: TransactionIntegration
+paths:
+  /service-api/v2/transactions:
+    post:
+      tags:
+        - TransactionIntegration
+      summary: Pulls transactions for the Arrangement and either date range of number of billing cycles.
+      description: Pulls transactions.
+      operationId: pullTransactions
+      requestBody:
+        description: Push Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PullIngestionRequest'
+
+      responses:
+        "200":
+          description: Transactions sucessfully returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PullTransactionsResponse'
+
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+components:
+  schemas:
+    BadRequest:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+
+    PullIngestionRequest:
+      type: object
+      properties:
+        arrangementId:
+          type: string
+        externalArrangementId:
+          type: string
+        dateRangeStart:
+          type: string
+          format: date-time
+        dateRangeEnd:
+          type: string
+          format: date-time
+        billingCycles:
+          type: integer
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+
+    PullTransactionsResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: '../../../target/yaml/transaction-manager/transaction-manager-service-api-v2.9.0.yaml#/components/schemas/TransactionsPostRequestBody'
+
+    InternalServerError:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+

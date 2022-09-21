@@ -1,0 +1,20 @@
+required:
+  - code
+  - name
+type: object
+properties:
+  code:
+    type: string
+    description: Unique sub-portfolio identificator, used to identify a sub-portfolio in a bank.
+  name:
+    type: string
+    description: Name of a sub-portfolio.
+  valuation:
+    $ref: money.yaml
+    description: Valuation of a sub-portfolio, expressed as a monetary amount.
+  performance:
+    type: number
+    description: Performance of a sub portfolio, expressed as a percentage.
+  percentOfParent:
+    type: number
+    description: Share of positions in a sub portfolio across all the portfolios, expressed as a percentage.

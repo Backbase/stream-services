@@ -1,11 +1,13 @@
 package com.backbase.stream.compositions.product.core.config;
 
+import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.stream.compositions.integration.product.ApiClient;
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +53,9 @@ public class ProductCompositionConfiguration {
 
     @Bean
     public com.backbase.stream.compositions.transaction.ApiClient transactionClient(
-            WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
+            @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+            ObjectMapper objectMapper,
+            DateFormat dateFormat) {
         com.backbase.stream.compositions.transaction.ApiClient apiClient =
                 new com.backbase.stream.compositions.transaction.ApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(productConfigurationProperties.getChains().getTransactionComposition().getBaseUrl());
@@ -61,7 +65,9 @@ public class ProductCompositionConfiguration {
 
     @Bean
     public com.backbase.stream.compositions.paymentorder.ApiClient paymentOrderClient(
-            WebClient dbsWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
+            @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+            ObjectMapper objectMapper,
+            DateFormat dateFormat) {
         com.backbase.stream.compositions.paymentorder.ApiClient apiClient =
                 new com.backbase.stream.compositions.paymentorder.ApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(productConfigurationProperties.getChains().getPaymentOrderComposition().getBaseUrl());
@@ -70,8 +76,10 @@ public class ProductCompositionConfiguration {
     }
 
     @Bean
-    public ApiClient productClient(WebClient dbsWebClient, ObjectMapper objectMapper,
-                                   DateFormat dateFormat) {
+    public ApiClient productClient(
+            @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+            ObjectMapper objectMapper,
+            DateFormat dateFormat) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(productConfigurationProperties.getIntegrationBaseUrl());
 

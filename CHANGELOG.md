@@ -1,7 +1,392 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+## [3.1.0](https://github.com/Backbase/stream-services/compare/3.0.0...3.1.0)
+- Upgraded to DBS 2022.09
+
+## [3.0.0](https://github.com/Backbase/stream-services/compare/2.88.0...3.0.0)
+### Added
+- We welcome [Stream Compositions](stream-compositions)! More details can be found in the [confluence page](https://backbase.atlassian.net/wiki/spaces/ES/pages/3481894959/Stream+Services+3.0).
+
+## [2.86.1](https://github.com/Backbase/stream-services/compare/2.86.0...2.86.1)
+### Fixed
+- Added qualifier for WebClient in ContactsServiceConfiguration.
+
+## [2.86.0](https://github.com/Backbase/stream-services/compare/2.85.0...2.86.0)
+### Fixed
+- Custom Job Role Mapping Issue is fixed by adding missing mapping of BusinessFunction object of BusinessFunctionGroupMapper class
+
+## [2.85.0](https://github.com/Backbase/stream-services/compare/2.84.0...2.85.0)
+### Added
+- Deploying task executables and http services as docker images using `repo.backbase.com/backbase-stream-images` registry. 
+> e.g. `repo.backbase.com/backbase-stream-images/legal-entity-bootstrap-task:2.85.0`
+
+### Fixed
+- Logging configuration was broken in some modules given wrong dependency scope for `stream-test-support`.
+
+### Changed
+- Segregating `moustache-bank` profile in `moustache-bank-subsidiaries` to support ingesting the root legal entity without any dependency on product service.
+
+## [2.84.0](https://github.com/Backbase/stream-services/compare/2.83.0...2.84.0)
+### Added
+- Contacts Support Added for Legal Entity, Service Agreement and Users 
+- Usage Sample of Bootstrap json to be added to Legal Entity, Service Agreement and User 
+
+- Contacts Support for LE Contacts
+```yaml
+name: ABC Company
+legalEntityType: CUSTOMER
+contacts:
+    - category: Employee
+      externalId: a8141b9e06621c312001
+      addressLine1: 410 7th St
+      addressLine2: ''
+      streetName: ''
+      postCode: 93950
+      town: Pacific Grove
+      countrySubDivision: CA
+      country: US
+      name: Beatrice D. Ma
+      contactPerson: N/A
+      phoneNumber: 530 676 8602
+      Email: be@mail.com
+      accounts:
+      - externalId: a8141b9e06632d362001
+        name: Checking USD 2247
+        alias: My account
+        accountNumber: '9948772699182247'
+        bankName: CitiBank
+        bankAddressLine1: 736 Levy Court
+        bankAddressLine2: ''
+        bankStreetName: ''
+        bankPostCode: '01720'
+        bankTown: Acton
+        bankCountrySubDivision: MA
+        bankCountry: US
+        BIC: CITIUS33
+        bankCode: '11103093'
+```
+
+- Contacts Support for User Contacts
+```yaml
+name: John
+realmName: customer
+externalId: john
+legalEntityType: CUSTOMER
+users:
+- user:
+    externalId: john99
+    fullName: John Doe
+  referenceJobRoleNames:
+  - Retail Customer
+  contacts:
+  - category: Employee
+    externalId: a8141b9e06621c12001
+    addressLine1: 736 Levy Court
+    addressLine2: ''
+    streetName: ''
+    postCode: '01720'
+    town: Acton
+    countrySubDivision: MA
+    country: US
+    name: Barbara P. Dolan
+    contactPerson: N/A
+    phoneNumber: 617 509 6995
+    Email: Barbara@barb.com
+    accounts:
+    - externalId: a8141b9e06632d62001
+      name: Checking USD 0023
+      alias: ''
+      accountNumber: '9249194950590023'
+      bankName: CitiBank
+      bankAddressLine1: 736 Levy Court
+      bankAddressLine2: ''
+      bankStreetName: ''
+      bankPostCode: '01720'
+      bankTown: Acton
+      bankCountrySubDivision: MA
+      bankCountry: US
+      BIC: CITIUS33
+      bankCode: '11103093'
+    - externalId: a8141b9e06632d62002
+      name: Checking USD 4858
+      alias: ''
+      accountNumber: '1445192940594858'
+      bankName: CitiBank
+      bankAddressLine1: 736 Levy Court
+      bankAddressLine2: ''
+      bankStreetName: ''
+      bankPostCode: '01720'
+      bankTown: Acton
+      bankCountrySubDivision: MA
+      bankCountry: US
+      BIC: CITIUS33
+      bankCode: '11103093'
+```
+
+- Contacts Support for Service Agreement
+```yaml
+name: Bory Coffee Company Ltd
+customServiceAgreement:
+  externalId: salary_bory_csa
+  name: Salary Services for Bory Coffee Company
+  description: Custom Service Agreement Between Salary Services and Bory Coffee Company
+  status: ENABLED
+  isMaster: 'false'
+  participants:
+  - externalId: bory-coffee-ltd
+    sharingUsers: false
+    sharingAccounts: true
+    admins:
+    - kristelcfo
+  - externalId: salary-services-ltd
+    sharingUsers: true
+    sharingAccounts: false
+    users:
+    - hhsa01
+    - fbsa02
+  contacts:
+  - category: Employee
+    externalId: a8141b9e06621c512001
+    addressLine1: 02 Meadows Dr,
+    addressLine2: ''
+    streetName: ''
+    postCode: 30010
+    town: Columbus
+    countrySubDivision: GA
+    country: US
+    name: Troy M. Hazard
+    contactPerson: N/A
+    phoneNumber: 530 676 5523
+    Email: Tr@mail.com
+    accounts:
+    - externalId: a8141b9e06632d562001
+      name: Checking USD 0022
+      alias: ''
+      accountNumber: '2512948500122022'
+      bankName: Bank of America
+      bankAddressLine1: 50 Georgia St
+      bankAddressLine2: ''
+      bankStreetName: ''
+      bankPostCode: '30102'
+      bankTown: Atlanta
+      bankCountrySubDivision: GA
+      bankCountry: US
+      BIC: BOFAUS6H
+      bankCode: '121000358'
+```
+## [2.83.0]
+### Fixed
+- Adding Custom Role Permission Issue
+
+## [2.82.0]
+### Fixed
+- Adding fallback to default settings for services endpoints.
+
+## [2.81.0]
+### Fixed
+- [176](https://github.com/Backbase/stream-services/issues/176): Update Job Role does not consider the 207 multi-status response
+
+## [2.80.0]
+### Added
+- Support for creating data group of type `REPOSITORIES`.
+```yaml
+referenceJobRoles:
+  - name: Custom Engagement Template Viewer
+    description: View Custom Engagement Default Templates
+    functionGroups:
+      - name: Custom Engagement Template Viewer
+        functions:
+          - functionId: '1100'
+            name: Manage Content
+            privileges:
+              - privilege: view
+productGroups:
+  - name: Repository_Group_Template_Custom
+    description: Repository group that provides view access to the repository where custom engagement default templates are stored
+    productGroupType: REPOSITORIES
+    customDataGroupItems:
+      - internalId: template-custom
+    users:
+      - user:
+          externalId: emp-john
+          fullName: John Doe
+        referenceJobRoleNames:
+          - Custom Engagement Template Viewer
+```
+
+## [2.78.0]
+### Added
+- Support for updating Portfolio Capability data. Example([stream-portfolio/readme.md](stream-portfolio/readme.md#Bootstrap Ingestion Configuration))
+
+## [2.76.0]
+### Added
+- Support for LE limits
+```yaml
+name: Bory Breweries Ltd
+legalEntityType: CUSTOMER
+limit:
+  currencyCode: USD
+  transactional: 10000
+  daily: 250000
+  weekly: 500000
+  monthly: 2000000
+  quarterly: 600000
+  yearly: 1200000
+```
+- Support for SA limits
+```yaml
+name: Bory Breweries Ltd
+legalEntityType: CUSTOMER
+masterServiceAgreement:
+  limit:
+    currencyCode: USD
+    transactional: 10000
+    daily: 250000
+    weekly: 500000
+    monthly: 2000000
+    quarterly: 600000
+    yearly: 1200000
+```
+- Support for LE in SA limits
+```yaml
+name: Bory Breweries Ltd
+legalEntityType: CUSTOMER
+masterServiceAgreement:
+  participants:
+    - externalId: bory-brew-ltd
+      limit:
+        currencyCode: USD
+        transactional: 10000
+        daily: 250000
+        weekly: 500000
+        monthly: 2000000
+        quarterly: 600000
+        yearly: 1200000
+```
+```yaml
+name: Bory Breweries Ltd
+legalEntityType: CUSTOMER
+customServiceAgreement:
+  participants:
+    - externalId: bory-brew-ltd
+      limit:
+        currencyCode: USD
+        transactional: 10000
+        daily: 250000
+        weekly: 500000
+        monthly: 2000000
+        quarterly: 600000
+        yearly: 1200000
+```
+- Support for Job role limits
+```yaml
+jobRoles:
+  - name: Custom Accounts and Payments
+    description: Custom Accounts and Payments
+    functionGroups:
+      - name: Products, payments, txn, contacts, actions, user profile, devices
+        functions:
+          - functionId: '1017'
+            name: US Domestic Wire
+            privileges:
+              - privilege: create
+                supportsLimit: true
+                limit:
+                  currencyCode: USD
+                  daily: 100000
+                  weekly: 400000
+                  transactional: 10000
+```
+```yaml
+referenceJobRoles:
+  - name: admin
+    description: Admin
+    functionGroups:
+      - name: admin
+        functions:
+          - functionId: '1017'
+            name: US Domestic Wire
+            privileges:
+              - privilege: create
+                supportsLimit: true
+                limit:
+                  currencyCode: USD
+                  daily: 100000
+                  weekly: 400000
+                  transactional: 10000
+```
+- Support for User Job role limits
+```yaml
+referenceJobRoles:
+  - name: Domestic Payments
+    description: Domestic Payments
+    functionGroups:
+      - name: Products, payments, txn, contacts, actions, user profile, devices
+        functions:
+          - functionId: '1017'
+            name: US Domestic Wire
+            privileges:
+              - privilege: approve
+                limit:
+                  currencyCode: USD
+                  transactional: 15000
+productGroups:
+  - internalId: bblicdag1
+    name: My business salary account
+    description: The account of my business I use for salary payments
+    users:
+      - user:
+          externalId: hhsa01
+          fullName: Henk Hurry
+          supportsLimit: true
+        referenceJobRoleNames:
+          - Domestic Payments
+```
+
+## [2.75.0]
+Clean up of many old components and replaced Stream SDK with Service SDK 14
+> By moving to Service SDK, pipelines can now be configured like any other Backbase service using the Service SDK
+>
+> **Migrate your CICD pipelines to the Service SDK standards**
+
+### Removed
+- Old Legal Entity Open API definitions
+- Stream Transactions Open API Spec
+- Removed Spring Cloud Data Flow components as nobody uses it
+  - Stream Cursor Source
+  - Legal Entity Sink
+  - Product Sink
+  - Transactions Sink
+  - Transactions HTTP
+- Removed Stream SDK Starters
+  - `stream-aio-starter-parent` (replaced by `service-sdk-core-starter`)
+  - `stream-batch-starter-parent` (replaced by `service-sdk-starter-core` + `spring-boot-starter-batch`)
+  - `stream-generated-client-starter-parent`
+  - `stream-processor-starter-parent`
+  - `stream-sdk-starter-core`(replaced by `service-sdk-starter-core`)
+  - `stream-sink-starter-parent`
+  - `stream-source-starter-parent`
+- Removed `stream-dbs-web-client` (replaced by `service-sdk-web-client`)
+  - The OAuth2 client (provider and registration) initially defined as `dbs` is now called `bb`, hence the token converter configuration should to be updated (e.g. `spring.security.oauth2.client.provider.bb.token-uri=http://token-converter:8080/oauth/token`).
+
+### Changed
+- Replaced Stream SDK with Service SDK 14.1.0.
+  - Upgrade Spring Boot 2.6.6
+
+## [2.74.0]
+### Fixed
+- Fix allowing empty product-groups to be created.
+
+## [2.73.0]
+### Fixed
+- Fix to add an arrangement in more than one product group
+
+## [2.72.0]
+### Changed
+- Update Spring Boot to 2.5.14
+- Update Swagger Core to 2.2.0
+- Update bcprov-jdk15on to 1.70 
 
 ## [2.71.0]
 ### Added
@@ -12,7 +397,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - Fix for issue https://github.com/Backbase/stream-services/issues/138
 
-## [2.70.0]
+## [2.71.0]
 ### Changed
 - Upgraded to DBS 2022.04
 - Upgrade Spring Boot to 2.15.13
@@ -59,11 +444,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - JUnit and Hibernate Validator dependency update to address security vulnerabilities.
 
-## [3.0.0] 
-### Removed
-- Sources, Processors and Sinks for Stream Components
-- Removed obsolete Stream SDK modules in preparation to support ServiceSDK
-- Removed generators. Test data generation to be done using `space-generator`
 ## [2.62.0]
 ### Fixed
 - Legal Entity Saga: linkLegalEntityToRealm method executed multiple times ( when multiple users are ingested): `unique constraint (PK_LE_ASSIGN_REALM) violated`
@@ -89,12 +469,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
             .map(LegalEntityTask::getData)
             .doOnNext(actual -> log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
  ```
-## [3.0.0] 
-### Removed
-- Sources, Processors and Sinks for Stream Components
-- Removed obsolete Stream SDK modules in preparation to support ServiceSDK
-- Removed generators. Test data generation to be done using `space-generator`
-
 ## [2.51.0]
 ### Maintenance
 - Update to 2021.10
@@ -643,4 +1017,6 @@ backbase:
 [2.8.0]: https://github.com/Backbase/stream-services/compare/2.7.0...2.8.0
 [2.7.0]: https://github.com/Backbase/stream-services/compare/2.6.0...2.7.0
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
-[2.70.1]: https://github.com/Backbase/stream-services/compare/2.70.0...2.70.1
+[2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
+[2.75.0]: https://github.com/Backbase/stream-services/compare/2.74.0...2.75.0
+

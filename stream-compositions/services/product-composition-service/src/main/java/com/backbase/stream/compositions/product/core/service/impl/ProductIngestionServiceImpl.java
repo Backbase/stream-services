@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.product.core.service.impl;
 
 import com.backbase.buildingblocks.presentation.errors.BadRequestException;
 import com.backbase.buildingblocks.presentation.errors.Error;
+import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
@@ -10,6 +11,7 @@ import com.backbase.stream.compositions.product.core.service.ProductIntegrationS
 import com.backbase.stream.compositions.product.core.service.ProductPostIngestionService;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import lombok.AllArgsConstructor;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 public class ProductIngestionServiceImpl implements ProductIngestionService {
     private final BatchProductIngestionSaga batchProductIngestionSaga;
     private final ProductIntegrationService productIntegrationService;
+    private final ProductConfigurationProperties config;
 
     private final Validator validator;
 
@@ -83,25 +86,27 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @return Ingested product group
      */
     private Mono<ProductIngestResponse> sendToDbs(ProductIngestResponse res) {
-       return batchProductIngestionSaga.process(buildBatchTask(res.getProductGroup()))
+        return batchProductIngestionSaga.process(buildBatchTask(res))
                 .map(BatchProductGroupTask::getData)
                 .map(pg -> ProductIngestResponse.builder()
-                        .productGroup((ProductGroup) pg.getProductGroups().get(0))
+                        .productGroups(pg.getProductGroups().stream().map(g -> (ProductGroup) g).collect(Collectors.toList()))
                         .build());
     }
 
-    private BatchProductGroupTask buildBatchTask(ProductGroup productGroup) {
+    private BatchProductGroupTask buildBatchTask(ProductIngestResponse res) {
         BatchProductGroup bpg = new BatchProductGroup();
-        bpg.addProductGroupsItem(productGroup);
-        bpg.setServiceAgreement(productGroup.getServiceAgreement());
-        return new BatchProductGroupTask(productGroup.getServiceAgreement().getInternalId(),
-                bpg, BatchProductGroupTask.IngestionMode.UPDATE);
+        res.getProductGroups().forEach(bpg::addProductGroupsItem);
+
+        bpg.setServiceAgreement(new ServiceAgreement()
+                .internalId(res.getServiceAgreementInternalId())
+                .externalId(res.getServiceAgreementExternalId()));
+
+        return new BatchProductGroupTask(res.getServiceAgreementInternalId(),
+                bpg, config.getIngestionMode());
     }
 
-
-
     private Mono<ProductIngestResponse> validate(ProductIngestResponse res) {
-        Set<ConstraintViolation<ProductGroup>> violations = validator.validate(res.getProductGroup());
+        Set<ConstraintViolation<List<ProductGroup>>> violations = validator.validate(res.getProductGroups());
 
         if (!CollectionUtils.isEmpty(violations)) {
             List<Error> errors = violations.stream().map(c -> new Error()

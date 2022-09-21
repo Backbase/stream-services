@@ -1,36 +1,17 @@
 # Stream config
 spring:
+  cloud:
+    task:
+      events:
+        enabled: false
   zipkin:
     enabled: false
-  security:
-    oauth2:
-      client:
-        registration:
-          dbs:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          dbs:
-            token-uri: http://token-converter:8080/oauth/token
-
-backbase:
-  stream:
-    dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
 
 ---
 spring:
-  profiles: moustache-bank
-  cloud:
-    kubernetes:
-      discovery:
-        # Set to false if using Eureka for service discovery
-        enabled: true
-  zipkin:
-    enabled: false
+  config:
+    activate:
+      on-profile: moustache-bank
 
 backbase:
   stream:
@@ -38,11 +19,7 @@ backbase:
       sink:
         useIdentityIntegration: true
 
-logging:
-  level:
-    root: INFO
-
-# Legal Entity Structure Configuration
+# Root Legal Entity Structure Configuration
 bootstrap:
   legalEntity:
     name: "Moustache Bank"
@@ -56,6 +33,7 @@ bootstrap:
           - name: "Manage Entitlements"
             functions:
               - functionId: "1019"
+                name: "Manage Data Groups"
                 functionCode: "manage.data.groups"
                 privileges:
                   - privilege: "view"
@@ -64,6 +42,7 @@ bootstrap:
                   - privilege: "delete"
                   - privilege: "approve"
               - functionId: "1020"
+                name: "Manage Function Groups"
                 functionCode: "manage.function.groups"
                 privileges:
                   - privilege: "view"
@@ -77,25 +56,30 @@ bootstrap:
           - name: "Products, payments, txn, contacts"
             functions:
               - functionId: "1006"
+                name: "Product Summary"
                 functionCode: "product.summary"
                 privileges:
                   - privilege: "view"
               - functionId: "1003"
+                name: "Transactions"
                 functionCode: "transactions"
                 privileges:
                   - privilege: "view"
                   - privilege: "edit"
               - functionId: "1017"
+                name: "US Domestic Wire"
                 functionCode: "us.domestic.wire"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
               - functionId: "1018"
+                name: "US Foreign Wire"
                 functionCode: "us.foreign.wire"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
               - functionId: "1005"
+                name: "Contacts"
                 functionCode: "contacts"
                 privileges:
                   - privilege: "view"
@@ -113,9 +97,24 @@ bootstrap:
     users:
       - user:
           externalId: "admin"
+          fullName: "Backbase Root Admin"
           identityLinkStrategy: "CREATE_IN_IDENTITY"
+          emailAddress:
+            address: "bbadmin@email.com"
+          mobileNumber:
+            number: "1234567890"
         referenceJobRoleNames:
           - "Entitlements - Manager"
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "moustache-bank & moustache-bank-subsidiaries"
+
+# Subsidiaries Legal Entity Structure Configuration
+bootstrap:
+  legalEntity:
     subsidiaries:
       - name: "Moustache Bank USA"
         realmName: "backbase"
@@ -137,7 +136,12 @@ bootstrap:
             users:
               - user:
                   externalId: "sara"
+                  fullName: "Sara Jones"
                   identityLinkStrategy: "CREATE_IN_IDENTITY"
+                  emailAddress:
+                    address: "sara@email.com"
+                  mobileNumber:
+                    number: "1234567890"
                 referenceJobRoleNames:
                   - "Retail User - USA"
             productGroups:

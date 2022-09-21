@@ -5,33 +5,18 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.1.0</version>
     </parent>
 
     <artifactId>transaction-composition-service</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.1.0</version>
 
     <packaging>jar</packaging>
 
     <name>Stream :: Compositions :: Services :: Transaction</name>
 
     <dependencies>
-        <!-- Service SDK dependencies -->
-        <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>events</artifactId>
-        </dependency>
 
-
-        <!-- Spring dependencies -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.backbase.stream.compositions.api</groupId>
             <artifactId>transaction-composition-api</artifactId>
@@ -49,52 +34,13 @@
             <artifactId>transaction-events</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.backbase.stream.compositions.api</groupId>
-            <artifactId>transaction-composition-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>transactions-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-        </dependency>
-
-        <!-- Test dependencies -->
-        <dependency>
-            <groupId>com.backbase.stream.compositions</groupId>
-            <artifactId>test-utils</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-broker</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq.tooling</groupId>
-            <artifactId>activemq-junit</artifactId>
-            <version>${activemq.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-kahadb-store</artifactId>
-            <version>${activemq.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>transactions-core</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
     <build>
@@ -151,7 +97,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/../../api/integrations-api/transaction-integration-api/src/main/resources/integration-api-v2.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/../../api/integrations-api/transaction-integration-api/src/main/resources/service-api-v2.yaml</inputSpec>
                             <apiPackage>com.backbase.stream.compositions.transaction.integration.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.transaction.integration.client.model</modelPackage>
                             <additionalProperties>useWithModifiers=true</additionalProperties>

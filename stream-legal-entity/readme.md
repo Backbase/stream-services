@@ -32,20 +32,6 @@ The Legal Entity Saga can be used in several ways:
 The following configuration shows the required properties for Stream Legal Entity service
 
 ```yaml
-spring:
-  security:
-    oauth2:
-      client:
-        provider:
-          dbs:
-            token-uri: http://token-converter:8080/oauth/token
-        registration:
-          dbs:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-
 backbase:
   stream:
     dbs:

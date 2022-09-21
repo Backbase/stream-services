@@ -1,0 +1,11 @@
+required:
+  - name
+  - percentage
+type: object
+properties:
+  name:
+    type: string
+    description: Name of the allocation item.
+  percentage:
+    type: number
+    description: Percentage value of the allocation item.

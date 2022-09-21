@@ -1,0 +1,11 @@
+required:
+  - code
+  - name
+type: object
+properties:
+  name:
+    type: string
+    description: Name of a sub asset class.
+  code:
+    type: string
+    description: Code of a sub asset class.

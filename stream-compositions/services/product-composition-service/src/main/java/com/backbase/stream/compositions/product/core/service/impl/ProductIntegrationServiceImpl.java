@@ -6,6 +6,7 @@ import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
+import com.backbase.stream.legalentity.model.ProductGroup;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,24 +25,42 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
      */
     public Mono<ProductIngestResponse> pullProductGroup(ProductIngestPullRequest ingestPullRequest) {
         return productIntegrationApi
-                .pullProductGroup(
-                        mapper.mapStreamToIntegration(ingestPullRequest))
+                .pullProductGroup(mapper.mapStreamToIntegration(ingestPullRequest))
                 .map(mapper::mapResponseIntegrationToStream)
+                .map(response -> this.setServiceAgreementIds(ingestPullRequest, response))
                 .map(pir -> pir.withAdditions(ingestPullRequest.getAdditions()))
                 .onErrorResume(this::handleIntegrationError)
                 .flatMap(this::handleIntegrationResponse);
     }
 
+    /**
+     * Sets service agreements ids from request to response.
+     *
+     * @param request  ProductIngestPullRequest
+     * @param response ProductIngestResponse
+     * @return ProductIngestResponse
+     */
+    private ProductIngestResponse setServiceAgreementIds(
+            ProductIngestPullRequest request, ProductIngestResponse response) {
+        response.setServiceAgreementInternalId(request.getServiceAgreementInternalId());
+        response.setServiceAgreementExternalId(request.getServiceAgreementExternalId());
+
+        return response;
+    }
+
     private Mono<ProductIngestResponse> handleIntegrationResponse(ProductIngestResponse res) {
-        log.debug("Savings Accounts received from Integration: {}", res.getProductGroup().getSavingAccounts());
-        log.debug("Current Accounts received from Integration: {}", res.getProductGroup().getCurrentAccounts());
-        log.debug("Loan Accounts received from Integration: {}", res.getProductGroup().getLoans());
-        log.debug("Credit Cards received from Integration: {}", res.getProductGroup().getCreditCards());
-        log.debug("Debit Cards received from Integration: {}", res.getProductGroup().getDebitCards());
-        log.debug("Investment accounts received from Integration: {}", res.getProductGroup().getInvestmentAccounts());
-        log.debug("Term Deposit Accounts received from Integration: {}", res.getProductGroup().getTermDeposits());
-        log.debug("Custom Accounts received from Integration: {}", res.getProductGroup().getCustomProducts());
-        log.debug("Custom Data group items received from Integration: {}", res.getProductGroup().getCustomDataGroupItems());
+        for (ProductGroup productGroup : res.getProductGroups()) {
+            log.debug("Product Group: " + productGroup.getName());
+            log.debug("Savings Accounts received from Integration: {}", productGroup.getSavingAccounts());
+            log.debug("Current Accounts received from Integration: {}", productGroup.getCurrentAccounts());
+            log.debug("Loan Accounts received from Integration: {}", productGroup.getLoans());
+            log.debug("Credit Cards received from Integration: {}", productGroup.getCreditCards());
+            log.debug("Debit Cards received from Integration: {}", productGroup.getDebitCards());
+            log.debug("Investment accounts received from Integration: {}", productGroup.getInvestmentAccounts());
+            log.debug("Term Deposit Accounts received from Integration: {}", productGroup.getTermDeposits());
+            log.debug("Custom Accounts received from Integration: {}", productGroup.getCustomProducts());
+            log.debug("Custom Data group items received from Integration: {}", productGroup.getCustomDataGroupItems());
+        }
         return Mono.just(res);
     }
 

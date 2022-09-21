@@ -5,12 +5,12 @@
   <parent>
     <groupId>com.backbase.stream.compositions</groupId>
     <artifactId>cursors</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.1.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>transaction-cursor</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.1.0</version>
 
   <packaging>jar</packaging>
 
@@ -83,10 +83,9 @@
     </dependency>
 
     <!-- Third party dependencies -->
-
     <dependency>
-      <groupId>org.mapstruct</groupId>
-      <artifactId>mapstruct-processor</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
       <groupId>org.liquibase</groupId>
@@ -117,6 +116,11 @@
       <artifactId>activemq-kahadb-store</artifactId>
       <version>${activemq.version}</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct-processor</artifactId>
     </dependency>
   </dependencies>
 

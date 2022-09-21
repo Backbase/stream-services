@@ -77,6 +77,7 @@ public interface ProductGroupMapper {
 
     /**
      * Maps steam ProductIngestPullRequest to integration PullProductProductRequest model.
+     *
      * @param productIngestPullRequest
      * @return Pull Product Group Request object
      */
@@ -84,6 +85,7 @@ public interface ProductGroupMapper {
 
     /**
      * Maps integration response to Stream response
+     *
      * @param pullProductGroupResponse
      * @return Stream Product Response
      */

@@ -10,21 +10,16 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 
-@ConfigurationProperties("backbase.stream.client")
 @Data
 @NoArgsConstructor
+@ConfigurationProperties("backbase.stream.client")
 public class DbsWebClientConfigurationProperties {
-
-    /**
-     * The client registration id used in in the DBS Web Client
-     */
-    private String defaultClientRegistrationId = "dbs";
 
     /**
      * Additional headers sent in each request to DBS Service API's.
      * This is used to set the X-TID Header for setting the right tenant in a multi-tenant environment
      */
-    private MultiValueMap<String, String> additionalHeaders = null;
+    private MultiValueMap<String, String> additionalHeaders;
 
     /**
      * Header keys from the original request to forward to DBS
