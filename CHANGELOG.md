@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [2.86.1]
+### Added
+- Add support for Entitlement Wizard Metadata.
+
 ## [2.86.0]
 ### Fixed
 - Custom Job Role Mapping Issue is fixed by adding missing mapping of BusinessFunction object of BusinessFunctionGroupMapper class
