@@ -2394,6 +2394,10 @@ components:
           type: string
           description: Assignable Permission Set name
           maxLength: 128
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
       required:
         - name
         - description
