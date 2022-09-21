@@ -1,8 +1,8 @@
 package com.backbase.stream.portfolio.mapper;
 
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.AllocationType;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioAllocationsParentItem;
-import com.backbase.portfolio.api.service.integration.v1.model.PortfolioAllocationsParentItem.AllocationTypeEnum;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioBenchmarkPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionTransactionsPostItem;
@@ -12,10 +12,8 @@ import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPostReq
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.SubPortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.TransactionCategoryPostRequest;
-import com.backbase.portfolio.instrument.integration.api.service.v1.model.InstrumentsPostRequest;
 import com.backbase.stream.portfolio.model.AggregatePortfolio;
 import com.backbase.stream.portfolio.model.Allocation;
-import com.backbase.stream.portfolio.model.Instrument;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.PortfolioCumulativePerformances;
 import com.backbase.stream.portfolio.model.PortfolioPositionsHierarchy;
@@ -41,8 +39,10 @@ public interface PortfolioMapper {
 
     @ValueMapping(source = "BY_CURRENCY", target = "CURRENCY")
     @ValueMapping(source = "BY_ASSET_CLASS", target = "ASSET_CLASS")
+    @ValueMapping(source = "BY_REGION", target = "REGION")
+    @ValueMapping(source = "BY_COUNTRY", target = "COUNTRY")
     @ValueMapping(source = MappingConstants.ANY_UNMAPPED, target = MappingConstants.NULL)
-    AllocationTypeEnum map(String allocationTypeEnum);
+    AllocationType map(String allocationTypeEnum);
 
     List<PortfolioPositionsHierarchyItem> mapHierarchies(List<PortfolioPositionsHierarchy> allocations);
 
