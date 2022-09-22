@@ -45,23 +45,15 @@ jobs:
 
       - name: Get version from POM
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          VERSION_PARTS=($(echo $VERSION | tr "." "\n"))
+          VERSION_PARTS=($(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | tr "." "\n"))
           echo "MAJOR=${VERSION_PARTS[0]}" >> $GITHUB_ENV
           echo "MINOR=${VERSION_PARTS[1]}" >> $GITHUB_ENV
           echo "PATCH=${VERSION_PARTS[2]}" >> $GITHUB_ENV
-          echo "DOCKER_TAG_VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Setup release version
         if: contains(github.ref, 'master')
         run: |
           NEW_VERSION="$((MAJOR)).$((MINOR+1)).0"
-          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
-
-      - name: Setup release version from a snapshot
-        if: "contains(github.ref, 'master') && contains(env.PATCH, 'SNAPSHOT')"
-        run: |
-          NEW_VERSION="${MAJOR}.${MINOR}.$(echo $PATCH | awk 'BEGIN { FS = "-" } ; { print $1 }')"
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
       - name: Setup patch version
@@ -76,19 +68,7 @@ jobs:
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}-PR-$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')"
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
-      - name: Setup docker tag version
-        if: "env.NEW_VERSION != null"
-        run: |
-          echo "DOCKER_TAG_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
-
-      - name: Setup snapshot docker tag with execution number
-        if: "env.NEW_VERSION == null && contains(env.PATCH, 'SNAPSHOT')"
-        run: |
-          DOCKER_TAG_VERSION="${MAJOR}.${MINOR}.$(echo $PATCH | awk 'BEGIN { FS = "-" } ; { print $1 }')-rc${GITHUB_RUN_NUMBER}"
-          echo "DOCKER_TAG_VERSION=${DOCKER_TAG_VERSION}" >> $GITHUB_ENV
-
       - name: Update POM Version
-        if: env.NEW_VERSION != null
         run: |
           echo "New version  is: $NEW_VERSION"
           mvn versions:set versions:update-child-modules -DnewVersion=${NEW_VERSION} -DprocessAllModules -DgenerateBackupPoms=false
@@ -116,4 +96,4 @@ jobs:
 
       - name: Upload to Repo
         if: "contains(github.ref, 'master') || contains(github.ref, 'support/') || contains(github.ref, 'develop')" # In case of develop branch it will upload the snapshot version
-        run: mvn deploy -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
+        run: mvn deploy -Pdocker-image,no-scs,no-jdbc,no-latest-tag -Ddocker.repo.url=repo.backbase.com -Ddocker.repo.project=backbase-stream-images -Djib.to.auth.username=${{ secrets.REPO_USERNAME }} -Djib.to.auth.password=${{ secrets.REPO_PASSWORD }} -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
