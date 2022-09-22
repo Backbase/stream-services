@@ -112,6 +112,7 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.STREAM_BOT_TOKEN }}
+          branch: ${{ github.ref }}
 
       - name: Upload to Repo
         if: "contains(github.ref, 'master') || contains(github.ref, 'support/') || contains(github.ref, 'develop')" # In case of develop branch it will upload the snapshot version
