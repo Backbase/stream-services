@@ -61,6 +61,7 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
     private Mono<PaymentOrderIngestContext> sendToDbs(Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux) {
 
         return paymentOrderPostRequestFlux
+                .doOnNext(s-> System.out.println("WOOHOOO"))
                 .publish(paymentOrderService::processPaymentOrder)
                 .flatMapIterable(UnitOfWork::getStreamTasks)
                 .next()
@@ -78,12 +79,12 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
     private void handleSuccess(PaymentOrderIngestContext paymentOrderIngestContext) {
         // if we add cursor in the future, this needs to be updated to success here
         paymentOrderPostIngestionService.handleSuccess(paymentOrderIngestContext);
-        log.debug("Ingested payment orders: {}", paymentOrderIngestContext);
+        log.debug("Ingested payment orders (success): {}", paymentOrderIngestContext);
     }
 
     private Mono<PaymentOrderIngestContext> handleError(Throwable e) {
         // if we add cursor in the future, this needs to be updated to failure here
-        log.debug("Ingested payment orders: {}", e.getMessage());
+        log.debug("Ingested payment orders (fail): {}", e.getMessage());
         return paymentOrderPostIngestionService.handleFailure(e);
     }
 }

@@ -67,9 +67,10 @@ public class PaymentOrderServiceConfiguration {
     @Bean
     public PaymentOrderService paymentOrderService(ApiClient paymentOrderApiClient,
                                                   PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
-        PaymentOrdersApi paymentOrdersApi = new PaymentOrdersApi(paymentOrderApiClient);
+//        PaymentOrdersApi paymentOrdersApi = new PaymentOrdersApi(paymentOrderApiClient);
 
-        return new PaymentOrderServiceImpl(paymentOrdersApi, paymentOrderUnitOfWorkExecutor);
+//        return new PaymentOrderServiceImpl(paymentOrdersApi, paymentOrderUnitOfWorkExecutor);
+        return new PaymentOrderServiceImpl(paymentOrderUnitOfWorkExecutor);
     }
 
     @Bean

@@ -5,18 +5,6 @@ spring:
     broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
-  security:
-    oauth2:
-      client:
-        registration:
-          dbs:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          dbs:
-            token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   main:
     allow-bean-definition-overriding: true
   codec:
@@ -33,14 +21,11 @@ sso:
 backbase:
   activemq:
     enabled: true
-  mtls:
-    enabled: false
-  security:
+  communication:
     http:
-      enabled: true
-    service-api:
-      authentication:
-        required-scope: api:service
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   stream:
     dbs:
       user-manager-base-url: http://localhost:8086/user-manager
@@ -73,5 +58,4 @@ bootstrap:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
-    org.apache.http.wire: DEBUG
 

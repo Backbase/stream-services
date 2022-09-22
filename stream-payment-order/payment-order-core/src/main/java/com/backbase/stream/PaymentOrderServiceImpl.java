@@ -15,13 +15,12 @@ import reactor.core.publisher.Flux;
 @Slf4j
 public class PaymentOrderServiceImpl implements PaymentOrderService{
 
-    private final PaymentOrdersApi paymentOrdersApi;
+//    private final PaymentOrdersApi paymentOrdersApi;
     private final PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor;
 
-    public PaymentOrderServiceImpl(PaymentOrdersApi paymentOrdersApi,
-                                   PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
+    public PaymentOrderServiceImpl(PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
         this.paymentOrderUnitOfWorkExecutor = paymentOrderUnitOfWorkExecutor;
-        this.paymentOrdersApi = paymentOrdersApi;
+//        this.paymentOrdersApi = paymentOrdersApi;
     }
 
     @Override
