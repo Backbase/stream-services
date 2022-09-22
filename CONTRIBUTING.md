@@ -14,7 +14,7 @@ You are welcome to provide bug fixes and new features in the form of pull reques
 #### Create support branch
 ```shell
 # checkout tag 2.45.0
-git checkout 2.45.0
+git checkout tags/2.45.0
 
 # create new support branch form the above tag
 git checkout -b support/2.45.x
