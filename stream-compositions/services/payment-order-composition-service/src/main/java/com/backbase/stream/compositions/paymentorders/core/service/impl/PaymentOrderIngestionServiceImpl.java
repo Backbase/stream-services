@@ -61,7 +61,6 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
     private Mono<PaymentOrderIngestContext> sendToDbs(Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux) {
 
         return paymentOrderPostRequestFlux
-                .doOnNext(s-> System.out.println("WOOHOOO"))
                 .publish(paymentOrderService::processPaymentOrder)
                 .flatMapIterable(UnitOfWork::getStreamTasks)
                 .next()

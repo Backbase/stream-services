@@ -79,66 +79,6 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
                 });
     }
 
-
-    // todo remove this debug code before merging
-    public Mono<PaymentOrderIngestContext> debugPrintPaymentOrderIngestContext(PaymentOrderIngestContext paymentOrderIngestContext) {
-        try {
-
-            ObjectMapper mapper = JsonMapper.builder()
-                    .addModule(new JavaTimeModule())
-                    .build();
-
-            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-
-
-            System.out.println("-----core pmt order test------");
-            if (!paymentOrderIngestContext.corePaymentOrder().isEmpty()) {
-                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.corePaymentOrder()));
-            }
-            System.out.println("***************");
-
-            System.out.println("-----existing pmt order test------");
-            if (!paymentOrderIngestContext.existingPaymentOrder().isEmpty()) {
-                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.existingPaymentOrder()));
-            }
-            System.out.println("***************");
-
-            System.out.println("-----new pmt order test------");
-            if (!paymentOrderIngestContext.newPaymentOrder().isEmpty()) {
-                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.newPaymentOrder()));
-            }
-            System.out.println("***************");
-
-            System.out.println("-----update pmt order test------");
-            if (!paymentOrderIngestContext.updatePaymentOrder().isEmpty()) {
-                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.updatePaymentOrder()));
-            }
-            System.out.println("***************");
-
-            System.out.println("-----delete pmt order test------");
-            if (!paymentOrderIngestContext.deletePaymentOrder().isEmpty()) {
-                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.deletePaymentOrder()));
-            }
-            System.out.println("***************");
-            System.out.println("-----------");
-
-            System.out.println("-----updatedPaymentOrderResponse test------");
-            if (!paymentOrderIngestContext.updatedPaymentOrderResponse().isEmpty()) {
-                System.out.println(mapper.writeValueAsString(paymentOrderIngestContext.updatedPaymentOrderResponse()));
-            } else {
-                System.out.println("WE HAVE NO UPDATES!!");
-            }
-            System.out.println("***************");
-            System.out.println("-----------");
-
-            return Mono.just(paymentOrderIngestContext);
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return Mono.just(paymentOrderIngestContext);
-        }
-    }
-
     public Mono<PaymentOrderIngestContext> buildIngestPaymentOrderList(PaymentOrderIngestContext paymentOrderIngestContext) {
 
         List<PaymentOrderPostRequest> newPaymentOrder = new ArrayList<>();
