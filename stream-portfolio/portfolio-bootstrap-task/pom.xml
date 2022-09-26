@@ -17,6 +17,11 @@
     <dependencies>
 
         <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>portfolio-core</artifactId>
             <version>${project.version}</version>
