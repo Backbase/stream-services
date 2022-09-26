@@ -48,6 +48,10 @@ properties:
     description: List of managers associated with a portfolio.
     items:
       $ref: portfolio-manager.yaml
+  valuationRefreshDate:
+    type: string
+    description: Date of last refresh of valuation numbers for portfolio.
+    format: date-time
   attorneys:
     type: array
     description: List of attorneys associated with a portfolio.
