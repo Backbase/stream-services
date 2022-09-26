@@ -20,73 +20,7 @@
   </modules>
 
   <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
   </properties>
-
-  <profiles>
-    <profile>
-      <id>clean-database</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>sql-maven-plugin</artifactId>
-            <inherited>false</inherited>
-            <version>1.5</version>
-            <configuration>
-              <printResultSet>true</printResultSet>
-            </configuration>
-            <executions>
-              <execution>
-                <id>drop-db</id>
-                <phase>clean</phase>
-                <goals>
-                  <goal>execute</goal>
-                </goals>
-                <configuration>
-                  <driver>com.mysql.jdbc.Driver</driver>
-                  <url>jdbc:mysql://localhost:3306?useSSL=false</url>
-                  <username>root</username>
-                  <password>root</password>
-                  <forceMojoExecution>true</forceMojoExecution>
-                  <sqlCommand>
-                    DROP
-                    DATABASE IF EXISTS transaction_cursor;
-                  </sqlCommand>
-                </configuration>
-              </execution>
-              <execution>
-                <id>create-db-transaction_cursor</id>
-                <phase>clean</phase>
-                <goals>
-                  <goal>execute</goal>
-                </goals>
-                <configuration>
-                  <driver>com.mysql.jdbc.Driver</driver>
-                  <url>jdbc:mysql://localhost:3306/transaction_cursor?useSSL=false&amp;createDatabaseIfNotExist=true</url>
-                  <username>root</username>
-                  <password>root</password>
-                  <forceMojoExecution>true</forceMojoExecution>
-                  <fileset>
-                    <basedir>${project.basedir}/files/sql/transaction_cursor/mysql</basedir>
-                    <includes>
-                      <include>create/*.sql</include>
-                    </includes>
-                  </fileset>
-                </configuration>
-              </execution>
-            </executions>
-            <dependencies>
-              <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>5.1.41</version>
-              </dependency>
-            </dependencies>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 </project>
