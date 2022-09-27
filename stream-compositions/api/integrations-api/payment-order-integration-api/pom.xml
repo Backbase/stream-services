@@ -89,7 +89,7 @@
                             <goal>validate</goal>
                         </goals>
                         <configuration>
-                            <input>src/main/resources/integration-api-v2.yaml</input>
+                            <input>src/main/resources/service-api-v2.yaml</input>
                             <failOnWarning>true</failOnWarning>
                         </configuration>
                     </execution>
