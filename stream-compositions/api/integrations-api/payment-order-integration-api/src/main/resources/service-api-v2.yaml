@@ -24,7 +24,7 @@ paths:
 
       responses:
         "200":
-          description: Transactions sucessfully returned.
+          description: Payment Order sucessfully returned.
           content:
             application/json:
               schema:
