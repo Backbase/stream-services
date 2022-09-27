@@ -52,8 +52,6 @@ eureka:
 
 bootstrap:
   enabled: false
-  # This is just na example. Replace arrangementId from your project database reference
-#  paymentorder:
 
 logging:
   level:
