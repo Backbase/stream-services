@@ -11,5 +11,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class TransactionIngestPushRequest {
+    private String externalArrangementId;
+    private String legalEntityInternalId;
+    private String arrangementId;
     private List<TransactionsPostRequestBody> transactions;
 }

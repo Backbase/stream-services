@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,7 +60,10 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @return ProductIngestResponse
      */
     public Mono<ProductIngestResponse> ingestPush(ProductIngestPushRequest ingestPushRequest) {
-        throw new UnsupportedOperationException();
+        return pushProductGroup(ingestPushRequest)
+                .flatMap(this::sendToDbs)
+                .flatMap(productPostIngestionService::handleSuccess)
+                .doOnError(productPostIngestionService::handleFailure);
     }
 
     /**
@@ -71,6 +75,14 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
     private Mono<ProductIngestResponse> pullProductGroup(ProductIngestPullRequest request) {
         return productIntegrationService
                 .pullProductGroup(request);
+    }
+
+    private Mono<ProductIngestResponse> pushProductGroup(ProductIngestPushRequest request) {
+        return Mono.just(ProductIngestResponse.builder()
+                        .productGroups(Collections.singletonList(request.getProductGroup()))
+                        .serviceAgreementExternalId(request.getProductGroup().getServiceAgreement().getExternalId())
+                        .serviceAgreementInternalId(request.getProductGroup().getServiceAgreement().getExternalId())
+                                .build());
     }
 
     /**
