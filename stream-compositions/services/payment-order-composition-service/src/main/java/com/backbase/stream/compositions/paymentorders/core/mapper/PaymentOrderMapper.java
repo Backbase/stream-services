@@ -12,13 +12,12 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * This is a mapper for TransactionsPostRequestBody objects used in:
+ * This is a mapper for various Payment Order request and response objects used in:
  * - dbs model
- * - transaction-composition-api
- * - transaction-integration-api
- * - transaction-events
+ * - payment-order-composition-api
+ * - payment-order-integration-api
  * <p>
- * All TransactionsPostRequestBody objects used in above modules have exactly same structures they are built
+ * All Payment Order request and response objects used in above modules have exactly same structures they are built
  * from the common /api folder.
  */
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
