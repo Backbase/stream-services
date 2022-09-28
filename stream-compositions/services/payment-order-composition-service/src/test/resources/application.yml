@@ -1,18 +1,6 @@
 spring:
   zipkin:
     enabled: false
-  security:
-    oauth2:
-      client:
-        registration:
-          dbs:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          dbs:
-            token-uri: http://localhost:10000/oauth/token
   cloud:
     kubernetes:
       config:
@@ -35,6 +23,11 @@ sso:
           value: SIG_SECRET_KEY
 
 backbase:
+  communication:
+    http:
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://localhost:17000/oauth/token
   mtls:
     enabled: false
   security:
@@ -51,16 +44,11 @@ backbase:
       transaction-manager-base-url: http://localhost:8083/transaction-manager
       payment-order-service-base-url: http://localhost:8090/payment-order-service
     compositions:
-      transaction:
-        defaultStartOffsetInDays: 30
+      paymentorder:
         integration-base-url: http://localhost:18000
         events:
           enableCompleted: true
           enableFailed: true
-        cursor:
-          enabled: true
-          transactionIdsFilterEnabled: false
-          base-url: http://localhost:12000
 
 logging:
   level:
