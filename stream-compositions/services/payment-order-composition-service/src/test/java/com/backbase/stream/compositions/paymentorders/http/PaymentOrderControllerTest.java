@@ -12,11 +12,8 @@ import com.backbase.stream.model.PaymentOrderIngestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
@@ -26,10 +23,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-import static reactor.core.publisher.Mono.when;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentOrderControllerTest {
@@ -51,11 +44,6 @@ class PaymentOrderControllerTest {
                 paymentOrderIngestionService,
                 paymentOrderService,
                 paymentOrderMapper);
-
-
-//        lenient().when(mapper.mapCompositionToStream(any()))
-//                .thenReturn(new com.backbase.stream.legalentity.model.ProductGroup());
-//        lenient().when(mapper.mapStreamToComposition(any())).thenReturn(new ProductGroup());
     }
 
     @Test
@@ -67,13 +55,6 @@ class PaymentOrderControllerTest {
         List<PaymentOrderPostResponse> newPaymentOrderResponse = new ArrayList<>();
         PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse().id("id");
         newPaymentOrderResponse.add(paymentOrderPostResponse);
-
-//        doReturn(paymentOrderPostResponse)
-//                .when(paymentOrderMapper.mapStreamNewPaymentOrderToComposition(any()));
-//        PaymentOrderPostResponse paymentOrderPostResponse1 = new PaymentOrderPostResponse().id("id");
-//        when(paymentOrderMapper.mapStreamNewPaymentOrderToComposition(any(PaymentOrderPostResponse.class)))
-//                .thenReturn(paymentOrderPostResponse1);
-
 
         List<UpdateStatusPut> updatedPaymentOrderResponse = new ArrayList<>();
         List<String> deletePaymentOrderResponse = new ArrayList<>();
@@ -95,11 +76,8 @@ class PaymentOrderControllerTest {
         PaymentOrderIngestionResponse ingestionResponse = responseEntity.getBody();
         assertNotNull(ingestionResponse);
         assertNotNull(ingestionResponse.getNewPaymentOrder());
-//        assertNotNull(ingestionResponse.getNewPaymentOrder().get(0).getId());
         assertNotNull(ingestionResponse.getUpdatedPaymentOrder());
         assertNotNull(ingestionResponse.getDeletedPaymentOrder());
-//        verify(productIngestionService).ingestPull(any());
-
     }
 
 }
