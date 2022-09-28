@@ -57,9 +57,9 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
                 .map(f -> filterExisting(f, ingestPullRequest.getLastIngestedExternalIds()))
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(list -> handleSuccess(
-                        ingestPullRequest.getArrangementId(), list))
+                        ingestPullRequest.getArrangementId(), true, list))
                 .onErrorResume(e -> handleError(
-                        ingestPullRequest.getArrangementId(), e))
+                        ingestPullRequest.getArrangementId(), true, e))
                 .map(list -> buildResponse(list, ingestPullRequest));
     }
 
@@ -104,7 +104,13 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
      * @return ProductIngestResponse
      */
     public Mono<TransactionIngestResponse> ingestPush(TransactionIngestPushRequest ingestPushRequest) {
-        throw new UnsupportedOperationException();
+        return Mono.just(Flux.fromIterable(ingestPushRequest.getTransactions()))
+                .flatMap(this::sendToDbs)
+                .doOnSuccess(list -> handleSuccess(
+                        ingestPushRequest.getArrangementId(), false, list))
+                .onErrorResume(e -> handleError(
+                        ingestPushRequest.getArrangementId(), false, e))
+                .map(list -> buildResponse(list, ingestPushRequest));
     }
 
     /**
@@ -199,15 +205,24 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
     }
 
     private TransactionIngestResponse buildResponse(List<TransactionsPostResponseBody> transactions,
-                                                    TransactionIngestPullRequest ingestPullRequest) {
+                                                    TransactionIngestPushRequest ingestRequest) {
         return TransactionIngestResponse.builder()
                 .transactions(transactions)
-                .arrangementId(ingestPullRequest.getArrangementId())
+                .arrangementId(ingestRequest.getArrangementId())
                 .build();
     }
 
-    private void handleSuccess(String arrangementId, List<TransactionsPostResponseBody> transactions) {
-        if (config.isCursorEnabled()) {
+    private TransactionIngestResponse buildResponse(List<TransactionsPostResponseBody> transactions,
+                                                    TransactionIngestPullRequest ingestRequest) {
+        return TransactionIngestResponse.builder()
+                .transactions(transactions)
+                .arrangementId(ingestRequest.getArrangementId())
+                .build();
+    }
+
+    private void handleSuccess(String arrangementId, boolean pullMode,
+                               List<TransactionsPostResponseBody> transactions) {
+        if (config.isCursorEnabled() && pullMode) {
             String lastTxnIds = null;
             if (config.isTransactionIdsFilterEnabled()) {
                 log.info("Transaction Id based filter is enabled");
@@ -225,8 +240,9 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
         log.debug("Ingested transactions: {}", transactions);
     }
 
-    private Mono<List<TransactionsPostResponseBody>> handleError(String arrangementId, Throwable e) {
-        if (config.isCursorEnabled()) {
+    private Mono<List<TransactionsPostResponseBody>> handleError(String arrangementId,
+                                                                 boolean pullMode, Throwable e) {
+        if (config.isCursorEnabled() && pullMode) {
             patchCursor(arrangementId, buildPatchCursorRequest(
                     TransactionCursor.StatusEnum.FAILED,
                     null, null));

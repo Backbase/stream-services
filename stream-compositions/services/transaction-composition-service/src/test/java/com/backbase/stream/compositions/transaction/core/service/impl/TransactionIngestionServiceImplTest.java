@@ -1,10 +1,5 @@
 package com.backbase.stream.compositions.transaction.core.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
 import com.backbase.stream.TransactionService;
@@ -28,11 +23,6 @@ import com.backbase.stream.compositions.transaction.core.service.impl.Transactio
 import com.backbase.stream.compositions.transaction.core.service.impl.TransactionPostIngestionServiceImpl;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.worker.model.UnitOfWork;
-
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +33,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionIngestionServiceImplTest {
@@ -232,10 +231,21 @@ class TransactionIngestionServiceImplTest {
     }
 
     @Test
-    void ingestionInPushMode_Unsupported() {
-        TransactionIngestPushRequest request = TransactionIngestPushRequest.builder().build();
-        assertThrows(UnsupportedOperationException.class, () -> {
-            transactionIngestionService.ingestPush(request);
-        });
+    void ingestionInPushMode_Success() {
+        mockConfigForTransaction();
+        mockTransactionService();
+        TransactionIngestPushRequest request = TransactionIngestPushRequest.builder()
+                .arrangementId("id1")
+                .transactions(Collections.singletonList(
+                        new com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody()
+                                .arrangementId("id1")
+                                .externalArrangementId("extId1")
+                                .description("Transaction Desc")))
+                .build();
+
+        Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
+                .ingestPush(request);
+        StepVerifier.create(productIngestResponse)
+                .assertNext(Assertions::assertNotNull).verifyComplete();
     }
 }
