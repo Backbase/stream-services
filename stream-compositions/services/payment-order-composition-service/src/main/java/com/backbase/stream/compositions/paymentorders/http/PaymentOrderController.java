@@ -3,10 +3,6 @@ package com.backbase.stream.compositions.paymentorders.http;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +13,6 @@ import com.backbase.stream.compositions.paymentorder.api.PaymentOrderComposition
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderIngestionResponse;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPullIngestionRequest;
 import com.backbase.stream.compositions.paymentorders.core.mapper.PaymentOrderMapper;
-import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPullRequest;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestResponse;
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderIngestionService;
 import io.swagger.annotations.ApiParam;
@@ -44,28 +39,9 @@ public class PaymentOrderController implements PaymentOrderCompositionApi {
             ServerWebExchange exchange) {
 
         return paymentOrderPullIngestionRequest
-                .map(this::buildPullRequest)
+                .map(paymentOrderMapper::mapPullRequest)
                 .flatMap(paymentOrderIngestionService::ingestPull)
                 .map(this::mapIngestionToResponse);
-    }
-
-    /**
-     * Builds ingestion request for downstream service.
-     *
-     * @param request PullIngestionRequest
-     * @return ProductIngestPullRequest
-     */
-    private PaymentOrderIngestPullRequest buildPullRequest(PaymentOrderPullIngestionRequest request) {
-        return PaymentOrderIngestPullRequest
-                .builder()
-                .memberNumber(request.getMemberNumber())
-                .legalEntityInternalId(request.getLegalEntityInternalId())
-                .legalEntityExternalId(request.getLegalEntityExternalId())
-                .internalUserId(request.getInternalUserId())
-                .dateRangeStart(request.getDateRangeStart())
-                .dateRangeEnd(request.getDateRangeEnd())
-                .additions(request.getAdditions())
-                .build();
     }
 
     /**
