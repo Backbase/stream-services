@@ -1,8 +1,6 @@
 server.port: 9005
 
 spring:
-  activemq:
-    broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
   main:
@@ -18,42 +16,26 @@ sso:
         key:
           type: ENV
           value: SIG_SECRET_KEY
+
 backbase:
-  activemq:
-    enabled: true
-  communication:
+  mtls:
+    enabled: false
+  security:
     http:
-      client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+      enabled: true
+    service-api:
+      authentication:
+        required-scope: api:service
   stream:
     dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
-      transaction-manager-base-url: http://localhost:8083/transaction-manager
-      payment-order-service-base-url: http://localhost:8090/payment-order-service
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
+      transaction-manager-base-url: http://transaction-manager:8080
+      payment-order-service-base-url: http:///payment-order-service:8080
     compositions:
       paymentorder:
-        defaultStartOffsetInDays: 30
-        integration-base-url: http://localhost:7004
+        integration-base-url: http://payment-order-integration:8080
         events:
           enableCompleted: true
           enableFailed: true
-
-eureka:
-  instance:
-    metadata-map:
-      public: true
-      role: live
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8080/registry/eureka/
-
-bootstrap:
-  enabled: false
-
-logging:
-  level:
-    com.backbase.stream.compositions: DEBUG
-

@@ -31,7 +31,6 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
 
     private final PaymentOrderMapper paymentOrderMapper;
 
-
     @Override
     public Mono<PaymentOrderIngestResponse> ingestPull(PaymentOrderIngestPullRequest ingestPullRequest) {
 

@@ -1,5 +1,6 @@
 package com.backbase.stream.config;
 
+import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.dbs.paymentorder.api.service.ApiClient;
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.stream.PaymentOrderService;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullableModule;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -65,22 +67,17 @@ public class PaymentOrderServiceConfiguration {
     }
 
     @Bean
-    public PaymentOrderService paymentOrderService(ApiClient paymentOrderApiClient,
-                                                  PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
-//        PaymentOrdersApi paymentOrdersApi = new PaymentOrdersApi(paymentOrderApiClient);
-
-//        return new PaymentOrderServiceImpl(paymentOrdersApi, paymentOrderUnitOfWorkExecutor);
+    public PaymentOrderService paymentOrderService(PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
         return new PaymentOrderServiceImpl(paymentOrderUnitOfWorkExecutor);
     }
 
     @Bean
     public ApiClient paymentOrderApiClient(ObjectMapper objectMapper,
                                            DateFormat dateFormat,
-                                           WebClient dbsWebClient,
+                                           @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
                                            BackbaseStreamConfigurationProperties config) {
         ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-        // todo - make this configurable
-        apiClient.setBasePath("http://localhost:8090/payment-order-service");
+        apiClient.setBasePath(config.getDbs().getPaymentOrderBaseUrl());
         return apiClient;
     }
 
@@ -88,7 +85,6 @@ public class PaymentOrderServiceConfiguration {
     @Primary
     public Jackson2ObjectMapperBuilder customObjectMapper() {
         return new Jackson2ObjectMapperBuilder()
-                // other configs are possible
                 .modules(new JsonNullableModule(), new JavaTimeModule());
     }
 }
