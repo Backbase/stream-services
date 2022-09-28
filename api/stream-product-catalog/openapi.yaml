@@ -1,17 +1,17 @@
 openapi: 3.0.1
 info:
-  title: Payment Order API
+  title: Product Catalog API
   version: 1.0.0
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
     backgroundColor: "#FFFFFF"
     altText: "Backbase logo"
 servers:
-  - url: http://stream-payment-order-http.proto.backbasecloud.com/
+  - url: http://stream-product-catalog-http.proto.backbasecloud.com/
     description: The server
 paths:
   ###############################################
-  ## Payment Order
+  ## Product Catalog
   ###############################################
   /product-catalog:
     get:
