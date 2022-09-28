@@ -9,15 +9,9 @@ spring:
     allow-bean-definition-overriding: true
   codec:
     max-in-memory-size: 10MB
-sso:
-  jwt:
-    internal:
-      type: signed
-      signature:
-        algorithm: HS256
-        key:
-          type: ENV
-          value: SIG_SECRET_KEY
+sso.jwt.internal.signature.key:
+  type: VALUE
+  value: JWTSecretKeyDontUseInProduction!
 backbase:
   activemq:
     enabled: true
