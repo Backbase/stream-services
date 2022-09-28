@@ -1,6 +1,5 @@
 package com.backbase.stream;
 
-import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.stream.paymentorder.PaymentOrderTask;
 import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
@@ -15,12 +14,10 @@ import reactor.core.publisher.Flux;
 @Slf4j
 public class PaymentOrderServiceImpl implements PaymentOrderService{
 
-//    private final PaymentOrdersApi paymentOrdersApi;
     private final PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor;
 
     public PaymentOrderServiceImpl(PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
         this.paymentOrderUnitOfWorkExecutor = paymentOrderUnitOfWorkExecutor;
-//        this.paymentOrdersApi = paymentOrdersApi;
     }
 
     @Override
