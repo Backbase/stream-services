@@ -36,12 +36,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/InternalServerError'
 
 components:
   schemas:
