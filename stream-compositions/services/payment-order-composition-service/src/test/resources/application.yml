@@ -46,9 +46,6 @@ backbase:
     compositions:
       paymentorder:
         integration-base-url: http://localhost:18000
-        events:
-          enableCompleted: true
-          enableFailed: true
 
 logging:
   level:

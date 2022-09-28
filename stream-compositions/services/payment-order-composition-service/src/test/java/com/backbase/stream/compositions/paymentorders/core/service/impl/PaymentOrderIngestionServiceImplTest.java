@@ -73,10 +73,6 @@ class PaymentOrderIngestionServiceImplTest {
 
     @Test
     void ingestionInPull() {
-        PaymentOrderConfigurationProperties.Events events = new PaymentOrderConfigurationProperties.Events();
-        events.setEnableCompleted(true);
-        events.setEnableFailed(true);
-        when(config.getEvents()).thenReturn(new PaymentOrderConfigurationProperties.Events());
 
         PaymentOrderIngestPullRequest paymentOrderIngestPullRequest = PaymentOrderIngestPullRequest.builder()
             .memberNumber("123")

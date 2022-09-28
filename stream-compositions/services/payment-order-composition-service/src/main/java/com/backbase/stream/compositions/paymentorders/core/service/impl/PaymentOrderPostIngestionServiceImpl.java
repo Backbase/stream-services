@@ -20,29 +20,12 @@ public class PaymentOrderPostIngestionServiceImpl implements PaymentOrderPostIng
     @Override
     public void handleSuccess(PaymentOrderIngestContext response) {
         log.info("Payment Order ingestion completed successfully.");
-        if (Boolean.TRUE.equals(paymentOrderConfigurationProperties.getEvents().getEnableCompleted())) {
-            //todo log event
-//            TransactionsCompletedEvent event = new TransactionsCompletedEvent()
-//                    .withTransactionIds(res.stream().map(TransactionsPostResponseBody::getId).collect(Collectors.toList()));
-//            EnvelopedEvent<TransactionsCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
-//            envelopedEvent.setEvent(event);
-//            eventBus.emitEvent(envelopedEvent);
-        }
-
-        log.debug("Ingested Payments: {}", response);
+        // events can be handled here as part of a different ticket.
     }
 
     @Override
     public Mono<PaymentOrderIngestContext> handleFailure(Throwable error) { //Mono<List<PaymentOrderPostResponse>> handleFailure(Throwable error) {
-        log.error("Payment Order ingestion failed. {}", error.getMessage());
-        //todo handle event
-//        if (Boolean.TRUE.equals(transactionConfigurationProperties.getEvents().getEnableFailed())) {
-//            TransactionsFailedEvent event = new TransactionsFailedEvent()
-//                    .withMessage(error.getMessage());
-//            EnvelopedEvent<TransactionsFailedEvent> envelopedEvent = new EnvelopedEvent<>();
-//            envelopedEvent.setEvent(event);
-//            eventBus.emitEvent(envelopedEvent);
-//        }
+        // events can be handled here as part of a different ticket.
         return Mono.empty();
     }
 }

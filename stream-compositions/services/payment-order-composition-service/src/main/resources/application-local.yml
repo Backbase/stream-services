@@ -30,9 +30,6 @@ backbase:
     compositions:
       paymentorder:
         integration-base-url: http://localhost:7004
-        events:
-          enableCompleted: true
-          enableFailed: true
 
 eureka:
   instance:

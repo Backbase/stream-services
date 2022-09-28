@@ -36,6 +36,3 @@ backbase:
     compositions:
       paymentorder:
         integration-base-url: http://payment-order-integration:8080
-        events:
-          enableCompleted: true
-          enableFailed: true
