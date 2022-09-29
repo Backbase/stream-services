@@ -80,11 +80,4 @@ public class PaymentOrderServiceConfiguration {
         apiClient.setBasePath(config.getDbs().getPaymentOrderBaseUrl());
         return apiClient;
     }
-
-    @Bean
-    @Primary
-    public Jackson2ObjectMapperBuilder customObjectMapper() {
-        return new Jackson2ObjectMapperBuilder()
-                .modules(new JsonNullableModule(), new JavaTimeModule());
-    }
 }
