@@ -38,6 +38,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -136,7 +138,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                     .functionId("102")
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
-                ));
+                ))
+            .metadata(Map.of("key1","value1"));
 
         Mockito.when(functionGroupsApi.postPresentationIngestFunctionGroup(any()))
             .thenReturn(Mono.just(new IdItem().id("1")));
@@ -153,6 +156,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .name("jobRoleNew")
                 .description("jobRoleNew")
                 .type(PresentationIngestFunctionGroup.TypeEnum.REGULAR)
+                .metadata(Map.of("key1","value1"))
                 .addPermissionsItem(new PresentationPermission()
                     .functionId("101")
                     .addPrivilegesItem("view")
@@ -214,7 +218,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                     .functionId("102")
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
-                ));
+                ))
+            .metadata(Map.of("key1","value1"));
 
         Mockito.when(functionGroupsApi.putFunctionGroupsUpdate(any()))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
@@ -230,6 +235,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .functionGroup(new Functiongroupupdate()
                     .name("jobRole")
                     .description("jobRole")
+                        .metadata(Map.of("key1","value1"))
                     .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
                         .functionName("name1")
                         .addPrivilegesItem("view"))

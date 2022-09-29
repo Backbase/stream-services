@@ -1159,6 +1159,8 @@ public class AccessGroupService {
         PresentationIngestFunctionGroup presentationIngestFunctionGroup = accessGroupMapper.toPresentation(jobRole);
         presentationIngestFunctionGroup.setPermissions(accessGroupMapper.toPresentation(jobRole.getFunctionGroups()));
         presentationIngestFunctionGroup.setExternalServiceAgreementId(serviceAgreement.getExternalId());
+        presentationIngestFunctionGroup.setMetadata(jobRole.getMetadata());
+
         if(jobRole instanceof ReferenceJobRole) {
             log.debug("Creating a Reference Job Role.");
             presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
@@ -1314,6 +1316,7 @@ public class AccessGroupService {
             .validUntilDate(jobRole.getValidUntilDate())
             .validUntilTime(jobRole.getValidUntilTime())
             .permissions(accessGroupMapper.toUpdate(jobRole.getFunctionGroups()))
+                .metadata(jobRole.getMetadata())
         );
         putRequestBody.setIdentifier(new PresentationIdentifier().idIdentifier(functionGroupItem.getId()));
 
