@@ -14,7 +14,6 @@ import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulati
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionTransactionsPostItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionsHierarchyItem;
-import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionsHierarchyItem.ItemTypeEnum;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionsHierarchyPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioTransactionsPostItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioTransactionsPostRequest;
@@ -56,6 +55,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
@@ -121,14 +121,18 @@ class PortfolioIntegrationServiceTest {
             .addTransactionCategoriesItem(new TransactionCategory().key(transactionCategoryKey).alias(categoryAlias))
             .transactions(List.of(new PositionTransaction().exchange(exchange)));
 
+        when(positionManagementApi.getPositionById(anyString()))
+            .thenReturn(Mono.empty());
         when(positionManagementApi.postPositions(any(PositionsPostRequest.class)))
             .thenReturn(Mono.empty());
         when(transactionCategoryManagementApi.postTransactionCategory(any(TransactionCategoryPostRequest.class)))
             .thenReturn(Mono.empty());
         when(transactionManagementApi.postPortfolioTransactions(anyString(),
             any(PortfolioTransactionsPostRequest.class))).thenReturn(Mono.empty());
+        when(transactionManagementApi.deletePositionTransactions(anyString())).thenReturn(Mono.empty());
+        when(transactionCategoryManagementApi.getTransactionCategories()).thenReturn(Flux.empty());
 
-        portfolioIntegrationService.createPosition(positionBundle).block();
+        portfolioIntegrationService.upsertPosition(positionBundle).block();
 
         verify(positionManagementApi).postPositions(new PositionsPostRequest()
             .portfolioCode(portfolioId)
@@ -182,8 +186,14 @@ class PortfolioIntegrationServiceTest {
         when(portfolioValuationManagementApi
             .putPortfolioValuations(anyString(), any(PortfolioValuationsPutRequest.class)))
             .thenReturn(Mono.empty());
+        when(subPortfolioManagementApi.getSubPortfolio(anyString(), anyString())).thenReturn(Mono.empty());
+        when(portfolioManagementApi.getPortfolio(anyString())).thenReturn(Mono.empty());
+        when(portfolioBenchmarksManagementApi.getPortfolioBenchmarks(0, Integer.MAX_VALUE))
+            .thenReturn(Mono.empty());
+        when(portfolioValuationManagementApi.deletePortfolioValuations(anyString(), anyString()))
+            .thenReturn(Mono.empty());
 
-        portfolioIntegrationService.createPortfolio(portfolioBundle).blockLast();
+        portfolioIntegrationService.upsertPortfolio(portfolioBundle).blockLast();
 
         verify(portfolioManagementApi).postPortfolios(new PortfoliosPostRequest()
             .code(portfolioId)
@@ -195,7 +205,7 @@ class PortfolioIntegrationServiceTest {
                 .classifierType(AllocationClassifierType.ASSET_CLASS)));
         verify(portfolioPositionsHierarchyManagementApi).putPortfolioPositionsHierarchy(portfolioId,
             new PortfolioPositionsHierarchyPutRequest().addItemsItem(new PortfolioPositionsHierarchyItem()
-                .itemType(ItemTypeEnum.ASSET_CLASS)));
+                .itemType(PortfolioPositionsHierarchyItem.ItemTypeEnum.ASSET_CLASS)));
         verify(portfolioCumulativePerformanceManagementApi).putPortfolioCumulativePerformance(portfolioId,
             new PortfolioCumulativePerformancesPutRequest()
                 .addCumulativePerformanceItem(new PortfolioCumulativePerformancesItem().valuePct(BigDecimal.TEN)));

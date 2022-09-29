@@ -9,6 +9,31 @@ You are welcome to provide bug fixes and new features in the form of pull reques
 - Together with your changes, submit updated [CHANGELOG.md](CHANGELOG.md) in your PR using the next desired version as reference.
 - After your pull request gets approved and integrated, then **GitHub actions will bump** the `MINOR` version and deploy it to Backbase maven repository. *(e.g. 2.45.0 -> 2.46.0)*
     * For small fixes and patches utilize the `hotfix/` branch prefix, so once it is integrated the pipelines will automatically bump the `PATCH` version instead of the `MINOR`. *(e.g. 2.46.0 -> 2.46.1)*
+    * Always use `hotfix/` branches for creating PRs to [`support/` branches](https://gitversion.net/docs/learn/branching-strategies/gitflow/examples#support-branches).
+### Support Branch Example
+#### Create support branch
+```shell
+# checkout tag 2.45.0
+git checkout tags/2.45.0
+
+# create new support branch form the above tag
+git checkout -b support/2.45.x
+
+# set upstream branch
+git push --set-upstream origin  support/2.45.x
+
+# push support branch
+git push 
+```
+
+#### Create hotfix branch for your support branch then update your changes and create a Pull Request `hotfix/<hotfix-branch-name> -> support/2.45.x`
+
+```shell
+git checkout support/2.45.x
+git checkout -b hotfix/<hotfix-branch-name>
+```
 
 ### Branching Strategy Flow
 ![Branching Strategy](docs/branching_strategy.jpg)
+
+#### For more information checkout [support-branches](https://gitversion.net/docs/learn/branching-strategies/gitflow/examples#support-branches)
