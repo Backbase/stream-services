@@ -21,8 +21,6 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
     public Flux<UnitOfWork<PaymentOrderTask>> prepareUnitOfWork(List<PaymentOrderPostRequest> items) {
 
-        // todo add grouping
-
         Stream<UnitOfWork<PaymentOrderTask>> unitOfWorkStream;
         String unitOfOWorkId = "payment-orders-mixed-" + System.currentTimeMillis();
         PaymentOrderTask task = new PaymentOrderTask(unitOfOWorkId, items);

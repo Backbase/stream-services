@@ -24,7 +24,7 @@ public class PaymentOrderPostIngestionServiceImpl implements PaymentOrderPostIng
     }
 
     @Override
-    public Mono<PaymentOrderIngestContext> handleFailure(Throwable error) { //Mono<List<PaymentOrderPostResponse>> handleFailure(Throwable error) {
+    public Mono<PaymentOrderIngestContext> handleFailure(Throwable error) {
         // events can be handled here as part of a different ticket.
         return Mono.empty();
     }
