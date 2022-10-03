@@ -5,7 +5,7 @@
     <parent>
         <artifactId>cursors-api</artifactId>
         <groupId>com.backbase.stream.compositions</groupId>
-        <version>3.4.0</version>
+        <version>3.6.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,8 +13,8 @@
     <artifactId>transaction-cursor-api</artifactId>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <findMainClass.skip>true</findMainClass.skip>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <sonar.skip>true</sonar.skip>

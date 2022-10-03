@@ -1,10 +1,5 @@
 package com.backbase.stream.compositions.product.core.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
-
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Chains;
@@ -20,32 +15,27 @@ import com.backbase.stream.compositions.product.core.service.ProductPostIngestio
 import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
 import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
 import com.backbase.stream.compositions.transaction.client.model.TransactionsPostResponseBody;
-import com.backbase.stream.legalentity.model.BaseProductGroup;
-import com.backbase.stream.legalentity.model.BatchProductGroup;
-import com.backbase.stream.legalentity.model.LegalEntityReference;
-import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.SavingsAccount;
-import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.*;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import javax.validation.Validator;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import javax.validation.Validator;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductIngestionServiceImplTest {
@@ -175,8 +165,49 @@ class ProductIngestionServiceImplTest {
     }
 
     @Test
-    void ingestionInPushMode_Unsupported() {
-        ProductIngestPushRequest request = ProductIngestPushRequest.builder().build();
-        assertThrows(UnsupportedOperationException.class, () -> productIngestionService.ingestPush(request));
+    void ingestionInPushMode_Success() {
+        executeIngestionInPushMode(false);
+    }
+
+    void executeIngestionInPushMode(Boolean isAsync) {
+        Events events = new Events();
+        events.setEnableCompleted(Boolean.TRUE);
+        config.setEvents(events);
+
+        Chains chains = new Chains();
+        TransactionComposition transactionComposition = new TransactionComposition();
+        transactionComposition.setAsync(isAsync);
+        transactionComposition.setEnabled(Boolean.FALSE);
+        chains.setTransactionComposition(transactionComposition);
+        config.setChains(chains);
+
+        SavingsAccount account = new SavingsAccount();
+        account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP")
+                .legalEntities(List.of(new LegalEntityReference().externalId("savInternalId")));
+        ProductGroup productGroup = new ProductGroup();
+        productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
+        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+                .name("somePgName")
+                .description("somePgDescription").savingAccounts(Collections.singletonList(account));
+
+        ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
+        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
+
+        ProductIngestPushRequest productIngestPullRequest = ProductIngestPushRequest.builder()
+                .productGroup(productGroup)
+                .build();
+
+        lenient().when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+                .thenReturn(productGroupTaskMono);
+
+        when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
+                .thenReturn(Mono.just(new BatchProductGroupTask()
+                        .data(new BatchProductGroup().productGroups(List.of(productGroup))
+                                .serviceAgreement(productGroup.getServiceAgreement()))));
+
+        Mono<ProductIngestResponse> productIngestResponse = productIngestionService
+                .ingestPush(productIngestPullRequest);
+        StepVerifier.create(productIngestResponse)
+                .assertNext(Assertions::assertNotNull).verifyComplete();
     }
 }
