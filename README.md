@@ -42,7 +42,8 @@ You can find listed here the API specification containing the opinionated model 
 | 2.49.0 to 2.69.0                                                       | 2021.09 (2.21.2.x) | 11           |
 | 2.44.0 to 2.48.0                                                       | 2021.07 (2.21.0.x) | 11           |
 | 2.23.0 to 2.43.0                                                       | 2.20.x             | 11           |
-| 2.1.0 to 2.22.0                                                        | 2.19.x             | 11           |
+| 2.15.0 to 2.22.0                                                       | 2.19.x             | 11           |
+| 2.1.0 to 2.14.0                                                        | 2.19.x             | 8            |
 
 ## Software License Terms
 Please see the license terms [here](LICENSE.txt).

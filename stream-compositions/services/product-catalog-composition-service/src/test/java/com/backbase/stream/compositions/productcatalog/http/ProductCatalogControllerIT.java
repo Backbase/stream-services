@@ -11,6 +11,7 @@ import com.backbase.stream.compositions.productcatalog.model.ProductCatalogPushI
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
 import com.backbase.streams.compositions.test.IntegrationTest;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
@@ -18,7 +19,6 @@ import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
@@ -80,10 +80,11 @@ class ProductCatalogControllerIT extends IntegrationTest {
     }
 
     @Test
-    @Disabled
     void pullIngestLegalEntity_Success() throws Exception {
-        ProductCatalog productCatalog = new ObjectMapper()
-            .readValue(readContentFromClasspath("integration-data/response.json"), ProductCatalog.class);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.readTree(readContentFromClasspath("integration-data/response.json"))
+            .get("productCatalog");
+        ProductCatalog productCatalog = mapper.treeToValue(node, ProductCatalog.class);
 
         when(reactiveProductCatalogService.setupProductCatalog(any()))
                 .thenReturn(Mono.just(productCatalog));

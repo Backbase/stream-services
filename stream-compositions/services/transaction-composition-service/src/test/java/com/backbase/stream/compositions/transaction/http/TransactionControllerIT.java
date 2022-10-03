@@ -14,12 +14,12 @@ import com.backbase.stream.compositions.transaction.api.model.TransactionsPostRe
 import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursor;
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorResponse;
-import com.backbase.stream.compositions.transaction.http.TransactionController;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.streams.compositions.test.IntegrationTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URI;
@@ -30,7 +30,6 @@ import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
@@ -140,13 +139,13 @@ class TransactionControllerIT extends IntegrationTest {
     }
 
     @Test
-    @Disabled
     void pullIngestTransactions_Success() throws Exception {
 
         URI uri = URI.create("/service-api/v2/ingest/pull");
         WebTestClient webTestClient = WebTestClient.bindToController(transactionController).build();
 
         List<TransactionsPostResponseBody> transactionsPostResponses = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .readValue(readContentFromClasspath("integration-data/response.json"), new TypeReference<>() {});
 
         TransactionTask dbsResTask = new TransactionTask("id", null);
