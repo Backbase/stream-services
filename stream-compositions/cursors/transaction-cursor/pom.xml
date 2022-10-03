@@ -16,16 +16,6 @@
 
   <name>Stream :: Compositions :: Cursors :: Transaction Cursor</name>
 
-
-  <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-    <liquibase-core.version>4.9.1</liquibase-core.version>
-    <mysql.connector.version>8.0.28</mysql.connector.version>
-    <mssql-jdbc.version>7.4.1.jre8</mssql-jdbc.version>
-    <ojdbc8.version>19.3.0.0</ojdbc8.version>
-  </properties>
-
   <dependencies>
     <!-- Service SDK dependencies -->
     <dependency>
@@ -58,23 +48,6 @@
       <artifactId>stream-dbs-web-client</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>${mysql.connector.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.sqlserver</groupId>
-      <artifactId>mssql-jdbc</artifactId>
-      <version>${mssql-jdbc.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.oracle.ojdbc</groupId>
-      <artifactId>ojdbc8</artifactId>
-      <version>${ojdbc8.version}</version>
-      <type>jar</type>
-    </dependency>
 
     <dependency>
       <groupId>io.projectreactor</groupId>
@@ -90,7 +63,6 @@
     <dependency>
       <groupId>org.liquibase</groupId>
       <artifactId>liquibase-core</artifactId>
-      <version>${liquibase-core.version}</version>
     </dependency>
 
     <!-- Test dependencies -->

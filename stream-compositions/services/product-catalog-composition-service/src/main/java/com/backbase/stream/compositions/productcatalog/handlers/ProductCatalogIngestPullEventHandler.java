@@ -3,20 +3,19 @@ package com.backbase.stream.compositions.productcatalog.handlers;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCatalogIngestCompletedEvent;
-import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCatalogIngestFailedEvent;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalogIngestPullEvent;
+import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCatalogIngestCompletedEvent;
+import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCatalogIngestFailedEvent;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalogIngestPullEvent;
 import com.backbase.stream.compositions.productcatalog.core.config.ProductCatalogConfigurationProperties;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPullRequest;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-
-import java.util.UUID;
 
 @Component
 @AllArgsConstructor

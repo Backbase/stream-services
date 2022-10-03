@@ -1,6 +1,6 @@
 spring:
   application:
-    name: product-catalog-composition-service
+    name: product-catalog-composition
   cloud:
     kubernetes:
       config:
