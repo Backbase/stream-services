@@ -35,6 +35,7 @@
 
         <module>stream-approvals</module>
         <module>stream-compositions</module>
+        <module>stream-payment-order</module>
 
         <module>stream-portfolio</module>
         <module>stream-contacts</module>

@@ -30,7 +30,8 @@ public class ProductController implements ProductCompositionApi {
     @Override
     public Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProduct(
             @Valid Mono<ProductPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-        return pullIngestionRequest.map(this::buildPullRequest)
+        return pullIngestionRequest
+                .map(this::buildPullRequest)
                 .flatMap(productIngestionService::ingestPull)
                 .map(this::mapIngestionToResponse);
     }

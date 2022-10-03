@@ -54,6 +54,10 @@ public class BackbaseStreamConfigurationProperties {
         private String approvalsBaseUrl = "http://approval-service:8080";
 
         /**
+         * The location of DBS User Profile Manager Service.
+         */
+        private String paymentOrderBaseUrl = "http://payment-order-service:8080";
+        /**
          * The location of Portfolio Service.
          */
         private String portfolioBaseUrl = "http://portfolio:8080";
@@ -62,7 +66,6 @@ public class BackbaseStreamConfigurationProperties {
          * Location of Contacts Service.
          */
         private String contactManagerBaseUrl = "http://contact-manager:8080";
-
     }
 
     @Data

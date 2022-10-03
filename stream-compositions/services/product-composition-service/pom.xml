@@ -132,6 +132,25 @@
 
             </configuration>
           </execution>
+          <execution>
+            <id>generate-payment-order-composition-client-code</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate-webclient-embedded</goal>
+            </goals>
+            <configuration>
+              <inputSpec>
+                ${project.basedir}/../../api/service-api/payment-order-composition-api/src/main/resources/service-api-v2.yaml
+              </inputSpec>
+              <apiPackage>com.backbase.stream.compositions.paymentorder.client</apiPackage>
+              <modelPackage>com.backbase.stream.compositions.paymentorder.client.model</modelPackage>
+              <additionalProperties>useWithModifiers=true</additionalProperties>
+              <configOptions>
+                <reactive>true</reactive>
+              </configOptions>
+
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 

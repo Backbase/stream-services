@@ -19,6 +19,8 @@ import com.backbase.stream.compositions.transaction.cursor.client.model.Transact
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorUpsertResponse;
 import com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody;
+import com.backbase.stream.compositions.transaction.core.service.impl.TransactionIngestionServiceImpl;
+import com.backbase.stream.compositions.transaction.core.service.impl.TransactionPostIngestionServiceImpl;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.worker.model.UnitOfWork;
 import org.junit.jupiter.api.Assertions;

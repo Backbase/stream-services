@@ -74,7 +74,13 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      */
     private Mono<ProductIngestResponse> pullProductGroup(ProductIngestPullRequest request) {
         return productIntegrationService
-                .pullProductGroup(request);
+                .pullProductGroup(request)
+                .map(i -> i.toBuilder()
+                        .legalEntityExternalId(request.getLegalEntityExternalId())
+                        .legalEntityInternalId(request.getLegalEntityInternalId())
+                        .userExternalId(request.getUserExternalId())
+                        .userInternalId(request.getUserInternalId())
+                        .build());
     }
 
     private Mono<ProductIngestResponse> pushProductGroup(ProductIngestPushRequest request) {

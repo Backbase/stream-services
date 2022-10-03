@@ -119,6 +119,14 @@
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>com.backbase.dbs.paymentorder</groupId>
+                                    <artifactId>payment-order-service</artifactId>
+                                    <type>zip</type>
+                                    <classifier>api</classifier>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>com.backbase.dbs.user</groupId>
                                     <artifactId>user-manager</artifactId>
                                     <classifier>api</classifier>
@@ -257,6 +265,24 @@
                             <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.transaction.api.service.v2.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-payment-order-service-client-api-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <typeMappings>
+                                <typeMapping>OffsetDateTime=java.lang.String</typeMapping>
+                            </typeMappings>
+                            <importMappings>
+                                <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
+                            </importMappings>
+                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.paymentorder.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.paymentorder.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>

@@ -15,6 +15,7 @@ import com.backbase.stream.compositions.transaction.core.service.TransactionInge
 import java.util.List;
 import java.util.Map;
 
+import com.backbase.stream.compositions.transaction.http.TransactionController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

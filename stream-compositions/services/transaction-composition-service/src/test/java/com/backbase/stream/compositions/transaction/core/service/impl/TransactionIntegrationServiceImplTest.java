@@ -12,6 +12,7 @@ import com.backbase.stream.compositions.transaction.integration.client.model.Tra
 import java.util.List;
 import java.util.Map;
 
+import com.backbase.stream.compositions.transaction.core.service.impl.TransactionIntegrationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

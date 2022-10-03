@@ -49,6 +49,7 @@
                             <outputFile>${project.basedir}/target/generated-sources</outputFile>
                               <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
                             <packageName>com.backbase.stream.compositions.events.ingress</packageName>
+                            <groupNameStrategy>APP_NAME</groupNameStrategy>
                         </configuration>
                     </execution>
                     <execution>
@@ -62,6 +63,7 @@
                             <outputFile>${project.basedir}/target/generated-sources</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
                             <packageName>com.backbase.stream.compositions.events.egress</packageName>
+                            <groupNameStrategy>APP_NAME</groupNameStrategy>
                         </configuration>
                     </execution>
                 </executions>
