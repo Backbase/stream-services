@@ -5,7 +5,7 @@
     <parent>
         <artifactId>events</artifactId>
         <groupId>com.backbase.stream.compositions</groupId>
-        <version>3.6.0</version>
+        <version>3.7.0</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions.events</groupId>
@@ -50,6 +50,7 @@
                             <outputFile>${project.basedir}/target/generated-sources</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
                             <packageName>stream.compositions.events.ingress</packageName>
+                            <groupNameStrategy>APP_NAME</groupNameStrategy>
                         </configuration>
                     </execution>
                     <execution>
@@ -64,6 +65,7 @@
                             <outputFile>${project.basedir}/target/generated-sources</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
                             <packageName>stream.compositions.events.egress</packageName>
+                            <groupNameStrategy>APP_NAME</groupNameStrategy>
                         </configuration>
                     </execution>
                 </executions>

@@ -5,6 +5,9 @@ import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
+import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
+import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
+import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderPullIngestionRequest;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
@@ -38,6 +41,8 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private final TransactionCompositionApi transactionCompositionApi;
 
+    private final PaymentOrderCompositionApi paymentOrderCompositionApi;
+
     private final ProductGroupMapper mapper;
 
     @Override
@@ -45,7 +50,8 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         return Mono.just(res)
                 .doOnNext(r -> log.info("Product ingestion completed successfully for SA {}",
                         res.getServiceAgreementInternalId()))
-                .flatMap(this::processChains)
+                .flatMap(this::processTransactionChains)
+                .flatMap(this::processPaymentOrderChains)
                 .doOnNext(this::processSuccessEvent)
                 .doOnNext(r -> {
                     log.debug("Ingested product groups: {}", res.getProductGroups());
@@ -64,7 +70,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         }
     }
 
-    private Mono<ProductIngestResponse> processChains(ProductIngestResponse res) {
+    private Mono<ProductIngestResponse> processTransactionChains(ProductIngestResponse res) {
         Mono<ProductIngestResponse> transactionChainMono;
 
         if (!config.isTransactionChainEnabled()) {
@@ -77,6 +83,22 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         }
 
         return transactionChainMono;
+
+    }
+
+    private Mono<ProductIngestResponse> processPaymentOrderChains(ProductIngestResponse res) {
+        Mono<ProductIngestResponse> paymentOrderChainMono;
+
+        if (!config.isPaymentOrderChainEnabled()) {
+            log.debug("Payment Order Chain is disabled");
+            paymentOrderChainMono = Mono.just(res);
+        } else if (config.isPaymentOrderChainAsync()) {
+            paymentOrderChainMono = ingestPaymentOrderAsync(res);
+        } else {
+            paymentOrderChainMono = ingestPaymentOrder(res);
+        }
+
+        return paymentOrderChainMono;
 
     }
 
@@ -93,6 +115,17 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .map(p -> res);
     }
 
+    private Mono<ProductIngestResponse> ingestPaymentOrder(ProductIngestResponse res) {
+        return Mono.just(buildPaymentOrderPullRequest(res))
+                .flatMap(paymentOrderCompositionApi::pullPaymentOrder)
+                .onErrorResume(this::handlePaymentOrderError)
+                .doOnNext(response -> {
+                    log.debug("Response from Payment Order Composition: {} ",
+                            response.getNewPaymentOrder());
+                })
+                .map(p -> res);
+    }
+
     private Mono<ProductIngestResponse> ingestTransactionsAsync(ProductIngestResponse res) {
         return extractProducts(res.getProductGroups())
                 .map(product -> buildTransactionPullRequest(product, res))
@@ -100,6 +133,14 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .doOnNext(t -> log.info("Async transaction ingestion called for arrangement: {}",
                         t.getArrangementId()))
                 .collectList()
+                .map(p -> res);
+    }
+
+    private Mono<ProductIngestResponse> ingestPaymentOrderAsync(ProductIngestResponse res) {
+        return Mono.just(buildPaymentOrderPullRequest(res))
+                .doOnNext(request -> paymentOrderCompositionApi.pullPaymentOrder(request).subscribe())
+                .doOnNext(t -> log.info("Async payment order ingestion called for Legal Entity: {}",
+                        t.getLegalEntityExternalId()))
                 .map(p -> res);
     }
 
@@ -115,6 +156,11 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
         log.error("Error while calling Transaction Composition: {}", t.getMessage());
+        return Mono.error(new InternalServerErrorException(t.getMessage()));
+    }
+
+    private Mono<PaymentOrderIngestionResponse> handlePaymentOrderError(Throwable t) {
+        log.error("Error while calling Payment Order Composition: {}", t.getMessage());
         return Mono.error(new InternalServerErrorException(t.getMessage()));
     }
 
@@ -175,5 +221,15 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .withAdditions(res.getAdditions())
                 .withArrangementId(product.getInternalId())
                 .withExternalArrangementId(product.getExternalId());
+    }
+
+    private PaymentOrderPullIngestionRequest buildPaymentOrderPullRequest(ProductIngestResponse res) {
+        return new PaymentOrderPullIngestionRequest()
+                .withLegalEntityInternalId(res.getLegalEntityInternalId())
+                .withLegalEntityExternalId(res.getLegalEntityExternalId())
+                .withInternalUserId(res.getUserInternalId())
+                .withMemberNumber(res.getUserExternalId())
+                .withServiceAgreementInternalId(res.getServiceAgreementInternalId())
+                .withAdditions(res.getAdditions());
     }
 }

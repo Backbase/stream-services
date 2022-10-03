@@ -13,10 +13,10 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>3.6.0</version>
+    <version>3.7.0</version>
 
     <properties>
-        <backbase-bom.version>2021.10</backbase-bom.version>
+        <backbase-bom.version>2022.09</backbase-bom.version>
         <boat-maven-plugin.version>0.15.3</boat-maven-plugin.version>
         <testcontainers.version>1.12.5</testcontainers.version>
         <mock.server.version>5.11.2</mock.server.version>

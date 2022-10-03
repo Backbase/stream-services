@@ -32,6 +32,11 @@ backbase:
             base-url: http://transaction-composition:8080
             async: false
             excludeProductTypeExternalIds:
+          payment-order-composition:
+            enabled: true
+            base-url: http://localhost:9005
+            async: false
+            excludeProductTypeExternalIds:
         events:
           enableCompleted: true
           enableFailed: true
@@ -39,4 +44,12 @@ backbase:
           enabled: false
           base-url: http://product-cursor:8080
         ingestion-mode: UPDATE
+
+logging:
+  level:
+    #    root: DEBUG
+    com:
+      backbase:
+        dbs: DEBUG
+        buildingblocks: DEBUG
 

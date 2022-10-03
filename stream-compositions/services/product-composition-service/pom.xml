@@ -7,11 +7,11 @@
   <parent>
     <groupId>com.backbase.stream.compositions</groupId>
     <artifactId>services</artifactId>
-    <version>3.6.0</version>
+    <version>3.7.0</version>
   </parent>
 
   <artifactId>product-composition-service</artifactId>
-  <version>3.6.0</version>
+  <version>3.7.0</version>
 
   <packaging>jar</packaging>
 
@@ -125,6 +125,25 @@
               </inputSpec>
               <apiPackage>com.backbase.stream.compositions.transaction.client</apiPackage>
               <modelPackage>com.backbase.stream.compositions.transaction.client.model</modelPackage>
+              <additionalProperties>useWithModifiers=true</additionalProperties>
+              <configOptions>
+                <reactive>true</reactive>
+              </configOptions>
+
+            </configuration>
+          </execution>
+          <execution>
+            <id>generate-payment-order-composition-client-code</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>generate-webclient-embedded</goal>
+            </goals>
+            <configuration>
+              <inputSpec>
+                ${project.basedir}/../../api/service-api/payment-order-composition-api/src/main/resources/service-api-v2.yaml
+              </inputSpec>
+              <apiPackage>com.backbase.stream.compositions.paymentorder.client</apiPackage>
+              <modelPackage>com.backbase.stream.compositions.paymentorder.client.model</modelPackage>
               <additionalProperties>useWithModifiers=true</additionalProperties>
               <configOptions>
                 <reactive>true</reactive>

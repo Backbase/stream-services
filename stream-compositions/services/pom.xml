@@ -5,7 +5,7 @@
     <parent>
         <artifactId>stream-compositions</artifactId>
         <groupId>com.backbase.stream</groupId>
-        <version>3.6.0</version>
+        <version>3.7.0</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions</groupId>
@@ -20,6 +20,7 @@
         <module>product-composition-service</module>
         <module>product-catalog-composition-service</module>
         <module>transaction-composition-service</module>
+        <module>payment-order-composition-service</module>
     </modules>
 
     <dependencies>

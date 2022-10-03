@@ -3,6 +3,8 @@ package com.backbase.stream.compositions.transaction.core.config;
 import com.backbase.stream.compositions.transaction.cursor.client.TransactionCursorApi;
 import com.backbase.stream.compositions.transaction.integration.ApiClient;
 import com.backbase.stream.compositions.transaction.integration.client.TransactionIntegrationApi;
+import com.backbase.stream.compositions.transaction.core.config.TransactionCompositionConfiguration;
+import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.transaction.core.config;
 
+import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties;
 import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties.Cursor;
 import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties.Events;
 import org.junit.jupiter.api.Test;

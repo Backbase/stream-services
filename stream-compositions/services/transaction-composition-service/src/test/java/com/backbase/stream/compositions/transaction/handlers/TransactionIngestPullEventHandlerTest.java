@@ -10,6 +10,7 @@ import com.backbase.stream.compositions.transaction.core.mapper.TransactionMappe
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPullRequest;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
+import com.backbase.stream.compositions.transaction.handlers.TransactionIngestPullEventHandler;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;

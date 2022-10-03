@@ -11,34 +11,28 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>3.6.0</version>
+    <version>3.7.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
 
     <modules>
-
         <module>stream-dbs-clients</module>
         <module>stream-sdk</module>
-
         <module>stream-configuration</module>
         <module>stream-models</module>
-
         <module>stream-product</module>
         <module>stream-access-control</module>
         <module>stream-transactions</module>
         <module>stream-cursor</module>
-
         <module>stream-product-catalog</module>
         <module>stream-limits</module>
         <module>stream-legal-entity</module>
-
         <module>stream-approvals</module>
-        <module>stream-compositions</module>
-
+        <module>stream-payment-order</module>
         <module>stream-portfolio</module>
         <module>stream-contacts</module>
-
+        <module>stream-compositions</module>
     </modules>
 
     <properties>

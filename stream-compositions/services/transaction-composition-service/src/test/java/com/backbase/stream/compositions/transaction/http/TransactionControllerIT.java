@@ -14,6 +14,7 @@ import com.backbase.stream.compositions.transaction.api.model.TransactionsPostRe
 import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursor;
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorResponse;
+import com.backbase.stream.compositions.transaction.http.TransactionController;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.streams.compositions.test.IntegrationTest;

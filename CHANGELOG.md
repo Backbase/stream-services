@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [3.6.0](https://github.com/Backbase/stream-services/compare/3.6.0...3.7.0)
+## [3.8.0](https://github.com/Backbase/stream-services/compare/3.7.0...3.8.0)
 ### Changed
 - Upgraded to SSDK 15.0.1
 - Upgraded to Java 17
