@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -147,7 +146,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     private void processSuccessEvent(ProductIngestResponse res) {
         if (Boolean.TRUE.equals(config.isCompletedEventEnabled())) {
             ProductCompletedEvent event = new ProductCompletedEvent()
-                    .withProductGroups(res.getProductGroups().stream().map(p -> mapper.mapStreamToEvent(p)).collect(Collectors.toList()));
+                    .withProductGroups(res.getProductGroups().stream().map(p -> mapper.mapStreamToEvent(p)).toList());
             EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
@@ -168,31 +167,31 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         return Flux.concat(
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getLoans()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getTermDeposits()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getCurrentAccounts()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getSavingAccounts()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getCreditCards()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getInvestmentAccounts()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getCustomProducts()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)))
                 .filter(this::excludeProducts);
     }
