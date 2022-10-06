@@ -903,6 +903,57 @@ components:
         - legalEntityType
         - administrators
         - jobProfile
+    JobRole:
+      title: "Job Role"
+      properties:
+        id:
+          $ref: '#/components/schemas/InternalIdentifier'
+        name:
+          maxLength: 128
+          minLength: 1
+          pattern: ^\S(.*(\S))?$
+          type: string
+          description: Job role name
+        description:
+          maxLength: 255
+          minLength: 1
+          pattern: ^(\S|\n)((.|\n)*(\S|\n))?$
+          type: string
+          description: Job role description
+        functionGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessFunctionGroup'
+        validFromDate:
+          type: string
+          description: Start date of the function group. (date-only from RFC3339 - yyyy-MM-dd)
+        validFromTime:
+          type: string
+          description: Start time of the function group. (time-only from RFC3339 - HH:mm:ss)
+        validUntilDate:
+          type: string
+          description: End date of the function group. (date-only from RFC3339 - yyyy-MM-dd)
+        validUntilTime:
+          type: string
+          description: End time of the function group. (time-only from RFC3339 - HH:mm:ss)
+        apsId:
+          type: number
+          description: Assignable Permission Set Id
+        apsName:
+          type: string
+          description: Assignable Permission Set name
+          maxLength: 128
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - name
+        - description
+    ReferenceJobRole:
+      title: "Reference Job Role"
+      allOf:
+        - $ref: '#/components/schemas/JobRole'
     JobProfileUser:
       type: object
       properties:

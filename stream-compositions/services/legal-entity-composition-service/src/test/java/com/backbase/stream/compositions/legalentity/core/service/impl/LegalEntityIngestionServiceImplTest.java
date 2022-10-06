@@ -12,7 +12,7 @@ import com.backbase.stream.compositions.legalentity.core.service.LegalEntityInge
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityPostIngestionService;
 import com.backbase.stream.compositions.product.client.ProductCompositionApi;
-import com.backbase.stream.compositions.product.client.model.CurrentAccount;
+import com.backbase.stream.compositions.product.client.model.CurrentAccount2;
 import com.backbase.stream.compositions.product.client.model.ProductIngestionResponse;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -83,9 +83,9 @@ class LegalEntityIngestionServiceImplTest {
         when(productCompositionApi.pullIngestProduct(any()))
                 .thenReturn(Mono.just(new ProductIngestionResponse()
                         .withProductGroups(
-                                Arrays.asList((com.backbase.stream.compositions.product.client.model.ProductGroup)
-                                        new com.backbase.stream.compositions.product.client.model.ProductGroup()
-                                                .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN")))))));
+                                Arrays.asList((com.backbase.stream.compositions.product.client.model.ProductGroup2)
+                                        new com.backbase.stream.compositions.product.client.model.ProductGroup2()
+                                                .withCurrentAccounts(List.of(new CurrentAccount2().withBBAN("test BBAN")))))));
 
         Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
                 Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
@@ -101,9 +101,9 @@ class LegalEntityIngestionServiceImplTest {
         when(productCompositionApi.pullIngestProduct(any()))
                 .thenReturn(Mono.just(new ProductIngestionResponse()
                         .withProductGroups(
-                                Arrays.asList((com.backbase.stream.compositions.product.client.model.ProductGroup)
-                                        new com.backbase.stream.compositions.product.client.model.ProductGroup()
-                                                .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN")))))));
+                                Arrays.asList((com.backbase.stream.compositions.product.client.model.ProductGroup2)
+                                        new com.backbase.stream.compositions.product.client.model.ProductGroup2()
+                                                .withCurrentAccounts(List.of(new CurrentAccount2().withBBAN("test BBAN")))))));
 
         Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
                 Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
