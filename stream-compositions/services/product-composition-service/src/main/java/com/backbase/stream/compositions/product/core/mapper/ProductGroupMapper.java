@@ -54,7 +54,7 @@ public interface ProductGroupMapper {
      * @param productGroup Stream product group
      * @return Composition product group
      */
-    com.backbase.stream.compositions.product.api.model.ProductGroup mapStreamToComposition(
+    com.backbase.stream.compositions.product.api.model.ProductGroup2 mapStreamToComposition(
             com.backbase.stream.legalentity.model.ProductGroup productGroup);
 
     /**

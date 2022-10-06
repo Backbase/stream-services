@@ -1,15 +1,6 @@
 package com.backbase.stream.compositions.product.http;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-
-import com.backbase.stream.compositions.product.api.model.ProductGroup;
-import com.backbase.stream.compositions.product.api.model.ProductIngestionResponse;
-import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
-import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
+import com.backbase.stream.compositions.product.api.model.*;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
@@ -24,6 +15,10 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
@@ -44,7 +39,7 @@ class ProductControllerTest {
 
         lenient().when(mapper.mapCompositionToStream(any()))
                 .thenReturn(new com.backbase.stream.legalentity.model.ProductGroup());
-        lenient().when(mapper.mapStreamToComposition(any())).thenReturn(new ProductGroup());
+        lenient().when(mapper.mapStreamToComposition(any())).thenReturn(new ProductGroup2());
     }
 
     @Test
