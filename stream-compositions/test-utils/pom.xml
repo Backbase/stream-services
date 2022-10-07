@@ -5,7 +5,7 @@
     <parent>
         <artifactId>stream-compositions</artifactId>
         <groupId>com.backbase.stream</groupId>
-        <version>3.7.0</version>
+        <version>3.8.0</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions</groupId>
@@ -56,19 +56,14 @@
             <version>${mock.server.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>${gson.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
             <version>${mockito.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

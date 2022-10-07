@@ -2,7 +2,7 @@ package com.backbase.stream.compositions.productcatalog.handlers;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalogIngestPushEvent;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalogIngestPushEvent;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPushRequest;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;

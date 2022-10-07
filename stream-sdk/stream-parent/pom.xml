@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>backbase-parent</artifactId>
-        <version>14.1.1</version>
+        <version>15.0.1</version>
         <relativePath />
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-parent</artifactId>
-    <version>3.7.0</version>
+    <version>3.8.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Parent</name>
     <description>Parent for all Stream SDK modules</description>
@@ -36,7 +36,7 @@
     </modules>
 
     <properties>
-        <ssdk.version>14.1.1</ssdk.version>
+        <ssdk.version>15.0.1</ssdk.version>
         <japicmp.skip>true</japicmp.skip>
     </properties>
 

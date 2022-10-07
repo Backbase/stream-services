@@ -3,8 +3,8 @@ package com.backbase.stream.compositions.product.core.service.impl;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
-import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
-import com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
+import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
+import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderPullIngestionRequest;
@@ -17,21 +17,17 @@ import com.backbase.stream.compositions.transaction.client.model.TransactionInge
 import com.backbase.stream.compositions.transaction.client.model.TransactionPullIngestionRequest;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.ProductGroup;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Optional.ofNullable;
 
 @Service
 @Slf4j
@@ -150,7 +146,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     private void processSuccessEvent(ProductIngestResponse res) {
         if (Boolean.TRUE.equals(config.isCompletedEventEnabled())) {
             ProductCompletedEvent event = new ProductCompletedEvent()
-                    .withProductGroups(res.getProductGroups().stream().map(p -> mapper.mapStreamToEvent(p)).collect(Collectors.toList()));
+                    .withProductGroups(res.getProductGroups().stream().map(p -> mapper.mapStreamToEvent(p)).toList());
             EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
@@ -171,31 +167,31 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         return Flux.concat(
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getLoans()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getTermDeposits()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getCurrentAccounts()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getSavingAccounts()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getCreditCards()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getInvestmentAccounts()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)),
                         Flux.fromIterable(Optional.of(productGroups.stream()
                                         .flatMap(group -> productStream(group.getCustomProducts()))
-                                        .collect(Collectors.toList()))
+                                        .toList())
                                 .orElseGet(Collections::emptyList)))
                 .filter(this::excludeProducts);
     }

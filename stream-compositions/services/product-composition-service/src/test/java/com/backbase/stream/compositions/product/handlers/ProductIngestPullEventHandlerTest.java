@@ -7,13 +7,14 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPullEvent;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPullEvent;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Events;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import com.backbase.stream.legalentity.model.ProductGroup;
+import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -21,8 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
-
-import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class ProductIngestPullEventHandlerTest {

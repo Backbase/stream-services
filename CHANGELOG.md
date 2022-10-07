@@ -1,20 +1,29 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.8.0](https://github.com/Backbase/stream-services/compare/3.7.0...3.8.0)
+### Changed
+- Upgraded to SSDK 15.0.1
+- Upgraded to Java 17
+
 ## [3.6.0](https://github.com/Backbase/stream-services/compare/3.5.0...3.6.0)
 ### Added
 - Add support for Entitlement Wizard Metadata.
 
 ## [3.5.0](https://github.com/Backbase/stream-services/compare/3.4.0...3.5.0)
+### Added
 - Added support for push ingestion mode for product and transactions 
 
 ## [3.4.0](https://github.com/Backbase/stream-services/compare/3.3.0...3.4.0)
+### Added
 - Enable Multi architecture docker images: arm64 and amd64
 
 ## [3.3.0](https://github.com/Backbase/stream-services/compare/3.1.0...3.3.0)
+### Changed
 - Tech Debt: Make portfolio saga idempotent #172
 
 ## [3.1.0](https://github.com/Backbase/stream-services/compare/3.0.0...3.1.0)
+### Changed
 - Upgraded to DBS 2022.09
 
 ## [3.0.0](https://github.com/Backbase/stream-services/compare/2.88.0...3.0.0)

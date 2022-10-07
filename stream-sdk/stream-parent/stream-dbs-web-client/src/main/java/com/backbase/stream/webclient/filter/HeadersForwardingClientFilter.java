@@ -23,10 +23,10 @@ public class HeadersForwardingClientFilter implements ExchangeFilterFunction {
     public Mono<ClientResponse> filter(ClientRequest originalRequest, ExchangeFunction next) {
         ClientRequest additionalHeadersRequest = enrichRequestWithAdditionalHeaders(originalRequest);
 
-        return Mono.subscriberContext().flatMap(context -> {
+        return Mono.deferContextual(context -> {
             Optional<MultiValueMap<String, String>> forwardHeaders = context.getOrEmpty(CONTEXT_KEY_FORWARDED_HEADERS);
-            log.debug("Context contains headers? {}", forwardHeaders.isPresent());
-            log.debug("Forwarded headers: {}", forwardHeaders.map(MultiValueMap::toString).orElse("none"));
+            log.trace("Context contains headers? {}", forwardHeaders.isPresent());
+            log.trace("Forwarded headers: {}", forwardHeaders.map(MultiValueMap::toString).orElse("none"));
 
             ClientRequest forwardHeadersRequest = enrichRequestWithForwardedHeaders(additionalHeadersRequest,
                 forwardHeaders);

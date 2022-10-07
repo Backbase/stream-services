@@ -1,5 +1,11 @@
 package com.backbase.stream.compositions.transaction.http;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
 import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
 import com.backbase.stream.TransactionService;
 import com.backbase.stream.compositions.transaction.api.model.TransactionPullIngestionRequest;
@@ -8,17 +14,23 @@ import com.backbase.stream.compositions.transaction.api.model.TransactionsPostRe
 import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursor;
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorResponse;
-import com.backbase.stream.compositions.transaction.http.TransactionController;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.streams.compositions.test.IntegrationTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.broker.BrokerService;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
@@ -32,19 +44,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 @DirtiesContext
 @SpringBootTest
@@ -72,10 +71,6 @@ class TransactionControllerIT extends IntegrationTest {
 
     @MockBean
     TransactionService transactionService;
-
-    static {
-        System.setProperty("spring.application.name", "transaction-composition-service");
-    }
 
     @BeforeAll
     static void initActiveMqBroker() throws Exception {
@@ -149,10 +144,9 @@ class TransactionControllerIT extends IntegrationTest {
         URI uri = URI.create("/service-api/v2/ingest/pull");
         WebTestClient webTestClient = WebTestClient.bindToController(transactionController).build();
 
-        Type typeOfObjectsList = TypeToken.getParameterized(ArrayList.class, TransactionsPostResponseBody.class).getType();
-
-        List<TransactionsPostResponseBody> transactionsPostResponses = new Gson()
-                .fromJson(readContentFromClasspath("integration-data/response.json"), typeOfObjectsList);
+        List<TransactionsPostResponseBody> transactionsPostResponses = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .readValue(readContentFromClasspath("integration-data/response.json"), new TypeReference<>() {});
 
         TransactionTask dbsResTask = new TransactionTask("id", null);
         dbsResTask.setResponse(transactionsPostResponses);

@@ -64,7 +64,7 @@ public interface ProductGroupMapper {
      * @return Stream product group
      */
     com.backbase.stream.legalentity.model.ProductGroup mapEventToStream(
-            com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductGroup productGroup);
+            com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductGroup productGroup);
 
     /**
      * Maps steam ProductGroup to event ProductGroup model.
@@ -72,7 +72,7 @@ public interface ProductGroupMapper {
      * @param productGroup Stream product group
      * @return Event product group
      */
-    com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductGroup mapStreamToEvent(
+    com.backbase.stream.compositions.events.egress.event.spec.v1.ProductGroup mapStreamToEvent(
             com.backbase.stream.legalentity.model.ProductGroup productGroup);
 
     /**
