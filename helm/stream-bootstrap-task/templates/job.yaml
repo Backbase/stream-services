@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "stream-task.fullname" . }}
+  name: {{ template "stream-bootstrap-task.fullname" . }}
   labels:
-{{ include "stream-task.labels" . | indent 4 }}
+{{ include "stream-bootstrap-task.labels" . | indent 4 }}
 spec:
   template:
     spec:
@@ -12,13 +12,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{ end }}
-      {{with .Values.initContainers }}
-      initContainers:
-        {{- toYaml . | nindent 8 }}
-      {{ end }}
+      {{- include "stream-bootstrap-task.init-containers" . | nindent 6 }}
       containers:
-        - name: stream-task-job
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        - name: stream-bootstrap-task-job
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           {{- range $key, $value := .Values.env }}
