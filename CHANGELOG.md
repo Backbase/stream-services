@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Upgraded to SSDK 15.0.1
 - Upgraded to Java 17
+- Creating the [`stream-bootstrap-task`](helm/README.md) for deployment of boostrap task Jobs on Kubernetes.
 
 ## [3.6.0](https://github.com/Backbase/stream-services/compare/3.5.0...3.6.0)
 ### Added
