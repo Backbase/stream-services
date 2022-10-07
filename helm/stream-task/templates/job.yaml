@@ -12,6 +12,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{ end }}
+      {{with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{ end }}
       containers:
         - name: stream-task-job
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

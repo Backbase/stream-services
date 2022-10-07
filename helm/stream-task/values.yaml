@@ -1,9 +1,14 @@
+imagePullSecrets: [ ]
 image:
-  repository: <Get access from Akshay for ECR image for retail-bootstrap-task> #853613606038.dkr.ecr.us-east-1.amazonaws.com/retail-bootstrap-task
-  tag: 2022.05-0.32.0-SNAPSHOT-4
+  repository: repo.backbase.com/backbase-stream-images/legal-entity-bootstrap-task
+  tag: 3.8.0
   pullPolicy: Always
   restartPolicy: OnFailure
 backoffLimit: 1
+initContainers:
+  - name: access-control-check
+    image: alpine/curl
+    command: [ 'sh', '-c', 'until curl --connect-timeout 5 http://access-control:8080/actuator/health/readiness; do echo "Waiting for the access-control..."; sleep 5; done' ]
 resources:
   limits:
     cpu: 500m
@@ -13,5 +18,4 @@ resources:
     memory: 256Mi
 env:
   "spring.cloud.config.enabled": "false"
-  "admin.basePath": <Your identity installation domain name endpoint> #https://identity-akshay.bb-se-internal.com/auth
 
