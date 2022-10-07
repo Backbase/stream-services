@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>backbase-parent</artifactId>
-        <version>14.1.1</version>
+        <version>15.0.1</version>
         <relativePath />
     </parent>
 
@@ -17,34 +17,28 @@
     <name>Stream :: Services</name>
 
     <modules>
-
         <module>stream-dbs-clients</module>
         <module>stream-sdk</module>
-
         <module>stream-configuration</module>
         <module>stream-models</module>
-
         <module>stream-product</module>
         <module>stream-access-control</module>
         <module>stream-transactions</module>
         <module>stream-cursor</module>
-
         <module>stream-product-catalog</module>
         <module>stream-limits</module>
         <module>stream-legal-entity</module>
-
         <module>stream-approvals</module>
-        <module>stream-compositions</module>
         <module>stream-payment-order</module>
-
         <module>stream-portfolio</module>
         <module>stream-contacts</module>
-
+        <module>stream-compositions</module>
     </modules>
 
     <properties>
+        <java.version>17</java.version>
+        <ssdk.version>15.0.1</ssdk.version>
         <backbase-bom.version>2022.09</backbase-bom.version>
-        <ssdk.version>14.1.1</ssdk.version>
         <boat-maven-plugin.version>0.15.8</boat-maven-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>

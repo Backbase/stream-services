@@ -61,7 +61,7 @@ public interface ProductCatalogMapper {
      * @return Stream product catalog
      */
     com.backbase.stream.productcatalog.model.ProductCatalog mapEventToStream(
-            com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalog productCatalog);
+            com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalog productCatalog);
 
     /**
      * Maps steam ProductCatalog to event ProductCatalog model.
@@ -69,6 +69,6 @@ public interface ProductCatalogMapper {
      * @param productCatalog Stream product catalog
      * @return Event product catalog
      */
-    com.backbase.com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCatalog mapStreamToEvent(
+    com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCatalog mapStreamToEvent(
             com.backbase.stream.productcatalog.model.ProductCatalog productCatalog);
 }

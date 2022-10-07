@@ -1,17 +1,18 @@
 package com.backbase.stream.compositions.productcatalog.handlers;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalogIngestPullEvent;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalogIngestPullEvent;
 import com.backbase.stream.compositions.productcatalog.core.config.ProductCatalogConfigurationProperties;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
-import com.backbase.stream.compositions.productcatalog.handlers.ProductCatalogIngestPullEventHandler;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
-
-import java.util.List;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -19,8 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
-
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductCatalogIngestPullEventHandlerTest {
