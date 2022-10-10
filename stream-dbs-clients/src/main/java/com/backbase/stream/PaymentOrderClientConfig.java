@@ -20,14 +20,14 @@ public class PaymentOrderClientConfig extends ApiClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient paymentOrderClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
-    public PaymentOrdersApi paymentOrdersApi(ApiClient apiClient) {
-        return new PaymentOrdersApi(apiClient);
+    public PaymentOrdersApi paymentOrdersApi(ApiClient paymentOrderClient) {
+        return new PaymentOrdersApi(paymentOrderClient);
     }
 
 }

@@ -23,29 +23,29 @@ public class ApprovalClientConfig extends ApiClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient approvalsApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
-    public ApprovalTypesApi approvalTypesApi(ApiClient apiClient) {
-        return new ApprovalTypesApi(apiClient);
+    public ApprovalTypesApi approvalTypesApi(ApiClient approvalsApiClient) {
+        return new ApprovalTypesApi(approvalsApiClient);
     }
 
     @Bean
-    public ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi(ApiClient apiClient) {
-        return new ApprovalTypeAssignmentsApi(apiClient);
+    public ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi(ApiClient approvalsApiClient) {
+        return new ApprovalTypeAssignmentsApi(approvalsApiClient);
     }
 
     @Bean
-    public PoliciesApi policiesApi(ApiClient apiClient) {
-        return new PoliciesApi(apiClient);
+    public PoliciesApi policiesApi(ApiClient approvalsApiClient) {
+        return new PoliciesApi(approvalsApiClient);
     }
 
     @Bean
-    public PolicyAssignmentsApi policyAssignmentsApi(ApiClient apiClient) {
-        return new PolicyAssignmentsApi(apiClient);
+    public PolicyAssignmentsApi policyAssignmentsApi(ApiClient approvalsApiClient) {
+        return new PolicyAssignmentsApi(approvalsApiClient);
     }
 
 }

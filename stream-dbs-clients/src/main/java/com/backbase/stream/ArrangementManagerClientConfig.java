@@ -22,24 +22,24 @@ public class ArrangementManagerClientConfig extends ApiClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient arrangementManagerApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
-    public ArrangementsApi arrangementsApi(ApiClient apiClient) {
-        return new ArrangementsApi(apiClient);
+    public ArrangementsApi arrangementsApi(ApiClient arrangementManagerApiClient) {
+        return new ArrangementsApi(arrangementManagerApiClient);
     }
 
     @Bean
-    public ProductsApi productsApi(ApiClient apiClient) {
-        return new ProductsApi(apiClient);
+    public ProductsApi productsApi(ApiClient arrangementManagerApiClient) {
+        return new ProductsApi(arrangementManagerApiClient);
     }
 
     @Bean
-    public ProductKindsApi productKindsApi(ApiClient apiClient) {
-        return new ProductKindsApi(apiClient);
+    public ProductKindsApi productKindsApi(ApiClient arrangementManagerApiClient) {
+        return new ProductKindsApi(arrangementManagerApiClient);
     }
 
 }

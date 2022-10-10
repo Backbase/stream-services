@@ -20,14 +20,14 @@ public class ContactManagerClientConfig extends ApiClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient contactManagerApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
-    public ContactsApi contactsApi(ApiClient apiClient) {
-        return new ContactsApi(apiClient);
+    public ContactsApi contactsApi(ApiClient contactManagerApiClient) {
+        return new ContactsApi(contactManagerApiClient);
     }
 
 }

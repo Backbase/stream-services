@@ -20,14 +20,14 @@ public class UserProfileManagerClientConfig extends ApiClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient userProfileManagerClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
-    public UserProfileManagementApi userProfileManagementApi(ApiClient apiClient) {
-        return new UserProfileManagementApi(apiClient);
+    public UserProfileManagementApi userProfileManagementApi(ApiClient userProfileManagerClient) {
+        return new UserProfileManagementApi(userProfileManagerClient);
     }
 
 }

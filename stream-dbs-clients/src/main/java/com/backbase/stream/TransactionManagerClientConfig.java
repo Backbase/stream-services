@@ -20,14 +20,14 @@ public class TransactionManagerClientConfig extends ApiClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient transactionManagerClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
-    public TransactionPresentationServiceApi transactionPresentationServiceApi(ApiClient apiClient) {
-        return new TransactionPresentationServiceApi(apiClient);
+    public TransactionPresentationServiceApi transactionPresentationServiceApi(ApiClient transactionManagerClient) {
+        return new TransactionPresentationServiceApi(transactionManagerClient);
     }
 
 }

@@ -13,11 +13,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 @ExtendWith(MockitoExtension.class)
 abstract class BaseApiConfigurationTest<Config, Client> {
 
-    public static final String PORTFOLIO_BASE_URL = "portfolioBaseUrl";
+    public static final String PORTFOLIO_BASE_URL = "null://portfolio";
     @Mock
     WebClient dbsWebClient;
-    @Mock
-    ObjectMapper objectMapper;
+
+    ObjectMapper objectMapper = new ObjectMapper();
     @Mock
     DateFormat dateFormat;
 
@@ -31,6 +31,7 @@ abstract class BaseApiConfigurationTest<Config, Client> {
     @BeforeEach
     void init() {
         instrumentApiConfiguration = new InstrumentApiConfiguration();
+        instrumentApiConfiguration.setWebClient(dbsWebClient);
         apiClient = instrumentApiConfiguration.instrumentApiClient(objectMapper, dateFormat);
     }
 

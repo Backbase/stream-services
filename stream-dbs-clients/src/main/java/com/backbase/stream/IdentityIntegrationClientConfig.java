@@ -22,14 +22,14 @@ public class IdentityIntegrationClientConfig extends ApiClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient identityApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
-    public IdentityIntegrationServiceApi identityIntegrationServiceApi(ApiClient apiClient) {
-        return new IdentityIntegrationServiceApi(apiClient);
+    public IdentityIntegrationServiceApi identityIntegrationServiceApi(ApiClient identityApiClient) {
+        return new IdentityIntegrationServiceApi(identityApiClient);
     }
 
 }

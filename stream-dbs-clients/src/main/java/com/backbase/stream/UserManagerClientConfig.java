@@ -21,19 +21,19 @@ public class UserManagerClientConfig extends ApiClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient userManagerClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
-    public UserManagementApi usersApi(ApiClient apiClient) {
-        return new UserManagementApi(apiClient);
+    public UserManagementApi usersApi(ApiClient userManagerClient) {
+        return new UserManagementApi(userManagerClient);
     }
 
     @Bean
-    public IdentityManagementApi identityManagementApi(ApiClient apiClient) {
-        return new IdentityManagementApi(apiClient);
+    public IdentityManagementApi identityManagementApi(ApiClient userManagerClient) {
+        return new IdentityManagementApi(userManagerClient);
     }
 
 }

@@ -24,6 +24,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermissio
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermissionFunctionGroupUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.Privilege;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
+import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobRole;
@@ -82,6 +83,9 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
     @Mock
     private ServiceAgreementsApi serviceAgreementsApi;
+
+    @Mock
+    private DeletionProperties deletionProperties;
 
     @Test
     void setupJobRole() {

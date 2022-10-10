@@ -29,7 +29,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.lang.NonNull;
 
 /**
  * Access Control Configuration.
@@ -50,8 +49,8 @@ public class AccessControlConfiguration {
     }
 
     @Bean
-    public LegalEntityService legalEntityService(@NonNull LegalEntitiesApi legalEntitiesApi,
-        @NonNull LegalEntityApi legalEntityApi) {
+    public LegalEntityService legalEntityService(LegalEntitiesApi legalEntitiesApi,
+        LegalEntityApi legalEntityApi) {
         return new LegalEntityService(legalEntitiesApi, legalEntityApi);
     }
 
@@ -70,11 +69,11 @@ public class AccessControlConfiguration {
     @Bean
     public AccessGroupService accessGroupService(
         ApiClient usersApiClient,
-        DeletionProperties configurationProperties, @NonNull UserQueryApi userQueryApi,
-        @NonNull UsersApi accessControlUsersApi, @NonNull DataGroupApi dataGroupApi,
-        @NonNull DataGroupsApi dataGroupsApi, @NonNull ServiceAgreementsApi serviceAgreementsApi,
-        @NonNull ServiceAgreementApi serviceAgreementApi, @NonNull ServiceAgreementQueryApi serviceAgreementQueryApi,
-        @NonNull FunctionGroupsApi functionGroupsApi, @NonNull FunctionGroupApi functionGroupApi) {
+        DeletionProperties configurationProperties, UserQueryApi userQueryApi,
+        UsersApi accessControlUsersApi, DataGroupApi dataGroupApi,
+        DataGroupsApi dataGroupsApi, ServiceAgreementsApi serviceAgreementsApi,
+        ServiceAgreementApi serviceAgreementApi, ServiceAgreementQueryApi serviceAgreementQueryApi,
+        FunctionGroupsApi functionGroupsApi, FunctionGroupApi functionGroupApi) {
 
         UserManagementApi usersApi = new UserManagementApi(usersApiClient);
         return new AccessGroupService(usersApi, userQueryApi, accessControlUsersApi, dataGroupApi, dataGroupsApi,

@@ -30,64 +30,64 @@ public class AccessControlClientConfig extends ApiClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient accessControlApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
-    public UserQueryApi userQueryApi(ApiClient apiClient) {
-        return new UserQueryApi(apiClient);
+    public UserQueryApi userQueryApi(ApiClient accessControlApiClient) {
+        return new UserQueryApi(accessControlApiClient);
     }
 
     @Bean
-    public UsersApi accessControlUsersApi(ApiClient apiClient) {
-        return new UsersApi(apiClient);
+    public UsersApi accessControlUsersApi(ApiClient accessControlApiClient) {
+        return new UsersApi(accessControlApiClient);
     }
 
     @Bean
-    public DataGroupApi dataGroupApi(ApiClient apiClient) {
-        return new DataGroupApi(apiClient);
+    public DataGroupApi dataGroupApi(ApiClient accessControlApiClient) {
+        return new DataGroupApi(accessControlApiClient);
     }
 
     @Bean
-    public DataGroupsApi dataGroupsApi(ApiClient apiClient) {
-        return new DataGroupsApi(apiClient);
+    public DataGroupsApi dataGroupsApi(ApiClient accessControlApiClient) {
+        return new DataGroupsApi(accessControlApiClient);
     }
 
     @Bean
-    public FunctionGroupApi functionGroupApi(ApiClient apiClient) {
-        return new FunctionGroupApi(apiClient);
+    public FunctionGroupApi functionGroupApi(ApiClient accessControlApiClient) {
+        return new FunctionGroupApi(accessControlApiClient);
     }
 
     @Bean
-    public FunctionGroupsApi functionGroupsApi(ApiClient apiClient) {
-        return new FunctionGroupsApi(apiClient);
+    public FunctionGroupsApi functionGroupsApi(ApiClient accessControlApiClient) {
+        return new FunctionGroupsApi(accessControlApiClient);
     }
 
     @Bean
-    public ServiceAgreementQueryApi serviceAgreementQueryApi(ApiClient apiClient) {
-        return new ServiceAgreementQueryApi(apiClient);
+    public ServiceAgreementQueryApi serviceAgreementQueryApi(ApiClient accessControlApiClient) {
+        return new ServiceAgreementQueryApi(accessControlApiClient);
     }
 
     @Bean
-    public ServiceAgreementApi serviceAgreementApi(ApiClient apiClient) {
-        return new ServiceAgreementApi(apiClient);
+    public ServiceAgreementApi serviceAgreementApi(ApiClient accessControlApiClient) {
+        return new ServiceAgreementApi(accessControlApiClient);
     }
 
     @Bean
-    public ServiceAgreementsApi serviceAgreementsApi(ApiClient apiClient) {
-        return new ServiceAgreementsApi(apiClient);
+    public ServiceAgreementsApi serviceAgreementsApi(ApiClient accessControlApiClient) {
+        return new ServiceAgreementsApi(accessControlApiClient);
     }
 
     @Bean
-    public LegalEntitiesApi legalEntitiesApi(ApiClient apiClient) {
-        return new LegalEntitiesApi(apiClient);
+    public LegalEntitiesApi legalEntitiesApi(ApiClient accessControlApiClient) {
+        return new LegalEntitiesApi(accessControlApiClient);
     }
 
     @Bean
-    public LegalEntityApi legalEntityApi(ApiClient apiClient) {
-        return new LegalEntityApi(apiClient);
+    public LegalEntityApi legalEntityApi(ApiClient accessControlApiClient) {
+        return new LegalEntityApi(accessControlApiClient);
     }
 
 }

@@ -20,14 +20,14 @@ public class LimitsClientConfig extends ApiClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient limitApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
-    public LimitsServiceApi limitsServiceApi(ApiClient apiClient) {
-        return new LimitsServiceApi(apiClient);
+    public LimitsServiceApi limitsServiceApi(ApiClient limitApiClient) {
+        return new LimitsServiceApi(limitApiClient);
     }
 
 }

@@ -1,23 +1,30 @@
 spring:
-  security:
-    oauth2:
+  cloud:
+    discovery:
       client:
-        registration:
-          bb:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          bb:
-            token-uri: http://localhost:10000/oauth/token
+        simple:
+          instances:
+            token-converter:
+              - uri: http://localhost:10000
+            user-manager:
+              - uri: http://localhost:10000
+                metadata:
+                  contextPath: /user-manager
+            access-control:
+              - uri: http://localhost:10000
+                metadata:
+                  contextPath: /access-control
+            arrangement-manager:
+              - uri: http://localhost:10000
+                metadata:
+                  contextPath: /arrangement-manager
+eureka:
+  client:
+    enabled: false
 
 backbase:
   stream:
     client:
       additional-headers:
         X-TID: tenant1
-    dbs:
-      user-manager-base-url: http://localhost:10000/user-manager
-      access-control-base-url: http://localhost:10000/access-control
-      arrangement-manager-base-url: http://localhost:10000/arrangement-manager
+
