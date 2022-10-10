@@ -4,15 +4,18 @@ import static com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseI
 import static com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_OK;
 import static com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction.ADD;
 import static com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction.REMOVE;
-import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
 import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
 import static com.backbase.stream.WebClientTestUtils.buildWebResponseExceptionMono;
+import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
@@ -41,7 +44,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
+import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -50,6 +53,9 @@ import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.product.task.BatchProductGroupTask;
+import com.backbase.stream.worker.exception.StreamTaskException;
+import com.backbase.stream.worker.model.StreamTask;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,10 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.backbase.stream.product.task.BatchProductGroupTask;
-import com.backbase.stream.worker.exception.StreamTaskException;
-import com.backbase.stream.worker.model.StreamTask;
 import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -116,7 +118,7 @@ class AccessGroupServiceTest {
     private ServiceAgreementsApi serviceAgreementsApi;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private BackbaseStreamConfigurationProperties configurationProperties;
+    private DeletionProperties configurationProperties;
 
     @Test
     void getServiceAgreementByExternalIdRetrievesServiceAgreementByExternalId() {
@@ -641,7 +643,7 @@ class AccessGroupServiceTest {
     void deleteFunctionGroupsForServiceAgreement_noneTypeConfigured_doesNotInvokeDeletion() {
         String internalSaId = "sa-internal-id";
 
-        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(BackbaseStreamConfigurationProperties.DeletionProperties.FunctionGroupItemType.NONE);
+        when(configurationProperties.getFunctionGroupItemType()).thenReturn(DeletionProperties.FunctionGroupItemType.NONE);
 
         subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
 
@@ -667,7 +669,7 @@ class AccessGroupServiceTest {
 
         when(functionGroupsApi.postFunctionGroupsDelete(any())).thenReturn(Flux.empty());
 
-        when(configurationProperties.getDbs().getDeletion().getFunctionGroupItemType()).thenReturn(BackbaseStreamConfigurationProperties.DeletionProperties.FunctionGroupItemType.TEMPLATE);
+        when(configurationProperties.getFunctionGroupItemType()).thenReturn(DeletionProperties.FunctionGroupItemType.TEMPLATE);
 
         subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
 

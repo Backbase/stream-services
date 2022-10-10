@@ -1,19 +1,13 @@
 package com.backbase.stream.portfolio.configuration;
 
-import static org.mockito.Mockito.when;
-
 import com.backbase.portfolio.instrument.integration.api.service.ApiClient;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties.DbsConnectionProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,10 +20,6 @@ abstract class BaseApiConfigurationTest<Config, Client> {
     ObjectMapper objectMapper;
     @Mock
     DateFormat dateFormat;
-    @Mock
-    BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties;
-    @Mock
-    DbsConnectionProperties dbsConnectionProperties;
 
     Config config;
     Client client;
@@ -40,11 +30,8 @@ abstract class BaseApiConfigurationTest<Config, Client> {
 
     @BeforeEach
     void init() {
-        when(backbaseStreamConfigurationProperties.getDbs()).thenReturn(dbsConnectionProperties);
-        when(dbsConnectionProperties.getPortfolioBaseUrl()).thenReturn(PORTFOLIO_BASE_URL);
-
-        instrumentApiConfiguration = new InstrumentApiConfiguration(backbaseStreamConfigurationProperties);
-        apiClient = instrumentApiConfiguration.instrumentApiClient(dbsWebClient, objectMapper, dateFormat);
+        instrumentApiConfiguration = new InstrumentApiConfiguration();
+        apiClient = instrumentApiConfiguration.instrumentApiClient(objectMapper, dateFormat);
     }
 
     protected void assertBaseUrl(Client client) {
