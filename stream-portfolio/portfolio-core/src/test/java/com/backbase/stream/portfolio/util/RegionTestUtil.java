@@ -32,8 +32,12 @@ public class RegionTestUtil {
 		return new RegionBundle().region(regionUs).countries(countriesUs);
 	}
 
-	public static RegionBundleTask createRegionBundleTask() {
+	public static RegionBundleTask createRegionBundleTaskEu() {
 		return new RegionBundleTask(createRegionBundleEu());
+	}
+	
+	public static RegionBundleTask createRegionBundleTaskUs() {
+		return new RegionBundleTask(createRegionBundleUs());
 	}
 
 	public static List<RegionBundle> createRegionBundles() {

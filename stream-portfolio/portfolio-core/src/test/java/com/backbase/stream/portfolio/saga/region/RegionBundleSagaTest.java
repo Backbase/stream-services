@@ -53,7 +53,7 @@ class RegionBundleSagaTest {
 
 	@Test
 	void shouldRollBack() {
-		RegionBundleTask regionBundleTask = RegionTestUtil.createRegionBundleTask();
+		RegionBundleTask regionBundleTask = RegionTestUtil.createRegionBundleTaskEu();
 
 		Mono<RegionBundleTask> mono = regionBundleSaga.rollBack(regionBundleTask);
 
