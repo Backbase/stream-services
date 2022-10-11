@@ -33,5 +33,28 @@ class PortfolioTaskTest {
 
 		Assertions.assertNotEquals(portfolioTask1, portfolioTask2);
 	}
+	
+	@Test
+	void shouldGetHashCode() {
+		PortfolioTask portfolioTask1 = new PortfolioTask(
+				new WealthBundle().addRegionsItem(RegionTestUtil.createRegionBundleUs()));
+		
+		Assertions.assertNotEquals(0, portfolioTask1.hashCode());
+	}
+	
+	@Test
+	void shouldHaveNoArgsConstructor() {
+		PortfolioTask portfolioTask1 = new PortfolioTask();
+		
+		Assertions.assertNotNull(portfolioTask1);
+	}
+	
+	@Test
+	void shouldGetData() {
+		PortfolioTask portfolioTask1 = new PortfolioTask(
+				new WealthBundle().addRegionsItem(RegionTestUtil.createRegionBundleUs()));
+		
+		Assertions.assertNotNull(portfolioTask1.getData());
+	}
 
 }

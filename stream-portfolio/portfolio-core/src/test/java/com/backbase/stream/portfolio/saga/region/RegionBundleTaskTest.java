@@ -49,4 +49,18 @@ class RegionBundleTaskTest {
 
 		Assertions.assertNotEquals(regionBundleTaskEu1, regionBundleTaskEu2);
 	}
+	
+	@Test
+	void shouldGetHashCode() {
+		RegionBundleTask regionBundleTaskEu1 = RegionTestUtil.createRegionBundleTaskEu();
+		
+		Assertions.assertNotEquals(0, regionBundleTaskEu1.hashCode());
+	}
+	
+	@Test
+	void shouldGetData() {
+		RegionBundleTask regionBundleTaskEu1 = RegionTestUtil.createRegionBundleTaskEu();
+		
+		Assertions.assertNotNull(regionBundleTaskEu1.getData());
+	}
 }
