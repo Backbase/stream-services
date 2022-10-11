@@ -115,6 +115,9 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
         if (serviceAgreement == null && legalEntity.getCustomServiceAgreement() != null) {
             serviceAgreement = legalEntity.getCustomServiceAgreement();
         }
+        if (serviceAgreement == null) {
+            throw new IllegalArgumentException("Service agreement is null");
+        }
 
         return Mono.just(new ProductPullIngestionRequest()
                 .withLegalEntityInternalId(legalEntity.getInternalId())
