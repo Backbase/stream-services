@@ -24,21 +24,29 @@ class RegionBundleTaskTest {
 
 		Assertions.assertNotNull(data);
 	}
-	
+
 	@Test
 	void shouldGetToString() {
 		RegionBundleTask regionBundleTask = RegionTestUtil.createRegionBundleTaskEu();
-		
+
 		String toStringValue = regionBundleTask.toString();
-		
+
 		Assertions.assertNotNull(toStringValue);
 	}
-	
+
 	@Test
 	void shouldNotBeEqual() {
 		RegionBundleTask regionBundleTaskEu = RegionTestUtil.createRegionBundleTaskEu();
 		RegionBundleTask regionBundleTaskUs = RegionTestUtil.createRegionBundleTaskUs();
-		
+
 		Assertions.assertNotEquals(regionBundleTaskEu, regionBundleTaskUs);
+	}
+
+	@Test
+	void shouldNotBeEqual_SameData() {
+		RegionBundleTask regionBundleTaskEu1 = RegionTestUtil.createRegionBundleTaskEu();
+		RegionBundleTask regionBundleTaskEu2 = RegionTestUtil.createRegionBundleTaskEu();
+
+		Assertions.assertNotEquals(regionBundleTaskEu1, regionBundleTaskEu2);
 	}
 }
