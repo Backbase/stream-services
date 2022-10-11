@@ -27,11 +27,6 @@ backbase:
       authentication:
         required-scope: api:service
   stream:
-    dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
-      transaction-manager-base-url: http://transaction-manager:8080
     compositions:
       transaction:
         defaultStartOffsetInDays: 30

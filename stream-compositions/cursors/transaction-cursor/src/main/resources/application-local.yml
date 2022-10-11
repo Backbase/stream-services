@@ -15,7 +15,27 @@ spring:
   liquibase:
     enabled: true
     change-log: db/changelog/db.changelog-persistence.xml
-
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            user-manager:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /user-manager
+            access-control:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /access-control
+            arrangement-manager:
+              - uri: http://localhost:8082
+                metadata:
+                  contextPath: /arrangement-manager
+            user-profile-manager:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /user-profile-manager
 
 backbase:
   communication:
@@ -23,12 +43,6 @@ backbase:
       client-secret: bb-secret
       client-id: bb-client
       access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
-  stream:
-    dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      user-profile-manager-base-url: http://localhost:8086/user-profile-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
 
 logging:
   level:

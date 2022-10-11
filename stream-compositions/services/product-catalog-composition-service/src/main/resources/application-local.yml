@@ -5,6 +5,23 @@ spring:
     enabled: false
   main:
     allow-bean-definition-overriding: true
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            user-manager:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /user-manager
+            access-control:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /access-control
+            arrangement-manager:
+              - uri: http://localhost:8082
+                metadata:
+                  contextPath: /arrangement-manager
 backbase:
   communication:
     http:
@@ -12,10 +29,6 @@ backbase:
       client-id: bb-client
       access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   stream:
-    dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
     compositions:
       product-catalog:
         enable-completed-events: false

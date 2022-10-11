@@ -19,10 +19,6 @@ backbase:
     http:
       enabled: true
   stream:
-    dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
     compositions:
       product:
         integration-base-url: http://product-integration:8080

@@ -2,6 +2,26 @@ spring:
   zipkin:
     enabled: false
   cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            user-manager:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /user-manager
+            access-control:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /access-control
+            arrangement-manager:
+              - uri: http://localhost:8082
+                metadata:
+                  contextPath: /arrangement-manager
+            transaction-manager:
+              - uri: http://localhost:8083
+                metadata:
+                  contextPath: /transaction-manager
     kubernetes:
       config:
         enabled: false
@@ -37,11 +57,6 @@ backbase:
       authentication:
         required-scope: api:service
   stream:
-    dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
-      transaction-manager-base-url: http://localhost:8083/transaction-manager
     compositions:
       transaction:
         defaultStartOffsetInDays: 30

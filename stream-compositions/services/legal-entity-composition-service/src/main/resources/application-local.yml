@@ -8,6 +8,27 @@ spring:
     enabled: false
   main:
     allow-bean-definition-overriding: true
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            user-manager:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /user-manager
+            access-control:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /access-control
+            arrangement-manager:
+              - uri: http://localhost:8082
+                metadata:
+                  contextPath: /arrangement-manager
+            identity-integration-service:
+              - uri: http://localhost:8181
+                metadata:
+                  contextPath: /identity-integration-service
 eureka:
   client:
     enabled: true
@@ -24,13 +45,6 @@ backbase:
       sink:
         useIdentityIntegration: true
         userProfileEnabled: true
-    dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      user-profile-manager-base-url: http://localhost:8086/user-profile-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
-    identity:
-      identity-integration-base-url: http://localhost:8181/identity-integration-service
     compositions:
       legal-entity:
         integration-base-url: http://localhost:7001

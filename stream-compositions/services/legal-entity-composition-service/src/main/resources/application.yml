@@ -15,13 +15,6 @@ backbase:
       sink:
         useIdentityIntegration: true
         userProfileEnabled: true
-    dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
-      user-profile-manager-base-url: http://user-profile-manager:8080
-    identity:
-      identity-integration-base-url: http://identity-integration-service:8080
     compositions:
       legal-entity:
         integration-base-url: http://legal-entity-integration:8080

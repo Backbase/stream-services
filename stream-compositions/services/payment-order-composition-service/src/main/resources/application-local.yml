@@ -9,6 +9,32 @@ spring:
     allow-bean-definition-overriding: true
   codec:
     max-in-memory-size: 10MB
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            user-manager:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /user-manager
+            access-control:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /access-control
+            arrangement-manager:
+              - uri: http://localhost:8082
+                metadata:
+                  contextPath: /arrangement-manager
+            transaction-manager:
+              - uri: http://localhost:8083
+                metadata:
+                  contextPath: /transaction-manager
+            payment-order-service:
+              - uri: http://localhost:8090
+                metadata:
+                  contextPath: /payment-order-service
+
 sso.jwt.internal.signature.key:
   type: VALUE
   value: JWTSecretKeyDontUseInProduction!
@@ -21,12 +47,6 @@ backbase:
       client-id: bb-client
       access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   stream:
-    dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
-      transaction-manager-base-url: http://localhost:8083/transaction-manager
-      payment-order-service-base-url: http://localhost:8090/payment-order-service
     compositions:
       paymentorder:
         integration-base-url: http://localhost:7004
