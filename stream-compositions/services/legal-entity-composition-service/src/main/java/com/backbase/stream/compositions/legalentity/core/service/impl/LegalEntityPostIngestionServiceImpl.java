@@ -14,6 +14,7 @@ import com.backbase.stream.compositions.product.client.model.ProductIngestionRes
 import com.backbase.stream.compositions.product.client.model.ProductPullIngestionRequest;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -110,11 +111,16 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
         JobProfileUser jpUser = legalEntity.getUsers().get(0);
         User user = jpUser.getUser();
 
+        ServiceAgreement serviceAgreement = legalEntity.getCustomServiceAgreement();
+        if (serviceAgreement == null) {
+            serviceAgreement = legalEntity.getMasterServiceAgreement();
+        }
+
         return Mono.just(new ProductPullIngestionRequest()
                 .withLegalEntityInternalId(legalEntity.getInternalId())
                 .withLegalEntityExternalId(legalEntity.getExternalId())
-                .withServiceAgreementExternalId(legalEntity.getMasterServiceAgreement().getExternalId())
-                .withServiceAgreementInternalId(legalEntity.getMasterServiceAgreement().getInternalId())
+                .withServiceAgreementExternalId(serviceAgreement.getExternalId())
+                .withServiceAgreementInternalId(serviceAgreement.getInternalId())
                 .withMembershipAccounts(res.getMembershipAccounts())
                 .withUserExternalId(user.getExternalId())
                 .withUserInternalId(user.getInternalId())
