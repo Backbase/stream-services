@@ -6,10 +6,6 @@ All notable changes to this project will be documented in this file.
 - Add **portfolio-http**
 - Add `POST /integration-api/v1/regions/batch` endpoint to portfolio
 
-### Changed
-- Update **boat-maven-plugin** to version `0.16.5`
-- Update **maven-compiler-plugin** to version `3.10.1`
-
 ## [3.6.0](https://github.com/Backbase/stream-services/compare/3.5.0...3.6.0)
 ### Added
 - Add support for Entitlement Wizard Metadata.
