@@ -1,6 +1,53 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.9.0](https://github.com/Backbase/stream-services/compare/3.8.1...3.9.0)
+### Changed
+Adding SSDK service discovery mechanism to the Stream Task and Http applications.
+All the service url properties prefixed by `backbase.stream.dbs.*` and `backbase.stream.identity.*` are now removed
+and replaced by the service discovery mechanism of your choice, where the Banking Services will be discovered automatically.
+
+Using Eureka/Registry (Enabled by default):
+```properties
+eureka.client.serviceUrl.defaultZone=http://registry:8080/eureka
+eureka.instance.non-secure-port=8080
+```
+Using Kubernetes: 
+```properties
+eureka.client.enabled=false
+spring.cloud.kubernetes.enabled=true
+```
+
+If you **don't want to user a service discovery** mechanism, the following configuration below needs to be **replaced**. e.g.
+```yaml
+backbase:
+  stream:
+    dbs:
+      access-control-base-url: http://non-discoverable-host:8080/access-control
+    identity:
+      identity-integration-base-url: http://non-discoverable-host:8080/identity-integration-service
+```
+Similar behaviour can be achieved with:
+```yaml
+eureka:
+  client:
+    enabled: false
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            access-control:
+              - uri: http://non-discoverable-host:8080
+                metadata:
+                  contextPath: /access-control
+            identity-integration-service:
+              - uri: http://non-discoverable-host:8080
+                metadata:
+                  contextPath: /identity-integration-service
+```
+
 ## [3.8.0](https://github.com/Backbase/stream-services/compare/3.7.0...3.8.0)
 ### Changed
 - Upgraded to SSDK 15.0.1
