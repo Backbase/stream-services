@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.4.1](https://github.com/Backbase/stream-services/compare/3.4.0...3.4.1)
+- Set custom service agreement id in the ProductPullIngestionRequest if LE has custom service agreement and doesn't have MSA.
+
 ## [3.4.0](https://github.com/Backbase/stream-services/compare/3.3.0...3.4.0)
 - Enable Multi architecture docker images: arm64 and amd64
 

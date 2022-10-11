@@ -111,9 +111,9 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
         JobProfileUser jpUser = legalEntity.getUsers().get(0);
         User user = jpUser.getUser();
 
-        ServiceAgreement serviceAgreement = legalEntity.getCustomServiceAgreement();
-        if (serviceAgreement == null) {
-            serviceAgreement = legalEntity.getMasterServiceAgreement();
+        ServiceAgreement serviceAgreement = legalEntity.getMasterServiceAgreement();
+        if (serviceAgreement == null && legalEntity.getCustomServiceAgreement() != null) {
+            serviceAgreement = legalEntity.getCustomServiceAgreement();
         }
 
         return Mono.just(new ProductPullIngestionRequest()
