@@ -1,10 +1,13 @@
 package com.backbase.stream.portfolio.saga.region;
 
+import java.time.OffsetDateTime;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.backbase.stream.portfolio.model.RegionBundle;
 import com.backbase.stream.portfolio.util.RegionTestUtil;
+import com.backbase.stream.worker.model.StreamTask.State;
 
 /**
  * RegionBundleTask Test.
@@ -40,6 +43,13 @@ class RegionBundleTaskTest {
 		RegionBundleTask regionBundleTaskUs = RegionTestUtil.createRegionBundleTaskUs();
 
 		Assertions.assertNotEquals(regionBundleTaskEu, regionBundleTaskUs);
+	}
+	
+	@Test
+	void shouldNotBeEqual_DifferentType() {
+		RegionBundleTask regionBundleTaskEu = RegionTestUtil.createRegionBundleTaskEu();
+		
+		Assertions.assertNotEquals(regionBundleTaskEu, new Object());
 	}
 
 	@Test

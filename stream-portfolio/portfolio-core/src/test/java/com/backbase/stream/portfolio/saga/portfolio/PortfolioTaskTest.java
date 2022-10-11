@@ -2,11 +2,14 @@ package com.backbase.stream.portfolio.saga.portfolio;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.time.OffsetDateTime;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.backbase.stream.portfolio.model.WealthBundle;
 import com.backbase.stream.portfolio.util.RegionTestUtil;
+import com.backbase.stream.worker.model.StreamTask.State;
 
 class PortfolioTaskTest {
 
@@ -28,10 +31,19 @@ class PortfolioTaskTest {
 	void shouldNotBeEqual() {
 		PortfolioTask portfolioTask1 = new PortfolioTask(
 				new WealthBundle().addRegionsItem(RegionTestUtil.createRegionBundleUs()));
+		
 		PortfolioTask portfolioTask2 = new PortfolioTask(
 				new WealthBundle().addRegionsItem(RegionTestUtil.createRegionBundleEu()));
 
 		Assertions.assertNotEquals(portfolioTask1, portfolioTask2);
+	}
+	
+	@Test
+	void shouldNotBeEqual_DifferentType() {
+		PortfolioTask portfolioTask1 = new PortfolioTask(
+				new WealthBundle().addRegionsItem(RegionTestUtil.createRegionBundleUs()));
+		
+		Assertions.assertNotEquals(portfolioTask1, new Object());
 	}
 	
 	@Test
