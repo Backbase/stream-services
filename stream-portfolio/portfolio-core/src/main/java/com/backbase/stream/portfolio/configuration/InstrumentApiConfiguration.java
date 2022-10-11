@@ -1,5 +1,6 @@
 package com.backbase.stream.portfolio.configuration;
 
+import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.portfolio.instrument.integration.api.service.ApiClient;
 import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentAssetClassManagementApi;
 import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentCountryManagementApi;
@@ -9,15 +10,19 @@ import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentRe
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @Slf4j
-public class InstrumentApiConfiguration extends PortfolioApiConfiguration {
+@ConfigurationProperties("backbase.communication.services.instrument")
+public class InstrumentApiConfiguration extends ApiClientConfig {
+
+    public static final String PORTFOLIO_SERVICE_ID = "portfolio";
 
     public InstrumentApiConfiguration() {
-        super();
+        super(PORTFOLIO_SERVICE_ID);
     }
 
     @Bean

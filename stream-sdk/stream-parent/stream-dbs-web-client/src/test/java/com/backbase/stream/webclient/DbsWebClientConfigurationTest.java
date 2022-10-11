@@ -48,7 +48,7 @@ public class DbsWebClientConfigurationTest {
                     .block()
                     .getProviderDetails()
                     .getTokenUri();
-                Assertions.assertEquals("http://token-converter:8080/oauth/token", tokenUri);
+                Assertions.assertEquals("http://token-converter/oauth/token", tokenUri);
             });
     }
 

@@ -1,10 +1,11 @@
-package com.backbase.stream;
+package com.backbase.stream.clients.config;
 
 import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.paymentorder.api.service.ApiClient;
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,12 +21,14 @@ public class PaymentOrderClientConfig extends ApiClientConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public ApiClient paymentOrderClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public PaymentOrdersApi paymentOrdersApi(ApiClient paymentOrderClient) {
         return new PaymentOrdersApi(paymentOrderClient);
     }

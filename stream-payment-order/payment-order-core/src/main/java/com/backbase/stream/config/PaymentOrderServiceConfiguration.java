@@ -8,21 +8,18 @@ import com.backbase.stream.paymentorder.PaymentOrderTask;
 import com.backbase.stream.paymentorder.PaymentOrderTaskExecutor;
 import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
 import com.backbase.stream.paymentorder.repository.PaymentOrderUnitOfWorkRepository;
-import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 @EnableConfigurationProperties({
     PaymentOrderWorkerConfigurationProperties.class
 })
 @AllArgsConstructor
 @Configuration
-@Import({DbsWebClientConfiguration.class})
 public class PaymentOrderServiceConfiguration {
 
     private final PaymentOrderTypeMapper paymentOrderTypeMapper;

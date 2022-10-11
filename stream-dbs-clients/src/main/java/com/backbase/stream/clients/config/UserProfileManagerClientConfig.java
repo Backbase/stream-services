@@ -1,10 +1,11 @@
-package com.backbase.stream;
+package com.backbase.stream.clients.config;
 
 import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.user.profile.api.service.ApiClient;
 import com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,12 +21,14 @@ public class UserProfileManagerClientConfig extends ApiClientConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public ApiClient userProfileManagerClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public UserProfileManagementApi userProfileManagementApi(ApiClient userProfileManagerClient) {
         return new UserProfileManagementApi(userProfileManagerClient);
     }

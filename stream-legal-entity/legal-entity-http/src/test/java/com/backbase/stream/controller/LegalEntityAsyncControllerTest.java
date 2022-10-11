@@ -34,7 +34,6 @@ import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
-import com.backbase.stream.webclient.DbsWebClientConfiguration;
 import java.net.URI;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -57,7 +56,7 @@ import reactor.core.publisher.Mono;
 @AutoConfigureWebTestClient
 @TestPropertySource(properties = "spring.cloud.kubernetes.enabled=false")
 @Import({LegalEntityHttpConfiguration.class, LegalEntitySagaConfiguration.class,
-    UpdatedServiceAgreementSagaConfiguration.class, DbsWebClientConfiguration.class})
+    UpdatedServiceAgreementSagaConfiguration.class})
 class LegalEntityAsyncControllerTest {
 
     @MockBean

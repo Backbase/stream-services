@@ -1,10 +1,11 @@
-package com.backbase.stream;
+package com.backbase.stream.clients.config;
 
 import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.limit.api.service.ApiClient;
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,12 +21,14 @@ public class LimitsClientConfig extends ApiClientConfig {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public ApiClient limitApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public LimitsServiceApi limitsServiceApi(ApiClient limitApiClient) {
         return new LimitsServiceApi(limitApiClient);
     }
