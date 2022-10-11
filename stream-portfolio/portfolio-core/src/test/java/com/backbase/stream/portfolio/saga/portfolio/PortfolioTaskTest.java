@@ -1,9 +1,10 @@
-package com.backbase.stream.portfolio;
+package com.backbase.stream.portfolio.saga.portfolio;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.junit.jupiter.api.Test;
 
 import com.backbase.stream.portfolio.model.WealthBundle;
-import org.junit.jupiter.api.Test;
 
 class PortfolioTaskTest {
 

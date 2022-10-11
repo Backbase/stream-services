@@ -10,6 +10,8 @@ target
 **/*.log
 bin
 .DS_Store
+.checkstyle
+.factorypath
 
 *.versionsBackup
 **/src/main/resources/lib

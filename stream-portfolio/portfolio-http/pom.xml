@@ -9,22 +9,28 @@
         <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
     </parent>
 
-    <artifactId>legal-entity-http</artifactId>
+    <artifactId>portfolio-http</artifactId>
 
     <packaging>jar</packaging>
-    <name>Stream :: Legal Entity HTTP</name>
+    <name>Stream :: Portfolio HTTP</name>
 
     <properties>
-        <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
-        <raml2openapi-maven-plugin.output>${project.build.directory}/api/openapi.yaml</raml2openapi-maven-plugin.output>
+        <openapi-maven-plugin.input>${project.basedir}/../../api/stream-portfolio/openapi.yaml</openapi-maven-plugin.input>
+        <openapi-maven-plugin.output>${project.build.directory}/api/openapi.yaml</openapi-maven-plugin.output>
+        <openapi-maven-plugin.base-package>com.backbase.stream.portfolio</openapi-maven-plugin.base-package>
+        
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>legal-entity-core</artifactId>
+            <artifactId>portfolio-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.oai</groupId>
+            <artifactId>swagger-request-validator-core</artifactId>
         </dependency>
 
         <dependency>
@@ -32,12 +38,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.atlassian.oai</groupId>
-            <artifactId>swagger-request-validator-core</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
@@ -47,7 +47,6 @@
 
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
@@ -75,7 +74,7 @@
                         </goals>
                         <configuration>
                             <generatorName>spring</generatorName>
-                            <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
+                            <inputSpec>${openapi-maven-plugin.input}</inputSpec>
                             <generateApiTests>false</generateApiTests>
                             <generateApis>true</generateApis>
                             <generateModels>false</generateModels>
@@ -88,8 +87,8 @@
                                 <dateLibrary>java8</dateLibrary>
                                 <interfaceOnly>true</interfaceOnly>
                                 <skipDefaultInterface>true</skipDefaultInterface>
-                                <modelPackage>com.backbase.stream.legalentity.model</modelPackage>
-                                <apiPackage>com.backbase.stream.legalentity.api</apiPackage>
+                                <modelPackage>${openapi-maven-plugin.base-package}.model</modelPackage>
+                                <apiPackage>${openapi-maven-plugin.base-package}.api</apiPackage>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                             <typeMappings>
@@ -105,11 +104,10 @@
                         <phase>site</phase>
                         <configuration>
                             <generatorName>html2</generatorName>
-                            <inputSpec>${raml2openapi-maven-plugin.output}</inputSpec>
+                            <inputSpec>${openapi-maven-plugin.output}</inputSpec>
                             <output>${project.build.directory}/site</output>
                         </configuration>
                     </execution>
-
                 </executions>
             </plugin>
 

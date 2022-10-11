@@ -5,9 +5,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.portfolio.PortfolioSaga;
-import com.backbase.stream.portfolio.PortfolioTask;
 import com.backbase.stream.portfolio.model.WealthBundle;
+import com.backbase.stream.portfolio.saga.portfolio.PortfolioSaga;
+import com.backbase.stream.portfolio.saga.portfolio.PortfolioTask;
+
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

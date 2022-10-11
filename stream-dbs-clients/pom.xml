@@ -193,7 +193,6 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>0.15.8</version>
                 <executions>
                     <execution>
                         <id>generate-accesscontrol-client-api-code</id>

@@ -1,14 +1,25 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.7.1](https://github.com/Backbase/stream-services/compare/3.6.0...3.7.1)
+### Added
+- Add **portfolio-http**
+- Add `POST /integration-api/v1/regions/batch` endpoint to portfolio
+
+### Changed
+- Update **boat-maven-plugin** to version `0.16.5`
+- Update **maven-compiler-plugin** to version `3.10.1`
+
 ## [3.6.0](https://github.com/Backbase/stream-services/compare/3.5.0...3.6.0)
 ### Added
 - Add support for Entitlement Wizard Metadata.
 
 ## [3.5.0](https://github.com/Backbase/stream-services/compare/3.4.0...3.5.0)
+### Added
 - Added support for push ingestion mode for product and transactions 
 
 ## [3.4.0](https://github.com/Backbase/stream-services/compare/3.3.0...3.4.0)
+### Added
 - Enable Multi architecture docker images: arm64 and amd64
 
 ## [3.3.0](https://github.com/Backbase/stream-services/compare/3.1.0...3.3.0)
