@@ -5,6 +5,23 @@ spring:
     enabled: false
   main:
     allow-bean-definition-overriding: true
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            user-manager:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /user-manager
+            access-control:
+              - uri: http://localhost:8086
+                metadata:
+                  contextPath: /access-control
+            arrangement-manager:
+              - uri: http://localhost:8082
+                metadata:
+                  contextPath: /arrangement-manager
 sso:
   jwt:
     internal:
@@ -30,10 +47,6 @@ backbase:
     http:
       enabled: true
   stream:
-    dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
     compositions:
       product:
         integration-base-url: http://localhost:18000
