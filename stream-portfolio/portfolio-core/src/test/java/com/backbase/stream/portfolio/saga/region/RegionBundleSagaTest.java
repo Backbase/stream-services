@@ -1,13 +1,12 @@
 package com.backbase.stream.portfolio.saga.region;
 
-import static org.mockito.Mockito.times;
+import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -18,6 +17,7 @@ import com.backbase.stream.portfolio.service.InstrumentIntegrationService;
 import com.backbase.stream.portfolio.util.RegionTestUtil;
 
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 /**
  * RegionBundleSaga Test.
@@ -46,9 +46,7 @@ class RegionBundleSagaTest {
 
 		Assertions.assertNotNull(task);
 
-		task.block();
-
-		Mockito.verify(instrumentIntegrationService, times(1)).upsertRegions(regionBundles);
+		StepVerifier.create(task).assertNext(assertEqualsTo(regionBundleTask)).verifyComplete();
 	}
 
 	@Test
@@ -59,6 +57,6 @@ class RegionBundleSagaTest {
 
 		Assertions.assertNotNull(mono);
 
-		Mockito.verify(instrumentIntegrationService, times(0)).upsertRegions(ArgumentMatchers.anyList());
+		StepVerifier.create(mono).assertNext(assertEqualsTo(regionBundleTask)).verifyComplete();
 	}
 }

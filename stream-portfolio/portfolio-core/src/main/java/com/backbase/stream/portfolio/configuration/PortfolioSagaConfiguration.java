@@ -20,7 +20,7 @@ import com.backbase.stream.webclient.DbsWebClientConfiguration;
  */
 @Configuration
 @Import({ DbsWebClientConfiguration.class })
-@EnableConfigurationProperties({ BackbaseStreamConfigurationProperties.class, PortfolioSagaProperties.class })
+@EnableConfigurationProperties({ BackbaseStreamConfigurationProperties.class })
 public class PortfolioSagaConfiguration {
 
 	@Bean
