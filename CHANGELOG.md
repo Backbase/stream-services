@@ -1,5 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [2.88.1](https://github.com/Backbase/stream-services/compare/2.88.0...2.88.1)
+### Fixed
+- Added InterestDetails to BaseProduct
 
 ## [2.86.1](https://github.com/Backbase/stream-services/compare/2.86.0...2.86.1)
 ### Fixed
