@@ -40,7 +40,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @SpringBootTest(classes = LegalEntityHttpApplication.class)
 @ContextConfiguration(classes = {LegalEntitySagaIT.TestConfiguration.class})
 @TestPropertySource(properties = {"spring.config.location=classpath:application-it.yml"})
-@AutoConfigureWebTestClient
+@AutoConfigureWebTestClient(timeout = "20000")
 public class LegalEntitySagaIT {
 
     @RegisterExtension

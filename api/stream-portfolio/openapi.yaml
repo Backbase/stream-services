@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: Portfolio Ingestion API
   description: Ingestion Saga for Portfolio
@@ -12,6 +12,7 @@ servers:
     description: The server
 tags:
 - name: portfolios
+  description: Portfolios API
 paths:
   ###############################################
   ## Portfolio
@@ -19,9 +20,9 @@ paths:
   /portfolios:
     post:
       tags:
-        - portfolio
+        - portfolios
       summary: Create Wealth of Portfolios
-      operationId: createPortfolioBundlee
+      operationId: createPortfolios
       requestBody:
         content:
           application/json:
@@ -38,6 +39,34 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WealthBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/regions/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Portfolios Regions Batch
+      operationId: createPortfioliosRegionsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/RegionBundle'
+      responses:
+        200:
+          description: The created region and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RegionBundle'
         default:
           description: Error
           content:

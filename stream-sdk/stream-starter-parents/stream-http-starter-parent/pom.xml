@@ -20,8 +20,12 @@
     <properties>
         <jib.container.volumes>/tmp</jib.container.volumes>
         <docker.distroless.image>gcr.io/distroless/java11-debian11@sha256:cee68b3f1900467d5326ec18572bf9a6f9e3a9a9f741b51a8c2f0b375677932e</docker.distroless.image>
+        
+        <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
+        <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
+        <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
     </properties>
-
+    
     <dependencies>
         <dependency>
             <groupId>org.springframework.security</groupId>
@@ -55,6 +59,25 @@
                             </platforms>
                         </from>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>add-sources</id>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>add-source</goal>
+                            </goals>
+                            <configuration>
+                                <sources>
+                                    <source>${annotations.generated-sources-dir}</source>
+                                    <source>${openapi-generator-maven-plugin.output}/src/main/java</source>
+                                </sources>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
