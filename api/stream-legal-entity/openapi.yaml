@@ -375,6 +375,8 @@ components:
           $ref: '#/components/schemas/AmountInArrear'
         overdueSince:
           $ref: '#/components/schemas/OverdueSince'
+        interestDetails:
+          $ref: '#/components/schemas/InterestDetails'
         debitCardsItems:
           type: array
           items:
@@ -1716,6 +1718,53 @@ components:
           format: double
         currencyCode:
           $ref: '#/components/schemas/CurrencyCode'
+    AbstractInterestDetails:
+      title: AbstractInterestDetails
+      type: object
+      properties:
+        lastYearAccruedInterest:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: Last year's interest that was earned (credit interest) or due
+            (debit interest)
+        dividendWithheldYTD:
+          pattern: ^\d+(\.\d+)?%?$
+          type: string
+          description: "Total amount of interest that is being withheld up to date\
+                    \ and the bank provides 1099 document end of the year for Tax return purpose\n\
+                    \n*Example*:\n  - *12.32*: as fixed amount\n  - *3.14%*: as percent\n"
+        annualPercentageYield:
+          maximum: 1E+6
+          exclusiveMaximum: true
+          minimum: -1E+6
+          exclusiveMinimum: true
+          type: number
+          description: The real rate of return earned on a savings deposit or investment
+            taking into account the effect of compounding interest.
+        cashAdvanceInterestRate:
+          maximum: 1E+6
+          exclusiveMaximum: true
+          minimum: -1E+6
+          exclusiveMinimum: true
+          type: number
+          description: The Interest charge that is added monthly on the outstanding
+            cash advance due on a credit card.
+        penaltyInterestRate:
+          maximum: 1E+6
+          exclusiveMaximum: true
+          minimum: -1E+6
+          exclusiveMinimum: true
+          type: number
+          description: The Interest charge triggered by infractions such as late credit
+            card payments.
+    InterestDetails:
+      title: InterestDetails
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AbstractInterestDetails'
     PrincipalAmount:
       type: object
       description: "The amount that was (originally) contracted for the respective product. This is mainly used in the context of loans and deposits."
