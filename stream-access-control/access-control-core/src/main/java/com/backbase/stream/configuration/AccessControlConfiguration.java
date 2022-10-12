@@ -11,7 +11,6 @@ import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
-import com.backbase.dbs.user.api.service.ApiClient;
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi;
@@ -68,14 +67,12 @@ public class AccessControlConfiguration {
 
     @Bean
     public AccessGroupService accessGroupService(
-        ApiClient usersApiClient,
+        UserManagementApi usersApi,
         DeletionProperties configurationProperties, UserQueryApi userQueryApi,
         UsersApi accessControlUsersApi, DataGroupApi dataGroupApi,
         DataGroupsApi dataGroupsApi, ServiceAgreementsApi serviceAgreementsApi,
         ServiceAgreementApi serviceAgreementApi, ServiceAgreementQueryApi serviceAgreementQueryApi,
         FunctionGroupsApi functionGroupsApi, FunctionGroupApi functionGroupApi) {
-
-        UserManagementApi usersApi = new UserManagementApi(usersApiClient);
         return new AccessGroupService(usersApi, userQueryApi, accessControlUsersApi, dataGroupApi, dataGroupsApi,
             functionGroupApi, functionGroupsApi, serviceAgreementQueryApi, serviceAgreementApi, serviceAgreementsApi,
             configurationProperties);

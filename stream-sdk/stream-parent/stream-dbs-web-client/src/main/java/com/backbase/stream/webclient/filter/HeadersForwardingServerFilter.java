@@ -1,6 +1,6 @@
 package com.backbase.stream.webclient.filter;
 
-import static com.backbase.stream.webclient.DbsWebClientConfiguration.CONTEXT_KEY_FORWARDED_HEADERS;
+import static com.backbase.stream.webclient.configuration.DbsWebClientConfiguration.CONTEXT_KEY_FORWARDED_HEADERS;
 
 import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
 import java.util.List;

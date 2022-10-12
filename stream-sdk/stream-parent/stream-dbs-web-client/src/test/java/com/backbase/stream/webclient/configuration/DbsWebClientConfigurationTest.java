@@ -1,4 +1,4 @@
-package com.backbase.stream.webclient;
+package com.backbase.stream.webclient.configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

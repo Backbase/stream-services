@@ -10,7 +10,7 @@ import com.backbase.stream.clients.config.PaymentOrderClientConfig;
 import com.backbase.stream.clients.config.TransactionManagerClientConfig;
 import com.backbase.stream.clients.config.UserManagerClientConfig;
 import com.backbase.stream.clients.config.UserProfileManagerClientConfig;
-import com.backbase.stream.webclient.DbsWebClientConfiguration;
+import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 

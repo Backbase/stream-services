@@ -1,11 +1,11 @@
 package com.backbase.stream.configuration;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Data
-@NoArgsConstructor
+@Setter
+@Getter
 @ConfigurationProperties("backbase.stream.dbs.deletion")
 public class DeletionProperties {
 

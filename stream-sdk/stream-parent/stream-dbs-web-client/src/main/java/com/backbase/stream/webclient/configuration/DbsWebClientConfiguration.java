@@ -1,7 +1,6 @@
-package com.backbase.stream.webclient;
+package com.backbase.stream.webclient.configuration;
 
 import com.backbase.buildingblocks.webclient.InterServiceWebClientCustomizer;
-import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
 import com.backbase.stream.webclient.filter.HeadersForwardingClientFilter;
 import com.backbase.stream.webclient.filter.HeadersForwardingServerFilter;
 import lombok.extern.slf4j.Slf4j;

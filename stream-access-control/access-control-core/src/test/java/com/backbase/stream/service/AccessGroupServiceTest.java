@@ -68,12 +68,12 @@ import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -117,7 +117,7 @@ class AccessGroupServiceTest {
     @Mock
     private ServiceAgreementsApi serviceAgreementsApi;
 
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    @Spy
     private DeletionProperties configurationProperties;
 
     @Test
