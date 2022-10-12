@@ -44,7 +44,7 @@ class RegionBundleSagaIT {
 	static void configureProperties(DynamicPropertyRegistry registry) {
 		registry.add("spring.security.oauth2.client.provider.bb.token-uri",
 				() -> String.format("%s/oauth/token", wireMockServer.baseUrl()));
-		
+
 		registry.add("backbase.stream.dbs.portfolio-base-url",
 				() -> String.format("%s/portfolio", wireMockServer.baseUrl()));
 	}
@@ -60,7 +60,7 @@ class RegionBundleSagaIT {
 		List<RegionBundle> regionBundles = RegionTestUtil.createRegionBundles();
 
 		// When
-		webTestClient.post().uri("/integration-api/v1/regions/batch").header("Content-Type", "application/json")
+		webTestClient.post().uri("/portfolios/regions/batch").header("Content-Type", "application/json")
 				.header("X-TID", "tenant-id").bodyValue(regionBundles).exchange().expectStatus().isEqualTo(200);
 
 		// Then
@@ -96,7 +96,6 @@ class RegionBundleSagaIT {
 
 		wireMockServer.stubFor(WireMock.post("/portfolio/integration-api/v1/countries").willReturn(WireMock.aResponse()
 				.withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE).withBody("{\"countries\":[]}")));
-
 	}
 
 	public static class TestConfiguration {

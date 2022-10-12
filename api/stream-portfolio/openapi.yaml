@@ -13,8 +13,6 @@ servers:
 tags:
 - name: portfolios
   description: Portfolios API
-- name: integrations
-  description: Integration API
 paths:
   ###############################################
   ## Portfolio
@@ -24,7 +22,7 @@ paths:
       tags:
         - portfolios
       summary: Create Wealth of Portfolios
-      operationId: createPortfolioBundlee
+      operationId: createPortfolios
       requestBody:
         content:
           application/json:
@@ -47,15 +45,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  ###############################################
-  ## Integration
-  ###############################################
-  /integration-api/v1/regions/batch:
+  /portfolios/regions/batch:
     post:
       tags:
-        - integration
-      summary: Create Portfolio Regions Batch
-      operationId: createPortfiolioRegionsBatch
+        - portfolios
+      summary: Create Portfolios Regions Batch
+      operationId: createPortfioliosRegionsBatch
       requestBody:
         content:
           application/json:
