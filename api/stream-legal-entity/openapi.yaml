@@ -405,6 +405,10 @@ components:
           $ref: '#/components/schemas/UrgentTransfer'
         BIC:
           $ref: '#/components/schemas/BIC'
+        panSuffix:
+          $ref: '#/components/schemas/PanSuffix'
+        productNumber:
+          $ref: '#/components/schemas/ProductNumber'
         bankBranchCode:
           $ref: '#/components/schemas/BankBranchCode'
         accountInterestRate:
@@ -463,6 +467,10 @@ components:
           $ref: '#/components/schemas/UrgentTransfer'
         BIC:
           $ref: '#/components/schemas/BIC'
+        panSuffix:
+          $ref: '#/components/schemas/PanSuffix'
+        productNumber:
+          $ref: '#/components/schemas/ProductNumber'
         bankBranchCode:
           $ref: '#/components/schemas/BankBranchCode'
         accountInterestRate:
@@ -531,6 +539,10 @@ components:
           $ref: '#/components/schemas/CreditAccount'
         debitAccount:
           $ref: '#/components/schemas/DebitAccount'
+        panSuffix:
+          $ref: '#/components/schemas/PanSuffix'
+        productNumber:
+          $ref: '#/components/schemas/ProductNumber'
         startDate:
           $ref: '#/components/schemas/StartDate'
         validThru:
@@ -567,6 +579,10 @@ components:
           $ref: '#/components/schemas/CreditAccount'
         debitAccount:
           $ref: '#/components/schemas/DebitAccount'
+        panSuffix:
+          $ref: '#/components/schemas/PanSuffix'
+        productNumber:
+          $ref: '#/components/schemas/ProductNumber'
         remainingCredit:
           $ref: '#/components/schemas/RemainingCredit'
         outstandingPayment:
@@ -603,6 +619,8 @@ components:
           $ref: '#/components/schemas/PrincipalAmount'
         urgentTransferAllowed:
           $ref: '#/components/schemas/UrgentTransfer'
+        panSuffix:
+          $ref: '#/components/schemas/PanSuffix'
         productNumber:
           $ref: '#/components/schemas/ProductNumber'
         accountInterestRate:
@@ -659,6 +677,8 @@ components:
           $ref: '#/components/schemas/BBAN'
         urgentTransferAllowed:
           $ref: '#/components/schemas/UrgentTransfer'
+        panSuffix:
+          $ref: '#/components/schemas/PanSuffix'
         productNumber:
           $ref: '#/components/schemas/ProductNumber'
         accountInterestRate:
@@ -701,6 +721,8 @@ components:
           $ref: '#/components/schemas/CurrentInvestment'
         urgentTransferAllowed:
           $ref: '#/components/schemas/UrgentTransfer'
+        panSuffix:
+          $ref: '#/components/schemas/PanSuffix'
         productNumber:
           $ref: '#/components/schemas/ProductNumber'
         IBAN:
@@ -1495,6 +1517,10 @@ components:
     ValueDateBalance:
       type: number
       description: The balance of the account on a specific date that needs to be used for the calculation of interest. NB! If no date is specified (like for the book date balance) the current date can be assumed.
+    PanSuffix:
+      maxLength: 36
+      type: string
+      description: The name that can be assigned by the bank to label the product.
     ProductNumber:
       maxLength: 36
       type: string
@@ -2436,6 +2462,10 @@ components:
           type: string
           description: Assignable Permission Set name
           maxLength: 128
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
       required:
         - name
         - description

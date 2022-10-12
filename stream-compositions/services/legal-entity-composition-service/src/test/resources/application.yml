@@ -1,0 +1,147 @@
+spring:
+  zipkin:
+    enabled: false
+  main:
+    allow-bean-definition-overriding: true
+  activemq:
+    broker-url: vm://activemq
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
+      enabled: false
+      discovery:
+        enabled: true
+
+eureka:
+  client:
+    enabled: false
+
+sso:
+  jwt:
+    internal:
+      type: signed
+      signature:
+        algorithm: HS256
+        key:
+          type: ENV
+          value: SIG_SECRET_KEY
+
+
+backbase:
+  communication:
+    http:
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://localhost:17000/oauth/token
+  stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+        userProfileEnabled: true
+    dbs:
+      user-manager-base-url: http://localhost:8086/user-manager
+      user-profile-manager-base-url: http://localhost:8086/user-profile-manager
+      access-control-base-url: http://localhost:8086/access-control
+      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+    identity:
+      identity-integration-base-url: http://localhost:8181/identity-integration-service
+    compositions:
+      legal-entity:
+        integration-base-url: http://localhost:18000
+        chains:
+          product-composition:
+            enableOnComplete: true
+            enableOnFailure: false
+            base-url: http://localhost:9003
+            async: false
+        events:
+          enableCompleted: false
+          enableFailed: false
+        cursor:
+          enabled: false
+          base-url: http://localhost:9005
+bootstrap:
+  enabled: false
+  # This is just an example. Replace it with data corresponding to your bank
+  legalEntity:
+    name: "ACME Bank"
+    realmName: "backbase"
+    externalId: "ACME"
+    legalEntityType: "BANK"
+    referenceJobRoles:
+      - name: Entitlements - Manager
+        description: Full Entitlements administration.
+        functionGroups:
+          - name: "Manage Entitlements"
+            functions:
+              - functionId: "1019"
+                functionCode: "manage.data.groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+              - functionId: "1020"
+                functionCode: "manage.function.groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+      - name: Retail User - USA
+        description: Retail User Permissions for USA
+        functionGroups:
+          - name: "Products, payments, txn, contacts"
+            functions:
+              - functionId: "1006"
+                functionCode: "product.summary"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1003"
+                functionCode: "transactions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+              - functionId: "1017"
+                functionCode: "us.domestic.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1018"
+                functionCode: "us.foreign.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1005"
+                functionCode: "contacts"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+    administrators:
+      - externalId: "admin"
+        fullName: "Backbase Root Admin"
+        identityLinkStrategy: "IDENTITY_AGNOSTIC"
+        emailAddress:
+          address: "bbadmin@email.com"
+        mobileNumber:
+          number: "1234567890"
+    users:
+      - user:
+          externalId: "admin"
+          identityLinkStrategy: "IDENTITY_AGNOSTIC"
+        referenceJobRoleNames:
+          - "Entitlements - Manager"
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG
+    org.mockserver: DEBUG
+
+activemq:
+  store:
+    dir: /tmp

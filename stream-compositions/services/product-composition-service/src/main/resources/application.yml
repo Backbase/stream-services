@@ -1,0 +1,55 @@
+spring:
+  zipkin:
+    enabled: false
+  main:
+    allow-bean-definition-overriding: true
+sso:
+  jwt:
+    internal:
+      type: signed
+      signature:
+        algorithm: HS256
+        key:
+          type: ENV
+          value: SIG_SECRET_KEY
+backbase:
+  mtls:
+    enabled: false
+  security:
+    http:
+      enabled: true
+  stream:
+    dbs:
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
+    compositions:
+      product:
+        integration-base-url: http://product-integration:8080
+        chains:
+          transaction-composition:
+            enabled: true
+            base-url: http://transaction-composition:8080
+            async: false
+            excludeProductTypeExternalIds:
+          payment-order-composition:
+            enabled: true
+            base-url: http://localhost:9005
+            async: false
+            excludeProductTypeExternalIds:
+        events:
+          enableCompleted: true
+          enableFailed: true
+        cursor:
+          enabled: false
+          base-url: http://product-cursor:8080
+        ingestion-mode: UPDATE
+
+logging:
+  level:
+    #    root: DEBUG
+    com:
+      backbase:
+        dbs: DEBUG
+        buildingblocks: DEBUG
+

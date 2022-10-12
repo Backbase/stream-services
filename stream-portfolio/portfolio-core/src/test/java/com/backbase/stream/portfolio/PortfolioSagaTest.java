@@ -53,24 +53,26 @@ class PortfolioSagaTest {
         Mockito.when(wealthBundle.getPositions()).thenReturn(List.of(positionBundle));
         Mockito.when(wealthBundle.getAggregatePortfolios()).thenReturn(List.of(aggregatePortfolio));
 
-        Mockito.when(portfolioIntegrationService.createPosition(positionBundle)).thenReturn(Mono.just(positionBundle));
+        Mockito.when(portfolioIntegrationService.upsertPosition(positionBundle)).thenReturn(Mono.just(positionBundle));
         Mockito.when(portfolioIntegrationService.createAggregatePortfolio(aggregatePortfolio))
             .thenReturn(Mono.just(aggregatePortfolio));
-        Mockito.when(portfolioIntegrationService.createPortfolio(portfolioBundle))
+        Mockito.when(portfolioIntegrationService.upsertPortfolio(portfolioBundle))
             .thenReturn(Flux.just(portfolioBundle));
-        Mockito.when(instrumentIntegrationService.createAssetClass(assetClassBundle)).thenReturn(Flux.empty());
-        Mockito.when(instrumentIntegrationService.createInstrument(instrumentBundle))
+        Mockito.when(instrumentIntegrationService.upsertAssetClass(List.of(assetClassBundle)))
+            .thenReturn(Mono.just(List.of(assetClassBundle)));
+        Mockito.when(instrumentIntegrationService.upsertInstrument(instrumentBundle))
             .thenReturn(Mono.just(instrumentBundle));
-        Mockito.when(instrumentIntegrationService.createRegion(regionBundle)).thenReturn(Flux.empty());
+        Mockito.when(instrumentIntegrationService.upsertRegions(List.of(regionBundle)))
+            .thenReturn(Mono.just(List.of(regionBundle)));
 
         portfolioSaga.executeTask(streamTask).block();
 
-        Mockito.verify(portfolioIntegrationService).createPosition(positionBundle);
+        Mockito.verify(portfolioIntegrationService).upsertPosition(positionBundle);
         Mockito.verify(portfolioIntegrationService).createAggregatePortfolio(aggregatePortfolio);
-        Mockito.verify(portfolioIntegrationService).createPortfolio(portfolioBundle);
-        Mockito.verify(instrumentIntegrationService).createAssetClass(assetClassBundle);
-        Mockito.verify(instrumentIntegrationService).createInstrument(instrumentBundle);
-        Mockito.verify(instrumentIntegrationService).createRegion(regionBundle);
+        Mockito.verify(portfolioIntegrationService).upsertPortfolio(portfolioBundle);
+        Mockito.verify(instrumentIntegrationService).upsertAssetClass(List.of(assetClassBundle));
+        Mockito.verify(instrumentIntegrationService).upsertInstrument(instrumentBundle);
+        Mockito.verify(instrumentIntegrationService).upsertRegions(List.of(regionBundle));
 
         InOrder portfolioTaskOrder = Mockito.inOrder(wealthBundle);
         //noinspection ResultOfMethodCallIgnored

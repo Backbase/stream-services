@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: product-catalog-composition
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
+      enabled: false
+      discovery:
+        enabled: true

@@ -1,0 +1,28 @@
+imagePullSecrets: [ ]
+image:
+  registry: repo.backbase.com/backbase-stream-images
+  repository: # legal-entity-bootstrap-task
+  tag: 3.8.0
+  pullPolicy: Always
+  restartPolicy: OnFailure
+backoffLimit: 1
+dependencies: []
+#  - serviceName: identity-integration-service
+#  - serviceName: backbase-identity
+#    path: "/auth/realms/backbase/.well-known/openid-configuration"
+#    healthIndicator: "backbase"
+initContainers: []
+#  - name: init-product-catalog
+#    image: repo.backbase.com/backbase-stream-images/product-catalog-task:3.8.0
+#    env:
+#      - name: SPRING_PROFILES_INCLUDE
+#        value: "moustache-bank"
+resources:
+  limits:
+    cpu: 500m
+    memory: 2048Mi
+  requests:
+    cpu: 125m
+    memory: 256Mi
+env:
+  JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70.0 -Dspring.cloud.config.enabled=false"

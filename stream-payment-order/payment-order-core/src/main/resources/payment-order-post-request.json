@@ -1,0 +1,59 @@
+{
+  "id": "729190df-a421-4937-94fd-5e1a3da132cd",
+  "internalUserId": "baf813f9-0ce1-4a47-b7ea-37970f20e475",
+  "originator": {
+    "name": "STAR SAVINGS"
+  },
+  "originatorAccount": {
+    "identification": {
+      "identification": "*188-S30",
+      "schemeName": "BBAN"
+    },
+    "arrangementId": "8d1b45c0-567a-4c02-afd9-192fc9631790",
+    "externalArrangementId": "0000099188-S30"
+  },
+  "totalAmount": {
+    "amount": "10.29",
+    "currencyCode": "USD"
+  },
+  "batchBooking": false,
+  "instructionPriority": "HIGH",
+  "status": "READY",
+  "requestedExecutionDate": "2021-01-20",
+  "paymentMode": "RECURRING",
+  "paymentType": "INTERNAL_TRANSFER",
+  "schedule": {
+    "transferFrequency": "MONTHLY",
+    "on": 1,
+    "startDate": "2021-02-01",
+    "endDate": "2021-05-01",
+    "nextExecutionDate": "2021-03-01",
+    "every": "1"
+  },
+  "transferTransactionInformation": {
+    "instructedAmount": {
+      "amount": "10.29",
+      "currencyCode": "EUR"
+    },
+    "counterparty": {
+      "name": "NO STRINGS CHECKING"
+    },
+    "counterpartyAccount": {
+      "identification": {
+        "identification": "••••-S10",
+        "schemeName": "BBAN"
+      }
+    },
+    "remittanceInformation": {
+      "type": "UNSTRUCTURED",
+      "content": "Return a debt"
+    }
+  },
+  "audit": {
+    "timestamp": "2021-01-20T14:33:13Z",
+    "user": "tblade"
+  },
+  "intraLegalEntity": false,
+  "serviceAgreementId": "4028809c81608807018160a642460009",
+  "originatorAccountCurrency": "USD"
+}

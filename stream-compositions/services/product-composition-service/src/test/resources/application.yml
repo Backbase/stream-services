@@ -1,0 +1,64 @@
+spring:
+  activemq:
+    broker-url: vm://activemq
+  zipkin:
+    enabled: false
+  main:
+    allow-bean-definition-overriding: true
+sso:
+  jwt:
+    internal:
+      type: signed
+      signature:
+        algorithm: HS256
+        key:
+          type: ENV
+          value: SIG_SECRET_KEY
+eureka:
+  client:
+    enabled: false
+
+backbase:
+  communication:
+    http:
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://localhost:17000/oauth/token
+  mtls:
+    enabled: false
+  security:
+    http:
+      enabled: true
+  stream:
+    dbs:
+      user-manager-base-url: http://localhost:8086/user-manager
+      access-control-base-url: http://localhost:8086/access-control
+      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+    compositions:
+      product:
+        integration-base-url: http://localhost:18000
+        chains:
+          transaction-composition:
+            enabled: true
+            base-url: http://localhost:12000
+            async: false
+            excludeProductTypeExternalIds:
+          payment-order-composition:
+            enabled: true
+            base-url: http://localhost:13000
+            async: false
+            excludeProductTypeExternalIds:
+        events:
+          enableCompleted: true
+          enableFailed: true
+        cursor:
+          enabled: false
+          base-url: http://localhost:9999
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG
+
+activemq:
+  store:
+    dir: /tmp

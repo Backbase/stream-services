@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Added InterestDetails to BaseProduct
 
+## [3.8.0](https://github.com/Backbase/stream-services/compare/3.7.0...3.8.0)
+### Changed
+- Upgraded to SSDK 15.0.1
+- Upgraded to Java 17
+- Creating the [`stream-bootstrap-task`](helm/README.md) for deployment of boostrap task Jobs on Kubernetes.
+
+## [3.6.0](https://github.com/Backbase/stream-services/compare/3.5.0...3.6.0)
+### Added
+- Add support for Entitlement Wizard Metadata.
+
+## [3.5.0](https://github.com/Backbase/stream-services/compare/3.4.0...3.5.0)
+### Added
+- Added support for push ingestion mode for product and transactions 
+
+## [3.4.0](https://github.com/Backbase/stream-services/compare/3.3.0...3.4.0)
+### Added
+- Enable Multi architecture docker images: arm64 and amd64
+
+## [3.3.0](https://github.com/Backbase/stream-services/compare/3.1.0...3.3.0)
+### Changed
+- Tech Debt: Make portfolio saga idempotent #172
+
+## [3.1.0](https://github.com/Backbase/stream-services/compare/3.0.0...3.1.0)
+### Changed
+- Upgraded to DBS 2022.09
+
+## [3.0.0](https://github.com/Backbase/stream-services/compare/2.88.0...3.0.0)
+### Added
+- We welcome [Stream Compositions](stream-compositions)! More details can be found in the [confluence page](https://backbase.atlassian.net/wiki/spaces/ES/pages/3481894959/Stream+Services+3.0).
+
 ## [2.86.1](https://github.com/Backbase/stream-services/compare/2.86.0...2.86.1)
 ### Fixed
 - Added qualifier for WebClient in ContactsServiceConfiguration.
@@ -465,13 +495,12 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
             .map(LegalEntityTask::getData)
             .doOnNext(actual -> log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
  ```
-
 ## [2.51.0]
 ### Maintenance
 - Update to 2021.10
 - Update Spring Boot to 2.5.5
 - Update Spring Cloud to 2020.0.4
-- Aligned versions accross project
+- Aligned versions across project
 
 ## [2.48.0]
 ### Changed

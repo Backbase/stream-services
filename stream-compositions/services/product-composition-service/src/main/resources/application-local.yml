@@ -1,0 +1,59 @@
+server:
+  port: 9003
+
+spring:
+  activemq:
+    broker-url: tcp://localhost:61616
+  zipkin:
+    enabled: false
+  main:
+    allow-bean-definition-overriding: true
+sso:
+  jwt:
+    internal:
+      type: signed
+      signature:
+        algorithm: HS256
+        key:
+          type: ENV
+          value: SIG_SECRET_KEY
+eureka:
+  client:
+    enabled: true
+    serviceUrl.defaultZone: http://localhost:8080/registry/eureka
+
+backbase:
+  communication:
+    http:
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+  stream:
+    dbs:
+      user-manager-base-url: http://localhost:8086/user-manager
+      access-control-base-url: http://localhost:8086/access-control
+      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
+    compositions:
+      product:
+        integration-base-url: http://localhost:7003
+        chains:
+          transaction-composition:
+            enabled: true
+            base-url: http://localhost:9004
+            async: false
+            excludeProductTypeExternalIds:
+          payment-order-composition:
+            enabled: true
+            base-url: http://localhost:9004
+            async: false
+            excludeProductTypeExternalIds:
+        events:
+          enableCompleted: false
+          enableFailed: true
+        cursor:
+          enabled: false
+          base-url: http://localhost:9005
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG

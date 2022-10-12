@@ -34,13 +34,16 @@ You can find listed here the API specification containing the opinionated model 
 
 ## Supported Banking Services versions
 
-| DBS version        | Stream [version](https://github.com/Backbase/stream-services/releases) |
-|--------------------|------------------------------------------------------------------------|
-| 2022.04            | 2.71.0 to latest                                                       |
-| 2021.09 (2.21.2.x) | 2.49.0 to 2.69.0                                                       |
-| 2021.07 (2.21.0.x) | 2.44.0 to 2.48.0                                                       |
-| 2.20.x             | 2.23.0 to 2.43.0                                                       |
-| 2.19.x             | 2.1.0 to 2.22.0                                                        |
+| Stream [version](https://github.com/Backbase/stream-services/releases) | DBS version        | Java version |
+|------------------------------------------------------------------------|--------------------|--------------|
+| 3.8.0 to latest                                                        | 2022.09            | 17           |
+| 3.1.0 to 3.7.0                                                         | 2022.09            | 11           |
+| 2.71.0 to 3.0.0                                                        | 2022.04            | 11           |
+| 2.49.0 to 2.69.0                                                       | 2021.09 (2.21.2.x) | 11           |
+| 2.44.0 to 2.48.0                                                       | 2021.07 (2.21.0.x) | 11           |
+| 2.23.0 to 2.43.0                                                       | 2.20.x             | 11           |
+| 2.15.0 to 2.22.0                                                       | 2.19.x             | 11           |
+| 2.1.0 to 2.14.0                                                        | 2.19.x             | 8            |
 
 ## Software License Terms
 Please see the license terms [here](LICENSE.txt).

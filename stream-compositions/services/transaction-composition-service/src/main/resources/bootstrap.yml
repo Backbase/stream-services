@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: transaction-composition
+  cloud:
+    kubernetes:
+      config:
+        enabled: false
+      enabled: false
+      discovery:
+        enabled: true

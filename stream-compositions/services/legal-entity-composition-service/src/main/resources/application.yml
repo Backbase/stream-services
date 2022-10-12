@@ -1,0 +1,113 @@
+spring:
+  zipkin:
+    enabled: false
+  main:
+    allow-bean-definition-overriding: true
+
+backbase:
+  security:
+    http:
+      enabled: true
+      adapter:
+        enabled: true
+  stream:
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+        userProfileEnabled: true
+    dbs:
+      user-manager-base-url: http://user-manager:8080
+      access-control-base-url: http://access-control:8080
+      arrangement-manager-base-url: http://arrangement-manager:8080
+      user-profile-manager-base-url: http://user-profile-manager:8080
+    identity:
+      identity-integration-base-url: http://identity-integration-service:8080
+    compositions:
+      legal-entity:
+        integration-base-url: http://legal-entity-integration:8080
+        chains:
+          product-composition:
+            enabled: true
+            base-url: http://product-composition:8080
+            async: false
+        events:
+          enableCompleted: true
+          enableFailed: true
+        cursor:
+          enabled: false
+          base-url: http://legal-entity-cursor:8080
+bootstrap:
+  enabled: false
+  # This is just an example. Replace it with data corresponding to your bank
+  legalEntity:
+    name: "Bank"
+    realmName: "backbase"
+    externalId: "BANK"
+    legalEntityType: "BANK"
+    referenceJobRoles:
+      - name: Entitlements - Manager
+        description: Full Entitlements administration.
+        functionGroups:
+          - name: "Manage Entitlements"
+            functions:
+              - functionId: "1019"
+                functionCode: "manage.data.groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+              - functionId: "1020"
+                functionCode: "manage.function.groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+                  - privilege: "approve"
+      - name: Retail User - USA
+        description: Retail User Permissions for USA
+        functionGroups:
+          - name: "Products, payments, txn, contacts"
+            functions:
+              - functionId: "1006"
+                functionCode: "product.summary"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1003"
+                functionCode: "transactions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+              - functionId: "1017"
+                functionCode: "us.domestic.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1018"
+                functionCode: "us.foreign.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1005"
+                functionCode: "contacts"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+    administrators:
+      - externalId: "admin"
+        fullName: "Backbase Root Admin"
+        identityLinkStrategy: "IDENTITY_AGNOSTIC"
+        emailAddress:
+          address: "bbadmin@email.com"
+        mobileNumber:
+          number: "1234567890"
+    users:
+      - user:
+          externalId: "admin"
+          identityLinkStrategy: "IDENTITY_AGNOSTIC"
+        referenceJobRoleNames:
+          - "Entitlements - Manager"
