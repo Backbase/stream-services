@@ -1,7 +1,18 @@
 {
   "request": {
     "method": "POST",
-    "url": "/user-manager/service-api/v2/users/identities/realms"
+    "url": "/user-manager/service-api/v2/users/identities/realms",
+    "headers": {
+      "X-B3-TraceId": {
+        "matches": "[\\w-]+"
+      },
+      "X-B3-SpanId": {
+        "matches": "[\\w-]+"
+      },
+      "X-TID": {
+        "contains": "tenant1"
+      }
+    }
   },
   "response": {
     "status": 201,

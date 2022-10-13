@@ -12,4 +12,4 @@
     / /|  \                            ${AnsiColor.RED}/ .-'':._.'`-. \${AnsiColor.BLACK}              `_/      )${AnsiColor.DEFAULT}
    / /\|   \                           ${AnsiColor.RED}|/    /||\    \|${AnsiColor.BLACK}              (_(_/-(_/${AnsiColor.DEFAULT}
 _-/_/ _\7___\${AnsiColor.GREEN}_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-${AnsiColor.RED}bv${AnsiColor.GREEN}_-${AnsiColor.DEFAULT}
-${AnsiColor.DEFAULT}
+${AnsiColor.DEFAULT}${application.title} ${application.formatted-version}

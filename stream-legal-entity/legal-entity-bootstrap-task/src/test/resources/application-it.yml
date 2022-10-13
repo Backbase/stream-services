@@ -28,3 +28,6 @@ backbase:
       additional-headers:
         X-TID: tenant1
 
+logging:
+  level:
+    com.backbase.stream: DEBUG

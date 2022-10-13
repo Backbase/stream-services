@@ -1,5 +1,6 @@
 package com.backbase.stream.it;
 
+import static com.backbase.stream.it.LegalEntitySagaIT.NotEmptyPattern.notEmpty;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
@@ -17,8 +18,11 @@ import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.github.tomakehurst.wiremock.matching.MatchResult;
+import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
@@ -278,7 +282,9 @@ public class LegalEntitySagaIT {
 
         // Then
         verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v2/legalentities/500000"))
-                .withHeader("X-TID", WireMock.equalTo("tenant-id")));
+            .withHeader("X-TID", WireMock.equalTo("tenant-id"))
+            .withHeader("X-B3-TraceId", notEmpty())
+            .withHeader("X-B3-SpanId", notEmpty()));
     }
 
     @Test
@@ -302,7 +308,9 @@ public class LegalEntitySagaIT {
 
         // Then
         verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v2/legalentities/500000"))
-                .withHeader("X-TID", WireMock.equalTo("tenant-id")));
+            .withHeader("X-TID", WireMock.equalTo("tenant-id"))
+            .withHeader("X-B3-TraceId", notEmpty())
+            .withHeader("X-B3-SpanId", notEmpty()));
     }
 
     @Test
@@ -331,6 +339,23 @@ public class LegalEntitySagaIT {
 
         // Then
         verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v2/legalentities/500000"))
-                .withHeader("X-TID", WireMock.equalTo("tenant-id")));
+            .withHeader("X-TID", WireMock.equalTo("tenant-id"))
+            .withHeader("X-B3-TraceId", notEmpty())
+            .withHeader("X-B3-SpanId", notEmpty()));
+    }
+
+    static class NotEmptyPattern extends StringValuePattern {
+        public NotEmptyPattern(@JsonProperty("something") String expectedValue) {
+            super(expectedValue);
+        }
+
+        @Override
+        public MatchResult match(String value) {
+            return MatchResult.of(value != null && !value.isEmpty());
+        }
+
+        public static NotEmptyPattern notEmpty() {
+            return new NotEmptyPattern("(always)");
+        }
     }
 }
