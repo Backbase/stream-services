@@ -36,4 +36,19 @@ public class DbsApiClientConfigTest {
             });
     }
 
+    @Test
+    public void dbsApiClientConfigWithServicePortTest() {
+        contextRunner
+            .withPropertyValues(
+                "backbase.communication.http.default-service-port=8080",
+                "backbase.communication.services.user.profile.service-port=8181")
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(UserProfileManagerClientConfig.class)
+            .run(context -> {
+                var config = context.getBean(UserProfileManagerClientConfig.class);
+                assertEquals("http://user-profile-manager:8181", config.createBasePath());
+            });
+    }
+
 }

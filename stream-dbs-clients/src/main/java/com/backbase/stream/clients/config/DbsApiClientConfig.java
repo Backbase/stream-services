@@ -14,10 +14,9 @@ class DbsApiClientConfig extends ApiClientConfig {
 
     @Override
     public String createBasePath() {
-        if (defaultServicePort == null) {
-            return super.createBasePath();
+        if (getServicePort() == null && defaultServicePort != null) {
+            return String.format("%s://%s:%s", getScheme(), getServiceId(), defaultServicePort);
         }
-
-        return String.format("%s://%s:%s", getScheme(), getServiceId(), defaultServicePort);
+        return super.createBasePath();
     }
 }

@@ -13,9 +13,6 @@ sso:
           type: ENV
           value: SIG_SECRET_KEY
 backbase:
-  communication:
-    http:
-      default-service-port: 8080
   mtls:
     enabled: false
   security:

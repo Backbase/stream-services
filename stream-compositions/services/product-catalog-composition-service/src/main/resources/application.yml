@@ -4,9 +4,6 @@ spring:
   main:
     allow-bean-definition-overriding: true
 backbase:
-  communication:
-    http:
-      default-service-port: 8080
   mtls:
     enabled: false
   security:
