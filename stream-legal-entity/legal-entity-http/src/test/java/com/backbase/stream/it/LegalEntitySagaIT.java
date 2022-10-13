@@ -301,14 +301,12 @@ public class LegalEntitySagaIT {
         webTestClient.post()
                 .uri("/legal-entity")
                 .header("Content-Type", "application/json")
-                .header("X-TID", "tenant-id")
                 .bodyValue(legalEntityTask.getLegalEntity())
                 .exchange()
                 .expectStatus().isEqualTo(200);
 
         // Then
         verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v2/legalentities/500000"))
-            .withHeader("X-TID", WireMock.equalTo("tenant-id"))
             .withHeader("X-B3-TraceId", notEmpty())
             .withHeader("X-B3-SpanId", notEmpty()));
     }
