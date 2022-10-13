@@ -1,6 +1,5 @@
 package com.backbase.stream.clients.config;
 
-import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.approval.api.service.ApiClient;
 import com.backbase.dbs.approval.api.service.v2.ApprovalTypeAssignmentsApi;
 import com.backbase.dbs.approval.api.service.v2.ApprovalTypesApi;
@@ -15,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.approval")
-public class ApprovalClientConfig extends ApiClientConfig {
+public class ApprovalClientConfig extends DbsApiClientConfig {
 
     public static final String APPROVAL_SERVICE_ID = "approval-service";
 

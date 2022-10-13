@@ -1,6 +1,5 @@
 package com.backbase.stream.clients.config;
 
-import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.identity.integration.api.service.ApiClient;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties("backbase.communication.services.identity.integration")
 @ConditionalOnProperty(value = "backbase.stream.legalentity.sink.use-identity-integration")
-public class IdentityIntegrationClientConfig extends ApiClientConfig {
+public class IdentityIntegrationClientConfig extends DbsApiClientConfig {
 
     public static final String IDENTITY_INTEGRATION_SERVICE_ID = "identity-integration-service";
 

@@ -1,6 +1,5 @@
 package com.backbase.stream.clients.config;
 
-import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.limit.api.service.ApiClient;
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.limit")
-public class LimitsClientConfig extends ApiClientConfig {
+public class LimitsClientConfig extends DbsApiClientConfig {
 
     public static final String LIMITS_SERVICE_ID = "limit";
 

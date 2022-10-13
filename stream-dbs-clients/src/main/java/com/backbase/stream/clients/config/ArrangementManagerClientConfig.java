@@ -1,6 +1,5 @@
 package com.backbase.stream.clients.config;
 
-import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v2.ProductKindsApi;
@@ -14,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.arrangement.manager")
-public class ArrangementManagerClientConfig extends ApiClientConfig {
+public class ArrangementManagerClientConfig extends DbsApiClientConfig {
 
     public static final String ARRANGEMENT_MANAGER_SERVICE_ID = "arrangement-manager";
 

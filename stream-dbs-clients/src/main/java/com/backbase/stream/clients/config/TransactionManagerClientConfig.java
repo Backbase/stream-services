@@ -1,6 +1,5 @@
 package com.backbase.stream.clients.config;
 
-import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.transaction.api.service.ApiClient;
 import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.transaction.manager")
-public class TransactionManagerClientConfig extends ApiClientConfig {
+public class TransactionManagerClientConfig extends DbsApiClientConfig {
 
     public static final String TRANSACTION_MANAGER_SERVICE_ID = "transaction-manager";
 

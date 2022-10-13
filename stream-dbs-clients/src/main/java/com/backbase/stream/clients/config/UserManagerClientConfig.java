@@ -1,6 +1,5 @@
 package com.backbase.stream.clients.config;
 
-import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.user.api.service.ApiClient;
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
@@ -13,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.usermanager")
-public class UserManagerClientConfig extends ApiClientConfig {
+public class UserManagerClientConfig extends DbsApiClientConfig {
 
     public static final String USER_MANAGER_SERVICE_ID = "user-manager";
 

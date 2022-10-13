@@ -1,6 +1,5 @@
 package com.backbase.stream.clients.config;
 
-import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.contact.api.service.ApiClient;
 import com.backbase.dbs.contact.api.service.v2.ContactsApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.contactmanager")
-public class ContactManagerClientConfig extends ApiClientConfig {
+public class ContactManagerClientConfig extends DbsApiClientConfig {
 
     public static final String CONTACT_MANAGER_SERVICE_ID = "contact-manager";
 

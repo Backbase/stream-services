@@ -1,6 +1,5 @@
 package com.backbase.stream.clients.config;
 
-import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.paymentorder.api.service.ApiClient;
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.payment.order")
-public class PaymentOrderClientConfig extends ApiClientConfig {
+public class PaymentOrderClientConfig extends DbsApiClientConfig {
 
     public static final String PAYMENT_ORDER_SERVICE_ID = "payment-order-service";
 

@@ -1,6 +1,5 @@
 package com.backbase.stream.clients.config;
 
-import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.accesscontrol.api.service.ApiClient;
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
@@ -22,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.access-control")
-public class AccessControlClientConfig extends ApiClientConfig {
+public class AccessControlClientConfig extends DbsApiClientConfig {
 
     public static final String ACCESS_CONTROL_SERVICE_ID = "access-control";
 

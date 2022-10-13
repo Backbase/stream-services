@@ -1,6 +1,5 @@
 package com.backbase.stream.clients.config;
 
-import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.dbs.user.profile.api.service.ApiClient;
 import com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.user.profile")
-public class UserProfileManagerClientConfig extends ApiClientConfig {
+public class UserProfileManagerClientConfig extends DbsApiClientConfig {
 
     public static final String USER_PROFILE_MANAGER_SERVICE_ID = "user-profile-manager";
 
