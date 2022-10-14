@@ -8,27 +8,6 @@ spring:
     enabled: false
   main:
     allow-bean-definition-overriding: true
-  cloud:
-    discovery:
-      client:
-        simple:
-          instances:
-            user-manager:
-              - uri: http://localhost:8086
-                metadata:
-                  contextPath: /user-manager
-            access-control:
-              - uri: http://localhost:8086
-                metadata:
-                  contextPath: /access-control
-            arrangement-manager:
-              - uri: http://localhost:8082
-                metadata:
-                  contextPath: /arrangement-manager
-            identity-integration-service:
-              - uri: http://localhost:8181
-                metadata:
-                  contextPath: /identity-integration-service
 eureka:
   client:
     enabled: true
@@ -36,6 +15,20 @@ eureka:
 
 backbase:
   communication:
+    services:
+      usermanager:
+        direct-uri: http://localhost:8086/user-manager
+      access-control:
+        direct-uri: http://localhost:8086/access-control
+      arrangement:
+        manager:
+          direct-uri: http://localhost:8082/arrangement-manager
+      user:
+        profile:
+          direct-uri: http://localhost:8086/user-profile-manager
+      identity:
+        integration:
+          direct-uri: http://localhost:8181/identity-integration-service
     http:
       client-secret: bb-secret
       client-id: bb-client

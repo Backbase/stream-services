@@ -9,27 +9,6 @@ spring:
     allow-bean-definition-overriding: true
   codec:
     max-in-memory-size: 10MB
-  cloud:
-    discovery:
-      client:
-        simple:
-          instances:
-            user-manager:
-              - uri: http://localhost:8086
-                metadata:
-                  contextPath: /user-manager
-            access-control:
-              - uri: http://localhost:8086
-                metadata:
-                  contextPath: /access-control
-            arrangement-manager:
-              - uri: http://localhost:8082
-                metadata:
-                  contextPath: /arrangement-manager
-            transaction-manager:
-              - uri: http://localhost:8083
-                metadata:
-                  contextPath: /transaction-manager
 sso:
   jwt:
     internal:
@@ -40,13 +19,24 @@ sso:
           type: ENV
           value: SIG_SECRET_KEY
 backbase:
-  activemq:
-    enabled: true
   communication:
+    services:
+      usermanager:
+        direct-uri: http://localhost:8086/user-manager
+      access-control:
+        direct-uri: http://localhost:8086/access-control
+      arrangement:
+        manager:
+          direct-uri: http://localhost:8082/arrangement-manager
+      transaction:
+        manager:
+          direct-uri: http://localhost:8083/transaction-manager
     http:
       client-secret: bb-secret
       client-id: bb-client
       access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+  activemq:
+    enabled: true
   stream:
     compositions:
       transaction:

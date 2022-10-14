@@ -2,26 +2,6 @@ spring:
   zipkin:
     enabled: false
   cloud:
-    discovery:
-      client:
-        simple:
-          instances:
-            user-manager:
-              - uri: http://localhost:8086
-                metadata:
-                  contextPath: /user-manager
-            access-control:
-              - uri: http://localhost:8086
-                metadata:
-                  contextPath: /access-control
-            arrangement-manager:
-              - uri: http://localhost:8082
-                metadata:
-                  contextPath: /arrangement-manager
-            transaction-manager:
-              - uri: http://localhost:8083
-                metadata:
-                  contextPath: /transaction-manager
     kubernetes:
       config:
         enabled: false
@@ -44,6 +24,17 @@ sso:
 
 backbase:
   communication:
+    services:
+      usermanager:
+        direct-uri: http://localhost:8086/user-manager
+      access-control:
+        direct-uri: http://localhost:8086/access-control
+      arrangement:
+        manager:
+          direct-uri: http://localhost:8082/arrangement-manager
+      transaction:
+        manager:
+          direct-uri: http://localhost:8083/transaction-manager
     http:
       client-secret: bb-secret
       client-id: bb-client

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.transaction.manager")
-public class TransactionManagerClientConfig extends DbsApiClientConfig {
+public class TransactionManagerClientConfig extends CompositeApiClientConfig {
 
     public static final String TRANSACTION_MANAGER_SERVICE_ID = "transaction-manager";
 

@@ -24,6 +24,17 @@ sso:
 
 backbase:
   communication:
+    services:
+      usermanager:
+        service-port: 8080
+      access-control:
+        service-port: 8080
+      arrangement:
+        manager:
+          service-port: 8080
+      identity:
+        integration:
+          service-port: 8080
     http:
       client-secret: bb-secret
       client-id: bb-client

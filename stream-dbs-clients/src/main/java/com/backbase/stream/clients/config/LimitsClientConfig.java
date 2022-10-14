@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.limit")
-public class LimitsClientConfig extends DbsApiClientConfig {
+public class LimitsClientConfig extends CompositeApiClientConfig {
 
     public static final String LIMITS_SERVICE_ID = "limit";
 

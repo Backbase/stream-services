@@ -51,6 +51,10 @@ spring:
                   contextPath: /identity-integration-service
 ```
 
+> **Head Up!**: The Stream Composition services still don't support client load balancing, hence service discovery isn't available for the moment then you can't configure the spring cloud discovery simple instances. To override the default DBS services addresses you can use the `direct-uri` property. e.g.
+> ```properties 
+> backbase.communication.services.access-control.direct-uri=http://localhost:8086/access-control
+> ```
 ## [3.8.0](https://github.com/Backbase/stream-services/compare/3.7.0...3.8.0)
 ### Changed
 - Upgraded to SSDK 15.0.1

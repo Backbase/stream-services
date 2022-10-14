@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.approval")
-public class ApprovalClientConfig extends DbsApiClientConfig {
+public class ApprovalClientConfig extends CompositeApiClientConfig {
 
     public static final String APPROVAL_SERVICE_ID = "approval-service";
 

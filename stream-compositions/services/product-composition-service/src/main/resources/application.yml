@@ -13,6 +13,15 @@ sso:
           type: ENV
           value: SIG_SECRET_KEY
 backbase:
+  communication:
+    services:
+      usermanager:
+        service-port: 8080
+      access-control:
+        service-port: 8080
+      arrangement:
+        manager:
+          service-port: 8080
   mtls:
     enabled: false
   security:

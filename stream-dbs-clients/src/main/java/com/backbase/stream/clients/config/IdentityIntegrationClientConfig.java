@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties("backbase.communication.services.identity.integration")
 @ConditionalOnProperty(value = "backbase.stream.legalentity.sink.use-identity-integration")
-public class IdentityIntegrationClientConfig extends DbsApiClientConfig {
+public class IdentityIntegrationClientConfig extends CompositeApiClientConfig {
 
     public static final String IDENTITY_INTEGRATION_SERVICE_ID = "identity-integration-service";
 

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.contactmanager")
-public class ContactManagerClientConfig extends DbsApiClientConfig {
+public class ContactManagerClientConfig extends CompositeApiClientConfig {
 
     public static final String CONTACT_MANAGER_SERVICE_ID = "contact-manager";
 

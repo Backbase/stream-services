@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.payment.order")
-public class PaymentOrderClientConfig extends DbsApiClientConfig {
+public class PaymentOrderClientConfig extends CompositeApiClientConfig {
 
     public static final String PAYMENT_ORDER_SERVICE_ID = "payment-order-service";
 

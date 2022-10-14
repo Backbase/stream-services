@@ -5,6 +5,21 @@ spring:
     allow-bean-definition-overriding: true
 
 backbase:
+  communication:
+    services:
+      usermanager:
+        service-port: 8080
+      access-control:
+        service-port: 8080
+      arrangement:
+        manager:
+          service-port: 8080
+      user:
+        profile:
+          service-port: 8080
+      identity:
+        integration:
+          service-port: 8080
   security:
     http:
       enabled: true

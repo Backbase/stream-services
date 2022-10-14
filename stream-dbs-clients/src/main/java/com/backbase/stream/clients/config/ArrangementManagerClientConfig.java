@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.arrangement.manager")
-public class ArrangementManagerClientConfig extends DbsApiClientConfig {
+public class ArrangementManagerClientConfig extends CompositeApiClientConfig {
 
     public static final String ARRANGEMENT_MANAGER_SERVICE_ID = "arrangement-manager";
 

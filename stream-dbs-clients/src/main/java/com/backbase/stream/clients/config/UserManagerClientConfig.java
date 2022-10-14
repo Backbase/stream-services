@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.usermanager")
-public class UserManagerClientConfig extends DbsApiClientConfig {
+public class UserManagerClientConfig extends CompositeApiClientConfig {
 
     public static final String USER_MANAGER_SERVICE_ID = "user-manager";
 

@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.user.profile")
-public class UserProfileManagerClientConfig extends DbsApiClientConfig {
+public class UserProfileManagerClientConfig extends CompositeApiClientConfig {
 
     public static final String USER_PROFILE_MANAGER_SERVICE_ID = "user-profile-manager";
 

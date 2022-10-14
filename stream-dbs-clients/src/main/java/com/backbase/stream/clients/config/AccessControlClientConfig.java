@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.access-control")
-public class AccessControlClientConfig extends DbsApiClientConfig {
+public class AccessControlClientConfig extends CompositeApiClientConfig {
 
     public static final String ACCESS_CONTROL_SERVICE_ID = "access-control";
 
