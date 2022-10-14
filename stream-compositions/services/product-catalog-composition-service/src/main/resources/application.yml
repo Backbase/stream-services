@@ -5,6 +5,10 @@ spring:
     allow-bean-definition-overriding: true
 backbase:
   communication:
+    http:
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://token-converter:8080/oauth/token
     services:
       usermanager:
         service-port: 8080
