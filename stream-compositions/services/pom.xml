@@ -70,12 +70,10 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Third party dependencies -->
         <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>service-sdk-starter-mapping</artifactId>
         </dependency>
-
     </dependencies>
 
 </project>

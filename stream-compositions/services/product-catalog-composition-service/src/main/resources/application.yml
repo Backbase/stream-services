@@ -4,6 +4,22 @@ spring:
   main:
     allow-bean-definition-overriding: true
 backbase:
+  communication:
+    http:
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://token-converter:8080/oauth/token
+    services:
+      usermanager:
+        service-port: 8080
+      access-control:
+        service-port: 8080
+      arrangement:
+        manager:
+          service-port: 8080
+      identity:
+        integration:
+          service-port: 8080
   mtls:
     enabled: false
   security:
@@ -16,12 +32,6 @@ backbase:
     legalentity:
       sink:
         useIdentityIntegration: true
-    dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
-    identity:
-      identity-integration-base-url: http://identity-integration-service:8080
     compositions:
       product-catalog:
         enable-completed-events: false

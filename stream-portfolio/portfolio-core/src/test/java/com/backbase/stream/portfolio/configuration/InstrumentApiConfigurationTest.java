@@ -7,12 +7,12 @@ class InstrumentApiConfigurationTest extends BaseApiConfigurationTest<Instrument
 
     @Override
     public ApiClient getClient() {
-        return getConfig().instrumentApiClient(dbsWebClient, objectMapper, dateFormat);
+        return getConfig().instrumentApiClient(objectMapper, dateFormat);
     }
 
     @Override
     public InstrumentApiConfiguration getConfig() {
-        return new InstrumentApiConfiguration(backbaseStreamConfigurationProperties);
+        return new InstrumentApiConfiguration();
     }
 
     @Override
@@ -47,7 +47,7 @@ class InstrumentApiConfigurationTest extends BaseApiConfigurationTest<Instrument
 
     @Test
     void instrumentApiClient() {
-        assertBaseUrl(getConfig().instrumentApiClient(dbsWebClient, objectMapper, dateFormat));
+        assertBaseUrl(getConfig().instrumentApiClient(objectMapper, dateFormat));
     }
 
 }

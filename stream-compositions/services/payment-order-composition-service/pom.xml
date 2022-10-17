@@ -17,6 +17,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.backbase.stream.compositions.api</groupId>
             <artifactId>payment-order-composition-api</artifactId>
             <version>${project.version}</version>

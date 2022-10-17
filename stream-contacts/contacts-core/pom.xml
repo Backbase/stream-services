@@ -17,12 +17,6 @@
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-configuration</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-dbs-clients</artifactId>

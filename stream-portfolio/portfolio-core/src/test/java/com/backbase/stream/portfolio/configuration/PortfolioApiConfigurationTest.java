@@ -7,12 +7,12 @@ class PortfolioApiConfigurationTest extends BaseApiConfigurationTest<PortfolioAp
 
     @Override
     public ApiClient getClient() {
-        return getConfig().portfolioApiClient(dbsWebClient, objectMapper, dateFormat);
+        return getConfig().portfolioApiClient(objectMapper, dateFormat);
     }
 
     @Override
     public PortfolioApiConfiguration getConfig() {
-        return new PortfolioApiConfiguration(backbaseStreamConfigurationProperties);
+        return new PortfolioApiConfiguration();
     }
 
     @Override

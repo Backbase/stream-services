@@ -24,6 +24,20 @@ sso:
 
 backbase:
   communication:
+    services:
+      usermanager:
+        direct-uri: http://localhost:8086/user-manager
+      access-control:
+        direct-uri: http://localhost:8086/access-control
+      arrangement:
+        manager:
+          direct-uri: http://localhost:8082/arrangement-manager
+      payment:
+        order:
+          direct-uri: http://localhost:8090/payment-order-service
+      transaction:
+        manager:
+          direct-uri: http://localhost:8083/transaction-manager
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -37,12 +51,6 @@ backbase:
       authentication:
         required-scope: api:service
   stream:
-    dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
-      transaction-manager-base-url: http://localhost:8083/transaction-manager
-      payment-order-service-base-url: http://localhost:8090/payment-order-service
     compositions:
       paymentorder:
         integration-base-url: http://localhost:18000

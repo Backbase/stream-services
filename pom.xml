@@ -19,7 +19,6 @@
     <modules>
         <module>stream-dbs-clients</module>
         <module>stream-sdk</module>
-        <module>stream-configuration</module>
         <module>stream-models</module>
         <module>stream-product</module>
         <module>stream-access-control</module>
@@ -68,6 +67,14 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>

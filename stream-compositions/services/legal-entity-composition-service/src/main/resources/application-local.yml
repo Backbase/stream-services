@@ -15,6 +15,20 @@ eureka:
 
 backbase:
   communication:
+    services:
+      usermanager:
+        direct-uri: http://localhost:8086/user-manager
+      access-control:
+        direct-uri: http://localhost:8086/access-control
+      arrangement:
+        manager:
+          direct-uri: http://localhost:8082/arrangement-manager
+      user:
+        profile:
+          direct-uri: http://localhost:8086/user-profile-manager
+      identity:
+        integration:
+          direct-uri: http://localhost:8181/identity-integration-service
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -24,13 +38,6 @@ backbase:
       sink:
         useIdentityIntegration: true
         userProfileEnabled: true
-    dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      user-profile-manager-base-url: http://localhost:8086/user-profile-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
-    identity:
-      identity-integration-base-url: http://localhost:8181/identity-integration-service
     compositions:
       legal-entity:
         integration-base-url: http://localhost:7001

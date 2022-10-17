@@ -2,7 +2,6 @@ package com.backbase.stream.worker.configuration;
 
 import java.time.Duration;
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
 public abstract class StreamWorkerConfiguration {

@@ -26,21 +26,7 @@ The Legal Entity Saga can be used in several ways:
 * **HTTP REST** - Adhoc processing of Legal Entities
 * **Spring Cloud Data Flow Task** - Bootstrap Legal Entity Hierarchy from configuration
 * **Spring Cloud Data Flow Sink** - Spring Cloud Stream Input Channel for continuously processing Legal Entities
-* **Library** - Java Library used in All-in-one services 
-
-### Example Configurations
-The following configuration shows the required properties for Stream Legal Entity service
-
-```yaml
-backbase:
-  stream:
-    dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
-      transaction-manager-base-url: http://transaction-manager:8080
-      limit-manager-base-url: http://limits-manager:8080
-```
+* **Library** - Java Library used in All-in-one services
 
 ## Legal Entity Bootstrap
 

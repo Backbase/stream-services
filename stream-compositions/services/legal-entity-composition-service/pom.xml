@@ -16,7 +16,11 @@
   <name>Stream :: Compositions :: Services :: Legal Entity</name>
 
   <dependencies>
-
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <!-- Streams dependencies -->
     <dependency>
       <groupId>com.backbase.stream.compositions.events</groupId>
