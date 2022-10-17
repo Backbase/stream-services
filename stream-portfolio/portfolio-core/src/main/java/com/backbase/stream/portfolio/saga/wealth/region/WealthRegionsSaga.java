@@ -1,4 +1,4 @@
-package com.backbase.stream.portfolio.saga.region;
+package com.backbase.stream.portfolio.saga.wealth.region;
 
 import java.util.List;
 
@@ -13,14 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 /**
- * RegionBundle Saga.
+ * WealthRegions Saga.
  * 
  * @author Vladimir Kirchev
  *
  */
 @Slf4j
 @RequiredArgsConstructor
-public class RegionBundleSaga implements StreamTaskExecutor<RegionBundleTask> {
+public class WealthRegionsSaga implements StreamTaskExecutor<WealthRegionsTask> {
 
 	private static final String UPSERT = "upsert";
 	private static final String REGION_ENTITY = "REGION_ENTITY";
@@ -29,17 +29,17 @@ public class RegionBundleSaga implements StreamTaskExecutor<RegionBundleTask> {
 	private final InstrumentIntegrationService instrumentIntegrationService;
 
 	@Override
-	public Mono<RegionBundleTask> executeTask(RegionBundleTask streamTask) {
+	public Mono<WealthRegionsTask> executeTask(WealthRegionsTask streamTask) {
 		return upsertRegions(streamTask);
 	}
 
 	@Override
-	public Mono<RegionBundleTask> rollBack(RegionBundleTask streamTask) {
+	public Mono<WealthRegionsTask> rollBack(WealthRegionsTask streamTask) {
 		return Mono.just(streamTask);
 	}
 
 	@ContinueSpan(log = UPSERT_REGIONS)
-	private Mono<RegionBundleTask> upsertRegions(@SpanTag(value = "streamTask") RegionBundleTask task) {
+	private Mono<WealthRegionsTask> upsertRegions(@SpanTag(value = "streamTask") WealthRegionsTask task) {
 		task.info(REGION_ENTITY, UPSERT, null, null, null, "Upsert Regions");
 
 		log.info("Upserting region", task.getName());

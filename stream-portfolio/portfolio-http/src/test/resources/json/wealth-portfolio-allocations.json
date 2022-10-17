@@ -1,0 +1,53 @@
+[
+  {
+    "portfolioCode": "1234",
+    "allocations": [
+      {
+        "allocationType": "BY_ASSET_CLASS",
+        "classifierType": "ASSET_CLASS",
+        "classifierName": "Bonds",
+        "allocationMaxPct": 5,
+        "allocationMinPct": 0,
+        "allocationPct": 59.1354336257761,
+        "valuation": {
+          "amount": 50.85647291816745,
+          "currencyCode": "EUR"
+        },
+        "allocations": [
+          {
+            "classifierType": "CURRENCY",
+            "classifierName": "EUR",
+            "allocationPct": 48.07,
+            "valuation": {
+              "amount": 29790959.83,
+              "currencyCode": "EUR"
+            }
+          }
+        ]
+      },
+      {
+        "allocationType": "BY_CURRENCY",
+        "classifierType": "CURRENCY",
+        "classifierName": "GBP",
+        "allocationMaxPct": 55.84,
+        "allocationMinPct": 0.6,
+        "allocationPct": 26.66,
+        "valuation": {
+          "amount": 304879.64,
+          "currencyCode": "GBP"
+        },
+        "allocations": [
+          {
+            "classifierType": "ASSET_CLASS",
+            "classifierName": "Bonds",
+            "allocationPct": 27.67,
+            "valuation": {
+              "amount": 1848317.55,
+              "currencyCode": "GBP"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

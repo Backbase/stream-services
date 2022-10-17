@@ -1,0 +1,30 @@
+[
+  {
+    "region": {
+      "name": "Europe",
+      "code": "EU"
+    },
+    "countries": [
+      {
+        "name": "Netherlands",
+        "code": "NL"
+      },
+      {
+        "name": "Ukraine",
+        "code": "UA"
+      }
+    ]
+  },
+  {
+    "region": {
+      "name": "USA",
+      "code": "US"
+    },
+    "countries": [
+      {
+        "name": "USA",
+        "code": "US"
+      }
+    ]
+  }
+]

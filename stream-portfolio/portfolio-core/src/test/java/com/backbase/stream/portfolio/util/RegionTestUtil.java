@@ -5,7 +5,7 @@ import java.util.List;
 import com.backbase.stream.portfolio.model.Country;
 import com.backbase.stream.portfolio.model.Region;
 import com.backbase.stream.portfolio.model.RegionBundle;
-import com.backbase.stream.portfolio.saga.region.RegionBundleTask;
+import com.backbase.stream.portfolio.saga.wealth.region.WealthRegionsTask;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -32,12 +32,12 @@ public class RegionTestUtil {
 		return new RegionBundle().region(regionUs).countries(countriesUs);
 	}
 
-	public static RegionBundleTask createRegionBundleTaskEu() {
-		return new RegionBundleTask(createRegionBundleEu());
+	public static WealthRegionsTask createRegionBundleTaskEu() {
+		return new WealthRegionsTask(createRegionBundleEu());
 	}
 	
-	public static RegionBundleTask createRegionBundleTaskUs() {
-		return new RegionBundleTask(createRegionBundleUs());
+	public static WealthRegionsTask createRegionBundleTaskUs() {
+		return new WealthRegionsTask(createRegionBundleUs());
 	}
 
 	public static List<RegionBundle> createRegionBundles() {

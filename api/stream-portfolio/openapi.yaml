@@ -73,6 +73,118 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /portfolios/asset-classes/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Portfolios Asset Classes Batch
+      operationId: createPortfioliosAssetClassesBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AssetClassBundle'
+      responses:
+        200:
+          description: The created asset classes and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssetClassBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Portfolios Batch
+      operationId: createPortfioliosBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: schemas/v1/portfolio.yaml
+      responses:
+        200:
+          description: The created portfolios and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: schemas/v1/portfolio.yaml
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/sub-portfolios/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Sub Portfolios Batch
+      operationId: createSubPortfioliosBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/SubPortfolioBundle'
+      responses:
+        200:
+          description: The created sub portfolios and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubPortfolioBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/allocations/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Allocations Batch
+      operationId: createAllocationsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AllocationBundle'
+      responses:
+        200:
+          description: The created Allocations and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AllocationBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -130,6 +242,26 @@ components:
           type: array
           items:
             $ref: schemas/v1/portfolio-valuation.yaml
+    SubPortfolioBundle:
+      type: object
+      properties:
+        portfolioCode:
+          type: string
+          description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+        subPortfolios:
+          type: array
+          items:
+            $ref: schemas/v1/sub-portfolio.yaml
+    AllocationBundle:
+      type: object
+      properties:
+        portfolioCode:
+          type: string
+          description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+        allocations:
+          type: array
+          items:
+            $ref: schemas/v1/allocation.yaml
     PositionBundle:
       type: object
       properties:
@@ -182,7 +314,46 @@ components:
           type: array
           items:
             $ref: schemas/v1/aggregate-portfolio.yaml
-
+    WealthRegionsBundle:
+      type: object
+      properties:
+        regions:
+          description: Wealth Regions Bundle (regions and countries)
+          type: array
+          items:
+            $ref: '#/components/schemas/RegionBundle'
+    WealthAssetBundle:
+      type: object
+      properties:
+        assetClasses:
+          description: Asset Class Bundle (asset and sub-asset classes)
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetClassBundle'
+    WealthPortfolioBundle:
+      type: object
+      properties:
+        portfolios:
+          description: Portfolios and reference objects
+          type: array
+          items:
+            $ref: schemas/v1/portfolio.yaml
+    WealthSubPortfolioBundle:
+      type: object
+      properties:
+        batchSubPortfolios:
+          description: Sub Portfolios and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/SubPortfolioBundle'
+    WealthPortfolioAllocationsBundle:
+      type: object
+      properties:
+        batchPortfolioAllocations:
+          description: Allocations and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/AllocationBundle'
     Error:
       type: object
       properties:

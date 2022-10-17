@@ -1,4 +1,4 @@
-package com.backbase.stream.portfolio.saga.region;
+package com.backbase.stream.portfolio.saga.wealth.region;
 
 import java.util.UUID;
 
@@ -9,17 +9,17 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 /**
- * RegionBundle Task.
+ * WealthRegions Task.
  * 
  * @author Vladimir Kirchev
  *
  */
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class RegionBundleTask extends StreamTask {
+public class WealthRegionsTask extends StreamTask {
 	private final RegionBundle regionBundle;
 
-	public RegionBundleTask(RegionBundle regionBundle) {
+	public WealthRegionsTask(RegionBundle regionBundle) {
 		super(UUID.randomUUID().toString());
 
 		this.regionBundle = regionBundle;

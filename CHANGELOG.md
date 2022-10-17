@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Add **portfolio-http**
 - Add `POST /portfolios/regions/batch` endpoint to portfolio
+- Add `POST /portfolios/asset-classes/batch` endpoint to portfolio
+- Add `POST /portfolios/batch` endpoint to portfolio
+- Add `POST /portfolios/sub-portfolios/batch` endpoint to portfolio
+- Add `POST /portfolios/allocations/batch` endpoint to portfolio
 
 ## [3.6.0](https://github.com/Backbase/stream-services/compare/3.5.0...3.6.0)
 ### Added
