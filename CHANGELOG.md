@@ -1,10 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-## [3.8.2](https://github.com/Backbase/stream-services/compare/3.8.1...3.8.2)
-### Fixed
-- Added InterestDetails to BaseProduct
 
-## [3.9.0](https://github.com/Backbase/stream-services/compare/3.8.1...3.9.0)
+## [3.9.0](https://github.com/Backbase/stream-services/compare/3.8.2...3.9.0)
 ### Changed
 Adding SSDK service discovery mechanism to the Stream Task and Http applications.
 All the service url properties prefixed by `backbase.stream.dbs.*` and `backbase.stream.identity.*` are now removed
@@ -51,10 +48,17 @@ spring:
                   contextPath: /identity-integration-service
 ```
 
-> **Head Up!**: The Stream Composition services still don't support client load balancing, hence service discovery isn't available for the moment then you can't configure the spring cloud discovery simple instances. To override the default DBS services addresses you can use the `direct-uri` property. e.g.
+> **Heads Up!**: The Stream Composition services still don't support client load balancing, hence service discovery isn't available for the moment then you can't configure the spring cloud discovery simple instances. In the scenario where your service don't support, or you want to disable client side load balancers (e.g. `spring.cloud.loadbalancer.enabled=false`), you can override the default DBS services addresses using the `direct-uri` property. e.g.
 > ```properties 
-> backbase.communication.services.access-control.direct-uri=http://localhost:8086/access-control
+> backbase.communication.services.access-control.direct-uri=http://non-discoverable-host:8080/access-control
+> backbase.communication.services.identity.integration.direct-uri=http://non-discoverable-host:8080/identity-integration-service
 > ```
+> All configuration properties prefixes can be found at [stream-dbs-clients](stream-dbs-clients/src/main/java/com/backbase/stream/clients/config) module, and they are compliant to SSDK [configuration properties](https://community.backbase.com/documentation/ServiceSDK/latest/generate_clients_from_openapi).
+
+## [3.8.2](https://github.com/Backbase/stream-services/compare/3.8.1...3.8.2)
+### Fixed
+- Added InterestDetails to BaseProduct
+
 ## [3.8.0](https://github.com/Backbase/stream-services/compare/3.7.0...3.8.0)
 ### Changed
 - Upgraded to SSDK 15.0.1
