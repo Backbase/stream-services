@@ -54,6 +54,16 @@ class WealthSubPortfolioTaskTest {
     }
 
     @Test
+    void shouldBeEqual_SameInstance() throws Exception {
+        WealthSubPortfolioBundle wealthSubPortfolioBundle = PortfolioTestUtil.getWealthSubPortfolioBundle();
+        List<SubPortfolioBundle> batchSubPortfolios = wealthSubPortfolioBundle.getBatchSubPortfolios();
+        SubPortfolioBundle subPortfolioBundle0 = batchSubPortfolios.get(0);
+        WealthSubPortfolioTask wealthSubPortfolioTask0 = new WealthSubPortfolioTask(subPortfolioBundle0);
+
+        Assertions.assertEquals(wealthSubPortfolioTask0, wealthSubPortfolioTask0);
+    }
+
+    @Test
     void shouldNotBeEqual_DifferentType() throws Exception {
         WealthSubPortfolioBundle wealthSubPortfolioBundle = PortfolioTestUtil.getWealthSubPortfolioBundle();
         List<SubPortfolioBundle> batchSubPortfolios = wealthSubPortfolioBundle.getBatchSubPortfolios();

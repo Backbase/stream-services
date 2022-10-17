@@ -52,6 +52,16 @@ class WealthPortfolioTaskTest {
         Assertions.assertNotEquals(wealthPortfolioTask0, wealthPortfolioTask1);
         Assertions.assertNotEquals(wealthPortfolioTask1, wealthPortfolioTask0);
     }
+    
+    @Test
+    void shouldBeEqual_SameInstance() throws Exception {
+        WealthPortfolioBundle wealthPortfolioBundle = PortfolioTestUtil.getWealthPortfolioBundle();
+        List<Portfolio> portfolios = wealthPortfolioBundle.getPortfolios();
+        Portfolio portfolio0 = portfolios.get(0);
+        WealthPortfolioTask wealthPortfolioTask0 = new WealthPortfolioTask(portfolio0);
+
+        Assertions.assertEquals(wealthPortfolioTask0, wealthPortfolioTask0);
+    }
 
     @Test
     void shouldNotBeEqual_DifferentType() throws Exception {

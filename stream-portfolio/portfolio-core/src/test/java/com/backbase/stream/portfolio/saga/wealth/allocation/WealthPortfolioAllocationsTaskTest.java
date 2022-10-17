@@ -64,6 +64,19 @@ class WealthPortfolioAllocationsTaskTest {
     }
 
     @Test
+    void shouldBeEqual_SameInstance() throws Exception {
+        WealthPortfolioAllocationsBundle wealthPortfolioAllocationsBundle =
+                PortfolioTestUtil.getWealthPortfolioAllocationsBundle();
+        List<AllocationBundle> batchPortfolioAllocations =
+                wealthPortfolioAllocationsBundle.getBatchPortfolioAllocations();
+        AllocationBundle allocationBundle0 = batchPortfolioAllocations.get(0);
+        WealthPortfolioAllocationsTask wealthPortfolioAllocationsTask0 =
+                new WealthPortfolioAllocationsTask(allocationBundle0);
+
+        Assertions.assertEquals(wealthPortfolioAllocationsTask0, wealthPortfolioAllocationsTask0);
+    }
+
+    @Test
     void shouldNotBeEqual_DifferentType() throws Exception {
         WealthPortfolioAllocationsBundle wealthPortfolioAllocationsBundle =
                 PortfolioTestUtil.getWealthPortfolioAllocationsBundle();

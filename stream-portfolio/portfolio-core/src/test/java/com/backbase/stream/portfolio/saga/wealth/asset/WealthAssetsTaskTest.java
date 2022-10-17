@@ -52,6 +52,16 @@ class WealthAssetsTaskTest {
         Assertions.assertNotEquals(wealthAssetsTask0, wealthAssetsTask1);
         Assertions.assertNotEquals(wealthAssetsTask1, wealthAssetsTask0);
     }
+    
+    @Test
+    void shouldBeEqual_SameInstance() throws Exception {
+        WealthAssetBundle wealthAssetBundle = PortfolioTestUtil.getWealthAssetBundle();
+        List<AssetClassBundle> assetClasses = wealthAssetBundle.getAssetClasses();
+        AssetClassBundle assetClassBundle0 = assetClasses.get(0);
+        WealthAssetsTask wealthAssetsTask0 = new WealthAssetsTask(assetClassBundle0);
+        
+        Assertions.assertEquals(wealthAssetsTask0, wealthAssetsTask0);
+    }
 
     @Test
     void shouldNotBeEqual_DifferentType() throws Exception {
@@ -63,18 +73,18 @@ class WealthAssetsTaskTest {
         Assertions.assertNotEquals(wealthAssetsTask, new Object());
     }
 
-    @Test
-    void shouldNotBeEqual_SameData() throws Exception {
-        WealthAssetBundle wealthAssetBundle = PortfolioTestUtil.getWealthAssetBundle();
-        List<AssetClassBundle> assetClasses = wealthAssetBundle.getAssetClasses();
-        AssetClassBundle assetClassBundle0 = assetClasses.get(0);
-        AssetClassBundle assetClassBundle1 = assetClasses.get(1);
-        WealthAssetsTask wealthAssetsTask0 = new WealthAssetsTask(assetClassBundle0);
-        WealthAssetsTask wealthAssetsTask1 = new WealthAssetsTask(assetClassBundle1);
-
-        Assertions.assertNotEquals(wealthAssetsTask0, wealthAssetsTask1);
-        Assertions.assertNotEquals(wealthAssetsTask1, wealthAssetsTask0);
-    }
+//    @Test
+//    void shouldNotBeEqual_SameData() throws Exception {
+//        WealthAssetBundle wealthAssetBundle = PortfolioTestUtil.getWealthAssetBundle();
+//        List<AssetClassBundle> assetClasses = wealthAssetBundle.getAssetClasses();
+//        AssetClassBundle assetClassBundle0 = assetClasses.get(0);
+//        AssetClassBundle assetClassBundle1 = assetClasses.get(1);
+//        WealthAssetsTask wealthAssetsTask0 = new WealthAssetsTask(assetClassBundle0);
+//        WealthAssetsTask wealthAssetsTask1 = new WealthAssetsTask(assetClassBundle1);
+//
+//        Assertions.assertNotEquals(wealthAssetsTask0, wealthAssetsTask1);
+//        Assertions.assertNotEquals(wealthAssetsTask1, wealthAssetsTask0);
+//    }
 
     @Test
     void shouldGetHashCode() throws Exception {

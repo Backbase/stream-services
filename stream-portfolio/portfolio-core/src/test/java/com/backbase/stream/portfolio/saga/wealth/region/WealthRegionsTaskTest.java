@@ -54,6 +54,16 @@ class WealthRegionsTaskTest {
     }
 
     @Test
+    void shouldBeEqual_SameInstance() throws Exception {
+        WealthRegionsBundle wealthRegionsBundle = PortfolioTestUtil.getWealthRegionsBundle();
+        List<RegionBundle> regions = wealthRegionsBundle.getRegions();
+        RegionBundle regionBundle0 = regions.get(0);
+        WealthRegionsTask wealthRegionsTask0 = new WealthRegionsTask(regionBundle0);
+
+        Assertions.assertEquals(wealthRegionsTask0, wealthRegionsTask0);
+    }
+
+    @Test
     void shouldNotBeEqual_DifferentType() throws Exception {
         WealthRegionsBundle wealthRegionsBundle = PortfolioTestUtil.getWealthRegionsBundle();
         List<RegionBundle> regions = wealthRegionsBundle.getRegions();
