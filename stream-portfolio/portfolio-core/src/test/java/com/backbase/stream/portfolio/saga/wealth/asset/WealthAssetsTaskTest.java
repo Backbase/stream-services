@@ -54,6 +54,20 @@ class WealthAssetsTaskTest {
     }
     
     @Test
+    void shouldNotBeEqual_SameId() throws Exception {
+        WealthAssetBundle wealthAssetBundle = PortfolioTestUtil.getWealthAssetBundle();
+        List<AssetClassBundle> assetClasses = wealthAssetBundle.getAssetClasses();
+        AssetClassBundle assetClassBundle0 = assetClasses.get(0);
+        AssetClassBundle assetClassBundle1 = assetClasses.get(1);
+        WealthAssetsTask wealthAssetsTask0 = new WealthAssetsTask(assetClassBundle0);
+        WealthAssetsTask wealthAssetsTask1 = new WealthAssetsTask(assetClassBundle1);
+        
+        wealthAssetsTask1.setId(wealthAssetsTask0.getId());
+        
+        Assertions.assertNotEquals(wealthAssetsTask0, wealthAssetsTask1);
+    }
+    
+    @Test
     void shouldBeEqual_SameInstance() throws Exception {
         WealthAssetBundle wealthAssetBundle = PortfolioTestUtil.getWealthAssetBundle();
         List<AssetClassBundle> assetClasses = wealthAssetBundle.getAssetClasses();
@@ -72,6 +86,7 @@ class WealthAssetsTaskTest {
 
         Assertions.assertNotEquals(wealthAssetsTask, new Object());
     }
+    
 
 //    @Test
 //    void shouldNotBeEqual_SameData() throws Exception {

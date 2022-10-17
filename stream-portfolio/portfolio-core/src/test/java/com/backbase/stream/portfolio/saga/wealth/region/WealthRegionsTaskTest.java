@@ -54,6 +54,20 @@ class WealthRegionsTaskTest {
     }
 
     @Test
+    void shouldNotBeEqual_SameId() throws Exception {
+        WealthRegionsBundle wealthRegionsBundle = PortfolioTestUtil.getWealthRegionsBundle();
+        List<RegionBundle> regions = wealthRegionsBundle.getRegions();
+        RegionBundle regionBundle0 = regions.get(0);
+        RegionBundle regionBundle1 = regions.get(1);
+        WealthRegionsTask wealthRegionsTask0 = new WealthRegionsTask(regionBundle0);
+        WealthRegionsTask wealthRegionsTask1 = new WealthRegionsTask(regionBundle1);
+
+        wealthRegionsTask1.setId(wealthRegionsTask0.getId());
+
+        Assertions.assertNotEquals(wealthRegionsTask0, wealthRegionsTask1);
+    }
+
+    @Test
     void shouldBeEqual_SameInstance() throws Exception {
         WealthRegionsBundle wealthRegionsBundle = PortfolioTestUtil.getWealthRegionsBundle();
         List<RegionBundle> regions = wealthRegionsBundle.getRegions();

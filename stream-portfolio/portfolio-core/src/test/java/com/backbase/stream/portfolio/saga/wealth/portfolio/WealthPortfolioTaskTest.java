@@ -52,7 +52,21 @@ class WealthPortfolioTaskTest {
         Assertions.assertNotEquals(wealthPortfolioTask0, wealthPortfolioTask1);
         Assertions.assertNotEquals(wealthPortfolioTask1, wealthPortfolioTask0);
     }
-    
+
+    @Test
+    void shouldNotBeEqual_SameId() throws Exception {
+        WealthPortfolioBundle wealthPortfolioBundle = PortfolioTestUtil.getWealthPortfolioBundle();
+        List<Portfolio> portfolios = wealthPortfolioBundle.getPortfolios();
+        Portfolio portfolio0 = portfolios.get(0);
+        Portfolio portfolio1 = portfolios.get(1);
+        WealthPortfolioTask wealthPortfolioTask0 = new WealthPortfolioTask(portfolio0);
+        WealthPortfolioTask wealthPortfolioTask1 = new WealthPortfolioTask(portfolio1);
+
+        wealthPortfolioTask1.setId(wealthPortfolioTask0.getId());
+
+        Assertions.assertNotEquals(wealthPortfolioTask0, wealthPortfolioTask1);
+    }
+
     @Test
     void shouldBeEqual_SameInstance() throws Exception {
         WealthPortfolioBundle wealthPortfolioBundle = PortfolioTestUtil.getWealthPortfolioBundle();
