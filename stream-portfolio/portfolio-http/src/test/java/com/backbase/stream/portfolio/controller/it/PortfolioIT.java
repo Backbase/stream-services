@@ -1,4 +1,4 @@
-package com.backbase.stream.portfolio.saga.portfolio.it;
+package com.backbase.stream.portfolio.controller.it;
 
 import java.util.List;
 
@@ -25,16 +25,16 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 
 /**
- * PortfolioSaga IT.
+ * Portfolio IT.
  * 
  * @author Vladimir Kirchev
  *
  */
 @SpringBootTest(classes = PortfolioHttpApplication.class)
-@ContextConfiguration(classes = { PortfolioSagaIT.TestConfiguration.class })
+@ContextConfiguration(classes = { PortfolioIT.TestConfiguration.class })
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({ "it" })
-class PortfolioSagaIT {
+class PortfolioIT {
 
 	@RegisterExtension
 	static WireMockExtension wireMockServer = WireMockExtension.newInstance()

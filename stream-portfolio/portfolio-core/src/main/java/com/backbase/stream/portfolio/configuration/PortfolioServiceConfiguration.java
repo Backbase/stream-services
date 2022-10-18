@@ -3,12 +3,9 @@ package com.backbase.stream.portfolio.configuration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.backbase.stream.portfolio.saga.portfolio.PortfolioSaga;
-import com.backbase.stream.portfolio.saga.wealth.allocation.WealthPortfolioAllocationsSaga;
-import com.backbase.stream.portfolio.saga.wealth.asset.WealthAssetsSaga;
-import com.backbase.stream.portfolio.saga.wealth.portfolio.WealthPortfolioSaga;
-import com.backbase.stream.portfolio.saga.wealth.region.WealthRegionsSaga;
-import com.backbase.stream.portfolio.saga.wealth.subportfolio.WealthSubPortfolioSaga;
+import com.backbase.stream.portfolio.PortfolioSaga;
+import com.backbase.stream.portfolio.service.InstrumentIntegrationService;
+import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
 import com.backbase.stream.portfolio.service.PortfolioService;
 import com.backbase.stream.portfolio.service.WealthAssetsService;
 import com.backbase.stream.portfolio.service.WealthPortfolioAllocationsService;
@@ -38,32 +35,31 @@ public class PortfolioServiceConfiguration {
 
     @Bean
     WealthRegionsService wealthRegionsReactiveService(PortfolioSagaProperties portfolioSagaProperties,
-            WealthRegionsSaga wealthRegionsSaga) {
-        return new WealthRegionsReactiveService(portfolioSagaProperties, wealthRegionsSaga);
+            InstrumentIntegrationService instrumentIntegrationService) {
+        return new WealthRegionsReactiveService(portfolioSagaProperties, instrumentIntegrationService);
     }
 
     @Bean
     WealthPortfolioAllocationsService wealthPortfolioAllocationsReactiveService(
-            PortfolioSagaProperties portfolioSagaProperties,
-            WealthPortfolioAllocationsSaga wealthPortfolioAllocationsSaga) {
-        return new WealthPortfolioAllocationsReactiveService(portfolioSagaProperties, wealthPortfolioAllocationsSaga);
+            PortfolioSagaProperties portfolioSagaProperties, PortfolioIntegrationService portfolioIntegrationService) {
+        return new WealthPortfolioAllocationsReactiveService(portfolioSagaProperties, portfolioIntegrationService);
     }
-
+    
     @Bean
     WealthAssetsService wealthAssetsReactiveService(PortfolioSagaProperties portfolioSagaProperties,
-            WealthAssetsSaga wealthAssetsSaga) {
-        return new WealthAssetsReactiveService(portfolioSagaProperties, wealthAssetsSaga);
+            InstrumentIntegrationService instrumentIntegrationService) {
+        return new WealthAssetsReactiveService(portfolioSagaProperties, instrumentIntegrationService);
     }
 
     @Bean
     WealthPortfolioService wealthPortfolioReactiveService(PortfolioSagaProperties portfolioSagaProperties,
-            WealthPortfolioSaga wealthPortfolioSaga) {
-        return new WealthPortfolioReactiveService(portfolioSagaProperties, wealthPortfolioSaga);
+            PortfolioIntegrationService portfolioIntegrationService) {
+        return new WealthPortfolioReactiveService(portfolioSagaProperties, portfolioIntegrationService);
     }
-    
+
     @Bean
     WealthSubPortfolioService wealthSubPortfolioReactiveService(PortfolioSagaProperties portfolioSagaProperties,
-            WealthSubPortfolioSaga wealthSubPortfolioSaga) {
-        return new WealthSubPortfolioReactiveService(portfolioSagaProperties, wealthSubPortfolioSaga);
+            PortfolioIntegrationService portfolioIntegrationService) {
+        return new WealthSubPortfolioReactiveService(portfolioSagaProperties, portfolioIntegrationService);
     }
 }

@@ -52,8 +52,8 @@ public class PortfoliosController implements PortfoliosApi {
     @Override
     public Mono<ResponseEntity<Flux<AllocationBundle>>> createAllocationsBatch(Flux<AllocationBundle> allocationBundle,
             ServerWebExchange exchange) {
-        return Mono.just(ResponseEntity.ok(
-                wealthPortfolioAllocationsReactiveService.ingestPortfolioAllocationBundles(allocationBundle)));
+        return Mono.just(ResponseEntity
+                .ok(wealthPortfolioAllocationsReactiveService.ingestPortfolioAllocationBundles(allocationBundle)));
     }
 
     @Override

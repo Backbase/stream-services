@@ -1,9 +1,9 @@
 package com.backbase.stream.portfolio.service.impl;
 
+import com.backbase.stream.portfolio.PortfolioSaga;
+import com.backbase.stream.portfolio.PortfolioTask;
 import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.WealthBundle;
-import com.backbase.stream.portfolio.saga.portfolio.PortfolioSaga;
-import com.backbase.stream.portfolio.saga.portfolio.PortfolioTask;
 import com.backbase.stream.portfolio.service.PortfolioService;
 
 import lombok.RequiredArgsConstructor;

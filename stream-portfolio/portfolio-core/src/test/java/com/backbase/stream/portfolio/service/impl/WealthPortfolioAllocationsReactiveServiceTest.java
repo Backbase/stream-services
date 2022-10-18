@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioAllocationsBundle;
-import com.backbase.stream.portfolio.saga.wealth.allocation.WealthPortfolioAllocationsSaga;
+import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
 import com.backbase.stream.portfolio.util.PortfolioTestUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,7 +31,7 @@ class WealthPortfolioAllocationsReactiveServiceTest {
     private PortfolioSagaProperties portfolioSagaProperties;
 
     @Mock
-    private WealthPortfolioAllocationsSaga wealthPortfolioAllocationsSaga;
+    private PortfolioIntegrationService portfolioIntegrationService;
 
     @InjectMocks
     private WealthPortfolioAllocationsReactiveService wealthPortfolioAllocationsReactiveService;
@@ -47,7 +47,8 @@ class WealthPortfolioAllocationsReactiveServiceTest {
         AllocationBundle allocationBundle1 = batchPortfolioAllocations.get(1);
 
         Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
-        Mockito.when(wealthPortfolioAllocationsSaga.executeTask(any())).thenAnswer(i -> Mono.just(i.getArgument(0)));
+        Mockito.when(portfolioIntegrationService.upsertAllocations(any(), any()))
+                .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         Flux<AllocationBundle> ingestedPortfolioAllocationBundles = wealthPortfolioAllocationsReactiveService
                 .ingestPortfolioAllocationBundles(Flux.fromIterable(batchPortfolioAllocations));

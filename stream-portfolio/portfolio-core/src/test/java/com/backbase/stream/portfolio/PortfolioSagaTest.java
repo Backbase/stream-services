@@ -1,7 +1,6 @@
-package com.backbase.stream.portfolio.saga.portfolio;
+package com.backbase.stream.portfolio;
 
 import java.util.List;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.backbase.stream.portfolio.model.AggregatePortfolio;
 import com.backbase.stream.portfolio.model.AssetClassBundle;
 import com.backbase.stream.portfolio.model.InstrumentBundle;
@@ -20,7 +18,6 @@ import com.backbase.stream.portfolio.model.RegionBundle;
 import com.backbase.stream.portfolio.model.WealthBundle;
 import com.backbase.stream.portfolio.service.InstrumentIntegrationService;
 import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

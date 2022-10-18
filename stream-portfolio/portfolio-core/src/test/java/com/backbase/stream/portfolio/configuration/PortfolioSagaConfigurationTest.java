@@ -24,11 +24,6 @@ class PortfolioSagaConfigurationTest {
 
             Assertions.assertNull(startupFailure);
             Assertions.assertTrue(context.containsBean("portfolioSaga"));
-            Assertions.assertTrue(context.containsBean("wealthRegionsSaga"));
-            Assertions.assertTrue(context.containsBean("wealthPortfolioAllocationsSaga"));
-            Assertions.assertTrue(context.containsBean("wealthAssetsSaga"));
-            Assertions.assertTrue(context.containsBean("wealthPortfolioSaga"));
-            Assertions.assertTrue(context.containsBean("wealthSubPortfolioSaga"));
         });
     }
 

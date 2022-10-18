@@ -1,4 +1,4 @@
-package com.backbase.stream.portfolio.saga.portfolio;
+package com.backbase.stream.portfolio;
 
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.cloud.sleuth.annotation.SpanTag;

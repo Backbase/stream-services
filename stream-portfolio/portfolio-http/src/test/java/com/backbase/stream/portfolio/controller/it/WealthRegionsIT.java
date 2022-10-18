@@ -1,4 +1,4 @@
-package com.backbase.stream.portfolio.saga.wealth.region.it;
+package com.backbase.stream.portfolio.controller.it;
 
 import static com.backbase.stream.portfolio.util.PortfolioHttpTestUtil.X_TID_HEADER_NAME;
 import static com.backbase.stream.portfolio.util.PortfolioHttpTestUtil.X_TID_HEADER_VALUE;
@@ -25,16 +25,16 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 
 /**
- * WealthRegionsSaga IT.
+ * WealthRegions IT.
  * 
  * @author Vladimir Kirchev
  *
  */
 @SpringBootTest(classes = PortfolioHttpApplication.class)
-@ContextConfiguration(classes = {WealthRegionsSagaIT.TestConfiguration.class})
+@ContextConfiguration(classes = {WealthRegionsIT.TestConfiguration.class})
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({"it"})
-class WealthRegionsSagaIT {
+class WealthRegionsIT {
 
     @RegisterExtension
     static WireMockExtension wireMockServer =

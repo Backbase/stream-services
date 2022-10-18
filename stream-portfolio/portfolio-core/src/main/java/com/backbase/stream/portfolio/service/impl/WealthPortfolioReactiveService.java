@@ -2,8 +2,7 @@ package com.backbase.stream.portfolio.service.impl;
 
 import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.Portfolio;
-import com.backbase.stream.portfolio.saga.wealth.portfolio.WealthPortfolioSaga;
-import com.backbase.stream.portfolio.saga.wealth.portfolio.WealthPortfolioTask;
+import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
 import com.backbase.stream.portfolio.service.WealthPortfolioService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +19,12 @@ import reactor.core.publisher.Flux;
 public class WealthPortfolioReactiveService implements WealthPortfolioService {
 
     private final PortfolioSagaProperties portfolioSagaProperties;
-    private final WealthPortfolioSaga wealthPortfolioSaga;
+    private final PortfolioIntegrationService portfolioIntegrationService;
 
     @Override
     public Flux<Portfolio> ingestWealthPortfolios(Flux<Portfolio> portfolio) {
-        return portfolio.map(WealthPortfolioTask::new)
-                .flatMap(wealthPortfolioSaga::executeTask, portfolioSagaProperties.getTaskExecutors())
-                .map(WealthPortfolioTask::getData)
+        return portfolio
+                .flatMap(portfolioIntegrationService::upsertPortfolio, portfolioSagaProperties.getTaskExecutors())
                 .doOnNext(actual -> log.info("Finished Ingestion of portfolio, name: {}", actual.getName()));
     }
 

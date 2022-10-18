@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.RegionBundle;
 import com.backbase.stream.portfolio.model.WealthRegionsBundle;
-import com.backbase.stream.portfolio.saga.wealth.region.WealthRegionsSaga;
+import com.backbase.stream.portfolio.service.InstrumentIntegrationService;
 import com.backbase.stream.portfolio.util.PortfolioTestUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,7 +32,7 @@ class WealthRegionsReactiveServiceTest {
     private PortfolioSagaProperties portfolioSagaProperties;
 
     @Mock
-    private WealthRegionsSaga wealthRegionsSaga;
+    private InstrumentIntegrationService instrumentIntegrationService;
 
     @InjectMocks
     private WealthRegionsReactiveService wealthRegionsReactiveService;
@@ -46,7 +46,7 @@ class WealthRegionsReactiveServiceTest {
         RegionBundle regionBundle1 = regionBundles.get(1);
 
         Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
-        Mockito.when(wealthRegionsSaga.executeTask(any())).thenAnswer(i -> Mono.just(i.getArgument(0)));
+        Mockito.when(instrumentIntegrationService.upsertRegions(any())).thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         Flux<RegionBundle> ingestedRegionBundles =
                 wealthRegionsReactiveService.ingestRegionBundles(Flux.fromIterable(regionBundles));

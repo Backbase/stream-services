@@ -1,10 +1,8 @@
-package com.backbase.stream.portfolio.saga.portfolio;
+package com.backbase.stream.portfolio;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import com.backbase.stream.portfolio.model.WealthBundle;
 import com.backbase.stream.portfolio.util.RegionTestUtil;
 

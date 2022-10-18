@@ -1,7 +1,7 @@
 package com.backbase.stream.portfolio.service;
 
+import com.backbase.stream.portfolio.PortfolioTask;
 import com.backbase.stream.portfolio.exceptions.PortfolioBundleException;
-import com.backbase.stream.portfolio.saga.portfolio.PortfolioTask;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import java.util.List;
 import java.util.Objects;

@@ -1,5 +1,7 @@
-package com.backbase.stream.portfolio.saga.wealth.portfolio.it;
+package com.backbase.stream.portfolio.controller.it;
 
+import static com.backbase.stream.portfolio.util.PortfolioHttpTestUtil.X_TID_HEADER_NAME;
+import static com.backbase.stream.portfolio.util.PortfolioHttpTestUtil.X_TID_HEADER_VALUE;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,23 +18,23 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 import com.backbase.stream.portfolio.PortfolioHttpApplication;
-import com.backbase.stream.portfolio.model.Portfolio;
+import com.backbase.stream.portfolio.model.SubPortfolioBundle;
 import com.backbase.stream.portfolio.util.PortfolioHttpTestUtil;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 
 /**
- * WealthPortfolioSaga IT.
+ * WealthPortfolio IT.
  * 
  * @author Vladimir Kirchev
  *
  */
 @SpringBootTest(classes = PortfolioHttpApplication.class)
-@ContextConfiguration(classes = {WealthPortfolioSagaIT.TestConfiguration.class})
+@ContextConfiguration(classes = {WealthSubPortfolioIT.TestConfiguration.class})
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({"it"})
-class WealthPortfolioSagaIT {
+class WealthSubPortfolioIT {
 
     @RegisterExtension
     static WireMockExtension wireMockServer =
@@ -55,16 +57,18 @@ class WealthPortfolioSagaIT {
         // Given
         setupWireMock();
 
-        List<Portfolio> portfolios = PortfolioHttpTestUtil.getPortfolios();
+        List<SubPortfolioBundle> subPortfolioBundles = PortfolioHttpTestUtil.getSubPortfolios();
 
         // When
-        webTestClient.post().uri("/portfolios/batch").header("Content-Type", "application/json")
-                .header("X-TID", "tenant-id").bodyValue(portfolios).exchange().expectStatus().isEqualTo(200);
+        webTestClient.post().uri("/portfolios/sub-portfolios/batch").header("Content-Type", "application/json")
+                .header(X_TID_HEADER_NAME, X_TID_HEADER_VALUE).bodyValue(subPortfolioBundles).exchange().expectStatus()
+                .isEqualTo(200);
 
         // Then
         wireMockServer.verify(WireMock
-                .getRequestedFor(WireMock.urlEqualTo("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA"))
-                .withHeader("X-TID", WireMock.equalTo("tenant-id")));
+                .getRequestedFor(
+                        WireMock.urlEqualTo("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804"))
+                .withHeader(X_TID_HEADER_NAME, WireMock.equalTo(X_TID_HEADER_VALUE)));
 
         Assertions.assertTrue(wireMockServer.findAllUnmatchedRequests().isEmpty());
     }
@@ -77,16 +81,23 @@ class WealthPortfolioSagaIT {
                         + "\"not-before-policy\": 1633622545,"
                         + "\"session_state\": \"72a28739-3d20-4965-bd86-64410df53d04\",\"scope\": \"openid\"}")));
 
-        wireMockServer.stubFor(WireMock.get("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA")
-                .willReturn(WireMock.aResponse().withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE).withBody(
-                        "{\"code\": \"testCode\", \"arrangementId\": \"testArrangementId\", \"name\": \"testName\"}")));
-
-        wireMockServer.stubFor(WireMock.post("/portfolio/integration-api/v1/portfolios").willReturn(WireMock.aResponse()
-                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE).withBody("{\"regions\":[]}")));
-
-        wireMockServer.stubFor(WireMock.put("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA")
+        wireMockServer.stubFor(WireMock.get("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804")
                 .willReturn(WireMock.aResponse().withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"regions\":[]}")));
+                        .withBody("{\"code\":\"1234\", \"name\": \"testName\", \"valuation\": {\"amount\": 34.5, "
+                                + "\"currencyCode\": \"EUR\"}, \"performance\": 54.6, \"percentOfParent\": 32.5}")));
+
+        wireMockServer.stubFor(WireMock.get("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427805")
+                .willReturn(WireMock.aResponse().withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{\"code\":\"1234\", \"name\": \"testName\", \"valuation\": {\"amount\": 34.5, "
+                                + "\"currencyCode\": \"EUR\"}, \"performance\": 54.6, \"percentOfParent\": 32.5}")));
+
+        wireMockServer.stubFor(
+                WireMock.put("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804").willReturn(WireMock
+                        .aResponse().withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE).withBody("")));
+
+        wireMockServer.stubFor(
+                WireMock.put("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427805").willReturn(WireMock
+                        .aResponse().withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE).withBody("")));
     }
 
     public static class TestConfiguration {

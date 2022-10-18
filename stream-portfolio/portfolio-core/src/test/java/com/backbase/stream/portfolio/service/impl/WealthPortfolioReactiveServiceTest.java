@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.WealthPortfolioBundle;
-import com.backbase.stream.portfolio.saga.wealth.portfolio.WealthPortfolioSaga;
+import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
 import com.backbase.stream.portfolio.util.PortfolioTestUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,7 +31,7 @@ class WealthPortfolioReactiveServiceTest {
     private PortfolioSagaProperties portfolioSagaProperties;
 
     @Mock
-    private WealthPortfolioSaga wealthPortfolioSaga;
+    private PortfolioIntegrationService portfolioIntegrationService;
 
     @InjectMocks
     private WealthPortfolioReactiveService wealthPortfolioReactiveService;
@@ -45,7 +45,8 @@ class WealthPortfolioReactiveServiceTest {
         Portfolio portfolio1 = portfolios.get(1);
 
         Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
-        Mockito.when(wealthPortfolioSaga.executeTask(any())).thenAnswer(i -> Mono.just(i.getArgument(0)));
+        Mockito.when(portfolioIntegrationService.upsertPortfolio(any(Portfolio.class)))
+                .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         Flux<Portfolio> ingestedWealthPortfolios =
                 wealthPortfolioReactiveService.ingestWealthPortfolios(Flux.fromIterable(portfolios));
