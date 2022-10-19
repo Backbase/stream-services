@@ -1,15 +1,10 @@
-package com.backbase.stream.portfolio.saga.portfolio;
+package com.backbase.stream.portfolio;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.time.OffsetDateTime;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import com.backbase.stream.portfolio.model.WealthBundle;
 import com.backbase.stream.portfolio.util.RegionTestUtil;
-import com.backbase.stream.worker.model.StreamTask.State;
 
 class PortfolioTaskTest {
 

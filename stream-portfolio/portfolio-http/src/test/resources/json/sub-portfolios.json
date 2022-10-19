@@ -1,0 +1,25 @@
+[
+  {
+    "portfolioCode": "1234",
+    "subPortfolios": [
+      {
+        "code": 1427804,
+        "name": "Peden, Neil - CAP - GIA - 960464",
+        "valuation": {
+          "amount": "983045.74",
+          "currencyCode": "USD"
+        },
+        "percentOfParent": "100"
+      },
+      {
+        "code": 1427805,
+        "name": "Peden, Neil - INC - GIA - 960464",
+        "valuation": {
+          "amount": 0,
+          "currencyCode": "USD"
+        },
+        "percentOfParent": 0
+      }
+    ]
+  }
+]

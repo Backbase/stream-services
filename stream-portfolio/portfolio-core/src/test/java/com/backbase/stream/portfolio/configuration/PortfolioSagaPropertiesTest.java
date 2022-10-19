@@ -1,7 +1,6 @@
 package com.backbase.stream.portfolio.configuration;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

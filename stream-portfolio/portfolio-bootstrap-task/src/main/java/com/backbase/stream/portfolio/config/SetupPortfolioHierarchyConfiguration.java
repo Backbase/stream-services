@@ -1,9 +1,8 @@
 package com.backbase.stream.portfolio.config;
 
+import com.backbase.stream.portfolio.PortfolioSaga;
+import com.backbase.stream.portfolio.PortfolioTask;
 import com.backbase.stream.portfolio.model.WealthBundle;
-import com.backbase.stream.portfolio.saga.portfolio.PortfolioSaga;
-import com.backbase.stream.portfolio.saga.portfolio.PortfolioTask;
-
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;

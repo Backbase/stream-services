@@ -1,4 +1,4 @@
-package com.backbase.stream.portfolio.saga.portfolio;
+package com.backbase.stream.portfolio;
 
 import com.backbase.stream.portfolio.model.WealthBundle;
 import com.backbase.stream.worker.model.StreamTask;

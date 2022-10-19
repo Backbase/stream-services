@@ -1,0 +1,52 @@
+{
+  "assetClasses": [
+    {
+      "assetClass": {
+        "name": "Equity",
+        "code": "OvBckZySky"
+      },
+      "subAssetClasses": [
+        {
+          "name": "Technology Sector",
+          "code": "avPl3Z7O0"
+        }
+      ]
+    },
+    {
+      "assetClass": {
+        "name": "Bonds",
+        "code": "iWDEjAewOq"
+      },
+      "subAssetClasses": [
+        {
+          "name": "Commercial Paper",
+          "code": "n7e4DlpL5"
+        }
+      ]
+    },
+    {
+      "assetClass": {
+        "name": "Real Estate",
+        "code": "KAmfp8dZWo"
+      },
+      "subAssetClasses": [
+        {
+          "name": "Building Development",
+          "code": "QHvMXZXre"
+        }
+      ]
+    },
+    {
+      "assetClass": {
+        "name": "Cash",
+        "code": "L1mC78IIVj"
+      },
+      "subAssetClasses": [
+        {
+          "name": "Personal",
+          "code": "7nptjVuxC"
+        }
+      ]
+    }
+  ]
+}
