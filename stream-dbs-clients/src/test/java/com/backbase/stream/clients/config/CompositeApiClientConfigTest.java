@@ -71,4 +71,32 @@ class CompositeApiClientConfigTest {
             });
     }
 
+    @Test
+    void shouldNotReturnDefaultServicePortWhenServicePortIsSetTest() {
+        contextRunner
+            .withPropertyValues("backbase.communication.http.default-service-port=8181",
+                "backbase.communication.services.user.profile.service-port=8080")
+            .withBean(Factory.class, () -> loadBalancerFactory)
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(UserProfileManagerClientConfig.class)
+            .run(context -> {
+                var config = context.getBean(UserProfileManagerClientConfig.class);
+                assertEquals("http://user-profile-manager:8080", config.createBasePath());
+            });
+    }
+
+    @Test
+    void shouldReturnDefaultServicePortWhenServicePortIsEmptyTest() {
+        contextRunner
+            .withPropertyValues("backbase.communication.http.default-service-port=8181")
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(UserProfileManagerClientConfig.class)
+            .run(context -> {
+                var config = context.getBean(UserProfileManagerClientConfig.class);
+                assertEquals("http://user-profile-manager:8181", config.createBasePath());
+            });
+    }
+
 }

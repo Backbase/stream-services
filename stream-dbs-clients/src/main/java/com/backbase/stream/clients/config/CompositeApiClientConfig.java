@@ -2,19 +2,27 @@ package com.backbase.stream.clients.config;
 
 import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import java.util.Optional;
+import javax.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancer.Factory;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * This specialization make it flexible to use direct uris when load balancing is not available.
  */
+@Validated
 class CompositeApiClientConfig extends ApiClientConfig {
 
     /**
      * Direct uri used as base path when load balancing is not available.
      */
     private String directUri;
+
+    @Positive
+    @Value("${backbase.communication.http.default-service-port:}")
+    private Integer defaultServicePort;
 
     /**
      * Indicator whether load balancing is enabled or not.
@@ -23,6 +31,14 @@ class CompositeApiClientConfig extends ApiClientConfig {
 
     public CompositeApiClientConfig(String serviceId) {
         super(serviceId);
+    }
+
+    @Override
+    public Integer getServicePort() {
+        if (super.getServicePort() == null && getDefaultServicePort() != null) {
+            return getDefaultServicePort();
+        }
+        return super.getServicePort();
     }
 
     @Override
@@ -46,4 +62,11 @@ class CompositeApiClientConfig extends ApiClientConfig {
         this.directUri = directUri;
     }
 
+    public Integer getDefaultServicePort() {
+        return defaultServicePort;
+    }
+
+    public void setDefaultServicePort(Integer defaultServicePort) {
+        this.defaultServicePort = defaultServicePort;
+    }
 }

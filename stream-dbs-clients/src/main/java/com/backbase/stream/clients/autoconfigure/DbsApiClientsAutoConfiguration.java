@@ -11,6 +11,7 @@ import com.backbase.stream.clients.config.TransactionManagerClientConfig;
 import com.backbase.stream.clients.config.UserManagerClientConfig;
 import com.backbase.stream.clients.config.UserProfileManagerClientConfig;
 import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -35,6 +36,7 @@ import org.springframework.context.annotation.Import;
     UserManagerClientConfig.class,
     UserProfileManagerClientConfig.class
 })
+@EnableConfigurationProperties
 public class DbsApiClientsAutoConfiguration {
 
 }
