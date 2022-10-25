@@ -58,6 +58,16 @@ components:
     PullIngestionRequest:
       type: object
       properties:
+        memberNumber:
+          type: string
+        internalUserId:
+          type: string
+        legalEntityInternalId:
+          type: string
+        legalEntityExternalId:
+          type: string
+        serviceAgreementInternalId:
+          type: string
         arrangementId:
           type: string
         externalArrangementId:
