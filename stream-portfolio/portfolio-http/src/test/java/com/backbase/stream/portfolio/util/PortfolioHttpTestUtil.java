@@ -4,9 +4,12 @@ import java.util.List;
 import org.springframework.util.ResourceUtils;
 import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.AssetClassBundle;
+import com.backbase.stream.portfolio.model.InstrumentBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.RegionBundle;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
+import com.backbase.stream.portfolio.model.TransactionCategory;
+import com.backbase.stream.portfolio.model.ValuationsBundle;
 import com.backbase.stream.portfolio.model.WealthBundle;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -36,7 +39,7 @@ public class PortfolioHttpTestUtil {
     public static List<RegionBundle> getRegionBundles() throws Exception {
         return getObjectFromJsonFile("classpath:json/region-bundles.json", new TypeReference<List<RegionBundle>>() {});
     }
-    
+
     public static List<WealthBundle> getWealthBundles() throws Exception {
         return getObjectFromJsonFile("classpath:json/wealth-bundles.json", new TypeReference<List<WealthBundle>>() {});
     }
@@ -58,6 +61,20 @@ public class PortfolioHttpTestUtil {
     public static List<SubPortfolioBundle> getSubPortfolios() throws Exception {
         return getObjectFromJsonFile("classpath:json/sub-portfolios.json",
                 new TypeReference<List<SubPortfolioBundle>>() {});
+    }
+
+    public static List<InstrumentBundle> getInstrumentBundles() throws Exception {
+        return getObjectFromJsonFile("classpath:json/instruments.json", new TypeReference<List<InstrumentBundle>>() {});
+    }
+
+    public static List<TransactionCategory> getTransactionCategories() throws Exception {
+        return getObjectFromJsonFile("classpath:json/transaction-categories.json",
+                new TypeReference<List<TransactionCategory>>() {});
+    }
+
+    public static List<ValuationsBundle> getValuationsBundles() throws Exception {
+        return getObjectFromJsonFile("classpath:json/valuations.json",
+                new TypeReference<List<ValuationsBundle>>() {});
     }
 
     private static <T> T getObjectFromJsonFile(String fileName, Class<T> type) throws Exception {

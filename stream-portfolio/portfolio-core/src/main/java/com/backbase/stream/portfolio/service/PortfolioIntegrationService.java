@@ -31,6 +31,7 @@ import com.backbase.stream.portfolio.model.AggregatePortfolio;
 import com.backbase.stream.portfolio.model.Allocation;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.PortfolioBundle;
+import com.backbase.stream.portfolio.model.PortfolioValuation;
 import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.PositionBundle;
 import com.backbase.stream.portfolio.model.SubPortfolio;
@@ -95,7 +96,7 @@ public class PortfolioIntegrationService {
                 .switchIfEmpty(positionManagementApi
                         .postPositions(portfolioMapper.mapPosition(portfolioId, subPortfolioId, position))
                         .map(o -> position))
-                .thenMany(upsertTransactionCategory(positionBundle))
+                .thenMany(upsertTransactionCategory(positionBundle.getTransactionCategories()))
                 .then(upsertTransactions(positionBundle, portfolioId, position)).map(at -> positionBundle)
                 .doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException)
                 .onErrorResume(WebClientResponseException.class,
@@ -125,7 +126,8 @@ public class PortfolioIntegrationService {
                 .thenMany(upsertHierarchy(portfolioBundle, portfolio))
                 .thenMany(upsertPerformance(portfolioBundle, portfolio))
                 .thenMany(upsertBenchmark(portfolioBundle, portfolio))
-                .thenMany(upsertValuations(portfolioBundle, portfolio)).map(at -> portfolioBundle)
+                .thenMany(upsertValuations(portfolioBundle.getValuations(), portfolio.getCode()))
+                .map(at -> portfolioBundle)
                 .doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException)
                 .onErrorResume(WebClientResponseException.class,
                         ReactiveStreamHandler.error(portfolioBundle, "Failed to create Portfolio gang"))
@@ -177,6 +179,30 @@ public class PortfolioIntegrationService {
         return upsertSubPortfolio(subPortfolios, portfolioCode).collectList().flatMap(o -> Mono.just(subPortfolios));
     }
 
+    /**
+     * Create TransactionCategories.
+     * 
+     * @param transactionCategories The transactionCategories to be created.
+     * @return The created transactionCategories.
+     */
+    public Mono<List<com.backbase.stream.portfolio.model.TransactionCategory>> upsertTransactionCategories(
+            List<com.backbase.stream.portfolio.model.TransactionCategory> transactionCategories) {
+        return upsertTransactionCategory(transactionCategories).collectList()
+                .flatMap(o -> Mono.just(transactionCategories));
+    }
+
+    /**
+     * Create PortfolioValuations.
+     * 
+     * @param portfolioValuations The portfolioValuations to be created.
+     * @param portfolioCode The code of the root portfolio.
+     * @return The created subPortfolios.
+     */
+    public Mono<List<PortfolioValuation>> upsertPortfolioValuations(List<PortfolioValuation> portfolioValuations,
+            String portfolioCode) {
+        return upsertValuations(portfolioValuations, portfolioCode).flatMap(o -> Mono.just(portfolioValuations));
+    }
+
     @NotNull
     private Mono<Void> upsertTransactions(PositionBundle positionBundle, String portfolioId, Position position) {
         return Mono
@@ -198,10 +224,11 @@ public class PortfolioIntegrationService {
     }
 
     @NotNull
-    private Flux<Void> upsertTransactionCategory(PositionBundle positionBundle) {
+    private Flux<Void> upsertTransactionCategory(
+            List<com.backbase.stream.portfolio.model.TransactionCategory> transactionCategories) {
         return transactionCategoryManagementApi.getTransactionCategories().map(TransactionCategory::getKey)
                 .collectList()
-                .flatMapMany(tcs -> ReactiveStreamHandler.getFluxStream(positionBundle.getTransactionCategories())
+                .flatMapMany(tcs -> ReactiveStreamHandler.getFluxStream(transactionCategories)
                         .flatMap(tc -> (tcs.contains(tc.getKey())
                                 ? transactionCategoryManagementApi.putTransactionCategory(tc.getKey(),
                                         portfolioMapper.mapPutTransactionCategory(tc))
@@ -299,23 +326,20 @@ public class PortfolioIntegrationService {
     }
 
     @NotNull
-    private Mono<Void> upsertValuations(PortfolioBundle portfolioBundle, Portfolio portfolio) {
-        return Flux.just(GranularityEnum.values())
-                .flatMap(g -> portfolioValuationManagementApi
-                        .deletePortfolioValuations(portfolio.getCode(), g.getValue()).map(r -> g))
-                .collectList().then(
-                        Mono.justOrEmpty(portfolioBundle.getValuations())
-                                .flatMap(
-                                        valuations -> portfolioValuationManagementApi
-                                                .putPortfolioValuations(portfolio.getCode(),
-                                                        new PortfolioValuationsPutRequest()
-                                                                .valuations(portfolioMapper.mapValuations(valuations)))
-                                                .doOnError(WebClientResponseException.class,
-                                                        ReactiveStreamHandler::handleWebClientResponseException)
-                                                .onErrorResume(WebClientResponseException.class,
-                                                        ReactiveStreamHandler.error(valuations,
-                                                                "Failed to create Portfolio Valuations"))
-                                                .onErrorStop()));
+    private Mono<Void> upsertValuations(List<PortfolioValuation> valuations, String portfolioCode) {
+        return Flux.just(GranularityEnum.values()).flatMap(
+                g -> portfolioValuationManagementApi.deletePortfolioValuations(portfolioCode, g.getValue()).map(r -> g))
+                .collectList()
+                .then(Mono.justOrEmpty(valuations)
+                        .flatMap(v -> portfolioValuationManagementApi
+                                .putPortfolioValuations(portfolioCode,
+                                        new PortfolioValuationsPutRequest()
+                                                .valuations(portfolioMapper.mapValuations(v)))
+                                .doOnError(WebClientResponseException.class,
+                                        ReactiveStreamHandler::handleWebClientResponseException)
+                                .onErrorResume(WebClientResponseException.class,
+                                        ReactiveStreamHandler.error(v, "Failed to create Portfolio Valuations"))
+                                .onErrorStop()));
     }
 
 }

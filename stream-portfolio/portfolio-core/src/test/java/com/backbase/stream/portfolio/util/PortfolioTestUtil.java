@@ -2,10 +2,13 @@ package com.backbase.stream.portfolio.util;
 
 import org.springframework.util.ResourceUtils;
 import com.backbase.stream.portfolio.model.WealthAssetBundle;
+import com.backbase.stream.portfolio.model.WealthInstrumentBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioAllocationsBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioBundle;
+import com.backbase.stream.portfolio.model.WealthPortfolioValuationsBundle;
 import com.backbase.stream.portfolio.model.WealthRegionsBundle;
 import com.backbase.stream.portfolio.model.WealthSubPortfolioBundle;
+import com.backbase.stream.portfolio.model.WealthTransactionCategoriesBundle;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +36,8 @@ public class PortfolioTestUtil {
     }
 
     public static WealthPortfolioAllocationsBundle getWealthPortfolioAllocationsBundle() throws Exception {
-        return getObjectFromJsonFile("classpath:json/portfolio-allocations.json", WealthPortfolioAllocationsBundle.class);
+        return getObjectFromJsonFile("classpath:json/portfolio-allocations.json",
+                WealthPortfolioAllocationsBundle.class);
     }
 
     public static WealthAssetBundle getWealthAssetBundle() throws Exception {
@@ -46,6 +50,20 @@ public class PortfolioTestUtil {
 
     public static WealthSubPortfolioBundle getWealthSubPortfolioBundle() throws Exception {
         return getObjectFromJsonFile("classpath:json/sub-portfolios.json", WealthSubPortfolioBundle.class);
+    }
+
+    public static WealthInstrumentBundle getWealthInstrumentBundle() throws Exception {
+        return getObjectFromJsonFile("classpath:json/instruments.json", WealthInstrumentBundle.class);
+    }
+
+    public static WealthTransactionCategoriesBundle getWealthTransactionCategoriesBundle() throws Exception {
+        return getObjectFromJsonFile("classpath:json/transaction-categories.json",
+                WealthTransactionCategoriesBundle.class);
+    }
+    
+    public static WealthPortfolioValuationsBundle getWealthPortfolioValuationsBundle() throws Exception {
+        return getObjectFromJsonFile("classpath:json/valuations.json",
+                WealthPortfolioValuationsBundle.class);
     }
 
     private static <T> T getObjectFromJsonFile(String fileName, Class<T> type) throws Exception {
