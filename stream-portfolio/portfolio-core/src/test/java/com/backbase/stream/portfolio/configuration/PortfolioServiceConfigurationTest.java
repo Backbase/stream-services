@@ -24,11 +24,8 @@ class PortfolioServiceConfigurationTest {
 
 			Assertions.assertNull(startupFailure);
 			Assertions.assertTrue(context.containsBean("portfolioReactiveService"));
-			Assertions.assertTrue(context.containsBean("wealthRegionsReactiveService"));
-			Assertions.assertTrue(context.containsBean("wealthPortfolioAllocationsReactiveService"));
-			Assertions.assertTrue(context.containsBean("wealthAssetsReactiveService"));
-			Assertions.assertTrue(context.containsBean("wealthPortfolioReactiveService"));
-			Assertions.assertTrue(context.containsBean("wealthSubPortfolioReactiveService"));
+			Assertions.assertTrue(context.containsBean("portfolioIngestionReactiveService"));
+			Assertions.assertTrue(context.containsBean("instrumentIngestionReactiveService"));
 		});
 	}
 

@@ -185,6 +185,90 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /portfolios/valuations/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Valuations Batch
+      operationId: createValuationsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ValuationsBundle'
+      responses:
+        200:
+          description: The created Valuations and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValuationsBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/transaction-categories/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Transaction Categories Batch
+      operationId: createTransactionCategoriesBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: schemas/v1/transaction-category.yaml
+      responses:
+        200:
+          description: The created Valuations and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: schemas/v1/transaction-category.yaml
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/instruments/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Instruments Batch
+      operationId: createInstrumentsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/InstrumentBundle'
+      responses:
+        200:
+          description: The created Instruments and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InstrumentBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -262,6 +346,16 @@ components:
           type: array
           items:
             $ref: schemas/v1/allocation.yaml
+    ValuationsBundle:
+      type: object
+      properties:
+        portfolioCode:
+          type: string
+          description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+        valuations:
+          type: array
+          items:
+            $ref: schemas/v1/portfolio-valuation.yaml
     PositionBundle:
       type: object
       properties:
@@ -354,6 +448,30 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AllocationBundle'
+    WealthPortfolioValuationsBundle:
+      type: object
+      properties:
+        batchPortfolioValuations:
+          description: Valuations and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/ValuationsBundle'
+    WealthTransactionCategoriesBundle:
+      type: object
+      properties:
+        transaction-categories:
+          description: Transaction categories
+          type: array
+          items:
+            $ref: schemas/v1/transaction-category.yaml
+    WealthInstrumentBundle:
+      type: object
+      properties:
+        instruments:
+          description: Instruments and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/InstrumentBundle'
     Error:
       type: object
       properties:
