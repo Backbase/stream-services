@@ -5,11 +5,12 @@ import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequest
 import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class TransactionTaskExecutor implements StreamTaskExecutor<TransactionTask> {
@@ -35,7 +36,7 @@ public class TransactionTaskExecutor implements StreamTaskExecutor<TransactionTa
             })
             .collectList()
             .map(transactionIds -> {
-                streamTask.error("transactions", "post", "success", externalIds, transactionIds.stream().map(
+                streamTask.info("transactions", "post", "success", externalIds, transactionIds.stream().map(
                     TransactionsPostResponseBody::getId).collect(Collectors.joining(",")), "Ingested Transactions");
                 streamTask.setResponse(transactionIds);
                 return streamTask;
