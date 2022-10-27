@@ -72,6 +72,10 @@ components:
           type: string
         serviceAgreementInternalId:
           type: string
+        arrangementId:
+          type: string
+        externalArrangementId:
+          type: string
         dateRangeStart:
           type: string
           format: date-time
