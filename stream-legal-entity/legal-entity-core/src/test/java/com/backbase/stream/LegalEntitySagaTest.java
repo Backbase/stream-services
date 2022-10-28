@@ -162,7 +162,12 @@ class LegalEntitySagaTest {
 
         Assertions.assertNotNull(result);
         // To verify that processSubsidiaries was invoked
-        Assertions.assertEquals(leExternalId, result.getData().getSubsidiaries().get(0).getParentExternalId());
+        var subsidaries = result.getData().getSubsidiaries();
+        Assertions.assertEquals(leExternalId, subsidaries.get(0).getParentExternalId());
+
+        //to verify leExternalId2 skipped.
+        verify(legalEntityService, times(0)).getLegalEntityByExternalId(leExternalId2);
+        Assertions.assertNull(subsidaries.get(1).getParentExternalId());
 
         verify(accessGroupService).createServiceAgreement(eq(task), eq(customSa));
         verify(accessGroupService).updateServiceAgreementRegularUsers(eq(task), eq(customSa), any());

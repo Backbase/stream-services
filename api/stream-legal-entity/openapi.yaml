@@ -959,6 +959,7 @@ components:
         createInDBS:
           type: boolean
           default: true
+          description: to check whether legalEntity to be processed in DBS or not.
         realmName:
           type: string
           description: Realm to which the Legal Entity should be mapped.
