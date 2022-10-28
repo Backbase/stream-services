@@ -106,6 +106,7 @@ class LegalEntitySagaTest {
         getLegalEntitySagaConfigurationProperties();
 
     String leExternalId = "someLeExternalId";
+    String leExternalId2 = "someLeExternalId2";
     String leParentExternalId = "someParentLeExternalId";
     String leInternalId = "someLeInternalId";
     String adminExId = "someAdminExId";
@@ -134,8 +135,9 @@ class LegalEntitySagaTest {
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
         legalEntity = new LegalEntity().internalId(leInternalId).externalId(leExternalId).addAdministratorsItem(adminUser)
             .parentExternalId(leParentExternalId).customServiceAgreement(customSa).users(singletonList(regularUser))
-            .productGroups(singletonList(productGroup)).subsidiaries(singletonList(
-                    new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa)
+            .productGroups(singletonList(productGroup)).subsidiaries(List.of(
+                    new LegalEntity().externalId(leExternalId).customServiceAgreement(customSa),
+                    new LegalEntity().externalId(leExternalId2).customServiceAgreement(customSa).createInDBS(false)
             ));
 
         LegalEntityTask task = mockLegalEntityTask(legalEntity);

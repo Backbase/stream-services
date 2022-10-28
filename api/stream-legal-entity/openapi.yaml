@@ -956,6 +956,9 @@ components:
           $ref: '#/components/schemas/ExternalIdentifier'
         legalEntityType:
           $ref: '#/components/schemas/LegalEntityType'
+        createInDBS:
+          type: boolean
+          default: true
         realmName:
           type: string
           description: Realm to which the Legal Entity should be mapped.
