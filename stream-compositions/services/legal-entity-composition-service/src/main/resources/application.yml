@@ -63,46 +63,49 @@ bootstrap:
           - name: "Manage Entitlements"
             functions:
               - functionId: "1019"
-                functionCode: "manage.data.groups"
+                name: "Manage Data Groups"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
                   - privilege: "edit"
                   - privilege: "delete"
-                  - privilege: "approve"
               - functionId: "1020"
-                functionCode: "manage.function.groups"
+                name: "Manage Function Groups"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
                   - privilege: "edit"
                   - privilege: "delete"
-                  - privilege: "approve"
       - name: Retail User - USA
         description: Retail User Permissions for USA
         functionGroups:
           - name: "Products, payments, txn, contacts"
             functions:
               - functionId: "1006"
+                name: "Product Summary"
                 functionCode: "product.summary"
                 privileges:
                   - privilege: "view"
               - functionId: "1003"
+                name: "Transactions"
                 functionCode: "transactions"
                 privileges:
                   - privilege: "view"
                   - privilege: "edit"
               - functionId: "1017"
+                name: "US Domestic Wire"
                 functionCode: "us.domestic.wire"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
               - functionId: "1018"
+                name: "US Foreign Wire"
                 functionCode: "us.foreign.wire"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
               - functionId: "1005"
+                name: "Contacts"
                 functionCode: "contacts"
                 privileges:
                   - privilege: "view"
@@ -120,6 +123,7 @@ bootstrap:
     users:
       - user:
           externalId: "admin"
+          fullName: "Backbase Root Admin"
           identityLinkStrategy: "IDENTITY_AGNOSTIC"
         referenceJobRoleNames:
           - "Entitlements - Manager"
