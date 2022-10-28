@@ -902,7 +902,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
         Flux<LegalEntity> subsidiaries = parentLegalEntity.getSubsidiaries() == null
             ? Flux.empty()
-            : Flux.fromIterable(parentLegalEntity.getSubsidiaries().stream().filter(x -> x.getCreateInDBS()).toList());
+            : Flux.fromStream(parentLegalEntity.getSubsidiaries().stream().filter(x -> x.getCreateInDBS()));
 
         Flux<LegalEntityTask> subsidiariesWithParentId = setSubsidiaryParentLegalEntityId(parentLegalEntity,
             subsidiaries).map(LegalEntityTask::new);
