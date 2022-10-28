@@ -1,5 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [2.88.2](https://github.com/Backbase/stream-services/compare/2.88.1...2.88.2)
+- Fix memory leak with UnitOfWorkExecutor
+
 ## [2.88.1](https://github.com/Backbase/stream-services/compare/2.88.0...2.88.1)
 ### Fixed
 - Added InterestDetails to BaseProduct
