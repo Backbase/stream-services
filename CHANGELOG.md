@@ -1,6 +1,6 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-## [3.9.2](https://github.com/Backbase/stream-services/compare/3.9.1...3.9.2)
+## [3.9.3](https://github.com/Backbase/stream-services/compare/3.9.2...3.9.3)
 - Fix memory leak with UnitOfWorkExecutor
 
 ## [3.9.2](https://github.com/Backbase/stream-services/compare/3.9.1...3.9.2)
