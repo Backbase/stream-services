@@ -5,11 +5,11 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>3.9.2</version>
+        <version>3.9.3</version>
     </parent>
 
     <artifactId>transaction-composition-service</artifactId>
-    <version>3.9.2</version>
+    <version>3.9.3</version>
 
     <packaging>jar</packaging>
 
