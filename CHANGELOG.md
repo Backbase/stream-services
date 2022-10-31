@@ -1,8 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-## [3.9.2](https://github.com/Backbase/stream-services/compare/3.9.1...3.9.2)
+## [3.9.2](https://github.com/Backbase/stream-services/compare/3.9.2...3.9.3)
 ### Changed
 Adding createInDBS flag to check whether LegalEntity needs to be processed in DBS or not.
+
+## [3.9.2](https://github.com/Backbase/stream-services/compare/3.9.1...3.9.2)
+### Added
+- End-to-end tests for the Bootstrap Task
+
 ## [3.9.0](https://github.com/Backbase/stream-services/compare/3.8.2...3.9.0)
 ### Changed
 Adding SSDK service discovery mechanism to the Stream Task and Http applications.
