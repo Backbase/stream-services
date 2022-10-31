@@ -31,6 +31,7 @@ import com.backbase.stream.portfolio.model.AggregatePortfolio;
 import com.backbase.stream.portfolio.model.Allocation;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.PortfolioBundle;
+import com.backbase.stream.portfolio.model.PortfolioPositionsHierarchy;
 import com.backbase.stream.portfolio.model.PortfolioValuation;
 import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.PositionBundle;
@@ -112,21 +113,23 @@ public class PortfolioIntegrationService {
      */
     public Flux<PortfolioBundle> upsertPortfolio(PortfolioBundle portfolioBundle) {
         Portfolio portfolio = portfolioBundle.getPortfolio();
-        return portfolioManagementApi.getPortfolio(portfolio.getCode())
+        String portfolioCode = portfolio.getCode();
+        
+        return portfolioManagementApi.getPortfolio(portfolioCode)
                 .onErrorResume(WebClientResponseException.NotFound.class, throwable -> Mono.empty())
                 .flatMap(r -> portfolioManagementApi
-                        .putPortfolio(portfolio.getCode(), portfolioMapper.mapPutPortfolio(portfolio))
+                        .putPortfolio(portfolioCode, portfolioMapper.mapPutPortfolio(portfolio))
                         .then(Mono.just(portfolio)))
                 .switchIfEmpty(portfolioManagementApi.postPortfolios(portfolioMapper.mapPortfolio(portfolio))
                         // add update handle
                         .onErrorResume(WebClientResponseException.Conflict.class, throwable -> Mono.empty())
                         .map(r -> portfolio))
-                .thenMany(upsertSubPortfolio(portfolioBundle.getSubPortfolios(), portfolio.getCode()))
-                .thenMany(upsertAllocation(portfolioBundle.getAllocations(), portfolio.getCode()))
-                .thenMany(upsertHierarchy(portfolioBundle, portfolio))
+                .thenMany(upsertSubPortfolio(portfolioBundle.getSubPortfolios(), portfolioCode))
+                .thenMany(upsertAllocation(portfolioBundle.getAllocations(), portfolioCode))
+                .thenMany(upsertHierarchy(portfolioBundle.getHierarchies(), portfolioCode))
                 .thenMany(upsertPerformance(portfolioBundle, portfolio))
                 .thenMany(upsertBenchmark(portfolioBundle, portfolio))
-                .thenMany(upsertValuations(portfolioBundle.getValuations(), portfolio.getCode()))
+                .thenMany(upsertValuations(portfolioBundle.getValuations(), portfolioCode))
                 .map(at -> portfolioBundle)
                 .doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException)
                 .onErrorResume(WebClientResponseException.class,
@@ -189,6 +192,18 @@ public class PortfolioIntegrationService {
             List<com.backbase.stream.portfolio.model.TransactionCategory> transactionCategories) {
         return upsertTransactionCategory(transactionCategories).collectList()
                 .flatMap(o -> Mono.just(transactionCategories));
+    }
+    
+    /**
+     * Create Hierarchies.
+     * 
+     * @param hierarchies The hierarchies to be created.
+     * @param portfolioCode The code of the root portfolio.
+     * @return The created hierarchies.
+     */
+    public Mono<List<PortfolioPositionsHierarchy>> upsertHierarchies(List<PortfolioPositionsHierarchy> hierarchies,
+            String portfolioCode) {
+        return upsertHierarchy(hierarchies, portfolioCode).flatMap(o -> Mono.just(hierarchies));
     }
 
     /**
@@ -276,17 +291,16 @@ public class PortfolioIntegrationService {
     }
 
     @NotNull
-    private Mono<Void> upsertHierarchy(PortfolioBundle portfolioBundle, Portfolio portfolio) {
+    private Mono<Void> upsertHierarchy(List<PortfolioPositionsHierarchy> hierarchies, String portfolioCode) {
         return Mono
-                .justOrEmpty(
-                        portfolioBundle.getHierarchies())
-                .flatMap(hierarchies -> portfolioPositionsHierarchyManagementApi
-                        .putPortfolioPositionsHierarchy(portfolio.getCode(),
+                .justOrEmpty(hierarchies)
+                .flatMap(h -> portfolioPositionsHierarchyManagementApi
+                        .putPortfolioPositionsHierarchy(portfolioCode,
                                 new PortfolioPositionsHierarchyPutRequest()
-                                        .items(portfolioMapper.mapHierarchies(hierarchies)))
+                                        .items(portfolioMapper.mapHierarchies(h)))
                         .doOnError(WebClientResponseException.class,
                                 ReactiveStreamHandler::handleWebClientResponseException)
-                        .onErrorResume(WebClientResponseException.class, ReactiveStreamHandler.error(hierarchies,
+                        .onErrorResume(WebClientResponseException.class, ReactiveStreamHandler.error(h,
                                 "Failed to create Portfolio Position Hierarchies"))
                         .onErrorStop());
     }

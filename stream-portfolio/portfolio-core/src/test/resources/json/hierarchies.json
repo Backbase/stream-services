@@ -1,0 +1,95 @@
+{
+  "batchPortfolioPositionsHierarchies": [
+    {
+      "portfolioCode": "1234",
+      "hierarchies": [
+        {
+          "itemType": "SUB_PORTFOLIO",
+          "externalId": 4965926807606,
+          "name": "Equity 15Y Long Strategy",
+          "percentOfParent": 55,
+          "percentOfPortfolio": 5,
+          "performance": 10,
+          "unrealizedPL": {
+            "currencyCode": "EUR",
+            "amount": 50
+          },
+          "accruedInterest": {
+            "currencyCode": "EUR",
+            "amount": 50
+          },
+          "valuation": {
+            "currencyCode": "EUR",
+            "amount": 50
+          },
+          "items": [
+            {
+              "itemType": "ASSET_CLASS",
+              "externalId": "OvBckZySky",
+              "name": "Bond",
+              "percentOfParent": 55,
+              "percentOfPortfolio": 5,
+              "performance": 10,
+              "unrealizedPL": {
+                "currencyCode": "EUR",
+                "amount": 50
+              },
+              "accruedInterest": {
+                "currencyCode": "EUR",
+                "amount": 50
+              },
+              "valuation": {
+                "currencyCode": "EUR",
+                "amount": 50
+              },
+              "items": [
+                {
+                  "itemType": "REGION",
+                  "externalId": "EU",
+                  "name": "Europe",
+                  "percentOfParent": 55,
+                  "percentOfPortfolio": 5,
+                  "performance": 10,
+                  "unrealizedPL": {
+                    "currencyCode": "EUR",
+                    "amount": 50
+                  },
+                  "accruedInterest": {
+                    "currencyCode": "EUR",
+                    "amount": 50
+                  },
+                  "valuation": {
+                    "currencyCode": "EUR",
+                    "amount": 50
+                  },
+                  "items": [
+                    {
+                      "itemType": "COUNTRY",
+                      "externalId": "NL",
+                      "name": "Netherlands",
+                      "percentOfParent": 55,
+                      "percentOfPortfolio": 5,
+                      "performance": 10,
+                      "unrealizedPL": {
+                        "currencyCode": "EUR",
+                        "amount": 50
+                      },
+                      "accruedInterest": {
+                        "currencyCode": "EUR",
+                        "amount": 50
+                      },
+                      "valuation": {
+                        "currencyCode": "EUR",
+                        "amount": 50
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

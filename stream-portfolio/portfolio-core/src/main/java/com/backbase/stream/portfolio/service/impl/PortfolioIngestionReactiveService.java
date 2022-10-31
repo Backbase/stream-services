@@ -3,6 +3,7 @@ package com.backbase.stream.portfolio.service.impl;
 import java.util.List;
 import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.AllocationBundle;
+import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
@@ -79,6 +80,19 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
                         portfolioSagaProperties.getTaskExecutors())
                 .flatMapIterable(i -> i)
                 .doOnNext(actual -> log.info("Finished Ingestion of Transaction Category, key: {}", actual.getKey()));
+    }
+    
+    @Override
+    public Flux<HierarchyBundle> ingestHierarchyBundles(Flux<HierarchyBundle> hierarchyBundles) {
+        return hierarchyBundles.flatMap(this::upsertHierarchyBundle, portfolioSagaProperties.getTaskExecutors())
+                .doOnNext(actual -> log.info("Finished Ingestion of hierarchy bundle, portfolioCode: {}",
+                                             actual.getPortfolioCode()));
+    }
+
+    private Mono<HierarchyBundle> upsertHierarchyBundle(HierarchyBundle hierarchyBundle) {
+        return portfolioIntegrationService
+                .upsertHierarchies(hierarchyBundle.getHierarchies(), hierarchyBundle.getPortfolioCode())
+                .map(m -> hierarchyBundle);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.backbase.stream.portfolio.service;
 
 import com.backbase.stream.portfolio.model.AllocationBundle;
+import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
@@ -54,4 +55,12 @@ public interface PortfolioIngestionService {
      * @return The ingested {@code TransactionCategory}.
      */
     Flux<TransactionCategory> ingestTransactionCategories(Flux<TransactionCategory> transactionCategories);
+    
+    /**
+     * Ingest Hierarchiy Bundles.
+     * 
+     * @param hierarchyBundles The Flux of {@code HierarchyBundle} to be ingested.
+     * @return The Flux of ingested {@code HierarchyBundle}.
+     */
+    Flux<HierarchyBundle> ingestHierarchyBundles(Flux<HierarchyBundle> hierarchyBundles);
 }

@@ -269,6 +269,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /portfolios/hierarchies/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Hierarchies Batch
+      operationId: createHierarchiesBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/HierarchyBundle'
+      responses:
+        200:
+          description: The created Hierarchies and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HierarchyBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -375,6 +403,16 @@ components:
           type: array
           items:
             $ref: schemas/v1/position-transaction.yaml
+    HierarchyBundle:
+      type: object
+      properties:
+        portfolioCode:
+          type: string
+          description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+        hierarchies:
+          type: array
+          items:
+            $ref: schemas/v1/portfolio-positions-hierarchy.yaml
     WealthBundle:
       type: object
       properties:
@@ -472,6 +510,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InstrumentBundle'
+    WealthPortfolioPositionHierarchyBundle:
+      type: object
+      properties:
+        batchPortfolioPositionsHierarchies:
+          description: Hierarchies and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/HierarchyBundle'
     Error:
       type: object
       properties:
