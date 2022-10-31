@@ -1,0 +1,47 @@
+{
+  "realm": "backbase",
+  "enabled": true,
+  "users": [
+    {
+      "username": "provisioner",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "provisioner"
+        }
+      ],
+      "realmRoles": [
+        "ROLE_ADMIN"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "ROLE_USER",
+        "description": "User privileges"
+      },
+      {
+        "name": "ROLE_ADMIN",
+        "description": "Administrator privileges"
+      }
+    ]
+  },
+  "defaultRoles": [
+    "ROLE_USER"
+  ],
+  "clients": [
+    {
+      "clientId": "bb-web-client",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ]
+    }
+  ]
+}
