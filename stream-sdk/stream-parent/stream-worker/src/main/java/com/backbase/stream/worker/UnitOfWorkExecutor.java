@@ -6,8 +6,7 @@ import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.TaskHistory;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
-import java.time.OffsetDateTime;
-import java.util.stream.Collectors;
+import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.cloud.sleuth.annotation.NewSpan;
@@ -16,6 +15,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+
+import java.time.OffsetDateTime;
+import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class UnitOfWorkExecutor<T extends StreamTask> {
@@ -60,6 +62,16 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
         return repository.findById(unitOfWorkId);
     }
 
+    private Mono<UnitOfWork<T>> cleanup(UnitOfWork<T> unitOfWork) {
+        // Clean up completed/errored out unit of works from the InMemoryRepository
+        if (repository instanceof InMemoryReactiveUnitOfWorkRepository) {
+            log.info("Cleaning up Unit Of Work: {}", unitOfWork.getUnitOfOWorkId());
+            return repository.delete(unitOfWork)
+                    .thenReturn(unitOfWork);
+        }
+        return Mono.just(unitOfWork);
+    }
+
     private Mono<UnitOfWork<T>> complete(UnitOfWork<T> unitOfWork) {
         log.info("Completing Unit Of Work: {}", unitOfWork.getUnitOfOWorkId());
         unitOfWork.setLockedAt(null);
@@ -99,7 +111,8 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
         return Mono.just(unitOfWork)
             .flatMap(this::setLocked)
             .flatMap(this::executeTasks)
-            .flatMap(this::complete);
+            .flatMap(this::complete)
+            .doFinally(r -> cleanup(unitOfWork));
     }
 
     @ContinueSpan(log = "Locking Unit Of Work")
@@ -136,14 +149,15 @@ public abstract class UnitOfWorkExecutor<T extends StreamTask> {
                 return actual;
             })
             .onErrorResume(Throwable.class, throwable -> {
+                streamTask.setState(StreamTask.State.FAILED);
+                streamTask.setError(throwable.getMessage());
                 log.error("Stream Task: {} from Unit Of Work: {} failed: \n{}",
                     streamTaskId,
                     streamTask.getId(),
                     streamTask.getHistory().stream().map(TaskHistory::toString)
                         .collect(Collectors.joining("\n")));
-                streamTask.setState(StreamTask.State.FAILED);
-                return Mono.error(throwable);
-//                return Mono.just(streamTask);
+
+                return Mono.just(streamTask);
             });
     }
 
