@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.7.1](https://github.com/Backbase/stream-services/compare/3.7.0...3.7.1)
+- Fix memory leak with UnitOfWorkExecutor
+
 ## [3.6.0](https://github.com/Backbase/stream-services/compare/3.5.0...3.6.0)
 ### Added
 - Add support for Entitlement Wizard Metadata.
