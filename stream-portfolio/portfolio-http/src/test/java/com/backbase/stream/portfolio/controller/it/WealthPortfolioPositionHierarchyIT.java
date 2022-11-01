@@ -16,14 +16,14 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import com.backbase.stream.portfolio.PortfolioHttpApplication;
-import com.backbase.stream.portfolio.model.SubPortfolioBundle;
+import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.util.PortfolioHttpTestUtil;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 
 /**
- * WealthSubPortfolio IT.
+ * WealthPortfolioPositionHierarchy IT.
  * 
  * @author Vladimir Kirchev
  *
@@ -32,8 +32,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 @ContextConfiguration(classes = {ItTestConfiguration.class})
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({"it"})
-class WealthSubPortfolioIT {
-
+class WealthPortfolioPositionHierarchyIT {
     @RegisterExtension
     static WireMockExtension wireMockServer =
             WireMockExtension.newInstance().options(WireMockConfiguration.wireMockConfig().dynamicPort()).build();
@@ -51,26 +50,25 @@ class WealthSubPortfolioIT {
     private WebTestClient webTestClient;
 
     @Test
-    void shouldIngestRegionBundles() throws Exception {
+    void shouldIngestTransactionCategories() throws Exception {
         // Given
         setupWireMock();
 
-        List<SubPortfolioBundle> subPortfolioBundles = PortfolioHttpTestUtil.getSubPortfolios();
+        List<HierarchyBundle> hierarchyBundles = PortfolioHttpTestUtil.getHierarchyBundles();
 
         // When
         webTestClient.post()
-                .uri("/portfolios/sub-portfolios/batch")
+                .uri("/portfolios/hierarchies/batch")
                 .header("Content-Type", "application/json")
                 .header(X_TID_HEADER_NAME, X_TID_HEADER_VALUE)
-                .bodyValue(subPortfolioBundles)
+                .bodyValue(hierarchyBundles)
                 .exchange()
                 .expectStatus()
                 .isEqualTo(200);
 
         // Then
         wireMockServer.verify(WireMock
-                .getRequestedFor(WireMock
-                        .urlEqualTo("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804"))
+                .putRequestedFor(WireMock.urlEqualTo("/portfolio/integration-api/v1/portfolios/1234/hierarchies"))
                 .withHeader(X_TID_HEADER_NAME, WireMock.equalTo(X_TID_HEADER_VALUE)));
 
         Assertions.assertTrue(wireMockServer.findAllUnmatchedRequests().isEmpty());
@@ -85,26 +83,7 @@ class WealthSubPortfolioIT {
                                 + "\"not-before-policy\": 1633622545,"
                                 + "\"session_state\": \"72a28739-3d20-4965-bd86-64410df53d04\",\"scope\": \"openid\"}")));
 
-        wireMockServer.stubFor(WireMock.get("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804")
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"code\":\"1234\", \"name\": \"testName\", \"valuation\": {\"amount\": 34.5, "
-                                + "\"currencyCode\": \"EUR\"}, \"performance\": 54.6, \"percentOfParent\": 32.5}")));
-
-        wireMockServer.stubFor(WireMock.get("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427805")
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"code\":\"1234\", \"name\": \"testName\", \"valuation\": {\"amount\": 34.5, "
-                                + "\"currencyCode\": \"EUR\"}, \"performance\": 54.6, \"percentOfParent\": 32.5}")));
-
-        wireMockServer.stubFor(WireMock.put("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804")
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")));
-
-        wireMockServer.stubFor(WireMock.put("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427805")
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")));
+        wireMockServer.stubFor(WireMock.put("/portfolio/integration-api/v1/portfolios/1234/hierarchies")
+                .willReturn(WireMock.aResponse().withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)));
     }
 }

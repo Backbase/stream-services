@@ -6,6 +6,7 @@ import org.springframework.web.server.ServerWebExchange;
 import com.backbase.stream.portfolio.api.PortfoliosApi;
 import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.AssetClassBundle;
+import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.InstrumentBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.RegionBundle;
@@ -90,6 +91,12 @@ public class PortfoliosController implements PortfoliosApi {
             ServerWebExchange exchange) {
         return Mono
                 .just(ResponseEntity.ok(portfolioIngestionReactiveService.ingestValuationsBundles(valuationsBundle)));
+    }
+    
+    @Override
+    public Mono<ResponseEntity<Flux<HierarchyBundle>>> createHierarchiesBatch(Flux<HierarchyBundle> hierarchyBundles,
+            ServerWebExchange exchange) {
+        return Mono.just(ResponseEntity.ok(portfolioIngestionReactiveService.ingestHierarchyBundles(hierarchyBundles)));
     }
 
 }

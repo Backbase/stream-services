@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.util.ResourceUtils;
 import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.AssetClassBundle;
+import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.InstrumentBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.RegionBundle;
@@ -75,6 +76,10 @@ public class PortfolioHttpTestUtil {
     public static List<ValuationsBundle> getValuationsBundles() throws Exception {
         return getObjectFromJsonFile("classpath:json/valuations.json",
                 new TypeReference<List<ValuationsBundle>>() {});
+    }
+    
+    public static List<HierarchyBundle> getHierarchyBundles() throws Exception {
+        return getObjectFromJsonFile("classpath:json/hierarchies.json", new TypeReference<List<HierarchyBundle>>() {});
     }
 
     private static <T> T getObjectFromJsonFile(String fileName, Class<T> type) throws Exception {
