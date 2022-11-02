@@ -9,6 +9,7 @@ import com.backbase.stream.portfolio.model.AssetClassBundle;
 import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.InstrumentBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
+import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.RegionBundle;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
@@ -98,5 +99,10 @@ public class PortfoliosController implements PortfoliosApi {
             ServerWebExchange exchange) {
         return Mono.just(ResponseEntity.ok(portfolioIngestionReactiveService.ingestHierarchyBundles(hierarchyBundles)));
     }
-
+    
+    @Override
+    public Mono<ResponseEntity<Flux<Position>>> createPositionsBatch(Flux<Position> position,
+            ServerWebExchange exchange) {
+        return Mono.just(ResponseEntity.ok(portfolioIngestionReactiveService.ingestPositions(position)));
+    }
 }

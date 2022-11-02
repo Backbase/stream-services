@@ -7,6 +7,7 @@ import com.backbase.stream.portfolio.model.AssetClassBundle;
 import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.InstrumentBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
+import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.RegionBundle;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
@@ -47,12 +48,12 @@ public class PortfolioHttpTestUtil {
 
     public static List<AllocationBundle> getAllocationBundles() throws Exception {
         return getObjectFromJsonFile("classpath:json/wealth-portfolio-allocations.json",
-                new TypeReference<List<AllocationBundle>>() {});
+                                     new TypeReference<List<AllocationBundle>>() {});
     }
 
     public static List<AssetClassBundle> getAssetClasseBundles() throws Exception {
         return getObjectFromJsonFile("classpath:json/asset-classes.json",
-                new TypeReference<List<AssetClassBundle>>() {});
+                                     new TypeReference<List<AssetClassBundle>>() {});
     }
 
     public static List<Portfolio> getPortfolios() throws Exception {
@@ -61,7 +62,7 @@ public class PortfolioHttpTestUtil {
 
     public static List<SubPortfolioBundle> getSubPortfolios() throws Exception {
         return getObjectFromJsonFile("classpath:json/sub-portfolios.json",
-                new TypeReference<List<SubPortfolioBundle>>() {});
+                                     new TypeReference<List<SubPortfolioBundle>>() {});
     }
 
     public static List<InstrumentBundle> getInstrumentBundles() throws Exception {
@@ -70,16 +71,19 @@ public class PortfolioHttpTestUtil {
 
     public static List<TransactionCategory> getTransactionCategories() throws Exception {
         return getObjectFromJsonFile("classpath:json/transaction-categories.json",
-                new TypeReference<List<TransactionCategory>>() {});
+                                     new TypeReference<List<TransactionCategory>>() {});
     }
 
     public static List<ValuationsBundle> getValuationsBundles() throws Exception {
-        return getObjectFromJsonFile("classpath:json/valuations.json",
-                new TypeReference<List<ValuationsBundle>>() {});
+        return getObjectFromJsonFile("classpath:json/valuations.json", new TypeReference<List<ValuationsBundle>>() {});
     }
-    
+
     public static List<HierarchyBundle> getHierarchyBundles() throws Exception {
         return getObjectFromJsonFile("classpath:json/hierarchies.json", new TypeReference<List<HierarchyBundle>>() {});
+    }
+
+    public static List<Position> getPositions() throws Exception {
+        return getObjectFromJsonFile("classpath:json/positions.json", new TypeReference<List<Position>>() {});
     }
 
     private static <T> T getObjectFromJsonFile(String fileName, Class<T> type) throws Exception {

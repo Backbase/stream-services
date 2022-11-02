@@ -15,6 +15,7 @@ import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
+import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
 import com.backbase.stream.portfolio.model.ValuationsBundle;
@@ -22,6 +23,7 @@ import com.backbase.stream.portfolio.model.WealthPortfolioAllocationsBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioPositionHierarchyBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioValuationsBundle;
+import com.backbase.stream.portfolio.model.WealthPositionsBundle;
 import com.backbase.stream.portfolio.model.WealthSubPortfolioBundle;
 import com.backbase.stream.portfolio.model.WealthTransactionCategoriesBundle;
 import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
@@ -181,5 +183,24 @@ class PortfolioIngestionReactiveServiceTest {
         Assertions.assertNotNull(ingestedHierarchyBundles);
 
         StepVerifier.create(ingestedHierarchyBundles).assertNext(assertEqualsTo(hierarchyBundle0)).verifyComplete();
+    }
+
+    @Test
+    void shouldIngestWealthPortfolioPositionBundle() throws Exception {
+        WealthPositionsBundle wealthPositionsBundle = PortfolioTestUtil.getWealthPositionsBundle();
+        List<Position> positions = wealthPositionsBundle.getPositions();
+
+        Position position0 = positions.get(0);
+
+        Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
+        Mockito.when(portfolioIntegrationService.upsertPosition(any(Position.class)))
+                .thenAnswer(i -> Mono.just(i.getArgument(0)));
+
+        Flux<Position> ingestedPositions =
+                portfolioIngestionReactiveService.ingestPositions(Flux.fromIterable(positions));
+
+        Assertions.assertNotNull(ingestedPositions);
+
+        StepVerifier.create(ingestedPositions).assertNext(assertEqualsTo(position0)).verifyComplete();
     }
 }

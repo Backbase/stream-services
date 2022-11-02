@@ -1,0 +1,51 @@
+[
+  {
+    "externalId": "ID543894783",
+    "instrumentId": "ID78344628",
+    "portfolioCode": "IZ23452FD234",
+    "subPortfolioCode": "IX4389HJ49307",
+    "absolutePerformance": {
+      "amount": 44.12,
+      "currencyCode": "EUR"
+    },
+    "relativePerformance": 1.2,
+    "purchasePrice": {
+      "amount": 124.18,
+      "currencyCode": "EUR"
+    },
+    "unrealizedPLPct": 4.14,
+    "unrealizedPL": {
+      "amount": 34.12,
+      "currencyCode": "EUR"
+    },
+    "todayPLPct": 1.14,
+    "todayPL": {
+      "amount": 14.12,
+      "currencyCode": "EUR"
+    },
+    "accruedInterest": {
+      "amount": 12.45,
+      "currencyCode": "EUR"
+    },
+    "quantity": 187,
+    "valuation": {
+      "amount": 132.11,
+      "currencyCode": "EUR"
+    },
+    "costPrice": {
+      "amount": 145.11,
+      "currencyCode": "EUR"
+    },
+    "costExchangeRate": {
+      "amount": 1.23,
+      "currencyCode": "EUR"
+    },
+    "percentAssetClass": 187,
+    "percentPortfolio": 187,
+    "percentParent": 187,
+    "positionType": "Bond",
+    "additions": {
+      "someKey": "someValue"
+    }
+  }
+]
