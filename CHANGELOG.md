@@ -1,5 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.10.0](https://github.com/Backbase/stream-services/compare/3.9.3...3.10.0)
+### Added
+- Zip layout to composition services. This allows the addition of external jars to the classpath using `loader.path` property.
+
 ## [3.9.3](https://github.com/Backbase/stream-services/compare/3.9.2...3.9.3)
 - Fix memory leak with UnitOfWorkExecutor
 
