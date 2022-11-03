@@ -21,8 +21,8 @@ public class BatchProductIngestionMode {
     private DataGroupsMode dataGroupIngestionMode = DataGroupsMode.UPSERT;
     private ArrangementsMode arrangementsMode = ArrangementsMode.UPSERT;
 
-    public static BatchProductIngestionMode UPSERT = upsert();
-    public static BatchProductIngestionMode REPLACE = replace();
+    public static final BatchProductIngestionMode UPSERT = upsert();
+    public static final BatchProductIngestionMode REPLACE = replace();
 
     /**
      * @return True, if function groups should be replaced (function groups not existing in batch will be REMOVED from DBS).
