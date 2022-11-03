@@ -35,6 +35,7 @@ import com.backbase.stream.portfolio.model.PortfolioPositionsHierarchy;
 import com.backbase.stream.portfolio.model.PortfolioValuation;
 import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.PositionBundle;
+import com.backbase.stream.portfolio.model.PositionTransaction;
 import com.backbase.stream.portfolio.model.SubPortfolio;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -99,7 +100,7 @@ public class PortfolioIntegrationService {
                         .postPositions(portfolioMapper.mapPosition(portfolioId, subPortfolioId, position))
                         .map(o -> position))
                 .thenMany(upsertTransactionCategory(positionBundle.getTransactionCategories()))
-                .then(upsertTransactions(positionBundle, portfolioId, position))
+                .then(upsertTransactions(positionBundle.getTransactions(), portfolioId, position.getExternalId()))
                 .map(at -> positionBundle)
                 .doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException)
                 .onErrorResume(WebClientResponseException.class,
@@ -127,6 +128,11 @@ public class PortfolioIntegrationService {
                                ReactiveStreamHandler.error(position, "Failed to create Position"))
                 .onErrorStop();
     }
+    
+    public Mono<List<PositionTransaction>> upsertPositionTransactions(List<PositionTransaction> transactions,
+            String portfolioId, String positionId) {
+        return upsertTransactions(transactions, portfolioId, positionId).flatMap(o -> Mono.just(transactions));
+    }
 
     /**
      * Create Portfolios and all reference models that are related.
@@ -138,10 +144,10 @@ public class PortfolioIntegrationService {
         Portfolio portfolio = portfolioBundle.getPortfolio();
         String portfolioCode = portfolio.getCode();
 
-        return portfolioManagementApi.getPortfolio(portfolioCode)
+        return portfolioManagementApi.getPortfolio(portfolio.getCode())
                 .onErrorResume(WebClientResponseException.NotFound.class, throwable -> Mono.empty())
                 .flatMap(r -> portfolioManagementApi
-                        .putPortfolio(portfolioCode, portfolioMapper.mapPutPortfolio(portfolio))
+                        .putPortfolio(portfolio.getCode(), portfolioMapper.mapPutPortfolio(portfolio))
                         .then(Mono.just(portfolio)))
                 .switchIfEmpty(portfolioManagementApi.postPortfolios(portfolioMapper.mapPortfolio(portfolio))
                         // add update handle
@@ -242,14 +248,15 @@ public class PortfolioIntegrationService {
     }
 
     @NotNull
-    private Mono<Void> upsertTransactions(PositionBundle positionBundle, String portfolioId, Position position) {
-        return Mono.justOrEmpty(positionBundle.getTransactions())
-                .flatMap(trs -> transactionManagementApi.deletePositionTransactions(position.getExternalId())
+    private Mono<Void> upsertTransactions(List<PositionTransaction> transactions, String portfolioId,
+            String positionId) {
+        return Mono.justOrEmpty(transactions)
+                .flatMap(trs -> transactionManagementApi.deletePositionTransactions(positionId)
                         .then(transactionManagementApi
                                 .postPortfolioTransactions(portfolioId,
                                                            new PortfolioTransactionsPostRequest().transactions(List
                                                                    .of(new PortfolioTransactionsPostItem()
-                                                                           .positionId(position.getExternalId())
+                                                                           .positionId(positionId)
                                                                            .transactions(portfolioMapper
                                                                                    .mapTransaction(trs)))))
                                 .onErrorResume(WebClientResponseException.class,

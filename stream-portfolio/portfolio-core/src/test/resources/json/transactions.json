@@ -1,0 +1,71 @@
+{
+  "batchPortfolioTransactions": [
+    {
+      "portfolioCode": "1234",
+      "transactions": [
+        {
+          "positionId": "IOD4390KDJIWEO9320583DWK",
+          "transactions": [
+            {
+              "transactionId": "rerjt34-3-rket50-i34mfo5u40950",
+              "transactionDate": "2021-03-24T19:22:00.000-01:00",
+              "valueDate": "2021-03-29T11:46:00.000-01:00",
+              "transactionCategory": "Purchase",
+              "exchange": "NASDAQ",
+              "orderType": "Market Order",
+              "counterpartyName": "Executive Brokers",
+              "counterpartyAccount": "R3904N-R0328592-323-4",
+              "quantity": 55,
+              "price": {
+                "amount": 129.22,
+                "currencyCode": "EUR"
+              },
+              "amount": {
+                "amount": 7107.1,
+                "currencyCode": "EUR"
+              },
+              "amountGross": {
+                "amount": 7183.22,
+                "currencyCode": "EUR"
+              },
+              "fxRate": {
+                "amount": 1.22,
+                "currencyCode": "EUR"
+              },
+              "localTaxes": {
+                "amount": 32.04,
+                "currencyCode": "EUR"
+              },
+              "localFees": {
+                "amount": 7.03,
+                "currencyCode": "EUR"
+              },
+              "foreignTaxes": {
+                "amount": 12.03,
+                "currencyCode": "EUR"
+              },
+              "foreignFees": {
+                "amount": 25.02,
+                "currencyCode": "EUR"
+              },
+              "officialCode": "APPL",
+              "ISIN": "US4930248325",
+              "balanceAsset": {
+                "amount": 25.02,
+                "currencyCode": "EUR"
+              },
+              "balanceAmount": {
+                "amount": 25.02,
+                "currencyCode": "EUR"
+              },
+              "statusId": "an5fke68fik54l",
+              "statusName": "Pending",
+              "statusAbbr": "O",
+              "notes": "notes"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

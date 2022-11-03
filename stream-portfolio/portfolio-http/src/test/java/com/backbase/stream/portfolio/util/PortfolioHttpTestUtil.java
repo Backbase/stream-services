@@ -10,6 +10,7 @@ import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.RegionBundle;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
+import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
 import com.backbase.stream.portfolio.model.ValuationsBundle;
 import com.backbase.stream.portfolio.model.WealthBundle;
@@ -84,6 +85,11 @@ public class PortfolioHttpTestUtil {
 
     public static List<Position> getPositions() throws Exception {
         return getObjectFromJsonFile("classpath:json/positions.json", new TypeReference<List<Position>>() {});
+    }
+
+    public static List<TransactionBundle> getTransactionBundles() throws Exception {
+        return getObjectFromJsonFile("classpath:json/transactions.json",
+                                     new TypeReference<List<TransactionBundle>>() {});
     }
 
     private static <T> T getObjectFromJsonFile(String fileName, Class<T> type) throws Exception {

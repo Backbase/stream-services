@@ -1,12 +1,14 @@
 package com.backbase.stream.portfolio.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
+import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
 import com.backbase.stream.portfolio.model.ValuationsBundle;
 import com.backbase.stream.portfolio.service.PortfolioIngestionService;
@@ -32,7 +34,7 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
     public Flux<AllocationBundle> ingestPortfolioAllocationBundles(Flux<AllocationBundle> allocationBundle) {
         return allocationBundle.flatMap(this::upsertAllocations, portfolioSagaProperties.getTaskExecutors())
                 .doOnNext(actual -> log.info("Finished Ingestion of portfolio allocations, portfolioCode: {}",
-                        actual.getPortfolioCode()));
+                                             actual.getPortfolioCode()));
     }
 
     private Mono<AllocationBundle> upsertAllocations(AllocationBundle allocationBundle) {
@@ -52,7 +54,7 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
     public Flux<ValuationsBundle> ingestValuationsBundles(Flux<ValuationsBundle> valuationsBundles) {
         return valuationsBundles.flatMap(this::upsertValuationsBundle, portfolioSagaProperties.getTaskExecutors())
                 .doOnNext(actual -> log.info("Finished Ingestion of Valuations Bundle, portfolioCode: {}",
-                        actual.getPortfolioCode()));
+                                             actual.getPortfolioCode()));
     }
 
     private Mono<ValuationsBundle> upsertValuationsBundle(ValuationsBundle valuationsBundle) {
@@ -65,7 +67,7 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
     public Flux<SubPortfolioBundle> ingestWealthSubPortfolios(Flux<SubPortfolioBundle> subPortfolioBundles) {
         return subPortfolioBundles.flatMap(this::upsertSubPortfolios, portfolioSagaProperties.getTaskExecutors())
                 .doOnNext(actual -> log.info("Finished Ingestion of subPortfolio, portfolioCode: {}",
-                        actual.getPortfolioCode()));
+                                             actual.getPortfolioCode()));
     }
 
     private Mono<SubPortfolioBundle> upsertSubPortfolios(SubPortfolioBundle subPortfolioBundle) {
@@ -78,11 +80,11 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
     public Flux<TransactionCategory> ingestTransactionCategories(Flux<TransactionCategory> transactionCategories) {
         return transactionCategories.map(List::of)
                 .flatMap(portfolioIntegrationService::upsertTransactionCategories,
-                        portfolioSagaProperties.getTaskExecutors())
+                         portfolioSagaProperties.getTaskExecutors())
                 .flatMapIterable(i -> i)
                 .doOnNext(actual -> log.info("Finished Ingestion of Transaction Category, key: {}", actual.getKey()));
     }
-    
+
     @Override
     public Flux<HierarchyBundle> ingestHierarchyBundles(Flux<HierarchyBundle> hierarchyBundles) {
         return hierarchyBundles.flatMap(this::upsertHierarchyBundle, portfolioSagaProperties.getTaskExecutors())
@@ -95,7 +97,7 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
                 .upsertHierarchies(hierarchyBundle.getHierarchies(), hierarchyBundle.getPortfolioCode())
                 .map(m -> hierarchyBundle);
     }
-    
+
     @Override
     public Flux<Position> ingestPositions(Flux<Position> positions) {
         return positions.flatMap(this::upsertPosition, portfolioSagaProperties.getTaskExecutors())
@@ -106,6 +108,24 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
 
     private Mono<Position> upsertPosition(Position position) {
         return portfolioIntegrationService.upsertPosition(position).map(m -> position);
+    }
+
+    @Override
+    public Flux<TransactionBundle> ingestTransactionBundles(Flux<TransactionBundle> transactionBundles) {
+        return transactionBundles.flatMap(this::upsertTransactionBundle, portfolioSagaProperties.getTaskExecutors())
+                .doOnNext(actual -> log.info("Finished Ingestion of transactions, portfolioCode: {}",
+                                             actual.getPortfolioCode()));
+    }
+
+    private Mono<TransactionBundle> upsertTransactionBundle(TransactionBundle transactionBundle) {
+        String portfolioCode = transactionBundle.getPortfolioCode();
+
+        return Optional.ofNullable(transactionBundle.getTransactions())
+                .map(Flux::fromIterable)
+                .orElseGet(Flux::empty)
+                .flatMap(t -> portfolioIntegrationService
+                        .upsertPositionTransactions(t.getTransactions(), portfolioCode, t.getPositionId()))
+                .then(Mono.just(transactionBundle));
     }
 
 }

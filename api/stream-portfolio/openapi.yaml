@@ -325,6 +325,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /portfolios/transactions/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Transactions Batch
+      operationId: createTransactionsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TransactionBundle'
+      responses:
+        200:
+          description: The created Hierarchies and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -451,6 +479,16 @@ components:
           type: array
           items:
             $ref: schemas/v1/position-transaction.yaml
+    TransactionBundle:
+      type: object
+      properties:
+        portfolioCode:
+          type: string
+          description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionTransactionBundle'
     WealthBundle:
       type: object
       properties:
@@ -564,6 +602,14 @@ components:
           type: array
           items:
             $ref: schemas/v1/position.yaml
+    WealthPortfolioTransactionBundle:
+      type: object
+      properties:
+        batchPortfolioTransactions:
+          description: Transactions and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionBundle'
     Error:
       type: object
       properties:

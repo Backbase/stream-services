@@ -6,6 +6,7 @@ import com.backbase.stream.portfolio.model.WealthInstrumentBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioAllocationsBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioPositionHierarchyBundle;
+import com.backbase.stream.portfolio.model.WealthPortfolioTransactionBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioValuationsBundle;
 import com.backbase.stream.portfolio.model.WealthPositionsBundle;
 import com.backbase.stream.portfolio.model.WealthRegionsBundle;
@@ -73,6 +74,10 @@ public class PortfolioTestUtil {
 
     public static WealthPositionsBundle getWealthPositionsBundle() throws Exception {
         return getObjectFromJsonFile("classpath:json/positions.json", WealthPositionsBundle.class);
+    }
+
+    public static WealthPortfolioTransactionBundle getWealthPortfolioTransactionBundle() throws Exception {
+        return getObjectFromJsonFile("classpath:json/transactions.json", WealthPortfolioTransactionBundle.class);
     }
 
     private static <T> T getObjectFromJsonFile(String fileName, Class<T> type) throws Exception {

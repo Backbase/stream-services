@@ -5,6 +5,7 @@ import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
+import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
 import com.backbase.stream.portfolio.model.ValuationsBundle;
 import reactor.core.publisher.Flux;
@@ -72,4 +73,12 @@ public interface PortfolioIngestionService {
      * @return The Flux of the ingested {@code Position}.
      */
     Flux<Position> ingestPositions(Flux<Position> positions);
+    
+    /**
+     * Ingest TransactionBundles.
+     * 
+     * @param transactionBundles The Flux of {@code TransactionBundle} to be ingested.
+     * @return The Flux of the ingested {@code TransactionBundle}.
+     */
+    Flux<TransactionBundle> ingestTransactionBundles(Flux<TransactionBundle> transactionBundles);
 }

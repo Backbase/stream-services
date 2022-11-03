@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - Add `POST /portfolios/instruments/batch` endpoint to portfolio
 - Add `POST /portfolios/hierarchies/batch` endpoint to portfolio
 - Add `POST /portfolios/positions/batch` endpoint to portfolio
+- Add `POST /portfolios/transactions/batch` endpoint to portfolio
 
 ## [3.6.0](https://github.com/Backbase/stream-services/compare/3.5.0...3.6.0)
 ### Added
