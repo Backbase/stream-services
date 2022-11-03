@@ -53,7 +53,7 @@ public class HeadersForwardingClientFilter implements ExchangeFilterFunction {
                 log.debug("Adding additional headers: {} from Reactive subscriber context to Request: {}", headers,
                     additionalHeadersRequest.url());
                 return ClientRequest.from(additionalHeadersRequest)
-                    .headers(httpHeaders -> httpHeaders.addAll(headers))
+                    .headers(httpHeaders -> httpHeaders.putAll(headers))
                     .build();
             })
             .orElse(additionalHeadersRequest);

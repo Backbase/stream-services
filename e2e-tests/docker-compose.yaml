@@ -23,8 +23,8 @@ x-database-variables: &database-variables
   spring.liquibase.enabled: true
   spring.datasource.username: root
   spring.datasource.password: root
-  spring.datasource.driver-class-name: com.mysql.cj.jdbc.Driver
   spring.datasource.url: jdbc:mysql://mysql:3306?useSSL=false&allowPublicKeyRetrieval=true&cacheServerConfiguration=true
+  spring.datasource.driver-class-name: com.mysql.cj.jdbc.Driver
   spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
   backbase.multi-tenancy.datasource.strategy: SWITCH_CATALOG
 
@@ -57,7 +57,7 @@ services:
     ports:
       - "8761:8080"
     volumes:
-      - ./scripts/HealthCheck.java:/tmp/HealthCheck.java
+      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
       <<: *healthcheck-defaults
       test: [ "CMD", "java", "/tmp/HealthCheck.java" ]
@@ -74,7 +74,7 @@ services:
       BACKBASE_OIDCTOKENCONVERTER_WHITELISTEDDOMAINS_0_ISSUERHOST: localhost
       BACKBASE_MULTITENANCY_TENANTFILTER_SHOULDNOTFILTERPATHS: /oauth/token,/actuator/**
     volumes:
-      - ./scripts/HealthCheck.java:/tmp/HealthCheck.java
+      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
       <<: *healthcheck-defaults
       test: [ "CMD", "java", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/token-converter", "<status>UP</status>" ]
@@ -99,11 +99,15 @@ services:
       KEYCLOAK_CONNECTIONSJPA_QUARKUS_INITIALIZEEMPTY: "true"
       KEYCLOAK_CONNECTIONSJPA_QUARKUS_MIGRATIONSTRATEGY: "update"
       KEYCLOAK_BACKBASE_OIDC_TOKEN_CONVERTER_URL: "http://token-converter:8080"
+      keycloak.backbase.providers.tenant-resolver.tenants.t1.name: "Backbase"
+      keycloak.backbase.providers.tenant-resolver.tenants.t1.realms: "backbase"
+      keycloak.backbase.providers.tenant-resolver.tenants.t2.name: "Moustache"
+      keycloak.backbase.providers.tenant-resolver.tenants.t2.realms: "moustache"
       keycloak.hostname.default.frontendUrl: "http://localhost:8180/auth"
-      JAVA_TOOL_OPTIONS: "-Dkeycloak.migration.strategy=IGNORE_EXISTING -Dkeycloak.migration.action=import -Dkeycloak.profile.feature.upload_scripts=enabled -Dquarkus.log.category.'\"com.backbase\"'.level=DEBUG"
+      JAVA_TOOL_OPTIONS: "-Dkeycloak.migration.strategy=IGNORE_EXISTING -Dkeycloak.migration.action=import -Dkeycloak.profile.feature.upload_scripts=enabled -Dquarkus.log.category.'com.backbase'.level=DEBUG"
     volumes:
       - ./identity:/tmp/keycloak-export
-      - ./scripts/HealthCheck.java:/tmp/HealthCheck.java
+      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
       <<: *healthcheck-defaults
       test: [ "CMD", "java", "/tmp/HealthCheck.java", "http://localhost:8080/auth/realms/backbase/.well-known/openid-configuration", "backbase" ]
@@ -123,7 +127,7 @@ services:
       backbase.multi-tenancy.tenants[0].catalog: t1_access_control
       backbase.multi-tenancy.tenants[1].catalog: t2_access_control
     volumes:
-      - ./scripts/HealthCheck.java:/tmp/HealthCheck.java
+      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
       <<: *healthcheck-defaults
       test: [ "CMD", "java", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/access-control", "<status>UP</status>" ]
@@ -148,7 +152,7 @@ services:
       BACKBASE_USERS_IDENTITYINTEGRATIONENABLED: true
       BACKBASE_USERS_SYNCPRIMARYTOIDENTITYENABLED: true
     volumes:
-      - ./scripts/HealthCheck.java:/tmp/HealthCheck.java
+      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
       <<: *healthcheck-defaults
       test: [ "CMD", "java", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/user-manager", "<status>UP</status>" ]
@@ -171,7 +175,7 @@ services:
       IDENTITY_REALMCONFIGURATION_FALLBACKOPTIONS_ENABLEUSER: true
       IDENTITY_REALMCONFIGURATION_FALLBACKOPTIONS_USETEMPORARYPASSWORD: true
     volumes:
-      - ./scripts/HealthCheck.java:/tmp/HealthCheck.java
+      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
       <<: *healthcheck-defaults
       test: [ "CMD", "java", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/identity-integration-service", "<status>UP</status>" ]
@@ -183,8 +187,9 @@ services:
     image: repo.backbase.com/backbase-stream-images/legal-entity-bootstrap-task:${STREAM_VERSION}
     environment:
       <<: *common-variables
-      spring.profiles.include: "moustache-bank"
-      backbase.stream.client.additional-headers.x-tid: t1
+      spring.profiles.include: moustache-bank
+      bootstrap.legalEntity.realmName: moustache
+      backbase.stream.client.additional-headers.x-tid: t2
     depends_on:
       token-converter:
         condition: service_healthy
@@ -205,9 +210,9 @@ services:
     environment:
       <<: *common-variables
       bootstrap.enabled: true
-      backbase.stream.client.additional-headers.x-tid: t2
+      backbase.stream.client.additional-headers.x-tid: t1
     volumes:
-      - ./scripts/HealthCheck.java:/tmp/HealthCheck.java
+      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
       <<: *healthcheck-defaults
       test: [ "CMD", "java", "/tmp/HealthCheck.java", "http://localhost:8080/actuator/health" ]

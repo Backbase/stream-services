@@ -8,6 +8,10 @@ New class keeps ingestion modes separately for each main resource involved in Ba
 function groups, data groups and arrangements. Two preset modes have been created: BatchProductIngestionMode.UPSERT and 
 BatchProductIngestionMode.REPLACE (equivalents of previous UPDATE and REPLACE, respectively), but new ones can be 
 composed of any "sub modes" combination.
+## [3.10.1](https://github.com/Backbase/stream-services/compare/3.10.0...3.10.1)
+### Changed
+- Adjusting property `backbase.stream.client.headers-to-forward` to take precedence over `backbase.stream.client.additional-headers`.
+- Fixing Identity m10y configuration on e2e-tests with properly separated realms.
 
 ## [3.10.0](https://github.com/Backbase/stream-services/compare/3.9.3...3.10.0)
 ### Added
