@@ -54,6 +54,7 @@ import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.task.BatchProductGroupTask;
+import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.time.LocalDate;
@@ -343,7 +344,7 @@ class AccessGroupServiceTest {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
             new BatchProductGroup().serviceAgreement(new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
         );
-        batchProductGroupTask.setIngestionMode(BatchProductGroupTask.IngestionMode.UPDATE);
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
         baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"), Collections.emptyList());
@@ -410,7 +411,7 @@ class AccessGroupServiceTest {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
             new BatchProductGroup().serviceAgreement(new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
         );
-        batchProductGroupTask.setIngestionMode(BatchProductGroupTask.IngestionMode.UPDATE);
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
         baseProductGroupMap.put(
@@ -482,7 +483,7 @@ class AccessGroupServiceTest {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
             new BatchProductGroup().serviceAgreement(new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
         );
-        batchProductGroupTask.setIngestionMode(BatchProductGroupTask.IngestionMode.REPLACE);
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
         baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"), Collections.emptyList());
@@ -530,7 +531,7 @@ class AccessGroupServiceTest {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
             new BatchProductGroup().serviceAgreement(new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
         );
-        batchProductGroupTask.setIngestionMode(BatchProductGroupTask.IngestionMode.UPDATE);
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
         baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"), Collections.emptyList());
@@ -587,7 +588,7 @@ class AccessGroupServiceTest {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
             new BatchProductGroup().serviceAgreement(new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
         );
-        batchProductGroupTask.setIngestionMode(BatchProductGroupTask.IngestionMode.UPDATE);
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
         baseProductGroupMap.put(
