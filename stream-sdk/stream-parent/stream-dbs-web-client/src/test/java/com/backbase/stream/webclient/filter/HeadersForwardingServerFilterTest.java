@@ -1,12 +1,11 @@
 package com.backbase.stream.webclient.filter;
 
 import static java.util.Arrays.asList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +18,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class HeadersForwardingServerFilterTest {
@@ -47,45 +47,37 @@ class HeadersForwardingServerFilterTest {
     @Test
     void filterShouldForwardRequestHeaders() {
         String headerKeyToForward = "X-TID";
-        String headerValueToForward = "tenant1";
+        List<String> headerValueToForward = asList("tenant1");
         LinkedMultiValueMap<String, String> expectedForwardedHeaders = new LinkedMultiValueMap<>();
-        expectedForwardedHeaders.put(headerKeyToForward, asList(headerValueToForward));
-        Mono<Void> contextAssertionMono = buildContextAssertionMono("headers", expectedForwardedHeaders);
+        expectedForwardedHeaders.put(headerKeyToForward, headerValueToForward);
 
         when(dbsWebClientConfigurationProperties.getHeadersToForward()).thenReturn(asList(headerKeyToForward));
         when(serverWebExchange.getRequest()).thenReturn(serverHttpRequest);
         when(serverHttpRequest.getPath()).thenReturn(requestPath);
         when(serverHttpRequest.getHeaders()).thenReturn(httpHeaders);
-        when(httpHeaders.get(headerKeyToForward)).thenReturn(asList(headerValueToForward));
-        when(webFilterChain.filter(eq(serverWebExchange))).thenReturn(contextAssertionMono);
+        when(webFilterChain.filter(eq(serverWebExchange))).thenReturn(Mono.empty());
 
-        Mono<Void> result = subject.filter(serverWebExchange, webFilterChain);
-        result.block();
+        when(httpHeaders.get(headerKeyToForward)).thenReturn(headerValueToForward);
+
+        StepVerifier.create(subject.filter(serverWebExchange, webFilterChain))
+            .expectAccessibleContext().contains("headers", expectedForwardedHeaders)
+            .then()
+            .verifyComplete();
     }
 
     @Test
     void filterShouldNotForwardRequestHeaders() {
-        Mono<Void> contextAssertionMono = Mono.deferContextual(cv -> {
-            var actual = cv.getOrEmpty("headers");
-            assertTrue(actual.isEmpty(), "Headers context should be empty");
-            return Mono.empty().then();
-        });
-        when(dbsWebClientConfigurationProperties.getHeadersToForward()).thenReturn(asList("X-TID"));
+        String headerKeyToForward = "X-TID";
+
+        when(dbsWebClientConfigurationProperties.getHeadersToForward()).thenReturn(asList(headerKeyToForward));
         when(serverWebExchange.getRequest()).thenReturn(serverHttpRequest);
         when(serverHttpRequest.getPath()).thenReturn(requestPath);
         when(serverHttpRequest.getHeaders()).thenReturn(httpHeaders);
-        when(webFilterChain.filter(eq(serverWebExchange))).thenReturn(contextAssertionMono);
+        when(webFilterChain.filter(eq(serverWebExchange))).thenReturn(Mono.empty());
 
-        Mono<Void> result = subject.filter(serverWebExchange, webFilterChain);
-        result.block();
-    }
-
-    private Mono<Void> buildContextAssertionMono(String expectedKey, Object expectedValue) {
-        return Mono.deferContextual(cv -> {
-            Object actual = cv.get(expectedKey);
-            assertEquals(expectedValue, actual,
-                String.format("For key '%s' the expected value wasn't provided", expectedKey));
-            return Mono.empty().then();
-        });
+        StepVerifier.create(subject.filter(serverWebExchange, webFilterChain))
+            .expectAccessibleContext().matches(c -> c.getOrEmpty("headers").isEmpty())
+            .then()
+            .verifyComplete();
     }
 }

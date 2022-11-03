@@ -1,5 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+
+## [3.10.1](https://github.com/Backbase/stream-services/compare/3.10.0...3.10.1)
+### Changed
+- Adjusting property `backbase.stream.client.headers-to-forward` to take precedence over `backbase.stream.client.additional-headers`.
+- Fixing Identity m10y configuration on e2e-tests with properly separated realms.
+
 ## [3.10.0](https://github.com/Backbase/stream-services/compare/3.9.3...3.10.0)
 ### Added
 - Zip layout to composition services. This allows the addition of external jars to the classpath using `loader.path` property.
