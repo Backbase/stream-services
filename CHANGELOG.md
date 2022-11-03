@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [3.11.0](https://github.com/Backbase/stream-services/compare/3.10.0...3.11.0)
+## [3.11.0](https://github.com/Backbase/stream-services/compare/3.10.1...3.11.0)
 ### Changed
 - Replaced BatchProductGroupTask.IngestionMode with more flexible BatchProductIngestionMode class. 
 New class keeps ingestion modes separately for each main resource involved in BatchProductIngestionSaga processing: 
