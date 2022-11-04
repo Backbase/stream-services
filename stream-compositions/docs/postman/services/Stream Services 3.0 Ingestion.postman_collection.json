@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "a4f96cee-b4e9-487d-9755-21c7c5e80476",
+		"_postman_id": "92445a40-d3f7-471a-a671-e73d31211625",
 		"name": "Stream Services 3.0 Ingestion",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14432275"
 	},
 	"item": [
 		{
@@ -217,6 +218,49 @@
 								"service-api",
 								"v2",
 								"pull-ingestion"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ingest Payment Order Service (Push Mode)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = JSON.parse(responseBody);",
+									"/*postman.setEnvironmentVariable(\"Emp_User_Internal_ID\", response.legalEntity.users[0].user.internalId);",
+									"postman.setEnvironmentVariable(\"Emp_User_External_ID\", response.legalEntity.users[0].user.externalId);",
+									"postman.setEnvironmentVariable(\"Emp_MSA_Internal_ID\", response.legalEntity.masterServiceAgreement.internalId);*/"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"paymentOrders\": [\n        {\n            \"audit\": {\n                \"timestamp\": \"2022-11-04T10:00:00\",\n                \"user\": \"admin\"\n            },\n            \"id\": \"02d7c650-ec13-485c-b03c-b59465036023\",\n            \"bankReferenceId\": \"bankBranchCode1\",\n            \"internalUserId\": \"02d7c650-ec13-485c-b03c-b59465036023\",\n            \"originatorAccount\": {\n                \"arrangementId\": \"5266ef3f-105b-4483-882d-d58e4e7a1b57\",\n                \"externalArrangementId\": \"Sara Account\",\n                \"identification\": {\n                    \"identification\": \"NL67ABNA1070230618\",\n                    \"schemeName\": \"IBAN\"\n                },\n                \"additions\": {}\n            },\n            \"totalAmount\": {\n                \"amount\": \"1000.29\",\n                \"currencyCode\": \"EUR\"\n            },\n            \"requestedExecutionDate\": \"2022-11-08\",\n            \"paymentType\": \"Single\",\n            \"serviceAgreementId\": \"8a8080f3843e21ca01843e275bf00004\",\n            \"confirmationId\": \"123456\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{payment-order-composition-url}}/service-api/v2/ingest/push",
+							"host": [
+								"{{payment-order-composition-url}}"
+							],
+							"path": [
+								"service-api",
+								"v2",
+								"ingest",
+								"push"
 							]
 						}
 					},
