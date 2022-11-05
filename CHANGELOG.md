@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.11.0](https://github.com/Backbase/stream-services/compare/3.10.1...3.11.0)
+### Changed
+- Replaced BatchProductGroupTask.IngestionMode with more flexible BatchProductIngestionMode class. 
+New class keeps ingestion modes separately for each main resource involved in BatchProductIngestionSaga processing: 
+function groups, data groups and arrangements. Two preset modes have been created: BatchProductIngestionMode.UPSERT and 
+BatchProductIngestionMode.REPLACE (equivalents of previous UPDATE and REPLACE, respectively), but new ones can be 
+composed of any "sub modes" combination.
 ## [3.10.1](https://github.com/Backbase/stream-services/compare/3.10.0...3.10.1)
 ### Changed
 - Adjusting property `backbase.stream.client.headers-to-forward` to take precedence over `backbase.stream.client.additional-headers`.

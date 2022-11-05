@@ -11,13 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BatchProductGroupTask extends StreamTask {
 
-    private IngestionMode ingestionMode = IngestionMode.UPDATE;
-
-    private boolean deleteArrangementsInReplaceMode = true;
-
+    private BatchProductIngestionMode ingestionMode = BatchProductIngestionMode.UPSERT;
     private BatchProductGroup batchProductGroup;
 
-    public BatchProductGroupTask(String id, BatchProductGroup batchProductGroup, IngestionMode ingestionMode) {
+    public BatchProductGroupTask(String id, BatchProductGroup batchProductGroup, BatchProductIngestionMode ingestionMode) {
         this(id, batchProductGroup);
         this.ingestionMode = ingestionMode;
     }
@@ -31,15 +28,9 @@ public class BatchProductGroupTask extends StreamTask {
         return batchProductGroup;
     }
 
-
     public BatchProductGroupTask data(BatchProductGroup batchProductGroup) {
         this.batchProductGroup = batchProductGroup;
         return this;
-    }
-
-    public enum IngestionMode {
-        UPDATE,
-        REPLACE
     }
 
     @Override
