@@ -4,16 +4,13 @@ import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostReques
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.compositions.paymentorders.core.mapper.PaymentOrderMapper;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPullRequest;
+import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPushRequest;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestResponse;
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderIngestionService;
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderIntegrationService;
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderPostIngestionService;
 import com.backbase.stream.model.PaymentOrderIngestContext;
 import com.backbase.stream.worker.model.UnitOfWork;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,8 +35,17 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
                 .map(this::pullPaymentOrder)
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(this::handleSuccess)
-                .onErrorResume(e -> handleError(e))
+                .onErrorResume(this::handleError)
                 .map(paymentOrderIngestContext -> buildResponse(paymentOrderIngestContext, ingestPullRequest));
+    }
+
+    @Override
+    public Mono<PaymentOrderIngestResponse> ingestPush(PaymentOrderIngestPushRequest ingestPushRequest) {
+        return Mono.just(Flux.fromIterable(ingestPushRequest.getPaymentOrders()))
+                .flatMap(this::sendToDbs)
+                .doOnSuccess(this::handleSuccess)
+                .onErrorResume(this::handleError)
+                .map(paymentOrderIngestContext -> buildResponse(paymentOrderIngestContext, ingestPushRequest));
     }
 
     private Mono<PaymentOrderIngestPullRequest> buildIntegrationRequest(PaymentOrderIngestPullRequest paymentOrderIngestPullRequest) {
@@ -71,6 +77,14 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
         return PaymentOrderIngestResponse.builder()
                 .paymentOrderIngestContext(paymentOrderIngestContext)
                 .memberNumber(ingestPullRequest.getMemberNumber())
+                .build();
+    }
+
+    private PaymentOrderIngestResponse buildResponse(PaymentOrderIngestContext paymentOrderIngestContext,
+                                                     PaymentOrderIngestPushRequest ingestPushRequest) {
+        return PaymentOrderIngestResponse.builder()
+                .paymentOrderIngestContext(paymentOrderIngestContext)
+                .memberNumber(ingestPushRequest.getMemberNumber())
                 .build();
     }
 

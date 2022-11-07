@@ -40,6 +40,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InternalServerError'
+  /service-api/v2/ingest/push:
+    post:
+      tags:
+        - PaymentOrderComposition
+      summary: Ingests payment order (in push mode).
+      description: Ingests payment order (in push mode).
+      operationId: pushIngestPaymentOrder
+      requestBody:
+        description: Push Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentOrderPushIngestionRequest'
+      responses:
+        "201":
+          description: payment order ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentOrderIngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
 
 components:
   schemas:
@@ -82,6 +114,14 @@ components:
           type: object
           additionalProperties:
             type: string
+
+    PaymentOrderPushIngestionRequest:
+      type: object
+      properties:
+        paymentOrders:
+          type: array
+          items:
+            $ref: '../../../target/yaml/payment/payment-order-service-api-v2.8.0.yaml#/components/schemas/PaymentOrderPostRequest'
 
     PaymentOrderIngestionResponse:
       type: object
