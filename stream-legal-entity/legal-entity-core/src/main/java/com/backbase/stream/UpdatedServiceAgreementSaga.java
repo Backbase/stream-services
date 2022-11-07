@@ -19,6 +19,7 @@ import com.backbase.stream.mapper.ProductGroupMapper;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
 import com.backbase.stream.product.service.ArrangementService;
 import com.backbase.stream.product.task.BatchProductGroupTask;
+import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.worker.StreamTaskExecutor;
@@ -289,7 +290,7 @@ public class UpdatedServiceAgreementSaga implements StreamTaskExecutor<UpdatedSe
             ));
         log.trace("Permissions {}", request);
         BatchProductGroupTask bpgTask = new BatchProductGroupTask(BATCH_PRODUCT_GROUP_ID + System.currentTimeMillis(),
-            new BatchProductGroup().serviceAgreement(sa), BatchProductGroupTask.IngestionMode.UPDATE);
+            new BatchProductGroup().serviceAgreement(sa), BatchProductIngestionMode.UPSERT);
         return accessGroupService.assignPermissionsBatch(bpgTask, request)
             .onErrorResume(e -> e instanceof StreamTaskException || e instanceof WebClientResponseException, e -> {
                 bpgTask.setState(FAILED);
