@@ -76,6 +76,8 @@ public interface PortfolioMapper {
     @Mapping(target = "subPortfolioCode", source = "subPortfolioId")
     @Mapping(target = ".", source = "position")
     PositionsPostRequest mapPosition(String portfolioId, String subPortfolioId, Position position);
+    
+    PositionsPostRequest mapPostPosition(Position position);
 
     PositionsPutRequest mapPutPosition(Position position);
 

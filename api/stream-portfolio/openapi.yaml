@@ -297,6 +297,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /portfolios/positions/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Positions Batch
+      operationId: createPositionsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: schemas/v1/position.yaml
+      responses:
+        200:
+          description: The created Positions and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: schemas/v1/position.yaml
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -413,6 +441,16 @@ components:
           type: array
           items:
             $ref: schemas/v1/portfolio-positions-hierarchy.yaml
+    PositionTransactionBundle:
+      type: object
+      properties:
+        positionId:
+          type: string
+          description: Unique identificator for a position.
+        transactions:
+          type: array
+          items:
+            $ref: schemas/v1/position-transaction.yaml
     WealthBundle:
       type: object
       properties:
@@ -518,6 +556,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/HierarchyBundle'
+    WealthPositionsBundle:
+      type: object
+      properties:
+        positions:
+          description: Poitions and reference objects
+          type: array
+          items:
+            $ref: schemas/v1/position.yaml
     Error:
       type: object
       properties:

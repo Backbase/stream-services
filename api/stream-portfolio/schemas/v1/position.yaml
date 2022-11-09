@@ -10,6 +10,12 @@ properties:
   instrumentId:
     type: string
     description: Instrument external id.
+  portfolioCode:
+    type: string
+    description: Portfolio code.
+  subPortfolioCode:
+    type: string
+    description: SubPortfolio code.
   absolutePerformance:
     $ref: money.yaml
     description: Absolute price change for an instrument during a period of time.

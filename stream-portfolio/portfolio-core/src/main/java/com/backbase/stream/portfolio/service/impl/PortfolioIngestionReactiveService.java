@@ -5,6 +5,7 @@ import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
+import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
 import com.backbase.stream.portfolio.model.ValuationsBundle;
@@ -93,6 +94,18 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
         return portfolioIntegrationService
                 .upsertHierarchies(hierarchyBundle.getHierarchies(), hierarchyBundle.getPortfolioCode())
                 .map(m -> hierarchyBundle);
+    }
+    
+    @Override
+    public Flux<Position> ingestPositions(Flux<Position> positions) {
+        return positions.flatMap(this::upsertPosition, portfolioSagaProperties.getTaskExecutors())
+                .doOnNext(actual -> log.info("Finished Ingestion of position, externalId: {}, portfolioCode: {}",
+                                             actual.getExternalId(),
+                                             actual.getPortfolioCode()));
+    }
+
+    private Mono<Position> upsertPosition(Position position) {
+        return portfolioIntegrationService.upsertPosition(position).map(m -> position);
     }
 
 }
