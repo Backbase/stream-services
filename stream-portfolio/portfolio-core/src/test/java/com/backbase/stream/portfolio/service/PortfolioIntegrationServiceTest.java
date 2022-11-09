@@ -1,11 +1,13 @@
 package com.backbase.stream.portfolio.service;
 
+import static com.backbase.stream.portfolio.util.PortfolioTestUtil.EUR_CURRENCY_CODE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -60,8 +62,11 @@ import com.backbase.stream.portfolio.model.PortfolioValuation;
 import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.PositionBundle;
 import com.backbase.stream.portfolio.model.PositionTransaction;
+import com.backbase.stream.portfolio.model.PositionTransactionBundle;
 import com.backbase.stream.portfolio.model.SubPortfolio;
+import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
+import com.backbase.stream.portfolio.model.WealthPortfolioTransactionBundle;
 import com.backbase.stream.portfolio.model.WealthPositionsBundle;
 import com.backbase.stream.portfolio.util.PortfolioTestUtil;
 import reactor.core.publisher.Flux;
@@ -168,7 +173,6 @@ class PortfolioIntegrationServiceTest {
         String instrumentId = "ID78344628";
         String portfolioId = "IZ23452FD234";
         String subPortfolioId = "IX4389HJ49307";
-        String eurCurrencyCode = "EUR";
 
         WealthPositionsBundle wealthPositionsBundle = PortfolioTestUtil.getWealthPositionsBundle();
         List<Position> positions = wealthPositionsBundle.getPositions();
@@ -184,18 +188,18 @@ class PortfolioIntegrationServiceTest {
                 .subPortfolioCode(subPortfolioId)
                 .externalId(positionId)
                 .instrumentId(instrumentId)
-                .absolutePerformance(new Money().amount(BigDecimal.valueOf(44.12)).currencyCode(eurCurrencyCode))
+                .absolutePerformance(new Money().amount(BigDecimal.valueOf(44.12)).currencyCode(EUR_CURRENCY_CODE))
                 .relativePerformance(BigDecimal.valueOf(1.2))
-                .purchasePrice(new Money().amount(BigDecimal.valueOf(124.18)).currencyCode(eurCurrencyCode))
+                .purchasePrice(new Money().amount(BigDecimal.valueOf(124.18)).currencyCode(EUR_CURRENCY_CODE))
                 .unrealizedPLPct(BigDecimal.valueOf(4.14))
-                .unrealizedPL(new Money().amount(BigDecimal.valueOf(34.12)).currencyCode(eurCurrencyCode))
+                .unrealizedPL(new Money().amount(BigDecimal.valueOf(34.12)).currencyCode(EUR_CURRENCY_CODE))
                 .todayPLPct(BigDecimal.valueOf(1.14))
-                .todayPL(new Money().amount(BigDecimal.valueOf(14.12)).currencyCode(eurCurrencyCode))
-                .accruedInterest(new Money().amount(BigDecimal.valueOf(12.45)).currencyCode(eurCurrencyCode))
+                .todayPL(new Money().amount(BigDecimal.valueOf(14.12)).currencyCode(EUR_CURRENCY_CODE))
+                .accruedInterest(new Money().amount(BigDecimal.valueOf(12.45)).currencyCode(EUR_CURRENCY_CODE))
                 .quantity(BigDecimal.valueOf(187))
-                .valuation(new Money().amount(BigDecimal.valueOf(132.11)).currencyCode(eurCurrencyCode))
-                .costPrice(new Money().amount(BigDecimal.valueOf(145.11)).currencyCode(eurCurrencyCode))
-                .costExchangeRate(new Money().amount(BigDecimal.valueOf(1.23)).currencyCode(eurCurrencyCode))
+                .valuation(new Money().amount(BigDecimal.valueOf(132.11)).currencyCode(EUR_CURRENCY_CODE))
+                .costPrice(new Money().amount(BigDecimal.valueOf(145.11)).currencyCode(EUR_CURRENCY_CODE))
+                .costExchangeRate(new Money().amount(BigDecimal.valueOf(1.23)).currencyCode(EUR_CURRENCY_CODE))
                 .percentAssetClass(BigDecimal.valueOf(187))
                 .percentPortfolio(BigDecimal.valueOf(187))
                 .percentParent(BigDecimal.valueOf(187))
@@ -211,7 +215,7 @@ class PortfolioIntegrationServiceTest {
         String instrumentId = "ID78344628";
         String portfolioId = "IZ23452FD234";
         String subPortfolioId = "IX4389HJ49307";
-        String eurCurrencyCode = "EUR";
+        String EUR_CURRENCY_CODE = "EUR";
 
         WealthPositionsBundle wealthPositionsBundle = PortfolioTestUtil.getWealthPositionsBundle();
         List<Position> positions = wealthPositionsBundle.getPositions();
@@ -228,18 +232,18 @@ class PortfolioIntegrationServiceTest {
                 .subPortfolioCode(subPortfolioId)
                 .externalId(positionId)
                 .instrumentId(instrumentId)
-                .absolutePerformance(new Money().amount(BigDecimal.valueOf(44.12)).currencyCode(eurCurrencyCode))
+                .absolutePerformance(new Money().amount(BigDecimal.valueOf(44.12)).currencyCode(EUR_CURRENCY_CODE))
                 .relativePerformance(BigDecimal.valueOf(1.2))
-                .purchasePrice(new Money().amount(BigDecimal.valueOf(124.18)).currencyCode(eurCurrencyCode))
+                .purchasePrice(new Money().amount(BigDecimal.valueOf(124.18)).currencyCode(EUR_CURRENCY_CODE))
                 .unrealizedPLPct(BigDecimal.valueOf(4.14))
-                .unrealizedPL(new Money().amount(BigDecimal.valueOf(34.12)).currencyCode(eurCurrencyCode))
+                .unrealizedPL(new Money().amount(BigDecimal.valueOf(34.12)).currencyCode(EUR_CURRENCY_CODE))
                 .todayPLPct(BigDecimal.valueOf(1.14))
-                .todayPL(new Money().amount(BigDecimal.valueOf(14.12)).currencyCode(eurCurrencyCode))
-                .accruedInterest(new Money().amount(BigDecimal.valueOf(12.45)).currencyCode(eurCurrencyCode))
+                .todayPL(new Money().amount(BigDecimal.valueOf(14.12)).currencyCode(EUR_CURRENCY_CODE))
+                .accruedInterest(new Money().amount(BigDecimal.valueOf(12.45)).currencyCode(EUR_CURRENCY_CODE))
                 .quantity(BigDecimal.valueOf(187))
-                .valuation(new Money().amount(BigDecimal.valueOf(132.11)).currencyCode(eurCurrencyCode))
-                .costPrice(new Money().amount(BigDecimal.valueOf(145.11)).currencyCode(eurCurrencyCode))
-                .costExchangeRate(new Money().amount(BigDecimal.valueOf(1.23)).currencyCode(eurCurrencyCode))
+                .valuation(new Money().amount(BigDecimal.valueOf(132.11)).currencyCode(EUR_CURRENCY_CODE))
+                .costPrice(new Money().amount(BigDecimal.valueOf(145.11)).currencyCode(EUR_CURRENCY_CODE))
+                .costExchangeRate(new Money().amount(BigDecimal.valueOf(1.23)).currencyCode(EUR_CURRENCY_CODE))
                 .percentAssetClass(BigDecimal.valueOf(187))
                 .percentPortfolio(BigDecimal.valueOf(187))
                 .percentParent(BigDecimal.valueOf(187))
@@ -252,7 +256,7 @@ class PortfolioIntegrationServiceTest {
     @Test
     void shouldUpdatePosition_Position() throws Exception {
         String positionId = "ID543894783";
-        String eurCurrencyCode = "EUR";
+        String EUR_CURRENCY_CODE = "EUR";
 
         WealthPositionsBundle wealthPositionsBundle = PortfolioTestUtil.getWealthPositionsBundle();
         List<Position> positions = wealthPositionsBundle.getPositions();
@@ -267,23 +271,78 @@ class PortfolioIntegrationServiceTest {
 
         verify(positionManagementApi).getPositionById(positionId);
         verify(positionManagementApi).putPosition(positionId, new PositionsPutRequest()
-                .absolutePerformance(new Money().amount(BigDecimal.valueOf(44.12)).currencyCode(eurCurrencyCode))
+                .absolutePerformance(new Money().amount(BigDecimal.valueOf(44.12)).currencyCode(EUR_CURRENCY_CODE))
                 .relativePerformance(BigDecimal.valueOf(1.2))
-                .purchasePrice(new Money().amount(BigDecimal.valueOf(124.18)).currencyCode(eurCurrencyCode))
+                .purchasePrice(new Money().amount(BigDecimal.valueOf(124.18)).currencyCode(EUR_CURRENCY_CODE))
                 .unrealizedPLPct(BigDecimal.valueOf(4.14))
-                .unrealizedPL(new Money().amount(BigDecimal.valueOf(34.12)).currencyCode(eurCurrencyCode))
+                .unrealizedPL(new Money().amount(BigDecimal.valueOf(34.12)).currencyCode(EUR_CURRENCY_CODE))
                 .todayPLPct(BigDecimal.valueOf(1.14))
-                .todayPL(new Money().amount(BigDecimal.valueOf(14.12)).currencyCode(eurCurrencyCode))
-                .accruedInterest(new Money().amount(BigDecimal.valueOf(12.45)).currencyCode(eurCurrencyCode))
+                .todayPL(new Money().amount(BigDecimal.valueOf(14.12)).currencyCode(EUR_CURRENCY_CODE))
+                .accruedInterest(new Money().amount(BigDecimal.valueOf(12.45)).currencyCode(EUR_CURRENCY_CODE))
                 .quantity(BigDecimal.valueOf(187))
-                .valuation(new Money().amount(BigDecimal.valueOf(132.11)).currencyCode(eurCurrencyCode))
-                .costPrice(new Money().amount(BigDecimal.valueOf(145.11)).currencyCode(eurCurrencyCode))
-                .costExchangeRate(new Money().amount(BigDecimal.valueOf(1.23)).currencyCode(eurCurrencyCode))
+                .valuation(new Money().amount(BigDecimal.valueOf(132.11)).currencyCode(EUR_CURRENCY_CODE))
+                .costPrice(new Money().amount(BigDecimal.valueOf(145.11)).currencyCode(EUR_CURRENCY_CODE))
+                .costExchangeRate(new Money().amount(BigDecimal.valueOf(1.23)).currencyCode(EUR_CURRENCY_CODE))
                 .percentAssetClass(BigDecimal.valueOf(187))
                 .percentPortfolio(BigDecimal.valueOf(187))
                 .percentParent(BigDecimal.valueOf(187))
                 .positionType("Bond")
                 .additions(Map.of("someKey", "someValue")));
+    }
+
+    @Test
+    void shouldCreatePositionTransactions() throws Exception {
+        WealthPortfolioTransactionBundle wealthPortfolioTransactionBundle =
+                PortfolioTestUtil.getWealthPortfolioTransactionBundle();
+        List<TransactionBundle> transactionBundles = wealthPortfolioTransactionBundle.getBatchPortfolioTransactions();
+        TransactionBundle transactionBundle0 = transactionBundles.get(0);
+        String portfolioCode = transactionBundle0.getPortfolioCode();
+        List<PositionTransactionBundle> positionTransactionBundles = transactionBundle0.getTransactions();
+        PositionTransactionBundle positionTransactionBundle0 = positionTransactionBundles.get(0);
+        String positionId = positionTransactionBundle0.getPositionId();
+        List<PositionTransaction> transactions = positionTransactionBundle0.getTransactions();
+
+        when(transactionManagementApi.deletePositionTransactions(anyString())).thenReturn(Mono.empty());
+        when(transactionManagementApi.postPortfolioTransactions(anyString(),
+                any(PortfolioTransactionsPostRequest.class))).thenReturn(Mono.empty());
+
+        portfolioIntegrationService.upsertPositionTransactions(transactions, portfolioCode, positionId).block();
+
+        verify(transactionManagementApi).deletePositionTransactions(positionId);
+        verify(transactionManagementApi).postPortfolioTransactions(portfolioCode,
+                new PortfolioTransactionsPostRequest().transactions(List.of(new PortfolioTransactionsPostItem()
+                        .positionId(positionId)
+                        .transactions(List.of(new PortfolioPositionTransactionsPostItem()
+                                .transactionId("rerjt34-3-rket50-i34mfo5u40950")
+                                .transactionDate(OffsetDateTime.parse("2021-03-24T20:22Z"))
+                                .valueDate(OffsetDateTime.parse("2021-03-29T12:46Z"))
+                                .transactionCategory("Purchase")
+                                .exchange("NASDAQ")
+                                .orderType("Market Order")
+                                .counterpartyName("Executive Brokers")
+                                .counterpartyAccount("R3904N-R0328592-323-4")
+                                .quantity(BigDecimal.valueOf(55))
+                                .price(new Money().amount(BigDecimal.valueOf(129.22)).currencyCode(EUR_CURRENCY_CODE))
+                                .amount(new Money().amount(BigDecimal.valueOf(7107.1)).currencyCode(EUR_CURRENCY_CODE))
+                                .amountGross(
+                                        new Money().amount(BigDecimal.valueOf(7183.22)).currencyCode(EUR_CURRENCY_CODE))
+                                .fxRate(new Money().amount(BigDecimal.valueOf(1.22)).currencyCode(EUR_CURRENCY_CODE))
+                                .localTaxes(new Money().amount(BigDecimal.valueOf(32.04)).currencyCode(EUR_CURRENCY_CODE))
+                                .localFees(new Money().amount(BigDecimal.valueOf(7.03)).currencyCode(EUR_CURRENCY_CODE))
+                                .foreignTaxes(
+                                        new Money().amount(BigDecimal.valueOf(12.03)).currencyCode(EUR_CURRENCY_CODE))
+                                .foreignFees(
+                                        new Money().amount(BigDecimal.valueOf(25.02)).currencyCode(EUR_CURRENCY_CODE))
+                                .officialCode("APPL")
+                                .ISIN("US4930248325")
+                                .balanceAsset(
+                                        new Money().amount(BigDecimal.valueOf(25.02)).currencyCode(EUR_CURRENCY_CODE))
+                                .balanceAmount(
+                                        new Money().amount(BigDecimal.valueOf(25.02)).currencyCode(EUR_CURRENCY_CODE))
+                                .statusId("an5fke68fik54l")
+                                .statusName("Pending")
+                                .statusAbbr("O")
+                                .notes("notes"))))));
     }
 
     @Test

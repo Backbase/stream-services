@@ -27,6 +27,8 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PortfolioTestUtil {
+    public static final String EUR_CURRENCY_CODE = "EUR";
+
     public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
@@ -40,7 +42,7 @@ public class PortfolioTestUtil {
 
     public static WealthPortfolioAllocationsBundle getWealthPortfolioAllocationsBundle() throws Exception {
         return getObjectFromJsonFile("classpath:json/portfolio-allocations.json",
-                                     WealthPortfolioAllocationsBundle.class);
+                WealthPortfolioAllocationsBundle.class);
     }
 
     public static WealthAssetBundle getWealthAssetBundle() throws Exception {
@@ -61,7 +63,7 @@ public class PortfolioTestUtil {
 
     public static WealthTransactionCategoriesBundle getWealthTransactionCategoriesBundle() throws Exception {
         return getObjectFromJsonFile("classpath:json/transaction-categories.json",
-                                     WealthTransactionCategoriesBundle.class);
+                WealthTransactionCategoriesBundle.class);
     }
 
     public static WealthPortfolioValuationsBundle getWealthPortfolioValuationsBundle() throws Exception {
