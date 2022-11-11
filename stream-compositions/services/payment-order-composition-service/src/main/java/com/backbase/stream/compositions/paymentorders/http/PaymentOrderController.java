@@ -3,6 +3,7 @@ package com.backbase.stream.compositions.paymentorders.http;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 
+import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPushIngestionRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +42,15 @@ public class PaymentOrderController implements PaymentOrderCompositionApi {
         return paymentOrderPullIngestionRequest
                 .map(paymentOrderMapper::mapPullRequest)
                 .flatMap(paymentOrderIngestionService::ingestPull)
+                .map(this::mapIngestionToResponse);
+    }
+
+    @Override
+    public Mono<ResponseEntity<PaymentOrderIngestionResponse>> pushIngestPaymentOrder(
+            @Valid Mono<PaymentOrderPushIngestionRequest> paymentOrderPushIngestionRequest, ServerWebExchange exchange) {
+        return paymentOrderPushIngestionRequest
+                .map(paymentOrderMapper::mapPushRequest)
+                .flatMap(paymentOrderIngestionService::ingestPush)
                 .map(this::mapIngestionToResponse);
     }
 

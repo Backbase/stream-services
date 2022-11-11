@@ -4,8 +4,10 @@ import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostReques
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
 import com.backbase.dbs.paymentorder.api.service.v2.model.UpdateStatusPut;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPullIngestionRequest;
+import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPushIngestionRequest;
 import com.backbase.stream.compositions.paymentorder.integration.client.model.PullIngestionRequest;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPullRequest;
+import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPushRequest;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -36,4 +38,6 @@ public interface PaymentOrderMapper {
     PullIngestionRequest mapStreamToIntegration(PaymentOrderIngestPullRequest source);
 
     PaymentOrderIngestPullRequest mapPullRequest(PaymentOrderPullIngestionRequest source);
+
+    PaymentOrderIngestPushRequest mapPushRequest(PaymentOrderPushIngestionRequest source);
 }
