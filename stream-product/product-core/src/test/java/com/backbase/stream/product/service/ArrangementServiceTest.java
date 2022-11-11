@@ -91,13 +91,10 @@ public class ArrangementServiceTest {
         when(arrangementsApi.postArrangements(any()))
                 .thenReturn(Mono.error(webClientResponseException));
 
-        try {
-            arrangementService.createArrangement(request).block();
-            Assertions.fail("should have thrown an exception");
-        } catch (ArrangementCreationException e) {
-            Assertions.assertEquals("Failed to post arrangements", e.getMessage());
-            Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
-        }
+        ArrangementCreationException e = Assertions.assertThrows(ArrangementCreationException.class,
+                () -> arrangementService.createArrangement(request).block());
+        Assertions.assertEquals("Failed to post arrangements", e.getMessage());
+        Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
 
         verify(arrangementsApi).postArrangements(any());
     }
@@ -125,13 +122,10 @@ public class ArrangementServiceTest {
         when(arrangementsApi.putArrangements(any()))
                 .thenReturn(Mono.error(webClientResponseException));
 
-        try {
-            arrangementService.updateArrangement(request).block();
-            Assertions.fail("should have thrown an exception");
-        } catch (ArrangementUpdateException e) {
-            Assertions.assertEquals("Failed to update Arrangement: " + request.getExternalArrangementId(), e.getMessage());
-            Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
-        }
+        ArrangementUpdateException e = Assertions.assertThrows(ArrangementUpdateException.class,
+                () -> arrangementService.updateArrangement(request).block());
+        Assertions.assertEquals("Failed to update Arrangement: " + request.getExternalArrangementId(), e.getMessage());
+        Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
 
         verify(arrangementsApi).putArrangements(any());
     }
@@ -169,14 +163,12 @@ public class ArrangementServiceTest {
         when(arrangementsApi.postBatchUpsertArrangements(any()))
                 .thenReturn(Flux.just(accountBatchResponseItemExtended));
 
-        try {
-            arrangementService.upsertBatchArrangements(List.of(request)).blockFirst();
-        } catch (IllegalStateException e) {
-            String errorMessage = e.getMessage();
-            Assertions.assertTrue(errorMessage.startsWith("Batch arrangement update failed: 'resource_id'"));
-            Assertions.assertTrue(errorMessage.contains("message: Some error"));
-            Assertions.assertTrue(errorMessage.contains("message: Some other error"));
-        }
+        IllegalStateException e = Assertions.assertThrows(IllegalStateException.class,
+                () -> arrangementService.upsertBatchArrangements(List.of(request)).blockFirst());
+        String errorMessage = e.getMessage();
+        Assertions.assertTrue(errorMessage.startsWith("Batch arrangement update failed: 'resource_id'"));
+        Assertions.assertTrue(errorMessage.contains("message: Some error"));
+        Assertions.assertTrue(errorMessage.contains("message: Some other error"));
 
         verify(arrangementsApi).postBatchUpsertArrangements(any());
     }
@@ -189,13 +181,10 @@ public class ArrangementServiceTest {
         when(arrangementsApi.postBatchUpsertArrangements(any()))
                 .thenReturn(Flux.error(webClientResponseException));
 
-        try {
-            arrangementService.upsertBatchArrangements(List.of(request)).blockFirst();
-            Assertions.fail("should have thrown an exception");
-        } catch (ArrangementUpdateException e) {
-            Assertions.assertEquals("Batch arrangement update failed: " + List.of(request), e.getMessage());
-            Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
-        }
+        ArrangementUpdateException e = Assertions.assertThrows(ArrangementUpdateException.class,
+                () -> arrangementService.upsertBatchArrangements(List.of(request)).blockFirst());
+        Assertions.assertEquals("Batch arrangement update failed: " + List.of(request), e.getMessage());
+        Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
 
         verify(arrangementsApi).postBatchUpsertArrangements(any());
     }
@@ -370,11 +359,9 @@ public class ArrangementServiceTest {
         when(arrangementsApi.deleteExternalArrangementId(accountArrangementItem.getExternalArrangementId()))
                 .thenReturn(Mono.error(webClientResponseException));
 
-        try {
-            arrangementService.deleteArrangementByInternalId(arrangementInternalId).block();
-        } catch (WebClientResponseException e) {
-            Assertions.assertEquals("500 Some error", e.getMessage());
-        }
+        WebClientResponseException e = Assertions.assertThrows(WebClientResponseException.class,
+                () -> arrangementService.deleteArrangementByInternalId(arrangementInternalId).block());
+        Assertions.assertEquals("500 Some error", e.getMessage());
 
         verify(arrangementsApi, times(1)).getArrangementById(arrangementInternalId, false);
         verify(arrangementsApi, times(1)).deleteExternalArrangementId(anyString());
@@ -406,11 +393,9 @@ public class ArrangementServiceTest {
         when(arrangementsApi.postArrangementLegalEntities(arrangementExternalId, accountExternalLegalEntityIds))
                 .thenReturn(Mono.error(webClientResponseException));
 
-        try {
-        arrangementService.addLegalEntitiesForArrangement(arrangementExternalId, legalEntitiesExternalIds).block();
-        } catch (WebClientResponseException e) {
-            Assertions.assertEquals("500 Some error", e.getMessage());
-        }
+        WebClientResponseException e = Assertions.assertThrows(WebClientResponseException.class,
+                () -> arrangementService.addLegalEntitiesForArrangement(arrangementExternalId, legalEntitiesExternalIds).block());
+        Assertions.assertEquals("500 Some error", e.getMessage());
 
         verify(arrangementsApi).postArrangementLegalEntities(arrangementExternalId, accountExternalLegalEntityIds);
     }
@@ -470,11 +455,9 @@ public class ArrangementServiceTest {
                 }))
                 .thenReturn(Mono.error(webClientResponseException));
 
-        try {
-            arrangementService.removeLegalEntityFromArrangement(arrangementExternalId, legalEntityExternalIds).block();
-        } catch (WebClientResponseException e) {
-            Assertions.assertEquals("500 Some error", e.getMessage());
-        }
+        WebClientResponseException e = Assertions.assertThrows(WebClientResponseException.class,
+                () -> arrangementService.removeLegalEntityFromArrangement(arrangementExternalId, legalEntityExternalIds).block());
+        Assertions.assertEquals("500 Some error", e.getMessage());
 
         verify(arrangementsApi).getApiClient();
     }
