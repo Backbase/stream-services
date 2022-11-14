@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -27,6 +28,7 @@ import com.backbase.portfolio.api.service.integration.v1.model.PortfolioAllocati
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioBenchmarkPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioGetResponse;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionTransactionsPostItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionsHierarchyItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionsHierarchyPutRequest;
@@ -35,6 +37,7 @@ import com.backbase.portfolio.api.service.integration.v1.model.PortfolioTransact
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioValuationsItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioValuationsPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionGetResponse;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPutRequest;
@@ -66,6 +69,7 @@ import com.backbase.stream.portfolio.model.PositionTransactionBundle;
 import com.backbase.stream.portfolio.model.SubPortfolio;
 import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
+import com.backbase.stream.portfolio.model.WealthPortfolioBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioTransactionBundle;
 import com.backbase.stream.portfolio.model.WealthPositionsBundle;
 import com.backbase.stream.portfolio.util.PortfolioTestUtil;
@@ -77,7 +81,7 @@ class PortfolioIntegrationServiceTest {
 
     @SuppressWarnings("unused")
     @Spy
-    private PortfolioMapper portfolioMapper;
+    private PortfolioMapper portfolioMapper = Mappers.getMapper(PortfolioMapper.class);
 
     @Mock
     private PortfolioManagementApi portfolioManagementApi;
@@ -327,7 +331,8 @@ class PortfolioIntegrationServiceTest {
                                 .amountGross(
                                         new Money().amount(BigDecimal.valueOf(7183.22)).currencyCode(EUR_CURRENCY_CODE))
                                 .fxRate(new Money().amount(BigDecimal.valueOf(1.22)).currencyCode(EUR_CURRENCY_CODE))
-                                .localTaxes(new Money().amount(BigDecimal.valueOf(32.04)).currencyCode(EUR_CURRENCY_CODE))
+                                .localTaxes(
+                                        new Money().amount(BigDecimal.valueOf(32.04)).currencyCode(EUR_CURRENCY_CODE))
                                 .localFees(new Money().amount(BigDecimal.valueOf(7.03)).currencyCode(EUR_CURRENCY_CODE))
                                 .foreignTaxes(
                                         new Money().amount(BigDecimal.valueOf(12.03)).currencyCode(EUR_CURRENCY_CODE))
@@ -346,7 +351,7 @@ class PortfolioIntegrationServiceTest {
     }
 
     @Test
-    void shouldCreatePortfolio() {
+    void shouldCreatePortfolio_PortfolioBundle() {
 
         String benchmarkName = "benchmarkName";
         String portfolioId = "portfolioId";
@@ -399,6 +404,62 @@ class PortfolioIntegrationServiceTest {
         verify(portfolioValuationManagementApi).putPortfolioValuations(portfolioId, new PortfolioValuationsPutRequest()
                 .addValuationsItem(new PortfolioValuationsItem().valuePct(BigDecimal.ONE)));
 
+    }
+
+    @Test
+    void shouldCreatePortfolio_Portfolio() throws Exception {
+        WealthPortfolioBundle wealthPortfolioBundle = PortfolioTestUtil.getWealthPortfolioBundle();
+        List<Portfolio> portfolios = wealthPortfolioBundle.getPortfolios();
+        Portfolio portfolio0 = portfolios.get(0);
+
+        String portfolioCode = "ARRANGEMENT_SARA";
+        
+        when(portfolioManagementApi.getPortfolio(anyString())).thenReturn(Mono.empty());
+        when(portfolioManagementApi.postPortfolios(any(PortfoliosPostRequest.class))).thenReturn(Mono.empty());
+
+        portfolioIntegrationService.upsertPortfolio(portfolio0).block();
+
+        verify(portfolioManagementApi).getPortfolio(portfolioCode);
+        verify(portfolioManagementApi).postPortfolios(portfolioMapper.mapPortfolio(portfolio0));
+        verify(portfolioManagementApi, times(0)).putPortfolio(anyString(), any(PortfoliosPutRequest.class));
+    }
+    
+    @Test
+    void shouldCreatePortfolio_Portfolio_GetThrowsNotFound() throws Exception {
+        WealthPortfolioBundle wealthPortfolioBundle = PortfolioTestUtil.getWealthPortfolioBundle();
+        List<Portfolio> portfolios = wealthPortfolioBundle.getPortfolios();
+        Portfolio portfolio0 = portfolios.get(0);
+        
+        String portfolioCode = "ARRANGEMENT_SARA";
+        
+        when(portfolioManagementApi.getPortfolio(anyString())).thenThrow(WebClientResponseException
+                .create(HttpStatus.NOT_FOUND.value(), "Not Found", HttpHeaders.EMPTY, new byte[] {}, null));
+        when(portfolioManagementApi.postPortfolios(any(PortfoliosPostRequest.class))).thenReturn(Mono.empty());
+        
+        portfolioIntegrationService.upsertPortfolio(portfolio0).block();
+        
+        verify(portfolioManagementApi).getPortfolio(portfolioCode);
+        verify(portfolioManagementApi).postPortfolios(portfolioMapper.mapPortfolio(portfolio0));
+        verify(portfolioManagementApi, times(0)).putPortfolio(anyString(), any(PortfoliosPutRequest.class));
+    }
+    
+    @Test
+    void shouldUpdatePortfolio_Portfolio() throws Exception {
+        WealthPortfolioBundle wealthPortfolioBundle = PortfolioTestUtil.getWealthPortfolioBundle();
+        List<Portfolio> portfolios = wealthPortfolioBundle.getPortfolios();
+        Portfolio portfolio0 = portfolios.get(0);
+        
+        String portfolioCode = "ARRANGEMENT_SARA";
+        
+        when(portfolioManagementApi.getPortfolio(anyString())).thenReturn(Mono.just(new PortfolioGetResponse().code(portfolioCode)));
+        when(portfolioManagementApi.putPortfolio(anyString(), any(PortfoliosPutRequest.class))).thenReturn(Mono.empty());
+        
+        portfolioIntegrationService.upsertPortfolio(portfolio0).block();
+        
+        verify(portfolioManagementApi).getPortfolio(portfolioCode);
+        
+        verify(portfolioManagementApi).putPortfolio(portfolioCode, portfolioMapper.mapPutPortfolio(portfolio0));
+        verify(portfolioManagementApi, times(0)).postPortfolios(any(PortfoliosPostRequest.class));
     }
 
 }
