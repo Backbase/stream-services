@@ -41,7 +41,9 @@ import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPutRequ
 import com.backbase.portfolio.api.service.integration.v1.model.PositionGetResponse;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.SubPortfolioGetResponse;
 import com.backbase.portfolio.api.service.integration.v1.model.SubPortfoliosPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.SubPortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.TransactionCategoryPostRequest;
 import com.backbase.portfolio.integration.api.service.v1.AggregatePortfolioManagementApi;
 import com.backbase.portfolio.integration.api.service.v1.PortfolioBenchmarksManagementApi;
@@ -56,6 +58,7 @@ import com.backbase.portfolio.integration.api.service.v1.TransactionManagementAp
 import com.backbase.stream.portfolio.mapper.PortfolioMapper;
 import com.backbase.stream.portfolio.model.AggregatePortfolio;
 import com.backbase.stream.portfolio.model.Allocation;
+import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.PortfolioBenchmark;
 import com.backbase.stream.portfolio.model.PortfolioBundle;
@@ -67,11 +70,14 @@ import com.backbase.stream.portfolio.model.PositionBundle;
 import com.backbase.stream.portfolio.model.PositionTransaction;
 import com.backbase.stream.portfolio.model.PositionTransactionBundle;
 import com.backbase.stream.portfolio.model.SubPortfolio;
+import com.backbase.stream.portfolio.model.SubPortfolioBundle;
 import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
+import com.backbase.stream.portfolio.model.WealthPortfolioAllocationsBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioTransactionBundle;
 import com.backbase.stream.portfolio.model.WealthPositionsBundle;
+import com.backbase.stream.portfolio.model.WealthSubPortfolioBundle;
 import com.backbase.stream.portfolio.util.PortfolioTestUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -117,7 +123,7 @@ class PortfolioIntegrationServiceTest {
     private PortfolioIntegrationService portfolioIntegrationService;
 
     @Test
-    void shouldAgreateAggregatePortfolio() {
+    void shouldCreateAgreateAggregatePortfolio() {
         String arrangementId = "arrangementId";
         AggregatePortfolio aggregatePortfolios = new AggregatePortfolio().id(arrangementId);
 
@@ -413,7 +419,7 @@ class PortfolioIntegrationServiceTest {
         Portfolio portfolio0 = portfolios.get(0);
 
         String portfolioCode = "ARRANGEMENT_SARA";
-        
+
         when(portfolioManagementApi.getPortfolio(anyString())).thenReturn(Mono.empty());
         when(portfolioManagementApi.postPortfolios(any(PortfoliosPostRequest.class))).thenReturn(Mono.empty());
 
@@ -423,43 +429,118 @@ class PortfolioIntegrationServiceTest {
         verify(portfolioManagementApi).postPortfolios(portfolioMapper.mapPortfolio(portfolio0));
         verify(portfolioManagementApi, times(0)).putPortfolio(anyString(), any(PortfoliosPutRequest.class));
     }
-    
+
     @Test
     void shouldCreatePortfolio_Portfolio_GetThrowsNotFound() throws Exception {
         WealthPortfolioBundle wealthPortfolioBundle = PortfolioTestUtil.getWealthPortfolioBundle();
         List<Portfolio> portfolios = wealthPortfolioBundle.getPortfolios();
         Portfolio portfolio0 = portfolios.get(0);
-        
+
         String portfolioCode = "ARRANGEMENT_SARA";
-        
+
         when(portfolioManagementApi.getPortfolio(anyString())).thenThrow(WebClientResponseException
                 .create(HttpStatus.NOT_FOUND.value(), "Not Found", HttpHeaders.EMPTY, new byte[] {}, null));
         when(portfolioManagementApi.postPortfolios(any(PortfoliosPostRequest.class))).thenReturn(Mono.empty());
-        
+
         portfolioIntegrationService.upsertPortfolio(portfolio0).block();
-        
+
         verify(portfolioManagementApi).getPortfolio(portfolioCode);
         verify(portfolioManagementApi).postPortfolios(portfolioMapper.mapPortfolio(portfolio0));
         verify(portfolioManagementApi, times(0)).putPortfolio(anyString(), any(PortfoliosPutRequest.class));
     }
-    
+
     @Test
     void shouldUpdatePortfolio_Portfolio() throws Exception {
         WealthPortfolioBundle wealthPortfolioBundle = PortfolioTestUtil.getWealthPortfolioBundle();
         List<Portfolio> portfolios = wealthPortfolioBundle.getPortfolios();
         Portfolio portfolio0 = portfolios.get(0);
-        
+
         String portfolioCode = "ARRANGEMENT_SARA";
-        
-        when(portfolioManagementApi.getPortfolio(anyString())).thenReturn(Mono.just(new PortfolioGetResponse().code(portfolioCode)));
-        when(portfolioManagementApi.putPortfolio(anyString(), any(PortfoliosPutRequest.class))).thenReturn(Mono.empty());
-        
+
+        when(portfolioManagementApi.getPortfolio(anyString()))
+                .thenReturn(Mono.just(new PortfolioGetResponse().code(portfolioCode)));
+        when(portfolioManagementApi.putPortfolio(anyString(), any(PortfoliosPutRequest.class)))
+                .thenReturn(Mono.empty());
+
         portfolioIntegrationService.upsertPortfolio(portfolio0).block();
-        
+
         verify(portfolioManagementApi).getPortfolio(portfolioCode);
-        
+
         verify(portfolioManagementApi).putPortfolio(portfolioCode, portfolioMapper.mapPutPortfolio(portfolio0));
         verify(portfolioManagementApi, times(0)).postPortfolios(any(PortfoliosPostRequest.class));
     }
 
+    @Test
+    void shouldCreateAllocation() throws Exception {
+        WealthPortfolioAllocationsBundle wealthPortfolioAllocationsBundle =
+                PortfolioTestUtil.getWealthPortfolioAllocationsBundle();
+        List<AllocationBundle> batchPortfolioAllocations =
+                wealthPortfolioAllocationsBundle.getBatchPortfolioAllocations();
+        AllocationBundle allocationBundle0 = batchPortfolioAllocations.get(0);
+
+        when(portfolioManagementApi.putPortfolioAllocations(anyString(), any(PortfolioAllocationsPutRequest.class)))
+                .thenReturn(Mono.empty());
+
+        String portfolioCode = allocationBundle0.getPortfolioCode();
+        List<Allocation> allocations = allocationBundle0.getAllocations();
+
+        portfolioIntegrationService.upsertAllocations(allocations, portfolioCode).block();
+
+        verify(portfolioManagementApi).putPortfolioAllocations(portfolioCode,
+                new PortfolioAllocationsPutRequest().allocations(portfolioMapper.mapAllocations(allocations)));
+    }
+
+    @Test
+    void shouldCreateSubPortfolio() throws Exception {
+        WealthSubPortfolioBundle wealthSubPortfolioBundle = PortfolioTestUtil.getWealthSubPortfolioBundle();
+        List<SubPortfolioBundle> batchSubPortfolios = wealthSubPortfolioBundle.getBatchSubPortfolios();
+        SubPortfolioBundle subPortfolioBundle0 = batchSubPortfolios.get(0);
+
+        when(subPortfolioManagementApi.getSubPortfolio(anyString(), anyString())).thenReturn(Mono.empty());
+        when(subPortfolioManagementApi.postSubPortfolios(anyString(), any(SubPortfoliosPostRequest.class)))
+                .thenReturn(Mono.empty());
+
+        String portfolioCode0 = subPortfolioBundle0.getPortfolioCode();
+        List<SubPortfolio> subPortfolios = subPortfolioBundle0.getSubPortfolios();
+        SubPortfolio subPortfolio0 = subPortfolios.get(0);
+        SubPortfolio subPortfolio1 = subPortfolios.get(1);
+
+        portfolioIntegrationService.upsertSubPortfolios(subPortfolios, portfolioCode0).block();
+
+        verify(subPortfolioManagementApi).getSubPortfolio(portfolioCode0, subPortfolio0.getCode());
+        verify(subPortfolioManagementApi).getSubPortfolio(portfolioCode0, subPortfolio1.getCode());
+
+        verify(subPortfolioManagementApi).postSubPortfolios(portfolioCode0,
+                portfolioMapper.mapSubPortfolio(subPortfolio0));
+        verify(subPortfolioManagementApi).postSubPortfolios(portfolioCode0,
+                portfolioMapper.mapSubPortfolio(subPortfolio1));
+
+        verify(subPortfolioManagementApi, times(0)).putSubPortfolio(anyString(), anyString(),
+                any(SubPortfoliosPutRequest.class));
+    }
+
+    @Test
+    void shouldUpdateSubPortfolio() throws Exception {
+        WealthSubPortfolioBundle wealthSubPortfolioBundle = PortfolioTestUtil.getWealthSubPortfolioBundle();
+        List<SubPortfolioBundle> batchSubPortfolios = wealthSubPortfolioBundle.getBatchSubPortfolios();
+        SubPortfolioBundle subPortfolioBundle0 = batchSubPortfolios.get(0);
+        String portfolioCode0 = subPortfolioBundle0.getPortfolioCode();
+        List<SubPortfolio> subPortfolios = subPortfolioBundle0.getSubPortfolios();
+        SubPortfolio subPortfolio0 = subPortfolios.get(0);
+        String subPortfolioCode0 = subPortfolio0.getCode();
+
+        when(subPortfolioManagementApi.getSubPortfolio(portfolioCode0, subPortfolioCode0))
+                .thenReturn(Mono.just(new SubPortfolioGetResponse().code(subPortfolioCode0)));
+        when(subPortfolioManagementApi.putSubPortfolio(anyString(), anyString(), any(SubPortfoliosPutRequest.class)))
+                .thenReturn(Mono.empty());
+
+        portfolioIntegrationService.upsertSubPortfolios(List.of(subPortfolio0), portfolioCode0).block();
+
+        verify(subPortfolioManagementApi).getSubPortfolio(portfolioCode0, subPortfolio0.getCode());
+
+        verify(subPortfolioManagementApi).putSubPortfolio(portfolioCode0, subPortfolioCode0,
+                portfolioMapper.mapPutSubPortfolio(subPortfolio0));
+
+        verify(subPortfolioManagementApi, times(0)).postSubPortfolios(anyString(), any(SubPortfoliosPostRequest.class));
+    }
 }
