@@ -24,7 +24,7 @@ public final class ReactiveStreamHandler {
     private static final String FAILED = "failed";
 
     public static <T> Flux<T> getFluxStream(List<T> task) {
-        return Flux.fromStream(Optional.ofNullable(task).orElse(List.of()).stream());
+        return Flux.fromStream(Optional.ofNullable(task).orElseGet(List::of).stream());
     }
 
     @NotNull

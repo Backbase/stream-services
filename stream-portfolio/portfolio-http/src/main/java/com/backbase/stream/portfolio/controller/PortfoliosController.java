@@ -12,6 +12,7 @@ import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.RegionBundle;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
+import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
 import com.backbase.stream.portfolio.model.ValuationsBundle;
 import com.backbase.stream.portfolio.model.WealthBundle;
@@ -70,8 +71,8 @@ public class PortfoliosController implements PortfoliosApi {
     @Override
     public Mono<ResponseEntity<Flux<SubPortfolioBundle>>> createSubPortfioliosBatch(
             Flux<SubPortfolioBundle> subPortfolioBundle, ServerWebExchange exchange) {
-        return Mono.just(
-                ResponseEntity.ok(portfolioIngestionReactiveService.ingestWealthSubPortfolios(subPortfolioBundle)));
+        return Mono.just(ResponseEntity
+                .ok(portfolioIngestionReactiveService.ingestWealthSubPortfolios(subPortfolioBundle)));
     }
 
     @Override
@@ -83,8 +84,8 @@ public class PortfoliosController implements PortfoliosApi {
     @Override
     public Mono<ResponseEntity<Flux<TransactionCategory>>> createTransactionCategoriesBatch(
             Flux<TransactionCategory> transactionCategory, ServerWebExchange exchange) {
-        return Mono.just(
-                ResponseEntity.ok(portfolioIngestionReactiveService.ingestTransactionCategories(transactionCategory)));
+        return Mono.just(ResponseEntity
+                .ok(portfolioIngestionReactiveService.ingestTransactionCategories(transactionCategory)));
     }
 
     @Override
@@ -93,16 +94,23 @@ public class PortfoliosController implements PortfoliosApi {
         return Mono
                 .just(ResponseEntity.ok(portfolioIngestionReactiveService.ingestValuationsBundles(valuationsBundle)));
     }
-    
+
     @Override
     public Mono<ResponseEntity<Flux<HierarchyBundle>>> createHierarchiesBatch(Flux<HierarchyBundle> hierarchyBundles,
             ServerWebExchange exchange) {
         return Mono.just(ResponseEntity.ok(portfolioIngestionReactiveService.ingestHierarchyBundles(hierarchyBundles)));
     }
-    
+
     @Override
     public Mono<ResponseEntity<Flux<Position>>> createPositionsBatch(Flux<Position> position,
             ServerWebExchange exchange) {
         return Mono.just(ResponseEntity.ok(portfolioIngestionReactiveService.ingestPositions(position)));
+    }
+
+    @Override
+    public Mono<ResponseEntity<Flux<TransactionBundle>>> createTransactionsBatch(
+            Flux<TransactionBundle> transactionBundle, ServerWebExchange exchange) {
+        return Mono
+                .just(ResponseEntity.ok(portfolioIngestionReactiveService.ingestTransactionBundles(transactionBundle)));
     }
 }

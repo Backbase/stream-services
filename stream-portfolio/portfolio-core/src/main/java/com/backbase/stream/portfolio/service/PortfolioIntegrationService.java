@@ -35,6 +35,7 @@ import com.backbase.stream.portfolio.model.PortfolioPositionsHierarchy;
 import com.backbase.stream.portfolio.model.PortfolioValuation;
 import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.PositionBundle;
+import com.backbase.stream.portfolio.model.PositionTransaction;
 import com.backbase.stream.portfolio.model.SubPortfolio;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,16 +66,15 @@ public class PortfolioIntegrationService {
      * @param aggregatePortfolios {@see AggregatePortfolio}
      * @return Mono {@link AggregatePortfolio}
      */
-    public Mono<AggregatePortfolio> createAggregatePortfolio(AggregatePortfolio aggregatePortfolios) {
-        return aggregatePortfolioManagementApi
-                .postAggregatePortfolios(portfolioMapper.mapAggregate(aggregatePortfolios))
+    public Mono<AggregatePortfolio> createAggregatePortfolio(AggregatePortfolio aggregatePortfolio) {
+        return aggregatePortfolioManagementApi.postAggregatePortfolios(portfolioMapper.mapAggregate(aggregatePortfolio))
                 .onErrorResume(WebClientResponseException.Conflict.class,
-                        throwable -> aggregatePortfolioManagementApi.putAggregatePortfolio(aggregatePortfolios.getId(),
-                                portfolioMapper.mapPutAggregate(aggregatePortfolios)))
-                .map(at -> aggregatePortfolios)
+                        throwable -> aggregatePortfolioManagementApi.putAggregatePortfolio(aggregatePortfolio.getId(),
+                                portfolioMapper.mapPutAggregate(aggregatePortfolio)))
+                .map(at -> aggregatePortfolio)
                 .doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException)
                 .onErrorResume(WebClientResponseException.class,
-                        ReactiveStreamHandler.error(aggregatePortfolios, "Failed to create Aggregate Portfolio"))
+                        ReactiveStreamHandler.error(aggregatePortfolio, "Failed to create Aggregate Portfolio"))
                 .onErrorStop();
     }
 
@@ -85,20 +85,21 @@ public class PortfolioIntegrationService {
      * @return Mono {@link PositionBundle}
      */
     public Mono<PositionBundle> upsertPosition(PositionBundle positionBundle) {
-        String subPortfolioId = positionBundle.getSubPortfolioId();
         String portfolioId = positionBundle.getPortfolioId();
+        String subPortfolioId = positionBundle.getSubPortfolioId();
         Position position = positionBundle.getPosition();
+        String positionId = position.getExternalId();
+
         // add check for instrument external id
-        return Mono.defer(() -> positionManagementApi.getPositionById(position.getExternalId()))
+        return positionManagementApi.getPositionById(positionId)
                 .onErrorResume(WebClientResponseException.NotFound.class, throwable -> Mono.empty())
-                .flatMap(r -> positionManagementApi
-                        .putPosition(position.getExternalId(), portfolioMapper.mapPutPosition(position))
+                .flatMap(r -> positionManagementApi.putPosition(positionId, portfolioMapper.mapPutPosition(position))
                         .then(Mono.just(position)))
                 .switchIfEmpty(Mono.defer(() -> positionManagementApi
                         .postPositions(portfolioMapper.mapPosition(portfolioId, subPortfolioId, position))
                         .map(o -> position)))
                 .thenMany(upsertTransactionCategory(positionBundle.getTransactionCategories()))
-                .then(upsertTransactions(positionBundle, portfolioId, position))
+                .then(upsertTransactions(positionBundle.getTransactions(), portfolioId, positionId))
                 .map(at -> positionBundle)
                 .doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException)
                 .onErrorResume(WebClientResponseException.class,
@@ -115,7 +116,7 @@ public class PortfolioIntegrationService {
     public Mono<Position> upsertPosition(Position position) {
         String positionId = position.getExternalId();
 
-        return Mono.defer(() -> positionManagementApi.getPositionById(positionId))
+        return positionManagementApi.getPositionById(positionId)
                 .onErrorResume(WebClientResponseException.NotFound.class, throwable -> Mono.empty())
                 .flatMap(r -> positionManagementApi.putPosition(positionId, portfolioMapper.mapPutPosition(position))
                         .then(Mono.just(position)))
@@ -127,6 +128,19 @@ public class PortfolioIntegrationService {
                 .onErrorResume(WebClientResponseException.class,
                         ReactiveStreamHandler.error(position, "Failed to create Position"))
                 .onErrorStop();
+    }
+
+    /**
+     * Create PositionTransactions and all reference models that are related.
+     * 
+     * @param transactions
+     * @param portfolioId
+     * @param positionId
+     * @return
+     */
+    public Mono<List<PositionTransaction>> upsertPositionTransactions(List<PositionTransaction> transactions,
+            String portfolioId, String positionId) {
+        return upsertTransactions(transactions, portfolioId, positionId).flatMap(o -> Mono.just(transactions));
     }
 
     /**
@@ -169,10 +183,12 @@ public class PortfolioIntegrationService {
      * @return Mono {@link Portfolio}.
      */
     public Mono<Portfolio> upsertPortfolio(Portfolio portfolio) {
-        return portfolioManagementApi.getPortfolio(portfolio.getCode())
+        String portfolioCode = portfolio.getCode();
+
+        return portfolioManagementApi.getPortfolio(portfolioCode)
                 .onErrorResume(WebClientResponseException.NotFound.class, throwable -> Mono.empty())
                 .flatMap(r -> portfolioManagementApi
-                        .putPortfolio(portfolio.getCode(), portfolioMapper.mapPutPortfolio(portfolio))
+                        .putPortfolio(portfolioCode, portfolioMapper.mapPutPortfolio(portfolio))
                         .then(Mono.just(portfolio)))
                 .switchIfEmpty(
                         Mono.defer(() -> portfolioManagementApi.postPortfolios(portfolioMapper.mapPortfolio(portfolio))
@@ -245,14 +261,15 @@ public class PortfolioIntegrationService {
     }
 
     @NotNull
-    private Mono<Void> upsertTransactions(PositionBundle positionBundle, String portfolioId, Position position) {
-        return Mono.justOrEmpty(positionBundle.getTransactions())
-                .flatMap(trs -> transactionManagementApi.deletePositionTransactions(position.getExternalId())
-                        .then(transactionManagementApi
-                                .postPortfolioTransactions(portfolioId,
-                                        new PortfolioTransactionsPostRequest().transactions(List.of(
-                                                new PortfolioTransactionsPostItem().positionId(position.getExternalId())
-                                                        .transactions(portfolioMapper.mapTransaction(trs)))))
+    private Mono<Void> upsertTransactions(List<PositionTransaction> transactions, String portfolioId,
+            String positionId) {
+        return Mono.justOrEmpty(transactions)
+                .flatMap(trs -> transactionManagementApi.deletePositionTransactions(positionId)
+                        .then(Mono
+                                .defer(() -> transactionManagementApi.postPortfolioTransactions(portfolioId,
+                                        new PortfolioTransactionsPostRequest().transactions(
+                                                List.of(new PortfolioTransactionsPostItem().positionId(positionId)
+                                                        .transactions(portfolioMapper.mapTransaction(trs))))))
                                 .onErrorResume(WebClientResponseException.class,
                                         ReactiveStreamHandler.error(trs, "Failed to create Transactions"))
                                 .onErrorStop()));
@@ -286,9 +303,9 @@ public class PortfolioIntegrationService {
                                 .putSubPortfolio(portfolioCode, sp.getCode(), portfolioMapper.mapPutSubPortfolio(sp))
                                 .then(Mono.just(sp)))
                         .onErrorResume(WebClientResponseException.NotFound.class, throwable -> Mono.empty())
-                        .switchIfEmpty(subPortfolioManagementApi
+                        .switchIfEmpty(Mono.defer(() -> subPortfolioManagementApi
                                 .postSubPortfolios(portfolioCode, portfolioMapper.mapSubPortfolio(sp))
-                                .then(Mono.just(sp)))
+                                .then(Mono.just(sp))))
                         .doOnError(WebClientResponseException.class,
                                 ReactiveStreamHandler::handleWebClientResponseException)
                         .onErrorResume(WebClientResponseException.class,
@@ -347,7 +364,8 @@ public class PortfolioIntegrationService {
         return portfolioBenchmarksManagementApi.getPortfolioBenchmarks(0, Integer.MAX_VALUE)
                 .map(PortfolioBenchmarksGetResponse::getBenchmarks)
                 .switchIfEmpty(Mono.defer(() -> Mono.just(Collections.emptyList())))
-                .flatMap(existBenchmarks -> {
+                .flatMap(existBenchmarks ->
+                {
                     String name = portfolioBundle.getBenchmark().getName();
                     return existBenchmarks.stream()
                             .filter(b -> b.getName().equalsIgnoreCase(name))

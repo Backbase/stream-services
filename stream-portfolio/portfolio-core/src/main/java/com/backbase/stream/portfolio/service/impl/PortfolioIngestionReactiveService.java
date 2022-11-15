@@ -1,12 +1,14 @@
 package com.backbase.stream.portfolio.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
+import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
 import com.backbase.stream.portfolio.model.ValuationsBundle;
 import com.backbase.stream.portfolio.service.PortfolioIngestionService;
@@ -82,12 +84,12 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
                 .flatMapIterable(i -> i)
                 .doOnNext(actual -> log.info("Finished Ingestion of Transaction Category, key: {}", actual.getKey()));
     }
-    
+
     @Override
     public Flux<HierarchyBundle> ingestHierarchyBundles(Flux<HierarchyBundle> hierarchyBundles) {
         return hierarchyBundles.flatMap(this::upsertHierarchyBundle, portfolioSagaProperties.getTaskExecutors())
                 .doOnNext(actual -> log.info("Finished Ingestion of hierarchy bundle, portfolioCode: {}",
-                                             actual.getPortfolioCode()));
+                        actual.getPortfolioCode()));
     }
 
     private Mono<HierarchyBundle> upsertHierarchyBundle(HierarchyBundle hierarchyBundle) {
@@ -95,17 +97,34 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
                 .upsertHierarchies(hierarchyBundle.getHierarchies(), hierarchyBundle.getPortfolioCode())
                 .map(m -> hierarchyBundle);
     }
-    
+
     @Override
     public Flux<Position> ingestPositions(Flux<Position> positions) {
         return positions.flatMap(this::upsertPosition, portfolioSagaProperties.getTaskExecutors())
                 .doOnNext(actual -> log.info("Finished Ingestion of position, externalId: {}, portfolioCode: {}",
-                                             actual.getExternalId(),
-                                             actual.getPortfolioCode()));
+                        actual.getExternalId(), actual.getPortfolioCode()));
     }
 
     private Mono<Position> upsertPosition(Position position) {
         return portfolioIntegrationService.upsertPosition(position).map(m -> position);
+    }
+
+    @Override
+    public Flux<TransactionBundle> ingestTransactionBundles(Flux<TransactionBundle> transactionBundles) {
+        return transactionBundles.flatMap(this::upsertTransactionBundle, portfolioSagaProperties.getTaskExecutors())
+                .doOnNext(actual -> log.info("Finished Ingestion of transactions, portfolioCode: {}",
+                        actual.getPortfolioCode()));
+    }
+
+    private Mono<TransactionBundle> upsertTransactionBundle(TransactionBundle transactionBundle) {
+        String portfolioCode = transactionBundle.getPortfolioCode();
+
+        return Optional.ofNullable(transactionBundle.getTransactions())
+                .map(Flux::fromIterable)
+                .orElseGet(Flux::empty)
+                .flatMap(t -> portfolioIntegrationService.upsertPositionTransactions(t.getTransactions(), portfolioCode,
+                        t.getPositionId()))
+                .then(Mono.just(transactionBundle));
     }
 
 }
