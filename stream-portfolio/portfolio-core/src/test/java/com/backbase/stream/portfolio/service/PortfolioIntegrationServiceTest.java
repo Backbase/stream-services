@@ -45,6 +45,7 @@ import com.backbase.portfolio.api.service.integration.v1.model.SubPortfolioGetRe
 import com.backbase.portfolio.api.service.integration.v1.model.SubPortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.SubPortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.TransactionCategoryPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.TransactionCategoryPutRequest;
 import com.backbase.portfolio.integration.api.service.v1.AggregatePortfolioManagementApi;
 import com.backbase.portfolio.integration.api.service.v1.PortfolioBenchmarksManagementApi;
 import com.backbase.portfolio.integration.api.service.v1.PortfolioCumulativePerformanceManagementApi;
@@ -59,6 +60,7 @@ import com.backbase.stream.portfolio.mapper.PortfolioMapper;
 import com.backbase.stream.portfolio.model.AggregatePortfolio;
 import com.backbase.stream.portfolio.model.Allocation;
 import com.backbase.stream.portfolio.model.AllocationBundle;
+import com.backbase.stream.portfolio.model.HierarchyBundle;
 import com.backbase.stream.portfolio.model.Portfolio;
 import com.backbase.stream.portfolio.model.PortfolioBenchmark;
 import com.backbase.stream.portfolio.model.PortfolioBundle;
@@ -73,11 +75,15 @@ import com.backbase.stream.portfolio.model.SubPortfolio;
 import com.backbase.stream.portfolio.model.SubPortfolioBundle;
 import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
+import com.backbase.stream.portfolio.model.ValuationsBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioAllocationsBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioBundle;
+import com.backbase.stream.portfolio.model.WealthPortfolioPositionHierarchyBundle;
 import com.backbase.stream.portfolio.model.WealthPortfolioTransactionBundle;
+import com.backbase.stream.portfolio.model.WealthPortfolioValuationsBundle;
 import com.backbase.stream.portfolio.model.WealthPositionsBundle;
 import com.backbase.stream.portfolio.model.WealthSubPortfolioBundle;
+import com.backbase.stream.portfolio.model.WealthTransactionCategoriesBundle;
 import com.backbase.stream.portfolio.util.PortfolioTestUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -542,5 +548,100 @@ class PortfolioIntegrationServiceTest {
                 portfolioMapper.mapPutSubPortfolio(subPortfolio0));
 
         verify(subPortfolioManagementApi, times(0)).postSubPortfolios(anyString(), any(SubPortfoliosPostRequest.class));
+    }
+
+    @Test
+    void shouldCreateTransactionCategories() throws Exception {
+        WealthTransactionCategoriesBundle wealthTransactionCategoriesBundle =
+                PortfolioTestUtil.getWealthTransactionCategoriesBundle();
+        List<TransactionCategory> transactionCategories = wealthTransactionCategoriesBundle.getTransactionCategories();
+
+        when(transactionCategoryManagementApi.getTransactionCategories()).thenReturn(Flux.empty());
+        when(transactionCategoryManagementApi.postTransactionCategory(any(TransactionCategoryPostRequest.class)))
+                .thenReturn(Mono.empty());
+
+        portfolioIntegrationService.upsertTransactionCategories(transactionCategories).block();
+
+        verify(transactionCategoryManagementApi).getTransactionCategories();
+
+        TransactionCategory transactionCategory0 = transactionCategories.get(0);
+        TransactionCategory transactionCategory1 = transactionCategories.get(1);
+
+        verify(transactionCategoryManagementApi)
+                .postTransactionCategory(portfolioMapper.mapTransactionCategory(transactionCategory0));
+        verify(transactionCategoryManagementApi)
+                .postTransactionCategory(portfolioMapper.mapTransactionCategory(transactionCategory1));
+
+        verify(transactionCategoryManagementApi, times(0)).putTransactionCategory(anyString(),
+                any(TransactionCategoryPutRequest.class));
+    }
+
+    @Test
+    void shouldUpdateTransactionCategories() throws Exception {
+        WealthTransactionCategoriesBundle wealthTransactionCategoriesBundle =
+                PortfolioTestUtil.getWealthTransactionCategoriesBundle();
+        List<TransactionCategory> transactionCategories = wealthTransactionCategoriesBundle.getTransactionCategories();
+        TransactionCategory transactionCategory0 = transactionCategories.get(0);
+        TransactionCategory transactionCategory1 = transactionCategories.get(1);
+        String key0 = transactionCategory0.getKey();
+        String key1 = transactionCategory1.getKey();
+
+        when(transactionCategoryManagementApi.getTransactionCategories()).thenReturn(Flux.fromIterable(
+                List.of(new com.backbase.portfolio.api.service.integration.v1.model.TransactionCategory().key(key0),
+                        new com.backbase.portfolio.api.service.integration.v1.model.TransactionCategory().key(key1))));
+        when(transactionCategoryManagementApi.putTransactionCategory(anyString(),
+                any(TransactionCategoryPutRequest.class))).thenReturn(Mono.empty());
+
+        portfolioIntegrationService.upsertTransactionCategories(transactionCategories).block();
+
+        verify(transactionCategoryManagementApi).getTransactionCategories();
+
+        verify(transactionCategoryManagementApi).putTransactionCategory(key0,
+                portfolioMapper.mapPutTransactionCategory(transactionCategory0));
+        verify(transactionCategoryManagementApi).putTransactionCategory(key1,
+                portfolioMapper.mapPutTransactionCategory(transactionCategory1));
+
+        verify(transactionCategoryManagementApi, times(0))
+                .postTransactionCategory(any(TransactionCategoryPostRequest.class));
+    }
+
+    @Test
+    void shouldUpdateHierarchies() throws Exception {
+        WealthPortfolioPositionHierarchyBundle wealthPortfolioPositionHierarchyBundle =
+                PortfolioTestUtil.getWealthPortfolioPositionHierarchyBundle();
+        List<HierarchyBundle> batchPortfolioPositionsHierarchies =
+                wealthPortfolioPositionHierarchyBundle.getBatchPortfolioPositionsHierarchies();
+        HierarchyBundle hierarchyBundle0 = batchPortfolioPositionsHierarchies.get(0);
+        List<PortfolioPositionsHierarchy> hierarchies = hierarchyBundle0.getHierarchies();
+        String portfolioCode0 = hierarchyBundle0.getPortfolioCode();
+
+        when(portfolioPositionsHierarchyManagementApi.putPortfolioPositionsHierarchy(anyString(),
+                any(PortfolioPositionsHierarchyPutRequest.class))).thenReturn(Mono.empty());
+
+        portfolioIntegrationService.upsertHierarchies(hierarchies, portfolioCode0).block();
+
+        verify(portfolioPositionsHierarchyManagementApi).putPortfolioPositionsHierarchy(portfolioCode0,
+                new PortfolioPositionsHierarchyPutRequest().items(portfolioMapper.mapHierarchies(hierarchies)));
+    }
+
+    @Test
+    void shouldUpdateValuations() throws Exception {
+        WealthPortfolioValuationsBundle wealthPortfolioValuationsBundle =
+                PortfolioTestUtil.getWealthPortfolioValuationsBundle();
+        List<ValuationsBundle> batchPortfolioValuations = wealthPortfolioValuationsBundle.getBatchPortfolioValuations();
+        ValuationsBundle valuationsBundle0 = batchPortfolioValuations.get(0);
+
+        List<PortfolioValuation> valuations0 = valuationsBundle0.getValuations();
+        String portfolioCode0 = valuationsBundle0.getPortfolioCode();
+
+        when(portfolioValuationManagementApi.deletePortfolioValuations(anyString(), anyString()))
+                .thenReturn(Mono.empty());
+        when(portfolioValuationManagementApi.putPortfolioValuations(anyString(),
+                any(PortfolioValuationsPutRequest.class))).thenReturn(Mono.empty());
+
+        portfolioIntegrationService.upsertPortfolioValuations(valuations0, portfolioCode0).block();
+
+        verify(portfolioValuationManagementApi).putPortfolioValuations(portfolioCode0,
+                new PortfolioValuationsPutRequest().valuations(portfolioMapper.mapValuations(valuations0)));
     }
 }
