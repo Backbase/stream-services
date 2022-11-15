@@ -152,8 +152,8 @@ class PortfolioIntegrationServiceTest {
         AggregatePortfolio aggregatePortfolios = new AggregatePortfolio().id(arrangementId);
 
         when(aggregatePortfolioManagementApi.postAggregatePortfolios(any(AggregatePortfoliosPostRequest.class)))
-                .thenThrow(WebClientResponseException.create(HttpStatus.CONFLICT.value(), "Conflict", HttpHeaders.EMPTY,
-                        new byte[] {}, null));
+                .thenReturn(Mono.error(WebClientResponseException.create(HttpStatus.CONFLICT.value(), "Conflict",
+                        HttpHeaders.EMPTY, new byte[] {}, null)));
         when(aggregatePortfolioManagementApi.putAggregatePortfolio(anyString(),
                 any(AggregatePortfoliosPutRequest.class))).thenReturn(Mono.empty());
 
@@ -260,8 +260,8 @@ class PortfolioIntegrationServiceTest {
         List<Position> positions = wealthPositionsBundle.getPositions();
         Position position0 = positions.get(0);
 
-        when(positionManagementApi.getPositionById(anyString())).thenThrow(WebClientResponseException
-                .create(HttpStatus.NOT_FOUND.value(), "Not Found", HttpHeaders.EMPTY, new byte[] {}, null));
+        when(positionManagementApi.getPositionById(anyString())).thenReturn(Mono.error(WebClientResponseException
+                .create(HttpStatus.NOT_FOUND.value(), "Not Found", HttpHeaders.EMPTY, new byte[] {}, null)));
         when(positionManagementApi.postPositions(any(PositionsPostRequest.class))).thenReturn(Mono.empty());
 
         portfolioIntegrationService.upsertPosition(position0).block();
@@ -467,8 +467,8 @@ class PortfolioIntegrationServiceTest {
 
         String portfolioCode = "ARRANGEMENT_SARA";
 
-        when(portfolioManagementApi.getPortfolio(anyString())).thenThrow(WebClientResponseException
-                .create(HttpStatus.NOT_FOUND.value(), "Not Found", HttpHeaders.EMPTY, new byte[] {}, null));
+        when(portfolioManagementApi.getPortfolio(anyString())).thenReturn(Mono.error(WebClientResponseException
+                .create(HttpStatus.NOT_FOUND.value(), "Not Found", HttpHeaders.EMPTY, new byte[] {}, null)));
         when(portfolioManagementApi.postPortfolios(any(PortfoliosPostRequest.class))).thenReturn(Mono.empty());
 
         portfolioIntegrationService.upsertPortfolio(portfolio0).block();
