@@ -21,6 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AllocationClassifierType;
 import com.backbase.portfolio.api.service.integration.v1.model.Money;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioAllocationsParentItem;
@@ -140,6 +141,28 @@ class PortfolioIntegrationServiceTest {
 
         verify(aggregatePortfolioManagementApi)
                 .postAggregatePortfolios(new AggregatePortfoliosPostRequest().id(arrangementId));
+
+        verify(aggregatePortfolioManagementApi, times(0)).putAggregatePortfolio(anyString(),
+                any(AggregatePortfoliosPutRequest.class));
+    }
+
+    @Test
+    void shouldUpdateAgreateAggregatePortfolio() {
+        String arrangementId = "arrangementId";
+        AggregatePortfolio aggregatePortfolios = new AggregatePortfolio().id(arrangementId);
+
+        when(aggregatePortfolioManagementApi.postAggregatePortfolios(any(AggregatePortfoliosPostRequest.class)))
+                .thenThrow(WebClientResponseException.create(HttpStatus.CONFLICT.value(), "Conflict", HttpHeaders.EMPTY,
+                        new byte[] {}, null));
+        when(aggregatePortfolioManagementApi.putAggregatePortfolio(anyString(),
+                any(AggregatePortfoliosPutRequest.class))).thenReturn(Mono.empty());
+
+        portfolioIntegrationService.createAggregatePortfolio(aggregatePortfolios).block();
+
+        verify(aggregatePortfolioManagementApi)
+                .postAggregatePortfolios(new AggregatePortfoliosPostRequest().id(arrangementId));
+        verify(aggregatePortfolioManagementApi).putAggregatePortfolio(arrangementId,
+                portfolioMapper.mapPutAggregate(aggregatePortfolios));
 
     }
 
