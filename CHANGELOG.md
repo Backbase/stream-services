@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.14.1](https://github.com/Backbase/stream-services/compare/3.14.0...3.14.1)
+### Changed
+- Cherry-picking fixes from 3.7.1 for stream composition payment order mapping.
+### Added
+- Adding ReDoc documentation for Stream Compositions APIs
+
 ## [3.11.0](https://github.com/Backbase/stream-services/compare/3.10.1...3.11.0)
 ### Changed
 - Replaced BatchProductGroupTask.IngestionMode with more flexible BatchProductIngestionMode class. 

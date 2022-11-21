@@ -254,13 +254,13 @@ components:
       type: object
       properties:
         cursor:
-          $ref: 'TransactionCursor'
+          $ref: '#/components/schemas/TransactionCursor'
 
     TransactionCursorUpsertRequest:
       type: object
       properties:
         cursor:
-          $ref: 'TransactionCursor'
+          $ref: '#/components/schemas/TransactionCursor'
 
     TransactionCursorUpsertResponse:
       type: object

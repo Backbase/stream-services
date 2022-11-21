@@ -87,7 +87,7 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
         return Mono.just(ProductIngestResponse.builder()
                         .productGroups(Collections.singletonList(request.getProductGroup()))
                         .serviceAgreementExternalId(request.getProductGroup().getServiceAgreement().getExternalId())
-                        .serviceAgreementInternalId(request.getProductGroup().getServiceAgreement().getExternalId())
+                        .serviceAgreementInternalId(request.getProductGroup().getServiceAgreement().getInternalId())
                                 .build());
     }
 
