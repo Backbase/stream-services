@@ -1,30 +1,35 @@
 package com.backbase.stream.portfolio.configuration;
 
-import com.backbase.buildingblocks.webclient.WebClientConstants;
+import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.portfolio.instrument.integration.api.service.ApiClient;
 import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentAssetClassManagementApi;
 import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentCountryManagementApi;
 import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentManagementApi;
 import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentPriceManagementApi;
 import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentRegionManagementApi;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-@EnableConfigurationProperties(BackbaseStreamConfigurationProperties.class)
-@RequiredArgsConstructor
 @Slf4j
-public class InstrumentApiConfiguration {
+@ConfigurationProperties("backbase.communication.services.instrument")
+public class InstrumentApiConfiguration extends ApiClientConfig {
 
-    private final BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties;
+    public static final String PORTFOLIO_SERVICE_ID = "portfolio";
+
+    public InstrumentApiConfiguration() {
+        super(PORTFOLIO_SERVICE_ID);
+    }
+
+    @Bean
+    public ApiClient instrumentApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), objectMapper, dateFormat)
+            .setBasePath(createBasePath());
+    }
 
     @Bean
     public InstrumentManagementApi instrumentManagementApi(ApiClient instrumentApiClient) {
@@ -49,16 +54,6 @@ public class InstrumentApiConfiguration {
     @Bean
     public InstrumentAssetClassManagementApi instrumentAssetClassManagementApi(ApiClient instrumentApiClient) {
         return new InstrumentAssetClassManagementApi(instrumentApiClient);
-    }
-
-    @Bean
-    ApiClient instrumentApiClient(@Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-
-        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-        log.debug("Instrument Api Client Stream Configuration Properties: {}", backbaseStreamConfigurationProperties);
-        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getPortfolioBaseUrl());
-        return apiClient;
     }
 
 }

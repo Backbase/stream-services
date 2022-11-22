@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-payment-order</artifactId>
-        <version>3.7.2-SNAPSHOT</version>
+        <version>3.14.1</version>
     </parent>
 
     <artifactId>payment-order-core</artifactId>
@@ -28,12 +28,6 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-configuration</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
             <artifactId>stream-dbs-clients</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -42,6 +36,13 @@
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-worker</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>stream-test-support</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

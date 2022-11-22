@@ -6,6 +6,7 @@ import com.backbase.stream.compositions.integration.product.api.ProductIntegrati
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.DateFormat;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,8 +16,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.text.DateFormat;
 
 @Configuration
 @AllArgsConstructor
@@ -47,8 +46,8 @@ public class ProductCompositionConfiguration {
     @Bean
     @Primary
     public PaymentOrderCompositionApi paymentOrderCompositionApi(
-            com.backbase.stream.compositions.paymentorder.ApiClient paymentOrderClient) {
-        return new PaymentOrderCompositionApi(paymentOrderClient);
+            com.backbase.stream.compositions.paymentorder.ApiClient paymentOrderApiClient) {
+        return new PaymentOrderCompositionApi(paymentOrderApiClient);
     }
 
     @Bean
@@ -64,7 +63,7 @@ public class ProductCompositionConfiguration {
     }
 
     @Bean
-    public com.backbase.stream.compositions.paymentorder.ApiClient paymentOrderClient(
+    public com.backbase.stream.compositions.paymentorder.ApiClient paymentOrderApiClient(
             @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
             ObjectMapper objectMapper,
             DateFormat dateFormat) {

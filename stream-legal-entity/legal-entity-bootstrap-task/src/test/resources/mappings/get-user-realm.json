@@ -3,6 +3,12 @@
     "method": "GET",
     "url": "/user-manager/service-api/v2/users/identities/realms",
     "headers": {
+      "X-B3-TraceId": {
+        "matches": "[\\w-]+"
+      },
+      "X-B3-SpanId": {
+        "matches": "[\\w-]+"
+      },
       "X-TID": {
         "contains": "tenant1"
       }

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+  <title>Stream Compositions</title>
+</head>
+<body>
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="payment-integration-tab" data-bs-target="#payment-integration" type="button" role="tab"
+            aria-controls="payment-integration" aria-selected="true">Payment Order Integration
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="legal-entity-integration-tab" data-bs-target="#legal-entity-integration" type="button" role="tab"
+            aria-controls="legal-entity-integration" aria-selected="false">Legal Entity Integration
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="product-catalog-integration-tab" data-bs-target="#product-catalog-integration" type="button" role="tab"
+            aria-controls="product-catalog-integration" aria-selected="false">Product Catalog Integration
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="product-integration-tab" data-bs-target="#product-integration" type="button" role="tab"
+            aria-controls="product-integration" aria-selected="false">Product Integration
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="transaction-integration-tab" data-bs-target="#transaction-integration" type="button" role="tab"
+            aria-controls="transaction-integration" aria-selected="false">Transaction Integration
+    </button>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="payment-integration" role="tabpanel" aria-labelledby="payment-integration-tab"></div>
+  <div class="tab-pane fade" id="legal-entity-integration" role="tabpanel" aria-labelledby="legal-entity-integration-tab"></div>
+  <div class="tab-pane fade" id="product-catalog-integration" role="tabpanel" aria-labelledby="product-catalog-integration-tab"></div>
+  <div class="tab-pane fade" id="product-integration" role="tabpanel" aria-labelledby="product-integration-tab"></div>
+  <div class="tab-pane fade" id="transaction-integration" role="tabpanel" aria-labelledby="transaction-integration-tab"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js"></script>
+<script>
+  const specs = {
+    "payment-integration": "payment-order-integration-api/src/main/resources/service-api-v2.yaml",
+    "legal-entity-integration": "legal-entity-integration-api/src/main/resources/service-api-v2.yaml",
+    "product-catalog-integration": "product-catalog-integration-api/src/main/resources/service-api-v2.yaml",
+    "product-integration": "product-integration-api/src/main/resources/service-api-v2.yaml",
+    "transaction-integration": "transaction-integration-api/src/main/resources/service-api-v2.yaml"
+  }
+  const triggerTabList = document.querySelectorAll('#myTab button');
+  triggerTabList.forEach(triggerEl => {
+    const tabTrigger = new bootstrap.Tab(triggerEl);
+    triggerEl.addEventListener('click', event => {
+      event.preventDefault();
+      let specId = triggerEl.getAttribute("data-bs-target").replaceAll("#", "");
+      let specPath = specs[specId];
+      if(specPath) {
+        Redoc.init(specPath, {
+          scrollYOffset: 50
+        }, document.getElementById(specId));
+      }
+      tabTrigger.show();
+    })
+    if (triggerEl.classList.contains("active")){
+      triggerEl.click();
+    }
+  })
+</script>
+</body>
+</html>

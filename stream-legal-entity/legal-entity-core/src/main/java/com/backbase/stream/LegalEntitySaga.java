@@ -1,5 +1,13 @@
 package com.backbase.stream;
 
+import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
+import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
@@ -18,7 +26,26 @@ import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
 import com.backbase.stream.exceptions.AccessGroupException;
 import com.backbase.stream.exceptions.LegalEntityException;
-import com.backbase.stream.legalentity.model.*;
+import com.backbase.stream.legalentity.model.BaseProduct;
+import com.backbase.stream.legalentity.model.BaseProductGroup;
+import com.backbase.stream.legalentity.model.BatchProductGroup;
+import com.backbase.stream.legalentity.model.BusinessFunction;
+import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
+import com.backbase.stream.legalentity.model.ExternalContact;
+import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
+import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.JobRole;
+import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.LegalEntityParticipant;
+import com.backbase.stream.legalentity.model.LegalEntityReference;
+import com.backbase.stream.legalentity.model.LegalEntityStatus;
+import com.backbase.stream.legalentity.model.Limit;
+import com.backbase.stream.legalentity.model.Privilege;
+import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
+import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.legalentity.model.UserProfile;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.mapper.ExternalContactMapper;
@@ -27,6 +54,7 @@ import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
 import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
+import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
@@ -36,6 +64,21 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
@@ -46,19 +89,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
-
-import javax.validation.Valid;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
-import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
-import static java.util.Objects.*;
-import static java.util.Optional.ofNullable;
-import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * Legal Entity Saga. This Service creates Legal Entities and their supporting objects from a {@link LegalEntity}
@@ -611,7 +641,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         log.trace("Permissions {}", request);
         return accessGroupService.assignPermissionsBatch(
                 new BatchProductGroupTask(BATCH_PRODUCT_GROUP_ID + System.currentTimeMillis(), new BatchProductGroup()
-                    .serviceAgreement(retrieveServiceAgreement(legalEntity)), BatchProductGroupTask.IngestionMode.UPDATE), request)
+                    .serviceAgreement(retrieveServiceAgreement(legalEntity)), BatchProductIngestionMode.UPSERT), request)
             .thenReturn(legalEntityTask);
 
     }
@@ -640,7 +670,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
         return accessGroupService.assignPermissionsBatch(
                 new BatchProductGroupTask(BATCH_PRODUCT_GROUP_ID + System.currentTimeMillis(), new BatchProductGroup()
-                    .serviceAgreement(retrieveServiceAgreement(legalEntity)), BatchProductGroupTask.IngestionMode.UPDATE),
+                    .serviceAgreement(retrieveServiceAgreement(legalEntity)), BatchProductIngestionMode.UPSERT),
                 request)
             .thenReturn(legalEntityTask);
     }
@@ -669,18 +699,21 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private Mono<User> upsertUserBulk(User user, LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
-        streamTask.info(USER, UPSERT, "", user.getExternalId(), "Upsert User with External ID: %s", user.getExternalId());
+        streamTask.info(USER, UPSERT, "", user.getExternalId(), user.getInternalId(),
+            "Upsert User with External ID: %s", user.getExternalId());
 
         Mono<User> getExistingUser = Mono.zip(Mono.just(user), userService.getUserByExternalId(user.getExternalId()), (u, existingUser) -> {
             u.setInternalId(existingUser.getInternalId());
-            streamTask.info(USER, EXISTS, u.getExternalId(), u.getInternalId(), "User %s already exists", existingUser.getExternalId());
+            streamTask.info(USER, UPSERT, EXISTS, u.getExternalId(), u.getInternalId(), "User %s already exists",
+                existingUser.getExternalId());
             return u;
         });
 
         Mono<User> createNewUser = Mono.zip(Mono.just(user), userService.createUser(user, legalEntity.getExternalId(), streamTask),
             (u, newUser) -> {
                 u.setInternalId(newUser.getInternalId());
-                streamTask.info(USER, CREATED, u.getExternalId(), user.getInternalId(), "User %s created", newUser.getExternalId());
+                streamTask.info(USER, UPSERT, CREATED, u.getExternalId(), user.getInternalId(), "User %s created",
+                    newUser.getExternalId());
                 return user;
             });
         return getExistingUser.switchIfEmpty(createNewUser);
@@ -696,7 +729,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
             return userService.updateUser(user).flatMap(userUpdated -> {
                 log.info("User was updated: {}", userUpdated.getFullName());
-                streamTask.info(USER, UPDATED, user.getExternalId(), user.getInternalId(), "User %s updated", existUser.getExternalId());
+                streamTask.info(USER, UPSERT, UPDATED, user.getExternalId(), user.getInternalId(), "User %s updated",
+                    existUser.getExternalId());
                 return Mono.just(userUpdated);
             });
         });
@@ -704,19 +738,21 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         Mono<User> createNewUser = Mono.zip(Mono.just(user), userService.createUser(user, legalEntity.getExternalId(), streamTask),
             (u, newUser) -> {
                 u.setInternalId(newUser.getInternalId());
-                streamTask.info(USER, CREATED, u.getExternalId(), user.getInternalId(), "User %s created", newUser.getExternalId());
+                streamTask.info(USER, UPSERT, CREATED, u.getExternalId(), user.getInternalId(), "User %s created",
+                    newUser.getExternalId());
                 return user;
             });
         return existingUser.switchIfEmpty(createNewUser);
     }
 
     private Mono<User> upsertIdentityUser(LegalEntityTask streamTask, User user) {
-        streamTask.info(IDENTITY_USER, UPSERT, "", user.getExternalId(), "Upsert User to Identity with External ID: %s", user.getExternalId());
+      streamTask.info(IDENTITY_USER, UPSERT, "", user.getExternalId(), user.getInternalId(),
+          "Upsert User to Identity with External ID: %s", user.getExternalId());
         LegalEntity legalEntity = streamTask.getData();
         Mono<User> getExistingIdentityUser = userService.getUserByExternalId(user.getExternalId())
             .map(existingUser -> {
                 user.setInternalId(existingUser.getInternalId());
-                streamTask.info(IDENTITY_USER, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId());
+                streamTask.info(IDENTITY_USER, UPSERT, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId());
                 return user;
             })
             ;
@@ -727,7 +763,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 .flatMap(currentUser -> userService.updateUserState(currentUser, legalEntity.getRealmName()))
                 .map(existingUser -> {
                     user.setInternalId(existingUser.getInternalId());
-                    streamTask.info(IDENTITY_USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId());
+                    streamTask.info(IDENTITY_USER, UPSERT, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId());
                     return user;
                 }));
         return getExistingIdentityUser.switchIfEmpty(createNewIdentityUser);

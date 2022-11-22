@@ -5,17 +5,22 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>3.7.2-SNAPSHOT</version>
+        <version>3.14.1</version>
     </parent>
 
     <artifactId>payment-order-composition-service</artifactId>
-    <version>3.7.2-SNAPSHOT</version>
+    <version>3.14.1</version>
 
     <packaging>jar</packaging>
 
     <name>Stream :: Compositions :: Services :: Payment Order</name>
 
     <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.backbase.stream.compositions.api</groupId>
             <artifactId>payment-order-composition-api</artifactId>

@@ -1,6 +1,100 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.14.1](https://github.com/Backbase/stream-services/compare/3.14.0...3.14.1)
+### Changed
+- Cherry-picking fixes from 3.7.1 for stream composition payment order mapping.
+### Added
+- Adding ReDoc documentation for Stream Compositions APIs
+
+## [3.11.0](https://github.com/Backbase/stream-services/compare/3.10.1...3.11.0)
+### Changed
+- Replaced BatchProductGroupTask.IngestionMode with more flexible BatchProductIngestionMode class. 
+New class keeps ingestion modes separately for each main resource involved in BatchProductIngestionSaga processing: 
+function groups, data groups and arrangements. Two preset modes have been created: BatchProductIngestionMode.UPSERT and 
+BatchProductIngestionMode.REPLACE (equivalents of previous UPDATE and REPLACE, respectively), but new ones can be 
+composed of any "sub modes" combination.
+
+## [3.10.1](https://github.com/Backbase/stream-services/compare/3.10.0...3.10.1)
+### Changed
+- Adjusting property `backbase.stream.client.headers-to-forward` to take precedence over `backbase.stream.client.additional-headers`.
+- Fixing Identity m10y configuration on e2e-tests with properly separated realms.
+
+## [3.10.0](https://github.com/Backbase/stream-services/compare/3.9.3...3.10.0)
+### Added
+- Zip layout to composition services. This allows the addition of external jars to the classpath using `loader.path` property.
+
+## [3.9.3](https://github.com/Backbase/stream-services/compare/3.9.2...3.9.3)
+- Fix memory leak with UnitOfWorkExecutor
+
+## [3.9.2](https://github.com/Backbase/stream-services/compare/3.9.1...3.9.2)
+### Added
+- End-to-end tests for the Bootstrap Task
+
+## [3.9.0](https://github.com/Backbase/stream-services/compare/3.8.2...3.9.0)
+### Changed
+Adding SSDK service discovery mechanism to the Stream Task and Http applications.
+All the service url properties prefixed by `backbase.stream.dbs.*` and `backbase.stream.identity.*` are now removed
+and replaced by the service discovery mechanism of your choice, where the Banking Services will be discovered automatically.
+
+Using Eureka/Registry (Enabled by default):
+```properties
+eureka.client.serviceUrl.defaultZone=http://registry:8080/eureka
+eureka.instance.non-secure-port=8080
+```
+Using Kubernetes: 
+```properties
+eureka.client.enabled=false
+spring.cloud.kubernetes.enabled=true
+```
+
+If you **don't want to user a service discovery** mechanism, the following configuration below needs to be **replaced**. e.g.
+```yaml
+backbase:
+  stream:
+    dbs:
+      access-control-base-url: http://non-discoverable-host:8080/access-control
+    identity:
+      identity-integration-base-url: http://non-discoverable-host:8080/identity-integration-service
+```
+Similar behaviour can be achieved with:
+```yaml
+eureka:
+  client:
+    enabled: false
+spring:
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            access-control:
+              - uri: http://non-discoverable-host:8080
+                metadata:
+                  contextPath: /access-control
+            identity-integration-service:
+              - uri: http://non-discoverable-host:8080
+                metadata:
+                  contextPath: /identity-integration-service
+```
+
+> **Heads Up!**: The Stream Composition services still don't support client load balancing, hence service discovery isn't available for the moment then you can't configure the spring cloud discovery simple instances. In the scenario where your service don't support, or you want to disable client side load balancers (e.g. `spring.cloud.loadbalancer.enabled=false`), you can override the default DBS services addresses using the `direct-uri` property. e.g.
+> ```properties 
+> backbase.communication.services.access-control.direct-uri=http://non-discoverable-host:8080/access-control
+> backbase.communication.services.identity.integration.direct-uri=http://non-discoverable-host:8080/identity-integration-service
+> ```
+> All configuration properties prefixes can be found at [stream-dbs-clients](stream-dbs-clients/src/main/java/com/backbase/stream/clients/config) module, and they are compliant to SSDK [configuration properties](https://community.backbase.com/documentation/ServiceSDK/latest/generate_clients_from_openapi).
+
+## [3.8.2](https://github.com/Backbase/stream-services/compare/3.8.1...3.8.2)
+### Fixed
+- Added InterestDetails to BaseProduct
+
+## [3.8.0](https://github.com/Backbase/stream-services/compare/3.7.0...3.8.0)
+### Changed
+- Upgraded to SSDK 15.0.1
+- Upgraded to Java 17
+- Creating the [`stream-bootstrap-task`](helm/README.md) for deployment of boostrap task Jobs on Kubernetes.
+
 ## [3.7.2](https://github.com/Backbase/stream-services/compare/3.6.0...3.7.2)
 ### Added
 - Add **portfolio-http**
@@ -29,9 +123,11 @@ All notable changes to this project will be documented in this file.
 - Enable Multi architecture docker images: arm64 and amd64
 
 ## [3.3.0](https://github.com/Backbase/stream-services/compare/3.1.0...3.3.0)
+### Changed
 - Tech Debt: Make portfolio saga idempotent #172
 
 ## [3.1.0](https://github.com/Backbase/stream-services/compare/3.0.0...3.1.0)
+### Changed
 - Upgraded to DBS 2022.09
 
 ## [3.0.0](https://github.com/Backbase/stream-services/compare/2.88.0...3.0.0)

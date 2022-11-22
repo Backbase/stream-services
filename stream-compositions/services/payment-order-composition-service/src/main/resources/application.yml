@@ -1,5 +1,3 @@
-server.port: 9005
-
 spring:
   zipkin:
     enabled: false
@@ -18,6 +16,25 @@ sso:
           value: SIG_SECRET_KEY
 
 backbase:
+  communication:
+    http:
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://token-converter:8080/oauth/token
+    services:
+      usermanager:
+        service-port: 8080
+      access-control:
+        service-port: 8080
+      arrangement:
+        manager:
+          service-port: 8080
+      payment:
+        order:
+          service-port: 8080
+      transaction:
+        manager:
+          service-port: 8080
   mtls:
     enabled: false
   security:
@@ -27,12 +44,6 @@ backbase:
       authentication:
         required-scope: api:service
   stream:
-    dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
-      transaction-manager-base-url: http://transaction-manager:8080
-      payment-order-service-base-url: http:///payment-order-service:8080
     compositions:
       paymentorder:
         integration-base-url: http://payment-order-integration:8080

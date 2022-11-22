@@ -30,7 +30,7 @@ public class HeadersForwardingClientFilterTest {
     ExchangeFunction exchangeFunction;
 
     @Test
-    void shouldEnrichWithExtraHeaders() {
+    void shouldEnrichWithAdditionalHeaders() {
         doReturn(new HttpHeaders()).when(clientRequest).headers();
         doReturn(new LinkedMultiValueMap()).when(clientRequest).cookies();
 
@@ -66,6 +66,29 @@ public class HeadersForwardingClientFilterTest {
             .verifyComplete();
     }
 
+    @Test
+    void shouldSkipAdditionalHeaderWhenEnrichingWithSameServerHeadersToForward() {
+        doReturn(new HttpHeaders()).when(clientRequest).headers();
+        doReturn(new LinkedMultiValueMap()).when(clientRequest).cookies();
+
+        will(a -> assertClientRequestHeader(a.getArgument(0), "x-tid", "tenant1"))
+            .given(exchangeFunction).exchange(any());
+
+        MultiValueMap<String, String> headersToBeIncluded = new LinkedMultiValueMap();
+        headersToBeIncluded.add("x-tid", "tenant2");
+
+        DbsWebClientConfigurationProperties properties = new DbsWebClientConfigurationProperties();
+        properties.setAdditionalHeaders(headersToBeIncluded);
+        ExchangeFilterFunction underTest = new HeadersForwardingClientFilter(properties);
+
+        var serverRequestHeaders = new LinkedMultiValueMap<>();
+        serverRequestHeaders.add("X-TID", "tenant1");
+
+        StepVerifier.create(underTest.filter(clientRequest, exchangeFunction)
+                .contextWrite(Context.of("headers", serverRequestHeaders)))
+            .verifyComplete();
+    }
+
     /**
      * Given the nature of reactive applications we are asserting when the exchangeFunction is activated, where we
      * validate the processed client request after the header enrichment.
@@ -77,6 +100,13 @@ public class HeadersForwardingClientFilterTest {
     private Mono<Void> assertClientRequestHeader(ClientRequest request, String expectedKey) {
         Assert.notNull(request, "Invalid request");
         Assert.isTrue(request.headers().containsKey(expectedKey), "Missing header");
+        return Mono.empty();
+    }
+
+    private Mono<Void> assertClientRequestHeader(ClientRequest request, String expectedKey, String expectedValue) {
+        Assert.notNull(request, "Invalid request");
+        Assert.isTrue(request.headers().get(expectedKey).stream().allMatch(v -> v.equals(expectedValue)),
+            "Wrong header value");
         return Mono.empty();
     }
 

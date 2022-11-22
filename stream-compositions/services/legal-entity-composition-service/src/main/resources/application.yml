@@ -5,6 +5,25 @@ spring:
     allow-bean-definition-overriding: true
 
 backbase:
+  communication:
+    http:
+      client-secret: bb-secret
+      client-id: bb-client
+      access-token-uri: http://token-converter:8080/oauth/token
+    services:
+      usermanager:
+        service-port: 8080
+      access-control:
+        service-port: 8080
+      arrangement:
+        manager:
+          service-port: 8080
+      user:
+        profile:
+          service-port: 8080
+      identity:
+        integration:
+          service-port: 8080
   security:
     http:
       enabled: true
@@ -15,13 +34,6 @@ backbase:
       sink:
         useIdentityIntegration: true
         userProfileEnabled: true
-    dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
-      user-profile-manager-base-url: http://user-profile-manager:8080
-    identity:
-      identity-integration-base-url: http://identity-integration-service:8080
     compositions:
       legal-entity:
         integration-base-url: http://legal-entity-integration:8080
@@ -51,46 +63,49 @@ bootstrap:
           - name: "Manage Entitlements"
             functions:
               - functionId: "1019"
-                functionCode: "manage.data.groups"
+                name: "Manage Data Groups"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
                   - privilege: "edit"
                   - privilege: "delete"
-                  - privilege: "approve"
               - functionId: "1020"
-                functionCode: "manage.function.groups"
+                name: "Manage Function Groups"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
                   - privilege: "edit"
                   - privilege: "delete"
-                  - privilege: "approve"
       - name: Retail User - USA
         description: Retail User Permissions for USA
         functionGroups:
           - name: "Products, payments, txn, contacts"
             functions:
               - functionId: "1006"
+                name: "Product Summary"
                 functionCode: "product.summary"
                 privileges:
                   - privilege: "view"
               - functionId: "1003"
+                name: "Transactions"
                 functionCode: "transactions"
                 privileges:
                   - privilege: "view"
                   - privilege: "edit"
               - functionId: "1017"
+                name: "US Domestic Wire"
                 functionCode: "us.domestic.wire"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
               - functionId: "1018"
+                name: "US Foreign Wire"
                 functionCode: "us.foreign.wire"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
               - functionId: "1005"
+                name: "Contacts"
                 functionCode: "contacts"
                 privileges:
                   - privilege: "view"
@@ -108,6 +123,7 @@ bootstrap:
     users:
       - user:
           externalId: "admin"
+          fullName: "Backbase Root Admin"
           identityLinkStrategy: "IDENTITY_AGNOSTIC"
         referenceJobRoleNames:
           - "Entitlements - Manager"

@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>3.7.2-SNAPSHOT</version>
+        <version>3.14.1</version>
     </parent>
 
     <artifactId>product-catalog-composition-service</artifactId>
@@ -14,7 +14,11 @@
     <name>Stream :: Compositions :: Services :: Product Catalog</name>
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.backbase.stream.compositions.api</groupId>
             <artifactId>product-catalog-composition-api</artifactId>

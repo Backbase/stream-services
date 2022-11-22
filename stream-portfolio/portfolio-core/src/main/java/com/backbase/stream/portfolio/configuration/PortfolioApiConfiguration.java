@@ -1,6 +1,6 @@
 package com.backbase.stream.portfolio.configuration;
 
-import com.backbase.buildingblocks.webclient.WebClientConstants;
+import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
 import com.backbase.portfolio.integration.api.service.ApiClient;
 import com.backbase.portfolio.integration.api.service.v1.AggregatePortfolioManagementApi;
 import com.backbase.portfolio.integration.api.service.v1.PortfolioBenchmarksManagementApi;
@@ -12,22 +12,30 @@ import com.backbase.portfolio.integration.api.service.v1.PositionManagementApi;
 import com.backbase.portfolio.integration.api.service.v1.SubPortfolioManagementApi;
 import com.backbase.portfolio.integration.api.service.v1.TransactionCategoryManagementApi;
 import com.backbase.portfolio.integration.api.service.v1.TransactionManagementApi;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-@RequiredArgsConstructor
 @Slf4j
-public class PortfolioApiConfiguration {
+@ConfigurationProperties("backbase.communication.services.portfolio")
+public class PortfolioApiConfiguration extends ApiClientConfig {
 
-    private final BackbaseStreamConfigurationProperties backbaseStreamConfigurationProperties;
+    public static final String PORTFOLIO_SERVICE_ID = "portfolio";
+
+    public PortfolioApiConfiguration() {
+        super(PORTFOLIO_SERVICE_ID);
+    }
+
+    @Bean
+    public ApiClient portfolioApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), objectMapper,
+            dateFormat)
+            .setBasePath(createBasePath());
+    }
 
     @Bean
     public TransactionCategoryManagementApi transactionCategoryManagementApi(ApiClient portfolioApiClient) {
@@ -80,15 +88,6 @@ public class PortfolioApiConfiguration {
     @Bean
     public SubPortfolioManagementApi subPortfolioManagementApi(ApiClient portfolioApiClient) {
         return new SubPortfolioManagementApi(portfolioApiClient);
-    }
-
-    @Bean
-    ApiClient portfolioApiClient(@Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
-        ObjectMapper objectMapper, DateFormat dateFormat) {
-
-        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(backbaseStreamConfigurationProperties.getDbs().getPortfolioBaseUrl());
-        return apiClient;
     }
 
 }

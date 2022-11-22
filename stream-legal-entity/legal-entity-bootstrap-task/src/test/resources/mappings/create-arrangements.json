@@ -1,7 +1,18 @@
 {
   "request": {
     "method": "POST",
-    "url": "/arrangement-manager/service-api/v2/arrangements/batch"
+    "url": "/arrangement-manager/service-api/v2/arrangements/batch",
+    "headers": {
+      "X-B3-TraceId": {
+        "matches": "[\\w-]+"
+      },
+      "X-B3-SpanId": {
+        "matches": "[\\w-]+"
+      },
+      "X-TID": {
+        "contains": "tenant1"
+      }
+    }
   },
   "response": {
     "status": 207,

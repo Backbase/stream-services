@@ -1,6 +1,6 @@
 package com.backbase.stream.webclient.filter;
 
-import static com.backbase.stream.webclient.DbsWebClientConfiguration.CONTEXT_KEY_FORWARDED_HEADERS;
+import static com.backbase.stream.webclient.configuration.DbsWebClientConfiguration.CONTEXT_KEY_FORWARDED_HEADERS;
 
 import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
 import java.util.List;
@@ -29,10 +29,10 @@ public class HeadersForwardingServerFilter implements WebFilter {
                 .map(ServerHttpRequest::getPath)
                 .map(RequestPath::toString)
                 .orElse("null"));
-        LinkedMultiValueMap<String, String> forwardedHeaders =
+        LinkedMultiValueMap<String, String> headers =
             assemblyHeadersToForward(properties.getHeadersToForward(), exchange.getRequest().getHeaders());
         return chain.filter(exchange)
-            .contextWrite(ctx -> ctx.put(CONTEXT_KEY_FORWARDED_HEADERS, forwardedHeaders));
+            .contextWrite(ctx -> headers.isEmpty() ? ctx : ctx.put(CONTEXT_KEY_FORWARDED_HEADERS, headers));
     }
 
     private LinkedMultiValueMap<String, String> assemblyHeadersToForward(
@@ -40,7 +40,7 @@ public class HeadersForwardingServerFilter implements WebFilter {
         LinkedMultiValueMap<String, String> forwardedHeaders = new LinkedMultiValueMap<>();
         headersToForward.forEach(headerKey -> {
             List<String> headerValues = requestHeaders.get(headerKey);
-            if (headerValues != null) {
+            if (headerValues != null && !headerValues.isEmpty()) {
                 log.debug("Forwarding header: {}={}", headerKey, headerValues);
                 forwardedHeaders.addAll(headerKey, headerValues);
             }

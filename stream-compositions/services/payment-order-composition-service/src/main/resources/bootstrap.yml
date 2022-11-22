@@ -1,6 +1,6 @@
 spring:
   application:
-    name: payment-order-composition-service
+    name: payment-order-composition
   cloud:
     kubernetes:
       config:

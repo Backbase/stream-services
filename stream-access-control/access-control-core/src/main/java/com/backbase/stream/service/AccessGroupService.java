@@ -14,11 +14,42 @@ import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.*;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ArrangementPrivilegesGetResponseBody;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.DataGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.DataGroupItemSystemBase;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.Functiongroupupdate;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.IdItem;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ListOfFunctionGroupsWithDataGroups;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPermissions;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationApprovalStatus;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAssignUserPermissions;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupItemPutRequestBody;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionDataGroup;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupDataGroup;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupPutRequestBody;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationGenericObjectId;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationItemIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantBatchUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermissionFunctionGroupUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationSearchDataGroupsRequest;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUserPair;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUsersBatchUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties.DeletionProperties.FunctionGroupItemType;
+import com.backbase.stream.configuration.DeletionProperties;
+import com.backbase.stream.configuration.DeletionProperties.FunctionGroupItemType;
 import com.backbase.stream.legalentity.model.ApprovalStatus;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -61,6 +92,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,8 +102,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * Access Group Service provide access to Access Control, Data Groups and Function Groups from a single service.
@@ -113,7 +143,7 @@ public class AccessGroupService {
     @NonNull
     private final ServiceAgreementsApi serviceAgreementsApi;
     @NonNull
-    private final BackbaseStreamConfigurationProperties configurationProperties;
+    private final DeletionProperties deletionProperties;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
@@ -511,7 +541,7 @@ public class AccessGroupService {
 
         return Mono.just(request)
             .flatMap(userPermissionsRequest -> {
-                if (task.getIngestionMode().equals(BatchProductGroupTask.IngestionMode.REPLACE)) {
+                if (task.getIngestionMode().isFunctionGroupsReplaceEnabled()) {
                     task.info(ACCESS_GROUP, "assign-permissions", "", "", null, "Replacing assigned permissions for users: %s with: %s", prettyPrintExternalIds(userPermissionsRequest), prettyPrintDataGroups(userPermissionsRequest));
                     return Mono.just(userPermissionsRequest);
                 }
@@ -745,7 +775,7 @@ public class AccessGroupService {
             .map(StreamUtils::getInternalProductIds)
             .flatMap(List::stream)
             .collect(Collectors.toSet());
-        if (BatchProductGroupTask.IngestionMode.REPLACE.equals(task.getIngestionMode())) {
+        if (task.getIngestionMode().isDataGroupsReplaceEnabled()) {
             // if REPLACE mode, existing products (not sent in the request) also need to be added to the set of affected arrangements.
             affectedArrangements.addAll(existingDataGroups.stream()
                 .map(DataGroupItem::getItems)
@@ -993,7 +1023,7 @@ public class AccessGroupService {
      */
     public Mono<Void> deleteFunctionGroupsForServiceAgreement(String serviceAgreementInternalId) {
         log.debug("Retrieving Function Groups for Service Agreement {}", serviceAgreementInternalId);
-        if (configurationProperties.getDbs().getDeletion().getFunctionGroupItemType().equals(FunctionGroupItemType.NONE)) {
+        if (deletionProperties.getFunctionGroupItemType().equals(FunctionGroupItemType.NONE)) {
             log.info("Skipped deleting Function Groups due to deletion configuration set to NONE");
             return Mono.empty();
         }

@@ -3,7 +3,6 @@ package com.backbase.stream.service;
 import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
 import static org.mockito.ArgumentMatchers.any;
 
-
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupApi;
@@ -25,7 +24,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermissio
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermissionFunctionGroupUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.Privilege;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
-import com.backbase.stream.config.BackbaseStreamConfigurationProperties;
+import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobRole;
@@ -39,7 +38,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,7 +85,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
     private ServiceAgreementsApi serviceAgreementsApi;
 
     @Mock
-    private BackbaseStreamConfigurationProperties configurationProperties;
+    private DeletionProperties deletionProperties;
 
     @Test
     void setupJobRole() {

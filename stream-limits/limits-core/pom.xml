@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-limits</artifactId>
-        <version>3.7.2-SNAPSHOT</version>
+        <version>3.14.1</version>
     </parent>
 
     <artifactId>limits-core</artifactId>
@@ -17,12 +17,6 @@
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-configuration</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-dbs-clients</artifactId>

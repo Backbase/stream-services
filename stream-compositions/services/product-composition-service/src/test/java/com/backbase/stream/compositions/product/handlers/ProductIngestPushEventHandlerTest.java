@@ -5,18 +5,17 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
-import com.backbase.com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPushEvent;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPushEvent;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import com.backbase.stream.legalentity.model.ProductGroup;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
-
-import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class ProductIngestPushEventHandlerTest {

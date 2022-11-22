@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-approvals</artifactId>
-        <version>3.7.2-SNAPSHOT</version>
+        <version>3.14.1</version>
     </parent>
 
     <artifactId>approvals-core</artifactId>
@@ -15,6 +15,7 @@
 
     <properties>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
+        <sonar.tests />
     </properties>
 
     <dependencies>

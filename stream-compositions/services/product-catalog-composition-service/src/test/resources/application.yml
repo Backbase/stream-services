@@ -24,6 +24,17 @@ sso:
 
 backbase:
   communication:
+    services:
+      usermanager:
+        service-port: 8080
+      access-control:
+        service-port: 8080
+      arrangement:
+        manager:
+          service-port: 8080
+      identity:
+        integration:
+          service-port: 8080
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -40,12 +51,6 @@ backbase:
     legalentity:
       sink:
         useIdentityIntegration: true
-    dbs:
-      user-manager-base-url: http://user-manager:8080
-      access-control-base-url: http://access-control:8080
-      arrangement-manager-base-url: http://arrangement-manager:8080
-    identity:
-      identity-integration-base-url: http://identity-integration-service:8080
     compositions:
       product-catalog:
         enable-completed-events: false

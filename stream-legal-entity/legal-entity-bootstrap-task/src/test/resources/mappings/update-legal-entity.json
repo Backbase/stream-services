@@ -1,7 +1,18 @@
 {
   "request": {
     "method": "PUT",
-    "url": "/access-control/service-api/v2/legalentities"
+    "url": "/access-control/service-api/v2/legalentities",
+    "headers": {
+      "X-B3-TraceId": {
+        "matches": "[\\w-]+"
+      },
+      "X-B3-SpanId": {
+        "matches": "[\\w-]+"
+      },
+      "X-TID": {
+        "contains": "tenant1"
+      }
+    }
   },
   "response": {
     "status": 200,

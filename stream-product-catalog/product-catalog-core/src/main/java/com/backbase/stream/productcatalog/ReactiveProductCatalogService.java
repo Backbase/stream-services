@@ -1,6 +1,5 @@
 package com.backbase.stream.productcatalog;
 
-import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.dbs.arrangement.api.service.v2.ProductKindsApi;
 import com.backbase.dbs.arrangement.api.service.v2.ProductsApi;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountProductId;
@@ -17,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -27,16 +27,12 @@ import reactor.core.publisher.Mono;
  * Reactive Product Catalog Service allowing to setup a complete Product Catalog in a single call.
  */
 @Slf4j
+@RequiredArgsConstructor
 public class ReactiveProductCatalogService {
 
     private final ProductsApi productsApi;
     private final ProductKindsApi productKindsApi;
     private final ProductCatalogMapper productCatalogMapper = Mappers.getMapper(ProductCatalogMapper.class);
-
-    public ReactiveProductCatalogService(ApiClient accountPresentationClient) {
-        this.productsApi = new ProductsApi(accountPresentationClient);
-        this.productKindsApi = new ProductKindsApi(accountPresentationClient);
-    }
 
     /**
      * Get Product Catalog from DBS.

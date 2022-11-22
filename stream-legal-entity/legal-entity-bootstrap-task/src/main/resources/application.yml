@@ -34,22 +34,79 @@ bootstrap:
             functions:
               - functionId: "1019"
                 name: "Manage Data Groups"
-                functionCode: "manage.data.groups"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
                   - privilege: "edit"
                   - privilege: "delete"
-                  - privilege: "approve"
               - functionId: "1020"
                 name: "Manage Function Groups"
-                functionCode: "manage.function.groups"
                 privileges:
                   - privilege: "view"
                   - privilege: "create"
                   - privilege: "edit"
                   - privilege: "delete"
-                  - privilege: "approve"
+              - functionId: "1010"
+                name: "Manage Users"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1009"
+                name: "Assign Permissions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+              - functionId: "1028"
+                name: "Manage Service Agreements"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1119"
+                name: "Manage Self-approve Permissions"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1007"
+                name: "Assign Users"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+              - functionId: "1035"
+                name: "Manage User Profiles"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+              - functionId: "1011"
+                name: "Manage Legal Entities"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1034"
+                name: "Manage Identities"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+              - functionId: "1049"
+                name: "Lock User"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+              - functionId: "1050"
+                name: "Unlock User"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+              - functionId: "1084"
+                name: "Revoke access"
+                privileges:
+                  - privilege: "create"
       - name: Retail User - USA
         description: Retail User Permissions for USA
         functionGroups:
