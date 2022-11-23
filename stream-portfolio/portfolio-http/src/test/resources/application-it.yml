@@ -2,24 +2,27 @@ spring:
   zipkin:
     enabled: false
   cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            token-converter:
+              - uri: http://localhost:10000
+            portfolio:
+              - uri: http://localhost:10000
+                metadata:
+                  contextPath: /portfolio
     kubernetes:
       config:
         enabled: false
         enable-api: false
       enabled: false
-  security:
-    oauth2:
-      client:
-        registration:
-          bb:
-            authorization-grant-type: client_credentials
-            client-id: bb-client
-            client-secret: bb-secret
-            client-authentication-method: post
-        provider:
-          bb:
-            token-uri: http://localhost:10000/oauth/token
+
+eureka:
+  client:
+    enabled: false
+
 logging:
   level:
     root: INFO
-    com.backbase.stream: DEBUG
+    '[com.backbase.stream]': DEBUG
