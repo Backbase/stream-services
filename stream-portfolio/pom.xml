@@ -16,5 +16,6 @@
     <modules>
         <module>portfolio-core</module>
         <module>portfolio-bootstrap-task</module>
+        <module>portfolio-http</module>
     </modules>
 </project>

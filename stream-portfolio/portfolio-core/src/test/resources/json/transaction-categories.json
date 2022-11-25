@@ -1,0 +1,14 @@
+{
+  "transaction-categories": [
+    {
+      "key": "income",
+      "alias": "Income",
+      "description": "Transaction Category description"
+    },
+    {
+      "key": "buy",
+      "alias": "Buy",
+      "description": "Transaction Category description"
+    }
+  ]
+}

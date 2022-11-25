@@ -1,0 +1,104 @@
+{
+  "portfolios": [
+    {
+      "code": "ARRANGEMENT_SARA",
+      "name": "96 Years Long Strategy",
+      "alias": "96 Years Long Strategy",
+      "iban": "HU47087157129619760786488054",
+      "riskLevel": "High-Medium",
+      "valuation": {
+        "amount": 8913921.77,
+        "currencyCode": "EUR"
+      },
+      "ytdPerformance": 16.54,
+      "ytdPerformanceValue": {
+        "amount": 24548559.95,
+        "currencyCode": "EUR"
+      },
+      "mtdPerformance": -23.37,
+      "mtdPerformanceValue": {
+        "amount": -93161036.89,
+        "currencyCode": "EUR"
+      },
+      "inValue": {
+        "amount": 83689906.97,
+        "currencyCode": "EUR"
+      },
+      "outValue": {
+        "amount": 21219477.15,
+        "currencyCode": "EUR"
+      },
+      "netValue": {
+        "amount": 80593665.74,
+        "currencyCode": "EUR"
+      },
+      "managers": [
+        {
+          "id": "p1fejk-3tji5o495803jr-43",
+          "name": "Kevin Clark",
+          "link": "http://backbase.com"
+        }
+      ],
+      "attorneys": [
+        {
+          "id": "p1klsjr3904-43nf389-rej2189",
+          "name": "John Doe",
+          "link": "http://backbase.com"
+        }
+      ],
+      "additions": {
+        "someKey": "someValue"
+      }
+    },
+    {
+      "code": "ARRANGEMENT_DAVID",
+      "name": "16 Years Long Strategy",
+      "alias": "16 Years Long Strategy",
+      "iban": "HU47087157129619760786488055",
+      "riskLevel": "High-Medium",
+      "valuation": {
+        "amount": 3913421.88,
+        "currencyCode": "EUR"
+      },
+      "ytdPerformance": 14.54,
+      "ytdPerformanceValue": {
+        "amount": 14548560.95,
+        "currencyCode": "EUR"
+      },
+      "mtdPerformance": -34.37,
+      "mtdPerformanceValue": {
+        "amount": -63161057.89,
+        "currencyCode": "EUR"
+      },
+      "inValue": {
+        "amount": 53689903.33,
+        "currencyCode": "EUR"
+      },
+      "outValue": {
+        "amount": 32329477.15,
+        "currencyCode": "EUR"
+      },
+      "netValue": {
+        "amount": 31593665.32,
+        "currencyCode": "EUR"
+      },
+      "managers": [
+        {
+          "id": "p1fgjk-3tjt5o495803jr-46",
+          "name": "Jane Johnson",
+          "link": "http://backbase.com"
+        }
+      ],
+      "attorneys": [
+        {
+          "id": "p1dlsjr3304-43nf329-rej2129",
+          "name": "Jack Doe",
+          "link": "http://backbase.com"
+        }
+      ],
+      "additions": {
+        "someKey": "someValue"
+      }
+    }
+  ]
+}

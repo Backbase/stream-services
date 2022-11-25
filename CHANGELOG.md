@@ -1,9 +1,25 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.15.0](https://github.com/Backbase/stream-services/compare/3.14.1...3.15.0)
+### Added
+- Add **portfolio-http**
+- Add `POST /portfolios/regions/batch` endpoint to portfolio
+- Add `POST /portfolios/asset-classes/batch` endpoint to portfolio
+- Add `POST /portfolios/batch` endpoint to portfolio
+- Add `POST /portfolios/sub-portfolios/batch` endpoint to portfolio
+- Add `POST /portfolios/allocations/batch` endpoint to portfolio
+- Add `POST /portfolios/valuations/batch` endpoint to portfolio
+- Add `POST /portfolios/transaction-categories/batch` endpoint to portfolio
+- Add `POST /portfolios/instruments/batch` endpoint to portfolio
+- Add `POST /portfolios/hierarchies/batch` endpoint to portfolio
+- Add `POST /portfolios/positions/batch` endpoint to portfolio
+- Add `POST /portfolios/transactions/batch` endpoint to portfolio
+
 ## [3.14.1](https://github.com/Backbase/stream-services/compare/3.14.0...3.14.1)
 ### Changed
 - Cherry-picking fixes from 3.7.1 for stream composition payment order mapping.
+
 ### Added
 - Adding ReDoc documentation for Stream Compositions APIs
 
@@ -14,6 +30,7 @@ New class keeps ingestion modes separately for each main resource involved in Ba
 function groups, data groups and arrangements. Two preset modes have been created: BatchProductIngestionMode.UPSERT and 
 BatchProductIngestionMode.REPLACE (equivalents of previous UPDATE and REPLACE, respectively), but new ones can be 
 composed of any "sub modes" combination.
+
 ## [3.10.1](https://github.com/Backbase/stream-services/compare/3.10.0...3.10.1)
 ### Changed
 - Adjusting property `backbase.stream.client.headers-to-forward` to take precedence over `backbase.stream.client.additional-headers`.

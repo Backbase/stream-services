@@ -1,0 +1,82 @@
+[
+  {
+    "instrument": {
+      "id": 526016263840848,
+      "name": "Apple",
+      "instrumentNameLong": "Apple",
+      "code": 526016263840848,
+      "instrumentCodeCustom": "US0378331005",
+      "price": {
+        "amount": 2.16,
+        "currencyCode": "USD"
+      },
+      "subAssetClassCode": "avPl3Z7O0",
+      "country": "NL",
+      "ticker": "AAPL",
+      "exchange": "NASDAQ",
+      "pricePerformance": 123.24,
+      "canTrade": true,
+      "about": {
+        "about": "It's About content",
+        "address": "Kyiv, Volodymyrska 101 st.",
+        "phoneNumber": 123456654321,
+        "link": "http://backbase.com"
+      },
+      "keyStatistics": {
+        "exchangeRate": 1.21,
+        "changeInNetAssetValue": 7.81,
+        "fundStatus": "open-ended fund",
+        "totalAssets": 134.3,
+        "trailingTwelveMonthsYield": 1.4,
+        "oneYearReturn": 68.97,
+        "effectiveDuration": 4.51,
+        "portfolioAssetsAllocation": "Equity",
+        "turnover": 30,
+        "creditRating": "AAA",
+        "priceToEarningsRatio": 37.59,
+        "estPriceToEarningsRatio": 31.06,
+        "priceToEarningsToGrowthRatio": 3.09,
+        "sharesOutstanding": 17.002,
+        "priceToBookRatio": 32.07,
+        "earningsPerShare": 1.39,
+        "dividendYield": 0.66,
+        "lastDividendReported": 0.2,
+        "nextEarningsAnnouncement": "2021-01-26T00:00:00.000Z",
+        "coupon": 5.63,
+        "maturity": "2028-01-04T00:00:00.000Z",
+        "yieldToMaturity": 0,
+        "duration": 7.63,
+        "couponFrequency": "annually",
+        "unrealizedPLPct": 4.14,
+        "unrealizedPL": 4.14,
+        "accruedInterestOnBond": 4.14,
+        "additionalKeyStatistics": {
+          "purchasePrice": 118.34,
+          "totalAssets": 50,
+          "coupon": false
+        }
+      },
+      "additions": {
+        "someKey": "someValue"
+      }
+    },
+    "history-prices": [
+      {
+        "price": {
+          "amount": 2.97,
+          "currencyCode": "USD"
+        },
+        "date": "2021-01-01T00:00:00.000Z",
+        "priceType": "OPEN"
+      },
+      {
+        "price": {
+          "amount": 2.24,
+          "currencyCode": "USD"
+        },
+        "date": "2021-02-01T00:00:00.000Z",
+        "priceType": "CLOSE"
+      }
+    ]
+  }
+]

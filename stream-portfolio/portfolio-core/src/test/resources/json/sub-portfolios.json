@@ -1,0 +1,50 @@
+{
+  "batchSubPortfolios": [
+    {
+      "portfolioCode": "1234",
+      "subPortfolios": [
+        {
+          "code": 1427804,
+          "name": "Peden, Neil - CAP - GIA - 960464",
+          "valuation": {
+            "amount": "983045.74",
+            "currencyCode": "USD"
+          },
+          "percentOfParent": "100"
+        },
+        {
+          "code": 1427805,
+          "name": "Peden, Neil - INC - GIA - 960464",
+          "valuation": {
+            "amount": 0,
+            "currencyCode": "USD"
+          },
+          "percentOfParent": 0
+        }
+      ]
+    },
+    {
+      "portfolioCode": "5678",
+      "subPortfolios": [
+        {
+          "code": 4424803,
+          "name": "Peden, Neil - CAP - GIA - 810426",
+          "valuation": {
+            "amount": "683035.74",
+            "currencyCode": "USD"
+          },
+          "percentOfParent": "100"
+        },
+        {
+          "code": 3424806,
+          "name": "Peden, Neil - INC - GIA - 360466",
+          "valuation": {
+            "amount": 3,
+            "currencyCode": "USD"
+          },
+          "percentOfParent": 1
+        }
+      ]
+    }
+  ]
+}
