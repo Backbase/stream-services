@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.16.0](https://github.com/Backbase/stream-services/compare/3.15.0...3.16.0)
+### Changed
+- Upgraded to SSDK 15.1.0 (pinned spring-cloud-kubernetes version to 2.1.13)
+- Upgraded to Banking Services 2022.10.3
+
 ## [3.15.1](https://github.com/Backbase/stream-services/compare/3.15.0...3.15.1)
 ### Changed
 - Adding null checks for ingesting legal entity, service agreement and arrangements with no users - User pre enrolment scenario.
