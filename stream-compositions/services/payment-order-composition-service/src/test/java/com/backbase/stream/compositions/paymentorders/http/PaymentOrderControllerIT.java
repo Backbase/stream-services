@@ -1,15 +1,17 @@
 package com.backbase.stream.compositions.paymentorders.http;
 
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
-import com.backbase.stream.PaymentOrderService;
-import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPullIngestionRequest;
-import com.backbase.stream.model.PaymentOrderIngestContext;
-import com.backbase.stream.paymentorder.PaymentOrderTask;
-import com.backbase.stream.worker.model.UnitOfWork;
-import com.backbase.streams.compositions.test.IntegrationTest;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import lombok.extern.slf4j.Slf4j;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,21 +28,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
+import com.backbase.stream.PaymentOrderService;
+import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPullIngestionRequest;
+import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
+import com.backbase.stream.paymentorder.PaymentOrderTask;
+import com.backbase.stream.worker.model.UnitOfWork;
+import com.backbase.streams.compositions.test.IntegrationTest;
+
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 @DirtiesContext
 @SpringBootTest
@@ -102,16 +100,10 @@ class PaymentOrderControllerIT extends IntegrationTest {
         URI uri = URI.create("/service-api/v2/ingest/pull");
         WebTestClient webTestClient = WebTestClient.bindToController(paymentOrderController).build();
 
-        Type typeOfObjectsList = TypeToken.getParameterized(ArrayList.class, PaymentOrderPostResponse.class).getType();
-
-        List<PaymentOrderPostResponse> paymentOrderPostResponses = new Gson()
-                .fromJson(readContentFromClasspath("integration-data/response.json"), typeOfObjectsList);
-
-        PaymentOrderIngestContext paymentOrderIngestContext = new PaymentOrderIngestContext();
-        paymentOrderIngestContext.newPaymentOrderResponse(paymentOrderPostResponses);
+        List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
 
         PaymentOrderTask dbsResTask = new PaymentOrderTask("id", null);
-        dbsResTask.setResponse(paymentOrderIngestContext);
+        dbsResTask.setResponses(responses);
 
         when(paymentOrderService.processPaymentOrder(any())).thenReturn(
                 Flux.just(UnitOfWork.from("id", dbsResTask)));

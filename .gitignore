@@ -7,6 +7,7 @@ target
 .project
 .settings
 .classpath
+.checkstyle
 **/*.log
 bin
 .DS_Store

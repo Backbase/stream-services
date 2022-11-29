@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutRequest;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.compositions.paymentorders.core.config.PaymentOrderConfigurationProperties;
 import com.backbase.stream.compositions.paymentorders.core.mapper.PaymentOrderMapper;
@@ -25,7 +26,11 @@ import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIng
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderIngestionService;
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderIntegrationService;
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderPostIngestionService;
-import com.backbase.stream.model.PaymentOrderIngestContext;
+import com.backbase.stream.model.request.DeletePaymentOrderIngestRequest;
+import com.backbase.stream.model.request.NewPaymentOrderIngestRequest;
+import com.backbase.stream.model.request.PaymentOrderIngestRequest;
+import com.backbase.stream.model.request.UpdatePaymentOrderIngestRequest;
+import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
 import com.backbase.stream.paymentorder.PaymentOrderTask;
 import com.backbase.stream.worker.model.UnitOfWork;
 
@@ -90,14 +95,16 @@ class PaymentOrderIngestionServiceImplTest {
         when(paymentOrderIntegrationService.pullPaymentOrder(paymentOrderIngestPullRequest))
             .thenReturn(paymentOrderPostRequestFlux);
 
-        PaymentOrderPostRequest paymentOrderPostRequestMapped = new PaymentOrderPostRequest();
-
         String unitOfOWorkId = "payment-orders-mixed-" + System.currentTimeMillis();
-        List<PaymentOrderPostRequest> data = new ArrayList<PaymentOrderPostRequest>();
-        data.add(paymentOrderPostRequestMapped);
+        List<PaymentOrderIngestRequest> data = new ArrayList<>();
+        data.add(new NewPaymentOrderIngestRequest(new PaymentOrderPostRequest()));
+        data.add(new UpdatePaymentOrderIngestRequest(new PaymentOrderPutRequest()));
+        data.add(new DeletePaymentOrderIngestRequest("paymentOrderId", "bankReferenceId"));
+
+        List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
 
         PaymentOrderTask paymentOrderTask = new PaymentOrderTask(unitOfOWorkId, data);
-        paymentOrderTask.setResponse(new PaymentOrderIngestContext());
+        paymentOrderTask.setResponses(responses);
 
         Stream<UnitOfWork<PaymentOrderTask>> unitOfWorkStream = Stream.of(
             UnitOfWork.from(unitOfOWorkId, paymentOrderTask)
