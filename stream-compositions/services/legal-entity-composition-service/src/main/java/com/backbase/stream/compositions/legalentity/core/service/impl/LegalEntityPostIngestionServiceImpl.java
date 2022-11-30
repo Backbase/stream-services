@@ -12,15 +12,19 @@ import com.backbase.stream.compositions.legalentity.core.service.LegalEntityPost
 import com.backbase.stream.compositions.product.client.ProductCompositionApi;
 import com.backbase.stream.compositions.product.client.model.ProductIngestionResponse;
 import com.backbase.stream.compositions.product.client.model.ProductPullIngestionRequest;
-import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
+import static java.util.Objects.nonNull;
 
 @Service
 @Slf4j
@@ -106,20 +110,45 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
     private Mono<ProductPullIngestionRequest> buildProductPullRequest(LegalEntityResponse res) {
         LegalEntity legalEntity = res.getLegalEntity();
-
-        JobProfileUser jpUser = legalEntity.getUsers().get(0);
-        User user = jpUser.getUser();
+        ServiceAgreement serviceAgreement = getServiceAgreementFromLegalEntity(legalEntity);
+        User user = getUserFromLegalEntity(legalEntity);
+        List<String> referenceJobRoleNames = getReferenceobRoleNamesFromLegalEntity(legalEntity);
 
         return Mono.just(new ProductPullIngestionRequest()
                 .withLegalEntityInternalId(legalEntity.getInternalId())
                 .withLegalEntityExternalId(legalEntity.getExternalId())
-                .withServiceAgreementExternalId(legalEntity.getMasterServiceAgreement().getExternalId())
-                .withServiceAgreementInternalId(legalEntity.getMasterServiceAgreement().getInternalId())
+                .withServiceAgreementExternalId(serviceAgreement.getExternalId())
+                .withServiceAgreementInternalId(serviceAgreement.getInternalId())
                 .withMembershipAccounts(res.getMembershipAccounts())
                 .withUserExternalId(user.getExternalId())
                 .withUserInternalId(user.getInternalId())
                 .withAdditions(res.getAdditions())
-                .withReferenceJobRoleNames(jpUser.getReferenceJobRoleNames()));
+                .withReferenceJobRoleNames(referenceJobRoleNames));
+    }
+
+    private User getUserFromLegalEntity(LegalEntity lg) {
+        if(nonNull(lg.getUsers()) && !lg.getUsers().isEmpty()) {
+            return lg.getUsers().get(0).getUser();
+        } else {
+            return new User();
+        }
+    }
+
+    private List<String> getReferenceobRoleNamesFromLegalEntity(LegalEntity lg) {
+        if(
+                nonNull(lg.getUsers()) &&
+                        !lg.getUsers().isEmpty() &&
+                        nonNull(lg.getUsers().get(0).getReferenceJobRoleNames())) {
+            return lg.getUsers().get(0).getReferenceJobRoleNames();
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    private ServiceAgreement getServiceAgreementFromLegalEntity(LegalEntity lg) {
+        return nonNull(lg.getMasterServiceAgreement()) ?
+                lg.getMasterServiceAgreement() :
+                lg.getCustomServiceAgreement();
     }
 
     private Mono<ProductIngestionResponse> handleProductError(Throwable t) {

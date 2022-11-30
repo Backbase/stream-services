@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.15.1](https://github.com/Backbase/stream-services/compare/3.15.0...3.15.1)
+### Changed
+- Adding null checks for ingesting legal entity, service agreement and arrangements with no users - User pre enrolment scenario.
+
 ## [3.15.0](https://github.com/Backbase/stream-services/compare/3.14.1...3.15.0)
 ### Added
 - Add **portfolio-http**
