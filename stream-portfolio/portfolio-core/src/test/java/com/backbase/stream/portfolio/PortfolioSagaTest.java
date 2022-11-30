@@ -1,14 +1,5 @@
 package com.backbase.stream.portfolio;
 
-import com.backbase.stream.portfolio.model.AggregatePortfolio;
-import com.backbase.stream.portfolio.model.AssetClassBundle;
-import com.backbase.stream.portfolio.model.InstrumentBundle;
-import com.backbase.stream.portfolio.model.PortfolioBundle;
-import com.backbase.stream.portfolio.model.PositionBundle;
-import com.backbase.stream.portfolio.model.RegionBundle;
-import com.backbase.stream.portfolio.model.WealthBundle;
-import com.backbase.stream.portfolio.service.InstrumentIntegrationService;
-import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,6 +9,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.backbase.stream.portfolio.model.AggregatePortfolio;
+import com.backbase.stream.portfolio.model.AssetClassBundle;
+import com.backbase.stream.portfolio.model.InstrumentBundle;
+import com.backbase.stream.portfolio.model.PortfolioBundle;
+import com.backbase.stream.portfolio.model.PositionBundle;
+import com.backbase.stream.portfolio.model.RegionBundle;
+import com.backbase.stream.portfolio.model.WealthBundle;
+import com.backbase.stream.portfolio.service.InstrumentIntegrationService;
+import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -26,7 +26,8 @@ class PortfolioSagaTest {
 
     @Mock
     private PortfolioIntegrationService portfolioIntegrationService;
-    @Mock()
+    
+    @Mock
     private InstrumentIntegrationService instrumentIntegrationService;
 
     @Mock

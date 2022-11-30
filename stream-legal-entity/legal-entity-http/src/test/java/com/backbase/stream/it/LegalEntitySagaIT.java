@@ -3,7 +3,16 @@ package com.backbase.stream.it;
 import static com.backbase.stream.it.LegalEntitySagaIT.NotEmptyPattern.notEmpty;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-
+import java.util.Arrays;
+import java.util.Collections;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.CurrentAccount;
@@ -23,22 +32,12 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.StringValuePattern;
-import java.util.Arrays;
-import java.util.Collections;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest
 @ActiveProfiles("it")
 @WireMockTest(httpPort = 10000)
-@AutoConfigureWebTestClient
-public class LegalEntitySagaIT {
+@AutoConfigureWebTestClient(timeout = "20000")
+class LegalEntitySagaIT {
 
     @Autowired
     private WebTestClient webTestClient;

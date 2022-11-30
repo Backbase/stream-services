@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: Portfolio Ingestion API
   description: Ingestion Saga for Portfolio
@@ -12,6 +12,7 @@ servers:
     description: The server
 tags:
 - name: portfolios
+  description: Portfolios API
 paths:
   ###############################################
   ## Portfolio
@@ -19,9 +20,9 @@ paths:
   /portfolios:
     post:
       tags:
-        - portfolio
+        - portfolios
       summary: Create Wealth of Portfolios
-      operationId: createPortfolioBundlee
+      operationId: createPortfolios
       requestBody:
         content:
           application/json:
@@ -38,6 +39,314 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WealthBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/regions/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Portfolios Regions Batch
+      operationId: createPortfioliosRegionsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/RegionBundle'
+      responses:
+        200:
+          description: The created region and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RegionBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/asset-classes/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Portfolios Asset Classes Batch
+      operationId: createPortfioliosAssetClassesBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AssetClassBundle'
+      responses:
+        200:
+          description: The created asset classes and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssetClassBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Portfolios Batch
+      operationId: createPortfioliosBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: schemas/v1/portfolio.yaml
+      responses:
+        200:
+          description: The created portfolios and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: schemas/v1/portfolio.yaml
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/sub-portfolios/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Sub Portfolios Batch
+      operationId: createSubPortfioliosBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/SubPortfolioBundle'
+      responses:
+        200:
+          description: The created sub portfolios and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubPortfolioBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/allocations/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Allocations Batch
+      operationId: createAllocationsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/AllocationBundle'
+      responses:
+        200:
+          description: The created Allocations and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AllocationBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/valuations/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Valuations Batch
+      operationId: createValuationsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ValuationsBundle'
+      responses:
+        200:
+          description: The created Valuations and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ValuationsBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/transaction-categories/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Transaction Categories Batch
+      operationId: createTransactionCategoriesBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: schemas/v1/transaction-category.yaml
+      responses:
+        200:
+          description: The created Valuations and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: schemas/v1/transaction-category.yaml
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/instruments/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Instruments Batch
+      operationId: createInstrumentsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/InstrumentBundle'
+      responses:
+        200:
+          description: The created Instruments and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InstrumentBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/hierarchies/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Hierarchies Batch
+      operationId: createHierarchiesBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/HierarchyBundle'
+      responses:
+        200:
+          description: The created Hierarchies and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HierarchyBundle'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/positions/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Positions Batch
+      operationId: createPositionsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: schemas/v1/position.yaml
+      responses:
+        200:
+          description: The created Positions and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: schemas/v1/position.yaml
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /portfolios/transactions/batch:
+    post:
+      tags:
+        - portfolios
+      summary: Create Transactions Batch
+      operationId: createTransactionsBatch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TransactionBundle'
+      responses:
+        200:
+          description: The created Hierarchies and all their objects with internal ids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionBundle'
         default:
           description: Error
           content:
@@ -101,6 +410,36 @@ components:
           type: array
           items:
             $ref: schemas/v1/portfolio-valuation.yaml
+    SubPortfolioBundle:
+      type: object
+      properties:
+        portfolioCode:
+          type: string
+          description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+        subPortfolios:
+          type: array
+          items:
+            $ref: schemas/v1/sub-portfolio.yaml
+    AllocationBundle:
+      type: object
+      properties:
+        portfolioCode:
+          type: string
+          description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+        allocations:
+          type: array
+          items:
+            $ref: schemas/v1/allocation.yaml
+    ValuationsBundle:
+      type: object
+      properties:
+        portfolioCode:
+          type: string
+          description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+        valuations:
+          type: array
+          items:
+            $ref: schemas/v1/portfolio-valuation.yaml
     PositionBundle:
       type: object
       properties:
@@ -120,6 +459,36 @@ components:
           type: array
           items:
             $ref: schemas/v1/position-transaction.yaml
+    HierarchyBundle:
+      type: object
+      properties:
+        portfolioCode:
+          type: string
+          description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+        hierarchies:
+          type: array
+          items:
+            $ref: schemas/v1/portfolio-positions-hierarchy.yaml
+    PositionTransactionBundle:
+      type: object
+      properties:
+        positionId:
+          type: string
+          description: Unique identificator for a position.
+        transactions:
+          type: array
+          items:
+            $ref: schemas/v1/position-transaction.yaml
+    TransactionBundle:
+      type: object
+      properties:
+        portfolioCode:
+          type: string
+          description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PositionTransactionBundle'
     WealthBundle:
       type: object
       properties:
@@ -153,7 +522,94 @@ components:
           type: array
           items:
             $ref: schemas/v1/aggregate-portfolio.yaml
-
+    WealthRegionsBundle:
+      type: object
+      properties:
+        regions:
+          description: Wealth Regions Bundle (regions and countries)
+          type: array
+          items:
+            $ref: '#/components/schemas/RegionBundle'
+    WealthAssetBundle:
+      type: object
+      properties:
+        assetClasses:
+          description: Asset Class Bundle (asset and sub-asset classes)
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetClassBundle'
+    WealthPortfolioBundle:
+      type: object
+      properties:
+        portfolios:
+          description: Portfolios and reference objects
+          type: array
+          items:
+            $ref: schemas/v1/portfolio.yaml
+    WealthSubPortfolioBundle:
+      type: object
+      properties:
+        batchSubPortfolios:
+          description: Sub Portfolios and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/SubPortfolioBundle'
+    WealthPortfolioAllocationsBundle:
+      type: object
+      properties:
+        batchPortfolioAllocations:
+          description: Allocations and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/AllocationBundle'
+    WealthPortfolioValuationsBundle:
+      type: object
+      properties:
+        batchPortfolioValuations:
+          description: Valuations and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/ValuationsBundle'
+    WealthTransactionCategoriesBundle:
+      type: object
+      properties:
+        transaction-categories:
+          description: Transaction categories
+          type: array
+          items:
+            $ref: schemas/v1/transaction-category.yaml
+    WealthInstrumentBundle:
+      type: object
+      properties:
+        instruments:
+          description: Instruments and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/InstrumentBundle'
+    WealthPortfolioPositionHierarchyBundle:
+      type: object
+      properties:
+        batchPortfolioPositionsHierarchies:
+          description: Hierarchies and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/HierarchyBundle'
+    WealthPositionsBundle:
+      type: object
+      properties:
+        positions:
+          description: Poitions and reference objects
+          type: array
+          items:
+            $ref: schemas/v1/position.yaml
+    WealthPortfolioTransactionBundle:
+      type: object
+      properties:
+        batchPortfolioTransactions:
+          description: Transactions and reference objects
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionBundle'
     Error:
       type: object
       properties:

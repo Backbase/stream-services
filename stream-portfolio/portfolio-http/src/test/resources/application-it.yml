@@ -1,0 +1,28 @@
+spring:
+  zipkin:
+    enabled: false
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            token-converter:
+              - uri: http://localhost:10000
+            portfolio:
+              - uri: http://localhost:10000
+                metadata:
+                  contextPath: /portfolio
+    kubernetes:
+      config:
+        enabled: false
+        enable-api: false
+      enabled: false
+
+eureka:
+  client:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    '[com.backbase.stream]': DEBUG

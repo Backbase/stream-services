@@ -54,7 +54,7 @@ public interface PortfolioMapper {
     @ValueMapping(source = MappingConstants.ANY_UNMAPPED, target = MappingConstants.NULL)
     AllocationType map(String allocationTypeEnum);
 
-    List<PortfolioPositionsHierarchyItem> mapHierarchies(List<PortfolioPositionsHierarchy> allocations);
+    List<PortfolioPositionsHierarchyItem> mapHierarchies(List<PortfolioPositionsHierarchy> hierarchies);
 
     List<PortfolioCumulativePerformancesItem> mapCumulativePerformances(
         List<PortfolioCumulativePerformances> cumulativePerformances);
@@ -76,6 +76,8 @@ public interface PortfolioMapper {
     @Mapping(target = "subPortfolioCode", source = "subPortfolioId")
     @Mapping(target = ".", source = "position")
     PositionsPostRequest mapPosition(String portfolioId, String subPortfolioId, Position position);
+    
+    PositionsPostRequest mapPostPosition(Position position);
 
     PositionsPutRequest mapPutPosition(Position position);
 

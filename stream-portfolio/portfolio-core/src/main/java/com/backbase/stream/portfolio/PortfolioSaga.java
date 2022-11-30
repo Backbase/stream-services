@@ -1,5 +1,7 @@
 package com.backbase.stream.portfolio;
 
+import org.springframework.cloud.sleuth.annotation.ContinueSpan;
+import org.springframework.cloud.sleuth.annotation.SpanTag;
 import com.backbase.stream.portfolio.exceptions.PortfolioBundleException;
 import com.backbase.stream.portfolio.service.InstrumentIntegrationService;
 import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
@@ -7,14 +9,10 @@ import com.backbase.stream.portfolio.service.ReactiveStreamHandler;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.sleuth.annotation.ContinueSpan;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
 public class PortfolioSaga implements StreamTaskExecutor<PortfolioTask> {
 
     private static final String REGION_ENTITY = "REGION_ENTITY";

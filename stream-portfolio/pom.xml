@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>3.12.0</version>
+        <version>3.15.0</version>
     </parent>
 
     <artifactId>stream-portfolio</artifactId>
@@ -16,5 +16,6 @@
     <modules>
         <module>portfolio-core</module>
         <module>portfolio-bootstrap-task</module>
+        <module>portfolio-http</module>
     </modules>
 </project>
