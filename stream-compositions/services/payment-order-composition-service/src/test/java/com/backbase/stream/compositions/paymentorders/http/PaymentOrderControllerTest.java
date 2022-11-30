@@ -8,7 +8,11 @@ import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPullI
 import com.backbase.stream.compositions.paymentorders.core.mapper.PaymentOrderMapper;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestResponse;
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderIngestionService;
-import com.backbase.stream.model.PaymentOrderIngestContext;
+import com.backbase.stream.model.response.DeletePaymentOrderIngestDbsResponse;
+import com.backbase.stream.model.response.NewPaymentOrderIngestDbsResponse;
+import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
+import com.backbase.stream.model.response.UpdatePaymentOrderIngestDbsResponse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,22 +56,19 @@ class PaymentOrderControllerTest {
         Mono<PaymentOrderPullIngestionRequest> requestMono = Mono.just(
                 new PaymentOrderPullIngestionRequest().withInternalUserId("internalUserId"));
 
-        List<PaymentOrderPostResponse> newPaymentOrderResponse = new ArrayList<>();
-        PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse().id("id");
-        newPaymentOrderResponse.add(paymentOrderPostResponse);
-
-        List<UpdateStatusPut> updatedPaymentOrderResponse = new ArrayList<>();
-        List<String> deletePaymentOrderResponse = new ArrayList<>();
+        List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses = new ArrayList<>();
+        paymentOrderIngestDbsResponses.add(new NewPaymentOrderIngestDbsResponse(new PaymentOrderPostResponse()));
+        paymentOrderIngestDbsResponses.add(new UpdatePaymentOrderIngestDbsResponse(new UpdateStatusPut()));
+        paymentOrderIngestDbsResponses.add(new DeletePaymentOrderIngestDbsResponse("paymentOrderId"));
 
         doAnswer(invocation -> {
 
-            return Mono.just(PaymentOrderIngestResponse.builder()
-                            .paymentOrderIngestContext(new PaymentOrderIngestContext()
-                                    .internalUserId("internalId")
-                                    .newPaymentOrderResponse(newPaymentOrderResponse)
-                                    .updatedPaymentOrderResponse(updatedPaymentOrderResponse)
-                                    .deletePaymentOrderResponse(deletePaymentOrderResponse))
-                    .build());
+            return Mono.just(
+                PaymentOrderIngestResponse.builder()
+                    .memberNumber("memberNumber")
+                    .paymentOrderIngestDbsResponses(paymentOrderIngestDbsResponses)
+                    .build()
+            );
         }).when(paymentOrderIngestionService).ingestPull(any());
 
         ResponseEntity<PaymentOrderIngestionResponse> responseEntity = paymentOrderController.pullPaymentOrder(requestMono, null)

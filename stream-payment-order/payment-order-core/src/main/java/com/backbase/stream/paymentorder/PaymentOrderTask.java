@@ -1,9 +1,12 @@
 package com.backbase.stream.paymentorder;
 
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
-import com.backbase.stream.model.PaymentOrderIngestContext;
-import com.backbase.stream.worker.model.StreamTask;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.backbase.stream.model.request.PaymentOrderIngestRequest;
+import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
+import com.backbase.stream.worker.model.StreamTask;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,13 +15,13 @@ import lombok.EqualsAndHashCode;
 public class PaymentOrderTask extends StreamTask {
 
     public PaymentOrderTask(String unitOfWorkId,
-                            List<PaymentOrderPostRequest> data) {
+                            List<PaymentOrderIngestRequest> data) {
         super(unitOfWorkId);
         this.data = data;
     }
 
-    private List<PaymentOrderPostRequest> data;
-    private PaymentOrderIngestContext response;
+    private List<PaymentOrderIngestRequest> data;
+    private List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
 
     @Override
     public String getName() {

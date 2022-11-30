@@ -6,6 +6,7 @@ import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostR
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPullIngestionRequest;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPushIngestionRequest;
 import com.backbase.stream.model.PaymentOrderIngestContext;
+import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
 import com.backbase.stream.paymentorder.PaymentOrderTask;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.streams.compositions.test.IntegrationTest;
@@ -34,6 +35,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -99,31 +101,25 @@ class PaymentOrderControllerIT extends IntegrationTest {
         URI uri = URI.create("/service-api/v2/ingest/pull");
         WebTestClient webTestClient = WebTestClient.bindToController(paymentOrderController).build();
 
-        List<PaymentOrderPostResponse> paymentOrderPostResponses = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .readValue(readContentFromClasspath("integration-data/response.json"), new TypeReference<>() {
-            });
-
-        PaymentOrderIngestContext paymentOrderIngestContext = new PaymentOrderIngestContext();
-        paymentOrderIngestContext.newPaymentOrderResponse(paymentOrderPostResponses);
+        List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
 
         PaymentOrderTask dbsResTask = new PaymentOrderTask("id", null);
-        dbsResTask.setResponse(paymentOrderIngestContext);
+        dbsResTask.setResponses(responses);
 
         when(paymentOrderService.processPaymentOrder(any())).thenReturn(
-            Flux.just(UnitOfWork.from("id", dbsResTask)));
+                Flux.just(UnitOfWork.from("id", dbsResTask)));
 
         PaymentOrderPullIngestionRequest pullIngestionRequest =
-            new PaymentOrderPullIngestionRequest()
-                .withInternalUserId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
-                .withMemberNumber("memberId")
-                .withServiceAgreementInternalId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
-                .withLegalEntityExternalId("leExternalId")
-                .withLegalEntityInternalId("leInternalId");
+                new PaymentOrderPullIngestionRequest()
+                        .withInternalUserId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
+                        .withMemberNumber("memberId")
+                        .withServiceAgreementInternalId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
+                        .withLegalEntityExternalId("leExternalId")
+                        .withLegalEntityInternalId("leInternalId");
         webTestClient.post().uri(uri)
-            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-            .body(Mono.just(pullIngestionRequest), PaymentOrderPullIngestionRequest.class).exchange()
-            .expectStatus().isCreated();
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Mono.just(pullIngestionRequest), PaymentOrderPullIngestionRequest.class).exchange()
+                .expectStatus().isCreated();
 
     }
 
@@ -138,11 +134,10 @@ class PaymentOrderControllerIT extends IntegrationTest {
                 .readValue(readContentFromClasspath("integration-data/response.json"), new TypeReference<>() {
                 });
 
-        PaymentOrderIngestContext paymentOrderIngestContext = new PaymentOrderIngestContext();
-        paymentOrderIngestContext.newPaymentOrderResponse(paymentOrderPostResponses);
+        List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
 
         PaymentOrderTask dbsResTask = new PaymentOrderTask("id", null);
-        dbsResTask.setResponse(paymentOrderIngestContext);
+        dbsResTask.setResponses(responses);
 
         when(paymentOrderService.processPaymentOrder(any())).thenReturn(
                 Flux.just(UnitOfWork.from("id", dbsResTask)));
