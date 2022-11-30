@@ -13,4 +13,6 @@ public class PaymentOrderWorkerConfigurationProperties extends StreamWorkerConfi
     private boolean groupPerArrangementId;
 
     private boolean continueOnError;
+
+    private boolean deletePaymentOrder = true;
 }

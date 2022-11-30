@@ -1,18 +1,21 @@
 package com.backbase.stream.compositions.paymentorders.core.service;
 
-import com.backbase.stream.model.PaymentOrderIngestContext;
+import java.util.List;
+
+import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
+
 import reactor.core.publisher.Mono;
 
 public interface PaymentOrderPostIngestionService {
     /**
      * Post processing for a completed ingestion process
-     * @param response
+     * @param paymentOrderIngestDbsResponses
      */
-     void handleSuccess(PaymentOrderIngestContext response);
+     void handleSuccess(List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses);
 
     /**
      * Post processing for a failed ingestion process
      * @param error
      */
-    Mono<PaymentOrderIngestContext> handleFailure(Throwable error);
+    Mono<List<PaymentOrderIngestDbsResponse>> handleFailure(Throwable error);
 }
