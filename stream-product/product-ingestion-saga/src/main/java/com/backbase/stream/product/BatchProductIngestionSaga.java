@@ -265,7 +265,9 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
 
         return setupBusinessFunctions(task, task.getData().getServiceAgreement(), profileUsers)
                 .flatMap(functionGroups -> {
-                    Collection<JobProfileUser> uniqueUsers = profileUsers.stream().collect(Collectors.toMap(jpu -> jpu.getUser().getExternalId(), u -> u, (u, id) -> u)).values();
+                    Collection<JobProfileUser> uniqueUsers = profileUsers.stream()
+                            .filter(jpu -> jpu.getUser().getExternalId() != null)
+                            .collect(Collectors.toMap(jpu -> jpu.getUser().getExternalId(), u -> u, (u, id) -> u)).values();
                     return Flux.fromIterable(uniqueUsers)
                             .flatMap(user -> processUser(task, user))
                             .collectList()
