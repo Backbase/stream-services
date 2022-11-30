@@ -19,6 +19,7 @@ import com.backbase.dbs.paymentorder.api.service.v2.model.GetPaymentOrderRespons
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterRequest;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterResponse;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.stream.config.PaymentOrderWorkerConfigurationProperties;
 import com.backbase.stream.mappers.PaymentOrderTypeMapper;
 import com.backbase.stream.model.PaymentOrderIngestContext;
 import com.backbase.stream.model.request.DeletePaymentOrderIngestRequest;
@@ -62,7 +63,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
     public Flux<UnitOfWork<PaymentOrderTask>> prepareUnitOfWork(Flux<PaymentOrderPostRequest> items) {
         return items.collectList()
-            .map(paymentOrderPostRequests -> this.createPaymentOrderIngestContext(paymentOrderPostRequests))
+            .map(this::createPaymentOrderIngestContext)
             .flatMap(this::getPersistedScheduledTransfers)
             .flatMapMany(this::getPaymentOrderIngestRequest)
             .bufferTimeout(streamWorkerConfiguration.getBufferSize(), streamWorkerConfiguration.getBufferMaxTime())
@@ -146,11 +147,13 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         });
 
         // build delete payment list (Bank ref is in DBS, but not in core)
-        paymentOrderIngestContext.existingPaymentOrder().forEach(existingPaymentOrder -> {
-            if(!coreBankRefIds.contains(existingPaymentOrder.getBankReferenceId())) {
-                paymentOrderIngestRequests.add(new DeletePaymentOrderIngestRequest(existingPaymentOrder.getId(), existingPaymentOrder.getBankReferenceId()));
-            }
-        });
+        if (((PaymentOrderWorkerConfigurationProperties) streamWorkerConfiguration).isDeletePaymentOrder()) {
+            paymentOrderIngestContext.existingPaymentOrder().forEach(existingPaymentOrder -> {
+                if(!coreBankRefIds.contains(existingPaymentOrder.getBankReferenceId())) {
+                    paymentOrderIngestRequests.add(new DeletePaymentOrderIngestRequest(existingPaymentOrder.getId(), existingPaymentOrder.getBankReferenceId()));
+                }
+            });
+        }
 
         return Flux.fromIterable(paymentOrderIngestRequests);
     }

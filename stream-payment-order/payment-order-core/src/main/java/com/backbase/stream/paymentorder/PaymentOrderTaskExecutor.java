@@ -37,7 +37,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
 
     @Override
     public Mono<PaymentOrderTask> executeTask(PaymentOrderTask streamTask) {
-        
+
       String externalIds = streamTask.getData().stream().map(PaymentOrderIngestRequest::getBankReferenceId)
       .collect(Collectors.joining(","));
 
@@ -99,7 +99,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
             paymentOrderPutRequest.getNextExecutionDate()
         )
             .doOnNext(response -> log.debug("Updated Payment Order status: {}", response))
-            .map(updateStatusPut -> new UpdatePaymentOrderIngestDbsResponse(updateStatusPut));
+            .map(UpdatePaymentOrderIngestDbsResponse::new);
     }
 
     /**
