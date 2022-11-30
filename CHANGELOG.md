@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 3.7.2
+- Fix payment order core implementation logic
+
 ## [3.7.1](https://github.com/Backbase/stream-services/compare/3.7.0...3.7.1)
 - Fix memory leak with UnitOfWorkExecutor
 
