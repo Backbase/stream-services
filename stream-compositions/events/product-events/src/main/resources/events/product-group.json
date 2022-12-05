@@ -1,18 +1,19 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "properties": {
-    "currentAccounts": {
-      "type": "array",
-      "items": {
-        "$ref": "current-account.json"
-      }
+  "properties" : {
+    "serviceAgreement" : {
+      "$ref" : "../spec/generated/legal-entity-openapi-spec.json#/components/schemas/ServiceAgreement"
     },
-    "savingsAccounts": {
-      "type": "array",
-      "items": {
-        "$ref": "savings-account.json"
+    "assignedPermissions" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "../spec/generated/legal-entity-openapi-spec.json#/components/schemas/AssignedPermission"
       }
     }
+  },
+  "description" : "Products assigned to service agreement",
+  "extends":  {
+    "$ref" : "../spec/generated/legal-entity-openapi-spec.json#/components/schemas/BaseProductGroup"
   }
 }
