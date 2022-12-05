@@ -529,12 +529,6 @@
             "items" : {
               "$ref" : "#/components/schemas/UserPreferences"
             }
-          },
-          "additions" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
-            }
           }
         },
         "description" : "The Base product holds all common properties between different product types\n"
@@ -1380,12 +1374,6 @@
             "items" : {
               "$ref" : "#/components/schemas/ExternalContact"
             }
-          },
-          "additions" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
-            }
           }
         },
         "description" : "A Legal Entity is any personal or non-personal entity that is involved in a transaction or an product with the bank. Both the bank and its customers are legal entities\n\nA Legal Entity:\n* Has one or more users that act on its behalf.\n* Owns one or more products.\n* A legal entity hierarchy is a collection of parent-child relationships. For example, within the same deployment, this allows you to:\n* Set up a holding structure for a corporate customer of the bank.\n* Set up a structure within the bank to support country and regional offices.\n"
@@ -1465,12 +1453,6 @@
           },
           "limit" : {
             "$ref" : "#/components/schemas/Limit"
-          },
-          "additions" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
-            }
           },
           "attributes" : {
             "type" : "object",
@@ -1952,12 +1934,6 @@
             "type" : "array",
             "items" : {
               "$ref" : "#/components/schemas/ExternalContact"
-            }
-          },
-          "additions" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
             }
           }
         },
@@ -2586,12 +2562,6 @@
           "favorite" : {
             "type" : "boolean",
             "description" : "Indication whether an arrangement can be favorable for a user"
-          },
-          "additions" : {
-            "type" : "object",
-            "additionalProperties" : {
-              "type" : "string"
-            }
           }
         },
         "description" : "Users defined preferences for a specific arrangement."
@@ -2682,9 +2652,6 @@
           },
           "activeStatus" : {
             "$ref" : "#/components/schemas/ActiveContactStatus"
-          },
-          "additions" : {
-            "$ref" : "#/components/schemas/Additions"
           }
         },
         "description" : "External Contacts"
@@ -2811,9 +2778,6 @@
             "minLength" : 2,
             "type" : "string",
             "description" : "ISO Country Code"
-          },
-          "additions" : {
-            "$ref" : "#/components/schemas/Additions"
           }
         }
       },
