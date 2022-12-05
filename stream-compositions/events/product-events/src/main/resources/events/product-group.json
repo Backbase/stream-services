@@ -3,17 +3,11 @@
   "type": "object",
   "properties" : {
     "serviceAgreement" : {
-      "$ref" : "../spec/generated/legal-entity-openapi-spec.json#/components/schemas/ServiceAgreement"
-    },
-    "assignedPermissions" : {
-      "type" : "array",
-      "items" : {
-        "$ref" : "../spec/generated/legal-entity-openapi-spec.json#/components/schemas/AssignedPermission"
-      }
+      "$ref" : "base-schema.json#/schemas/ServiceAgreement"
     }
   },
   "description" : "Products assigned to service agreement",
   "extends":  {
-    "$ref" : "../spec/generated/legal-entity-openapi-spec.json#/components/schemas/BaseProductGroup"
+    "$ref" : "base-product-group.json"
   }
 }

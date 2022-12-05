@@ -33,38 +33,12 @@
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
-<!--
-            <plugin>
-                <groupId>io.swagger.codegen.v3</groupId>
-                <artifactId>swagger-codegen-maven-plugin</artifactId>
-                <version>3.0.11</version>
-                <executions>
-                    <execution>
-                        <id>convert</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/../../../api/stream-legal-entity/openapi.yaml</inputSpec>
-                            <output>src/main/resources/spec/generated</output>
-                            <language>openapi</language>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                            <configOptions>
-                                <outputFile>legal-entity-openapi-spec.json</outputFile>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
--->
-
             <plugin>
                 <groupId>com.backbase.codegen</groupId>
                 <artifactId>jsonschema-events-maven-plugin</artifactId>
                 <version>${ssdk.version}</version>
                 <executions>
-                    <!--<execution>
+                    <execution>
                         <id>generate-ingress-events</id>
                         <phase>process-resources</phase>
                         <goals>
@@ -77,7 +51,7 @@
                               <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
                             <packageName>stream.compositions.events.ingress</packageName>
                         </configuration>
-                    </execution>-->
+                    </execution>
                     <execution>
                         <id>generate-egress-events</id>
                         <phase>process-resources</phase>
@@ -90,6 +64,9 @@
                             <outputFile>${project.basedir}/target/generated-sources</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
                             <packageName>stream.compositions.events.egress</packageName>
+                            <generationConfig>
+                                <includeAdditionalProperties>false</includeAdditionalProperties>
+                            </generationConfig>
                         </configuration>
                     </execution>
                 </executions>
