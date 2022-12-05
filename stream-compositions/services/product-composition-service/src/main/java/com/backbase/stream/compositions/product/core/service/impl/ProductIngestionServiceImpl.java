@@ -14,6 +14,7 @@ import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
+import com.backbase.stream.product.task.BatchProductIngestionMode;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -114,7 +115,10 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
                 .externalId(res.getServiceAgreementExternalId()));
 
         return new BatchProductGroupTask(res.getServiceAgreementInternalId(),
-                bpg, config.getIngestionMode());
+            bpg, BatchProductIngestionMode.builder()
+            .dataGroupIngestionMode(BatchProductIngestionMode.DataGroupsMode.REPLACE)
+            .build()
+        );
     }
 
     private Mono<ProductIngestResponse> validate(ProductIngestResponse res) {
