@@ -14,5 +14,4 @@ backbase.stream.compositions.product.chains.transaction-composition.async | The 
 backbase.stream.compositions.product.chains.transaction-composition.excludeProductTypeExternalIds | The Product Types to be excluded during chaining
 backbase.stream.compositions.product.chains.events.enableCompleted | The toggle for enabling events on composition completion
 backbase.stream.compositions.product.chains.events.enableFailed | The toggle for enabling events on composition failure
-backbase.stream.compositions.product.ingestion-mode | The Ingestion mode [UPDATE,REPLACE]
 
