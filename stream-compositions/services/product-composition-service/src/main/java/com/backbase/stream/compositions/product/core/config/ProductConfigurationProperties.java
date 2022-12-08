@@ -20,7 +20,7 @@ public class ProductConfigurationProperties {
     private Chains chains;
     private Events events;
     private Cursor cursor;
-    private BatchProductIngestionMode ingestionMode = BatchProductIngestionMode.UPSERT;
+    private IngestionMode ingestionMode = new IngestionMode();
 
     @Data
     @NoArgsConstructor
@@ -41,6 +41,14 @@ public class ProductConfigurationProperties {
     public static class Chains {
         private TransactionComposition transactionComposition;
         private PaymentOrderComposition paymentOrderComposition;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class IngestionMode {
+        private BatchProductIngestionMode.FunctionGroupsMode functionGroups = BatchProductIngestionMode.FunctionGroupsMode.UPSERT;
+        private BatchProductIngestionMode.DataGroupsMode dataGroups = BatchProductIngestionMode.DataGroupsMode.UPSERT;
+        private BatchProductIngestionMode.ArrangementsMode arrangements = BatchProductIngestionMode.ArrangementsMode.UPSERT;
     }
 
     @Data
