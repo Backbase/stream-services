@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.16.1](https://github.com/Backbase/stream-services/compare/3.16.0...3.16.1)
+### Changed
+- Additional groups added as attribute to User model and will be passed to legal-entity-integration service within Legal Entity Saga execution
+
 ## [3.16.0](https://github.com/Backbase/stream-services/compare/3.15.0...3.16.0)
 ### Changed
 - Upgraded to SSDK 15.1.0 (pinned spring-cloud-kubernetes version to 2.1.13)
