@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [3.17.0](https://github.com/Backbase/stream-services/compare/3.16.0...3.17.0)
-### Changed
+### Added
 - Added ingestion mode config for product-composition-service
 
 ## [3.16.0](https://github.com/Backbase/stream-services/compare/3.15.0...3.16.0)
