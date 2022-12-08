@@ -1091,7 +1091,7 @@ components:
         additionalGroups:
           type: array
           items:
-            type: String
+            type: string
       required:
         - externalId
         - fullName
