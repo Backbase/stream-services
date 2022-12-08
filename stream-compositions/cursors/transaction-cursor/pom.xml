@@ -16,6 +16,11 @@
 
   <name>Stream :: Compositions :: Cursors :: Transaction Cursor</name>
 
+  <properties>
+    <enforce-banned-dependencies.skip>true</enforce-banned-dependencies.skip>
+    <mysql-connector.version>5.1.41</mysql-connector.version>
+  </properties>
+
   <dependencies>
     <!-- Service SDK dependencies -->
     <dependency>
@@ -26,6 +31,12 @@
     <dependency>
       <groupId>com.backbase.buildingblocks</groupId>
       <artifactId>persistence</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>${mysql-connector.version}</version>
     </dependency>
 
     <!-- Spring dependencies -->
