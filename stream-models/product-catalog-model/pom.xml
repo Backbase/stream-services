@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-models</artifactId>
-        <version>3.16.1</version>
+        <version>3.17.0</version>
     </parent>
 
     <artifactId>product-catalog-model</artifactId>
