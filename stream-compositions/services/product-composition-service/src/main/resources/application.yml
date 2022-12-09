@@ -52,7 +52,10 @@ backbase:
         cursor:
           enabled: false
           base-url: http://product-cursor:8080
-
+        ingestion-mode:
+          function-groups: UPSERT
+          data-groups: UPSERT
+          arrangements: UPSERT
 logging:
   level:
     #    root: DEBUG
