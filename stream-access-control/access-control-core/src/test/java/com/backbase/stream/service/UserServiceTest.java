@@ -148,6 +148,31 @@ class UserServiceTest {
     }
 
     @Test
+    void assignAdditionalGroups() {
+        String internalId = "someInternalId";
+        String realm = "someRealm";
+        String email = "some@email.com";
+
+        EnhancedUserRepresentation enhancedUserRepresentation = new EnhancedUserRepresentation().id(internalId)
+            .email(email).addGroupsItem("group1").addGroupsItem("group2");
+        when(identityIntegrationApi.getUserById(realm, internalId))
+            .thenReturn(Mono.just(enhancedUserRepresentation));
+        when(identityIntegrationApi.updateUserById(eq(realm), eq(internalId), any(UserRequestBody.class)))
+            .thenReturn(Mono.empty());
+
+        User user = new User().internalId(internalId)
+            .additionalGroups(Arrays.asList("group2", "group3"));
+        Mono<User> result = subject.updateUserState(user, realm);
+
+
+        result.subscribe(assertEqualsTo(user));
+        verify(identityIntegrationApi).getUserById(realm, internalId);
+        UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email)
+            .credentials(Collections.emptyList()).groups(Arrays.asList("group1", "group2", "group3"));
+        verify(identityIntegrationApi).updateUserById(realm, internalId, expectedUser);
+    }
+
+    @Test
     void createOrImportIdentityUserUpdateAttributesWhenIFIStrategy() {
         final String internalId = "someInternalId";
         final String externalId = "someExternalId";

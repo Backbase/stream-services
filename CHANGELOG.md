@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.20.0](https://github.com/Backbase/stream-services/compare/3.19.0...3.20.0)
+### Added
+- Additional groups added as attribute to User model and will be passed to legal-entity-integration service within Legal Entity Saga execution
+
 ## [3.18.0](https://github.com/Backbase/stream-services/compare/3.17.0...3.18.0)
 ### Added
 - Added MySQL Dependency to fix cursor execution in local env

@@ -318,8 +318,8 @@ public class UserService {
      * @return user.
      */
     public Mono<User> updateUserState(User user, String realm) {
-        log.info("Changing user {} state to locked status {} and additional realm roles {}", user.getInternalId(),
-            user.getLocked(), user.getAdditionalRealmRoles());
+        log.info("Changing user {} state to locked status {}, additional realm roles {}, additional groups {}",
+            user.getInternalId(), user.getLocked(), user.getAdditionalRealmRoles(), user.getAdditionalGroups());
 
         return identityIntegrationApi.map(api -> getIdentityUser(user, realm)
             .flatMap(currentUser -> {
@@ -383,6 +383,18 @@ public class UserService {
                     userRequestBody.getRealmRoles().add(realmRole);
 
                     log.debug("Realm role {} added", realmRole);
+                }
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(user.getAdditionalGroups())) {
+            for (String group : user.getAdditionalGroups()) {
+                if (userRequestBody.getGroups().stream().noneMatch(group::equals)) {
+                    updateRequired = true;
+
+                    userRequestBody.getGroups().add(group);
+
+                    log.debug("Group {} added", group);
                 }
             }
         }

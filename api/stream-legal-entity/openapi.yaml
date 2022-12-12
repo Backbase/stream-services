@@ -1087,7 +1087,11 @@ components:
         additionalRealmRoles:
           type: array
           items:
-            type: String
+            type: string
+        additionalGroups:
+          type: array
+          items:
+            type: string
       required:
         - externalId
         - fullName
