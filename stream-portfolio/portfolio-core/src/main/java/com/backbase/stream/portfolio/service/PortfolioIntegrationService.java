@@ -99,7 +99,7 @@ public class PortfolioIntegrationService {
                         .postPositions(portfolioMapper.mapPosition(portfolioId, subPortfolioId, position))
                         .map(o -> position)))
                 .thenMany(upsertTransactionCategory(positionBundle.getTransactionCategories()))
-                .then(upsertTransactions(positionBundle.getTransactions(), portfolioId, positionId))
+                .then(upsertTransactions(positionBundle.getTransactions(), portfolioId, positionId).next())
                 .map(at -> positionBundle)
                 .doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException)
                 .onErrorResume(WebClientResponseException.class,
@@ -140,7 +140,7 @@ public class PortfolioIntegrationService {
      */
     public Mono<List<PositionTransaction>> upsertPositionTransactions(List<PositionTransaction> transactions,
             String portfolioId, String positionId) {
-        return upsertTransactions(transactions, portfolioId, positionId).flatMap(o -> Mono.just(transactions));
+        return upsertTransactions(transactions, portfolioId, positionId).next().flatMap(o -> Mono.just(transactions));
     }
 
     /**
@@ -261,18 +261,37 @@ public class PortfolioIntegrationService {
     }
 
     @NotNull
-    private Mono<Void> upsertTransactions(List<PositionTransaction> transactions, String portfolioId,
+    private Flux<PositionTransaction> upsertTransactions(List<PositionTransaction> transactions, String portfolioId,
             String positionId) {
-        return Mono.justOrEmpty(transactions)
-                .flatMap(trs -> transactionManagementApi.deletePositionTransactions(positionId)
-                        .then(Mono
-                                .defer(() -> transactionManagementApi.postPortfolioTransactions(portfolioId,
-                                        new PortfolioTransactionsPostRequest().transactions(
-                                                List.of(new PortfolioTransactionsPostItem().positionId(positionId)
-                                                        .transactions(portfolioMapper.mapTransaction(trs))))))
-                                .onErrorResume(WebClientResponseException.class,
-                                        ReactiveStreamHandler.error(trs, "Failed to create Transactions"))
-                                .onErrorStop()));
+
+        return Flux.fromIterable(transactions)
+                .flatMap(txn -> upsertTransaction(txn, portfolioId, positionId));
+    }
+
+    private Mono<PositionTransaction> upsertTransaction(PositionTransaction transaction, String portfolioId,
+            String positionId) {
+
+        return transactionManagementApi
+                .putPositionTransactionById(positionId, transaction.getTransactionId(),
+                        portfolioMapper.mapPositionTransactionPutRequest(transaction))
+                .onErrorResume(WebClientResponseException.BadRequest.class, thr -> Mono.defer(() ->
+                {
+                    log.info(
+                            "Position Transaction not found for update, creating a new one, portfolioId: {}, positionId: {}",
+                            portfolioId, positionId);
+
+                    return transactionManagementApi.postPortfolioTransactions(portfolioId,
+                            createPortfolioTransactionsPostRequest(transaction, positionId));
+                }).doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException))
+                .map(a -> transaction)
+                .onErrorStop();
+    }
+
+    private PortfolioTransactionsPostRequest createPortfolioTransactionsPostRequest(PositionTransaction transaction,
+            String positionId) {
+        return new PortfolioTransactionsPostRequest()
+                .addTransactionsItem(new PortfolioTransactionsPostItem().positionId(positionId)
+                        .addTransactionsItem(portfolioMapper.mapTransactionPostItem(transaction)));
     }
 
     @NotNull
