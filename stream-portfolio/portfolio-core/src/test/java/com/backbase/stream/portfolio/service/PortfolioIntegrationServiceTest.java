@@ -7,7 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -40,6 +39,7 @@ import com.backbase.portfolio.api.service.integration.v1.model.PortfolioValuatio
 import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionGetResponse;
+import com.backbase.portfolio.api.service.integration.v1.model.PositionTransactionPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.SubPortfolioGetResponse;
@@ -173,6 +173,7 @@ class PortfolioIntegrationServiceTest {
         String portfolioId = "portfolioId";
         String subPortfolioId = "subPortfolioId";
         String transactionCategoryKey = "transactionCategoryKey";
+        String transactionId = "transactionId";
         String categoryAlias = "categoryAlias";
         String exchange = "exchange";
 
@@ -181,15 +182,18 @@ class PortfolioIntegrationServiceTest {
                 .position(new Position().instrumentId(instrumentId).externalId(positionId))
                 .addTransactionCategoriesItem(
                         new TransactionCategory().key(transactionCategoryKey).alias(categoryAlias))
-                .transactions(List.of(new PositionTransaction().exchange(exchange)));
+                .transactions(List.of(new PositionTransaction().transactionId(transactionId).exchange(exchange)));
 
         when(positionManagementApi.getPositionById(anyString())).thenReturn(Mono.empty());
         when(positionManagementApi.postPositions(any(PositionsPostRequest.class))).thenReturn(Mono.empty());
         when(transactionCategoryManagementApi.postTransactionCategory(any(TransactionCategoryPostRequest.class)))
                 .thenReturn(Mono.empty());
+        when(transactionManagementApi.putPositionTransactionById(anyString(), anyString(),
+                any(PositionTransactionPutRequest.class)))
+                        .thenReturn(Mono.error(WebClientResponseException.create(HttpStatus.BAD_REQUEST.value(),
+                                "Bad request", HttpHeaders.EMPTY, new byte[] {}, null)));
         when(transactionManagementApi.postPortfolioTransactions(anyString(),
                 any(PortfolioTransactionsPostRequest.class))).thenReturn(Mono.empty());
-        when(transactionManagementApi.deletePositionTransactions(anyString())).thenReturn(Mono.empty());
         when(transactionCategoryManagementApi.getTransactionCategories()).thenReturn(Flux.empty());
 
         portfolioIntegrationService.upsertPosition(positionBundle).block();
@@ -200,10 +204,10 @@ class PortfolioIntegrationServiceTest {
                 .instrumentId(instrumentId));
         verify(transactionCategoryManagementApi).postTransactionCategory(
                 new TransactionCategoryPostRequest().key(transactionCategoryKey).alias(categoryAlias));
-        verify(transactionManagementApi).postPortfolioTransactions(portfolioId,
-                new PortfolioTransactionsPostRequest().transactions(List.of(new PortfolioTransactionsPostItem()
-                        .positionId(positionId)
-                        .transactions(List.of(new PortfolioPositionTransactionsPostItem().exchange(exchange))))));
+        verify(transactionManagementApi).postPortfolioTransactions(portfolioId, new PortfolioTransactionsPostRequest()
+                .transactions(List.of(new PortfolioTransactionsPostItem().positionId(positionId)
+                        .transactions(List.of(new PortfolioPositionTransactionsPostItem().transactionId(transactionId)
+                                .exchange(exchange))))));
     }
 
     @Test
@@ -308,8 +312,8 @@ class PortfolioIntegrationServiceTest {
 
         portfolioIntegrationService.upsertPosition(position0).block();
 
-        verify(positionManagementApi).getPositionById(positionId);
-        verify(positionManagementApi).putPosition(positionId, new PositionsPutRequest()
+        verify(positionManagementApi, times(1)).getPositionById(positionId);
+        verify(positionManagementApi, times(1)).putPosition(positionId, new PositionsPutRequest()
                 .absolutePerformance(new Money().amount(BigDecimal.valueOf(44.12)).currencyCode(EUR_CURRENCY_CODE))
                 .relativePerformance(BigDecimal.valueOf(1.2))
                 .purchasePrice(new Money().amount(BigDecimal.valueOf(124.18)).currencyCode(EUR_CURRENCY_CODE))
@@ -330,6 +334,33 @@ class PortfolioIntegrationServiceTest {
     }
 
     @Test
+    void shouldUpdatePositionTransactions() throws Exception {
+        WealthPortfolioTransactionBundle wealthPortfolioTransactionBundle =
+                PortfolioTestUtil.getWealthPortfolioTransactionBundle();
+        List<TransactionBundle> transactionBundles = wealthPortfolioTransactionBundle.getBatchPortfolioTransactions();
+        TransactionBundle transactionBundle0 = transactionBundles.get(0);
+        String portfolioCode = transactionBundle0.getPortfolioCode();
+        List<PositionTransactionBundle> positionTransactionBundles = transactionBundle0.getTransactions();
+        PositionTransactionBundle positionTransactionBundle0 = positionTransactionBundles.get(0);
+        String positionId = positionTransactionBundle0.getPositionId();
+        List<PositionTransaction> transactions = positionTransactionBundle0.getTransactions();
+        PositionTransaction positionTransaction0 = transactions.get(0);
+
+        when(transactionManagementApi.putPositionTransactionById(anyString(), anyString(),
+                any(PositionTransactionPutRequest.class))).thenReturn(Mono.empty());
+
+        portfolioIntegrationService.upsertPositionTransactions(transactions, portfolioCode, positionId).block();
+
+        verify(transactionManagementApi, times(1)).putPositionTransactionById(positionId,
+                positionTransaction0.getTransactionId(),
+                portfolioMapper.mapPositionTransactionPutRequest(positionTransaction0));
+        verify(transactionManagementApi, times(0)).postPortfolioTransactions(portfolioCode,
+                new PortfolioTransactionsPostRequest()
+                        .addTransactionsItem(new PortfolioTransactionsPostItem().positionId(positionId)
+                                .addTransactionsItem(portfolioMapper.mapTransactionPostItem(positionTransaction0))));
+    }
+
+    @Test
     void shouldCreatePositionTransactions() throws Exception {
         WealthPortfolioTransactionBundle wealthPortfolioTransactionBundle =
                 PortfolioTestUtil.getWealthPortfolioTransactionBundle();
@@ -340,49 +371,24 @@ class PortfolioIntegrationServiceTest {
         PositionTransactionBundle positionTransactionBundle0 = positionTransactionBundles.get(0);
         String positionId = positionTransactionBundle0.getPositionId();
         List<PositionTransaction> transactions = positionTransactionBundle0.getTransactions();
+        PositionTransaction positionTransaction0 = transactions.get(0);
 
-        when(transactionManagementApi.deletePositionTransactions(anyString())).thenReturn(Mono.empty());
+        when(transactionManagementApi.putPositionTransactionById(anyString(), anyString(),
+                any(PositionTransactionPutRequest.class)))
+                        .thenReturn(Mono.error(WebClientResponseException.create(HttpStatus.BAD_REQUEST.value(),
+                                "Bad request", HttpHeaders.EMPTY, new byte[] {}, null)));
         when(transactionManagementApi.postPortfolioTransactions(anyString(),
                 any(PortfolioTransactionsPostRequest.class))).thenReturn(Mono.empty());
 
         portfolioIntegrationService.upsertPositionTransactions(transactions, portfolioCode, positionId).block();
 
-        verify(transactionManagementApi).deletePositionTransactions(positionId);
-        verify(transactionManagementApi).postPortfolioTransactions(portfolioCode,
-                new PortfolioTransactionsPostRequest().transactions(List.of(new PortfolioTransactionsPostItem()
-                        .positionId(positionId)
-                        .transactions(List.of(new PortfolioPositionTransactionsPostItem()
-                                .transactionId("rerjt34-3-rket50-i34mfo5u40950")
-                                .transactionDate(OffsetDateTime.parse("2021-03-24T20:22Z"))
-                                .valueDate(OffsetDateTime.parse("2021-03-29T12:46Z"))
-                                .transactionCategory("Purchase")
-                                .exchange("NASDAQ")
-                                .orderType("Market Order")
-                                .counterpartyName("Executive Brokers")
-                                .counterpartyAccount("R3904N-R0328592-323-4")
-                                .quantity(BigDecimal.valueOf(55))
-                                .price(new Money().amount(BigDecimal.valueOf(129.22)).currencyCode(EUR_CURRENCY_CODE))
-                                .amount(new Money().amount(BigDecimal.valueOf(7107.1)).currencyCode(EUR_CURRENCY_CODE))
-                                .amountGross(
-                                        new Money().amount(BigDecimal.valueOf(7183.22)).currencyCode(EUR_CURRENCY_CODE))
-                                .fxRate(new Money().amount(BigDecimal.valueOf(1.22)).currencyCode(EUR_CURRENCY_CODE))
-                                .localTaxes(
-                                        new Money().amount(BigDecimal.valueOf(32.04)).currencyCode(EUR_CURRENCY_CODE))
-                                .localFees(new Money().amount(BigDecimal.valueOf(7.03)).currencyCode(EUR_CURRENCY_CODE))
-                                .foreignTaxes(
-                                        new Money().amount(BigDecimal.valueOf(12.03)).currencyCode(EUR_CURRENCY_CODE))
-                                .foreignFees(
-                                        new Money().amount(BigDecimal.valueOf(25.02)).currencyCode(EUR_CURRENCY_CODE))
-                                .officialCode("APPL")
-                                .ISIN("US4930248325")
-                                .balanceAsset(
-                                        new Money().amount(BigDecimal.valueOf(25.02)).currencyCode(EUR_CURRENCY_CODE))
-                                .balanceAmount(
-                                        new Money().amount(BigDecimal.valueOf(25.02)).currencyCode(EUR_CURRENCY_CODE))
-                                .statusId("an5fke68fik54l")
-                                .statusName("Pending")
-                                .statusAbbr("O")
-                                .notes("notes"))))));
+        verify(transactionManagementApi, times(1)).putPositionTransactionById(positionId,
+                positionTransaction0.getTransactionId(),
+                portfolioMapper.mapPositionTransactionPutRequest(positionTransaction0));
+        verify(transactionManagementApi, times(1)).postPortfolioTransactions(portfolioCode,
+                new PortfolioTransactionsPostRequest()
+                        .addTransactionsItem(new PortfolioTransactionsPostItem().positionId(positionId)
+                                .addTransactionsItem(portfolioMapper.mapTransactionPostItem(positionTransaction0))));
     }
 
     @Test
