@@ -748,17 +748,12 @@ class PortfolioIT {
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("")));
 
-        WireMock.stubFor(WireMock.delete("/portfolio/integration-api/v1/positions/072901772368866/transactions")
-                .willReturn(WireMock.aResponse()
+        WireMock.stubFor(WireMock.put("/portfolio/integration-api/v1/positions/072901772368866/transactions/399015806984935")
+                .willReturn(WireMock.badRequest()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("")));
-
-        WireMock.stubFor(WireMock.delete("/portfolio/integration-api/v1/positions/072901772368896/transactions")
-                .willReturn(WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")));
-
-        WireMock.stubFor(WireMock.delete("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_ROHIT/transactions")
+        
+        WireMock.stubFor(WireMock.put("/portfolio/integration-api/v1/positions/072901772368896/transactions/499015806984935")
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("")));
