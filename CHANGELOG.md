@@ -1,6 +1,22 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.18.0](https://github.com/Backbase/stream-services/compare/3.17.0...3.18.0)
+### Added
+- Added MySQL Dependency to fix cursor execution in local env
+- Added local profile for Approval Task
+- Fixed cursor port number
+- Set payment order composition config to false
+
+## [3.17.0](https://github.com/Backbase/stream-services/compare/3.16.0...3.17.0)
+### Added
+- Added ingestion mode config for product-composition-service
+
+## [3.16.0](https://github.com/Backbase/stream-services/compare/3.15.0...3.16.0)
+### Changed
+- Upgraded to SSDK 15.1.0 (pinned spring-cloud-kubernetes version to 2.1.13)
+- Upgraded to Banking Services 2022.10.3
+
 ## [3.15.1](https://github.com/Backbase/stream-services/compare/3.15.0...3.15.1)
 ### Changed
 - Adding null checks for ingesting legal entity, service agreement and arrangements with no users - User pre enrolment scenario.

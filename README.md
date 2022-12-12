@@ -41,7 +41,8 @@ You can find listed here the API specification containing the opinionated model 
 
 | Stream [version](https://github.com/Backbase/stream-services/releases) | DBS version        | Java version |
 |------------------------------------------------------------------------|--------------------|--------------|
-| 3.8.0 to latest                                                        | 2022.09            | 17           |
+| 3.16.0 to latest                                                       | 2022.10            | 17           |
+| 3.8.0 to 3.15.0                                                        | 2022.09            | 17           |
 | 3.1.0 to 3.7.0                                                         | 2022.09            | 11           |
 | 2.71.0 to 3.0.0                                                        | 2022.04            | 11           |
 | 2.49.0 to 2.69.0                                                       | 2021.09 (2.21.2.x) | 11           |
