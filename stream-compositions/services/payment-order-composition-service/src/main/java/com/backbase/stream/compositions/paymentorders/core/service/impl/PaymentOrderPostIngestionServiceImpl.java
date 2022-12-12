@@ -1,12 +1,16 @@
 package com.backbase.stream.compositions.paymentorders.core.service.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.stream.compositions.paymentorders.core.config.PaymentOrderConfigurationProperties;
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderPostIngestionService;
-import com.backbase.stream.model.PaymentOrderIngestContext;
+import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -18,13 +22,13 @@ public class PaymentOrderPostIngestionServiceImpl implements PaymentOrderPostIng
     private final PaymentOrderConfigurationProperties paymentOrderConfigurationProperties;
 
     @Override
-    public void handleSuccess(PaymentOrderIngestContext response) {
+    public void handleSuccess(List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses) {
         log.info("Payment Order ingestion completed successfully.");
         // events can be handled here as part of a different ticket.
     }
 
     @Override
-    public Mono<PaymentOrderIngestContext> handleFailure(Throwable error) {
+    public Mono<List<PaymentOrderIngestDbsResponse>> handleFailure(Throwable error) {
         // events can be handled here as part of a different ticket.
         return Mono.empty();
     }

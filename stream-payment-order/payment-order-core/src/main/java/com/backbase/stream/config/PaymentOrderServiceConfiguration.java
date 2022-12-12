@@ -24,20 +24,20 @@ public class PaymentOrderServiceConfiguration {
 
     private final PaymentOrderTypeMapper paymentOrderTypeMapper;
 
-
     @Bean
-    public PaymentOrderTaskExecutor paymentOrderTaskExecutor(PaymentOrdersApi paymentOrderApi) {
-        return new PaymentOrderTaskExecutor(paymentOrderApi, paymentOrderTypeMapper);
+    public PaymentOrderTaskExecutor paymentOrderTaskExecutor(PaymentOrdersApi paymentOrdersApi) {
+        return new PaymentOrderTaskExecutor(paymentOrdersApi);
     }
 
     @Bean
     public PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor(
         PaymentOrderTaskExecutor paymentOrderTaskExecutor,
         PaymentOrderUnitOfWorkRepository paymentOrderUnitOfWorkRepository,
-        PaymentOrderWorkerConfigurationProperties paymentOrderWorkerConfigurationProperties) {
+        PaymentOrderWorkerConfigurationProperties paymentOrderWorkerConfigurationProperties,
+        PaymentOrdersApi paymentOrdersApi) {
 
         return new PaymentOrderUnitOfWorkExecutor(paymentOrderUnitOfWorkRepository, paymentOrderTaskExecutor,
-            paymentOrderWorkerConfigurationProperties);
+                paymentOrderWorkerConfigurationProperties, paymentOrdersApi, paymentOrderTypeMapper);
     }
 
     @Bean
