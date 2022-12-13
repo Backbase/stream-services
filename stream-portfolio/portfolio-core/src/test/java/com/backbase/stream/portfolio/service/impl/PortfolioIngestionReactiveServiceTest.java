@@ -2,6 +2,7 @@ package com.backbase.stream.portfolio.service.impl;
 
 import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -216,8 +217,8 @@ class PortfolioIngestionReactiveServiceTest {
         TransactionBundle transactionBundle0 = batchPortfolioTransactions.get(0);
 
         Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
-        Mockito.when(portfolioIntegrationService.upsertPositionTransactions(any(), anyString(), anyString()))
-                .thenAnswer(i -> Mono.just(i.getArgument(0)));
+        Mockito.when(portfolioIntegrationService.upsertTransactions(anyList(), anyString(), anyString()))
+                .thenAnswer(i -> Flux.fromIterable(i.getArgument(0)));
 
         Flux<TransactionBundle> ingestedTransactionBundles = portfolioIngestionReactiveService
                 .ingestTransactionBundles(Flux.fromIterable(batchPortfolioTransactions));

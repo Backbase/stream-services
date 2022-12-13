@@ -48,9 +48,8 @@ class WealthPortfolioTransactionsIT {
                 .isEqualTo(200);
 
         // Then
-        WireMock.verify(WireMock
-                .deleteRequestedFor(WireMock
-                        .urlEqualTo("/portfolio/integration-api/v1/positions/IOD4390KDJIWEO9320583DWK/transactions"))
+        WireMock.verify(WireMock.putRequestedFor(WireMock.urlEqualTo(
+                "/portfolio/integration-api/v1/positions/IOD4390KDJIWEO9320583DWK/transactions/rerjt34-3-rket50-i34mfo5u40950"))
                 .withHeader(X_TID_HEADER_NAME, WireMock.equalTo(X_TID_HEADER_VALUE)));
 
         WireMock.verify(WireMock
@@ -70,9 +69,9 @@ class WealthPortfolioTransactionsIT {
                                         + "\"not-before-policy\": 1633622545,"
                                         + "\"session_state\": \"72a28739-3d20-4965-bd86-64410df53d04\",\"scope\": \"openid\"}")));
 
-        WireMock.stubFor(
-                WireMock.delete("/portfolio/integration-api/v1/positions/IOD4390KDJIWEO9320583DWK/transactions")
-                        .willReturn(WireMock.aResponse()));
+        WireMock.stubFor(WireMock.put(
+                "/portfolio/integration-api/v1/positions/IOD4390KDJIWEO9320583DWK/transactions/rerjt34-3-rket50-i34mfo5u40950")
+                .willReturn(WireMock.badRequest()));
 
         WireMock.stubFor(WireMock.post("/portfolio/integration-api/v1/portfolios/1234/transactions")
                 .willReturn(WireMock.aResponse()));
