@@ -99,8 +99,8 @@ public class PortfolioIntegrationService {
                         .postPositions(portfolioMapper.mapPosition(portfolioId, subPortfolioId, position))
                         .map(o -> position)))
                 .thenMany(upsertTransactionCategory(positionBundle.getTransactionCategories()))
-                .then(upsertTransactions(positionBundle.getTransactions(), portfolioId, positionId).next())
-                .map(at -> positionBundle)
+                .thenMany(upsertTransactions(positionBundle.getTransactions(), portfolioId, positionId))
+                .then(Mono.just(positionBundle))
                 .doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException)
                 .onErrorResume(WebClientResponseException.class,
                         ReactiveStreamHandler.error(positionBundle, "Failed to create Position gang"))
@@ -128,19 +128,6 @@ public class PortfolioIntegrationService {
                 .onErrorResume(WebClientResponseException.class,
                         ReactiveStreamHandler.error(position, "Failed to create Position"))
                 .onErrorStop();
-    }
-
-    /**
-     * Create PositionTransactions and all reference models that are related.
-     * 
-     * @param transactions
-     * @param portfolioId
-     * @param positionId
-     * @return
-     */
-    public Mono<List<PositionTransaction>> upsertPositionTransactions(List<PositionTransaction> transactions,
-            String portfolioId, String positionId) {
-        return upsertTransactions(transactions, portfolioId, positionId).next().flatMap(o -> Mono.just(transactions));
     }
 
     /**
@@ -261,7 +248,7 @@ public class PortfolioIntegrationService {
     }
 
     @NotNull
-    private Flux<PositionTransaction> upsertTransactions(List<PositionTransaction> transactions, String portfolioId,
+    public Flux<PositionTransaction> upsertTransactions(List<PositionTransaction> transactions, String portfolioId,
             String positionId) {
 
         return Flux.fromIterable(transactions)

@@ -349,7 +349,7 @@ class PortfolioIntegrationServiceTest {
         when(transactionManagementApi.putPositionTransactionById(anyString(), anyString(),
                 any(PositionTransactionPutRequest.class))).thenReturn(Mono.empty());
 
-        portfolioIntegrationService.upsertPositionTransactions(transactions, portfolioCode, positionId).block();
+        portfolioIntegrationService.upsertTransactions(transactions, portfolioCode, positionId).blockLast();
 
         verify(transactionManagementApi, times(1)).putPositionTransactionById(positionId,
                 positionTransaction0.getTransactionId(),
@@ -380,7 +380,7 @@ class PortfolioIntegrationServiceTest {
         when(transactionManagementApi.postPortfolioTransactions(anyString(),
                 any(PortfolioTransactionsPostRequest.class))).thenReturn(Mono.empty());
 
-        portfolioIntegrationService.upsertPositionTransactions(transactions, portfolioCode, positionId).block();
+        portfolioIntegrationService.upsertTransactions(transactions, portfolioCode, positionId).blockLast();
 
         verify(transactionManagementApi, times(1)).putPositionTransactionById(positionId,
                 positionTransaction0.getTransactionId(),
