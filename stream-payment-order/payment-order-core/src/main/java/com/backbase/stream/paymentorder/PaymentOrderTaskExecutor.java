@@ -1,18 +1,16 @@
 package com.backbase.stream.paymentorder;
 
-import java.time.LocalDate;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutResponse;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutRequest;
-import com.backbase.dbs.paymentorder.api.service.v2.model.Status;
-import com.backbase.dbs.paymentorder.api.service.v2.model.UpdateStatusPut;
 import com.backbase.stream.model.request.DeletePaymentOrderIngestRequest;
 import com.backbase.stream.model.request.NewPaymentOrderIngestRequest;
 import com.backbase.stream.model.request.PaymentOrderIngestRequest;
@@ -34,6 +32,8 @@ import reactor.core.publisher.Mono;
 public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrderTask> {
 
     private final PaymentOrdersApi paymentOrdersApi;
+
+    private final String BANK_REFERENCE_ID = "BANKREFERENCEID";
 
     @Override
     public Mono<PaymentOrderTask> executeTask(PaymentOrderTask streamTask) {
@@ -92,11 +92,10 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
     ) {
         UpdatePaymentOrderIngestRequest updatePaymentOrderIngestRequest = (UpdatePaymentOrderIngestRequest) paymentOrderIngestRequest;
         PaymentOrderPutRequest paymentOrderPutRequest = updatePaymentOrderIngestRequest.getPaymentOrderPutRequest();
+
         return updatePaymentOrderStatus(
             paymentOrderPutRequest.getBankReferenceId(),
-            paymentOrderPutRequest.getStatus(),
-            paymentOrderPutRequest.getBankStatus(),
-            paymentOrderPutRequest.getNextExecutionDate()
+                paymentOrderPutRequest
         )
             .doOnNext(response -> log.debug("Updated Payment Order status: {}", response))
             .map(UpdatePaymentOrderIngestDbsResponse::new);
@@ -137,22 +136,13 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
      * Calls the payment order service to update the status of an existing payment.
      *
      * @param bankReferenceId   The bank reference id.
-     * @param status            the status of the transaction
-     * @param bankStatus        The bank status.
-     * @param nextExecutionDate The next execution date.
+     * @param paymentOrderPutRequest holds all the data that needs to be updated
      * @return A Mono with the response from the service api.
      */
-    private Mono<UpdateStatusPut> updatePaymentOrderStatus(String bankReferenceId,
-                                                     Status status,
-                                                     String bankStatus,
-                                                     LocalDate nextExecutionDate) {
+    private Mono<PaymentOrderPutResponse> updatePaymentOrderStatus(String bankReferenceId,
+                                                           PaymentOrderPutRequest paymentOrderPutRequest) {
 
-        var updatePaymentStatus = new UpdateStatusPut()
-                .bankReferenceId(bankReferenceId)
-                .status(status)
-                .bankStatus(bankStatus)
-                .nextExecutionDate(nextExecutionDate);
-        return paymentOrdersApi.putUpdateStatus(updatePaymentStatus);
+        return paymentOrdersApi.updatePaymentOrder(bankReferenceId, BANK_REFERENCE_ID, paymentOrderPutRequest);
     }
 
     /**

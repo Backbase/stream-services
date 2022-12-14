@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.paymentorders.core.mapper;
 
 import java.util.List;
 
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutResponse;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -39,7 +40,7 @@ public interface PaymentOrderMapper {
      com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse mapStreamNewPaymentOrderToComposition(PaymentOrderPostResponse source);
 
     @Mapping(target="id", source="bankReferenceId")
-    com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse mapStreamUpdatePaymentOrderToComposition(UpdateStatusPut source);
+    com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse mapStreamUpdatePaymentOrderToComposition(PaymentOrderPutResponse source);
 
     PullIngestionRequest mapStreamToIntegration(PaymentOrderIngestPullRequest source);
 
@@ -59,7 +60,7 @@ public interface PaymentOrderMapper {
                 UpdatePaymentOrderIngestDbsResponse updatePaymentOrderIngestDbsResponse = (UpdatePaymentOrderIngestDbsResponse) paymentOrderIngestDbsResponse;
                 paymentOrderIngestionResponse.addUpdatedPaymentOrderItem(
                     this.mapStreamUpdatePaymentOrderToComposition(
-                        updatePaymentOrderIngestDbsResponse.getUpdateStatusPut()
+                        updatePaymentOrderIngestDbsResponse.getPaymentOrderPutResponse()
                     )
                 );
             } else if (paymentOrderIngestDbsResponse instanceof DeletePaymentOrderIngestDbsResponse) {
