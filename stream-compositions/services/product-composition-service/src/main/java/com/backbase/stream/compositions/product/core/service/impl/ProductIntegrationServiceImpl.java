@@ -9,6 +9,7 @@ import com.backbase.stream.compositions.product.core.service.ProductIntegrationS
 import com.backbase.stream.legalentity.model.ProductGroup;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -27,24 +28,28 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
         return productIntegrationApi
                 .pullProductGroup(mapper.mapStreamToIntegration(ingestPullRequest))
                 .map(mapper::mapResponseIntegrationToStream)
-                .map(response -> this.setServiceAgreementIds(ingestPullRequest, response))
-                .map(pir -> pir.withAdditions(ingestPullRequest.getAdditions()))
+                .map(response -> this.setRequestParameters(ingestPullRequest, response))
                 .onErrorResume(this::handleIntegrationError)
                 .flatMap(this::handleIntegrationResponse);
     }
 
     /**
-     * Sets service agreements ids from request to response.
+     * Sets serviceAgreementsIds, legalEntityIds, userIds from request to response.
      *
      * @param request  ProductIngestPullRequest
      * @param response ProductIngestResponse
      * @return ProductIngestResponse
      */
-    private ProductIngestResponse setServiceAgreementIds(
+    private ProductIngestResponse setRequestParameters(
             ProductIngestPullRequest request, ProductIngestResponse response) {
         response.setServiceAgreementInternalId(request.getServiceAgreementInternalId());
         response.setServiceAgreementExternalId(request.getServiceAgreementExternalId());
-
+        response.setLegalEntityExternalId(request.getLegalEntityExternalId());
+        response.setLegalEntityInternalId(request.getLegalEntityInternalId());
+        response.setUserExternalId(request.getUserExternalId());
+        response.setUserInternalId(request.getUserInternalId());
+        response.setSource(request.getSource());
+        response.setAdditions(request.getAdditions());
         return response;
     }
 

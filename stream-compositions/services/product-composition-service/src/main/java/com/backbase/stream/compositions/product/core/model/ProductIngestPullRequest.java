@@ -20,5 +20,6 @@ public class ProductIngestPullRequest {
     private List<String> referenceJobRoleNames;
     private List<String> membershipAccounts;
     private Map<String, String> additions;
+    private String source;
 }
 
