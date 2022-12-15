@@ -328,5 +328,10 @@ class ProductIngestionServiceImplTest {
                 .ingestPush(productIngestPushRequest);
         StepVerifier.create(productIngestResponse)
                 .assertNext(Assertions::assertNotNull).verifyComplete();
+
+        ArgumentCaptor<EnvelopedEvent<ProductCompletedEvent>> argumentCaptor = ArgumentCaptor.forClass(EnvelopedEvent.class);
+        verify(eventBus, times(1)).emitEvent(argumentCaptor.capture());
+        ProductCompletedEvent event = argumentCaptor.getValue().getEvent();
+        assertThat(event.getSource(), is("source_of_ingestion_process"));
     }
 }
