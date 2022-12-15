@@ -6,24 +6,7 @@ import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemP
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountUserPreferencesItemPut;
 import com.backbase.dbs.arrangement.api.service.v2.model.TimeUnit;
-import com.backbase.stream.legalentity.model.AvailableBalance;
-import com.backbase.stream.legalentity.model.BaseProduct;
-import com.backbase.stream.legalentity.model.BookedBalance;
-import com.backbase.stream.legalentity.model.CreditCard;
-import com.backbase.stream.legalentity.model.CreditLimit;
-import com.backbase.stream.legalentity.model.CurrentAccount;
-import com.backbase.stream.legalentity.model.DebitCard;
-import com.backbase.stream.legalentity.model.InterestPaymentFrequencyUnit;
-import com.backbase.stream.legalentity.model.InvestmentAccount;
-import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityReference;
-import com.backbase.stream.legalentity.model.Loan;
-import com.backbase.stream.legalentity.model.PrincipalAmount;
-import com.backbase.stream.legalentity.model.Product;
-import com.backbase.stream.legalentity.model.SavingsAccount;
-import com.backbase.stream.legalentity.model.TermDeposit;
-import com.backbase.stream.legalentity.model.TermUnit;
-import com.backbase.stream.legalentity.model.UserPreferences;
+import com.backbase.stream.legalentity.model.*;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -179,6 +162,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.EXTERNAL_PRODUCT_ID, target = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITY_IDS, target = ProductMapperConstants.LEGAL_ENTITIES)
     @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
+    @Mapping(source = "currentInvestmentValue", target = "currentInvestment")
     InvestmentAccount mapInvestmentAccount(AccountArrangementItem product);
 
 
@@ -204,6 +188,13 @@ public interface ProductMapper {
         if (bigDecimal == null)
             return null;
         return new CreditLimit().amount(bigDecimal);
+    }
+
+    default CurrentInvestment mapCurrentInvestment(BigDecimal bigDecimal) {
+        if (bigDecimal == null) {
+            return null;
+        }
+        return new CurrentInvestment().amount(bigDecimal);
     }
 
     default LegalEntity mapLegalEntity(String legalEntityId) {
