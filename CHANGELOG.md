@@ -1,9 +1,20 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [3.20.1](https://github.com/Backbase/stream-services/compare/3.20.0...3.20.1)
+## [3.22.1](https://github.com/Backbase/stream-services/compare/3.22.0...3.22.1)
 ### Added
 - Fixed current investment field mapping for the InvestmentAccount
+
+## [3.22.0](https://github.com/Backbase/stream-services/compare/3.21.0...3.22.0)
+### Added
+- Adds new parameter `source` to `ProductIngestPullRequest`, `ProductIngestPushRequest` & `ProductIngestResponse`.
+  - `source` field can be useful to understand from where this ingestion process was triggered & can be useful in many ways to identify the source of the request.
+- Adds different products to `ProductCompletedEvent`. I.e Loan, Term Deposit, Credit Card & Current Account on top of Savings Account.
+- Adds `source` field to `ProductCompletedEvent` & populate it with value sent from the request.
+- Adds key fields relate to User ID, Legal Entity ID & Service Agreement ID to `ProductCompletedEvent` & populate it from the `ProductIngestPullRequest` for the ingestion mode Pull.
+  - These fields are `userExternalId`, `userInternalId`, `legalEntityExternalId`, `legalEntityInternalId`, `serviceAgreementExternalId`, `serviceAgreementInternalId`.
+  - These can be useful on event handler side to identify user & service agreement for which this ingestion was triggered.
+- Pass `additions` from `ProductIngestPullRequest` to `ProductIngestResponse` & then to `ProductCompletedEvent` which can be useful to pass any extra information from request & can be captured on event handler.
 
 ## [3.20.0](https://github.com/Backbase/stream-services/compare/3.19.0...3.20.0)
 ### Added

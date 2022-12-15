@@ -145,11 +145,24 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private void processSuccessEvent(ProductIngestResponse res) {
         if (Boolean.TRUE.equals(config.isCompletedEventEnabled())) {
+            log.info("Emitting product completed event for userExternalId: {}, legalEntityExternalId: {}",
+                    res.getUserExternalId(), res.getLegalEntityExternalId());
             ProductCompletedEvent event = new ProductCompletedEvent()
-                    .withProductGroups(res.getProductGroups().stream().map(p -> mapper.mapStreamToEvent(p)).toList());
+                    .withProductGroups(res.getProductGroups().stream().map(p -> mapper.mapStreamToEvent(p)).toList())
+                    .withUserExternalId(res.getUserExternalId())
+                    .withUserInternalId(res.getUserInternalId())
+                    .withLegalEntityInternalId(res.getLegalEntityInternalId())
+                    .withLegalEntityExternalId(res.getLegalEntityExternalId())
+                    .withServiceAgreementInternalId(res.getServiceAgreementInternalId())
+                    .withServiceAgreementExternalId(res.getServiceAgreementExternalId())
+                    .withSource(res.getSource());
+            event.setAdditions(res.getAdditions());
             EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
+            log.debug("Emitted product completed event for userExternalId: {}, legalEntityExternalId: {}, SA: {}, source: {}",
+                    res.getUserExternalId(), res.getLegalEntityExternalId(), res.getServiceAgreementInternalId(),
+                    res.getSource());
         }
     }
 

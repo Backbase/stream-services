@@ -1,24 +1,23 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "type": "object",
-  "properties": {
-    "internalId": {
-      "description": "Product internal id",
-      "type": "string"
+  "properties" : {
+    "bookedBalance" : {
+      "$ref" : "base-schema.json#/schemas/BookedBalance"
     },
-    "externalId": {
-      "description": "Product external id",
-      "type": "string"
+    "availableBalance" : {
+      "$ref" : "base-schema.json#/schemas/AvailableBalance"
     },
-    "IBAN": {
-      "description": "International Bank Account Number",
-      "type": "string"
+    "IBAN" : {
+      "$ref" : "base-schema.json#/schemas/IBAN"
+    },
+    "BBAN" : {
+      "$ref" : "base-schema.json#/schemas/BBAN"
+    },
+    "bankBranchCode" : {
+      "$ref" : "base-schema.json#/schemas/BankBranchCode"
     }
   },
-  "additionalProperties": false,
-  "required": [
-    "internalId",
-    "externalId",
-    "IBAN"
-  ]
+  "extends" : {
+    "$ref" : "base-schema.json#/schemas/BaseProduct"
+  }
 }

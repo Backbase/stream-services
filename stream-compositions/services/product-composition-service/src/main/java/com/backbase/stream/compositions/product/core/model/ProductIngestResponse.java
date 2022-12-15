@@ -33,4 +33,5 @@ public class ProductIngestResponse {
     private final List<ProductGroup> productGroups;
     @With
     private Map<String, String> additions;
+    private String source;
 }

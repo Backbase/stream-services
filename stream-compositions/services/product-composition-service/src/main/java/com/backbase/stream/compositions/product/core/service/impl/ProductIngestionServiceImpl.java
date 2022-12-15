@@ -74,22 +74,16 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @return ProductGroup
      */
     private Mono<ProductIngestResponse> pullProductGroup(ProductIngestPullRequest request) {
-        return productIntegrationService
-                .pullProductGroup(request)
-                .map(i -> i.toBuilder()
-                        .legalEntityExternalId(request.getLegalEntityExternalId())
-                        .legalEntityInternalId(request.getLegalEntityInternalId())
-                        .userExternalId(request.getUserExternalId())
-                        .userInternalId(request.getUserInternalId())
-                        .build());
+        return productIntegrationService.pullProductGroup(request);
     }
 
     private Mono<ProductIngestResponse> pushProductGroup(ProductIngestPushRequest request) {
         return Mono.just(ProductIngestResponse.builder()
-                        .productGroups(Collections.singletonList(request.getProductGroup()))
-                        .serviceAgreementExternalId(request.getProductGroup().getServiceAgreement().getExternalId())
-                        .serviceAgreementInternalId(request.getProductGroup().getServiceAgreement().getInternalId())
-                                .build());
+                .productGroups(Collections.singletonList(request.getProductGroup()))
+                .serviceAgreementExternalId(request.getProductGroup().getServiceAgreement().getExternalId())
+                .serviceAgreementInternalId(request.getProductGroup().getServiceAgreement().getInternalId())
+                .source(request.getSource())
+                .build());
     }
 
     /**
@@ -103,6 +97,14 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
                 .map(BatchProductGroupTask::getData)
                 .map(pg -> ProductIngestResponse.builder()
                         .productGroups(pg.getProductGroups().stream().map(g -> (ProductGroup) g).collect(Collectors.toList()))
+                        .serviceAgreementExternalId(res.getServiceAgreementExternalId())
+                        .serviceAgreementInternalId(res.getServiceAgreementInternalId())
+                        .userExternalId(res.getUserExternalId())
+                        .userInternalId(res.getUserInternalId())
+                        .legalEntityExternalId(res.getLegalEntityExternalId())
+                        .legalEntityInternalId(res.getLegalEntityInternalId())
+                        .source(res.getSource())
+                        .additions(res.getAdditions())
                         .build());
     }
 

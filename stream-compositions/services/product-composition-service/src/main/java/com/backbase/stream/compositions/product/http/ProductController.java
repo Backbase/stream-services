@@ -62,6 +62,7 @@ public class ProductController implements ProductCompositionApi {
                 .membershipAccounts(request.getMembershipAccounts())
                 .additions(request.getAdditions())
                 .referenceJobRoleNames(request.getReferenceJobRoleNames())
+                .source(request.getSource())
                 .build();
     }
 
@@ -74,6 +75,7 @@ public class ProductController implements ProductCompositionApi {
     private ProductIngestPushRequest buildPushRequest(ProductPushIngestionRequest request) {
         return ProductIngestPushRequest.builder()
                 .productGroup(mapper.mapCompositionToStream(request.getProductGroup()))
+                .source(request.getSource())
                 .build();
     }
 
