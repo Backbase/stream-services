@@ -40,7 +40,7 @@
                 <executions>
                     <execution>
                         <id>generate-ingress-events</id>
-                        <phase>process-resources</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>events-generation</goal>
                         </goals>
@@ -54,7 +54,7 @@
                     </execution>
                     <execution>
                         <id>generate-egress-events</id>
-                        <phase>process-resources</phase>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>events-generation</goal>
                         </goals>
