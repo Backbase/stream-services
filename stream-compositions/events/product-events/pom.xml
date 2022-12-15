@@ -64,9 +64,6 @@
                             <outputFile>${project.basedir}/target/generated-sources</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
                             <packageName>stream.compositions.events.egress</packageName>
-                            <generationConfig>
-                                <includeAdditionalProperties>false</includeAdditionalProperties>
-                            </generationConfig>
                         </configuration>
                     </execution>
                 </executions>
