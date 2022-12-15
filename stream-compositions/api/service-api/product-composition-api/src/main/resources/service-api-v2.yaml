@@ -89,16 +89,32 @@ components:
       properties:
         legalEntityExternalId:
           type: string
+          description: Legal Entity External Id
+          example: testuser
         legalEntityInternalId:
           type: string
+          description: Legal Entity Internal Id
+          example: 4028818483400316018340775f2c000d
         serviceAgreementExternalId:
           type: string
+          description: Service Agreement External Id
+          example: sa_retail_b086f116-3132-3d70-b878-a648fecf4106
         serviceAgreementInternalId:
           type: string
+          description: Service Agreement Internal Id
+          example: 402881878008bdd8018014daf54d001d
         userExternalId:
           type: string
+          description: Backbase DBS external userid
+          example: testuser
         userInternalId:
           type: string
+          description: Backbase DBS userid
+          example: 2df8a3f8-b500-433b-8092-af8f95e8488e
+        source:
+          type: string
+          description: Source of the ingestion process from where the ingestion was triggered.
+          example: nightly_ingestion
         referenceJobRoleNames:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
           description: The reference job roles that should get assigned to the user
@@ -114,6 +130,10 @@ components:
     ProductPushIngestionRequest:
       type: object
       properties:
+        source:
+          type: string
+          description: Source of the ingestion process from where the ingestion was triggered.
+          example: nightly_ingestion
         productGroup:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
 

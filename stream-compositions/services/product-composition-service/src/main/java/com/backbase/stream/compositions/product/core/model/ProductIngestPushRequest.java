@@ -11,4 +11,5 @@ import lombok.Getter;
 public class ProductIngestPushRequest {
     private String eventId;
     private ProductGroup productGroup;
+    private String source;
 }

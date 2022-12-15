@@ -1,18 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "properties": {
-    "currentAccounts": {
-      "type": "array",
-      "items": {
-        "$ref": "current-account.json"
-      }
-    },
-    "savingsAccounts": {
-      "type": "array",
-      "items": {
-        "$ref": "savings-account.json"
-      }
+  "properties" : {
+    "serviceAgreement" : {
+      "$ref" : "base-schema.json#/schemas/ServiceAgreement"
     }
+  },
+  "description" : "Products assigned to service agreement",
+  "extends":  {
+    "$ref" : "base-product-group.json"
   }
 }

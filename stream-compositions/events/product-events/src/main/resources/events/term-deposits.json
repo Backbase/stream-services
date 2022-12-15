@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "properties" : {
-    "availableBalance" : {
-      "$ref" : "base-schema.json#/schemas/AvailableBalance"
-    },
     "bookedBalance" : {
       "$ref" : "base-schema.json#/schemas/BookedBalance"
+    },
+    "principalAmount" : {
+      "$ref" : "base-schema.json#/schemas/PrincipalAmount"
     },
     "IBAN" : {
       "$ref" : "base-schema.json#/schemas/IBAN"
@@ -13,11 +13,14 @@
     "BBAN" : {
       "$ref" : "base-schema.json#/schemas/BBAN"
     },
-    "bankBranchCode" : {
-      "$ref" : "base-schema.json#/schemas/BankBranchCode"
+    "termNumber" : {
+      "$ref" : "base-schema.json#/schemas/TermNumber"
     },
-    "principalAmount" : {
-      "$ref" : "base-schema.json#/schemas/PrincipalAmount"
+    "maturityDate" : {
+      "$ref" : "base-schema.json#/schemas/MaturityDate"
+    },
+    "maturityAmount" : {
+      "$ref" : "base-schema.json#/schemas/MaturityAmount"
     },
     "creditAccount" : {
       "$ref" : "base-schema.json#/schemas/CreditAccount"
