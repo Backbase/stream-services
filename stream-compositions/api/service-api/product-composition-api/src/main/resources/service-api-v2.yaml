@@ -99,6 +99,8 @@ components:
           type: string
         userInternalId:
           type: string
+        source:
+          type: string
         referenceJobRoleNames:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
           description: The reference job roles that should get assigned to the user
@@ -114,6 +116,8 @@ components:
     ProductPushIngestionRequest:
       type: object
       properties:
+        source:
+          type: string
         productGroup:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
 
