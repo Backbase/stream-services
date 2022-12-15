@@ -99,8 +99,8 @@ public class PortfolioIntegrationService {
                         .postPositions(portfolioMapper.mapPosition(portfolioId, subPortfolioId, position))
                         .map(o -> position)))
                 .thenMany(upsertTransactionCategory(positionBundle.getTransactionCategories()))
-                .then(upsertTransactions(positionBundle.getTransactions(), portfolioId, positionId))
-                .map(at -> positionBundle)
+                .thenMany(upsertTransactions(positionBundle.getTransactions(), portfolioId, positionId))
+                .then(Mono.just(positionBundle))
                 .doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException)
                 .onErrorResume(WebClientResponseException.class,
                         ReactiveStreamHandler.error(positionBundle, "Failed to create Position gang"))
@@ -128,19 +128,6 @@ public class PortfolioIntegrationService {
                 .onErrorResume(WebClientResponseException.class,
                         ReactiveStreamHandler.error(position, "Failed to create Position"))
                 .onErrorStop();
-    }
-
-    /**
-     * Create PositionTransactions and all reference models that are related.
-     * 
-     * @param transactions
-     * @param portfolioId
-     * @param positionId
-     * @return
-     */
-    public Mono<List<PositionTransaction>> upsertPositionTransactions(List<PositionTransaction> transactions,
-            String portfolioId, String positionId) {
-        return upsertTransactions(transactions, portfolioId, positionId).flatMap(o -> Mono.just(transactions));
     }
 
     /**
@@ -261,18 +248,37 @@ public class PortfolioIntegrationService {
     }
 
     @NotNull
-    private Mono<Void> upsertTransactions(List<PositionTransaction> transactions, String portfolioId,
+    public Flux<PositionTransaction> upsertTransactions(List<PositionTransaction> transactions, String portfolioId,
             String positionId) {
-        return Mono.justOrEmpty(transactions)
-                .flatMap(trs -> transactionManagementApi.deletePositionTransactions(positionId)
-                        .then(Mono
-                                .defer(() -> transactionManagementApi.postPortfolioTransactions(portfolioId,
-                                        new PortfolioTransactionsPostRequest().transactions(
-                                                List.of(new PortfolioTransactionsPostItem().positionId(positionId)
-                                                        .transactions(portfolioMapper.mapTransaction(trs))))))
-                                .onErrorResume(WebClientResponseException.class,
-                                        ReactiveStreamHandler.error(trs, "Failed to create Transactions"))
-                                .onErrorStop()));
+
+        return Flux.fromIterable(transactions)
+                .flatMap(txn -> upsertTransaction(txn, portfolioId, positionId));
+    }
+
+    private Mono<PositionTransaction> upsertTransaction(PositionTransaction transaction, String portfolioId,
+            String positionId) {
+
+        return transactionManagementApi
+                .putPositionTransactionById(positionId, transaction.getTransactionId(),
+                        portfolioMapper.mapPositionTransactionPutRequest(transaction))
+                .onErrorResume(WebClientResponseException.BadRequest.class, thr -> Mono.defer(() ->
+                {
+                    log.info(
+                            "Position Transaction not found for update, creating a new one, portfolioId: {}, positionId: {}",
+                            portfolioId, positionId);
+
+                    return transactionManagementApi.postPortfolioTransactions(portfolioId,
+                            createPortfolioTransactionsPostRequest(transaction, positionId));
+                }).doOnError(WebClientResponseException.class, ReactiveStreamHandler::handleWebClientResponseException))
+                .map(a -> transaction)
+                .onErrorStop();
+    }
+
+    private PortfolioTransactionsPostRequest createPortfolioTransactionsPostRequest(PositionTransaction transaction,
+            String positionId) {
+        return new PortfolioTransactionsPostRequest()
+                .addTransactionsItem(new PortfolioTransactionsPostItem().positionId(positionId)
+                        .addTransactionsItem(portfolioMapper.mapTransactionPostItem(transaction)));
     }
 
     @NotNull

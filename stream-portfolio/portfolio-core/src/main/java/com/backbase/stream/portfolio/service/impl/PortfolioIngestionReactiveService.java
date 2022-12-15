@@ -122,7 +122,7 @@ public class PortfolioIngestionReactiveService implements PortfolioIngestionServ
         return Optional.ofNullable(transactionBundle.getTransactions())
                 .map(Flux::fromIterable)
                 .orElseGet(Flux::empty)
-                .flatMap(t -> portfolioIntegrationService.upsertPositionTransactions(t.getTransactions(), portfolioCode,
+                .flatMap(t -> portfolioIntegrationService.upsertTransactions(t.getTransactions(), portfolioCode,
                         t.getPositionId()))
                 .then(Mono.just(transactionBundle));
     }

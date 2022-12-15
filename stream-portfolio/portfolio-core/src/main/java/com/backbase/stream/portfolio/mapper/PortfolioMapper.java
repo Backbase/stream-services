@@ -1,5 +1,10 @@
 package com.backbase.stream.portfolio.mapper;
 
+import java.util.List;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.ValueMapping;
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AllocationType;
@@ -9,9 +14,11 @@ import com.backbase.portfolio.api.service.integration.v1.model.PortfolioBenchmar
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionTransactionsPostItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionsHierarchyItem;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioTransactionsPostItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioValuationsItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PositionTransactionPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.SubPortfoliosPostRequest;
@@ -28,11 +35,6 @@ import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.PositionTransaction;
 import com.backbase.stream.portfolio.model.SubPortfolio;
 import com.backbase.stream.portfolio.model.TransactionCategory;
-import java.util.List;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ValueMapping;
 
 @Mapper
 public interface PortfolioMapper {
@@ -56,8 +58,8 @@ public interface PortfolioMapper {
 
     List<PortfolioPositionsHierarchyItem> mapHierarchies(List<PortfolioPositionsHierarchy> hierarchies);
 
-    List<PortfolioCumulativePerformancesItem> mapCumulativePerformances(
-        List<PortfolioCumulativePerformances> cumulativePerformances);
+    List<PortfolioCumulativePerformancesItem>
+            mapCumulativePerformances(List<PortfolioCumulativePerformances> cumulativePerformances);
 
     @Mapping(target = "name", source = "benchmarkName")
     PortfolioBenchmarkPutRequest mapBenchmark(String benchmarkName);
@@ -76,12 +78,21 @@ public interface PortfolioMapper {
     @Mapping(target = "subPortfolioCode", source = "subPortfolioId")
     @Mapping(target = ".", source = "position")
     PositionsPostRequest mapPosition(String portfolioId, String subPortfolioId, Position position);
-    
+
     PositionsPostRequest mapPostPosition(Position position);
 
     PositionsPutRequest mapPutPosition(Position position);
 
-    List<PortfolioPositionTransactionsPostItem> mapTransaction(List<PositionTransaction> trs);
+    @Mapping(target = "positionId", source = "positionId")
+    @Mapping(target = "transactions", source = "transactions")
+    PortfolioTransactionsPostItem mapPortfolioTransactionsPostItem(String positionId,
+            List<PositionTransaction> transactions);
+    
+    PositionTransactionPutRequest mapPositionTransactionPutRequest(PositionTransaction transaction);
+
+    PortfolioPositionTransactionsPostItem mapTransactionPostItem(PositionTransaction transaction);
+
+    List<PortfolioPositionTransactionsPostItem> mapTransactionPostItems(List<PositionTransaction> transactions);
 
     TransactionCategoryPostRequest mapTransactionCategory(TransactionCategory tc);
 
