@@ -6,7 +6,6 @@ import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemP
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountUserPreferencesItemPut;
 import com.backbase.dbs.arrangement.api.service.v2.model.TimeUnit;
-import com.backbase.stream.legalentity.model.*;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -14,6 +13,25 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.backbase.stream.legalentity.model.AvailableBalance;
+import com.backbase.stream.legalentity.model.BaseProduct;
+import com.backbase.stream.legalentity.model.BookedBalance;
+import com.backbase.stream.legalentity.model.CreditCard;
+import com.backbase.stream.legalentity.model.CreditLimit;
+import com.backbase.stream.legalentity.model.CurrentAccount;
+import com.backbase.stream.legalentity.model.CurrentInvestment;
+import com.backbase.stream.legalentity.model.DebitCard;
+import com.backbase.stream.legalentity.model.InterestPaymentFrequencyUnit;
+import com.backbase.stream.legalentity.model.InvestmentAccount;
+import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.LegalEntityReference;
+import com.backbase.stream.legalentity.model.Loan;
+import com.backbase.stream.legalentity.model.PrincipalAmount;
+import com.backbase.stream.legalentity.model.Product;
+import com.backbase.stream.legalentity.model.SavingsAccount;
+import com.backbase.stream.legalentity.model.TermDeposit;
+import com.backbase.stream.legalentity.model.TermUnit;
+import com.backbase.stream.legalentity.model.UserPreferences;
 import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
