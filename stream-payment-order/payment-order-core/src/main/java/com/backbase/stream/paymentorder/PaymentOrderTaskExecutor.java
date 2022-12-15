@@ -33,7 +33,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
 
     private final PaymentOrdersApi paymentOrdersApi;
 
-    private final String BANK_REFERENCE_ID = "BANKREFERENCEID";
+    private final String BANK_REFERENCE_ID_FIELD_NAME = "BANKREFERENCEID";
 
     @Override
     public Mono<PaymentOrderTask> executeTask(PaymentOrderTask streamTask) {
@@ -142,7 +142,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
     private Mono<PaymentOrderPutResponse> updatePaymentOrderStatus(String bankReferenceId,
                                                            PaymentOrderPutRequest paymentOrderPutRequest) {
 
-        return paymentOrdersApi.updatePaymentOrder(bankReferenceId, BANK_REFERENCE_ID, paymentOrderPutRequest);
+        return paymentOrdersApi.updatePaymentOrder(bankReferenceId, BANK_REFERENCE_ID_FIELD_NAME, paymentOrderPutRequest);
     }
 
     /**
