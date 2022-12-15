@@ -29,5 +29,4 @@ public class PaymentOrderIntegrationServiceImpl implements PaymentOrderIntegrati
                         paymentOrderMapper.mapStreamToIntegration(ingestPullRequest))
                 .flatMapIterable(PullPaymentOrderResponse::getPaymentOrder);
     }
-
 }
