@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.20.1](https://github.com/Backbase/stream-services/compare/3.20.0...3.20.1)
+### Added
+- Fixed current investment field mapping for the InvestmentAccount
+
 ## [3.20.0](https://github.com/Backbase/stream-services/compare/3.19.0...3.20.0)
 ### Added
 - Additional groups added as attribute to User model and will be passed to legal-entity-integration service within Legal Entity Saga execution
