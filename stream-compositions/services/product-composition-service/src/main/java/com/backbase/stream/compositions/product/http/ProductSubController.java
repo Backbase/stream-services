@@ -52,7 +52,6 @@ class ProductSubController {
                 .build();
     }
 
-
     /**
      * Builds ingestion request for downstream service.
      *

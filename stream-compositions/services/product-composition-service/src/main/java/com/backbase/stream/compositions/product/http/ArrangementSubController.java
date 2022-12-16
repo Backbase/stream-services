@@ -36,7 +36,6 @@ class ArrangementSubController {
                 .map(this::mapIngestionToResponse);
     }
 
-
     /**
      * Builds ingestion request for downstream service.
      *
@@ -49,7 +48,6 @@ class ArrangementSubController {
                 .source(request.getSource())
                 .build();
     }
-
 
     /**
      * Builds ingestion response for API endpoint.
