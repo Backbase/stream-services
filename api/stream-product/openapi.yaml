@@ -118,7 +118,7 @@ components:
     AccountArrangementItemPut:
       title: AccountArrangementItemPut
       required:
-        - externalArrangementId
+        - internalArrangementId
       properties:
         externalArrangementId:
           maxLength: 50
