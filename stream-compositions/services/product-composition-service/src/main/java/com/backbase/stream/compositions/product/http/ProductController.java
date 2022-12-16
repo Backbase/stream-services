@@ -46,10 +46,10 @@ public class ProductController implements ProductCompositionApi {
     }
 
     @Override
-    public Mono<ResponseEntity<ProductIngestionResponse>> pushIngestArrangement(
-            Mono<ProductPushIngestionRequest> productPushIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<ArrangementIngestionResponse>> pushIngestArrangement(Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest, ServerWebExchange exchange) {
         return null;
     }
+
 
     @Override
     public Mono<ResponseEntity<ProductIngestionResponse>> pushIngestProduct(

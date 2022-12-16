@@ -119,14 +119,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProductPushIngestionRequest'
+              $ref: '#/components/schemas/ArrangementPushIngestionRequest'
       responses:
         "201":
           description: Products ingested.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductIngestionResponse'
+                $ref: '#/components/schemas/ArrangementIngestionResponse'
         "400":
           description: BadRequest
           content:
