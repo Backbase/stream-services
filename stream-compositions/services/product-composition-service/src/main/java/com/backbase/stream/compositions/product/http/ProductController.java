@@ -1,13 +1,11 @@
 package com.backbase.stream.compositions.product.http;
 
 import com.backbase.stream.compositions.product.api.ProductCompositionApi;
-import com.backbase.stream.compositions.product.api.model.ProductIngestionResponse;
-import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
-import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
+import com.backbase.stream.compositions.product.api.model.*;
+import com.backbase.stream.compositions.product.core.mapper.ArrangementMapper;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
-import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
-import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
-import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+import com.backbase.stream.compositions.product.core.model.*;
+import com.backbase.stream.compositions.product.core.service.ArrangementIngestionService;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +23,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProductController implements ProductCompositionApi {
     private final ProductIngestionService productIngestionService;
-    private final ProductGroupMapper mapper;
+    private final ArrangementIngestionService arrangementIngestionService;
+    private final ProductGroupMapper productMapper;
+    private final ArrangementMapper arrangementMapper;
+
+    @Override
+    public Mono<ResponseEntity<ArrangementIngestionResponse>> pullIngestArrangement(
+            Mono<ArrangementPullIngestionRequest> arrangementPullIngestionRequest, ServerWebExchange exchange) {
+        return arrangementPullIngestionRequest
+                .map(this::buildPullRequest)
+                .flatMap(arrangementIngestionService::ingestPull)
+                .map(this::mapArrangementIngestionToResponse);
+    }
 
     @Override
     public Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProduct(
@@ -34,6 +43,12 @@ public class ProductController implements ProductCompositionApi {
                 .map(this::buildPullRequest)
                 .flatMap(productIngestionService::ingestPull)
                 .map(this::mapIngestionToResponse);
+    }
+
+    @Override
+    public Mono<ResponseEntity<ProductIngestionResponse>> pushIngestArrangement(
+            Mono<ProductPushIngestionRequest> productPushIngestionRequest, ServerWebExchange exchange) {
+        return null;
     }
 
     @Override
@@ -74,7 +89,7 @@ public class ProductController implements ProductCompositionApi {
      */
     private ProductIngestPushRequest buildPushRequest(ProductPushIngestionRequest request) {
         return ProductIngestPushRequest.builder()
-                .productGroup(mapper.mapCompositionToStream(request.getProductGroup()))
+                .productGroup(productMapper.mapCompositionToStream(request.getProductGroup()))
                 .source(request.getSource())
                 .build();
     }
@@ -90,8 +105,38 @@ public class ProductController implements ProductCompositionApi {
                 new ProductIngestionResponse()
                         .withProductGroups(
                                 response.getProductGroups().stream()
-                                        .map(group -> mapper.mapStreamToComposition(group))
+                                        .map(group -> productMapper.mapStreamToComposition(group))
                                         .collect(Collectors.toList())),
+                HttpStatus.CREATED);
+    }
+
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param request ArrangementPullIngestionRequest
+     * @return ArrangementPullIngestionRequest
+     */
+    private ArrangementIngestPullRequest buildPullRequest(ArrangementPullIngestionRequest request) {
+        return ArrangementIngestPullRequest
+                .builder()
+                .arrangementId(request.getArrangementId())
+                .externalArrangementId(request.getExternalArrangementId())
+                .source(request.getSource())
+                .build();
+    }
+
+    /**
+     * Builds ingestion response for API endpoint.
+     *
+     * @param response ArrangementIngestPullResponse
+     * @return ArrangementIngestionResponse
+     */
+    private ResponseEntity<ArrangementIngestionResponse> mapArrangementIngestionToResponse(
+            ArrangementIngestResponse response) {
+        return new ResponseEntity<>(
+                new ArrangementIngestionResponse()
+                        .withArrangement(
+                                arrangementMapper.mapStreamToComposition(response.getArrangement())),
                 HttpStatus.CREATED);
     }
 }

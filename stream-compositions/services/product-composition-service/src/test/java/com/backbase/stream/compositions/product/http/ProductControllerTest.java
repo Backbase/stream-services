@@ -1,19 +1,15 @@
 package com.backbase.stream.compositions.product.http;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-
 import com.backbase.stream.compositions.product.api.model.ProductGroup;
 import com.backbase.stream.compositions.product.api.model.ProductIngestionResponse;
 import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
 import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
+import com.backbase.stream.compositions.product.core.mapper.ArrangementMapper;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+import com.backbase.stream.compositions.product.core.service.ArrangementIngestionService;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +21,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
 
@@ -32,7 +32,13 @@ class ProductControllerTest {
     ProductGroupMapper mapper;
 
     @Mock
+    ArrangementMapper arrangementMapper;
+
+    @Mock
     ProductIngestionService productIngestionService;
+
+    @Mock
+    ArrangementIngestionService arrangementIngestionService;
 
     ProductController controller;
 
@@ -40,7 +46,9 @@ class ProductControllerTest {
     void setUp() {
         controller = new ProductController(
                 productIngestionService,
-                mapper);
+                arrangementIngestionService,
+                mapper,
+                arrangementMapper);
 
         lenient().when(mapper.mapCompositionToStream(any()))
                 .thenReturn(new com.backbase.stream.legalentity.model.ProductGroup());

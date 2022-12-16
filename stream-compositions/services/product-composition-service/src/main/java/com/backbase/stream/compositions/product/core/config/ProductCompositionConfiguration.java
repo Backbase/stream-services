@@ -2,11 +2,11 @@ package com.backbase.stream.compositions.product.core.config;
 
 import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.stream.compositions.integration.product.ApiClient;
+import com.backbase.stream.compositions.integration.product.api.ArrangementIntegrationApi;
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.DateFormat;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,6 +16,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.text.DateFormat;
 
 @Configuration
 @AllArgsConstructor
@@ -34,6 +36,12 @@ public class ProductCompositionConfiguration {
     @Primary
     public ProductIntegrationApi productIntegrationApi(ApiClient productClient) {
         return new ProductIntegrationApi(productClient);
+    }
+
+    @Bean
+    @Primary
+    public ArrangementIntegrationApi arrangementIntegrationApi(ApiClient productClient) {
+        return new ArrangementIntegrationApi(productClient);
     }
 
     @Bean
