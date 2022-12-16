@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.22.1](https://github.com/Backbase/stream-services/compare/3.22.0...3.22.1)
+### Added
+- Fixed current investment field mapping for the InvestmentAccount
+
 ## [3.22.0](https://github.com/Backbase/stream-services/compare/3.21.0...3.22.0)
 ### Added
 - Adds new parameter `source` to `ProductIngestPullRequest`, `ProductIngestPushRequest` & `ProductIngestResponse`.
