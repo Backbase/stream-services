@@ -46,8 +46,11 @@ public class ProductController implements ProductCompositionApi {
     }
 
     @Override
-    public Mono<ResponseEntity<ArrangementIngestionResponse>> pushIngestArrangement(Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest, ServerWebExchange exchange) {
-        return null;
+    public Mono<ResponseEntity<ArrangementIngestionResponse>> pushIngestArrangement(
+            Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest, ServerWebExchange exchange) {
+        return arrangementPushIngestionRequest.map(this::buildPushRequest)
+                .flatMap(arrangementIngestionService::ingestPush)
+                .map(this::mapIngestionToResponse);
     }
 
 
@@ -95,6 +98,19 @@ public class ProductController implements ProductCompositionApi {
     }
 
     /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param request PushIngestionRequest
+     * @return ProductIngestPushRequest
+     */
+    private ArrangementIngestPushRequest buildPushRequest(ArrangementPushIngestionRequest request) {
+        return ArrangementIngestPushRequest.builder()
+                .arrangement(arrangementMapper.mapCompositionToStream(request.getArrangement()))
+                .source(request.getSource())
+                .build();
+    }
+
+    /**
      * Builds ingestion response for API endpoint.
      *
      * @param response ProductCatalogIngestResponse
@@ -105,8 +121,23 @@ public class ProductController implements ProductCompositionApi {
                 new ProductIngestionResponse()
                         .withProductGroups(
                                 response.getProductGroups().stream()
-                                        .map(group -> productMapper.mapStreamToComposition(group))
+                                        .map(productMapper::mapStreamToComposition)
                                         .collect(Collectors.toList())),
+                HttpStatus.CREATED);
+    }
+
+    /**
+     * Builds ingestion response for API endpoint.
+     *
+     * @param response ProductCatalogIngestResponse
+     * @return IngestionResponse
+     */
+    private ResponseEntity<ArrangementIngestionResponse> mapIngestionToResponse(ArrangementIngestResponse response) {
+        return new ResponseEntity<>(
+                new ArrangementIngestionResponse()
+                        .withArrangement(
+                                arrangementMapper.mapStreamToComposition(response.getArrangement())
+                        ),
                 HttpStatus.CREATED);
     }
 

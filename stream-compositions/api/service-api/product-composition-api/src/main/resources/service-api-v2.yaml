@@ -227,9 +227,9 @@ components:
           description: Source of the ingestion process from where the ingestion was triggered.
           example: nightly_ingestion
         config:
-          $ref: '#/components/schemas/ArrangementPullIngestionConfig'
+          $ref: '#/components/schemas/ArrangementIngestionConfig'
 
-    ArrangementPullIngestionConfig:
+    ArrangementIngestionConfig:
       type: object
       properties:
         chains:
@@ -258,6 +258,8 @@ components:
           type: string
           description: Source of the ingestion process from where the ingestion was triggered.
           example: nightly_ingestion
+        config:
+          $ref: '#/components/schemas/ArrangementIngestionConfig'
         arrangement:
           $ref: '../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut'
 
