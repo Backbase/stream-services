@@ -20,11 +20,7 @@ public class ConfigMapper {
                 ProductConfigurationProperties.Chains
                         .builder()
                         .transactionComposition(this.map(config.getChains().getTransactionComposition()))
-                        .paymentOrderComposition(
-                                ProductConfigurationProperties.PaymentOrderComposition
-                                        .builder()
-                                        .enabled(chainsConfig.getPaymentOrderComposition().getEnabled())
-                                        .build())
+                        .paymentOrderComposition(this.map(config.getChains().getPaymentOrderComposition()))
                         .build()
                 : null;
     }
