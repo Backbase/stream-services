@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -19,6 +20,7 @@ import javax.validation.Valid;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Service
 @AllArgsConstructor
 class ProductSubController {
     private final ProductIngestionService productIngestionService;
