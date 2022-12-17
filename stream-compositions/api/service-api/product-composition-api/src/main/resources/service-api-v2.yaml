@@ -46,7 +46,7 @@ paths:
       tags:
         - ProductComposition
       summary: Ingests products (in push mode).
-      description: Ingests poducts (in push mode).
+      description: Ingests products (in push mode).
       operationId: pushIngestProduct
       requestBody:
         description: Push Ingestion Request
