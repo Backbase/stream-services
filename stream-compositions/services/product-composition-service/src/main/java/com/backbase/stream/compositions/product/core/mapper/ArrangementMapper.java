@@ -15,5 +15,4 @@ public interface ArrangementMapper {
 
     com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut mapCompositionToStream(
             com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut arrangementItem);
-
 }
