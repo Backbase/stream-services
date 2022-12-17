@@ -83,6 +83,7 @@ public class ArrangementIngestionServiceImpl implements ArrangementIngestionServ
         return arrangementService.updateArrangement(res.getArrangement())
                 .map(item -> ArrangementIngestResponse.builder()
                         .arrangement(res.getArrangement())
+                        .config(res.getConfig())
                         .build());
     }
 }

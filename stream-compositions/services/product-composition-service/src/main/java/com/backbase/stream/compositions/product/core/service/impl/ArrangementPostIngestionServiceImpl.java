@@ -16,7 +16,6 @@ import com.backbase.stream.legalentity.model.BaseProduct;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.Collection;
@@ -30,13 +29,9 @@ import java.util.stream.Stream;
 public class ArrangementPostIngestionServiceImpl implements ArrangementPostIngestionService {
 
     private final EventBus eventBus;
-
     private final ProductConfigurationProperties config;
-
     private final TransactionCompositionApi transactionCompositionApi;
-
     private final PaymentOrderCompositionApi paymentOrderCompositionApi;
-
     private final ProductGroupMapper mapper;
 
     @Override
@@ -66,7 +61,7 @@ public class ArrangementPostIngestionServiceImpl implements ArrangementPostInges
     private Mono<ArrangementIngestResponse> processTransactionChains(ArrangementIngestResponse res) {
         Mono<ArrangementIngestResponse> transactionChainMono;
 
-        if (!config.isTransactionChainEnabled()) {
+        if (!isTransactionChainEnabled(res)) {
             log.debug("Transaction Chain is disabled");
             transactionChainMono = Mono.just(res);
         } else if (config.isTransactionChainAsync()) {
@@ -117,20 +112,16 @@ public class ArrangementPostIngestionServiceImpl implements ArrangementPostInges
                 .orElseGet(Stream::empty);
     }
 
-    private Boolean excludeProducts(BaseProduct product) {
-        List<String> excludeList = config
-                .getChains().getTransactionComposition()
-                .getExcludeProductTypeExternalIds();
-
-        if (CollectionUtils.isEmpty(excludeList)) {
-            return Boolean.TRUE;
-        }
-
-        return !excludeList.contains(product.getProductTypeExternalId());
-    }
-
     private TransactionPullIngestionRequest buildTransactionPullRequest(ArrangementIngestResponse res) {
         return new TransactionPullIngestionRequest()
                 .withExternalArrangementId(res.getArrangement().getExternalArrangementId());
+    }
+
+    private boolean isTransactionChainEnabled(ArrangementIngestResponse res) {
+        if (res.getConfig() != null && res.getConfig().getTransactionComposition() != null) {
+            return Boolean.TRUE.equals(res.getConfig().getTransactionComposition().getEnabled());
+        } else {
+            return config.isTransactionChainEnabled();
+        }
     }
 }
