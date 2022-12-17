@@ -19,8 +19,8 @@ public class ConfigMapper {
         return chainsConfig != null ?
                 ProductConfigurationProperties.Chains
                         .builder()
-                        .transactionComposition(this.map(config.getChains().getTransactionComposition()))
-                        .paymentOrderComposition(this.map(config.getChains().getPaymentOrderComposition()))
+                        .transactionComposition(this.map(chainsConfig.getTransactionComposition()))
+                        .paymentOrderComposition(this.map(chainsConfig.getPaymentOrderComposition()))
                         .build()
                 : null;
     }
