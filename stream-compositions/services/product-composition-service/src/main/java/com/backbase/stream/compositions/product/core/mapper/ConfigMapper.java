@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.product.core.mapper;
 
 import com.backbase.stream.compositions.product.api.model.ArrangementIngestionConfig;
 import com.backbase.stream.compositions.product.api.model.ArrangementsChainsConfig;
+import com.backbase.stream.compositions.product.api.model.PaymentOrderCompositionChainConfig;
 import com.backbase.stream.compositions.product.api.model.TransactionCompositionChainConfig;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,15 @@ public class ConfigMapper {
     private ProductConfigurationProperties.TransactionComposition map(TransactionCompositionChainConfig config) {
         return config != null ?
                 ProductConfigurationProperties.TransactionComposition
+                        .builder()
+                        .enabled(config.getEnabled())
+                        .build()
+                : null;
+    }
+
+    private ProductConfigurationProperties.PaymentOrderComposition map(PaymentOrderCompositionChainConfig config) {
+        return config != null ?
+                ProductConfigurationProperties.PaymentOrderComposition
                         .builder()
                         .enabled(config.getEnabled())
                         .build()
