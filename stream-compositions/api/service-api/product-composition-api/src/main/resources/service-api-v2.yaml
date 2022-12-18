@@ -238,9 +238,9 @@ components:
     ArrangementsChainsConfig:
       type: object
       properties:
-        transaction-composition:
+        transactionComposition:
           $ref: '#/components/schemas/TransactionCompositionChainConfig'
-        payment-order-composition:
+        paymentOrderComposition:
           $ref: '#/components/schemas/PaymentOrderCompositionChainConfig'
 
     TransactionCompositionChainConfig:

@@ -61,7 +61,7 @@ public class ArrangementPostIngestionServiceImpl implements ArrangementPostInges
     private Mono<ArrangementIngestResponse> processTransactionChains(ArrangementIngestResponse res) {
         Mono<ArrangementIngestResponse> transactionChainMono;
 
-        if (!isTransactionChainEnabled(res)) {
+        if (!config.isTransactionChainEnabled(res.getConfig())) {
             log.debug("Transaction Chain is disabled");
             transactionChainMono = Mono.just(res);
         } else if (config.isTransactionChainAsync()) {
@@ -115,13 +115,5 @@ public class ArrangementPostIngestionServiceImpl implements ArrangementPostInges
     private TransactionPullIngestionRequest buildTransactionPullRequest(ArrangementIngestResponse res) {
         return new TransactionPullIngestionRequest()
                 .withExternalArrangementId(res.getArrangement().getExternalArrangementId());
-    }
-
-    private boolean isTransactionChainEnabled(ArrangementIngestResponse res) {
-        if (res.getConfig() != null && res.getConfig().getTransactionComposition() != null) {
-            return Boolean.TRUE.equals(res.getConfig().getTransactionComposition().getEnabled());
-        } else {
-            return config.isTransactionChainEnabled();
-        }
     }
 }

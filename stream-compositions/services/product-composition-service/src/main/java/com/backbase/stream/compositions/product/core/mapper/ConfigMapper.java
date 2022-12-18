@@ -5,19 +5,23 @@ import com.backbase.stream.compositions.product.api.model.ArrangementsChainsConf
 import com.backbase.stream.compositions.product.api.model.PaymentOrderCompositionChainConfig;
 import com.backbase.stream.compositions.product.api.model.TransactionCompositionChainConfig;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
+import com.backbase.stream.compositions.product.core.model.RequestConfig;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ConfigMapper {
-    ProductConfigurationProperties.Chains map(ArrangementIngestionConfig config) {
-        if (config == null) {
-            return null;
-        }
+    public RequestConfig map(ArrangementIngestionConfig config) {
+        return config != null ?
+                RequestConfig
+                        .builder()
+                        .chains(this.map(config.getChains()))
+                        .build()
+                : null;
+    }
 
-        ArrangementsChainsConfig chainsConfig = config.getChains();
-
+    private RequestConfig.Chains map(ArrangementsChainsConfig chainsConfig) {
         return chainsConfig != null ?
-                ProductConfigurationProperties.Chains
+                RequestConfig.Chains
                         .builder()
                         .transactionComposition(this.map(chainsConfig.getTransactionComposition()))
                         .paymentOrderComposition(this.map(chainsConfig.getPaymentOrderComposition()))

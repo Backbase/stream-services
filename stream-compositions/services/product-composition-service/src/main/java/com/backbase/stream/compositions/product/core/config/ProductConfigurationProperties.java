@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.product.core.config;
 
+import com.backbase.stream.compositions.product.core.model.RequestConfig;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -18,6 +19,36 @@ public class ProductConfigurationProperties {
     private Events events;
     private Cursor cursor;
     private IngestionMode ingestionMode = new IngestionMode();
+
+    public boolean isCompletedEventEnabled() {
+        return Boolean.TRUE.equals(events.getEnableCompleted());
+    }
+
+    public boolean isFailedEventEnabled() {
+        return Boolean.TRUE.equals(events.getEnableFailed());
+    }
+
+    public boolean isTransactionChainEnabled() {
+        return Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled());
+    }
+
+    public boolean isTransactionChainEnabled(RequestConfig requestConfig) {
+        return requestConfig == null || requestConfig.isTransactionChainEnabled().isEmpty()
+                ? Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
+                : requestConfig.isTransactionChainEnabled().get();
+    }
+
+    public boolean isTransactionChainAsync() {
+        return Boolean.TRUE.equals(chains.getTransactionComposition().getAsync());
+    }
+
+    public boolean isPaymentOrderChainEnabled() {
+        return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getEnabled());
+    }
+
+    public boolean isPaymentOrderChainAsync() {
+        return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getAsync());
+    }
 
     @Data
     @NoArgsConstructor
@@ -74,29 +105,5 @@ public class ProductConfigurationProperties {
     @SuperBuilder
     public static class PaymentOrderComposition extends BaseComposition {
         private List<String> excludeProductTypeExternalIds = new ArrayList<>();
-    }
-
-    public boolean isCompletedEventEnabled() {
-        return Boolean.TRUE.equals(events.getEnableCompleted());
-    }
-
-    public boolean isFailedEventEnabled() {
-        return Boolean.TRUE.equals(events.getEnableFailed());
-    }
-
-    public boolean isTransactionChainEnabled() {
-        return Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled());
-    }
-
-    public boolean isTransactionChainAsync() {
-        return Boolean.TRUE.equals(chains.getTransactionComposition().getAsync());
-    }
-
-    public boolean isPaymentOrderChainEnabled() {
-        return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getEnabled());
-    }
-
-    public boolean isPaymentOrderChainAsync() {
-        return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getAsync());
     }
 }
