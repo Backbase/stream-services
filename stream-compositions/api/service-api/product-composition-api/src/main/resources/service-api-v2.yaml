@@ -214,7 +214,7 @@ components:
     ArrangementPullIngestionRequest:
       type: object
       properties:
-        arrangementId:
+        internalArrangementId:
           type: string
         externalArrangementId:
           type: string
@@ -252,7 +252,7 @@ components:
     ArrangementPushIngestionRequest:
       type: object
       properties:
-        arrangementId:
+        internalArrangementId:
           type: string
         source:
           type: string

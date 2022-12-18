@@ -131,12 +131,6 @@ components:
           type: string
           description: Reference to the product of which the arrangement is an instantiation.
             This is an external product id
-      allOf:
-        - $ref: '#/components/schemas/AccountArrangementItemBase'
-    AccountArrangementItemBase:
-      title: AccountArrangementItemBase
-      type: object
-      properties:
         debitCards:
           uniqueItems: true
           type: array
@@ -158,345 +152,6 @@ components:
           $ref: '#/components/schemas/OverdueSince'
         paymentsPastDue:
           $ref: '#/components/schemas/PaymentsPastDue'
-      allOf:
-        - $ref: '#/components/schemas/AbstractArrangementItemBase'
-    AccountArrangementItem:
-      title: AccountArrangementItem
-      required:
-        - id
-        - productId
-      type: object
-      properties:
-        id:
-          maxLength: 36
-          type: string
-          description: A unique identifier for the Arrangement object that is generated
-            and used Internally in DBS
-        productKindName:
-          maxLength: 50
-          minLength: 1
-          type: string
-          description: "The label/name that is used for the respective product kind\
-            \ ex. Current Account, Savings Account"
-        visible:
-          type: boolean
-          description: DEPRECATED 2.12.2 AND REPLACED BY `userPreferences.visible`.
-            Indicator whether to show or hide the arrangement on the widget
-          deprecated: true
-        legalEntityIds:
-          minItems: 1
-          uniqueItems: true
-          type: array
-          description: References to the internal legal entities that own the arrangement.
-          items:
-            maxLength: 36
-            type: string
-        productId:
-          maxLength: 36
-          type: string
-          description: Reference to the product of which the arrangement is an instantiation.
-        productTypeName:
-          maxLength: 50
-          type: string
-          description: The label/name that is used to label a specific product type
-        externalLegalEntityId:
-          maxLength: 64
-          type: string
-          description: A unique identifier for the legal entity for which the arrangement
-            is assigned to (this property is being deprecated and its being replaced
-            by legalEntityIds).
-        externalProductId:
-          maxLength: 50
-          type: string
-          description: A unique identifier for the product that the arrangement applies
-            to
-        externalArrangementId:
-          maxLength: 50
-          minLength: 1
-          type: string
-          description: A unique external identifier for the arrangement
-        userPreferences:
-          $ref: '#/components/schemas/AccountUserPreferencesItem'
-        product:
-          $ref: '#/components/schemas/AccountPresentationProductItem'
-        state:
-          $ref: '#/components/schemas/StateItem'
-        parentId:
-          maxLength: 36
-          type: string
-          description: Indicate if the account has parent child relationship with
-            another account
-        subscriptions:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/Subscription'
-      allOf:
-        - $ref: '#/components/schemas/AccountArrangementItemBase'
-    AccountArrangementItemPost:
-      title: AccountArrangementItemPost
-      required:
-        - externalArrangementId
-        - externalProductId
-      properties:
-        externalArrangementId:
-          maxLength: 50
-          minLength: 1
-          type: string
-          description: A unique external identifier for the arrangement
-        externalLegalEntityIds:
-          uniqueItems: true
-          type: array
-          items:
-            maxLength: 64
-            minLength: 1
-            type: string
-            description: An external unique identifier for the Legal Entity object.
-        legalEntityIds:
-          uniqueItems: true
-          type: array
-          items:
-            maxLength: 36
-            minLength: 1
-            type: string
-            description: An internal unique identifier for the Legal Entity object.
-        externalProductId:
-          maxLength: 50
-          minLength: 1
-          type: string
-          description: A unique identifier for the product that the arrangement applies
-            to
-        externalStateId:
-          maxLength: 50
-          type: string
-          description: External reference to the arrangement state
-        productId:
-          maxLength: 50
-          minLength: 1
-          type: string
-          description: Reference to the product of which the arrangement is an instantiation.
-            This is an external product id
-      allOf:
-        - $ref: '#/components/schemas/AccountArrangementItemBase'
-    AccountPresentationProductItem:
-      title: AccountPresentationProductItem
-      type: object
-      properties:
-        id:
-          maxLength: 50
-          type: string
-          description: A unique identifier for the product.
-        translations:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/TranslationItem'
-      allOf:
-        - $ref: '#/components/schemas/ExternalProductItem'
-    AccountStateItem:
-      title: AccountStateItem
-      required:
-        - externalStateId
-        - state
-      type: object
-      properties:
-        externalStateId:
-          maxLength: 50
-          minLength: 1
-          type: string
-          description: unique external identifier for the state
-        state:
-          maxLength: 50
-          minLength: 1
-          type: string
-          description: "unique identifier for the state. Example: Active"
-        description:
-          maxLength: 200
-          type: string
-          description: description of the state
-    AccountUserPreferencesItem:
-      title: AccountUserPreferencesItem
-      required:
-        - arrangementId
-      type: object
-      properties:
-        arrangementId:
-          maxLength: 36
-          minLength: 1
-          type: string
-          description: The unique Arrangement identifier related to these user preferences
-        alias:
-          maxLength: 50
-          type: string
-          description: The name that can be assigned by the user to label the arrangement
-        visible:
-          type: boolean
-          description: User indicator whether to show or hide the arrangement on the
-            front end
-        favorite:
-          type: boolean
-          description: Indication whether an arrangement can be favorable for a user
-      description: "User defined preferences for a specific arrangement.\nNote: each\
-        \ user might have different preferences\n"
-      allOf:
-        - $ref: '#/components/schemas/AdditionalProperties'
-    CardDetails:
-      title: CardDetails
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/AbstractCardDetails'
-    InterestDetails:
-      title: InterestDetails
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/AbstractInterestDetails'
-    ApiError:
-      title: ApiError
-      required:
-        - message
-      type: object
-      properties:
-        message:
-          type: string
-    BadRequestError:
-      title: BadRequestError
-      type: object
-      example:
-        message: Bad Request
-        errors:
-          - message: "Value Exceeded. Must be between {min} and {max}."
-            key: common.api.shoesize
-            context:
-              max: "50"
-              min: "1"
-      allOf:
-        - $ref: '#/components/schemas/ErrorAwareApi'
-    ConflictError:
-      title: ConflictError
-      type: object
-      example:
-        message: Conflict error
-        errors:
-          - message: The request could not be completed due to a conflict with the current
-              state of the resource.
-            key: transactions.api.billingstatus.transaction
-            context:
-              billingStatus: BILLED
-      allOf:
-        - $ref: '#/components/schemas/ErrorAwareApi'
-    ErrorAwareApi:
-      title: ApiErrorExt
-      required:
-        - errors
-      type: object
-      properties:
-        errors:
-          type: array
-          description: Detailed error information
-          items:
-            $ref: '#/components/schemas/ErrorItem'
-      allOf:
-        - $ref: '#/components/schemas/ApiError'
-    ErrorItem:
-      title: ErrorItem
-      type: object
-      properties:
-        message:
-          type: string
-          description: Any further information.
-        key:
-          type: string
-          description: "{capability-name}.api.{api-key-name}. For generated validation\
-            \ errors this is the path in the document the error resolves to. e.g.\
-            \ object name + '.' + field"
-        context:
-          type: object
-          additionalProperties:
-            type: string
-          description: Context can be anything used to construct localised messages.
-      example:
-        message: "Value Exceeded. Must be between {min} and {max}."
-        key: common.api.shoesize
-        context:
-          max: "50"
-          min: "1"
-    ForbiddenError:
-      title: ForbiddenError
-      type: object
-      example:
-        message: Access to requested resource denied.
-        errors:
-          - message: "Resource access denied due to an insufficient user quota of {quota}."
-            key: common.api.quota
-            context:
-              quota: someQuota
-      allOf:
-        - $ref: '#/components/schemas/ErrorAwareApi'
-    InternalServerError:
-      title: InternalServerError
-      type: object
-      example:
-        message: Description of error
-      allOf:
-        - $ref: '#/components/schemas/ApiError'
-    NotAcceptableError:
-      title: NotAcceptableError
-      type: object
-      properties:
-        supportedMediaTypes:
-          type: array
-          description: List of supported media types for this endpoint
-          items:
-            type: string
-      example:
-        message: Could not find acceptable representation
-        supportedMediaTypes:
-          - application/json
-      allOf:
-        - $ref: '#/components/schemas/ApiError'
-    NotFoundError:
-      title: NotFoundError
-      type: object
-      example:
-        message: Resource not found.
-        errors:
-          - message: "Unable to find the resource requested resource: {resource}."
-            key: common.api.resource
-            context:
-              resource: aResource
-      allOf:
-        - $ref: '#/components/schemas/ErrorAwareApi'
-    UnauthorizedError:
-      title: UnauthorizedError
-      type: object
-      example:
-        message: Access to requested resource denied.
-        errors:
-          - message: Resource access denied due to invalid credentials.
-            key: common.api.token
-            context:
-              accessToken: expired
-      allOf:
-        - $ref: '#/components/schemas/ErrorAwareApi'
-    UnsupportedMediaTypeError:
-      title: UnsupportedMediaTypeError
-      type: object
-      example:
-        message: Unsupported media type.
-        errors:
-          - message: "The request entity has a media type {mediaType} which the resource\
-            \ does not support."
-            key: common.api.mediaType
-            context:
-              mediaType: application/javascript
-      allOf:
-        - $ref: '#/components/schemas/ErrorAwareApi'
-    AbstractArrangementItemBase:
-      title: AbstractArrangementItemBase
-      required:
-        - currency
-      type: object
-      properties:
         name:
           maxLength: 50
           type: string
@@ -841,8 +496,224 @@ components:
           type: string
           description: Last synchronization datetime
           format: date-time
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+      description: Additional Properties
+    AccountPresentationProductItem:
+      title: AccountPresentationProductItem
+      type: object
+      properties:
+        id:
+          maxLength: 50
+          type: string
+          description: A unique identifier for the product.
+        translations:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/TranslationItem'
+      allOf:
+        - $ref: '#/components/schemas/ExternalProductItem'
+    AccountStateItem:
+      title: AccountStateItem
+      required:
+        - externalStateId
+        - state
+      type: object
+      properties:
+        externalStateId:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: unique external identifier for the state
+        state:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: "unique identifier for the state. Example: Active"
+        description:
+          maxLength: 200
+          type: string
+          description: description of the state
+    AccountUserPreferencesItem:
+      title: AccountUserPreferencesItem
+      required:
+        - arrangementId
+      type: object
+      properties:
+        arrangementId:
+          maxLength: 36
+          minLength: 1
+          type: string
+          description: The unique Arrangement identifier related to these user preferences
+        alias:
+          maxLength: 50
+          type: string
+          description: The name that can be assigned by the user to label the arrangement
+        visible:
+          type: boolean
+          description: User indicator whether to show or hide the arrangement on the
+            front end
+        favorite:
+          type: boolean
+          description: Indication whether an arrangement can be favorable for a user
+      description: "User defined preferences for a specific arrangement.\nNote: each\
+        \ user might have different preferences\n"
       allOf:
         - $ref: '#/components/schemas/AdditionalProperties'
+    CardDetails:
+      title: CardDetails
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AbstractCardDetails'
+    InterestDetails:
+      title: InterestDetails
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AbstractInterestDetails'
+    ApiError:
+      title: ApiError
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+    BadRequestError:
+      title: BadRequestError
+      type: object
+      example:
+        message: Bad Request
+        errors:
+          - message: "Value Exceeded. Must be between {min} and {max}."
+            key: common.api.shoesize
+            context:
+              max: "50"
+              min: "1"
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    ConflictError:
+      title: ConflictError
+      type: object
+      example:
+        message: Conflict error
+        errors:
+          - message: The request could not be completed due to a conflict with the current
+              state of the resource.
+            key: transactions.api.billingstatus.transaction
+            context:
+              billingStatus: BILLED
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    ErrorAwareApi:
+      title: ApiErrorExt
+      required:
+        - errors
+      type: object
+      properties:
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+      allOf:
+        - $ref: '#/components/schemas/ApiError'
+    ErrorItem:
+      title: ErrorItem
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information.
+        key:
+          type: string
+          description: "{capability-name}.api.{api-key-name}. For generated validation\
+            \ errors this is the path in the document the error resolves to. e.g.\
+            \ object name + '.' + field"
+        context:
+          type: object
+          additionalProperties:
+            type: string
+          description: Context can be anything used to construct localised messages.
+      example:
+        message: "Value Exceeded. Must be between {min} and {max}."
+        key: common.api.shoesize
+        context:
+          max: "50"
+          min: "1"
+    ForbiddenError:
+      title: ForbiddenError
+      type: object
+      example:
+        message: Access to requested resource denied.
+        errors:
+          - message: "Resource access denied due to an insufficient user quota of {quota}."
+            key: common.api.quota
+            context:
+              quota: someQuota
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    InternalServerError:
+      title: InternalServerError
+      type: object
+      example:
+        message: Description of error
+      allOf:
+        - $ref: '#/components/schemas/ApiError'
+    NotAcceptableError:
+      title: NotAcceptableError
+      type: object
+      properties:
+        supportedMediaTypes:
+          type: array
+          description: List of supported media types for this endpoint
+          items:
+            type: string
+      example:
+        message: Could not find acceptable representation
+        supportedMediaTypes:
+          - application/json
+      allOf:
+        - $ref: '#/components/schemas/ApiError'
+    NotFoundError:
+      title: NotFoundError
+      type: object
+      example:
+        message: Resource not found.
+        errors:
+          - message: "Unable to find the resource requested resource: {resource}."
+            key: common.api.resource
+            context:
+              resource: aResource
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    UnauthorizedError:
+      title: UnauthorizedError
+      type: object
+      example:
+        message: Access to requested resource denied.
+        errors:
+          - message: Resource access denied due to invalid credentials.
+            key: common.api.token
+            context:
+              accessToken: expired
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    UnsupportedMediaTypeError:
+      title: UnsupportedMediaTypeError
+      type: object
+      example:
+        message: Unsupported media type.
+        errors:
+          - message: "The request entity has a media type {mediaType} which the resource\
+            \ does not support."
+            key: common.api.mediaType
+            context:
+              mediaType: application/javascript
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
     AbstractCardDetails:
       title: AbstractCardDetails
       required:

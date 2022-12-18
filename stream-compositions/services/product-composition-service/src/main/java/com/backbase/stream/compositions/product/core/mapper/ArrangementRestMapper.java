@@ -19,7 +19,7 @@ public class ArrangementRestMapper {
 
     public ArrangementIngestPushRequest mapPushRequest(ArrangementPushIngestionRequest request) {
         return ArrangementIngestPushRequest.builder()
-                .arrangementInternalId(request.getArrangementId())
+                .arrangementInternalId(request.getInternalArrangementId())
                 .arrangement(arrangementMapper.mapCompositionToStream(request.getArrangement()))
                 .source(request.getSource())
                 .config(chainsMapper.map(request.getConfig()))
@@ -28,7 +28,7 @@ public class ArrangementRestMapper {
 
     public ArrangementIngestPullRequest mapPullRequest(ArrangementPullIngestionRequest request) {
         return ArrangementIngestPullRequest.builder()
-                .arrangementId(request.getArrangementId())
+                .arrangementId(request.getInternalArrangementId())
                 .externalArrangementId(request.getExternalArrangementId())
                 .source(request.getSource())
                 .config(chainsMapper.map(request.getConfig()))

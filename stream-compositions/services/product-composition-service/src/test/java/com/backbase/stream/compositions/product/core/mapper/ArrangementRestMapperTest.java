@@ -46,7 +46,7 @@ class ArrangementRestMapperTest {
 
         ArrangementPushIngestionRequest request =
                 new ArrangementPushIngestionRequest()
-                        .withArrangementId(ARRANGEMENT_ID)
+                        .withInternalArrangementId(ARRANGEMENT_ID)
                         .withSource(SOURCE)
                         .withArrangement(arrangementItemPut)
                         .withConfig(requestConfig);
@@ -66,7 +66,7 @@ class ArrangementRestMapperTest {
 
         ArrangementPullIngestionRequest request =
                 new ArrangementPullIngestionRequest()
-                        .withArrangementId(ARRANGEMENT_ID)
+                        .withInternalArrangementId(ARRANGEMENT_ID)
                         .withExternalArrangementId(EXTERNAL_ARRANGEMENT_ID)
                         .withSource(SOURCE)
                         .withConfig(requestConfig);

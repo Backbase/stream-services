@@ -57,7 +57,7 @@ paths:
               $ref: '#/components/schemas/PullArrangementRequest'
       responses:
         "200":
-          description: Product group sucessfully returned.
+          description: Arrangement successfully returned.
           content:
             application/json:
               schema:
@@ -116,7 +116,7 @@ components:
     PullArrangementRequest:
       type: object
       properties:
-        arrangementId:
+        arrangementInternalId:
           type: string
         arrangementExternalId:
           type: string
@@ -136,8 +136,10 @@ components:
     PullArrangementResponse:
       type: object
       properties:
+        arrangementInternalId:
+          type: string
         arrangement:
-          $ref: '../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut'
+            $ref: '../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut'
 
     Product:
       type: object

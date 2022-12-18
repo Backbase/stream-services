@@ -24,7 +24,7 @@ public class ArrangementIntegrationServiceImpl implements ArrangementIntegration
             ArrangementIngestPullRequest ingestionRequest) {
         return arrangementIntegrationApi.pullArrangement(
                         new PullArrangementRequest()
-                                .arrangementId(ingestionRequest.getArrangementId())
+                                .arrangementInternalId(ingestionRequest.getArrangementId())
                                 .arrangementExternalId(ingestionRequest.getExternalArrangementId()))
                 .map(item -> arrangementMapper.mapIntegrationToStream(item.getArrangement()))
                 .map(item -> ArrangementIngestResponse.builder()

@@ -62,6 +62,7 @@ public class ArrangementIngestionServiceImpl implements ArrangementIngestionServ
     public Mono<ArrangementIngestResponse> pushArrangement(ArrangementIngestPushRequest request) {
         return Mono.just(ArrangementIngestResponse.builder()
                 .arrangement(request.getArrangement())
+                .arrangementInternalId(request.getArrangementInternalId())
                 .config(request.getConfig())
                 .source(request.getSource())
                 .build());
