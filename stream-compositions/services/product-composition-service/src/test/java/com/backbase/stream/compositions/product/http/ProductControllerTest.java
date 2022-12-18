@@ -1,38 +1,23 @@
 package com.backbase.stream.compositions.product.http;
 
-import com.backbase.stream.compositions.product.api.model.ProductGroup;
-import com.backbase.stream.compositions.product.api.model.ProductIngestionResponse;
-import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
-import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
-import com.backbase.stream.compositions.product.core.mapper.ArrangementMapper;
-import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
-import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
-import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
-import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import com.backbase.stream.compositions.product.api.model.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import java.util.Arrays;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-@Disabled
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
-
-    @Mock
-    ProductGroupMapper mapper;
-
-    @Mock
-    ArrangementMapper arrangementMapper;
+    @InjectMocks
+    ProductController controller;
 
     @Mock
     ProductSubController productSubController;
@@ -40,58 +25,63 @@ class ProductControllerTest {
     @Mock
     ArrangementSubController arrangementSubController;
 
-    ProductController controller;
+    @Test
+    void pullProductIngestion_Success() {
+        ProductPullIngestionRequest request = new ProductPullIngestionRequest();
+        ResponseEntity<ProductIngestionResponse> responseEntity = mock(ResponseEntity.class);
+        when(productSubController.pullIngestProduct(any(), any()))
+                .thenReturn(Mono.just(responseEntity));
 
-    @BeforeEach
-    void setUp() {
-        controller = new ProductController(
-                productSubController,
-                arrangementSubController);
+        Mono<ResponseEntity<ProductIngestionResponse>> responseEntityMono =
+                controller.pullIngestProduct(Mono.just(request), null);
 
-        lenient().when(mapper.mapCompositionToStream(any()))
-                .thenReturn(new com.backbase.stream.legalentity.model.ProductGroup());
-        lenient().when(mapper.mapStreamToComposition(any())).thenReturn(new ProductGroup());
+        StepVerifier.create(responseEntityMono)
+                .expectNext(responseEntity)
+                .verifyComplete();
     }
 
     @Test
-    void testPullIngestion_Success() {
-        Mono<ProductPullIngestionRequest> requestMono = Mono.just(
-                new ProductPullIngestionRequest().withLegalEntityExternalId("externalId"));
+    void pushProductIngestion_Success() {
+        ProductPushIngestionRequest request = new ProductPushIngestionRequest();
+        ResponseEntity<ProductIngestionResponse> responseEntity = mock(ResponseEntity.class);
+        when(productSubController.pushIngestProduct(any(), any()))
+                .thenReturn(Mono.just(responseEntity));
 
-        doAnswer(invocation -> {
-            ProductIngestPullRequest request = invocation.getArgument(0);
+        Mono<ResponseEntity<ProductIngestionResponse>> responseEntityMono =
+                controller.pushIngestProduct(Mono.just(request), null);
 
-            return Mono.just(ProductIngestResponse.builder()
-                    .productGroups(Arrays.asList(new com.backbase.stream.legalentity.model.ProductGroup()))
-                    .build());
-        }).when(productSubController).pullIngestProduct(any(), any());
-
-        ResponseEntity<ProductIngestionResponse> responseEntity = controller
-                .pullIngestProduct(requestMono, null).block();
-        ProductIngestionResponse ingestionResponse = responseEntity.getBody();
-        assertNotNull(ingestionResponse);
-        assertNotNull(ingestionResponse.getProductGroups());
-        verify(productSubController).pullIngestProduct(any(), any());
+        StepVerifier.create(responseEntityMono)
+                .expectNext(responseEntity)
+                .verifyComplete();
     }
 
     @Test
-    void testPushIngestion_Success() {
-        Mono<ProductPushIngestionRequest> requestMono = Mono.just(
-                new ProductPushIngestionRequest().withProductGroup(new ProductGroup()));
+    void pullArrangementIngestion_Success() {
+        ArrangementPullIngestionRequest request = new ArrangementPullIngestionRequest();
+        ResponseEntity<ArrangementIngestionResponse> responseEntity = mock(ResponseEntity.class);
+        when(arrangementSubController.pullIngestArrangement(any(), any()))
+                .thenReturn(Mono.just(responseEntity));
 
-        doAnswer(invocation -> {
-            ProductIngestPushRequest request = invocation.getArgument(0);
+        Mono<ResponseEntity<ArrangementIngestionResponse>> responseEntityMono =
+                controller.pullIngestArrangement(Mono.just(request), null);
 
-            return Mono.just(ProductIngestResponse.builder()
-                    .productGroups(Arrays.asList(new com.backbase.stream.legalentity.model.ProductGroup()))
-                    .build());
-        }).when(productSubController).pushIngestProduct(any(), any());
+        StepVerifier.create(responseEntityMono)
+                .expectNext(responseEntity)
+                .verifyComplete();
+    }
 
-        ResponseEntity<ProductIngestionResponse> responseEntity = controller
-                .pushIngestProduct(requestMono, null).block();
-        ProductIngestionResponse ingestionResponse = responseEntity.getBody();
-        assertNotNull(ingestionResponse);
-        assertNotNull(ingestionResponse.getProductGroups());
-        verify(productSubController).pushIngestProduct(any(), any());
+    @Test
+    void pushArrangementIngestion_Success() {
+        ArrangementPushIngestionRequest request = new ArrangementPushIngestionRequest();
+        ResponseEntity<ArrangementIngestionResponse> responseEntity = mock(ResponseEntity.class);
+        when(arrangementSubController.pushIngestArrangement(any(), any()))
+                .thenReturn(Mono.just(responseEntity));
+
+        Mono<ResponseEntity<ArrangementIngestionResponse>> responseEntityMono =
+                controller.pushIngestArrangement(Mono.just(request), null);
+
+        StepVerifier.create(responseEntityMono)
+                .expectNext(responseEntity)
+                .verifyComplete();
     }
 }

@@ -3,7 +3,7 @@ package com.backbase.stream.compositions.product.core.service.impl;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
-import com.backbase.stream.compositions.events.egress.event.spec.v1.ArrangementUpdateCompletedEvent;
+import com.backbase.stream.compositions.events.egress.event.spec.v1.ArrangementCompletedEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
@@ -86,10 +86,10 @@ public class ArrangementPostIngestionServiceImpl implements ArrangementPostInges
         if (Boolean.TRUE.equals(config.isCompletedEventEnabled())) {
             log.info("Emitting arrangement update completed event for externalArrangementId: {}, source: {}",
                     res.getArrangement().getExternalArrangementId(), res.getSource());
-            ArrangementUpdateCompletedEvent event = new ArrangementUpdateCompletedEvent()
+            ArrangementCompletedEvent event = new ArrangementCompletedEvent()
                     .withArrangementExternalId(res.getArrangement().getExternalArrangementId())
                     .withSource(res.getSource());
-            EnvelopedEvent<ArrangementUpdateCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
+            EnvelopedEvent<ArrangementCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
             log.info("Emitted arrangement update completed event for externalArrangementId: {}, source: {}",
