@@ -26,13 +26,20 @@ public class RequestConfig {
                 : Optional.of(Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled()));
     }
 
+    public Optional<Boolean> isTransactionChainAsync() {
+        return chains == null
+                || chains.getTransactionComposition() == null
+                || chains.getTransactionComposition().getAsync() == null
+                ? Optional.empty()
+                : Optional.of(Boolean.TRUE.equals(chains.getTransactionComposition().getAsync()));
+    }
+
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Chains {
         private ProductConfigurationProperties.TransactionComposition transactionComposition;
-        private ProductConfigurationProperties.PaymentOrderComposition paymentOrderComposition;
     }
 
     @Data
@@ -49,14 +56,6 @@ public class RequestConfig {
     @AllArgsConstructor
     @SuperBuilder
     public static class TransactionComposition extends ProductConfigurationProperties.BaseComposition {
-        private List<String> excludeProductTypeExternalIds = new ArrayList<>();
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @SuperBuilder
-    public static class PaymentOrderComposition extends ProductConfigurationProperties.BaseComposition {
         private List<String> excludeProductTypeExternalIds = new ArrayList<>();
     }
 }

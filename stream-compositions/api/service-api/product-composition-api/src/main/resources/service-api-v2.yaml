@@ -240,8 +240,6 @@ components:
       properties:
         transactionComposition:
           $ref: '#/components/schemas/TransactionCompositionChainConfig'
-        paymentOrderComposition:
-          $ref: '#/components/schemas/PaymentOrderCompositionChainConfig'
 
     TransactionCompositionChainConfig:
       type: object
@@ -262,14 +260,6 @@ components:
           $ref: '#/components/schemas/ArrangementIngestionConfig'
         arrangement:
           $ref: '../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut'
-
-    PaymentOrderCompositionChainConfig:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-        async:
-          type: boolean
 
     ArrangementIngestionResponse:
       type: object

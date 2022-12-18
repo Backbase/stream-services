@@ -38,6 +38,12 @@ public class ProductConfigurationProperties {
                 : requestConfig.isTransactionChainEnabled().get();
     }
 
+    public boolean isTransactionChainAsync(RequestConfig requestConfig) {
+        return requestConfig == null || requestConfig.isTransactionChainAsync().isEmpty()
+                ? Boolean.TRUE.equals(chains.getTransactionComposition().getAsync())
+                : requestConfig.isTransactionChainAsync().get();
+    }
+
     public boolean isTransactionChainAsync() {
         return Boolean.TRUE.equals(chains.getTransactionComposition().getAsync());
     }
