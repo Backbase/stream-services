@@ -32,6 +32,7 @@ public class ConfigMapper {
                 ProductConfigurationProperties.TransactionComposition
                         .builder()
                         .enabled(config.getEnabled())
+                        .async(config.getAsync())
                         .build()
                 : null;
     }
