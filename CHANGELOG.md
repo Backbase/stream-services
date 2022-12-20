@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.23.1](https://github.com/Backbase/stream-services/compare/3.23.0...3.23.1)
+### Added
+- Add the population of optional user additions to the service used by user ingestion in identity integration mode.
+  User additions are result of data extension to the OOTB user manager service.
+
 ## [3.22.1](https://github.com/Backbase/stream-services/compare/3.22.0...3.22.1)
 ### Added
 - Fixed current investment field mapping for the InvestmentAccount
