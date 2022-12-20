@@ -43,7 +43,7 @@ backbase:
             excludeProductTypeExternalIds:
           payment-order-composition:
             enabled: true
-            base-url: http://localhost:9005
+            base-url: http://payment-order-composition:8080
             async: false
             excludeProductTypeExternalIds:
         events:

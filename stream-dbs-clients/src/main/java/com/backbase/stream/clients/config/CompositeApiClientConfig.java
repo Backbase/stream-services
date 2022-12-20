@@ -10,7 +10,10 @@ import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalanc
 import org.springframework.validation.annotation.Validated;
 
 /**
- * This specialization make it flexible to use direct uris when load balancing is not available.
+ * This specialization make it flexible to use direct uris when client-side load balancing is not desired/supported.
+ *
+ * <p>In order to use the `direct-uri` property, the value of `spring.cloud.loadbalancer.enabled` needs to be set to
+ * false in services with support to client-side load balancing.
  */
 @Validated
 class CompositeApiClientConfig extends ApiClientConfig {
@@ -20,6 +23,9 @@ class CompositeApiClientConfig extends ApiClientConfig {
      */
     private String directUri;
 
+    /**
+     * Fallback when ports are the same for all service clients.
+     */
     @Positive
     @Value("${backbase.communication.http.default-service-port:}")
     private Integer defaultServicePort;
