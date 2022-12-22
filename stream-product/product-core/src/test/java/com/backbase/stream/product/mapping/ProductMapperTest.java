@@ -334,12 +334,6 @@ public class ProductMapperTest {
     }
 
     @Test
-    void mapCurrentInvestment() {
-        BigDecimal target = productMapper.mapCurrentInvestment(new CurrentInvestment().amount(BigDecimal.valueOf(12345.69)));
-        Assertions.assertEquals(BigDecimal.valueOf(12345.69), target);
-    }
-
-    @Test
     public void mapPrincipal() {
         BigDecimal source = new BigDecimal("130.79");
         PrincipalAmount target = productMapper.mapPrincipal(source);

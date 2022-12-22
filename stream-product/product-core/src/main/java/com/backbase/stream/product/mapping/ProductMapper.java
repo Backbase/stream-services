@@ -104,7 +104,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_PRODUCT_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITY_IDS)
-    @Mapping(source = "currentInvestment", target = "currentInvestmentValue")
+    @Mapping(source = "currentInvestment.amount", target = "currentInvestmentValue")
     @InheritConfiguration
     AccountArrangementItemPost toPresentation(InvestmentAccount investmentAccount);
 
@@ -214,13 +214,6 @@ public interface ProductMapper {
             return null;
         }
         return new CurrentInvestment().amount(bigDecimal);
-    }
-
-    default BigDecimal mapCurrentInvestment(CurrentInvestment currentInvestment) {
-        if (currentInvestment == null) {
-            return null;
-        }
-        return currentInvestment.getAmount();
     }
 
     default LegalEntity mapLegalEntity(String legalEntityId) {
