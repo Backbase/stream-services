@@ -105,7 +105,7 @@ class ProductControllerIT extends IntegrationTest {
 
         integrationServerClient.when(
                         request()
-                                .withMethod("POST")
+                                .withMethod("PUT")
                                 .withPath("/service-api/v2/arrangement"))
                 .respond(
                         response()
@@ -230,10 +230,10 @@ class ProductControllerIT extends IntegrationTest {
         URI uri = URI.create("/service-api/v2/ingest/arrangement/pull");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
-        webTestClient.post().uri(uri)
+        webTestClient.put().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class).exchange()
-                .expectStatus().isCreated();
+                .expectStatus().isOk();
     }
 
     @Test
@@ -255,9 +255,9 @@ class ProductControllerIT extends IntegrationTest {
         URI uri = URI.create("/service-api/v2/ingest/arrangement/push");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
-        webTestClient.post().uri(uri)
+        webTestClient.put().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(Mono.just(pushIngestionRequest), ArrangementPushIngestionRequest.class).exchange()
-                .expectStatus().isCreated();
+                .expectStatus().isOk();
     }
 }

@@ -43,7 +43,7 @@ paths:
                 $ref: '#/components/schemas/InternalServerError'
 
   /service-api/v2/arrangement:
-    post:
+    put:
       tags:
         - ArrangementIntegration
       summary: Pulls arrangement.
