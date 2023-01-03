@@ -1,8 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [3.23.2](https://github.com/Backbase/stream-services/compare/3.23.2...3.23.3)
-### Updated
+## [3.24.1](https://github.com/Backbase/stream-services/compare/3.23.2...3.24.1)
+### Changed
 - Updated stream `instrument.yaml` schema to include `iconUrl`
 
 ## [3.23.2](https://github.com/Backbase/stream-services/compare/3.23.1...3.23.2)
