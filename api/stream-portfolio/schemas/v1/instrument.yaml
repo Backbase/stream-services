@@ -66,6 +66,9 @@ properties:
   keyStatistics:
     description: Key statistics.
     $ref: key-statistics.yaml
+  iconUrl:
+    description: URL to icon image
+    $ref: url.yaml
   additions:
     description: Additional properties.
     type: object
