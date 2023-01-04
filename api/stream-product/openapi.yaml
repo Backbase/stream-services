@@ -1,0 +1,1338 @@
+openapi: 3.0.3
+info:
+  title: Arrangement Manager Service API
+  description: This API allows other DBS services to operate on products
+  version: 2.8.1
+servers:
+  - url: http://localhost:4010
+    description: Arrangement manager mock server
+tags:
+  - name: accounts
+  - name: arrangement-state
+  - name: arrangements
+  - name: balance-history
+  - name: balances
+  - name: product-kinds
+  - name: product-summary
+  - name: products
+paths:
+  /service-api/v2/arrangements:
+    summary: Arrangements
+    description: Arrangements
+    put:
+      tags:
+        - arrangements
+      description: Update arrangement by an arrangement id
+      operationId: putArrangements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountArrangementItemPut'
+            example:
+              externalArrangementId: d64c31c4-50e4-11e7-b114-b2f933d5fe66
+              name: Spending fee
+              bookedBalance: 100.1
+              availableBalance: 100.2
+              creditLimit: 100.3
+              IBAN: GB29NWBK60161331926819
+              BBAN: BBAN
+              currency: EUR
+              bankAlias: Secret account
+              externalTransferAllowed: true
+              urgentTransferAllowed: false
+              accruedInterest: 3.3
+              number: PANSuffix
+              principalAmount: 100.4
+              currentInvestmentValue: 100.5
+              productNumber: productNumber
+              BIC: BICExample1
+              bankBranchCode: bankBranchCode1
+              accountOpeningDate: 2016-01-28T16:41:41.090Z
+              accountInterestRate: 100.2
+              valueDateBalance: 100.1
+              creditLimitUsage: 100.3
+              creditLimitInterestRate: 100.4
+              creditLimitExpiryDate: 2019-09-28T16:41:41.090Z
+              startDate: 2016-02-28T16:41:41.090Z
+              termUnit: "Y"
+              termNumber: 50
+              interestPaymentFrequencyUnit: M
+              interestPaymentFrequencyNumber: 15
+              maturityDate: 2017-02-28T16:41:41.090Z
+              maturityAmount: 99.5
+              autoRenewalIndicator: true
+              interestSettlementAccount: interestSettlementAccount1
+              outstandingPrincipalAmount: 100.2
+              monthlyInstalmentAmount: 100.1
+              amountInArrear: 100.3
+              minimumRequiredBalance: 80.4
+              creditCardAccountNumber: "123456"
+              validThru: 2019-02-28T16:41:41.090Z
+              applicableInterestRate: 101.2
+              remainingCredit: 50
+              outstandingPayment: 105.5
+              minimumPayment: 51.1
+              minimumPaymentDueDate: 2018-02-28T16:41:41.090Z
+              totalInvestmentValue: 110.2
+              debitCards:
+                - number: "4578"
+                  expiryDate: 2020-08-22
+                  cardId: id2
+                  cardholderName: John Doe
+                  cardType: Visa Electron
+                  cardStatus: Active
+                - number: "3241"
+                  expiryDate: 2019-01-14
+                  cardId: id1
+                  cardholderName: John Doe
+                  cardType: Visa
+                  cardStatus: Active
+              accountHolderAddressLine1: accountHolderAddressLine11
+              accountHolderAddressLine2: accountHolderAddressLine12
+              accountHolderStreetName: street1
+              town: Amsterdam
+              postCode: "5000"
+              countrySubDivision: subDivision
+              accountHolderNames: "Okuneva Spencer,Mile Panika"
+              accountHolderCountry: AF
+              creditAccount: true
+              debitAccount: true
+              lastUpdateDate: 2019-09-28T16:41:41.090Z
+              productId: productId
+              sourceId: LJBASI2XXXX
+              externalStateId: externalStateId1
+              externalParentId: externalParentId100
+        required: true
+      responses:
+        "204":
+          description: Indicates successful update of an arrangement
+        "400":
+          $ref: '#/components/responses/400'
+        "404":
+          $ref: '#/components/responses/404'
+        "500":
+          $ref: '#/components/responses/500'
+components:
+  schemas:
+    AccountArrangementItemPut:
+      title: AccountArrangementItemPut
+      required:
+        - internalArrangementId
+      properties:
+        externalArrangementId:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: A unique external identifier for the arrangement
+        productId:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Reference to the product of which the arrangement is an instantiation.
+            This is an external product id
+        debitCards:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/DebitCardItem'
+        cardDetails:
+          $ref: '#/components/schemas/CardDetails'
+        interestDetails:
+          $ref: '#/components/schemas/InterestDetails'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
+        remainingPeriodicTransfers:
+          $ref: '#/components/schemas/RemainingPeriodicTransfers'
+        bankBranchCode2:
+          $ref: '#/components/schemas/BankBranchCode2'
+        nextClosingDate:
+          $ref: '#/components/schemas/NextClosingDate'
+        overdueSince:
+          $ref: '#/components/schemas/OverdueSince'
+        paymentsPastDue:
+          $ref: '#/components/schemas/PaymentsPastDue'
+        name:
+          maxLength: 50
+          type: string
+          description: The name that can be assigned by the bank to label an arrangement
+        bookedBalance:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: "Amount of money available before any adjustments have been\
+            \ made for deposits in transit, checks that have not yet been cleared,\
+            \ reserve requirements and interest received"
+        availableBalance:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: The amount that is available for transactions
+        creditLimit:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: The credit limit (or overdraft limit) is the maximum amount
+            of credit that the financial institution extends to the account holder
+            for this arrangement.
+        IBAN:
+          $ref: '#/components/schemas/IBAN'
+        BBAN:
+          $ref: '#/components/schemas/BBAN'
+        BIC:
+          $ref: '#/components/schemas/BIC'
+        currency:
+          $ref: '#/components/schemas/CurrencyCode'
+        externalTransferAllowed:
+          type: boolean
+          description: Defines if transfer to another party is allowed
+        urgentTransferAllowed:
+          type: boolean
+          description: Defines if urgent transfer is allowed
+        accruedInterest:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: "The interest that is earned or due, but not settled yet. Interest\
+            \ that is earned is also called credit interest or interest earned year\
+            \ to date. Interest that is due is also called debit interest."
+        number:
+          $ref: '#/components/schemas/CardNumber'
+        principalAmount:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: 'The amount that was (originally) contracted for the respective
+            product. This is mainly used in the context of loans and deposits. '
+        currentInvestmentValue:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: 0
+          type: number
+          description: The total current value of all the securities kept in the account
+        productNumber:
+          maxLength: 36
+          type: string
+          description: A unique identifier(number) assigned to identify the contract
+            for the product
+        bankBranchCode:
+          maxLength: 20
+          type: string
+          description: "A country-specific bank identification number or code: the\
+            \ sort code in the UK, the ACH routing number in the\nUS, and the transit\
+            \ number in Canada\n"
+        accountOpeningDate:
+          type: string
+          description: The date of activation of the account in the bank's system
+          format: date-time
+        accountInterestRate:
+          maximum: 1E+6
+          exclusiveMaximum: true
+          minimum: -1E+6
+          exclusiveMinimum: true
+          type: number
+          description: "The annualized cost of credit or debt capital computed as\
+            \ the percentage ratio of interest to the principal. In the case of credit\
+            \ cards, the account interest rate is the annual percentage that is added\
+            \ monthly to the outstanding balance due on a credit card."
+        valueDateBalance:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: The balance of the account on a specific date that needs to
+            be used for the calculation of interest. NB! If no date is specified (like
+            for the book date balance) the current date can be assumed.
+        creditLimitUsage:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: Monetary amount of the used overdraft
+        creditLimitInterestRate:
+          maximum: 1E+6
+          exclusiveMaximum: true
+          minimum: -1E+6
+          exclusiveMinimum: true
+          type: number
+          description: Overdraft Interest is an interest applied to the account for
+            any time throughout the month when the account is overdrawn
+        creditLimitExpiryDate:
+          type: string
+          description: The date after which overdraft will no longer be available
+            to the account (renewed automatically or cancelled)
+          format: date-time
+        startDate:
+          type: string
+          description: The date on which the credit card becomes active
+          format: date-time
+        termUnit:
+          $ref: '#/components/schemas/TimeUnit'
+        termNumber:
+          maximum: 1E+16
+          exclusiveMaximum: true
+          minimum: -1E+16
+          exclusiveMinimum: true
+          type: number
+          description: Number for the Term Unit for the product arranged between Bank
+            and customer
+        interestPaymentFrequencyUnit:
+          $ref: '#/components/schemas/TimeUnit'
+        interestPaymentFrequencyNumber:
+          maximum: 1E+16
+          exclusiveMaximum: true
+          minimum: -1E+16
+          exclusiveMinimum: true
+          type: number
+          description: "Number of times per year when the accumulated interest is\
+            \ settled to the account on a regular basis. The frequency could be yearly,\
+            \ half-yearly, quarterly, monthly, weekly, daily (or not at all, until\
+            \ maturity)."
+        maturityDate:
+          type: string
+          description: End term of a holding period
+          format: date-time
+        maturityAmount:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: Amount payable at the end of a holding period of a product
+            (maturity date). For deposit all of the interest is usualy paid at maturity
+            date (IF the term is shorter then one year).
+        autoRenewalIndicator:
+          type: boolean
+          description: Indicates whether or not an arrangement is to be continued
+            after maturity automatically. Usually the product is renewed using the
+            same principal and term unless renegotiation has taken place prior to
+            expiration.
+        interestSettlementAccount:
+          maxLength: 32
+          type: string
+          description: Account for settlement of accumulated interest on a regular
+            basis / Account that provides quick access to accumulated cash to facilitate
+            daily settlements with other businesses
+        outstandingPrincipalAmount:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: "The remaining portion of the original loan amount, plus any\
+            \ interest that has been capitalized, that is still owed. Interest accrues\
+            \ on the outstanding principal balance / The value date balance of the\
+            \ arrangement"
+        monthlyInstalmentAmount:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: A fixed payment amount paid by a borrower to the bank at a
+            specified date each calendar month.
+        amountInArrear:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: The part of a debt that is overdue after missing one or more
+            required payments. The amount of the arrears is the amount accrued from
+            the date on which the first missed payment was due.
+        minimumRequiredBalance:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: "Minimum amount that a customer must have in an account in\
+            \ order to receive some sort of service, such as keeping the account open\
+            \ or receive interest"
+        creditCardAccountNumber:
+          maxLength: 32
+          type: string
+          description: The number of the account the credit card transactions settle
+            on (so actually the reference to the settlement account of the card)
+        validThru:
+          type: string
+          description: "Expiration date of a credit card, after which is no longer\
+            \ valid"
+          format: date-time
+        applicableInterestRate:
+          maximum: 1E+6
+          exclusiveMaximum: true
+          minimum: -1E+6
+          exclusiveMinimum: true
+          type: number
+          description: The interest rate or rates which would be used for a particular
+            arrangement
+        remainingCredit:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: "Amount of money left to spent from the Credit limit of the\
+            \ account. If the user has received a refund, or has transferredadditional\
+            \ funds to the arrangement, then the RemainingCredit can in some cases\
+            \ be greater than the CreditLimit. RemainingCredit = CreditLimit - CreditLimitUsage\
+            \ + any additional funds transferred to the arrangement."
+        outstandingPayment:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: "Outstanding payment refers to the outstanding [unpaid] balance,\
+            \ i.e., the current amount due"
+        minimumPayment:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: "The minimum payment set a percentage of balance, or a fixed\
+            \ cash amount"
+        minimumPaymentDueDate:
+          type: string
+          description: Minimum Payment Due Date shown on your monthly statement to
+            remain in good standing
+          format: date-time
+        totalInvestmentValue:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: "The value of an asset to its owner, depending on his or her\
+            \ expectations"
+        accountHolderAddressLine1:
+          maxLength: 70
+          type: string
+          description: Address of the Payer/Payee - Alternate address line for the
+            account
+        accountHolderAddressLine2:
+          maxLength: 70
+          type: string
+          description: Address of the Payer/Payee - Alternate address line for the
+            account
+        accountHolderStreetName:
+          maxLength: 70
+          type: string
+          description: Street name of the Payer/Payee - Alternate street name for
+            the account.
+        town:
+          maxLength: 35
+          type: string
+          description: Town of the Payer/Payee - Alternate town for the account
+        postCode:
+          maxLength: 16
+          type: string
+          description: Post Code of the Payer/Payee - - Alternate post code for the
+            account
+        countrySubDivision:
+          maxLength: 35
+          type: string
+          description: Post Code of the Payer/Payee - - Alternate country sub division
+            for the account
+        accountHolderNames:
+          maxLength: 256
+          type: string
+          description: Party(s) with a relationship to the account.
+        accountHolderCountry:
+          pattern: "^[A-Z]{2}$"
+          type: string
+          description: Country of the account holder
+        creditAccount:
+          type: boolean
+          description: Indicator whether or not the arrangement can be used in payment
+            orders as credit account - account to transfer TO
+        debitAccount:
+          type: boolean
+          description: Indicator whether or not the arrangement can be used in payment
+            orders as debit account - account to transfer FROM
+        lastUpdateDate:
+          type: string
+          description: Last date of balance (or other parameter) update for the given
+            arrangement
+          format: date-time
+        bankAlias:
+          maxLength: 50
+          type: string
+          description: The name that can be assigned by the customer to label the
+            arrangement
+        sourceId:
+          maxLength: 11
+          type: string
+          description: Indicate if the account is regular or external
+        externalStateId:
+          maxLength: 50
+          type: string
+          description: External reference to the arrangement state
+        externalParentId:
+          maxLength: 50
+          type: string
+          description: Indicate if the account has parent child relationship with
+            another account
+        financialInstitutionId:
+          type: integer
+          description: Financial institution ID
+          format: int64
+          example: 1
+        lastSyncDate:
+          type: string
+          description: Last synchronization datetime
+          format: date-time
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+      description: Additional Properties
+    AccountPresentationProductItem:
+      title: AccountPresentationProductItem
+      type: object
+      properties:
+        id:
+          maxLength: 50
+          type: string
+          description: A unique identifier for the product.
+        translations:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/TranslationItem'
+      allOf:
+        - $ref: '#/components/schemas/ExternalProductItem'
+    AccountStateItem:
+      title: AccountStateItem
+      required:
+        - externalStateId
+        - state
+      type: object
+      properties:
+        externalStateId:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: unique external identifier for the state
+        state:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: "unique identifier for the state. Example: Active"
+        description:
+          maxLength: 200
+          type: string
+          description: description of the state
+    AccountUserPreferencesItem:
+      title: AccountUserPreferencesItem
+      required:
+        - arrangementId
+      type: object
+      properties:
+        arrangementId:
+          maxLength: 36
+          minLength: 1
+          type: string
+          description: The unique Arrangement identifier related to these user preferences
+        alias:
+          maxLength: 50
+          type: string
+          description: The name that can be assigned by the user to label the arrangement
+        visible:
+          type: boolean
+          description: User indicator whether to show or hide the arrangement on the
+            front end
+        favorite:
+          type: boolean
+          description: Indication whether an arrangement can be favorable for a user
+      description: "User defined preferences for a specific arrangement.\nNote: each\
+        \ user might have different preferences\n"
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    CardDetails:
+      title: CardDetails
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AbstractCardDetails'
+    InterestDetails:
+      title: InterestDetails
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AbstractInterestDetails'
+    ApiError:
+      title: ApiError
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+    BadRequestError:
+      title: BadRequestError
+      type: object
+      example:
+        message: Bad Request
+        errors:
+          - message: "Value Exceeded. Must be between {min} and {max}."
+            key: common.api.shoesize
+            context:
+              max: "50"
+              min: "1"
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    ConflictError:
+      title: ConflictError
+      type: object
+      example:
+        message: Conflict error
+        errors:
+          - message: The request could not be completed due to a conflict with the current
+              state of the resource.
+            key: transactions.api.billingstatus.transaction
+            context:
+              billingStatus: BILLED
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    ErrorAwareApi:
+      title: ApiErrorExt
+      required:
+        - errors
+      type: object
+      properties:
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+      allOf:
+        - $ref: '#/components/schemas/ApiError'
+    ErrorItem:
+      title: ErrorItem
+      type: object
+      properties:
+        message:
+          type: string
+          description: Any further information.
+        key:
+          type: string
+          description: "{capability-name}.api.{api-key-name}. For generated validation\
+            \ errors this is the path in the document the error resolves to. e.g.\
+            \ object name + '.' + field"
+        context:
+          type: object
+          additionalProperties:
+            type: string
+          description: Context can be anything used to construct localised messages.
+      example:
+        message: "Value Exceeded. Must be between {min} and {max}."
+        key: common.api.shoesize
+        context:
+          max: "50"
+          min: "1"
+    ForbiddenError:
+      title: ForbiddenError
+      type: object
+      example:
+        message: Access to requested resource denied.
+        errors:
+          - message: "Resource access denied due to an insufficient user quota of {quota}."
+            key: common.api.quota
+            context:
+              quota: someQuota
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    InternalServerError:
+      title: InternalServerError
+      type: object
+      example:
+        message: Description of error
+      allOf:
+        - $ref: '#/components/schemas/ApiError'
+    NotAcceptableError:
+      title: NotAcceptableError
+      type: object
+      properties:
+        supportedMediaTypes:
+          type: array
+          description: List of supported media types for this endpoint
+          items:
+            type: string
+      example:
+        message: Could not find acceptable representation
+        supportedMediaTypes:
+          - application/json
+      allOf:
+        - $ref: '#/components/schemas/ApiError'
+    NotFoundError:
+      title: NotFoundError
+      type: object
+      example:
+        message: Resource not found.
+        errors:
+          - message: "Unable to find the resource requested resource: {resource}."
+            key: common.api.resource
+            context:
+              resource: aResource
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    UnauthorizedError:
+      title: UnauthorizedError
+      type: object
+      example:
+        message: Access to requested resource denied.
+        errors:
+          - message: Resource access denied due to invalid credentials.
+            key: common.api.token
+            context:
+              accessToken: expired
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    UnsupportedMediaTypeError:
+      title: UnsupportedMediaTypeError
+      type: object
+      example:
+        message: Unsupported media type.
+        errors:
+          - message: "The request entity has a media type {mediaType} which the resource\
+            \ does not support."
+            key: common.api.mediaType
+            context:
+              mediaType: application/javascript
+      allOf:
+        - $ref: '#/components/schemas/ErrorAwareApi'
+    AbstractCardDetails:
+      title: AbstractCardDetails
+      required:
+        - cardProvider
+      type: object
+      properties:
+        cardProvider:
+          maxLength: 40
+          minLength: 1
+          type: string
+          description: "This field specifies the Card Provider associated with the\
+            \ Account.\n\n*Example*: Maestro, Visa, Master Card, American Express\
+            \ or Discover.\n"
+        secured:
+          type: boolean
+          description: "A card can either be Secured or Unsecured.\n  - *true*: amount\
+            \ deposited in the CC determines the Limit.\n  - *false*: credit limit\
+            \ is based off various factors including the CC holder’s Credit Score,\n\
+            \  Credit History and is determined by the lending bank.\n"
+        availableCashCredit:
+          minimum: 0
+          exclusiveMinimum: false
+          type: number
+          description: |
+            The amount of money currently available for a bank cash advance.
+
+            This is calculated given the portion of the CashCreditLimit which has been used for Cash Advance Transactions.
+        cashCreditLimit:
+          minimum: 0
+          exclusiveMinimum: false
+          type: number
+          description: |
+            The portion of the credit limit available for bank cash advance transactions..
+        lastPaymentDate:
+          type: string
+          description: |
+            The Date the last payment was made on the Credit-based arrangement
+          format: date
+        lastPaymentAmount:
+          minimum: 0
+          exclusiveMinimum: false
+          type: number
+          description: |
+            The amount of the last payment that was made on the Credit-based arrangement.
+        latePaymentFee:
+          pattern: ^\d+(\.\d+)?%?$
+          type: string
+          description: "The charge triggered by infractions such as late credit card\
+            \ payments. It can be expressed as fixed amount or as percent.\n\n*Example*:\n\
+            \  - *12.32*: as fixed amount\n  - *3.14%*: as percent\n"
+        previousStatementDate:
+          type: string
+          description: |
+            The date of the previous billing cycle for the arrangement.
+          format: date
+        previousStatementBalance:
+          type: number
+          description: |
+            The amount owed on the credit card as of the previous billing cycle.
+        statementBalance:
+          type: number
+          description: "The amount owed on the credit card as of the latest billing\
+            \ cycle. \n"
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    AbstractInterestDetails:
+      title: AbstractInterestDetails
+      type: object
+      properties:
+        lastYearAccruedInterest:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: number
+          description: Last year's interest that was earned (credit interest) or due
+            (debit interest)
+        dividendWithheldYTD:
+          pattern: ^\d+(\.\d+)?%?$
+          type: string
+          description: "Total amount of interest that is being withheld up to date\
+            \ and the bank provides 1099 document end of the year for Tax return purpose\n\
+            \n*Example*:\n  - *12.32*: as fixed amount\n  - *3.14%*: as percent\n"
+        annualPercentageYield:
+          maximum: 1E+6
+          exclusiveMaximum: true
+          minimum: -1E+6
+          exclusiveMinimum: true
+          type: number
+          description: The real rate of return earned on a savings deposit or investment
+            taking into account the effect of compounding interest.
+        cashAdvanceInterestRate:
+          maximum: 1E+6
+          exclusiveMaximum: true
+          minimum: -1E+6
+          exclusiveMinimum: true
+          type: number
+          description: The Interest charge that is added monthly on the outstanding
+            cash advance due on a credit card.
+        penaltyInterestRate:
+          maximum: 1E+6
+          exclusiveMaximum: true
+          minimum: -1E+6
+          exclusiveMinimum: true
+          type: number
+          description: The Interest charge triggered by infractions such as late credit
+            card payments.
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    AbstractDebitCardItem:
+      title: AbstractDebitCardItem
+      type: object
+      properties:
+        number:
+          $ref: '#/components/schemas/CardNumber'
+        expiryDate:
+          maxLength: 32
+          type: string
+          description: "Expiration date of a credit card, after which is no longer\
+            \ valid"
+        cardId:
+          maxLength: 32
+          type: string
+          description: External ID of the card
+        cardholderName:
+          maxLength: 64
+          type: string
+          description: First Name and Last Name of card holder.
+        cardType:
+          maxLength: 32
+          type: string
+          description: "Card type to change card image based on it, ex. Maestro Gold"
+        cardStatus:
+          maxLength: 32
+          type: string
+          description: "Status of the card ex. Active, Expired etc"
+      description: Debit Card item
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    AdditionalProperties:
+      title: AdditionalProperties
+      type: object
+      properties:
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+      description: Additional Properties
+    CardNumber:
+      maxLength: 36
+      type: string
+      description: First 6 and/or last 4 digits of a Payment card. All other digits
+        will/to be masked. Be aware that using card number differently is potential
+        PCI risk.
+    CurrencyCode:
+      pattern: "^[A-Z]{3}$"
+      type: string
+      description: The alpha-3 code (complying with ISO 4217) of the currency that
+        qualifies the amount.
+    CurrencyType:
+      title: CurrencyType
+      required:
+        - amount
+        - currencyCode
+      type: object
+      properties:
+        amount:
+          maximum: 1E+18
+          exclusiveMaximum: true
+          minimum: -1E+18
+          exclusiveMinimum: true
+          type: string
+          description: The amount in the specified currency
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    DebitCardItem:
+      title: DebitCardItem
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/AbstractDebitCardItem'
+    ExternalProductItem:
+      type: object
+      properties:
+        externalId:
+          maxLength: 50
+          type: string
+          description: 'A unique identifier for the product that the arrangement applies
+            to '
+        externalTypeId:
+          maxLength: 50
+          type: string
+          description: The ID that is used by the Bank to identify the specific Product
+            type - External reference to the product Type.
+        typeName:
+          maxLength: 50
+          type: string
+          description: The label/name that is used to label a specific product type.
+        productKind:
+          $ref: '#/components/schemas/ExternalProductKindItem'
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    ExternalProductKindItem:
+      title: ExternalProductKindItem
+      required:
+        - externalKindId
+        - kindName
+        - kindUri
+      type: object
+      properties:
+        externalKindId:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: unique external identifier for the product kind
+        kindName:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: unique product kind name
+        kindUri:
+          maxLength: 50
+          minLength: 1
+          pattern: "[a-z\\-0-9]*?"
+          type: string
+          description: unique product kind uri
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    LocaleTranslationItem:
+      title: LocaleTranslationItem
+      required:
+        - fieldName
+        - fieldValue
+      type: object
+      properties:
+        fieldName:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Defines the name of the field that is translated.
+        fieldValue:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Defines the translated value of the field.
+      description: Locale Translation item
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    MaskableAttribute:
+      title: MaskableAttribute
+      type: string
+      description: The name of the supported maskable attribute.
+      enum:
+        - IBAN
+        - BBAN
+        - number
+    OrderByField:
+      title: OrderByField
+      type: string
+      description: The property name used for ordering.
+      enum:
+        - name
+        - bankAlias
+        - bookedBalance
+        - availableBalance
+        - creditLimit
+        - displayName
+        - IBAN
+        - BBAN
+        - BIC
+        - currency
+        - externalTransferAllowed
+        - urgentTransferAllowed
+        - accruedInterest
+        - principalAmount
+        - currentInvestmentValue
+        - productNumber
+        - accountOpeningDate
+        - accountInterestRate
+        - valueDateBalance
+        - creditLimitUsage
+        - creditLimitInterestRate
+        - creditLimitExpiryDate
+        - startDate
+        - termUnit
+        - termNumber
+        - maturityDate
+        - maturityAmount
+        - autoRenewalIndicator
+        - interestPaymentFrequencyUnit
+        - interestPaymentFrequencyNumber
+        - interestSettlementAccount
+        - outstandingPrincipalAmount
+        - monthlyInstalmentAmount
+        - amountInArrear
+        - minimumRequiredBalance
+        - creditCardAccountNumber
+        - validThru
+        - applicableInterestRate
+        - remainingCredit
+        - outstandingPayment
+        - minimumPayment
+        - minimumPaymentDueDate
+        - totalInvestmentValue
+        - accountHolderAddressLine1
+        - accountHolderAddressLine2
+        - accountHolderStreetName
+        - postCode
+        - town
+        - countrySubDivision
+        - accountHolderCountry
+        - creditAccount
+        - debitAccount
+        - productKindName
+        - productTypeName
+        - sourceId
+    ProductKindItem:
+      title: ProductKindItem
+      required:
+        - id
+        - kindName
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Internal product kind used to save in DB. Since product kinds
+            will be static this property is deprecated.
+          deprecated: true
+          x-deprecated:
+            since: 2.21.2
+            for-removal: false
+        externalKindId:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: unique external identifier for the product kind
+        kindName:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: unique product kind name
+        kindUri:
+          maxLength: 50
+          minLength: 1
+          pattern: "[a-z\\-0-9]*?"
+          type: string
+          description: unique product kind uri
+        translations:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/TranslationItem'
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    ProductKindsResult:
+      required:
+        - productKinds
+      type: object
+      properties:
+        productKinds:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductKindItem'
+      example:
+        productKinds:
+          - id: 1
+            externalKindId: 123123-123f
+            kindName: Current Account
+            kindUri: current-account
+            translations:
+              - locale: de_DE
+                localeTranslations:
+                  - fieldName: kind_name
+                    fieldValue: Aktuelles Konto
+              - locale: ar_JO
+                localeTranslations:
+                  - fieldName: kind_name
+                    fieldValue: الحساب الحالي
+          - id: 2
+            externalKindId: asdads67-asd
+            kindName: Savings Account
+            kindUri: savings-account
+            translations:
+              - locale: de_DE
+                localeTranslations:
+                  - fieldName: kind_name
+                    fieldValue: Sparkonto
+              - locale: ar_JO
+                localeTranslations:
+                  - fieldName: kind_name
+                    fieldValue: حساب التوفير
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    StateItem:
+      title: StateItem
+      type: object
+      properties:
+        externalStateId:
+          maxLength: 50
+          type: string
+          description: An external unique identifier for the arrangement state object.
+        state:
+          maxLength: 50
+          type: string
+          description: Name that describes the specific arrangement state.
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    Subscription:
+      required:
+        - identifier
+      type: object
+      properties:
+        identifier:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Subscription identifier
+      description: Arrangement subscription
+    TimePeriod:
+      title: TimePeriod
+      type: string
+      enum:
+        - lastDay
+        - lastWeek
+        - lastMonth
+        - lastYear
+        - all
+    TimeUnit:
+      title: TimeUnit
+      type: string
+      description: The period of time for the product arranged between Bank and customer
+      enum:
+        - D
+        - W
+        - M
+        - "Y"
+    TranslationItem:
+      title: TranslationItem
+      type: object
+      properties:
+        locale:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: "Defines the translation natural language as specified in ISO\
+            \ 639-1, and territory two-letter form of ISO 3166."
+        localeTranslations:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/LocaleTranslationItem'
+      description: Translation item
+      allOf:
+        - $ref: '#/components/schemas/AdditionalProperties'
+    DisplayName:
+      maxLength: 50
+      type: string
+      description: "Represents an arrangement by it's correct naming identifier.\n\
+        It could be account alias or user alias depending on the journey selected\
+        \ by the financial institution.\nIf none of those is set, the arrangement\
+        \ name will be used.\n"
+    IBAN:
+      maxLength: 34
+      pattern: "^[0-9A-Z•]+$"
+      type: string
+      description: "The International Bank Account Number.\nIf specified, it must\
+        \ be a valid IBAN, otherwise an invalid value error could be raised.\n"
+    BBAN:
+      maxLength: 50
+      type: string
+      description: |
+        BBAN is the country-specific bank account number. It is short for
+        Basic Bank Account Number. Account numbers usually match the BBAN.
+    BIC:
+      maxLength: 11
+      type: string
+      description: Bank Identifier Code - international bank code that identifies
+        particular banks worldwide
+    ReservedAmount:
+      maximum: 1E+18
+      exclusiveMaximum: true
+      minimum: 0
+      type: number
+      description: |
+        The reservation of a portion of a credit or debit balance for the cost of services not yet rendered.
+    RemainingPeriodicTransfers:
+      maximum: 1E+18
+      exclusiveMaximum: true
+      minimum: 0
+      type: number
+      description: "The limitation in periodic saving transfers or withdrawals. In\
+        \ the case of the US, Regulation D enables for a maximum of 6 monthly savings\
+        \ transfers or withdrawals.\n"
+    BankBranchCode2:
+      maxLength: 20
+      type: string
+      description: "Another country-specific bank identification number or code: the\
+        \ Fedwire Routing Number in the US or another country-specific identifier.\n"
+    NextClosingDate:
+      type: string
+      description: The last day of the forthcoming billing cycle.
+      format: date
+    OverdueSince:
+      type: string
+      description: The date in which the arrangement has been overdue since.
+      format: date
+    PaymentsPastDue:
+      minimum: 0
+      type: integer
+      description: The number of payments that have not been made by the cutoff time
+        at the end of the due date.
+      format: int32
+  responses:
+    "400":
+      description: BadRequest
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BadRequestError'
+          example:
+            message: Bad Request
+            key: GENERAL_ERROR
+            errors:
+              - message: "Value Exceeded. Must be between {min} and {max}."
+                key: common.api.shoesize
+                context:
+                  max: "50"
+                  min: "1"
+    "401":
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnauthorizedError'
+          example:
+            message: Access to requested resource denied.
+            key: GENERAL_ERROR
+            errors:
+              - message: Resource access denied due to invalid credentials.
+                key: common.api.token
+                context:
+                  accessToken: expired
+    "403":
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ForbiddenError'
+          example:
+            message: Access to requested resource denied.
+            key: GENERAL_ERROR
+            errors:
+              - message: "Resource access denied due to an insufficient user quota of\
+                \ {quota}."
+                key: common.api.quota
+                context:
+                  quota: someQuota
+    "404":
+      description: NotFound
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NotFoundError'
+          example:
+            message: Resource not found.
+            key: GENERAL_ERROR
+            errors:
+              - message: "Unable to find the resource requested resource: {resource}."
+                key: common.api.resource
+                context:
+                  resource: aResource
+    "406":
+      description: NotAcceptable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NotAcceptableError'
+          example:
+            message: Could not find acceptable representation
+            supportedMediaTypes:
+              - application/json
+    "409":
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConflictError'
+          example:
+            message: Conflict error
+            key: GENERAL_ERROR
+            errors:
+              - message: The request could not be completed due to a conflict with the
+                  current state of the resource.
+                key: transactions.api.billingstatus.transaction
+                context:
+                  billingStatus: BILLED
+    "415":
+      description: UnsupportedMediaType
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UnsupportedMediaTypeError'
+          example:
+            message: Unsupported media type.
+            key: GENERAL_ERROR
+            errors:
+              - message: "The request entity has a media type {mediaType} which the\
+                \ resource does not support."
+                key: common.api.mediaType
+                context:
+                  mediaType: application/javascript
+    "500":
+      description: InternalServerError
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InternalServerError'
+          example:
+            message: Description of error
+
+

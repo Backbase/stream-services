@@ -46,7 +46,7 @@ paths:
       tags:
         - ProductComposition
       summary: Ingests products (in push mode).
-      description: Ingests poducts (in push mode).
+      description: Ingests products (in push mode).
       operationId: pushIngestProduct
       requestBody:
         description: Push Ingestion Request
@@ -61,6 +61,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductIngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+  /service-api/v2/ingest/arrangement/pull:
+    put:
+      tags:
+        - ProductComposition
+      summary: Ingests arrangement (in pull mode).
+      description: Ingests arrangement (in pull mode).
+      operationId: pullIngestArrangement
+      requestBody:
+        description: Arrangement Pull Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArrangementPullIngestionRequest'
+      responses:
+        "200":
+          description: Product ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrangementIngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+  /service-api/v2/ingest/arrangement/push:
+    put:
+      tags:
+        - ProductComposition
+      summary: Ingests arrangement (in push mode).
+      description: Ingests arrangement (in push mode).
+      operationId: pushIngestArrangement
+      requestBody:
+        description: Push Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArrangementPushIngestionRequest'
+      responses:
+        "200":
+          description: Products ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrangementIngestionResponse'
         "400":
           description: BadRequest
           content:
@@ -89,16 +155,32 @@ components:
       properties:
         legalEntityExternalId:
           type: string
+          description: Legal Entity External Id
+          example: testuser
         legalEntityInternalId:
           type: string
+          description: Legal Entity Internal Id
+          example: 4028818483400316018340775f2c000d
         serviceAgreementExternalId:
           type: string
+          description: Service Agreement External Id
+          example: sa_retail_b086f116-3132-3d70-b878-a648fecf4106
         serviceAgreementInternalId:
           type: string
+          description: Service Agreement Internal Id
+          example: 402881878008bdd8018014daf54d001d
         userExternalId:
           type: string
+          description: Backbase DBS external userid
+          example: testuser
         userInternalId:
           type: string
+          description: Backbase DBS userid
+          example: 2df8a3f8-b500-433b-8092-af8f95e8488e
+        source:
+          type: string
+          description: Source of the ingestion process from where the ingestion was triggered.
+          example: nightly_ingestion
         referenceJobRoleNames:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
           description: The reference job roles that should get assigned to the user
@@ -114,6 +196,10 @@ components:
     ProductPushIngestionRequest:
       type: object
       properties:
+        source:
+          type: string
+          description: Source of the ingestion process from where the ingestion was triggered.
+          example: nightly_ingestion
         productGroup:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
 
@@ -125,6 +211,64 @@ components:
           items:
             $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
 
+    ArrangementPullIngestionRequest:
+      type: object
+      properties:
+        internalArrangementId:
+          type: string
+        externalArrangementId:
+          type: string
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+        source:
+          type: string
+          description: Source of the ingestion process from where the ingestion was triggered.
+          example: nightly_ingestion
+        config:
+          $ref: '#/components/schemas/ArrangementIngestionConfig'
+
+    ArrangementIngestionConfig:
+      type: object
+      properties:
+        chains:
+          $ref: '#/components/schemas/ArrangementsChainsConfig'
+
+    ArrangementsChainsConfig:
+      type: object
+      properties:
+        transactionComposition:
+          $ref: '#/components/schemas/TransactionCompositionChainConfig'
+
+    TransactionCompositionChainConfig:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        async:
+          type: boolean
+
+    ArrangementPushIngestionRequest:
+      type: object
+      properties:
+        internalArrangementId:
+          type: string
+        source:
+          type: string
+          description: Source of the ingestion process from where the ingestion was triggered.
+          example: nightly_ingestion
+        config:
+          $ref: '#/components/schemas/ArrangementIngestionConfig'
+        arrangement:
+          $ref: '../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut'
+
+    ArrangementIngestionResponse:
+      type: object
+      properties:
+        arrangement:
+          $ref: '../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut'
+
     InternalServerError:
       required:
         - message
@@ -132,4 +276,3 @@ components:
       properties:
         message:
           type: string
-

@@ -1,10 +1,9 @@
 package com.backbase.stream.compositions.product.core.config;
 
+import com.backbase.stream.compositions.product.core.model.RequestConfig;
 import com.backbase.stream.product.task.BatchProductGroupTask;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.ArrayList;
@@ -22,6 +21,7 @@ public class ProductConfigurationProperties {
     private BatchProductGroupTask.IngestionMode ingestionMode = BatchProductGroupTask.IngestionMode.UPDATE;
 
     @Data
+    @SuperBuilder
     @NoArgsConstructor
     public static class Events {
         private Boolean enableCompleted = Boolean.FALSE;
@@ -36,6 +36,7 @@ public class ProductConfigurationProperties {
     }
 
     @Data
+    @SuperBuilder
     @NoArgsConstructor
     public static class Chains {
         private TransactionComposition transactionComposition;
@@ -43,23 +44,29 @@ public class ProductConfigurationProperties {
     }
 
     @Data
+    @SuperBuilder
+    @NoArgsConstructor
     public static abstract class BaseComposition {
         private Boolean enabled = Boolean.FALSE;
         private String baseUrl = "http://localhost:9003/";
         private Boolean async = Boolean.FALSE;
     }
 
-    @NoArgsConstructor
+
     @Data
+    @SuperBuilder
+    @NoArgsConstructor
     public static class TransactionComposition extends BaseComposition {
         private List<String> excludeProductTypeExternalIds = new ArrayList<>();
     }
 
-    @NoArgsConstructor
     @Data
+    @SuperBuilder
+    @NoArgsConstructor
     public static class PaymentOrderComposition extends BaseComposition {
         private List<String> excludeProductTypeExternalIds = new ArrayList<>();
     }
+
 
     public boolean isCompletedEventEnabled() {
         return Boolean.TRUE.equals(events.getEnableCompleted());
@@ -83,5 +90,17 @@ public class ProductConfigurationProperties {
 
     public boolean isPaymentOrderChainAsync() {
         return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getAsync());
+    }
+
+    public boolean isTransactionChainEnabled(RequestConfig requestConfig) {
+        return requestConfig == null || requestConfig.isTransactionChainEnabled().isEmpty()
+                ? Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
+                : requestConfig.isTransactionChainEnabled().get();
+    }
+
+    public boolean isTransactionChainAsync(RequestConfig requestConfig) {
+        return requestConfig == null || requestConfig.isTransactionChainAsync().isEmpty()
+                ? Boolean.TRUE.equals(chains.getTransactionComposition().getAsync())
+                : requestConfig.isTransactionChainAsync().get();
     }
 }

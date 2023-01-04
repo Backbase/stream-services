@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.product.core.config;
 
 import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.stream.compositions.integration.product.ApiClient;
+import com.backbase.stream.compositions.integration.product.api.ArrangementIntegrationApi;
 import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
@@ -36,6 +37,13 @@ public class ProductCompositionConfiguration {
     public ProductIntegrationApi productIntegrationApi(ApiClient productClient) {
         return new ProductIntegrationApi(productClient);
     }
+
+    @Bean
+    @Primary
+    public ArrangementIntegrationApi arrangementIntegrationApi(ApiClient productClient) {
+        return new ArrangementIntegrationApi(productClient);
+    }
+
 
     @Bean
     @Primary

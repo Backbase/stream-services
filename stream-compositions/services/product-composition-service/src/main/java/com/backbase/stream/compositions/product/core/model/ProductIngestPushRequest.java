@@ -10,5 +10,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ProductIngestPushRequest {
     private String eventId;
+    private String source;
     private ProductGroup productGroup;
 }
