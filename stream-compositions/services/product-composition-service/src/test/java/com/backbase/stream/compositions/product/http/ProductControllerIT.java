@@ -195,8 +195,8 @@ class ProductControllerIT extends IntegrationTest {
 
         webTestClient.post().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class).exchange()
-                .expectStatus().is5xxServerError();
+                .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class). exchange()
+                .expectStatus().isCreated();
     }
 
     @Test
@@ -229,7 +229,7 @@ class ProductControllerIT extends IntegrationTest {
         webTestClient.put().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class).exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().is2xxSuccessful();
     }
 
     @Test
@@ -254,6 +254,6 @@ class ProductControllerIT extends IntegrationTest {
         webTestClient.put().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(Mono.just(pushIngestionRequest), ArrangementPushIngestionRequest.class).exchange()
-                .expectStatus().is5xxServerError();
+                .expectStatus().is2xxSuccessful();
     }
 }
