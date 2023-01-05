@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.24.3](https://github.com/Backbase/stream-services/compare/3.24.2...3.24.3)
+### Fixed
+- Fix portfolio not to stop processing on error
+
 ## [3.24.2](https://github.com/Backbase/stream-services/compare/3.24.1...3.24.2)
 ### Changed
 - Updated stream `instrument.yaml` schema to include `iconUrl`
