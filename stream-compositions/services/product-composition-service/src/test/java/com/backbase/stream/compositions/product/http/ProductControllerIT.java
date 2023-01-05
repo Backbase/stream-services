@@ -188,6 +188,7 @@ class ProductControllerIT extends IntegrationTest {
                         .withUserExternalId("userId")
                         .withReferenceJobRoleNames(List.of("Admin Role"))
                         .withMembershipAccounts(null)
+                        .withSource("MacOS")
                         .withAdditions(Map.of());
 
         URI uri = URI.create("/service-api/v2/ingest/pull");
@@ -202,7 +203,8 @@ class ProductControllerIT extends IntegrationTest {
     @Test
     void pushIngestProduct_Success() throws Exception {
         ProductPushIngestionRequest pushIngestionRequest = new ProductPushIngestionRequest()
-                .withProductGroup(new com.backbase.stream.compositions.product.api.model.ProductGroup());
+                .withProductGroup(new com.backbase.stream.compositions.product.api.model.ProductGroup())
+                .withSource("MacOS");
         URI uri = URI.create("/service-api/v2/ingest/push");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 

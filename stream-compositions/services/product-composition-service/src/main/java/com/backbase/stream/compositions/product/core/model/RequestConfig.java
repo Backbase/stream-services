@@ -32,7 +32,8 @@ public class RequestConfig {
                 : Optional.of(Boolean.TRUE.equals(chains.getTransactionComposition().getAsync()));
     }
 
-    @Data
+    @Setter
+    @Getter
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -40,7 +41,8 @@ public class RequestConfig {
         private ProductConfigurationProperties.TransactionComposition transactionComposition;
     }
 
-    @Data
+    @Setter
+    @Getter
     @SuperBuilder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -49,7 +51,8 @@ public class RequestConfig {
         private Boolean async = Boolean.FALSE;
     }
 
-    @Data
+    @Setter
+    @Getter
     @NoArgsConstructor
     @AllArgsConstructor
     @SuperBuilder
