@@ -2,13 +2,9 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "productGroups": {
-      "description": "Arrangement internal id",
-      "$ref": "../arrangement.json"
-    },
     "arrangementId": {
       "description": "Arrangement internal id",
-      "type": "string"
+      "$ref": "../arrangement.json"
     },
     "arrangementExternalId": {
       "description": "Arrangement external id",

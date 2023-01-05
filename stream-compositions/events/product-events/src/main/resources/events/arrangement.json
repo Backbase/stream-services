@@ -5,7 +5,7 @@
       "$ref": "base-schema.json#/schemas/InternalIdentifier"
     },
     "availableBalance": {
-      "$ref": "base-schema.json#/schemas/ExternalIdentifier"
+      "$ref": "base-schema.json#/schemas/AvailableBalance"
     }
   }
 }
