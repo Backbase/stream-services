@@ -20,6 +20,14 @@ eureka:
 
 backbase:
   communication:
+    services:
+      usermanager:
+        direct-uri: http://localhost:8086/user-manager
+      access-control:
+        direct-uri: http://localhost:8086/access-control
+      arrangement:
+        manager:
+          direct-uri: http://localhost:8082/arrangement-manager
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -30,10 +38,6 @@ backbase:
     http:
       enabled: true
   stream:
-    dbs:
-      user-manager-base-url: http://localhost:8086/user-manager
-      access-control-base-url: http://localhost:8086/access-control
-      arrangement-manager-base-url: http://localhost:8082/arrangement-manager
     compositions:
       product:
         integration-base-url: http://localhost:18000
