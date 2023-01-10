@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.product.core.service.config;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
@@ -11,6 +12,8 @@ import com.backbase.stream.compositions.product.core.config.ProductConfiguration
 
 import java.util.List;
 
+import com.backbase.stream.compositions.product.core.model.RequestConfig;
+import com.backbase.stream.compositions.product.util.JsonUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -71,5 +74,10 @@ class ProductConfigurationPropertiesTest {
         assertTrue(properties.isTransactionChainAsync());
         assertTrue(properties.isPaymentOrderChainEnabled());
         assertTrue(properties.isPaymentOrderChainAsync());
+
+        assertTrue(properties.isTransactionChainAsync(null));
+        assertTrue(properties.isTransactionChainEnabled(null));
+        assertFalse(properties.isTransactionChainAsync(JsonUtil.readJsonFileToObject(RequestConfig.class,"integration-data/request-config-asynchain.json")));
+        assertFalse(properties.isTransactionChainEnabled(JsonUtil.readJsonFileToObject(RequestConfig.class,"integration-data/request-config-chain.json")));
     }
 }

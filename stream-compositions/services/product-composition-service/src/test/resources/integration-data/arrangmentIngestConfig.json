@@ -1,0 +1,10 @@
+{
+  "config": {
+    "chains": {
+      "transactionComposition": {
+        "enabled": true,
+        "async": false
+      }
+    }
+  }
+}

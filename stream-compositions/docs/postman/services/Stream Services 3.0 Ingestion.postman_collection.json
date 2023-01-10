@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "a4f96cee-b4e9-487d-9755-21c7c5e80476",
+		"_postman_id": "790ed9a3-23b5-46f4-8148-45e319d0ae6e",
 		"name": "Stream Services 3.0 Ingestion",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -221,6 +221,50 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Ingest arrangment push mode Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = JSON.parse(responseBody);",
+									"/*postman.setEnvironmentVariable(\"Emp_User_Internal_ID\", response.legalEntity.users[0].user.internalId);",
+									"postman.setEnvironmentVariable(\"Emp_User_External_ID\", response.legalEntity.users[0].user.externalId);",
+									"postman.setEnvironmentVariable(\"Emp_MSA_Internal_ID\", response.legalEntity.masterServiceAgreement.internalId);*/"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"internalArrangementId\": \"{{internal_arrangement_id}}\",\n  \"source\": \"\",\n  \"config\": {\n    \"chains\": {\n      \"transactionComposition\": {\n        \"enabled\": false,\n        \"async\": false\n      }\n    }\n  },\n  \"arrangement\": {\n    \"externalArrangementId\": \"{{external_arrangemnent_id}}\",\n    \"productId\": \"{{product_id}}}\",\n    \"bookedBalance\": 3343191.77,\n    \"currency\":\"USD\",\n    \"bban\": \"107281961\",\n    \"credit_limit\":0.0,\n    \"availableBalance\": 3343191.77\n\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{product-catalog-composition-url}}/service-api/v2/ingest/arrangement/push",
+							"host": [
+								"{{product-catalog-composition-url}}"
+							],
+							"path": [
+								"service-api",
+								"v2",
+								"ingest",
+								"arrangement",
+								"push"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -378,6 +422,52 @@
 								"integration-api",
 								"v2",
 								"transactions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ingest arrangment push mode Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = JSON.parse(responseBody);",
+									"/*postman.setEnvironmentVariable(\"Emp_User_Internal_ID\", response.legalEntity.users[0].user.internalId);",
+									"postman.setEnvironmentVariable(\"Emp_User_External_ID\", response.legalEntity.users[0].user.externalId);",
+									"postman.setEnvironmentVariable(\"Emp_MSA_Internal_ID\", response.legalEntity.masterServiceAgreement.internalId);*/"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"internalArrangementId\": \"2eec13c8-9108-4227-b721-3841e940219c\",\n  \"source\": \"\",\n  \"config\": {\n    \"chains\": {\n      \"transactionComposition\": {\n        \"enabled\": false,\n        \"async\": false\n      }\n    }\n  },\n  \"arrangement\": {\n    \"externalArrangementId\": \"107281961-DDA\",\n    \"productId\": \"210153\",\n    \"bookedBalance\": 3343191.77,\n    \"currency\":\"USD\",\n    \"bban\": \"107281961\",\n    \"credit_limit\":0.0,\n    \"availableBalance\": 3343191.77\n\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:9003/service-api/v2/ingest/arrangement/push",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "9003",
+							"path": [
+								"service-api",
+								"v2",
+								"ingest",
+								"arrangement",
+								"push"
 							]
 						}
 					},

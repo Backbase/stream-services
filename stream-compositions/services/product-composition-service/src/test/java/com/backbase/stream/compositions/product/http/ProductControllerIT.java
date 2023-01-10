@@ -1,8 +1,10 @@
 package com.backbase.stream.compositions.product.http;
 
-
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderPostResponse;
+import com.backbase.stream.compositions.product.api.model.ArrangementPullIngestionRequest;
+import com.backbase.stream.compositions.product.api.model.ArrangementPushIngestionRequest;
 import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRequest;
 import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
 import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
@@ -11,16 +13,15 @@ import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.product.BatchProductIngestionSaga;
+import com.backbase.stream.product.service.ArrangementService;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.streams.compositions.test.IntegrationTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.broker.BrokerService;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.MediaType;
@@ -33,7 +34,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
-
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
@@ -56,27 +58,22 @@ class ProductControllerIT extends IntegrationTest {
     private static final int INTEGRATION_SERVICE_PORT = 18000;
     private static final int TRANSACTION_SERVICE_PORT = 12000;
     private static final int PAYMENT_ORDER_SERVICE_PORT = 13000;
+    private static BrokerService broker;
+    @MockBean
+    @Qualifier("batchProductIngestionSaga")
+    BatchProductIngestionSaga batchProductIngestionSaga;
+    @MockBean
+    ArrangementService arrangementService;
+    @Autowired
+    ProductController productController;
+    @Autowired
+    ObjectMapper objectMapper;
     private ClientAndServer integrationServer;
     private ClientAndServer transactionServer;
     private ClientAndServer paymentOrderServer;
     private MockServerClient integrationServerClient;
     private MockServerClient transactionServerClient;
     private MockServerClient paymentOrderServerClient;
-    private static BrokerService broker;
-
-    @MockBean
-    @Qualifier("batchProductIngestionSaga")
-    BatchProductIngestionSaga batchProductIngestionSaga;
-
-    @Autowired
-    ProductController productController;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    static {
-        System.setProperty("spring.application.name", "product-composition-service");
-    }
 
     @BeforeAll
     static void initActiveMqBroker() throws Exception {
@@ -100,6 +97,17 @@ class ProductControllerIT extends IntegrationTest {
                                 .withStatusCode(200)
                                 .withContentType(MediaType.APPLICATION_JSON)
                                 .withBody(readContentFromClasspath("integration-data/response.json"))
+                );
+
+        integrationServerClient.when(
+                        request()
+                                .withMethod("PUT")
+                                .withPath("/service-api/v2/arrangement"))
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withContentType(MediaType.APPLICATION_JSON)
+                                .withBody(readContentFromClasspath("integration-data/arrangement-response.json"))
                 );
     }
 
@@ -155,8 +163,10 @@ class ProductControllerIT extends IntegrationTest {
 
     @Test
     void pullIngestProduct_Success() throws Exception {
-        ProductGroup productGroup = new Gson()
-                .fromJson(readContentFromClasspath("integration-data/response.json"), ProductGroup.class);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.readTree(readContentFromClasspath("integration-data/response.json"))
+                .get("productGroups").get(0);
+        ProductGroup productGroup = mapper.treeToValue(node, ProductGroup.class);
         productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
@@ -178,6 +188,7 @@ class ProductControllerIT extends IntegrationTest {
                         .withUserExternalId("userId")
                         .withReferenceJobRoleNames(List.of("Admin Role"))
                         .withMembershipAccounts(null)
+                        .withSource("MacOS")
                         .withAdditions(Map.of());
 
         URI uri = URI.create("/service-api/v2/ingest/pull");
@@ -192,7 +203,8 @@ class ProductControllerIT extends IntegrationTest {
     @Test
     void pushIngestProduct_Success() throws Exception {
         ProductPushIngestionRequest pushIngestionRequest = new ProductPushIngestionRequest()
-                .withProductGroup(new com.backbase.stream.compositions.product.api.model.ProductGroup());
+                .withProductGroup(new com.backbase.stream.compositions.product.api.model.ProductGroup())
+                .withSource("MacOS");
         URI uri = URI.create("/service-api/v2/ingest/push");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
@@ -200,5 +212,50 @@ class ProductControllerIT extends IntegrationTest {
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(Mono.just(pushIngestionRequest), ProductPushIngestionRequest.class).exchange()
                 .expectStatus().is5xxServerError();
+    }
+
+    @Test
+    void pullIngestArrangement_Success() throws Exception {
+        when(arrangementService.updateArrangement(any()))
+                .thenReturn(Mono.just(new AccountArrangementItemPut()));
+
+        ArrangementPullIngestionRequest pullIngestionRequest =
+                new ArrangementPullIngestionRequest()
+                        .withInternalArrangementId("arrangementId")
+                        .withExternalArrangementId("externalArrangementId")
+                        .withAdditions(Map.of());
+
+        URI uri = URI.create("/service-api/v2/ingest/arrangement/pull");
+        WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+
+        webTestClient.put().uri(uri)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class).exchange()
+                .expectStatus().is2xxSuccessful();
+    }
+
+    @Test
+    void pushIngestArrangement_Success() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node = mapper.readTree(readContentFromClasspath("integration-data/arrangement-response.json"))
+                .get("arrangement");
+        com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut arrangementItemPut =
+                mapper.treeToValue(node, com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut.class);
+
+        when(arrangementService.updateArrangement(any()))
+                .thenReturn(Mono.just(new AccountArrangementItemPut()));
+
+        ArrangementPushIngestionRequest pushIngestionRequest =
+                new ArrangementPushIngestionRequest()
+                        .withInternalArrangementId("arrangementId")
+                        .withArrangement(arrangementItemPut);
+
+        URI uri = URI.create("/service-api/v2/ingest/arrangement/push");
+        WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+
+        webTestClient.put().uri(uri)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Mono.just(pushIngestionRequest), ArrangementPushIngestionRequest.class).exchange()
+                .expectStatus().is2xxSuccessful();
     }
 }

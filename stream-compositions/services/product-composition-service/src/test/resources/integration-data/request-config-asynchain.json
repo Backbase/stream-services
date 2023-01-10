@@ -1,0 +1,9 @@
+{
+    "chains": {
+      "transactionComposition": {
+        "enabled": true,
+        "baseUrl" : "http://localhost:9003/",
+        "excludeProductTypeExternalIds" : []
+      }
+    }
+}

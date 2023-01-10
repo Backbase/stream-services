@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "arrangementId": {
+      "description": "Arrangement internal id",
+      "$ref": "../arrangement.json"
+    },
+    "arrangementExternalId": {
+      "description": "Arrangement external id",
+      "type": "string"
+    },
+    "source": {
+      "description": "Source of the ingestion",
+      "type": "string"
+    }
+  }
+}
