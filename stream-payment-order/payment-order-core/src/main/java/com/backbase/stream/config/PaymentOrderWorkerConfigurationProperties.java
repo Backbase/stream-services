@@ -14,5 +14,5 @@ public class PaymentOrderWorkerConfigurationProperties extends StreamWorkerConfi
 
     private boolean continueOnError;
 
-    private boolean deletePaymentOrder = true;
+    private boolean deletePaymentOrder = false;
 }
