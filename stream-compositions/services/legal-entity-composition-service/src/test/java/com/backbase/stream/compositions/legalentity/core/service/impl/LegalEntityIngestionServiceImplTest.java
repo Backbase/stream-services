@@ -1,5 +1,9 @@
 package com.backbase.stream.compositions.legalentity.core.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
@@ -15,25 +19,26 @@ import com.backbase.stream.compositions.product.client.ProductCompositionApi;
 import com.backbase.stream.compositions.product.client.model.CurrentAccount;
 import com.backbase.stream.compositions.product.client.model.ProductIngestionResponse;
 import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
-import org.junit.jupiter.api.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.validation.Validator;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import javax.validation.Validator;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LegalEntityIngestionServiceImplTest {
@@ -56,7 +61,7 @@ class LegalEntityIngestionServiceImplTest {
     @Mock
     EventBus eventBus;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     LegalEntityConfigurationProperties config;
 
     @Mock
@@ -79,7 +84,6 @@ class LegalEntityIngestionServiceImplTest {
     @Tag("true")
     void ingestionInPullModeAsync_Success(TestInfo testInfo) {
         List<String> tags = new ArrayList<>(testInfo.getTags());
-        when(config.isCompletedEventEnabled()).thenReturn(Boolean.TRUE);
         when(productCompositionApi.pullIngestProduct(any()))
                 .thenReturn(Mono.just(new ProductIngestionResponse()
                         .withProductGroups(
@@ -90,14 +94,17 @@ class LegalEntityIngestionServiceImplTest {
         Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
                 Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
         StepVerifier.create(legalEntityIngestResponseMono)
-                .assertNext(Assertions::assertNotNull).verifyComplete();
+            .thenConsumeWhile(x -> {
+                Assertions.assertNotNull(x);
+                return true;
+            }).verifyComplete();
     }
 
     @Test
     @Tag("false")
     void ingestionInPullModeSync_Success(TestInfo testInfo) {
         List<String> tags = new ArrayList<>(testInfo.getTags());
-        when(config.isCompletedEventEnabled()).thenReturn(Boolean.TRUE);
+        when(config.getChains().getIncludeSubsidiaries()).thenReturn(Boolean.TRUE);
         when(productCompositionApi.pullIngestProduct(any()))
                 .thenReturn(Mono.just(new ProductIngestionResponse()
                         .withProductGroups(
@@ -108,7 +115,10 @@ class LegalEntityIngestionServiceImplTest {
         Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
                 Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
         StepVerifier.create(legalEntityIngestResponseMono)
-                .assertNext(Assertions::assertNotNull).verifyComplete();
+            .thenConsumeWhile(x -> {
+                Assertions.assertNotNull(x);
+                return true;
+            }).verifyComplete();
     }
 
     @Test
@@ -138,21 +148,12 @@ class LegalEntityIngestionServiceImplTest {
                 .build();
 
         LegalEntityResponse res = new LegalEntityResponse(isProductChainEnabledFromRequest,
-                new com.backbase.stream.legalentity.model.LegalEntity().name("legalEntityName"), null, null);
+                new LegalEntity().name("legalEntityName"), null, null);
         when(legalEntityIntegrationService.pullLegalEntity(legalEntityIngestPullRequest))
                 .thenReturn(Mono.just(res));
 
         LegalEntityTask legalEntityTask = new LegalEntityTask();
-        legalEntityTask.setLegalEntity(
-                new com.backbase.stream.legalentity.model.LegalEntity()
-                        .name("legalEntityName").internalId("internalId")
-                        .externalId("externalId")
-                        .masterServiceAgreement(
-                                new ServiceAgreement().externalId("sa_externalId").internalId("sa_internalId"))
-                        .users(List.of(new JobProfileUser()
-                                .user(new User().internalId("user_internalId").externalId("user_externalId"))
-                                .referenceJobRoleNames(List.of("Admin Role"))))
-                        .productGroups(List.of(new ProductGroup())));
+        legalEntityTask.setLegalEntity(createLE().addSubsidiariesItem(createLE()));
 
         when(legalEntitySaga.executeTask(any()))
                 .thenReturn(Mono.just(legalEntityTask));
@@ -164,6 +165,18 @@ class LegalEntityIngestionServiceImplTest {
         return legalEntityIngestionService
                 .ingestPull(legalEntityIngestPullRequest);
 
+    }
+
+    private LegalEntity createLE(){
+        return new LegalEntity()
+            .name("legalEntityName").internalId("internalId")
+            .externalId("externalId")
+            .masterServiceAgreement(
+                new ServiceAgreement().externalId("sa_externalId").internalId("sa_internalId"))
+            .users(List.of(new JobProfileUser()
+                .user(new User().internalId("user_internalId").externalId("user_externalId"))
+                .referenceJobRoleNames(List.of("Admin Role"))))
+            .productGroups(List.of(new ProductGroup()));
     }
 
     //@Test
