@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.26.0](https://github.com/Backbase/stream-services/compare/3.25.0...3.26.0)
+### Added
+- Included support to chain products to all subsidiaries when using legal entity composition.
+  Disabled by default for compatibility reasons: `backbase.stream.compositions.legal-entity.chains.include-subsidiaries=false`
+- Adjusting default services ports to 8080 to avoid misconfiguration when compositions services are invoking sagas: `backbase.communication.http.default-service-port=8080`
+
 ## [3.24.3](https://github.com/Backbase/stream-services/compare/3.24.2...3.24.3)
 ### Fixed
 - Fix portfolio not to stop processing on error

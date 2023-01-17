@@ -1,8 +1,8 @@
 package com.backbase.stream.portfolio.configuration;
 
-import org.junit.jupiter.api.Test;
-
 import com.backbase.portfolio.instrument.integration.api.service.ApiClient;
+import com.backbase.stream.clients.config.InstrumentApiConfiguration;
+import org.junit.jupiter.api.Test;
 
 class InstrumentApiConfigurationTest extends BaseApiConfigurationTest<InstrumentApiConfiguration, ApiClient> {
 
