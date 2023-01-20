@@ -76,15 +76,15 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
                 .flatMap(productCompositionApi::pullIngestProduct)
                 .onErrorResume(this::handleProductError)
                 .doOnNext(response -> log.debug("Response from Product Composition: {}", response.getProductGroups()))
-                .then()
+                .last()
                 .map(p -> res);
     }
 
     private Mono<LegalEntityResponse> ingestProductsAsync(LegalEntityResponse res) {
         return buildProductPullRequest(res)
-                .doOnNext(request -> productCompositionApi.pullIngestProduct(request).subscribe())
-                .doOnNext(t -> log.debug("Async product ingestion called"))
-                .then()
+                .collectList()
+                .doOnNext(requests -> requests.forEach(r -> productCompositionApi.pullIngestProduct(r)
+                    .subscribe(t -> log.debug("Async product ingestion called"))))
                 .map(p -> res);
     }
 

@@ -94,10 +94,7 @@ class LegalEntityIngestionServiceImplTest {
         Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
                 Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
         StepVerifier.create(legalEntityIngestResponseMono)
-            .thenConsumeWhile(x -> {
-                Assertions.assertNotNull(x);
-                return true;
-            }).verifyComplete();
+            .assertNext(Assertions::assertNotNull).verifyComplete();
     }
 
     @Test
@@ -115,10 +112,7 @@ class LegalEntityIngestionServiceImplTest {
         Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
                 Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
         StepVerifier.create(legalEntityIngestResponseMono)
-            .thenConsumeWhile(x -> {
-                Assertions.assertNotNull(x);
-                return true;
-            }).verifyComplete();
+            .assertNext(Assertions::assertNotNull).verifyComplete();
     }
 
     @Test

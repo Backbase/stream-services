@@ -9,6 +9,8 @@ import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequ
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
+import java.util.stream.Collectors;
+import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,9 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import javax.validation.Valid;
-import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -63,6 +62,8 @@ public class ProductController implements ProductCompositionApi {
                 .additions(request.getAdditions())
                 .referenceJobRoleNames(request.getReferenceJobRoleNames())
                 .source(request.getSource())
+                .transactionChainEnabled(request.getTransactionChainEnabled())
+                .paymentOrderChainEnabled(request.getPaymentOrderChainEnabled())
                 .build();
     }
 

@@ -122,6 +122,12 @@ components:
           type: array
           items:
             type: string
+        transactionChainEnabled:
+          type: boolean
+          description: Flag to indicate if Transaction Ingestion should follow Product Ingestion
+        paymentOrderChainEnabled:
+          type: boolean
+          description: Flag to indicate if Payment Order Ingestion should follow Product Ingestion
         additions:
           type: object
           additionalProperties:
