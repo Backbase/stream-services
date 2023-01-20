@@ -49,6 +49,8 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
         response.setUserInternalId(request.getUserInternalId());
         response.setSource(request.getSource());
         response.setAdditions(request.getAdditions());
+        response.setTransactionChainEnabledFromRequest(request.getTransactionChainEnabled());
+        response.setPaymentOrderChainEnabledFromRequest(request.getPaymentOrderChainEnabled());
         return response;
     }
 

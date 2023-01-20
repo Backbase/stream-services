@@ -1,5 +1,15 @@
 package com.backbase.stream.compositions.product.core.service.impl;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
@@ -20,12 +30,33 @@ import com.backbase.stream.compositions.product.core.service.ProductPostIngestio
 import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
 import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
 import com.backbase.stream.compositions.transaction.client.model.TransactionsPostResponseBody;
-import com.backbase.stream.legalentity.model.*;
+import com.backbase.stream.legalentity.model.AvailableBalance;
+import com.backbase.stream.legalentity.model.BaseProductGroup;
+import com.backbase.stream.legalentity.model.BatchProductGroup;
+import com.backbase.stream.legalentity.model.BookedBalance;
+import com.backbase.stream.legalentity.model.CreditCard;
+import com.backbase.stream.legalentity.model.CurrentAccount;
+import com.backbase.stream.legalentity.model.LegalEntityReference;
+import com.backbase.stream.legalentity.model.Loan;
+import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.legalentity.model.SavingsAccount;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.TermDeposit;
+import com.backbase.stream.legalentity.model.TermUnit;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import javax.validation.Validator;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
@@ -33,23 +64,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import javax.validation.Validator;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNotNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductIngestionServiceImplTest {
@@ -117,13 +131,18 @@ class ProductIngestionServiceImplTest {
     @Test
     @Tag("true")
     void ingestionInPullModeAsync_success(TestInfo testInfo) {
-        executeIngestionWithPullMode(getTagInfo(testInfo));
+        executeIngestionWithPullMode(getTagInfo(testInfo), null);
     }
 
     @Test
     @Tag("false")
     void ingestionInPullModeSync_success(TestInfo testInfo) {
-        executeIngestionWithPullMode(getTagInfo(testInfo));
+        executeIngestionWithPullMode(getTagInfo(testInfo), null);
+    }
+
+    @Test
+    void ingestionInPullSkipChainPerRequest_success() {
+        executeIngestionWithPullMode(true, Boolean.FALSE);
     }
 
     Boolean getTagInfo(TestInfo testInfo) {
@@ -131,8 +150,8 @@ class ProductIngestionServiceImplTest {
         return Boolean.valueOf(testConfig);
     }
 
-    void executeIngestionWithPullMode(Boolean isAsync) {
-        configureEventAndChainParameters(isAsync, Boolean.TRUE);
+    void executeIngestionWithPullMode(Boolean isChainAsync, Boolean chainEnabledPerRequest) {
+        configureEventAndChainParameters(isChainAsync, Boolean.TRUE);
 
         ProductIngestPullRequest productIngestPullRequest = ProductIngestPullRequest.builder()
                 .source("nightly_ingestion")
@@ -144,6 +163,8 @@ class ProductIngestionServiceImplTest {
                 .userInternalId("user_internalId")
                 .source("source_of_ingestion_process")
                 .additions(Map.of("addition","addition1"))
+                .paymentOrderChainEnabled(chainEnabledPerRequest)
+                .transactionChainEnabled(chainEnabledPerRequest)
                 .build();
 
         SavingsAccount savingsAccount = buildSavingsAccount();
