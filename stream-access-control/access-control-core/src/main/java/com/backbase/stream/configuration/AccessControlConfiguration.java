@@ -22,6 +22,7 @@ import com.backbase.stream.service.EntitlementsService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
+import com.backbase.stream.utils.BatchResponseUtils;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -39,6 +40,11 @@ import org.springframework.context.annotation.Import;
 public class AccessControlConfiguration {
 
     @Bean
+    public BatchResponseUtils batchResponseUtils(){
+        return new BatchResponseUtils();
+    }
+
+    @Bean
     public EntitlementsService entitlementsService(ArrangementService arrangementService,
         AccessGroupService accessGroupService,
         LegalEntityService legalEntityService,
@@ -49,8 +55,8 @@ public class AccessControlConfiguration {
 
     @Bean
     public LegalEntityService legalEntityService(LegalEntitiesApi legalEntitiesApi,
-        LegalEntityApi legalEntityApi) {
-        return new LegalEntityService(legalEntitiesApi, legalEntityApi);
+        LegalEntityApi legalEntityApi, BatchResponseUtils batchResponseUtils) {
+        return new LegalEntityService(legalEntitiesApi, legalEntityApi, batchResponseUtils);
     }
 
     @Bean
@@ -72,10 +78,10 @@ public class AccessControlConfiguration {
         UsersApi accessControlUsersApi, DataGroupApi dataGroupApi,
         DataGroupsApi dataGroupsApi, ServiceAgreementsApi serviceAgreementsApi,
         ServiceAgreementApi serviceAgreementApi, ServiceAgreementQueryApi serviceAgreementQueryApi,
-        FunctionGroupsApi functionGroupsApi, FunctionGroupApi functionGroupApi) {
+        FunctionGroupsApi functionGroupsApi, FunctionGroupApi functionGroupApi, BatchResponseUtils batchResponseUtils) {
         return new AccessGroupService(usersApi, userQueryApi, accessControlUsersApi, dataGroupApi, dataGroupsApi,
             functionGroupApi, functionGroupsApi, serviceAgreementQueryApi, serviceAgreementApi, serviceAgreementsApi,
-            configurationProperties);
+            configurationProperties, batchResponseUtils);
     }
 
 }

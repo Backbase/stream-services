@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.26.2](https://github.com/Backbase/stream-services/compare/3.26.1...3.26.2)
+### Added
+- Included property to override the validation of atomic batch responses coming from DBS: When a single item is not successful in the batch response it fails the entire saga. 
+Keeping validation enabled for backwards compatibility: `backbase.stream.dbs.batch.validate-atomic-response=true`.
+- Enhancing logs for legal entity composition subsidiaries processing.
+- Updating the e2e tests images version.
+
 ## [3.26.0](https://github.com/Backbase/stream-services/compare/3.25.0...3.26.0)
 ### Added
 - Included support to chain products to all subsidiaries when using legal entity composition.

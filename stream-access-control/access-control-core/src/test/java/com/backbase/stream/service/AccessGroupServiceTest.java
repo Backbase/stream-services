@@ -55,6 +55,7 @@ import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
+import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.time.LocalDate;
@@ -120,6 +121,9 @@ class AccessGroupServiceTest {
 
     @Spy
     private DeletionProperties configurationProperties;
+
+    @Spy
+    private BatchResponseUtils batchResponseUtils;
 
     @Test
     void getServiceAgreementByExternalIdRetrievesServiceAgreementByExternalId() {

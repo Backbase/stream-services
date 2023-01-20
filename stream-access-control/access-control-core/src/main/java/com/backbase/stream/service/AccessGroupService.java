@@ -70,8 +70,8 @@ import com.backbase.stream.mapper.AccessGroupMapper;
 import com.backbase.stream.mapper.ParticipantMapper;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
-import com.backbase.stream.product.utils.BatchResponseUtils;
 import com.backbase.stream.product.utils.StreamUtils;
+import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.math.BigDecimal;
@@ -118,7 +118,6 @@ public class AccessGroupService {
     public static final String FUNCTION_GROUP = "function-group";
     public static final String JOB_ROLE = "job-role";
     public static final String SETUP_FUNCTION_GROUP = "setup-function-group";
-    public static final String CREATE_FUNCTION_GROUP = "create-function-group";
     public static final String SETUP_JOB_ROLE = "setup-job-role";
     private static final String FAILED = "failed";
 
@@ -144,6 +143,8 @@ public class AccessGroupService {
     private final ServiceAgreementsApi serviceAgreementsApi;
     @NonNull
     private final DeletionProperties deletionProperties;
+    @NonNull
+    private final BatchResponseUtils batchResponseUtils;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
@@ -556,7 +557,7 @@ public class AccessGroupService {
             .flatMap(userPermissionsList -> {
                 task.info(ACCESS_GROUP, "assign-permissions", task.getName(), null, task.getId(), "Assigning permissions: %s", userPermissionsList.stream().map(this::prettyPrintUserAssignedPermissions).collect(Collectors.joining(",")));
                 return accessControlUsersApi.putAssignUserPermissions(userPermissionsList)
-                    .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Permissions Update", r.getStatus().toString(), r.getResourceId(), r.getErrors()))
+                    .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Permissions Update", r.getStatus().toString(), r.getResourceId(), r.getErrors()))
                     .doOnNext(r -> task.info(ACCESS_GROUP, "assign-permissions", r.getExternalServiceAgreementId(), null, "Assigned permissions for: %s and Service Agreement: %s", r.getResourceId(), r.getExternalServiceAgreementId()))
                     .onErrorResume(WebClientResponseException.class, e -> {
                         task.error(ACCESS_GROUP, "assign-permissions", "failed", task.getData().getServiceAgreement().getExternalId(), task.getData().getServiceAgreement().getInternalId(), e, e.getResponseBodyAsString(), "Failed to execute Batch Permissions assignment request.");
@@ -847,7 +848,7 @@ public class AccessGroupService {
 
     public Flux<BatchResponseItemExtended> updateDataGroupItems(List<PresentationDataGroupItemPutRequestBody> request) {
         return dataGroupsApi.putDataGroupItemsUpdate(request)
-            .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Product Groups Update", r.getStatus().toString(), r.getResourceId(), r.getErrors()));
+            .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Product Groups Update", r.getStatus().toString(), r.getResourceId(), r.getErrors()));
     }
 
     public Flux<DataGroupItem> getExistingDataGroups(String serviceAgreementInternalId, String type) {
@@ -1036,7 +1037,7 @@ public class AccessGroupService {
                             .filter(f -> FunctionGroupItem.TypeEnum.TEMPLATE.equals(f.getType()))
                             .map(fg -> mapFunctionGroup(fg.getId()))
                             .collect(Collectors.toList())
-                    ).map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
+                    ).map(r -> batchResponseUtils.checkBatchResponseItem(r, "Function  Group Removal", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
                     .collectList())
             .then();
     }
@@ -1082,7 +1083,7 @@ public class AccessGroupService {
                         new PresentationServiceAgreementUsersBatchUpdate()
                             .action(PresentationAction.REMOVE)
                             .users(admins))
-                        .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Delete Admin", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
+                        .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Delete Admin", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
                         .collectList()
                         .onErrorResume(WebClientResponseException.class, e -> {
                             log.error("Failed to delete admin: {}", e.getResponseBodyAsString(), e);

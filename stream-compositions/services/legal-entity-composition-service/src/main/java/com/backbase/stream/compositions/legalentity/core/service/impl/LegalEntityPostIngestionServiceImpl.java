@@ -138,11 +138,13 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
         if (config.getChains().getIncludeSubsidiaries() && !CollectionUtils.isEmpty(
             legalEntity.getSubsidiaries())) {
+            log.info("Processing {} subsidiaries for legal entity '{}'", legalEntity.getSubsidiaries().size(),
+                legalEntity.getExternalId());
             legalEntity.getSubsidiaries()
                 .forEach(
                     subsidiary -> requests.addAll(buildProductPullRequest(subsidiary, membershipAccounts, additions)));
         } else {
-            log.info("Missing or disabled subsidiary chaining for legal entity '{}'", legalEntity.getExternalId());
+            log.debug("No subsidiary chained for legal entity '{}'.", legalEntity.getExternalId());
         }
 
         return requests;
