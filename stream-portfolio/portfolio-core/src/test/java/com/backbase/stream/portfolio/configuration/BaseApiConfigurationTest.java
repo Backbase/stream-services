@@ -1,6 +1,8 @@
 package com.backbase.stream.portfolio.configuration;
 
 import com.backbase.portfolio.instrument.integration.api.service.ApiClient;
+import com.backbase.stream.clients.config.InstrumentApiConfiguration;
+import com.backbase.stream.clients.config.PortfolioApiConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.junit.jupiter.api.Assertions;

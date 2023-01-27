@@ -7,23 +7,10 @@ spring:
 backbase:
   communication:
     http:
+      default-service-port: 8080
       client-secret: bb-secret
       client-id: bb-client
       access-token-uri: http://token-converter:8080/oauth/token
-    services:
-      usermanager:
-        service-port: 8080
-      access-control:
-        service-port: 8080
-      arrangement:
-        manager:
-          service-port: 8080
-      user:
-        profile:
-          service-port: 8080
-      identity:
-        integration:
-          service-port: 8080
   security:
     http:
       enabled: true
@@ -38,6 +25,7 @@ backbase:
       legal-entity:
         integration-base-url: http://legal-entity-integration:8080
         chains:
+          include-subsidiaries: false
           product-composition:
             enabled: true
             base-url: http://product-composition:8080

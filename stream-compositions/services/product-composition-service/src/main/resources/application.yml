@@ -15,17 +15,10 @@ sso:
 backbase:
   communication:
     http:
+      default-service-port: 8080
       client-secret: bb-secret
       client-id: bb-client
       access-token-uri: http://token-converter:8080/oauth/token
-    services:
-      usermanager:
-        service-port: 8080
-      access-control:
-        service-port: 8080
-      arrangement:
-        manager:
-          service-port: 8080
   mtls:
     enabled: false
   security:
@@ -43,7 +36,7 @@ backbase:
             excludeProductTypeExternalIds:
           payment-order-composition:
             enabled: true
-            base-url: http://localhost:9005
+            base-url: http://payment-order-composition:8080
             async: false
             excludeProductTypeExternalIds:
         events:

@@ -1,7 +1,40 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [3.22.1](https://github.com/Backbase/stream-services/compare/3.22.0...3.22.1)
+## [3.26.4](https://github.com/Backbase/stream-services/compare/3.26.3...3.26.4)
+### Changed
+- Updated stream `product-catalog/openapi.yaml` schema to include `accountHolderName`
+## [3.26.2](https://github.com/Backbase/stream-services/compare/3.26.1...3.26.2)
+### Added
+- Included property to override the validation of atomic batch responses coming from DBS: When a single item is not successful in the batch response it fails the entire saga. 
+Keeping validation enabled for backwards compatibility: `backbase.stream.dbs.batch.validate-atomic-response=true`.
+- Enhancing logs for legal entity composition subsidiaries processing.
+- Updating the e2e tests images version.
+
+## [3.26.0](https://github.com/Backbase/stream-services/compare/3.25.0...3.26.0)
+### Added
+- Included support to chain products to all subsidiaries when using legal entity composition.
+  Disabled by default for compatibility reasons: `backbase.stream.compositions.legal-entity.chains.include-subsidiaries=false`
+- Adjusting default services ports to 8080 to avoid misconfiguration when compositions services are invoking sagas: `backbase.communication.http.default-service-port=8080`
+
+## [3.24.3](https://github.com/Backbase/stream-services/compare/3.24.2...3.24.3)
+### Fixed
+- Fix portfolio not to stop processing on error
+
+## [3.24.2](https://github.com/Backbase/stream-services/compare/3.24.1...3.24.2)
+### Changed
+- Updated stream `instrument.yaml` schema to include `iconUrl`
+
+## [3.23.2](https://github.com/Backbase/stream-services/compare/3.23.1...3.23.2)
+### Added
+- Fixed `currentInvestment` mapping to `currentInvestmentValue` for InvestmentAccount.
+
+## [3.23.1](https://github.com/Backbase/stream-services/compare/3.23.0...3.23.1)
+### Added
+- Add the population of optional user additions to the service used by user ingestion in identity integration mode.
+  User additions are result of data extension to the OOTB user manager service.
+
+## [3.23](https://github.com/Backbase/stream-services/compare/3.22.0...3.23)
 ### Added
 - Fixed current investment field mapping for the InvestmentAccount
 

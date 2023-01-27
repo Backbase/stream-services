@@ -1,32 +1,25 @@
 package com.backbase.stream.service;
 
+import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
+
 import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntitiesApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntityApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityItemBase;
-import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.mapper.LegalEntityMapper;
+import com.backbase.stream.utils.BatchResponseUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.nio.charset.StandardCharsets;
-
-import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LegalEntityServiceTest {
@@ -42,7 +35,7 @@ class LegalEntityServiceTest {
 
     @BeforeEach
     void setup() {
-        subject = new LegalEntityService(legalEntitiesApi, legalEntityApi);
+        subject = new LegalEntityService(legalEntitiesApi, legalEntityApi, new BatchResponseUtils());
     }
 
     @Test

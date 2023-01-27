@@ -729,6 +729,8 @@ components:
           $ref: '#/components/schemas/IBAN'
         BBAN:
           $ref: '#/components/schemas/BBAN'
+        accountHolderName:
+          $ref: '#/components/schemas/AccountHolderName'
     Product:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'

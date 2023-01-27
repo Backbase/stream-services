@@ -13,9 +13,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class LegalEntityConfigurationProperties {
 
     private String integrationBaseUrl = "http://legal-entity-integration:9000";
-    private Chains chains;
-    private Events events;
-    private Cursor cursor;
+    private Chains chains = new Chains();
+    private Events events = new Events();
+    private Cursor cursor = new Cursor();
 
     @Data
     @NoArgsConstructor
@@ -37,7 +37,9 @@ public class LegalEntityConfigurationProperties {
     @NoArgsConstructor
     public static class Chains {
 
-        private ProductComposition productComposition;
+        private Boolean includeSubsidiaries = Boolean.FALSE;
+
+        private ProductComposition productComposition = new ProductComposition();
     }
 
     @Data

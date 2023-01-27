@@ -11,13 +11,15 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.mapper.AccessGroupMapper;
 import com.backbase.stream.mapper.LegalEntityMapper;
-import com.backbase.stream.product.utils.BatchResponseUtils;
+import com.backbase.stream.utils.BatchResponseUtils;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Objects;
+import java.util.UUID;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -44,6 +46,8 @@ public class LegalEntityService {
     private final LegalEntitiesApi legalEntitiesApi;
     @NonNull
     private final LegalEntityApi legalEntityApi;
+    @NonNull
+    private final BatchResponseUtils batchResponseUtils;
 
     private final LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
     private final AccessGroupMapper serviceAgreementMapper = Mappers.getMapper(AccessGroupMapper.class);
@@ -72,7 +76,7 @@ public class LegalEntityService {
     }
 
     private Mono<LegalEntityItemId> createLegalEntity(LegalEntityCreateItem legalEntity) {
-        // Create Legal Entity with out master service agreement
+        // Create Legal Entity without master service agreement
         return legalEntitiesApi.postCreateLegalEntities(legalEntity)
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .onErrorResume(WebClientResponseException.class, exception ->
@@ -164,7 +168,7 @@ public class LegalEntityService {
                 new LegalEntitiesBatchDelete()
                         .accessToken(getAccessControlAccessToken())
                         .externalIds(Collections.singletonList(legalEntityExternalId)))
-                .map(r -> BatchResponseUtils.checkBatchResponseItem(r, "Remove Legal Entity", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
+                .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Remove Legal Entity", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
                 .collectList()
                 .onErrorResume(WebClientResponseException.class, e -> {
                     log.error("Failed to remove legal  entity: {}", e.getResponseBodyAsString(), e);

@@ -15,18 +15,17 @@ import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -103,6 +102,8 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
                         .legalEntityInternalId(res.getLegalEntityInternalId())
                         .source(res.getSource())
                         .additions(res.getAdditions())
+                        .transactionChainEnabledFromRequest(res.getTransactionChainEnabledFromRequest())
+                        .paymentOrderChainEnabledFromRequest(res.getPaymentOrderChainEnabledFromRequest())
                         .build());
     }
 

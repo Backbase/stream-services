@@ -32,6 +32,13 @@ git push
 git checkout support/2.45.x
 git checkout -b hotfix/<hotfix-branch-name>
 ```
+> **NO!!** 
+> 
+> I know what you are thinking...
+> 
+> The `.x` in the support branch name **IS NOT** an "intuitive" documentation placeholder!
+> 
+> Please do not hardcode the patch version in the name of the support branch, it is supposed to be flexible to receive multiples patches, hence why keep the `.x` in its name.
 
 ### Branching Strategy Flow
 ![Branching Strategy](docs/branching_strategy.jpg)
