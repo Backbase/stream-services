@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.28.0](https://github.com/Backbase/stream-services/compare/3.27.0...3.28.0)
+### Added
+- Skipping product ingestion for legal entities without products
+
 ## [3.26.4](https://github.com/Backbase/stream-services/compare/3.26.3...3.26.4)
 ### Changed
 - Updated stream `product-catalog/openapi.yaml` schema to include `accountHolderName`
