@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.27.0](https://github.com/Backbase/stream-services/compare/3.26.4...3.27.0)
+### Added
+- Added update arrangement functionality.
+
 ## [3.26.4](https://github.com/Backbase/stream-services/compare/3.26.3...3.26.4)
 ### Changed
 - Updated stream `product-catalog/openapi.yaml` schema to include `accountHolderName`
