@@ -35,13 +35,13 @@ public class ProductConfigurationProperties {
     public boolean isTransactionChainEnabled(RequestConfig requestConfig) {
         return requestConfig == null || requestConfig.isTransactionChainEnabled().isEmpty()
                 ? Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
-                : requestConfig.isTransactionChainEnabled().get();
+                : requestConfig.isTransactionChainEnabled().orElse(false);
     }
 
     public boolean isTransactionChainAsync(RequestConfig requestConfig) {
         return requestConfig == null || requestConfig.isTransactionChainAsync().isEmpty()
                 ? Boolean.TRUE.equals(chains.getTransactionComposition().getAsync())
-                : requestConfig.isTransactionChainAsync().get();
+                : requestConfig.isTransactionChainAsync().orElse(false);
     }
 
     public boolean isTransactionChainAsync() {

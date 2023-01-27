@@ -237,6 +237,26 @@ class ProductControllerIT extends IntegrationTest {
     }
 
     @Test
+    void pullIngestArrangement_Fail() throws Exception {
+        when(arrangementService.updateArrangement(any()))
+                .thenThrow(new RuntimeException());
+
+        ArrangementPullIngestionRequest pullIngestionRequest =
+                new ArrangementPullIngestionRequest()
+                        .withInternalArrangementId("arrangementId")
+                        .withExternalArrangementId("externalArrangementId")
+                        .withAdditions(Map.of());
+
+        URI uri = URI.create("/service-api/v2/ingest/arrangement/pull");
+        WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+
+        webTestClient.put().uri(uri)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class).exchange()
+                .expectStatus().is5xxServerError();
+    }
+
+    @Test
     void pushIngestArrangement_Success() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node = mapper.readTree(readContentFromClasspath("integration-data/arrangement-response.json"))
