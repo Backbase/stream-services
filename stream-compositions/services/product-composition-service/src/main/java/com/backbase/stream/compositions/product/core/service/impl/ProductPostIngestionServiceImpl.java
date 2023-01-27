@@ -75,8 +75,10 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<ProductIngestResponse> processTransactionChains(ProductIngestResponse res) {
         Mono<ProductIngestResponse> transactionChainMono;
+        boolean isTransactionChainEnabled = res.getTransactionChainEnabledFromRequest() == null ?
+                config.isTransactionChainEnabled() : res.getTransactionChainEnabledFromRequest();
 
-        if (!config.isTransactionChainEnabled()) {
+        if (!isTransactionChainEnabled){
             log.debug("Transaction Chain is disabled");
             transactionChainMono = Mono.just(res);
         } else if (config.isTransactionChainAsync()) {
@@ -91,8 +93,10 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<ProductIngestResponse> processPaymentOrderChains(ProductIngestResponse res) {
         Mono<ProductIngestResponse> paymentOrderChainMono;
+        boolean isPaymentOrderChainEnabled = res.getPaymentOrderChainEnabledFromRequest() == null ?
+                config.isPaymentOrderChainEnabled() : res.getPaymentOrderChainEnabledFromRequest();
 
-        if (!config.isPaymentOrderChainEnabled()) {
+        if (!isPaymentOrderChainEnabled) {
             log.debug("Payment Order Chain is disabled");
             paymentOrderChainMono = Mono.just(res);
         } else if (config.isPaymentOrderChainAsync()) {

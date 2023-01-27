@@ -35,4 +35,8 @@ public class ProductIngestResponse {
     private Map<String, String> additions;
 
     private String source;
+
+    private Boolean transactionChainEnabledFromRequest;
+    private Boolean paymentOrderChainEnabledFromRequest;
+
 }

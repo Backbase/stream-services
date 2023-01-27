@@ -37,6 +37,8 @@ public class ProductRestMapper {
                 .additions(request.getAdditions())
                 .referenceJobRoleNames(request.getReferenceJobRoleNames())
                 .source(request.getSource())
+                .paymentOrderChainEnabled(request.getPaymentOrderChainEnabled())
+                .transactionChainEnabled(request.getTransactionChainEnabled())
                 .build();
     }
 

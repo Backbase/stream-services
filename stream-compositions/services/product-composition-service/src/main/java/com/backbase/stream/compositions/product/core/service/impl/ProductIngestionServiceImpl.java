@@ -102,6 +102,8 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
                 .map(BatchProductGroupTask::getData)
                 .map(pg -> ProductIngestResponse.builder()
                         .productGroups(pg.getProductGroups().stream().map(g -> (ProductGroup) g).collect(Collectors.toList()))
+                        .transactionChainEnabledFromRequest(res.getTransactionChainEnabledFromRequest())
+                        .paymentOrderChainEnabledFromRequest(res.getPaymentOrderChainEnabledFromRequest())
                         .build());
     }
 

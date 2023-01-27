@@ -21,5 +21,7 @@ public class ProductIngestPullRequest {
     private List<String> membershipAccounts;
     private Map<String, String> additions;
     private String source;
+    private Boolean transactionChainEnabled;
+    private Boolean paymentOrderChainEnabled;
 }
 
