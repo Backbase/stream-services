@@ -18,6 +18,11 @@ class RequestConfigTest {
         Assertions.assertEquals(chains.getTransactionComposition().getExcludeProductTypeExternalIds().size(),0);
         Assertions.assertEquals(request.isTransactionChainAsync().get(),false);
         Assertions.assertEquals(request.isTransactionChainEnabled().get(),true);
+        Assertions.assertNotNull(chains.getPaymentOrderComposition());
+        Assertions.assertEquals(chains.getPaymentOrderComposition().getExcludeProductTypeExternalIds().size(),0);
+        Assertions.assertEquals(request.isPaymentOrderChainAsync().get(),false);
+        Assertions.assertEquals(request.isPaymentOrderChainEnabled().get(),true);
+
 
     }
 
@@ -28,6 +33,9 @@ class RequestConfigTest {
         Assertions.assertNull(request.getChains().getTransactionComposition());
         Assertions.assertEquals(request.isTransactionChainAsync(), Optional.empty());
         Assertions.assertEquals(request.isTransactionChainEnabled(), Optional.empty());
+        Assertions.assertNull(request.getChains().getPaymentOrderComposition());
+        Assertions.assertEquals(request.isPaymentOrderChainAsync(), Optional.empty());
+        Assertions.assertEquals(request.isPaymentOrderChainEnabled(), Optional.empty());
     }
 
     private RequestConfig getRequestConfig(){
