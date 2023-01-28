@@ -105,4 +105,18 @@ public class ProductConfigurationProperties {
                 ? Boolean.TRUE.equals(chains.getTransactionComposition().getAsync())
                 : requestConfig.isTransactionChainAsync().orElse(false);
     }
+
+
+    public boolean isPaymentOrderChainEnabled(RequestConfig requestConfig) {
+        return requestConfig == null || requestConfig.isPaymentOrderChainEnabled().isEmpty()
+                ? Boolean.TRUE.equals(chains.getPaymentOrderComposition().getEnabled())
+                : requestConfig.isPaymentOrderChainEnabled().orElse(false);
+    }
+
+
+    public boolean isPaymentOrderChainAsync(RequestConfig requestConfig) {
+        return requestConfig == null || requestConfig.isPaymentOrderChainAsync().isEmpty()
+                ? Boolean.TRUE.equals(chains.getPaymentOrderComposition().getAsync())
+                : requestConfig.isPaymentOrderChainAsync().orElse(false);
+    }
 }
