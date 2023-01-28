@@ -4,6 +4,12 @@
         "baseUrl" : "http://localhost:9003/",
         "async": false,
         "excludeProductTypeExternalIds" : []
+      },
+      "paymentOrderComposition": {
+        "enabled": true,
+        "baseUrl" : "http://localhost:9003/",
+        "async": false,
+        "excludeProductTypeExternalIds" : []
       }
     }
 }
