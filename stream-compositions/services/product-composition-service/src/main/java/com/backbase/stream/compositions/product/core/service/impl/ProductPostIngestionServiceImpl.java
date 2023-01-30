@@ -79,7 +79,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         if (!config.isTransactionChainEnabled(res.getConfigFromRequest())) {
             log.debug("Transaction Chain is disabled");
             transactionChainMono = Mono.just(res);
-        } else if (config.isTransactionChainAsync()) {
+        } else if (config.isTransactionChainAsync(res.getConfigFromRequest())) {
             transactionChainMono = ingestTransactionsAsync(res);
         } else {
             transactionChainMono = ingestTransactions(res);

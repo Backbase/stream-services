@@ -223,7 +223,7 @@
 					"response": []
 				},
 				{
-					"name": "Ingest arrangment push mode Copy",
+					"name": "Ingest arrangment push mode",
 					"event": [
 						{
 							"listen": "test",
@@ -251,7 +251,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{product-catalog-composition-url}}/service-api/v2/ingest/arrangement/push",
+							"raw": "{{product-composition-url}}/service-api/v2/ingest/arrangement/push",
 							"host": [
 								"{{product-catalog-composition-url}}"
 							],
