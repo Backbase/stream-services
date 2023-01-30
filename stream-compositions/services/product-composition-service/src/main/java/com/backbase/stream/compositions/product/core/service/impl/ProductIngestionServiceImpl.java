@@ -80,6 +80,7 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
                         .legalEntityInternalId(request.getLegalEntityInternalId())
                         .userExternalId(request.getUserExternalId())
                         .userInternalId(request.getUserInternalId())
+                        .configFromRequest(request.getConfig())
                         .build());
     }
 
@@ -102,8 +103,7 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
                 .map(BatchProductGroupTask::getData)
                 .map(pg -> ProductIngestResponse.builder()
                         .productGroups(pg.getProductGroups().stream().map(g -> (ProductGroup) g).collect(Collectors.toList()))
-                        .transactionChainEnabledFromRequest(res.getTransactionChainEnabledFromRequest())
-                        .paymentOrderChainEnabledFromRequest(res.getPaymentOrderChainEnabledFromRequest())
+                        .configFromRequest(res.getConfigFromRequest())
                         .build());
     }
 
