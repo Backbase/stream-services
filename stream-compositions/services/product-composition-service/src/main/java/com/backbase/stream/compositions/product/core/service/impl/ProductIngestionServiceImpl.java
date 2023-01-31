@@ -124,6 +124,12 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
     }
 
     private Mono<ProductIngestResponse> validate(ProductIngestResponse res) {
+
+        if (res.getProductGroups() == null || res.getProductGroups().isEmpty()) {
+            log.info("No product groups. Skipping ingestion.");
+            return Mono.empty();
+        }
+
         Set<ConstraintViolation<List<ProductGroup>>> violations = validator.validate(res.getProductGroups());
 
         if (!CollectionUtils.isEmpty(violations)) {
