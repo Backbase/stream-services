@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [3.29.0](https://github.com/Backbase/stream-services/compare/3.28.0...3.29.0)
 ### Added
 - Added 'update arrangement' functionality (new dedicated endpoint: /service-api/v2/ingest/arrangement/pull).
+
 ## [3.28.0](https://github.com/Backbase/stream-services/compare/3.27.0...3.28.0)
 ### Added
 - Skipping product ingestion for legal entities without products
@@ -11,6 +12,7 @@ All notable changes to this project will be documented in this file.
 ## [3.26.4](https://github.com/Backbase/stream-services/compare/3.26.3...3.26.4)
 ### Changed
 - Updated stream `product-catalog/openapi.yaml` schema to include `accountHolderName`
+
 ## [3.26.2](https://github.com/Backbase/stream-services/compare/3.26.1...3.26.2)
 ### Added
 - Included property to override the validation of atomic batch responses coming from DBS: When a single item is not successful in the batch response it fails the entire saga. 
