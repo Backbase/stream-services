@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Add auto-configuration for user context service API in stream-dbs-clients module
 
+
 ## [3.15.2](https://github.com/Backbase/stream-services/compare/3.15.1...3.15.2)
 ### Changed
 - Add the population of optional user additions to the service used by user ingestion in identity integration mode. 
