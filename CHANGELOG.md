@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [3.29.0](https://github.com/Backbase/stream-services/compare/3.28.0...3.29.0)
 ### Added
 - Added 'Update arrangement' functionality (new dedicated endpoint: /service-api/v2/ingest/arrangement/pull and
-/service-api/v2/ingest/arrangement/pull).
+/service-api/v2/ingest/arrangement/push).
 
 ## [3.28.0](https://github.com/Backbase/stream-services/compare/3.27.0...3.28.0)
 ### Added
