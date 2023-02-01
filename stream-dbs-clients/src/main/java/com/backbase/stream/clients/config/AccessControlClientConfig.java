@@ -10,6 +10,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntityApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -100,6 +101,12 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public LegalEntityApi legalEntityApi(ApiClient accessControlApiClient) {
         return new LegalEntityApi(accessControlApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public UserContextApi userContextApi(ApiClient accessControlApiClient) {
+        return new UserContextApi(accessControlApiClient);
     }
 
 }
