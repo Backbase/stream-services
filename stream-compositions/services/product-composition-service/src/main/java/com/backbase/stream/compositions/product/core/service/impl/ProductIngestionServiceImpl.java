@@ -34,9 +34,7 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
     private final BatchProductIngestionSaga batchProductIngestionSaga;
     private final ProductIntegrationService productIntegrationService;
     private final ProductConfigurationProperties config;
-
     private final Validator validator;
-
     private final ProductPostIngestionService productPostIngestionService;
 
     /**

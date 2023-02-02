@@ -17,11 +17,6 @@ import com.backbase.stream.compositions.transaction.client.model.TransactionInge
 import com.backbase.stream.compositions.transaction.client.model.TransactionPullIngestionRequest;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.ProductGroup;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,19 +24,21 @@ import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 @Service
 @Slf4j
 @AllArgsConstructor
 public class ProductPostIngestionServiceImpl implements ProductPostIngestionService {
 
     private final EventBus eventBus;
-
     private final ProductConfigurationProperties config;
-
     private final TransactionCompositionApi transactionCompositionApi;
-
     private final PaymentOrderCompositionApi paymentOrderCompositionApi;
-
     private final ProductGroupMapper mapper;
 
     @Override
@@ -86,7 +83,6 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         }
 
         return transactionChainMono;
-
     }
 
     private Mono<ProductIngestResponse> processPaymentOrderChains(ProductIngestResponse res) {
@@ -106,7 +102,6 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         }
 
         return paymentOrderChainMono;
-
     }
 
     private Mono<ProductIngestResponse> ingestTransactions(ProductIngestResponse res) {

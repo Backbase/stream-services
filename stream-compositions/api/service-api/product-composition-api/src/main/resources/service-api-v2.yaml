@@ -46,7 +46,7 @@ paths:
       tags:
         - ProductComposition
       summary: Ingests products (in push mode).
-      description: Ingests poducts (in push mode).
+      description: Ingests products (in push mode).
       operationId: pushIngestProduct
       requestBody:
         description: Push Ingestion Request
@@ -61,6 +61,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductIngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+  /service-api/v2/ingest/arrangement/pull:
+    put:
+      tags:
+        - ProductComposition
+      summary: Ingests arrangement (in pull mode).
+      description: Ingests arrangement (in pull mode).
+      operationId: pullIngestArrangement
+      requestBody:
+        description: Arrangement Pull Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArrangementPullIngestionRequest'
+      responses:
+        "200":
+          description: Product ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrangementIngestionResponse'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerError'
+
+  /service-api/v2/ingest/arrangement/push:
+    put:
+      tags:
+        - ProductComposition
+      summary: Ingests arrangement (in push mode).
+      description: Ingests arrangement (in push mode).
+      operationId: pushIngestArrangement
+      requestBody:
+        description: Push Ingestion Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArrangementPushIngestionRequest'
+      responses:
+        "200":
+          description: Products ingested.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrangementIngestionResponse'
         "400":
           description: BadRequest
           content:
@@ -150,6 +216,64 @@ components:
           type: array
           items:
             $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+
+    ArrangementPullIngestionRequest:
+      type: object
+      properties:
+        internalArrangementId:
+          type: string
+        externalArrangementId:
+          type: string
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+        source:
+          type: string
+          description: Source of the ingestion process from where the ingestion was triggered.
+          example: nightly_ingestion
+        config:
+          $ref: '#/components/schemas/ArrangementIngestionConfig'
+
+    ArrangementIngestionConfig:
+      type: object
+      properties:
+        chains:
+          $ref: '#/components/schemas/ArrangementsChainsConfig'
+
+    ArrangementsChainsConfig:
+      type: object
+      properties:
+        transactionComposition:
+          $ref: '#/components/schemas/TransactionCompositionChainConfig'
+
+    TransactionCompositionChainConfig:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        async:
+          type: boolean
+
+    ArrangementPushIngestionRequest:
+      type: object
+      properties:
+        internalArrangementId:
+          type: string
+        source:
+          type: string
+          description: Source of the ingestion process from where the ingestion was triggered.
+          example: nightly_ingestion
+        config:
+          $ref: '#/components/schemas/ArrangementIngestionConfig'
+        arrangement:
+          $ref: '../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut'
+
+    ArrangementIngestionResponse:
+      type: object
+      properties:
+        arrangement:
+          $ref: '../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut'
 
     InternalServerError:
       required:
