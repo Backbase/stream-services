@@ -1,19 +1,15 @@
 package com.backbase.stream.compositions.product.core.service.config;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
-import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Chains;
-import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Cursor;
-import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Events;
-import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.TransactionComposition;
-import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.PaymentOrderComposition;
-
-import java.util.List;
-
+import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.*;
+import com.backbase.stream.compositions.product.core.model.RequestConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class ProductConfigurationPropertiesTest {
@@ -71,5 +67,13 @@ class ProductConfigurationPropertiesTest {
         assertTrue(properties.isTransactionChainAsync());
         assertTrue(properties.isPaymentOrderChainEnabled());
         assertTrue(properties.isPaymentOrderChainAsync());
+
+        assertTrue(properties.isPaymentOrderChainEnabled(null));
+        assertTrue(properties.isPaymentOrderChainAsync(null));
+
+        assertTrue(properties.isTransactionChainAsync(new RequestConfig()));
+        assertTrue(properties.isTransactionChainEnabled(new RequestConfig()));
+        assertTrue(properties.isPaymentOrderChainEnabled(new RequestConfig()));
+        assertTrue(properties.isPaymentOrderChainAsync(new RequestConfig()));
     }
 }

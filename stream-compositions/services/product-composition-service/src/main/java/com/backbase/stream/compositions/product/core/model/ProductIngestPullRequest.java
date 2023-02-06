@@ -1,10 +1,11 @@
 package com.backbase.stream.compositions.product.core.model;
 
-import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.util.List;
+import java.util.Map;
 
 @Getter
 @Builder
@@ -20,7 +21,6 @@ public class ProductIngestPullRequest {
     private List<String> membershipAccounts;
     private Map<String, String> additions;
     private String source;
-    private Boolean transactionChainEnabled;
-    private Boolean paymentOrderChainEnabled;
+    private RequestConfig config;
 }
 

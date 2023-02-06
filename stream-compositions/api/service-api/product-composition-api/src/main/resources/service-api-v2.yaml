@@ -188,12 +188,8 @@ components:
           type: array
           items:
             type: string
-        transactionChainEnabled:
-          type: boolean
-          description: Flag to indicate if Transaction Ingestion should follow Product Ingestion
-        paymentOrderChainEnabled:
-          type: boolean
-          description: Flag to indicate if Payment Order Ingestion should follow Product Ingestion
+        config:
+          $ref: '#/components/schemas/ProductIngestionConfig'
         additions:
           type: object
           additionalProperties:
@@ -247,7 +243,29 @@ components:
         transactionComposition:
           $ref: '#/components/schemas/TransactionCompositionChainConfig'
 
+    ProductIngestionConfig:
+      type: object
+      properties:
+        chains:
+          $ref: '#/components/schemas/ProductChainsConfig'
+
+    ProductChainsConfig:
+      type: object
+      properties:
+        transactionComposition:
+          $ref: '#/components/schemas/TransactionCompositionChainConfig'
+        paymentOrderComposition:
+          $ref: '#/components/schemas/PaymentOrderCompositionChainConfig'
+
     TransactionCompositionChainConfig:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        async:
+          type: boolean
+
+    PaymentOrderCompositionChainConfig:
       type: object
       properties:
         enabled:

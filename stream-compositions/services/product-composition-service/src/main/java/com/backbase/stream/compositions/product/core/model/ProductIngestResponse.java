@@ -1,13 +1,10 @@
 package com.backbase.stream.compositions.product.core.model;
 
 import com.backbase.stream.legalentity.model.ProductGroup;
+import lombok.*;
+
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.With;
 
 @Setter
 @Getter
@@ -37,6 +34,5 @@ public class ProductIngestResponse {
     @With
     private Map<String, String> additions;
     private String source;
-    private Boolean transactionChainEnabledFromRequest;
-    private Boolean paymentOrderChainEnabledFromRequest;
+    private RequestConfig configFromRequest;
 }

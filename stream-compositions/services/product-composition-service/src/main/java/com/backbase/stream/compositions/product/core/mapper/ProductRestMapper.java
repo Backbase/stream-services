@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductRestMapper {
     private final ProductGroupMapper productMapper;
+    private final ConfigMapper chainsMapper;
 
     /**
      * Builds ingestion request for downstream service.
@@ -37,6 +38,7 @@ public class ProductRestMapper {
                 .additions(request.getAdditions())
                 .referenceJobRoleNames(request.getReferenceJobRoleNames())
                 .source(request.getSource())
+                .config(chainsMapper.mapProductIngestionConfig(request.getConfig()))
                 .build();
     }
 
@@ -69,4 +71,5 @@ public class ProductRestMapper {
                                         .collect(Collectors.toList())),
                 HttpStatus.CREATED);
     }
+
 }

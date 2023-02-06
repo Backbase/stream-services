@@ -1,14 +1,16 @@
 package com.backbase.stream.compositions.product.core.mapper;
 
-import com.backbase.stream.compositions.product.api.model.ArrangementIngestionConfig;
-import com.backbase.stream.compositions.product.api.model.ArrangementsChainsConfig;
-import com.backbase.stream.compositions.product.api.model.TransactionCompositionChainConfig;
+import com.backbase.stream.compositions.product.api.model.*;
 import com.backbase.stream.compositions.product.core.model.RequestConfig;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ConfigMapperTest {
+    ConfigMapper configMapper = new ConfigMapper();
+
     @Test
     void map() {
         ArrangementIngestionConfig config =
@@ -20,7 +22,6 @@ class ConfigMapperTest {
                                                         .withEnabled(true)
                                                         .withAsync(true)));
 
-        ConfigMapper configMapper = new ConfigMapper();
         RequestConfig requestConfig = configMapper.map(config);
 
         assertEquals(true, requestConfig.getChains().getTransactionComposition().getEnabled());
@@ -34,7 +35,6 @@ class ConfigMapperTest {
                         .withChains(
                                 new ArrangementsChainsConfig());
 
-        ConfigMapper configMapper = new ConfigMapper();
         RequestConfig requestConfig = configMapper.map(config);
 
         assertNull(requestConfig.getChains().getTransactionComposition());
@@ -45,7 +45,6 @@ class ConfigMapperTest {
         ArrangementIngestionConfig config =
                 new ArrangementIngestionConfig();
 
-        ConfigMapper configMapper = new ConfigMapper();
         RequestConfig requestConfig = configMapper.map(config);
 
         assertNull(requestConfig.getChains());
@@ -53,9 +52,47 @@ class ConfigMapperTest {
 
     @Test
     void mapNull() {
-        ConfigMapper configMapper = new ConfigMapper();
         RequestConfig requestConfig = configMapper.map(null);
 
         assertNull(requestConfig);
+    }
+
+    @Test
+    void mapProduct() {
+        ProductIngestionConfig productConfig = getProductIngestionConfig();
+        RequestConfig config = configMapper.mapProductIngestionConfig(productConfig);
+        Assertions.assertNotNull(config);
+    }
+
+    @Test
+    void mapNullProductIngestionConfig() {
+        RequestConfig config = configMapper.mapProductIngestionConfig(null);
+        Assertions.assertNull(config);
+    }
+
+    private ArrangementIngestionConfig getArrangementIngestionConfig() {
+        ArrangementIngestionConfig config = new ArrangementIngestionConfig();
+        ArrangementsChainsConfig chainsConfig = new ArrangementsChainsConfig();
+        TransactionCompositionChainConfig transactionCompositionChainConfig = new TransactionCompositionChainConfig();
+        transactionCompositionChainConfig.setAsync(false);
+        transactionCompositionChainConfig.setEnabled(false);
+        chainsConfig.setTransactionComposition(transactionCompositionChainConfig);
+        config.setChains(chainsConfig);
+        return config;
+    }
+
+    private ProductIngestionConfig getProductIngestionConfig() {
+        ProductIngestionConfig config = new ProductIngestionConfig();
+        ProductChainsConfig chainsConfig = new ProductChainsConfig();
+        TransactionCompositionChainConfig transactionCompositionChainConfig = new TransactionCompositionChainConfig();
+        transactionCompositionChainConfig.setAsync(false);
+        transactionCompositionChainConfig.setEnabled(false);
+        chainsConfig.setTransactionComposition(transactionCompositionChainConfig);
+        PaymentOrderCompositionChainConfig paymentOrderCompositionChainConfig = new PaymentOrderCompositionChainConfig();
+        paymentOrderCompositionChainConfig.setAsync(true);
+        paymentOrderCompositionChainConfig.setEnabled(false);
+        chainsConfig.setPaymentOrderComposition(paymentOrderCompositionChainConfig);
+        config.setChains(chainsConfig);
+        return config;
     }
 }

@@ -32,12 +32,29 @@ public class RequestConfig {
                 : Optional.of(Boolean.TRUE.equals(chains.getTransactionComposition().getAsync()));
     }
 
+    public Optional<Boolean> isPaymentOrderChainEnabled() {
+        return chains == null
+                || chains.getPaymentOrderComposition() == null
+                || chains.getPaymentOrderComposition().getEnabled() == null
+                ? Optional.empty()
+                : Optional.of(Boolean.TRUE.equals(chains.getPaymentOrderComposition().getEnabled()));
+    }
+
+    public Optional<Boolean> isPaymentOrderChainAsync() {
+        return chains == null
+                || chains.getPaymentOrderComposition() == null
+                || chains.getPaymentOrderComposition().getAsync() == null
+                ? Optional.empty()
+                : Optional.of(Boolean.TRUE.equals(chains.getPaymentOrderComposition().getAsync()));
+    }
+
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Chains {
         private ProductConfigurationProperties.TransactionComposition transactionComposition;
+        private ProductConfigurationProperties.PaymentOrderComposition paymentOrderComposition;
     }
 
     @Data
@@ -54,6 +71,15 @@ public class RequestConfig {
     @AllArgsConstructor
     @SuperBuilder
     public static class TransactionComposition extends ProductConfigurationProperties.BaseComposition {
+        private List<String> excludeProductTypeExternalIds = new ArrayList<>();
+    }
+
+    @Setter
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @SuperBuilder
+    public static class PaymentOrderComposition extends ProductConfigurationProperties.BaseComposition {
         private List<String> excludeProductTypeExternalIds = new ArrayList<>();
     }
 }

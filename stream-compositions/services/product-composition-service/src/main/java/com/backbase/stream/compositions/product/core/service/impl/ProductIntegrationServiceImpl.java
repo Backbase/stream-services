@@ -27,7 +27,7 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
         return productIntegrationApi
                 .pullProductGroup(mapper.mapStreamToIntegration(ingestPullRequest))
                 .map(mapper::mapResponseIntegrationToStream)
-                .map(response -> this.setRequestParameters(ingestPullRequest, response))
+                .map(response -> this.setResponseAttributes(ingestPullRequest, response))
                 .onErrorResume(this::handleIntegrationError)
                 .flatMap(this::handleIntegrationResponse);
     }
@@ -39,7 +39,7 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
      * @param response ProductIngestResponse
      * @return ProductIngestResponse
      */
-    private ProductIngestResponse setRequestParameters(
+    private ProductIngestResponse setResponseAttributes(
             ProductIngestPullRequest request, ProductIngestResponse response) {
         response.setServiceAgreementInternalId(request.getServiceAgreementInternalId());
         response.setServiceAgreementExternalId(request.getServiceAgreementExternalId());
@@ -49,8 +49,7 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
         response.setUserInternalId(request.getUserInternalId());
         response.setSource(request.getSource());
         response.setAdditions(request.getAdditions());
-        response.setTransactionChainEnabledFromRequest(request.getTransactionChainEnabled());
-        response.setPaymentOrderChainEnabledFromRequest(request.getPaymentOrderChainEnabled());
+        response.setConfigFromRequest(request.getConfig());
         return response;
     }
 
