@@ -16,6 +16,7 @@
 
     <properties>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
+        <wiremock-jre8.version>2.33.2</wiremock-jre8.version>
     </properties>
 
     <dependencies>
@@ -35,6 +36,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
+            <version>${wiremock-jre8.version}</version>
             <scope>test</scope>
         </dependency>
 

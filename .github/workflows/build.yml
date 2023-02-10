@@ -40,7 +40,7 @@ jobs:
 
       - name: Get version from POM
         run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
           VERSION_PARTS=($(echo $VERSION | tr "." "\n"))
           echo "MAJOR=${VERSION_PARTS[0]}" >> $GITHUB_ENV
           echo "MINOR=${VERSION_PARTS[1]}" >> $GITHUB_ENV
@@ -86,7 +86,7 @@ jobs:
         if: env.NEW_VERSION != null
         run: |
           echo "New version  is: $NEW_VERSION"
-          mvn versions:set versions:update-child-modules -DnewVersion=${NEW_VERSION} -DprocessAllModules -DgenerateBackupPoms=false
+          mvn -B versions:set versions:update-child-modules -DnewVersion=${NEW_VERSION} -DprocessAllModules -DgenerateBackupPoms=false
 
       - name: Build Stream Services
         env:
@@ -111,4 +111,4 @@ jobs:
 
       - name: Upload to Repo
         if: "contains(github.ref, 'master') || contains(github.ref, 'support/') || contains(github.ref, 'develop')" # In case of develop branch it will upload the snapshot version
-        run: mvn deploy -Pdocker-image,no-latest-tag,no-scs -Dmaven.test.skip=true -Ddocker.default.tag=${{ env.DOCKER_TAG_VERSION }} -Ddocker.repo.url=repo.backbase.com -Ddocker.repo.project=backbase-stream-images -Djib.to.auth.username=${{ secrets.REPO_USERNAME }} -Djib.to.auth.password=${{ secrets.REPO_PASSWORD }} -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
+        run: mvn -B deploy -Pdocker-image,no-latest-tag,no-scs -Dmaven.test.skip=true -Ddocker.default.tag=${{ env.DOCKER_TAG_VERSION }} -Ddocker.repo.url=repo.backbase.com -Ddocker.repo.project=backbase-stream-images -Djib.to.auth.username=${{ secrets.REPO_USERNAME }} -Djib.to.auth.password=${{ secrets.REPO_PASSWORD }} -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
