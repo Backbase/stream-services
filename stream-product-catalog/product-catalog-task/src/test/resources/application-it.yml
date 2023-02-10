@@ -6,12 +6,6 @@ eureka:
   client:
     enabled: false
 
-backbase:
-  stream:
-    client:
-      additional-headers:
-        X-TID: tenant1
-
 logging:
   level:
     com.backbase.stream: DEBUG

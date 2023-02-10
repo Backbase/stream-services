@@ -1,0 +1,161 @@
+{
+  "mappings": [
+    {
+      "id": "ec55d9b3-ff28-4aec-9310-a57b8120d615",
+      "name": "service-api_v2_products",
+      "request": {
+        "url": "/service-api/v2/products",
+        "method": "POST",
+        "bodyPatterns": [
+          {
+            "equalToJson": "{\"externalId\":null,\"externalTypeId\":null,\"typeName\":\"Savings Accounts\",\"externalProductId\":\"savings-account\",\"externalProductKindId\":\"kind2\",\"productKindName\":\"Savings Account\",\"externalProductTypeId\":null,\"productTypeName\":\"Savings Accounts\",\"productKind\":null,\"translations\":null,\"additions\":null}",
+            "ignoreArrayOrder": true,
+            "ignoreExtraElements": true
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "body": "{\"id\":\"f2a9243d-ddcf-4945-a27b-5c0d03bda569\"}",
+        "headers": {
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "1; mode=block",
+          "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+          "pragma": "no-cache",
+          "expires": "0",
+          "x-frame-options": "DENY",
+          "content-type": "application/json",
+          "date": "Fri, 10 Feb 2023 13:13:56 GMT",
+          "x-envoy-upstream-service-time": "601",
+          "server": "istio-envoy",
+          "x-envoy-decorator-operation": "wiremock-org-private-arrangement-manager.default.svc.cluster.local:8080/*"
+        }
+      },
+      "uuid": "ec55d9b3-ff28-4aec-9310-a57b8120d615",
+      "persistent": true,
+      "priority": 5
+    },
+    {
+      "id": "cf183288-e389-4287-bbb3-309889d699c2",
+      "name": "service-api_v2_products",
+      "request": {
+        "url": "/service-api/v2/products",
+        "method": "POST",
+        "bodyPatterns": [
+          {
+            "equalToJson": "{\"externalId\":null,\"externalTypeId\":null,\"typeName\":\"Current Account\",\"externalProductId\":\"current-account\",\"externalProductKindId\":\"kind1\",\"productKindName\":\"Current Account\",\"externalProductTypeId\":null,\"productTypeName\":\"Current Account\",\"productKind\":null,\"translations\":null,\"additions\":null}",
+            "ignoreArrayOrder": true,
+            "ignoreExtraElements": true
+          }
+        ]
+      },
+      "response": {
+        "status": 201,
+        "body": "{\"id\":\"e2b9645c-0459-462a-80db-ba9eba75fd3d\"}",
+        "headers": {
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "1; mode=block",
+          "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+          "pragma": "no-cache",
+          "expires": "0",
+          "x-frame-options": "DENY",
+          "content-type": "application/json",
+          "date": "Fri, 10 Feb 2023 13:13:56 GMT",
+          "x-envoy-upstream-service-time": "606",
+          "server": "istio-envoy",
+          "x-envoy-decorator-operation": "wiremock-org-private-arrangement-manager.default.svc.cluster.local:8080/*"
+        }
+      },
+      "uuid": "cf183288-e389-4287-bbb3-309889d699c2",
+      "persistent": true,
+      "priority": 5
+    },
+    {
+      "id": "48f1fc4a-545f-4812-9a3e-0358a89cc490",
+      "name": "service-api_v2_product-kinds",
+      "request": {
+        "url": "/service-api/v2/product-kinds",
+        "method": "GET"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"productKinds\":[{\"id\":1,\"externalKindId\":\"kind1\",\"kindName\":\"Current Account\",\"kindUri\":\"current-account\",\"translations\":[]},{\"id\":2,\"externalKindId\":\"kind2\",\"kindName\":\"Savings Account\",\"kindUri\":\"savings-account\",\"translations\":[]},{\"id\":3,\"externalKindId\":\"kind3\",\"kindName\":\"Debit Card\",\"kindUri\":\"debit-card\",\"translations\":[]},{\"id\":4,\"externalKindId\":\"kind4\",\"kindName\":\"Credit Card\",\"kindUri\":\"credit-card\",\"translations\":[]},{\"id\":5,\"externalKindId\":\"kind5\",\"kindName\":\"Loan\",\"kindUri\":\"loan\",\"translations\":[]},{\"id\":6,\"externalKindId\":\"kind6\",\"kindName\":\"Term Deposit\",\"kindUri\":\"term-deposit\",\"translations\":[]},{\"id\":7,\"externalKindId\":\"kind7\",\"kindName\":\"Investment Account\",\"kindUri\":\"investment-account\",\"translations\":[]},{\"id\":8,\"externalKindId\":\"kind8\",\"kindName\":\"Pocket Parent\",\"kindUri\":\"pocket-parent\",\"translations\":[]},{\"id\":9,\"externalKindId\":\"kind9\",\"kindName\":\"Pocket\",\"kindUri\":\"pocket\",\"translations\":[]}]}",
+        "headers": {
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "1; mode=block",
+          "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+          "pragma": "no-cache",
+          "expires": "0",
+          "x-frame-options": "DENY",
+          "content-type": "application/json",
+          "date": "Fri, 10 Feb 2023 13:13:56 GMT",
+          "x-envoy-upstream-service-time": "45",
+          "server": "istio-envoy",
+          "x-envoy-decorator-operation": "wiremock-org-private-arrangement-manager.default.svc.cluster.local:8080/*"
+        }
+      },
+      "uuid": "48f1fc4a-545f-4812-9a3e-0358a89cc490",
+      "persistent": true,
+      "priority": 5
+    },
+    {
+      "id": "bb6a3fa4-2612-479b-8e76-a02d2fbb1b47",
+      "name": "service-api_v2_products",
+      "request": {
+        "url": "/service-api/v2/products",
+        "method": "GET"
+      },
+      "response": {
+        "status": 200,
+        "body": "[{\"externalId\":\"default-pocket-external-id\",\"typeName\":\"Pocket\",\"externalProductId\":\"default-pocket-external-id\",\"externalProductKindId\":\"kind9\",\"productKindName\":\"Pocket\",\"productTypeName\":\"Pocket\",\"productKind\":{\"externalKindId\":\"kind9\",\"kindName\":\"Pocket\",\"kindUri\":\"pocket\",\"translations\":[]},\"translations\":[],\"id\":\"5e493bca-4f58-4593-90b8-c2dfde2d1620\"},{\"externalId\":\"default-pocket-parent-external-id\",\"typeName\":\"Pocket Parent\",\"externalProductId\":\"default-pocket-parent-external-id\",\"externalProductKindId\":\"kind8\",\"productKindName\":\"Pocket Parent\",\"productTypeName\":\"Pocket Parent\",\"productKind\":{\"externalKindId\":\"kind8\",\"kindName\":\"Pocket Parent\",\"kindUri\":\"pocket-parent\",\"translations\":[]},\"translations\":[],\"id\":\"c55edc8b-ceef-439b-b637-ee9bc74f91e4\"}]",
+        "headers": {
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "1; mode=block",
+          "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+          "pragma": "no-cache",
+          "expires": "0",
+          "x-frame-options": "DENY",
+          "content-type": "application/json",
+          "date": "Fri, 10 Feb 2023 13:13:56 GMT",
+          "x-envoy-upstream-service-time": "635",
+          "server": "istio-envoy",
+          "x-envoy-decorator-operation": "wiremock-org-private-arrangement-manager.default.svc.cluster.local:8080/*"
+        }
+      },
+      "uuid": "bb6a3fa4-2612-479b-8e76-a02d2fbb1b47",
+      "persistent": true,
+      "priority": 5
+    },
+    {
+      "id": "13f4e38d-071d-4670-9308-e7a7760434d6",
+      "name": "service-api_v2_product-kinds",
+      "request": {
+        "url": "/service-api/v2/product-kinds",
+        "method": "GET"
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"productKinds\":[{\"id\":1,\"externalKindId\":\"kind1\",\"kindName\":\"Current Account\",\"kindUri\":\"current-account\",\"translations\":[]},{\"id\":2,\"externalKindId\":\"kind2\",\"kindName\":\"Savings Account\",\"kindUri\":\"savings-account\",\"translations\":[]},{\"id\":3,\"externalKindId\":\"kind3\",\"kindName\":\"Debit Card\",\"kindUri\":\"debit-card\",\"translations\":[]},{\"id\":4,\"externalKindId\":\"kind4\",\"kindName\":\"Credit Card\",\"kindUri\":\"credit-card\",\"translations\":[]},{\"id\":5,\"externalKindId\":\"kind5\",\"kindName\":\"Loan\",\"kindUri\":\"loan\",\"translations\":[]},{\"id\":6,\"externalKindId\":\"kind6\",\"kindName\":\"Term Deposit\",\"kindUri\":\"term-deposit\",\"translations\":[]},{\"id\":7,\"externalKindId\":\"kind7\",\"kindName\":\"Investment Account\",\"kindUri\":\"investment-account\",\"translations\":[]},{\"id\":8,\"externalKindId\":\"kind8\",\"kindName\":\"Pocket Parent\",\"kindUri\":\"pocket-parent\",\"translations\":[]},{\"id\":9,\"externalKindId\":\"kind9\",\"kindName\":\"Pocket\",\"kindUri\":\"pocket\",\"translations\":[]}]}",
+        "headers": {
+          "x-content-type-options": "nosniff",
+          "x-xss-protection": "1; mode=block",
+          "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+          "pragma": "no-cache",
+          "expires": "0",
+          "x-frame-options": "DENY",
+          "content-type": "application/json",
+          "date": "Fri, 10 Feb 2023 13:13:56 GMT",
+          "x-envoy-upstream-service-time": "607",
+          "server": "istio-envoy",
+          "x-envoy-decorator-operation": "wiremock-org-private-arrangement-manager.default.svc.cluster.local:8080/*"
+        }
+      },
+      "uuid": "13f4e38d-071d-4670-9308-e7a7760434d6",
+      "persistent": true,
+      "priority": 5
+    }
+  ],
+  "meta": {
+    "total": 5
+  }
+}

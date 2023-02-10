@@ -1,4 +1,4 @@
-package com.backbase.stream;
+package com.backbase.stream.productcatalog;
 
 import com.backbase.stream.productcatalog.model.BackbaseProductKind;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
