@@ -1,5 +1,9 @@
 # Stream config
+server:
+  shutdown: graceful
 spring:
+  main:
+    register-shutdown-hook: false
   cloud:
     task:
       events:

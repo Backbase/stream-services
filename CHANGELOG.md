@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.30.1](https://github.com/Backbase/stream-services/compare/3.30.0...3.30.1)
+### Changed
+- A fix for when zipkin is enabled preventing the boostrap tasks to stop running.
+
 ## [3.29.0](https://github.com/Backbase/stream-services/compare/3.28.0...3.29.0)
 ### Added
 - Added 'Update arrangement' functionality (new dedicated endpoint: /service-api/v2/ingest/arrangement/pull and

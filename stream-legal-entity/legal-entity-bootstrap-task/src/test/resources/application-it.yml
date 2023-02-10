@@ -1,23 +1,7 @@
 spring:
-  cloud:
-    discovery:
-      client:
-        simple:
-          instances:
-            token-converter:
-              - uri: http://localhost:10000
-            user-manager:
-              - uri: http://localhost:10000
-                metadata:
-                  contextPath: /user-manager
-            access-control:
-              - uri: http://localhost:10000
-                metadata:
-                  contextPath: /access-control
-            arrangement-manager:
-              - uri: http://localhost:10000
-                metadata:
-                  contextPath: /arrangement-manager
+  zipkin:
+    enabled: true
+
 eureka:
   client:
     enabled: false
@@ -31,3 +15,7 @@ backbase:
 logging:
   level:
     com.backbase.stream: DEBUG
+    org.springframework.cloud: DEBUG
+    org.springframework.boot.availability: DEBUG
+    brave: DEBUG
+    zipkin2: DEBUG

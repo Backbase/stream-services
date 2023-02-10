@@ -5,12 +5,12 @@ import org.junit.jupiter.api.Test;
 
 /**
  * PortfolioHttpApplication Test.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */
-class PortfolioHttpApplicationTest {
-	
+class PortfolioHttpApplicationIT {
+
 	@Test
 	void shouldStartApplication() {
 		Assertions.assertDoesNotThrow(() -> PortfolioHttpApplication.main(new String[] {}));
