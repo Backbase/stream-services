@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>3.30.0</version>
+        <version>3.30.1</version>
     </parent>
 
     <artifactId>stream-product</artifactId>
