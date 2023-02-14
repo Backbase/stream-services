@@ -4,9 +4,14 @@ required:
   - iban
 type: object
 properties:
+  arrangementId:
+    type: string
+    minLength: 1
+    maxLength: 50
+    description: The external arrangement id. Primary arrangement for the portfolio.
   code:
     type: string
-    description: Unique identificator for a portfolio, used to identify portfolio at a bank or an investment firm.
+    description: Unique identifier for a portfolio, used to identify portfolio at a bank or an investment firm.
   name:
     type: string
     description: Name of a portfolio.
@@ -24,13 +29,13 @@ properties:
     description: Valuation of a portfolio, expressed as a monetary amount.
   ytdPerformance:
     type: number
-    description: Year-to-date performance of a portflio, expressed as a percentage.
+    description: Year-to-date performance of a portfolio, expressed as a percentage.
   ytdPerformanceValue:
     $ref: money.yaml
     description: Year-to-date performance of a portfolio, expressed as a monetary amount.
   mtdPerformance:
     type: number
-    description: Month-to-date performance of a portflio, expressed as a percentage.
+    description: Month-to-date performance of a portfolio, expressed as a percentage.
   mtdPerformanceValue:
     $ref: money.yaml
     description: Month-to-date performance of a portfolio, expressed as a monetary amount.
