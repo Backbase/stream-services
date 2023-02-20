@@ -565,7 +565,7 @@ components:
         BBAN:
           $ref: '#/components/schemas/BBAN'
         accountHolderNames:
-          $ref: '#/components/schemas/AccountHolderName'
+          $ref: '#/components/schemas/AccountHolderNames'
         accountHolderCountry:
           $ref: '#/components/schemas/AccountHolderCountry'
         BIC:
