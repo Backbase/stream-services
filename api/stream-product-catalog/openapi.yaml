@@ -564,8 +564,12 @@ components:
           $ref: '#/components/schemas/IBAN'
         BBAN:
           $ref: '#/components/schemas/BBAN'
-        accountHolderName:
+        accountHolderNames:
           $ref: '#/components/schemas/AccountHolderName'
+        accountHolderCountry:
+          $ref: '#/components/schemas/AccountHolderCountry'
+        BIC:
+          $ref: '#/components/schemas/BIC'
     CustomProduct:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
@@ -815,6 +819,10 @@ components:
       maxLength: 256
       type: string
       description: Name of the Payer/Payee i.e. Owner of the Account
+    AccountHolderNames:
+      maxLength: 256
+      type: string
+      description: Party(s) with a relationship to the account.
     AccountHolderStreetName:
       maxLength: 70
       type: string
