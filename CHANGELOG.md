@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.30.3](https://github.com/Backbase/stream-services/compare/3.30.2...3.30.3)
+### Changed
+- Updated stream `InvestmentAccount` schema to include `accountHolderNames`,`accountHolderCountry`,`BIC`
+
 ## [3.30.2](https://github.com/Backbase/stream-services/compare/3.30.1...3.30.2)
 ### Changed
 - Updated stream `portfolio.yaml` schema to include `arrangementId`. from 2023.03 it's mandatory for portfolio
