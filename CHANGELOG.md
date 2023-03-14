@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.34.0](https://github.com/Backbase/stream-services/compare/3.33.1...3.34.0)
+### Changed
+- Upgraded SSDK to 15.2.0 
+- Upgraded Banking Services to 2023.02-LTS
+- Fix some breaking changes introduced by 2023.02-LTS
+
 ## [3.30.3](https://github.com/Backbase/stream-services/compare/3.30.2...3.30.3)
 ### Changed
 - Updated stream `InvestmentAccount` schema to include `accountHolderNames`,`accountHolderCountry`,`BIC`

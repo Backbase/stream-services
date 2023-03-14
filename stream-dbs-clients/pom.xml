@@ -110,7 +110,7 @@
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.arrangement</groupId>
+                                    <groupId>com.backbase.products</groupId>
                                     <artifactId>arrangement-manager</artifactId>
                                     <classifier>api</classifier>
                                     <type>zip</type>
