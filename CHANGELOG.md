@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.35.0](https://github.com/Backbase/stream-services/compare/3.34.0...3.35.0)
+### Added
+- Support for creating data group of type `CUSTOM`.
+
 ## [3.34.0](https://github.com/Backbase/stream-services/compare/3.33.1...3.34.0)
 ### Changed
 - Upgraded SSDK to 15.2.0 

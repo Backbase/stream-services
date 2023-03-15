@@ -252,6 +252,7 @@ components:
             - ARRANGEMENTS
             - JOURNEYS
             - REPOSITORIES
+            - CUSTOM
         name:
           maxLength: 128
           minLength: 1
