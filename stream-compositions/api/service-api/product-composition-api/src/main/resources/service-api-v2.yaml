@@ -216,6 +216,10 @@ components:
           type: array
           items:
             $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+        additions:
+          type: object
+          additionalProperties:
+            type: string
 
     ArrangementPullIngestionRequest:
       type: object

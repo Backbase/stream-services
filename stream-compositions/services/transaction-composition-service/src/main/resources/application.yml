@@ -1,4 +1,18 @@
+server.port: 7083
+
+# API Registry client configuration
+eureka:
+  instance:
+    metadata-map:
+      public: true
+      role: live
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8080/registry/eureka/
+
 spring:
+  activemq:
+    broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
   main:
@@ -17,11 +31,22 @@ sso:
 
 backbase:
   communication:
+    services:
+      usermanager:
+        direct-uri: http://localhost:8086/user-manager
+      access-control:
+        direct-uri: http://localhost:8086/access-control
+      arrangement:
+        manager:
+          direct-uri: http://localhost:8082/arrangement-manager
+      transaction:
+        manager:
+          direct-uri: http://localhost:8083/transaction-manager
     http:
-      default-service-port: 8080
+      #default-service-port: 8080
       client-secret: bb-secret
       client-id: bb-client
-      access-token-uri: http://token-converter:8080/oauth/token
+      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
   mtls:
     enabled: false
   security:
@@ -34,11 +59,15 @@ backbase:
     compositions:
       transaction:
         defaultStartOffsetInDays: 30
-        integration-base-url: http://transaction-integration:8080
+        integration-base-url: http://localhost:7012
         events:
           enableCompleted: true
           enableFailed: true
         cursor:
-          enabled: true
+          enabled: false
           transactionIdsFilterEnabled: false
           base-url: http://transaction-cursor:8080
+          
+logging:
+  level:
+    com.backbase: DEBUG
