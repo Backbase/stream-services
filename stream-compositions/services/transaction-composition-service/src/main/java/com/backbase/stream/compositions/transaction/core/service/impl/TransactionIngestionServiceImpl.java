@@ -217,6 +217,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
         return TransactionIngestResponse.builder()
                 .transactions(transactions)
                 .arrangementId(ingestRequest.getArrangementId())
+                .additions(ingestRequest.getAdditions())
                 .build();
     }
 

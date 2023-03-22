@@ -8,6 +8,8 @@ import com.backbase.stream.compositions.transaction.integration.client.model.Pul
 import com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -25,6 +27,23 @@ public class TransactionIntegrationServiceImpl implements TransactionIntegration
         return transactionIntegrationApi
                 .pullTransactions(
                         transactionMapper.mapStreamToIntegration(ingestPullRequest))
+                .doOnNext(response -> processSuccess(response, ingestPullRequest))
                 .flatMapIterable(PullTransactionsResponse::getTransactions);
+    }
+
+    private void processSuccess(PullTransactionsResponse pullTransactionsResponse, TransactionIngestPullRequest ingestPullRequest) {
+        propagateAdditions(pullTransactionsResponse, ingestPullRequest);
+    }
+
+    private void propagateAdditions(PullTransactionsResponse pullTransactionsResponse,
+            TransactionIngestPullRequest ingestPullRequest) {
+        if (pullTransactionsResponse.getAdditions() != null) {
+            Map<String, String> additions = ingestPullRequest.getAdditions();
+            if (additions == null) {
+                additions = new HashMap<>();
+            }
+            additions.putAll(pullTransactionsResponse.getAdditions());
+            ingestPullRequest.setAdditions(additions);
+        }
     }
 }
