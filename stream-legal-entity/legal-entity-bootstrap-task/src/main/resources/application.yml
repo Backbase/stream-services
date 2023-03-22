@@ -147,14 +147,6 @@ bootstrap:
                   - privilege: "create"
                   - privilege: "edit"
                   - privilege: "delete"
-    administrators:
-      - externalId: "admin"
-        fullName: "Backbase Root Admin"
-        identityLinkStrategy: "CREATE_IN_IDENTITY"
-        emailAddress:
-          address: "bbadmin@email.com"
-        mobileNumber:
-          number: "1234567890"
     users:
       - user:
           externalId: "admin"
@@ -186,14 +178,6 @@ bootstrap:
             realmName: "backbase"
             externalId: "sara"
             legalEntityType: "CUSTOMER"
-            administrators:
-              - externalId: "sara"
-                fullName: "Sara Jones"
-                identityLinkStrategy: "CREATE_IN_IDENTITY"
-                emailAddress:
-                  address: "sara@email.com"
-                mobileNumber:
-                  number: "1234567890"
             users:
               - user:
                   externalId: "sara"
