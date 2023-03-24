@@ -714,6 +714,8 @@ components:
           $ref: '#/components/schemas/DebitAccount'
         minimumRequiredBalance:
           $ref: '#/components/schemas/MinimumRequiredBalance'
+        bankBranchCode:
+          "$ref": '#/components/schemas/BankBranchCode'
     InvestmentAccount:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'

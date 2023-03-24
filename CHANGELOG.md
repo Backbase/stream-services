@@ -1,9 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.37.0](https://github.com/Backbase/stream-services/compare/3.36.0...3.37.0)
+### Added
+- Adds `bankBranchCode` field to `TermDeposit` openapi schema
+
 ## [3.36.0](https://github.com/Backbase/stream-services/compare/3.35.0...3.36.0)
 ### Added
-- Adds `bankBranchCode` field to `term-deposits.json`
+- Adds `bankBranchCode` field to `term-deposits.json` events
  
 ## [3.35.0](https://github.com/Backbase/stream-services/compare/3.34.0...3.35.0)
 ### Added
