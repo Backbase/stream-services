@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [3.35.1](https://github.com/Backbase/stream-services/compare/3.35.0...3.35.1)
+## [3.37.0](https://github.com/Backbase/stream-services/compare/3.35.0...3.37.0)
 ### Added
 - Adds `bankBranchCode` field to `term-deposits.json`
  
