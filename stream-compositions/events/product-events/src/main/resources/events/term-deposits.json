@@ -27,6 +27,9 @@
     },
     "debitAccount" : {
       "$ref" : "base-schema.json#/schemas/DebitAccount"
+    },
+    "bankBranchCode" : {
+      "$ref" : "base-schema.json#/schemas/BankBranchCode"
     }
   },
   "extends" : {
