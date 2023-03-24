@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.35.1](https://github.com/Backbase/stream-services/compare/3.35.0...3.35.1)
+### Added
+- Adds `bankBranchCode` field to `term-deposits.json`
+ 
 ## [3.35.0](https://github.com/Backbase/stream-services/compare/3.34.0...3.35.0)
 ### Added
 - Support for creating data group of type `CUSTOM`.
