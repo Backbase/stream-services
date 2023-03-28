@@ -524,6 +524,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
       properties:
+        bookedBalance:
+          $ref: '#/components/schemas/BookedBalance'
+        availableBalance:
+          $ref: '#/components/schemas/AvailableBalance'
         number:
           maxLength: 36
           type: string
@@ -668,6 +672,8 @@ components:
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
+        availableBalance:
+          $ref: '#/components/schemas/AvailableBalance'
         principalAmount:
           $ref: '#/components/schemas/PrincipalAmount'
         accruedInterest:
@@ -720,6 +726,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
       properties:
+        bookedBalance:
+          $ref: '#/components/schemas/BookedBalance'
+        availableBalance:
+          $ref: '#/components/schemas/AvailableBalance'
         currentInvestment:
           $ref: '#/components/schemas/CurrentInvestment'
         urgentTransferAllowed:
