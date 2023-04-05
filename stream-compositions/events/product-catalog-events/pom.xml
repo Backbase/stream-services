@@ -47,7 +47,7 @@
                         <configuration>
                             <packageVersion>1</packageVersion>
                             <groupNameStrategy>APP_NAME</groupNameStrategy>
-                            <outputFile>${project.basedir}/target/generated-sources</outputFile>
+                            <outputFile>${project.build.directory}/generated-sources/jsonschema-events</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
                             <packageName>stream.compositions.events.ingress</packageName>
                             <groupNameStrategy>APP_NAME</groupNameStrategy>
@@ -62,10 +62,44 @@
                         <configuration>
                             <packageVersion>1</packageVersion>
                             <groupNameStrategy>APP_NAME</groupNameStrategy>
-                            <outputFile>${project.basedir}/target/generated-sources</outputFile>
+                            <outputFile>${project.build.directory}/generated-sources/jsonschema-events</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
                             <packageName>stream.compositions.events.egress</packageName>
                             <groupNameStrategy>APP_NAME</groupNameStrategy>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/annotations</source>
+                                <source>${project.build.directory}/generated-sources/jsonschema-events</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/generated-resources</directory>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>
