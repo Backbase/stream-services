@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.backbase.stream.legalentity.model.AvailableBalance;
