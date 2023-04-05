@@ -31,5 +31,7 @@ class ProductMapperConstants {
     static final String INTERNAL_ID = "internalId";
     static final String DEBIT_CARDS_ITEMS = "debitCardsItems";
     static final String DEBIT_CARDS = "debitCards";
+    static final String NUMBER = "number";
+    static final String PAN_SUFFIX = "panSuffix";
 
 }
