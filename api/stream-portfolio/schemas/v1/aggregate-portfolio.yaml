@@ -1,5 +1,5 @@
 required:
-  - id
+- id
 type: object
 properties:
   id:

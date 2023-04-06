@@ -16,7 +16,11 @@
     },
     "type": {
       "description": "Type associated with the membership",
-      "enum": ["RETAIL", "SME", "CORPORATE"],
+      "enum": [
+        "RETAIL",
+        "SME",
+        "CORPORATE"
+      ],
       "type": "string"
     }
   }

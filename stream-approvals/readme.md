@@ -1,8 +1,9 @@
 # Approvals Ingestion SAGA
 
 This is not idempotent implementation!!!
- - due to lack of service-api
- - The request for improvement has being created
+
+- due to lack of service-api
+- The request for improvement has being created
 
 ```
 bootstrap:

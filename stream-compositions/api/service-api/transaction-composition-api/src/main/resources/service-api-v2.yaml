@@ -3,15 +3,15 @@ info:
   title: Transaction composition API
   version: 2.0.0
 servers:
-  - url: http://localhost:8080/service-api/v2
-    description: The server
+- url: http://localhost:8080/service-api/v2
+  description: The server
 tags:
-  - name: TransactionComposition
+- name: TransactionComposition
 paths:
   /service-api/v2/ingest/pull:
     post:
       tags:
-        - TransactionComposition
+      - TransactionComposition
       summary: Ingests transactions (in pull mode).
       description: Ingests transactions (in pull mode).
       operationId: pullTransactions
@@ -22,19 +22,19 @@ paths:
             schema:
               $ref: '#/components/schemas/TransactionPullIngestionRequest'
       responses:
-        "201":
+        '201':
           description: Transactions ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TransactionIngestionResponse'
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -43,7 +43,7 @@ paths:
   /service-api/v2/ingest/push:
     post:
       tags:
-        - TransactionComposition
+      - TransactionComposition
       summary: Ingests transactions (in push mode).
       description: Ingests tranasctions (in push mode).
       operationId: pushIngestTransactions
@@ -54,19 +54,19 @@ paths:
             schema:
               $ref: '#/components/schemas/TransactionPushIngestionRequest'
       responses:
-        "201":
+        '201':
           description: Product group ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TransactionIngestionResponse'
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -77,7 +77,7 @@ components:
   schemas:
     BadRequest:
       required:
-        - message
+      - message
       type: object
       properties:
         message:
@@ -111,7 +111,7 @@ components:
         transactions:
           type: array
           items:
-            $ref: '../../../target/yaml/transaction-manager/transaction-manager-service-api-v2.9.0.yaml#/components/schemas/TransactionsPostRequestBody'
+            $ref: ../../../target/yaml/transaction-manager/transaction-manager-service-api-v2.9.0.yaml#/components/schemas/TransactionsPostRequestBody
 
     TransactionIngestionResponse:
       type: object
@@ -119,11 +119,11 @@ components:
         transactions:
           type: array
           items:
-            $ref: '../../../target/yaml/transaction-manager/transaction-manager-service-api-v2.9.0.yaml#/components/schemas/TransactionsPostResponseBody'
+            $ref: ../../../target/yaml/transaction-manager/transaction-manager-service-api-v2.9.0.yaml#/components/schemas/TransactionsPostResponseBody
 
     InternalServerError:
       required:
-        - message
+      - message
       type: object
       properties:
         message:
@@ -131,13 +131,13 @@ components:
 
     ProductGroup:
       type: object
-      description: "Products assigned to service agreement"
+      description: Products assigned to service agreement
       allOf:
-        - $ref: '#/components/schemas/BaseProductGroup'
+      - $ref: '#/components/schemas/BaseProductGroup'
 
     BatchProductGroup:
       type: object
-      description: "Product groups assigned to the users within same legal entity"
+      description: Product groups assigned to the users within same legal entity
       properties:
         productGroups:
           type: array
@@ -146,7 +146,7 @@ components:
 
     BaseProductGroup:
       type: object
-      description: "Product groups assigned to the users within same legal entity"
+      description: Product groups assigned to the users within same legal entity
       properties:
         currentAccounts:
           type: array
@@ -194,33 +194,33 @@ components:
           type: string
           description: A unique identifier for the product coming from the core banking system.
         productTypeExternalId:
-            title: External ID of the Product Type as setup in Product Summary
-            maxLength: 64
-            minLength: 1
-            pattern: ^[^\r\n]{1,64}$
-            type: string
+          title: External ID of the Product Type as setup in Product Summary
+          maxLength: 64
+          minLength: 1
+          pattern: ^[^\r\n]{1,64}$
+          type: string
 
     CurrentAccount:
       allOf:
       - $ref: '#/components/schemas/BaseProduct'
     SavingsAccount:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
     DebitCard:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
     CreditCard:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
     Loan:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
     TermDeposit:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
     InvestmentAccount:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
     Product:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'

@@ -1,4 +1,4 @@
-imagePullSecrets: [ ]
+imagePullSecrets: []
 image:
   registry: repo.backbase.com/backbase-stream-images
   repository: # legal-entity-bootstrap-task
@@ -25,4 +25,4 @@ resources:
     cpu: 125m
     memory: 256Mi
 env:
-  JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70.0 -Dspring.cloud.config.enabled=false"
+  JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=70.0 -Dspring.cloud.config.enabled=false

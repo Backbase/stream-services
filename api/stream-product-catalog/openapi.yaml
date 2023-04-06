@@ -3,12 +3,12 @@ info:
   title: Product Catalog API
   version: 1.0.0
   x-logo:
-    url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
-    backgroundColor: "#FFFFFF"
-    altText: "Backbase logo"
+    url: http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png
+    backgroundColor: '#FFFFFF'
+    altText: Backbase logo
 servers:
-  - url: http://stream-product-catalog-http.proto.backbasecloud.com/
-    description: The server
+- url: http://stream-product-catalog-http.proto.backbasecloud.com/
+  description: The server
 paths:
   ###############################################
   ## Product Catalog
@@ -18,7 +18,7 @@ paths:
       summary: Get Product Catalog
       operationId: getProductCatalog
       tags:
-        - product-catalog
+      - product-catalog
       description: Assemble Product Catalog
       responses:
         200:
@@ -36,7 +36,7 @@ paths:
     post:
       summary: Setup a Product Catalog
       tags:
-        - product-catalog
+      - product-catalog
       description: |
       operationId: setupProductCatalog
       requestBody:
@@ -109,8 +109,7 @@ components:
         externalId:
           maxLength: 50
           type: string
-          description: 'A unique identifier for the product that the arrangement applies
-            to '
+          description: 'A unique identifier for the product that the arrangement applies to '
         externalTypeId:
           maxLength: 50
           type: string
@@ -186,14 +185,14 @@ components:
     BackbaseProductKind:
       type: string
       enum:
-        - "Current Account"
-        - "Credit Card"
-        - "Debit Card"
-        - "Loan"
-        - "Savings Account"
-        - "Investment Account"
-        - "Term Deposit"
-        - "Custom"
+      - Current Account
+      - Credit Card
+      - Debit Card
+      - Loan
+      - Savings Account
+      - Investment Account
+      - Term Deposit
+      - Custom
 
     ###############################################
     ## Products
@@ -240,10 +239,10 @@ components:
         accountOpeningDate:
           type: string
           description: The date of activation of the account in the bank's system.
-          format: 'date-time'
+          format: date-time
         lastUpdateDate:
           type: string
-          format: 'date-time'
+          format: date-time
           description: Last date of balance (or other) parameter update for the particular product
         state:
 
@@ -317,10 +316,10 @@ components:
         accountHolderCountry:
           $ref: '#/components/schemas/AccountHolderCountry'
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
     SavingsAccount:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
       properties:
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
@@ -386,7 +385,7 @@ components:
           $ref: '#/components/schemas/DebitAccount'
     DebitCard:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
       properties:
         number:
           maxLength: 36
@@ -410,7 +409,7 @@ components:
           $ref: '#/components/schemas/ValidThru'
     CreditCard:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
@@ -456,7 +455,7 @@ components:
           $ref: '#/components/schemas/AccruedInterest'
     Loan:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
@@ -504,7 +503,7 @@ components:
           $ref: '#/components/schemas/BBAN'
     TermDeposit:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
@@ -552,7 +551,7 @@ components:
           $ref: '#/components/schemas/MinimumRequiredBalance'
     InvestmentAccount:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/BaseProduct'
       properties:
         currentInvestment:
           $ref: '#/components/schemas/CurrentInvestment'
@@ -572,13 +571,13 @@ components:
           $ref: '#/components/schemas/BIC'
     CustomProduct:
       allOf:
-        - $ref: '#/components/schemas/BaseProduct'
-        - $ref: '#/components/schemas/CurrentAccount'
-        - $ref: '#/components/schemas/DebitCard'
-        - $ref: '#/components/schemas/CreditCard'
-        - $ref: '#/components/schemas/Loan'
-        - $ref: '#/components/schemas/TermDeposit'
-        - $ref: '#/components/schemas/InvestmentAccount'
+      - $ref: '#/components/schemas/BaseProduct'
+      - $ref: '#/components/schemas/CurrentAccount'
+      - $ref: '#/components/schemas/DebitCard'
+      - $ref: '#/components/schemas/CreditCard'
+      - $ref: '#/components/schemas/Loan'
+      - $ref: '#/components/schemas/TermDeposit'
+      - $ref: '#/components/schemas/InvestmentAccount'
       properties:
         productTypeExternalId:
           $ref: '#/components/schemas/ExternalIdentifier'
@@ -690,17 +689,17 @@ components:
             $ref: '#/components/schemas/User'
 
       required:
-        - name
-        - external
-        - legalEntityType
-        - administrators
+      - name
+      - external
+      - legalEntityType
+      - administrators
     LegalEntityType:
       type: string
       title: Legal Entity Type
       description: Type of the legal entity. Bank or Customer.
       enum:
-        - CUSTOMER
-        - BANK
+      - CUSTOMER
+      - BANK
     User:
       title: User
       description: |
@@ -721,7 +720,7 @@ components:
         limit:
           $ref: '#/components/schemas/Limit'
       required:
-        - externalId
+      - externalId
     Limit:
       title: Limit
       type: object
@@ -739,7 +738,7 @@ components:
         yearly:
           $ref: '#/components/schemas/YearlyLimit'
     ServiceAgreement:
-      title:  Service Agreement
+      title: Service Agreement
       description: |
         The formal vehicle that allows users of one entity to access products of that or other entities
         A Service agreement is:
@@ -878,11 +877,11 @@ components:
       type: string
       description: The period of time and/or the interest rate arranged between Bank and customer.
       enum:
-        - "Daily"
-        - "Weekly"
-        - "Monthly"
-        - "Quarterly"
-        - "Yearly"
+      - Daily
+      - Weekly
+      - Monthly
+      - Quarterly
+      - Yearly
     Town:
       maxLength: 35
       type: string
@@ -908,7 +907,7 @@ components:
       description: (This is to accomodate additional country specific fields like Sort Code in UK)
     StartDate:
       type: string
-      format: 'date-time'
+      format: date-time
     PostCode:
       maxLength: 16
       type: string
@@ -924,18 +923,18 @@ components:
       type: string
       description: The period of time and/or the interest rate arranged between Bank and customer.
       enum:
-        - "Daily"
-        - "Weekly"
-        - "Monthly"
-        - "Quarterly"
-        - "Yearly"
+      - Daily
+      - Weekly
+      - Monthly
+      - Quarterly
+      - Yearly
     CurrencyCode:
       pattern: ^[A-Z]{3}$
       type: string
       description: The alpha-3 code (complying with ISO 4217) of the currency that qualifies the amount
     BookedBalance:
       type: object
-      description: "Booked Balance"
+      description: Booked Balance
       properties:
         amount:
           type: string
@@ -943,7 +942,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     AvailableBalance:
       type: object
-      description: "Available Balance"
+      description: Available Balance
       properties:
         amount:
           type: string
@@ -951,7 +950,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     CreditLimit:
       type: object
-      description: "Credit Limit"
+      description: Credit Limit
       properties:
         amount:
           type: string
@@ -959,7 +958,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     PrincipalAmount:
       type: object
-      description: "The amount that was (originally) contracted for the respective product. This is mainly used in the context of loans and deposits."
+      description: The amount that was (originally) contracted for the respective product. This is mainly used in the context of loans and deposits.
       properties:
         amount:
           type: string
@@ -975,7 +974,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     TransactionalLimit:
       type: object
-      description: "Transactional Limit"
+      description: Transactional Limit
       properties:
         amount:
           type: string
@@ -983,7 +982,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     DailyLimit:
       type: object
-      description: "Daily Limit"
+      description: Daily Limit
       properties:
         amount:
           type: string
@@ -991,7 +990,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     WeeklyLimit:
       type: object
-      description: "Weekly Limit"
+      description: Weekly Limit
       properties:
         amount:
           type: string
@@ -999,7 +998,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     MonthlyLimit:
       type: object
-      description: "Monthly Limit"
+      description: Monthly Limit
       properties:
         amount:
           type: string
@@ -1007,7 +1006,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     QuarterlyLimit:
       type: object
-      description: "Quarterly Limit"
+      description: Quarterly Limit
       properties:
         amount:
           type: string
@@ -1015,7 +1014,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     YearlyLimit:
       type: object
-      description: "Yearly Limit"
+      description: Yearly Limit
       properties:
         amount:
           type: string
@@ -1054,9 +1053,7 @@ components:
                 description: Default Message. Any further information.
               key:
                 type: string
-                description: '{capability-name}.api.{api-key-name}. For generated
-                  validation errors this is the path in the document the error resolves
-                  to. e.g. object name + ''.'' + field'
+                description: "{capability-name}.api.{api-key-name}. For generated validation errors this is the path in the document the error resolves to. e.g. object name + '.' + field"
               context:
                 type: object
                 description: Context can be anything used to construct localised messages.

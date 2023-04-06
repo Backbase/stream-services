@@ -1,339 +1,339 @@
 {
-	"info": {
-		"_postman_id": "ef552ec9-2f25-4bf4-84d2-700ba44936d3",
-		"name": "Transaction Cursor",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Get Transaction Cursor by ArrangementId",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:9005/service-api/v2/cursor/arrangement/4337f8cc-d66d-41b3-a00e-f71ff15d93as",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "9005",
-					"path": [
-						"service-api",
-						"v2",
-						"cursor",
-						"arrangement",
-						"4337f8cc-d66d-41b3-a00e-f71ff15d93as"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get Transaction Cursor by ID",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:9005/service-api/v2/cursor/a710800e-5446-45cd-996e-a2482d40cda8",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "9005",
-					"path": [
-						"service-api",
-						"v2",
-						"cursor",
-						"a710800e-5446-45cd-996e-a2482d40cda8"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Delete Transaction Cursor by ArrangementId",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "",
-							"type": "string"
-						}
-					]
-				},
-				"method": "DELETE",
-				"header": [
-					{
-						"key": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:9005/service-api/v2/cursor/arrangement/4337f8cc-d66d-41b3-a00e-f71ff15d93as",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "9005",
-					"path": [
-						"service-api",
-						"v2",
-						"cursor",
-						"arrangement",
-						"4337f8cc-d66d-41b3-a00e-f71ff15d93as"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Upsert Transaction Cursor (New)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"cursor\": {\n        \"arrangementId\": \"4337f8cc-d66d-41b3-a00e-f71ff15d93as\",\n        \"extArrangementId\": \"6337f8cc-d66d-41b3-a00e-f71ff15d93as\",\n        \"legalEntityId\": \"model-bank\",\n        \"additions\":{\n            \"key1\":\"val1\",\n            \"key2\":\"val2\"\n            },\n        \"status\": \"SUCCESS\"\n    }\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:9005/service-api/v2/cursor/upsert",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "9005",
-					"path": [
-						"service-api",
-						"v2",
-						"cursor",
-						"upsert"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Upsert Transaction Cursor (Existing)",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"cursor\": {\n        \"id\": \"a710800e-5446-45cd-996e-a2482d40cda8\",\n        \"arrangementId\": \"4337f8cc-d66d-41b3-a00e-f71ff15d93ss\",\n        \"extArrangementId\": \"6337f8cc-d66d-41b3-a00e-f71ff15d93ss\",\n        \"legalEntityId\": \"model-bank\",\n        \"status\": \"SUCCESS\"\n    }\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:9005/service-api/v2/cursor/upsert",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "9005",
-					"path": [
-						"service-api",
-						"v2",
-						"cursor",
-						"upsert"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Patch Transaction Cursor by ArrangementId",
-			"request": {
-				"method": "PATCH",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "default"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"status\": \"SUCCESS\",\n    \"lastTxnDate\": \"2022-06-11 04:18:59\",\n    \"lastTxnIds\": \"11,12,13,14,15,16,17\"\n}"
-				},
-				"url": {
-					"raw": "http://localhost:9005/service-api/v2/cursor/arrangement/4337f8cc-d66d-41b3-a00e-f71ff15d93as",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "9005",
-					"path": [
-						"service-api",
-						"v2",
-						"cursor",
-						"arrangement",
-						"4337f8cc-d66d-41b3-a00e-f71ff15d93as"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Filter Transaction Cursor",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "default"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"status\": \"SUCCESS\",\n    \"lastTxnDate\": \"2022-06-17 03:18:59\"\n}"
-				},
-				"url": {
-					"raw": "http://localhost:9005/service-api/v2/cursor/filter",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "9005",
-					"path": [
-						"service-api",
-						"v2",
-						"cursor",
-						"filter"
-					]
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "ef552ec9-2f25-4bf4-84d2-700ba44936d3",
+    "name": "Transaction Cursor",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Transaction Cursor by ArrangementId",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "type": "text",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:9005/service-api/v2/cursor/arrangement/4337f8cc-d66d-41b3-a00e-f71ff15d93as",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9005",
+          "path": [
+            "service-api",
+            "v2",
+            "cursor",
+            "arrangement",
+            "4337f8cc-d66d-41b3-a00e-f71ff15d93as"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Transaction Cursor by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "type": "text",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:9005/service-api/v2/cursor/a710800e-5446-45cd-996e-a2482d40cda8",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9005",
+          "path": [
+            "service-api",
+            "v2",
+            "cursor",
+            "a710800e-5446-45cd-996e-a2482d40cda8"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Transaction Cursor by ArrangementId",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "type": "text",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:9005/service-api/v2/cursor/arrangement/4337f8cc-d66d-41b3-a00e-f71ff15d93as",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9005",
+          "path": [
+            "service-api",
+            "v2",
+            "cursor",
+            "arrangement",
+            "4337f8cc-d66d-41b3-a00e-f71ff15d93as"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Upsert Transaction Cursor (New)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "type": "text",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"cursor\": {\n        \"arrangementId\": \"4337f8cc-d66d-41b3-a00e-f71ff15d93as\",\n        \"extArrangementId\": \"6337f8cc-d66d-41b3-a00e-f71ff15d93as\",\n        \"legalEntityId\": \"model-bank\",\n        \"additions\":{\n            \"key1\":\"val1\",\n            \"key2\":\"val2\"\n            },\n        \"status\": \"SUCCESS\"\n    }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9005/service-api/v2/cursor/upsert",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9005",
+          "path": [
+            "service-api",
+            "v2",
+            "cursor",
+            "upsert"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Upsert Transaction Cursor (Existing)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "type": "text",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"cursor\": {\n        \"id\": \"a710800e-5446-45cd-996e-a2482d40cda8\",\n        \"arrangementId\": \"4337f8cc-d66d-41b3-a00e-f71ff15d93ss\",\n        \"extArrangementId\": \"6337f8cc-d66d-41b3-a00e-f71ff15d93ss\",\n        \"legalEntityId\": \"model-bank\",\n        \"status\": \"SUCCESS\"\n    }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:9005/service-api/v2/cursor/upsert",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9005",
+          "path": [
+            "service-api",
+            "v2",
+            "cursor",
+            "upsert"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Patch Transaction Cursor by ArrangementId",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "default"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"status\": \"SUCCESS\",\n    \"lastTxnDate\": \"2022-06-11 04:18:59\",\n    \"lastTxnIds\": \"11,12,13,14,15,16,17\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:9005/service-api/v2/cursor/arrangement/4337f8cc-d66d-41b3-a00e-f71ff15d93as",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9005",
+          "path": [
+            "service-api",
+            "v2",
+            "cursor",
+            "arrangement",
+            "4337f8cc-d66d-41b3-a00e-f71ff15d93as"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Filter Transaction Cursor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "default"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"status\": \"SUCCESS\",\n    \"lastTxnDate\": \"2022-06-17 03:18:59\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:9005/service-api/v2/cursor/filter",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "9005",
+          "path": [
+            "service-api",
+            "v2",
+            "cursor",
+            "filter"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
 }

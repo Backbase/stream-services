@@ -3,12 +3,12 @@ info:
   title: Backbase Stream Ingestion Cursor  API
   version: 1.0.0
   x-logo:
-    url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
-    backgroundColor: "#FFFFFF"
-    altText: "Backbase logo"
+    url: http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png
+    backgroundColor: '#FFFFFF'
+    altText: Backbase logo
 servers:
-  - url: http://stream-cursor-http.proto.backbasecloud.com/
-    description: The server
+- url: http://stream-cursor-http.proto.backbasecloud.com/
+  description: The server
 paths:
   ###############################################
   ## Ingestion Cursors
@@ -17,7 +17,7 @@ paths:
     summary: Ingestion Cursors
     post:
       tags:
-        - cursors
+      - cursors
       description: Creates a new Ingestion Cursor which is executed by the the executors
       operationId: createNewIngestionCursor
       requestBody:
@@ -34,7 +34,7 @@ paths:
                 $ref: '#/components/schemas/IngestionCursor'
     get:
       tags:
-        - cursors
+      - cursors
       description: Retrieves a list in ingestion cursors which are used to start the ingestion process
       operationId: getIngestionCursors
       responses:
@@ -52,7 +52,7 @@ paths:
     delete:
       summary: Deletes all ingestion cursors
       tags:
-        - cursors
+      - cursors
       description: |
         # Delete all ingestion cursors
 
@@ -66,43 +66,43 @@ paths:
   /cursors/{cursorId}:
     get:
       tags:
-        - cursors
+      - cursors
       description: Get a cursor
       operationId: getCursorById
       parameters:
-        - name: cursorId
-          in: path
-          description: ID of cursor to update
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: cursorId
+        in: path
+        description: ID of cursor to update
+        required: true
+        schema:
+          type: string
+          format: uuid
       responses:
         200:
           description: Ingestion Cursor created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IngestionCursor"
+                $ref: '#/components/schemas/IngestionCursor'
         404:
-          description: "Cannot find ingestion cursor with ID"
+          description: Cannot find ingestion cursor with ID
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
     put:
       tags:
-        - cursors
+      - cursors
       summary: Replace Cursor with new denition
       operationId: updateCursorById
       parameters:
-        - name: cursorId
-          in: path
-          description: ID of cursor to update
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: cursorId
+        in: path
+        description: ID of cursor to update
+        required: true
+        schema:
+          type: string
+          format: uuid
       requestBody:
         content:
           application/json:
@@ -113,37 +113,37 @@ paths:
           description: Update successfull
     delete:
       tags:
-        - cursors
+      - cursors
       summary: Deletes a cursor
       operationId: deleteCursorById
       parameters:
-        - name: cursorId
-          in: path
-          description: ID of cursor to update
-          required: true
-          schema:
-            type: string
-            format: uuid
+      - name: cursorId
+        in: path
+        description: ID of cursor to update
+        required: true
+        schema:
+          type: string
+          format: uuid
       responses:
         204:
           description: Delete succesfull
   /cursor-stream:
     get:
       tags:
-        - "cursor-stream"
+      - cursor-stream
       description: Retrieves a list in ingestion cursors which are used to start the ingestion process
       operationId: getIngestionCursorStream
       parameters:
-        - name: source
-          in: query
-          description: "The source of events to listen to"
-          schema:
-            type: string
-        - name: state
-          in: query
-          description: "The state of the cursor"
-          schema:
-            type: string
+      - name: source
+        in: query
+        description: The source of events to listen to
+        schema:
+          type: string
+      - name: state
+        in: query
+        description: The state of the cursor
+        schema:
+          type: string
       responses:
         200:
           description: |
@@ -170,69 +170,69 @@ components:
       properties:
         id:
           type: string
-          description: "Unique Identifier of the Ingestion Cursor"
+          description: Unique Identifier of the Ingestion Cursor
           readOnly: true
           format: uuid
         cursor_created_at:
           type: string
-          description: "Ingestion Cursor Creation Date"
-          format: 'date-time'
+          description: Ingestion Cursor Creation Date
+          format: date-time
           readOnly: true
         cursor_modified_at:
           type: string
-          description: "Ingestion Cursor Modified At"
-          format: 'date-time'
+          description: Ingestion Cursor Modified At
+          format: date-time
         cursor_type:
           type: string
-          description: "Type of the Ingestion Cursor. Real Time are generated from Events inside DBS, where as BATCH cursors are created from a scheduled process"
-          enum: ["BATCH", "REAL_TIME"]
+          description: Type of the Ingestion Cursor. Real Time are generated from Events inside DBS, where as BATCH cursors are created from a scheduled process
+          enum: [BATCH, REAL_TIME]
         cursor_state:
           type: string
-          description: "State of the cursor.  Newly created cursors start with NOT_STARTED state."
-          enum: ["not_started",  "abandoned", "completed", "failed", "started", "starting", "stopped", "stopping", "unknown"]
+          description: State of the cursor.  Newly created cursors start with NOT_STARTED state.
+          enum: [not_started, abandoned, completed, failed, started, starting, stopped, stopping, unknown]
         cursor_source:
           type: string
-          description: "Event which created the Ingestion Cursor"
-          enum: ["arrangement_added_event", "arrangement_updated_event", "login_event", "payment_created_event"]
+          description: Event which created the Ingestion Cursor
+          enum: [arrangement_added_event, arrangement_updated_event, login_event, payment_created_event]
         record_uuid:
           type: string
-          description: "Record UUID from which to start ingestion"
+          description: Record UUID from which to start ingestion
         internal_legal_entity_id:
           type: string
-          description: "Legal Entity ID of the user for which to ingest into"
+          description: Legal Entity ID of the user for which to ingest into
         external_legal_entity_id:
           type: string
-          description: "Legal Entity ID of the user for which to ingest into"
+          description: Legal Entity ID of the user for which to ingest into
         external_user_id:
           type: string
-          description: "External User ID"
+          description: External User ID
         internal_user_id:
           type: string
-          description: "Internal User ID"
+          description: Internal User ID
         arrangement_id:
           type: string
-          description: "The arrangement all transactions are added too"
+          description: The arrangement all transactions are added too
         external_arrangement_id:
           type: string
-          description: "The external arrangement id used to query Core Bank"
+          description: The external arrangement id used to query Core Bank
         bban:
           type: string
-          description: "The Base Bank Account Number to query transactions"
+          description: The Base Bank Account Number to query transactions
         iban:
           type: string
-          description: "The International Bank Account Number to query transactions for"
+          description: The International Bank Account Number to query transactions for
         date_from:
           type: string
-          format: "date"
+          format: date
         date_to:
           type: string
-          format: "date"
+          format: date
         date_time_from:
           type: string
-          format: "date-time"
+          format: date-time
         date_time_to:
           type: string
-          format: "date-time"
+          format: date-time
         additionalProperties:
           type: object
           additionalProperties: true
@@ -258,9 +258,7 @@ components:
                 description: Default Message. Any further information.
               key:
                 type: string
-                description: '{capability-name}.api.{api-key-name}. For generated
-                  validation errors this is the path in the document the error resolves
-                  to. e.g. object name + ''.'' + field'
+                description: "{capability-name}.api.{api-key-name}. For generated validation errors this is the path in the document the error resolves to. e.g. object name + '.' + field"
               context:
                 type: object
                 description: Context can be anything used to construct localised messages.

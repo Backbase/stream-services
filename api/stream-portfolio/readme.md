@@ -1,13 +1,13 @@
 Region
-    Country
+Country
 AssetClass
-    SubAssetClass
+SubAssetClass
 
 Instrument
-    history price
+history price
 
 Transaction category
-    Transactions (find by portfolio code)
+Transactions (find by portfolio code)
 
 Portfolio
 SubPortfolio
@@ -18,22 +18,25 @@ benchmarks
 valuations
 
 Position (find by portfolio code)
-trransactions: [
+trransactions: \[
 portfolioExternalId: id
-portfolioTransactions: [
+portfolioTransactions: \[
 ...
-],
+\],
 ...
 portfolioExternalId: id-n
 
-    portfolioTransactions: [
-      ...
-    ],
-]
+```
+portfolioTransactions: [
+  ...
+],
+```
+
+\]
 
 aggregate portfolios
 
-portfolios: [
+portfolios: \[
 portfoliodata1: {},
 portfoliodata2: {},
-]
+\]

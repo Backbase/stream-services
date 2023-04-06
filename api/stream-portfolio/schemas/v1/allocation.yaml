@@ -1,10 +1,10 @@
 required:
-  - allocationType
-  - classifierType
-  - classifierName
-  - allocationPct
-  - valuation
-  - allocations
+- allocationType
+- classifierType
+- classifierName
+- allocationPct
+- valuation
+- allocations
 type: object
 properties:
   allocationType:

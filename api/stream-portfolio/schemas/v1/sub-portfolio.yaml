@@ -1,6 +1,6 @@
 required:
-  - code
-  - name
+- code
+- name
 type: object
 properties:
   code:

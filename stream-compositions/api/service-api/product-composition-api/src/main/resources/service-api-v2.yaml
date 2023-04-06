@@ -3,15 +3,15 @@ info:
   title: Product composition API
   version: 2.0.0
 servers:
-  - url: http://localhost:8080/service-api/v2
-    description: The server
+- url: http://localhost:8080/service-api/v2
+  description: The server
 tags:
-  - name: ProductComposition
+- name: ProductComposition
 paths:
   /service-api/v2/ingest/pull:
     post:
       tags:
-        - ProductComposition
+      - ProductComposition
       summary: Ingests products (in pull mode).
       description: Ingests products (in pull mode).
       operationId: pullIngestProduct
@@ -22,19 +22,19 @@ paths:
             schema:
               $ref: '#/components/schemas/ProductPullIngestionRequest'
       responses:
-        "201":
+        '201':
           description: Products ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductIngestionResponse'
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -44,7 +44,7 @@ paths:
   /service-api/v2/ingest/push:
     post:
       tags:
-        - ProductComposition
+      - ProductComposition
       summary: Ingests products (in push mode).
       description: Ingests products (in push mode).
       operationId: pushIngestProduct
@@ -55,19 +55,19 @@ paths:
             schema:
               $ref: '#/components/schemas/ProductPushIngestionRequest'
       responses:
-        "201":
+        '201':
           description: Products ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductIngestionResponse'
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -77,7 +77,7 @@ paths:
   /service-api/v2/ingest/arrangement/pull:
     put:
       tags:
-        - ProductComposition
+      - ProductComposition
       summary: Ingests arrangement (in pull mode).
       description: Ingests arrangement (in pull mode).
       operationId: pullIngestArrangement
@@ -88,19 +88,19 @@ paths:
             schema:
               $ref: '#/components/schemas/ArrangementPullIngestionRequest'
       responses:
-        "200":
+        '200':
           description: Product ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrangementIngestionResponse'
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -110,7 +110,7 @@ paths:
   /service-api/v2/ingest/arrangement/push:
     put:
       tags:
-        - ProductComposition
+      - ProductComposition
       summary: Ingests arrangement (in push mode).
       description: Ingests arrangement (in push mode).
       operationId: pushIngestArrangement
@@ -121,19 +121,19 @@ paths:
             schema:
               $ref: '#/components/schemas/ArrangementPushIngestionRequest'
       responses:
-        "200":
+        '200':
           description: Products ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArrangementIngestionResponse'
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -144,7 +144,7 @@ components:
   schemas:
     BadRequest:
       required:
-        - message
+      - message
       type: object
       properties:
         message:
@@ -182,7 +182,7 @@ components:
           description: Source of the ingestion process from where the ingestion was triggered.
           example: nightly_ingestion
         referenceJobRoleNames:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
+          $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames
           description: The reference job roles that should get assigned to the user
         membershipAccounts:
           type: array
@@ -207,7 +207,7 @@ components:
           description: Source of the ingestion process from where the ingestion was triggered.
           example: nightly_ingestion
         productGroup:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+          $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup
 
     ProductIngestionResponse:
       type: object
@@ -215,7 +215,7 @@ components:
         productGroups:
           type: array
           items:
-            $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup'
+            $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/ProductGroup
 
     ArrangementPullIngestionRequest:
       type: object
@@ -267,17 +267,17 @@ components:
         config:
           $ref: '#/components/schemas/ArrangementIngestionConfig'
         arrangement:
-          $ref: '../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut'
+          $ref: ../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut
 
     ArrangementIngestionResponse:
       type: object
       properties:
         arrangement:
-          $ref: '../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut'
+          $ref: ../../../../../../../api/stream-product/openapi.yaml#/components/schemas/AccountArrangementItemPut
 
     InternalServerError:
       required:
-        - message
+      - message
       type: object
       properties:
         message:

@@ -1,3 +1,4 @@
+---
 # Stream config
 spring:
   cloud:
@@ -38,23 +39,23 @@ logging:
 
 bootstrap:
   approvals:
-    - name: Beta Approval Types & Policies
-      approvalTypes:
-        - name: A
-          description: A
-          rank: 3
-        - name: B
-          description: B
-          rank: 153
-        - name: C
-          description: C
-          rank: 265
-      policies:
-        - name: 0 approver
-          description: 0 approver
-          items: [ ]
-        - name: 1 approver
-          description: 1 approver
-          items:
-            - approvalTypeName: A
-              numberOfApprovals: 1
+  - name: Beta Approval Types & Policies
+    approvalTypes:
+    - name: A
+      description: A
+      rank: 3
+    - name: B
+      description: B
+      rank: 153
+    - name: C
+      description: C
+      rank: 265
+    policies:
+    - name: 0 approver
+      description: 0 approver
+      items: []
+    - name: 1 approver
+      description: 1 approver
+      items:
+      - approvalTypeName: A
+        numberOfApprovals: 1

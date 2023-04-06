@@ -1,14 +1,17 @@
 NOTE:
+
 ```
     This is an initial implementation.
     Ingestioin works only on clear DB. Improvement is required!
 ```
 
 # Portfolio Ingestion
+
 Main core functionality is in `portfolio-core`
 The bootstrap task config is in `portfolio-bootstrap-task`
 
 #Bootstrap Ingestion Configuration
+
 ```
 bootstrap:
   wealthBundles:

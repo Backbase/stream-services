@@ -1,7 +1,7 @@
 required:
-  - code
-  - name
-  - iban
+- code
+- name
+- iban
 type: object
 properties:
   arrangementId:

@@ -4,11 +4,11 @@ The Legal Entity API can be used to quickly onboard Customers into Backbase DBS 
 
 The API uses a special Ingestion Model which is an aggregate of all objects necessary to create a Legal Entity and their supporting objects:
 
-* Legal Entity
-* Users able to login on behalf of this Legal Entity
-* Service Agreement setup between the users and the Legal Entity
-* Job Profile Templates containing Business Functions, Privileges and Limits to be applied between user and service agreement
-* Grouped Arrangements with Job Profile Templates for assigned users
+- Legal Entity
+- Users able to login on behalf of this Legal Entity
+- Service Agreement setup between the users and the Legal Entity
+- Job Profile Templates containing Business Functions, Privileges and Limits to be applied between user and service agreement
+- Grouped Arrangements with Job Profile Templates for assigned users
 
 ## How it works
 
@@ -18,15 +18,14 @@ The Legal Entity Saga orchestrates calls to Backbase DBS using information pass 
 
 Communication to DBS is handled through the generated clients from `stream-dbs-cleints`
 
-
 ## Usage
 
 The Legal Entity Saga can be used in several ways:
 
-* **HTTP REST** - Adhoc processing of Legal Entities
-* **Spring Cloud Data Flow Task** - Bootstrap Legal Entity Hierarchy from configuration
-* **Spring Cloud Data Flow Sink** - Spring Cloud Stream Input Channel for continuously processing Legal Entities
-* **Library** - Java Library used in All-in-one services
+- **HTTP REST** - Adhoc processing of Legal Entities
+- **Spring Cloud Data Flow Task** - Bootstrap Legal Entity Hierarchy from configuration
+- **Spring Cloud Data Flow Sink** - Spring Cloud Stream Input Channel for continuously processing Legal Entities
+- **Library** - Java Library used in All-in-one services
 
 ## Legal Entity Bootstrap
 
@@ -34,14 +33,12 @@ For the initial ingestion of the Legal Entity, you can use the Spring Boot Task 
 
 Examples and usage instructions can be found in the [readme.md](legal-entity-bootstrap-task/readme.md).
 
-
 ## Legal Entity HTTP
 
 For processes that require an HTTP endpoint for ingestion of Legal Entities, the Legal Entity HTTP Service be deployed.
 The Legal Entity HTTP Service can be used to ingest Legal Entities both synchronously and asynchronously.
 
 Examples and usage instructions can be found in the [readme.md](legal-entity-http/readme.md).
-
 
 ## Legal Entity Sink
 

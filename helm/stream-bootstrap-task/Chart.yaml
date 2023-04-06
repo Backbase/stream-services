@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: '3.0.0'
+appVersion: 3.0.0
 description: A custom chart to deploy a generic Stream Boostrap Task as a job
 icon: https://start.backbase.com/favicon.png
 maintainers:

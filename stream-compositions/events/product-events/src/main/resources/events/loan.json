@@ -1,56 +1,56 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "properties" : {
-    "bookedBalance" : {
-      "$ref" : "base-schema.json#/schemas/BookedBalance"
+  "properties": {
+    "bookedBalance": {
+      "$ref": "base-schema.json#/schemas/BookedBalance"
     },
-    "valueDateBalance" : {
-      "$ref" : "base-schema.json#/schemas/ValueDateBalance"
+    "valueDateBalance": {
+      "$ref": "base-schema.json#/schemas/ValueDateBalance"
     },
-    "outstandingPayment" : {
-      "$ref" : "base-schema.json#/schemas/OutstandingPayment"
+    "outstandingPayment": {
+      "$ref": "base-schema.json#/schemas/OutstandingPayment"
     },
-    "accountInterestRate" : {
-      "$ref" : "base-schema.json#/schemas/AccountInterestRate"
+    "accountInterestRate": {
+      "$ref": "base-schema.json#/schemas/AccountInterestRate"
     },
-    "accruedInterest" : {
-      "$ref" : "base-schema.json#/schemas/AccruedInterest"
+    "accruedInterest": {
+      "$ref": "base-schema.json#/schemas/AccruedInterest"
     },
-    "availableBalance" : {
-      "$ref" : "base-schema.json#/schemas/AvailableBalance"
+    "availableBalance": {
+      "$ref": "base-schema.json#/schemas/AvailableBalance"
     },
-    "principalAmount" : {
-      "$ref" : "base-schema.json#/schemas/PrincipalAmount"
+    "principalAmount": {
+      "$ref": "base-schema.json#/schemas/PrincipalAmount"
     },
-    "outstandingPrincipalAmount" : {
-      "$ref" : "base-schema.json#/schemas/OutstandingPrincipalAmount"
+    "outstandingPrincipalAmount": {
+      "$ref": "base-schema.json#/schemas/OutstandingPrincipalAmount"
     },
-    "IBAN" : {
-      "$ref" : "base-schema.json#/schemas/IBAN"
+    "IBAN": {
+      "$ref": "base-schema.json#/schemas/IBAN"
     },
-    "BBAN" : {
-      "$ref" : "base-schema.json#/schemas/BBAN"
+    "BBAN": {
+      "$ref": "base-schema.json#/schemas/BBAN"
     },
-    "bankBranchCode" : {
-      "$ref" : "base-schema.json#/schemas/BankBranchCode"
+    "bankBranchCode": {
+      "$ref": "base-schema.json#/schemas/BankBranchCode"
     },
-    "minimumPayment" : {
-      "$ref" : "base-schema.json#/schemas/MinimumPayment"
+    "minimumPayment": {
+      "$ref": "base-schema.json#/schemas/MinimumPayment"
     },
-    "minimumPaymentDueDate" : {
-      "$ref" : "base-schema.json#/schemas/MinimumPaymentDueDate"
+    "minimumPaymentDueDate": {
+      "$ref": "base-schema.json#/schemas/MinimumPaymentDueDate"
     },
-    "accountHolderName" : {
-      "$ref" : "base-schema.json#/schemas/AccountHolderName"
+    "accountHolderName": {
+      "$ref": "base-schema.json#/schemas/AccountHolderName"
     },
-    "creditAccount" : {
-      "$ref" : "base-schema.json#/schemas/CreditAccount"
+    "creditAccount": {
+      "$ref": "base-schema.json#/schemas/CreditAccount"
     },
-    "debitAccount" : {
-      "$ref" : "base-schema.json#/schemas/DebitAccount"
+    "debitAccount": {
+      "$ref": "base-schema.json#/schemas/DebitAccount"
     }
   },
-  "extends" : {
-    "$ref" : "base-schema.json#/schemas/BaseProduct"
+  "extends": {
+    "$ref": "base-schema.json#/schemas/BaseProduct"
   }
 }

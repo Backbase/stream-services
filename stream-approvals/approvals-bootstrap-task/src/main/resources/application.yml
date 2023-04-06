@@ -1,3 +1,4 @@
+---
 # Stream config
 server:
   shutdown: graceful

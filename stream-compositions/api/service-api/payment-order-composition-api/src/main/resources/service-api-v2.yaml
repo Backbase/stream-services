@@ -3,15 +3,15 @@ info:
   title: Payment Order composition API
   version: 2.0.0
 servers:
-  - url: http://localhost:8080/service-api/v2
-    description: The server
+- url: http://localhost:8080/service-api/v2
+  description: The server
 tags:
-  - name: PaymentOrderComposition
+- name: PaymentOrderComposition
 paths:
   /service-api/v2/ingest/pull:
     post:
       tags:
-        - PaymentOrderComposition
+      - PaymentOrderComposition
       summary: Ingests payment order (in pull mode).
       description: Ingests payment order (in pull mode).
       operationId: pullPaymentOrder
@@ -22,19 +22,19 @@ paths:
             schema:
               $ref: '#/components/schemas/PaymentOrderPullIngestionRequest'
       responses:
-        "201":
+        '201':
           description: Payment Order ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentOrderIngestionResponse'
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -43,7 +43,7 @@ paths:
   /service-api/v2/ingest/push:
     post:
       tags:
-        - PaymentOrderComposition
+      - PaymentOrderComposition
       summary: Ingests payment order (in push mode).
       description: Ingests payment order (in push mode).
       operationId: pushIngestPaymentOrder
@@ -54,19 +54,19 @@ paths:
             schema:
               $ref: '#/components/schemas/PaymentOrderPushIngestionRequest'
       responses:
-        "201":
+        '201':
           description: payment order ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaymentOrderIngestionResponse'
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -77,7 +77,7 @@ components:
   schemas:
     BadRequest:
       required:
-        - message
+      - message
       type: object
       properties:
         message:
@@ -85,7 +85,7 @@ components:
 
     InternalServerError:
       required:
-        - message
+      - message
       type: object
       properties:
         message:
@@ -125,7 +125,7 @@ components:
         paymentOrders:
           type: array
           items:
-            $ref: '../../../target/yaml/payment/payment-order-service-api-v2.8.0.yaml#/components/schemas/PaymentOrderPostRequest'
+            $ref: ../../../target/yaml/payment/payment-order-service-api-v2.8.0.yaml#/components/schemas/PaymentOrderPostRequest
 
     PaymentOrderIngestionResponse:
       type: object
@@ -133,11 +133,11 @@ components:
         newPaymentOrder:
           type: array
           items:
-            $ref: '../../../target/yaml/payment/payment-order-service-api-v2.8.0.yaml#/components/schemas/PaymentOrderPostResponse'
+            $ref: ../../../target/yaml/payment/payment-order-service-api-v2.8.0.yaml#/components/schemas/PaymentOrderPostResponse
         updatedPaymentOrder:
           type: array
           items:
-            $ref: '../../../target/yaml/payment/payment-order-service-api-v2.8.0.yaml#/components/schemas/PaymentOrderPostResponse'
+            $ref: ../../../target/yaml/payment/payment-order-service-api-v2.8.0.yaml#/components/schemas/PaymentOrderPostResponse
         deletedPaymentOrder:
           type: array
           items:

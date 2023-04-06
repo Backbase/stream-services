@@ -1,5 +1,5 @@
 required:
-  - key
+- key
 type: object
 properties:
   key:

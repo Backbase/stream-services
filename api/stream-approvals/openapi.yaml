@@ -4,12 +4,12 @@ info:
   description: Ingestion Saga for Approvals
   version: 0.0.1
   x-logo:
-    url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
-    backgroundColor: "#FFFFFF"
-    altText: "Backbase logo"
+    url: http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png
+    backgroundColor: '#FFFFFF'
+    altText: Backbase logo
 servers:
-  - url: http://legal-entity-http.proto.backbasecloud.com/
-    description: The server
+- url: http://legal-entity-http.proto.backbasecloud.com/
+  description: The server
 paths:
   ###############################################
   ## Approval
@@ -17,7 +17,7 @@ paths:
   /approvals:
     post:
       tags:
-        - approval
+      - approval
       summary: Create Approvals
       operationId: createApprovals
       requestBody:
@@ -81,7 +81,7 @@ components:
 
     ApprovalType:
       type: object
-      title: "Approval Level Type"
+      title: Approval Level Type
       properties:
         internalId:
           $ref: '#/components/schemas/InternalIdentifier'
@@ -93,10 +93,10 @@ components:
           type: number
     Policy:
       type: object
-      title: "Approval Policy configuration"
+      title: Approval Policy configuration
       required:
-        - items
-        - logicalItems
+      - items
+      - logicalItems
       properties:
         internalId:
           $ref: '#/components/schemas/InternalIdentifier'
@@ -114,7 +114,7 @@ components:
             $ref: '#/components/schemas/PolicyItem'
     PolicyItem:
       type: object
-      title: "Policy Item Configuration"
+      title: Policy Item Configuration
       properties:
         approvalTypeId:
           $ref: '#/components/schemas/InternalIdentifier'
@@ -124,7 +124,7 @@ components:
           type: number
     PolicyLogicalItem:
       type: object
-      title: "Policy Logical Item Configuration"
+      title: Policy Logical Item Configuration
       properties:
         rank:
           type: number
@@ -185,8 +185,8 @@ components:
     Currency:
       title: Currency
       required:
-        - amount
-        - currencyCode
+      - amount
+      - currencyCode
       type: object
       properties:
         amount:
@@ -195,10 +195,9 @@ components:
           type: string
           description: The amount in the specified currency
         currencyCode:
-          pattern: "^[A-Z]{3}$"
+          pattern: ^[A-Z]{3}$
           type: string
-          description: The alpha-3 code (complying with ISO 4217) of the currency
-            that qualifies the amount
+          description: The alpha-3 code (complying with ISO 4217) of the currency that qualifies the amount
         additions:
           type: object
           additionalProperties:
@@ -208,15 +207,14 @@ components:
       maxLength: 36
       minLength: 1
       type: string
-      description: A simple definition for an internal identifier. Can be UUID but
-        doesn't have to.
+      description: A simple definition for an internal identifier. Can be UUID but doesn't have to.
     Uuid:
-      pattern: "^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[1-5][0-9a-fA-F]{3}-?[89abAB][0-9a-fA-F]{3}-?[0-9a-fA-F]{12}$"
+      pattern: ^[0-9a-fA-F]{8}-?[0-9a-fA-F]{4}-?[1-5][0-9a-fA-F]{3}-?[89abAB][0-9a-fA-F]{3}-?[0-9a-fA-F]{12}$
       type: string
-      description: "Universal Unique Identifier, "
+      description: 'Universal Unique Identifier, '
     IntegrationPolicyAssignmentRequestBounds:
       required:
-        - policyId
+      - policyId
       type: object
       properties:
         policyName:
@@ -260,9 +258,7 @@ components:
                 description: Default Message. Any further information.
               key:
                 type: string
-                description: '{capability-name}.api.{api-key-name}. For generated
-                      validation errors this is the path in the document the error resolves
-                      to. e.g. object name + ''.'' + field'
+                description: "{capability-name}.api.{api-key-name}. For generated validation errors this is the path in the document the error resolves to. e.g. object name + '.' + field"
               context:
                 type: object
                 description: Context can be anything used to construct localised messages.

@@ -3,42 +3,42 @@ info:
   title: Product Catalog Integration API
   version: 2.0.0
 servers:
-  - url: http://localhost:8080/service-api/v1
-    description: The server
+- url: http://localhost:8080/service-api/v1
+  description: The server
 tags:
-  - name: ProductCatalogIntegration
+- name: ProductCatalogIntegration
 paths:
   /service-api/v2/product-catalog:
     get:
       tags:
-        - ProductCatalogIntegration
+      - ProductCatalogIntegration
       summary: Pulls product catalog.
       description: Pulls product catalog.
       operationId: pullProductCatalog
 
       parameters:
-        - in: query
-          name: additionalParameters
-          schema:
-            type: object
-            additionalProperties:
-              type: string
+      - in: query
+        name: additionalParameters
+        schema:
+          type: object
+          additionalProperties:
+            type: string
 
       responses:
-        "201":
+        '201':
           description: Product catalog successfully returned.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PullProductCatalogResponse'
 
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -49,7 +49,7 @@ components:
   schemas:
     BadRequest:
       required:
-        - message
+      - message
       type: object
       properties:
         message:
@@ -59,11 +59,11 @@ components:
       type: object
       properties:
         productCatalog:
-          $ref: '../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog'
+          $ref: ../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog
 
     InternalServerError:
       required:
-        - message
+      - message
       type: object
       properties:
         message:

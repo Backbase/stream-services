@@ -12,7 +12,11 @@
     },
     "type": {
       "description": "Type of Legal Entity",
-      "enum": ["RETAIL", "SME", "CORPORATE"],
+      "enum": [
+        "RETAIL",
+        "SME",
+        "CORPORATE"
+      ],
       "type": "string"
     }
   },

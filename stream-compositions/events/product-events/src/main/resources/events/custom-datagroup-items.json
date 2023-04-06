@@ -1,14 +1,14 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "type" : "object",
-  "properties" : {
-    "externalId" : {
-      "type" : "string",
-      "description" : "Data Group Item Internal Id"
+  "type": "object",
+  "properties": {
+    "externalId": {
+      "type": "string",
+      "description": "Data Group Item Internal Id"
     },
-    "internalId" : {
-      "type" : "string",
-      "description" : "Data Group Item External Id"
+    "internalId": {
+      "type": "string",
+      "description": "Data Group Item External Id"
     }
   }
 }

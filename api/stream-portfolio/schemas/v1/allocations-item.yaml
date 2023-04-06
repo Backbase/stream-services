@@ -1,8 +1,8 @@
 required:
-  - classifierType
-  - classifierName
-  - allocationPct
-  - valuation
+- classifierType
+- classifierName
+- allocationPct
+- valuation
 type: object
 properties:
   classifierType:
