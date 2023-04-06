@@ -7,6 +7,7 @@ In this folder we will maintain automated tests to validate the end-to-end funct
 ## Docker Compose
 
 This docker compose file will spin up a minimal multi-tenant setup to test the following Stream Components:
+
 - legal-entity-bootstrap-task (Tenant 1)
 - legal-entity-composition-service (Tenant 2)
 

@@ -1,0 +1,23 @@
+- id: pmd
+  name: pmd
+  description: "Runs the PMD static code analyzer."
+  language: docker
+  entry: /bin/bash /opt/run_pmd.sh
+  files: \.java$
+  require_serial: true
+
+- id: cpd
+  name: cpd
+  description: "Runs the Copy/Paste Detector (CPD)."
+  language: docker
+  entry: /bin/bash /opt/run_cpd.sh
+  files: \.java$
+  require_serial: true
+
+- id: checkstyle
+  name: checkstyle
+  description: "Runs the Checkstyle static code analysis tool."
+  language: docker
+  entry: /bin/bash /opt/run_checkstyle.sh
+  files: \.java$
+  require_serial: true

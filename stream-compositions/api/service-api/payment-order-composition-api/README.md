@@ -3,6 +3,7 @@
 > _Fill out this file with some information about your OpenAPI spec._
 
 To build this spec, use:
+
 ```
 mvn clean install
 ```
@@ -18,6 +19,7 @@ Add links to documentation including setup, config, etc.
 Add link to Jira project.
 
 ## Confluence Links
+
 Links to relevant confluence pages (design etc).
 
 ## Support

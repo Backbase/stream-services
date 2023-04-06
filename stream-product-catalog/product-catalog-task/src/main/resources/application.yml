@@ -1,3 +1,4 @@
+---
 # Stream config
 server:
   shutdown: graceful
@@ -20,13 +21,13 @@ spring:
 bootstrap:
   product-catalog:
     productTypes:
-      - productKindName: "currentAccount"
-        productTypeName: "current-account"
-        typeName: "Current Account"
-        externalProductKindId: "kind1"
-        externalProductId: "current-account"
-      - productKindName: "savingsAccount"
-        productTypeName: "savings-account"
-        typeName: "Savings Accounts"
-        externalProductKindId: "kind2"
-        externalProductId: "savings-account"
+    - productKindName: currentAccount
+      productTypeName: current-account
+      typeName: Current Account
+      externalProductKindId: kind1
+      externalProductId: current-account
+    - productKindName: savingsAccount
+      productTypeName: savings-account
+      typeName: Savings Accounts
+      externalProductKindId: kind2
+      externalProductId: savings-account

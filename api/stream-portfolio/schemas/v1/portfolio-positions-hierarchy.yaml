@@ -1,7 +1,7 @@
 required:
-  - itemType
-  - externalId
-  - name
+- itemType
+- externalId
+- name
 type: object
 properties:
   itemType:
@@ -12,10 +12,10 @@ properties:
       Itemtype is used to denote the type of a collection, positions are expected to be grouped into, for example, asset class.
       Collection is a hierarchy type.
     enum:
-      - SUB_PORTFOLIO
-      - ASSET_CLASS
-      - REGION
-      - COUNTRY
+    - SUB_PORTFOLIO
+    - ASSET_CLASS
+    - REGION
+    - COUNTRY
   externalId:
     type: string
     description: An external id of the item to link a hierarchy entity to a system entity.
