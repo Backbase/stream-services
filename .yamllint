@@ -16,21 +16,31 @@ rules:
     max-spaces-inside: 1
   colons:
     level: warning
-  commas:
+  commas: enable
+  comments:
     level: warning
-  comments: disable
-  comments-indentation: disable
-  document-start: disable
+  comments-indentation:
+    level: warning
+  document-end: disable
+  document-start:
+    level: warning
   empty-lines:
     level: warning
-  hyphens:
-    level: warning
+  empty-values: disable
+  float-values: disable
+  hyphens: enable
   indentation:
-    level: warning
-    indent-sequences: consistent
+      level: warning
+      indent-sequences: consistent
+  key-duplicates: enable
+  key-ordering: disable
   line-length:
-    level: warning
-    allow-non-breakable-inline-mappings: true
-  truthy: disable
-  syntax:
+      level: warning
+      allow-non-breakable-inline-mappings: true
+  new-line-at-end-of-file: enable
+  new-lines: enable
+  octal-values: disable
+  quoted-strings: disable
+  trailing-spaces: enable
+  truthy:
     level: warning
