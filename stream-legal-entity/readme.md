@@ -1,13 +1,16 @@
 # Legal Entity Ingestion SAGA
 
-The Legal Entity API can be used to quickly onboard Customers into Backbase DBS by orchestrating the required REST calls on the Backbase DBS Services.
+The Legal Entity API can be used to quickly onboard Customers into Backbase DBS by orchestrating the required REST calls
+on the Backbase DBS Services.
 
-The API uses a special Ingestion Model which is an aggregate of all objects necessary to create a Legal Entity and their supporting objects:
+The API uses a special Ingestion Model which is an aggregate of all objects necessary to create a Legal Entity and their
+supporting objects:
 
 - Legal Entity
 - Users able to login on behalf of this Legal Entity
 - Service Agreement setup between the users and the Legal Entity
-- Job Profile Templates containing Business Functions, Privileges and Limits to be applied between user and service agreement
+- Job Profile Templates containing Business Functions, Privileges and Limits to be applied between user and service
+  agreement
 - Grouped Arrangements with Job Profile Templates for assigned users
 
 ## How it works

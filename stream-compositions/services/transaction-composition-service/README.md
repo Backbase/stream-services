@@ -7,7 +7,7 @@
 ## Configuration Properties
 
 | Property Path                                                               | Property Description                                                  |
-| --------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+|-----------------------------------------------------------------------------|-----------------------------------------------------------------------|
 | backbase.stream.compositions.transaction.defaultStartOffsetInDays           | The Transaction Cursor default start date                             |
 | backbase.stream.compositions.transaction.integration-base-url               | The Integration base url, which pulls the data from core              |
 | backbase.stream.compositions.transaction.events.enableCompleted             | The toggle for enabling events on composition completion              |

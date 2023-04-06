@@ -7,7 +7,7 @@
 ## Configuration Properties
 
 | Property Path                                                                                     | Property Description                                      |
-| ------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+|---------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
 | backbase.stream.compositions.product.integration-base-url                                         | The Integration base url, which pulls the data from core  |
 | backbase.stream.compositions.product.chains.transaction-composition.enabled                       | The toggle for chaining to be enabled/disabled            |
 | backbase.stream.compositions.product.chains.transaction-composition.base-url                      | The transaction composition service base url              |

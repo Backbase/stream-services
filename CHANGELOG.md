@@ -3,19 +3,27 @@
 All notable changes to this project will be documented in this file.
 
 ## [3.37.0](https://github.com/Backbase/stream-services/compare/3.36.0...3.37.0)
+
 ### Added
+
 - Adds `bankBranchCode` field to `TermDeposit` openapi schema
 
 ## [3.36.0](https://github.com/Backbase/stream-services/compare/3.35.0...3.36.0)
+
 ### Added
+
 - Adds `bankBranchCode` field to `term-deposits.json` events
 
 ## [3.35.0](https://github.com/Backbase/stream-services/compare/3.34.0...3.35.0)
+
 ### Added
+
 - Support for creating data group of type `CUSTOM`.
 
 ## [3.34.0](https://github.com/Backbase/stream-services/compare/3.33.1...3.34.0)
+
 ### Changed
+
 - Upgraded SSDK to 15.2.0
 - Upgraded Banking Services to 2023.02-LTS
 - Fix some breaking changes introduced by 2023.02-LTS
@@ -61,7 +69,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Included property to override the validation of atomic batch responses coming from DBS: When a single item is not successful in the batch response it fails the entire saga.
+- Included property to override the validation of atomic batch responses coming from DBS: When a single item is not
+  successful in the batch response it fails the entire saga.
   Keeping validation enabled for backwards compatibility: `backbase.stream.dbs.batch.validate-atomic-response=true`.
 - Enhancing logs for legal entity composition subsidiaries processing.
 - Updating the e2e tests images version.
@@ -71,8 +80,10 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Included support to chain products to all subsidiaries when using legal entity composition.
-  Disabled by default for compatibility reasons: `backbase.stream.compositions.legal-entity.chains.include-subsidiaries=false`
-- Adjusting default services ports to 8080 to avoid misconfiguration when compositions services are invoking sagas: `backbase.communication.http.default-service-port=8080`
+  Disabled by default for compatibility
+  reasons: `backbase.stream.compositions.legal-entity.chains.include-subsidiaries=false`
+- Adjusting default services ports to 8080 to avoid misconfiguration when compositions services are invoking
+  sagas: `backbase.communication.http.default-service-port=8080`
 
 ## [3.24.3](https://github.com/Backbase/stream-services/compare/3.24.2...3.24.3)
 
@@ -110,19 +121,26 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Adds new parameter `source` to `ProductIngestPullRequest`, `ProductIngestPushRequest` & `ProductIngestResponse`.
-  - `source` field can be useful to understand from where this ingestion process was triggered & can be useful in many ways to identify the source of the request.
-- Adds different products to `ProductCompletedEvent`. I.e Loan, Term Deposit, Credit Card & Current Account on top of Savings Account.
+    - `source` field can be useful to understand from where this ingestion process was triggered & can be useful in many
+      ways to identify the source of the request.
+- Adds different products to `ProductCompletedEvent`. I.e Loan, Term Deposit, Credit Card & Current Account on top of
+  Savings Account.
 - Adds `source` field to `ProductCompletedEvent` & populate it with value sent from the request.
-- Adds key fields relate to User ID, Legal Entity ID & Service Agreement ID to `ProductCompletedEvent` & populate it from the `ProductIngestPullRequest` for the ingestion mode Pull.
-  - These fields are `userExternalId`, `userInternalId`, `legalEntityExternalId`, `legalEntityInternalId`, `serviceAgreementExternalId`, `serviceAgreementInternalId`.
-  - These can be useful on event handler side to identify user & service agreement for which this ingestion was triggered.
-- Pass `additions` from `ProductIngestPullRequest` to `ProductIngestResponse` & then to `ProductCompletedEvent` which can be useful to pass any extra information from request & can be captured on event handler.
+- Adds key fields relate to User ID, Legal Entity ID & Service Agreement ID to `ProductCompletedEvent` & populate it
+  from the `ProductIngestPullRequest` for the ingestion mode Pull.
+    - These fields
+      are `userExternalId`, `userInternalId`, `legalEntityExternalId`, `legalEntityInternalId`, `serviceAgreementExternalId`, `serviceAgreementInternalId`.
+    - These can be useful on event handler side to identify user & service agreement for which this ingestion was
+      triggered.
+- Pass `additions` from `ProductIngestPullRequest` to `ProductIngestResponse` & then to `ProductCompletedEvent` which
+  can be useful to pass any extra information from request & can be captured on event handler.
 
 ## [3.20.0](https://github.com/Backbase/stream-services/compare/3.19.0...3.20.0)
 
 ### Added
 
-- Additional groups added as attribute to User model and will be passed to legal-entity-integration service within Legal Entity Saga execution
+- Additional groups added as attribute to User model and will be passed to legal-entity-integration service within Legal
+  Entity Saga execution
 
 ## [3.18.0](https://github.com/Backbase/stream-services/compare/3.17.0...3.18.0)
 
@@ -150,7 +168,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Adding null checks for ingesting legal entity, service agreement and arrangements with no users - User pre enrolment scenario.
+- Adding null checks for ingesting legal entity, service agreement and arrangements with no users - User pre enrolment
+  scenario.
 
 ## [3.15.0](https://github.com/Backbase/stream-services/compare/3.14.1...3.15.0)
 
@@ -185,7 +204,8 @@ All notable changes to this project will be documented in this file.
 
 - Replaced BatchProductGroupTask.IngestionMode with more flexible BatchProductIngestionMode class.
   New class keeps ingestion modes separately for each main resource involved in BatchProductIngestionSaga processing:
-  function groups, data groups and arrangements. Two preset modes have been created: BatchProductIngestionMode.UPSERT and
+  function groups, data groups and arrangements. Two preset modes have been created: BatchProductIngestionMode.UPSERT
+  and
   BatchProductIngestionMode.REPLACE (equivalents of previous UPDATE and REPLACE, respectively), but new ones can be
   composed of any "sub modes" combination.
 
@@ -193,14 +213,16 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Adjusting property `backbase.stream.client.headers-to-forward` to take precedence over `backbase.stream.client.additional-headers`.
+- Adjusting property `backbase.stream.client.headers-to-forward` to take precedence
+  over `backbase.stream.client.additional-headers`.
 - Fixing Identity m10y configuration on e2e-tests with properly separated realms.
 
 ## [3.10.0](https://github.com/Backbase/stream-services/compare/3.9.3...3.10.0)
 
 ### Added
 
-- Zip layout to composition services. This allows the addition of external jars to the classpath using `loader.path` property.
+- Zip layout to composition services. This allows the addition of external jars to the classpath using `loader.path`
+  property.
 
 ## [3.9.3](https://github.com/Backbase/stream-services/compare/3.9.2...3.9.3)
 
@@ -218,7 +240,8 @@ All notable changes to this project will be documented in this file.
 
 Adding SSDK service discovery mechanism to the Stream Task and Http applications.
 All the service url properties prefixed by `backbase.stream.dbs.*` and `backbase.stream.identity.*` are now removed
-and replaced by the service discovery mechanism of your choice, where the Banking Services will be discovered automatically.
+and replaced by the service discovery mechanism of your choice, where the Banking Services will be discovered
+automatically.
 
 Using Eureka/Registry (Enabled by default):
 
@@ -234,7 +257,8 @@ eureka.client.enabled=false
 spring.cloud.kubernetes.enabled=true
 ```
 
-If you **don't want to user a service discovery** mechanism, the following configuration below needs to be **replaced**. e.g.
+If you **don't want to user a service discovery** mechanism, the following configuration below needs to be **replaced**.
+e.g.
 
 ```yaml
 backbase:
@@ -267,14 +291,21 @@ spring:
                   contextPath: /identity-integration-service
 ```
 
-> **Heads Up!**: The Stream Composition services still don't support client load balancing, hence service discovery isn't available for the moment then you can't configure the spring cloud discovery simple instances. In the scenario where your service don't support, or you want to disable client side load balancers (e.g. `spring.cloud.loadbalancer.enabled=false`), you can override the default DBS services addresses using the `direct-uri` property. e.g.
+> **Heads Up!**: The Stream Composition services still don't support client load balancing, hence service discovery
+> isn't available for the moment then you can't configure the spring cloud discovery simple instances. In the scenario
+> where your service don't support, or you want to disable client side load balancers (
+> e.g. `spring.cloud.loadbalancer.enabled=false`), you can override the default DBS services addresses using
+> the `direct-uri` property. e.g.
 >
 > ```properties
 > backbase.communication.services.access-control.direct-uri=http://non-discoverable-host:8080/access-control
 > backbase.communication.services.identity.integration.direct-uri=http://non-discoverable-host:8080/identity-integration-service
 > ```
 >
-> All configuration properties prefixes can be found at [stream-dbs-clients](stream-dbs-clients/src/main/java/com/backbase/stream/clients/config) module, and they are compliant to SSDK [configuration properties](https://community.backbase.com/documentation/ServiceSDK/latest/generate_clients_from_openapi).
+> All configuration properties prefixes can be found
+> at [stream-dbs-clients](stream-dbs-clients/src/main/java/com/backbase/stream/clients/config) module, and they are
+> compliant to
+> SSDK [configuration properties](https://community.backbase.com/documentation/ServiceSDK/latest/generate_clients_from_openapi).
 
 ## [3.8.2](https://github.com/Backbase/stream-services/compare/3.8.1...3.8.2)
 
@@ -324,7 +355,8 @@ spring:
 
 ### Added
 
-- We welcome [Stream Compositions](stream-compositions)! More details can be found in the [confluence page](https://backbase.atlassian.net/wiki/spaces/ES/pages/3481894959/Stream+Services+3.0).
+- We welcome [Stream Compositions](stream-compositions)! More details can be found in
+  the [confluence page](https://backbase.atlassian.net/wiki/spaces/ES/pages/3481894959/Stream+Services+3.0).
 
 ## [2.86.1](https://github.com/Backbase/stream-services/compare/2.86.0...2.86.1)
 
@@ -336,13 +368,15 @@ spring:
 
 ### Fixed
 
-- Custom Job Role Mapping Issue is fixed by adding missing mapping of BusinessFunction object of BusinessFunctionGroupMapper class
+- Custom Job Role Mapping Issue is fixed by adding missing mapping of BusinessFunction object of
+  BusinessFunctionGroupMapper class
 
 ## [2.85.0](https://github.com/Backbase/stream-services/compare/2.84.0...2.85.0)
 
 ### Added
 
-- Deploying task executables and http services as docker images using `repo.backbase.com/backbase-stream-images` registry.
+- Deploying task executables and http services as docker images using `repo.backbase.com/backbase-stream-images`
+  registry.
 
 > e.g. `repo.backbase.com/backbase-stream-images/legal-entity-bootstrap-task:2.85.0`
 
@@ -352,7 +386,8 @@ spring:
 
 ### Changed
 
-- Segregating `moustache-bank` profile in `moustache-bank-subsidiaries` to support ingesting the root legal entity without any dependency on product service.
+- Segregating `moustache-bank` profile in `moustache-bank-subsidiaries` to support ingesting the root legal entity
+  without any dependency on product service.
 
 ## [2.84.0](https://github.com/Backbase/stream-services/compare/2.83.0...2.84.0)
 
@@ -368,20 +403,20 @@ spring:
 name: ABC Company
 legalEntityType: CUSTOMER
 contacts:
-    - category: Employee
-      externalId: a8141b9e06621c312001
-      addressLine1: 410 7th St
-      addressLine2: ''
-      streetName: ''
-      postCode: 93950
-      town: Pacific Grove
-      countrySubDivision: CA
-      country: US
-      name: Beatrice D. Ma
-      contactPerson: N/A
-      phoneNumber: 530 676 8602
-      Email: be@mail.com
-      accounts:
+  - category: Employee
+    externalId: a8141b9e06621c312001
+    addressLine1: 410 7th St
+    addressLine2: ''
+    streetName: ''
+    postCode: 93950
+    town: Pacific Grove
+    countrySubDivision: CA
+    country: US
+    name: Beatrice D. Ma
+    contactPerson: N/A
+    phoneNumber: 530 676 8602
+    Email: be@mail.com
+    accounts:
       - externalId: a8141b9e06632d362001
         name: Checking USD 2247
         alias: My account
@@ -406,54 +441,54 @@ realmName: customer
 externalId: john
 legalEntityType: CUSTOMER
 users:
-- user:
-    externalId: john99
-    fullName: John Doe
-  referenceJobRoleNames:
-  - Retail Customer
-  contacts:
-  - category: Employee
-    externalId: a8141b9e06621c12001
-    addressLine1: 736 Levy Court
-    addressLine2: ''
-    streetName: ''
-    postCode: '01720'
-    town: Acton
-    countrySubDivision: MA
-    country: US
-    name: Barbara P. Dolan
-    contactPerson: N/A
-    phoneNumber: 617 509 6995
-    Email: Barbara@barb.com
-    accounts:
-    - externalId: a8141b9e06632d62001
-      name: Checking USD 0023
-      alias: ''
-      accountNumber: '9249194950590023'
-      bankName: CitiBank
-      bankAddressLine1: 736 Levy Court
-      bankAddressLine2: ''
-      bankStreetName: ''
-      bankPostCode: '01720'
-      bankTown: Acton
-      bankCountrySubDivision: MA
-      bankCountry: US
-      BIC: CITIUS33
-      bankCode: '11103093'
-    - externalId: a8141b9e06632d62002
-      name: Checking USD 4858
-      alias: ''
-      accountNumber: '1445192940594858'
-      bankName: CitiBank
-      bankAddressLine1: 736 Levy Court
-      bankAddressLine2: ''
-      bankStreetName: ''
-      bankPostCode: '01720'
-      bankTown: Acton
-      bankCountrySubDivision: MA
-      bankCountry: US
-      BIC: CITIUS33
-      bankCode: '11103093'
+  - user:
+      externalId: john99
+      fullName: John Doe
+    referenceJobRoleNames:
+      - Retail Customer
+    contacts:
+      - category: Employee
+        externalId: a8141b9e06621c12001
+        addressLine1: 736 Levy Court
+        addressLine2: ''
+        streetName: ''
+        postCode: '01720'
+        town: Acton
+        countrySubDivision: MA
+        country: US
+        name: Barbara P. Dolan
+        contactPerson: N/A
+        phoneNumber: 617 509 6995
+        Email: Barbara@barb.com
+        accounts:
+          - externalId: a8141b9e06632d62001
+            name: Checking USD 0023
+            alias: ''
+            accountNumber: '9249194950590023'
+            bankName: CitiBank
+            bankAddressLine1: 736 Levy Court
+            bankAddressLine2: ''
+            bankStreetName: ''
+            bankPostCode: '01720'
+            bankTown: Acton
+            bankCountrySubDivision: MA
+            bankCountry: US
+            BIC: CITIUS33
+            bankCode: '11103093'
+          - externalId: a8141b9e06632d62002
+            name: Checking USD 4858
+            alias: ''
+            accountNumber: '1445192940594858'
+            bankName: CitiBank
+            bankAddressLine1: 736 Levy Court
+            bankAddressLine2: ''
+            bankStreetName: ''
+            bankPostCode: '01720'
+            bankTown: Acton
+            bankCountrySubDivision: MA
+            bankCountry: US
+            BIC: CITIUS33
+            bankCode: '11103093'
 ```
 
 - Contacts Support for Service Agreement
@@ -467,46 +502,46 @@ customServiceAgreement:
   status: ENABLED
   isMaster: 'false'
   participants:
-  - externalId: bory-coffee-ltd
-    sharingUsers: false
-    sharingAccounts: true
-    admins:
-    - kristelcfo
-  - externalId: salary-services-ltd
-    sharingUsers: true
-    sharingAccounts: false
-    users:
-    - hhsa01
-    - fbsa02
+    - externalId: bory-coffee-ltd
+      sharingUsers: false
+      sharingAccounts: true
+      admins:
+        - kristelcfo
+    - externalId: salary-services-ltd
+      sharingUsers: true
+      sharingAccounts: false
+      users:
+        - hhsa01
+        - fbsa02
   contacts:
-  - category: Employee
-    externalId: a8141b9e06621c512001
-    addressLine1: 02 Meadows Dr,
-    addressLine2: ''
-    streetName: ''
-    postCode: 30010
-    town: Columbus
-    countrySubDivision: GA
-    country: US
-    name: Troy M. Hazard
-    contactPerson: N/A
-    phoneNumber: 530 676 5523
-    Email: Tr@mail.com
-    accounts:
-    - externalId: a8141b9e06632d562001
-      name: Checking USD 0022
-      alias: ''
-      accountNumber: '2512948500122022'
-      bankName: Bank of America
-      bankAddressLine1: 50 Georgia St
-      bankAddressLine2: ''
-      bankStreetName: ''
-      bankPostCode: '30102'
-      bankTown: Atlanta
-      bankCountrySubDivision: GA
-      bankCountry: US
-      BIC: BOFAUS6H
-      bankCode: '121000358'
+    - category: Employee
+      externalId: a8141b9e06621c512001
+      addressLine1: 02 Meadows Dr,
+      addressLine2: ''
+      streetName: ''
+      postCode: 30010
+      town: Columbus
+      countrySubDivision: GA
+      country: US
+      name: Troy M. Hazard
+      contactPerson: N/A
+      phoneNumber: 530 676 5523
+      Email: Tr@mail.com
+      accounts:
+        - externalId: a8141b9e06632d562001
+          name: Checking USD 0022
+          alias: ''
+          accountNumber: '2512948500122022'
+          bankName: Bank of America
+          bankAddressLine1: 50 Georgia St
+          bankAddressLine2: ''
+          bankStreetName: ''
+          bankPostCode: '30102'
+          bankTown: Atlanta
+          bankCountrySubDivision: GA
+          bankCountry: US
+          BIC: BOFAUS6H
+          bankCode: '121000358'
 ```
 
 ## \[2.83.0\]
@@ -525,7 +560,8 @@ customServiceAgreement:
 
 ### Fixed
 
-- [176](https://github.com/Backbase/stream-services/issues/176): Update Job Role does not consider the 207 multi-status response
+- [176](https://github.com/Backbase/stream-services/issues/176): Update Job Role does not consider the 207 multi-status
+  response
 
 ## \[2.80.0\]
 
@@ -562,7 +598,8 @@ productGroups:
 
 ### Added
 
-- Support for updating Portfolio Capability data. Example(\[stream-portfolio/readme.md\](stream-portfolio/readme.md#Bootstrap Ingestion Configuration))
+- Support for updating Portfolio Capability data. Example(\[stream-portfolio/readme.md\](
+  stream-portfolio/readme.md#Bootstrap Ingestion Configuration))
 
 ## \[2.76.0\]
 
@@ -715,26 +752,28 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 - Old Legal Entity Open API definitions
 - Stream Transactions Open API Spec
 - Removed Spring Cloud Data Flow components as nobody uses it
-  - Stream Cursor Source
-  - Legal Entity Sink
-  - Product Sink
-  - Transactions Sink
-  - Transactions HTTP
+    - Stream Cursor Source
+    - Legal Entity Sink
+    - Product Sink
+    - Transactions Sink
+    - Transactions HTTP
 - Removed Stream SDK Starters
-  - `stream-aio-starter-parent` (replaced by `service-sdk-core-starter`)
-  - `stream-batch-starter-parent` (replaced by `service-sdk-starter-core` + `spring-boot-starter-batch`)
-  - `stream-generated-client-starter-parent`
-  - `stream-processor-starter-parent`
-  - `stream-sdk-starter-core`(replaced by `service-sdk-starter-core`)
-  - `stream-sink-starter-parent`
-  - `stream-source-starter-parent`
+    - `stream-aio-starter-parent` (replaced by `service-sdk-core-starter`)
+    - `stream-batch-starter-parent` (replaced by `service-sdk-starter-core` + `spring-boot-starter-batch`)
+    - `stream-generated-client-starter-parent`
+    - `stream-processor-starter-parent`
+    - `stream-sdk-starter-core`(replaced by `service-sdk-starter-core`)
+    - `stream-sink-starter-parent`
+    - `stream-source-starter-parent`
 - Removed `stream-dbs-web-client` (replaced by `service-sdk-web-client`)
-  - The OAuth2 client (provider and registration) initially defined as `dbs` is now called `bb`, hence the token converter configuration should to be updated (e.g. `spring.security.oauth2.client.provider.bb.token-uri=http://token-converter:8080/oauth/token`).
+    - The OAuth2 client (provider and registration) initially defined as `dbs` is now called `bb`, hence the token
+      converter configuration should to be updated (
+      e.g. `spring.security.oauth2.client.provider.bb.token-uri=http://token-converter:8080/oauth/token`).
 
 ### Changed
 
 - Replaced Stream SDK with Service SDK 14.1.0.
-  - Upgrade Spring Boot 2.6.6
+    - Upgrade Spring Boot 2.6.6
 
 ## \[2.74.0\]
 
@@ -780,7 +819,8 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 
 ### Added
 
-- Ability to configure what Function Group type needs to be deleted. This can be configured through `backbase.stream.deletion.functionGroupItemType`. With values `NONE` (default) or `TEMPLATE`.
+- Ability to configure what Function Group type needs to be deleted. This can be configured
+  through `backbase.stream.deletion.functionGroupItemType`. With values `NONE` (default) or `TEMPLATE`.
 
 ### Fixed
 
@@ -802,8 +842,10 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 
 ### Changed
 
-- Order of product group stream task processing within legal entity saga is changed to sequential. This is due to the fact that in some
-  circumstances user permissions update loosing previously assigned permissions during ingestion process (due to the nature of reactive processing)
+- Order of product group stream task processing within legal entity saga is changed to sequential. This is due to the
+  fact that in some
+  circumstances user permissions update loosing previously assigned permissions during ingestion process (due to the
+  nature of reactive processing)
 
 ### Fixed
 
@@ -831,7 +873,8 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 
 ### Added
 
-- Additional realm roles added as attribute to User model and will be passed to legal-entity-integration service within Legal Entity Saga execution
+- Additional realm roles added as attribute to User model and will be passed to legal-entity-integration service within
+  Legal Entity Saga execution
 
 ## [2.64.0]
 
@@ -843,7 +886,8 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 
 ### Fixed
 
-- Legal Entity Saga: linkLegalEntityToRealm method executed multiple times ( when multiple users are ingested): `unique constraint (PK_LE_ASSIGN_REALM) violated`
+- Legal Entity Saga: linkLegalEntityToRealm method executed multiple times ( when multiple users are
+  ingested): `unique constraint (PK_LE_ASSIGN_REALM) violated`
 
 ## [2.61.0]
 
@@ -861,10 +905,14 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 ### Changed
 
 - UserService
-  - Failed operations in User Service now generally return StreamTaskExceptions allowing for better control and handling of failures.
+    - Failed operations in User Service now generally return StreamTaskExceptions allowing for better control and
+      handling of failures.
 - Stream Task
-  - Added last error message for easier logging down stream
-- LIngesting a Flux of Customers / Transaction will not cause a thread mayhem and can be controlled through configuration. For Legal Entity Http Serivce, set the `backbase.stream.legalentity.sink.task-executors` property to control. When processing a Flux of Legal Entities, provide the concurrency parameter when invoking the `com.backbase.stream.LegalEntitySaga.executeTask` method. For example :
+    - Added last error message for easier logging down stream
+- LIngesting a Flux of Customers / Transaction will not cause a thread mayhem and can be controlled through
+  configuration. For Legal Entity Http Serivce, set the `backbase.stream.legalentity.sink.task-executors` property to
+  control. When processing a Flux of Legal Entities, provide the concurrency parameter when invoking
+  the `com.backbase.stream.LegalEntitySaga.executeTask` method. For example :
 
 ```
         Flux<LegalEntity> flux = legalEntity
@@ -888,11 +936,13 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 ### Changed
 
 - Update to `2021.09` release (DBS `2.21.2` and Identity `1.9.2`)
-  - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.postTransactions.
-  - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.getTransactions.
-  - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.patchTransactions.
-  - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.postDelete.
-  - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.postRefresh.
+    - Optional parameter (`xTransactionsServiceAgreementId`) added to
+      TransactionPresentationServiceApi.postTransactions.
+    - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.getTransactions.
+    - Optional parameter (`xTransactionsServiceAgreementId`) added to
+      TransactionPresentationServiceApi.patchTransactions.
+    - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.postDelete.
+    - Optional parameter (`xTransactionsServiceAgreementId`) added to TransactionPresentationServiceApi.postRefresh.
 
 ### Maintenance
 
@@ -902,9 +952,11 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 
 ### Added
 
-- Added support for json logging via logstash-logback-encoder. (could be replaced by service-sdk-starter-logging later on)
+- Added support for json logging via logstash-logback-encoder. (could be replaced by service-sdk-starter-logging later
+  on)
   In order to have logging in json format it's possible to provide logback.xml config from the external app
-  via jvm option `-Dlogging.config=file:logback.xml` or specify in the `application.yml` like `logging.config=file:logback.xml`
+  via jvm option `-Dlogging.config=file:logback.xml` or specify in the `application.yml`
+  like `logging.config=file:logback.xml`
 
 ## [2.46.3]
 
@@ -946,19 +998,19 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 ### Fixed
 
 - Legal Entity Saga
-  - Errors happening in the user profile manager must now correctly be dealt with.
-  - Ensure reactive immutability on user service operations.
+    - Errors happening in the user profile manager must now correctly be dealt with.
+    - Ensure reactive immutability on user service operations.
 
 ### Changed
 
 - Use backbase bom pom instead of banking-service and identity boms
 - Update to 2021.07 release (DBS 2.21.0 and Identity 1.9.0)
-  - Optional parameter (`includeSubscriptions`) added to ArrangementsApi.getArrangementById.
-  - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postTransactions.
-  - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.getTransactions.
-  - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.patchTransactions.
-  - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postDelete.
-  - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postRefresh.
+    - Optional parameter (`includeSubscriptions`) added to ArrangementsApi.getArrangementById.
+    - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postTransactions.
+    - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.getTransactions.
+    - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.patchTransactions.
+    - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postDelete.
+    - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postRefresh.
 
 ### Maintenance
 
@@ -983,7 +1035,8 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 
 ### Fixed
 
-- Permissions assignment for user marked as admin was working incorrectly due to fact that System Function Group was returned when no assigned groups expected
+- Permissions assignment for user marked as admin was working incorrectly due to fact that System Function Group was
+  returned when no assigned groups expected
 
 ## [2.41.0]
 
@@ -1003,36 +1056,39 @@ e.g.
 
 ```yaml
 jobRoles:
-- name: SUUS
-  description: Manager of the online helpdesk and processing teams, able to set up/edit contracts, add accounts etc. Also able to set up Broadcast messages
-  functionGroups:
-    - name: Manage Product Summary
-      functions:
-        - functionId: 1006
-          name: Product Summary
-          privileges:
-            - privilege: view
-            - privilege: create
-            - privilege: edit
+  - name: SUUS
+    description: Manager of the online helpdesk and processing teams, able to set up/edit contracts, add accounts etc. Also able to set up Broadcast messages
+    functionGroups:
+      - name: Manage Product Summary
+        functions:
+          - functionId: 1006
+            name: Product Summary
+            privileges:
+              - privilege: view
+              - privilege: create
+              - privilege: edit
 ```
 
 ## [2.39.0]
 
 ### Changed
 
-- For *access-control-core* exclusion of system function group was added in order to avoid DB constraint triggering during permissions PUT
+- For *access-control-core* exclusion of system function group was added in order to avoid DB constraint triggering
+  during permissions PUT
 
 ## [2.38.0]
 
 ### Fixed
 
-- For *legal-entity-bootstrap-task* fix case when link le to realm task could end the flow because empty returned instead of chaining stream task
+- For *legal-entity-bootstrap-task* fix case when link le to realm task could end the flow because empty returned
+  instead of chaining stream task
 
 ## [2.37.0]
 
 ### Added
 
-- For *legal-entity-bootstrap-task*, in case of no users/administrators is specified and identity integration enabled, provided realm will be created (if not exists) and linked to legal entity
+- For *legal-entity-bootstrap-task*, in case of no users/administrators is specified and identity integration enabled,
+  provided realm will be created (if not exists) and linked to legal entity
 
 ## [2.35.0]
 
@@ -1060,12 +1116,12 @@ bootstrap:
   approvals:
     - name: 4 eye approval policy
         approvalTypes:
-          - name: Supervisor
-            description: Supervisor approval level
-            rank: 1
-          - name: HelpDesk
-            description: Digital helpdesk and Operations User
-            rank: 2
+            - name: Supervisor
+              description: Supervisor approval level
+              rank: 1
+              - name: HelpDesk
+                description: Digital helpdesk and Operations User
+                rank: 2
         policies:
           - name: 4 eye policy
             description: Policy that requires approval from supervisor
@@ -1109,7 +1165,9 @@ bootstrap:
 
 - added lock identity user on creation flag.
 
-> New conditionally mandatory property added in legal entity stream: `backbase.stream.identity.identity-integration-base-url` to indicate BackBase Identity base URL for clients that integrate with it. This property must be defined when: `backbase.stream.legalentity.sink.use-identity-integration=true`
+> New conditionally mandatory property added in legal entity
+> stream: `backbase.stream.identity.identity-integration-base-url` to indicate BackBase Identity base URL for clients that
+> integrate with it. This property must be defined when: `backbase.stream.legalentity.sink.use-identity-integration=true`
 
 ## [2.31.0]
 
@@ -1127,13 +1185,15 @@ bootstrap:
 
 ### Changed
 
-- Checking the response recieved from Legal entity api , user  api to is2xxSuccessful as it  returns 207 response for success.
+- Checking the response recieved from Legal entity api , user api to is2xxSuccessful as it returns 207 response for
+  success.
 
 ## [2.28.0]
 
 ### Changed
 
-- Add "Custom Data Group Items" to Product Groups, require either Products or Custom Data Group Items (previously just Products)
+- Add "Custom Data Group Items" to Product Groups, require either Products or Custom Data Group Items (previously just
+  Products)
 
 ## [2.27.0]
 
@@ -1159,7 +1219,9 @@ The service-api/v2/users/externalids/{externlaIId}?skipHierarchyCheck=true retur
 
 ### Added
 
-- Included possibility to use Custom Service Agreements. From now on, if a custom service agreement is declared, and a master service agreement is not explicitly declared, that legal entity will have a custom service agreement only. If none are declared a default master service agreement is created. e.g.:
+- Included possibility to use Custom Service Agreements. From now on, if a custom service agreement is declared, and a
+  master service agreement is not explicitly declared, that legal entity will have a custom service agreement only. If
+  none are declared a default master service agreement is created. e.g.:
 
 ```yaml
 bootstrap:
@@ -1241,7 +1303,8 @@ bootstrap:
 
 ### Fixed
 
-- Fix for issue Product Catalog creation fails when either kinds or types are nullCLOSED (Product Catalog null pointer when either kinds or types are null)
+- Fix for issue Product Catalog creation fails when either kinds or types are nullCLOSED (Product Catalog null pointer
+  when either kinds or types are null)
 - Fix for issue Dependency conflict for org.yaml.snakeyamlCLOSED  (dependency conflicts)
 - Fix for null pointer in UserProfileMapper when additional emails/phones are null
 
@@ -1254,8 +1317,10 @@ bootstrap:
 ### Added
 
 - Added UserProfile support (for DBS service user-profile-manager) in Legal Entity SAGA.
-  It’s disabled by default and can be enabled by setting flag backbase.stream.legalentity.sink.userProfileEnabled to true.
-  It’s implemented as a nested object under User model, and it will use some of its properties (like fullName, email and phoneNumber) when constructing the UserProfile DBS resource.
+  It’s disabled by default and can be enabled by setting flag backbase.stream.legalentity.sink.userProfileEnabled to
+  true.
+  It’s implemented as a nested object under User model, and it will use some of its properties (like fullName, email and
+  phoneNumber) when constructing the UserProfile DBS resource.
   It performs an upsert so it supports both creation and update.
   Example:
 
@@ -1294,7 +1359,8 @@ bootstrap:
 ### Fixed
 
 - Fixed implementation of Reference Job Roles where we can assign a list of reference job roles to a specific user.
-  - Example with legal-entity-bootstrap-task on how to create a Reference Job Role in the root legal entity and assign it to a user below the hierarchy (example with a subsidiary):
+    - Example with legal-entity-bootstrap-task on how to create a Reference Job Role in the root legal entity and assign
+      it to a user below the hierarchy (example with a subsidiary):
 
 ```yaml
 bootstrap:
@@ -1383,6 +1449,7 @@ bootstrap:
 - Packaging the Saga’s OpenAPI specs in a zip module:
 
 ```xml
+
 <dependency>
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-models</artifactId>
@@ -1397,7 +1464,8 @@ bootstrap:
 ### Fixed
 
 - Fixed object mapper to not serialize null values
-- BUGFIX: Product Ingestion Saga was replacing all permissions assigned to users and adding new ones, now they are merged: #14
+- BUGFIX: Product Ingestion Saga was replacing all permissions assigned to users and adding new ones, now they are
+  merged: #14
 
 ### Changed
 
@@ -1412,7 +1480,8 @@ bootstrap:
 
 ### Changed
 
-- The master service agreement now can be manipulated during the creation of the Legal Entity, so we can add Assignable Permission Sets to it.
+- The master service agreement now can be manipulated during the creation of the Legal Entity, so we can add Assignable
+  Permission Sets to it.
 
 ## [2.8.0]
 
@@ -1445,7 +1514,7 @@ bootstrap:
 - Stream SDK part of Stream Services repository
 - DBS Clients generated with Boat
 - DBS Endpoints changed, defaults are now set to the defaults setup in Kubernetes.
-  - Before:
+    - Before:
 
 ```yaml
 spring:
@@ -1461,7 +1530,7 @@ backbase:
       access-control-pandp-base-url: https://stream-api.proto.backbasecloud.com/accesscontrol-pandp-service/service-api/v2
       access-group-presentation-base-url: https://stream-api.proto.backbasecloud.com/accessgroup-presentation-service/service-api/v2
       account-presentation-base-url: https://stream-api.proto.backbasecloud.com/account-presentation-service/service-api/v2
-      legal-entity-presentation-base-url:  https://stream-api.proto.backbasecloud.com/legalentity-presentation-service/service-api/v2
+      legal-entity-presentation-base-url: https://stream-api.proto.backbasecloud.com/legalentity-presentation-service/service-api/v2
       user-presentation-base-url: https://stream-api.proto.backbasecloud.com/user-presentation-service/service-api/v2
       transaction-presentation-base-url: https://stream-api.proto.backbasecloud.com/transaction-presentation-service/service-api/v2
 ```
@@ -1487,54 +1556,105 @@ backbase:
 ```
 
 [2.10.0]: https://github.com/Backbase/stream-services/compare/2.9.0...2.10.0
+
 [2.11.0]: https://github.com/Backbase/stream-services/compare/2.10.0...2.11.0
+
 [2.12.0]: https://github.com/Backbase/stream-services/compare/2.11.0...2.12.0
+
 [2.13.0]: https://github.com/Backbase/stream-services/compare/2.12.0...2.13.0
+
 [2.14.0]: https://github.com/Backbase/stream-services/compare/2.13.0...2.14.0
+
 [2.15.0]: https://github.com/Backbase/stream-services/compare/2.14.0...2.15.0
+
 [2.16.0]: https://github.com/Backbase/stream-services/compare/2.15.0...2.16.0
+
 [2.17.0]: https://github.com/Backbase/stream-services/compare/2.16.0...2.17.0
+
 [2.18.0]: https://github.com/Backbase/stream-services/compare/2.17.0...2.18.0
+
 [2.19.0]: https://github.com/Backbase/stream-services/compare/2.18.0...2.19.0
+
 [2.20.0]: https://github.com/Backbase/stream-services/compare/2.19.0...2.20.0
+
 [2.21.0]: https://github.com/Backbase/stream-services/compare/2.20.0...2.21.0
+
 [2.22.0]: https://github.com/Backbase/stream-services/compare/2.21.0...2.22.0
+
 [2.23.0]: https://github.com/Backbase/stream-services/compare/2.22.0...2.23.0
+
 [2.24.0]: https://github.com/Backbase/stream-services/compare/2.23.0...2.24.0
+
 [2.25.0]: https://github.com/Backbase/stream-services/compare/2.24.0...2.25.0
+
 [2.26.0]: https://github.com/Backbase/stream-services/compare/2.25.0...2.26.0
+
 [2.27.0]: https://github.com/Backbase/stream-services/compare/2.26.0...2.27.0
+
 [2.28.0]: https://github.com/Backbase/stream-services/compare/2.27.0...2.28.0
+
 [2.29.0]: https://github.com/Backbase/stream-services/compare/2.28.0...2.29.0
+
 [2.30.0]: https://github.com/Backbase/stream-services/compare/2.29.0...2.30.0
+
 [2.31.0]: https://github.com/Backbase/stream-services/compare/2.30.0...2.31.0
+
 [2.32.0]: https://github.com/Backbase/stream-services/compare/2.31.0...2.32.0
+
 [2.33.0]: https://github.com/Backbase/stream-services/compare/2.32.0...2.33.0
+
 [2.34.0]: https://github.com/Backbase/stream-services/compare/2.33.0...2.34.0
+
 [2.35.0]: https://github.com/Backbase/stream-services/compare/2.34.0...2.35.0
+
 [2.37.0]: https://github.com/Backbase/stream-services/compare/2.36.0...2.37.0
+
 [2.38.0]: https://github.com/Backbase/stream-services/compare/2.37.0...2.38.0
+
 [2.39.0]: https://github.com/Backbase/stream-services/compare/2.38.0...2.39.0
+
 [2.40.0]: https://github.com/Backbase/stream-services/compare/2.39.0...2.40.0
+
 [2.41.0]: https://github.com/Backbase/stream-services/compare/2.40.0...2.41.0
+
 [2.42.0]: https://github.com/Backbase/stream-services/compare/2.41.0...2.42.0
+
 [2.43.0]: https://github.com/Backbase/stream-services/compare/2.42.0...2.43.0
+
 [2.44.0]: https://github.com/Backbase/stream-services/compare/2.43.0...2.44.0
+
 [2.45.0]: https://github.com/Backbase/stream-services/compare/2.44.0...2.45.0
+
 [2.46.0]: https://github.com/Backbase/stream-services/compare/2.45.0...2.46.0
+
 [2.46.1]: https://github.com/Backbase/stream-services/compare/2.46.0...2.46.1
+
 [2.46.2]: https://github.com/Backbase/stream-services/compare/2.46.1...2.46.2
+
 [2.46.3]: https://github.com/Backbase/stream-services/compare/2.46.2...2.46.3
+
 [2.47.0]: https://github.com/Backbase/stream-services/compare/2.46.3...2.47.0
+
 [2.48.0]: https://github.com/Backbase/stream-services/compare/2.47.0...2.48.0
+
 [2.51.0]: https://github.com/Backbase/stream-services/compare/2.48.0...2.51.0
+
 [2.52.0]: https://github.com/Backbase/stream-services/compare/2.51.0...2.52.0
+
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
+
 [2.61.0]: https://github.com/Backbase/stream-services/compare/2.52.0...2.61.0
+
 [2.62.0]: https://github.com/Backbase/stream-services/compare/2.61.0...2.62.0
+
 [2.64.0]: https://github.com/Backbase/stream-services/compare/2.62.0...2.64.0
+
 [2.7.0]: https://github.com/Backbase/stream-services/compare/2.6.0...2.7.0
+
 [2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
+
 [2.75.0]: https://github.com/Backbase/stream-services/compare/2.74.0...2.75.0
+
 [2.8.0]: https://github.com/Backbase/stream-services/compare/2.7.0...2.8.0
+
 [2.9.0]: https://github.com/Backbase/stream-services/compare/2.8.0...2.9.0

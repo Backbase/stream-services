@@ -44,7 +44,8 @@ releases:
 
 ## Deployment
 
-The deployment of these charts are not yet automated, hence to make a new version available you have to go through the following steps:
+The deployment of these charts are not yet automated, hence to make a new version available you have to go through the
+following steps:
 
 ```shell
 helm package stream-bootstrap-task

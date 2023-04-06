@@ -7,7 +7,7 @@
 ## Configuration Properties
 
 | Property Path                                                                 | Property Description                                                                                                                                                     |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|-------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | backbase.stream.compositions.legal-entity.integration-base-url                | The Integration base url, which pulls the data from core                                                                                                                 |
 | backbase.stream.compositions.legal-entity.chains.product-composition.enabled  | The toggle for chaining to be enabled/disabled                                                                                                                           |
 | backbase.stream.compositions.legal-entity.chains.product-composition.base-url | The product composition service base url                                                                                                                                 |
@@ -27,5 +27,5 @@
 
   In the application yml, disable the User Profile ->
 
-  - backbase.stream.legalentity.sink.userProfileEnabled: false
-  - backbase.stream.legalentity.dbs.user-profile-manager-base-url -> Remove the base url
+    - backbase.stream.legalentity.sink.userProfileEnabled: false
+    - backbase.stream.legalentity.dbs.user-profile-manager-base-url -> Remove the base url
