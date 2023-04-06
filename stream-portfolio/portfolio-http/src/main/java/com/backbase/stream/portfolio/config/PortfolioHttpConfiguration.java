@@ -10,7 +10,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 
 /**
  * Portfolio Http Configuration.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

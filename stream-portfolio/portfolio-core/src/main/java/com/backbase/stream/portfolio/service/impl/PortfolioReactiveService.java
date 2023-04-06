@@ -12,7 +12,7 @@ import reactor.core.publisher.Flux;
 
 /**
  * Reactive implementation of {@code PortfolioService}.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

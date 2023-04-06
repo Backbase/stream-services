@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * Region Test Util.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

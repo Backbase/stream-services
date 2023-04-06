@@ -26,7 +26,7 @@ class PortfolioSagaTest {
 
     @Mock
     private PortfolioIntegrationService portfolioIntegrationService;
-    
+
     @Mock
     private InstrumentIntegrationService instrumentIntegrationService;
 

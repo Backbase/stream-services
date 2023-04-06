@@ -22,4 +22,3 @@ public class TransactionIngestPullRequest {
 
     private List<String> lastIngestedExternalIds;
 }
-

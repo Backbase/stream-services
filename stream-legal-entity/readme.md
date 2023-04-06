@@ -12,7 +12,7 @@ The API uses a special Ingestion Model which is an aggregate of all objects nece
 
 ## How it works
 
-The Legal Entity Saga orchestrates calls to Backbase DBS using information pass in the Legal Entity Ingestion Model. 
+The Legal Entity Saga orchestrates calls to Backbase DBS using information pass in the Legal Entity Ingestion Model.
 
 ![Sequence Diagram](docs/legal_enttiy_saga_sequence.png)
 
@@ -30,14 +30,14 @@ The Legal Entity Saga can be used in several ways:
 
 ## Legal Entity Bootstrap
 
-For the initial ingestion of the Legal Entity, you can use the Spring Boot Task `legal-entity-bootstrap-task`. 
+For the initial ingestion of the Legal Entity, you can use the Spring Boot Task `legal-entity-bootstrap-task`.
 
 Examples and usage instructions can be found in the [readme.md](legal-entity-bootstrap-task/readme.md).
 
 
 ## Legal Entity HTTP
 
-For processes that require an HTTP endpoint for ingestion of Legal Entities, the Legal Entity HTTP Service be deployed. 
+For processes that require an HTTP endpoint for ingestion of Legal Entities, the Legal Entity HTTP Service be deployed.
 The Legal Entity HTTP Service can be used to ingest Legal Entities both synchronously and asynchronously.
 
 Examples and usage instructions can be found in the [readme.md](legal-entity-http/readme.md).
@@ -45,6 +45,6 @@ Examples and usage instructions can be found in the [readme.md](legal-entity-htt
 
 ## Legal Entity Sink
 
-The Legal Entity Sink can be used in Spring Cloud Data Flow and serve as a Sink to Ingest Legal Entities. 
+The Legal Entity Sink can be used in Spring Cloud Data Flow and serve as a Sink to Ingest Legal Entities.
 
-Examples and usage instructions can be found in the [readme.md](legal-entity-sink/readme.md). 
+Examples and usage instructions can be found in the [readme.md](legal-entity-sink/readme.md).

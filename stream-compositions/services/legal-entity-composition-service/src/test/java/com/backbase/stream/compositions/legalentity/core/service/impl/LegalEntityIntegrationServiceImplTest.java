@@ -107,4 +107,3 @@ class LegalEntityIntegrationServiceImplTest {
         assertNull(legalEntityResponse);
     }
 }
-

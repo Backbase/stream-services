@@ -10,7 +10,7 @@ import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 
 /**
  * PortfolioSaga Configuration.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

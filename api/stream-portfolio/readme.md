@@ -7,7 +7,7 @@ Instrument
     history price
 
 Transaction category
-    Transactions (find by portfolio code)  
+    Transactions (find by portfolio code)
 
 Portfolio
 SubPortfolio

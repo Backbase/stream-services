@@ -66,4 +66,3 @@ initContainers:
 {{- end -}}
 {{- end -}}
 {{- end -}}
-

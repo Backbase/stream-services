@@ -18,7 +18,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 /**
  * WealthPortfolioAllocations IT.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

@@ -18,7 +18,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 /**
  * WealthPortfolioPositionHierarchy IT.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

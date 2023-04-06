@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file.
 
 ## [3.26.2](https://github.com/Backbase/stream-services/compare/3.26.1...3.26.2)
 ### Added
-- Included property to override the validation of atomic batch responses coming from DBS: When a single item is not successful in the batch response it fails the entire saga. 
+- Included property to override the validation of atomic batch responses coming from DBS: When a single item is not successful in the batch response it fails the entire saga.
 Keeping validation enabled for backwards compatibility: `backbase.stream.dbs.batch.validate-atomic-response=true`.
 - Enhancing logs for legal entity composition subsidiaries processing.
 - Updating the e2e tests images version.
@@ -119,10 +119,10 @@ Keeping validation enabled for backwards compatibility: `backbase.stream.dbs.bat
 
 ## [3.11.0](https://github.com/Backbase/stream-services/compare/3.10.1...3.11.0)
 ### Changed
-- Replaced BatchProductGroupTask.IngestionMode with more flexible BatchProductIngestionMode class. 
-New class keeps ingestion modes separately for each main resource involved in BatchProductIngestionSaga processing: 
-function groups, data groups and arrangements. Two preset modes have been created: BatchProductIngestionMode.UPSERT and 
-BatchProductIngestionMode.REPLACE (equivalents of previous UPDATE and REPLACE, respectively), but new ones can be 
+- Replaced BatchProductGroupTask.IngestionMode with more flexible BatchProductIngestionMode class.
+New class keeps ingestion modes separately for each main resource involved in BatchProductIngestionSaga processing:
+function groups, data groups and arrangements. Two preset modes have been created: BatchProductIngestionMode.UPSERT and
+BatchProductIngestionMode.REPLACE (equivalents of previous UPDATE and REPLACE, respectively), but new ones can be
 composed of any "sub modes" combination.
 
 ## [3.10.1](https://github.com/Backbase/stream-services/compare/3.10.0...3.10.1)
@@ -152,7 +152,7 @@ Using Eureka/Registry (Enabled by default):
 eureka.client.serviceUrl.defaultZone=http://registry:8080/eureka
 eureka.instance.non-secure-port=8080
 ```
-Using Kubernetes: 
+Using Kubernetes:
 ```properties
 eureka.client.enabled=false
 spring.cloud.kubernetes.enabled=true
@@ -189,7 +189,7 @@ spring:
 ```
 
 > **Heads Up!**: The Stream Composition services still don't support client load balancing, hence service discovery isn't available for the moment then you can't configure the spring cloud discovery simple instances. In the scenario where your service don't support, or you want to disable client side load balancers (e.g. `spring.cloud.loadbalancer.enabled=false`), you can override the default DBS services addresses using the `direct-uri` property. e.g.
-> ```properties 
+> ```properties
 > backbase.communication.services.access-control.direct-uri=http://non-discoverable-host:8080/access-control
 > backbase.communication.services.identity.integration.direct-uri=http://non-discoverable-host:8080/identity-integration-service
 > ```
@@ -211,7 +211,7 @@ spring:
 
 ## [3.5.0](https://github.com/Backbase/stream-services/compare/3.4.0...3.5.0)
 ### Added
-- Added support for push ingestion mode for product and transactions 
+- Added support for push ingestion mode for product and transactions
 
 ## [3.4.0](https://github.com/Backbase/stream-services/compare/3.3.0...3.4.0)
 ### Added
@@ -239,7 +239,7 @@ spring:
 
 ## [2.85.0](https://github.com/Backbase/stream-services/compare/2.84.0...2.85.0)
 ### Added
-- Deploying task executables and http services as docker images using `repo.backbase.com/backbase-stream-images` registry. 
+- Deploying task executables and http services as docker images using `repo.backbase.com/backbase-stream-images` registry.
 > e.g. `repo.backbase.com/backbase-stream-images/legal-entity-bootstrap-task:2.85.0`
 
 ### Fixed
@@ -250,8 +250,8 @@ spring:
 
 ## [2.84.0](https://github.com/Backbase/stream-services/compare/2.83.0...2.84.0)
 ### Added
-- Contacts Support Added for Legal Entity, Service Agreement and Users 
-- Usage Sample of Bootstrap json to be added to Legal Entity, Service Agreement and User 
+- Contacts Support Added for Legal Entity, Service Agreement and Users
+- Usage Sample of Bootstrap json to be added to Legal Entity, Service Agreement and User
 
 - Contacts Support for LE Contacts
 ```yaml
@@ -607,7 +607,7 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 ### Changed
 - Update Spring Boot to 2.5.14
 - Update Swagger Core to 2.2.0
-- Update bcprov-jdk15on to 1.70 
+- Update bcprov-jdk15on to 1.70
 
 ## [2.71.0]
 ### Added
@@ -641,8 +641,8 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 
 ## [2.66.0]
 ### Changed
-- Order of product group stream task processing within legal entity saga is changed to sequential. This is due to the fact that in some 
-  circumstances user permissions update loosing previously assigned permissions during ingestion process (due to the nature of reactive processing) 
+- Order of product group stream task processing within legal entity saga is changed to sequential. This is due to the fact that in some
+  circumstances user permissions update loosing previously assigned permissions during ingestion process (due to the nature of reactive processing)
 ### Fixed
 - Additional headers propagation to several calls within legal entity saga
 
@@ -674,9 +674,9 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 - Legal Entity Saga: referenceJobRoleNames are mixed up between users ( when multiple users are ingested)
 
 ## [2.52.0]
-### Removed 
+### Removed
 - Audit Core & Http Service. Created as a demo, never to be used.
-- Erroneous log message removed when assigning permissiosn without datagroups which is not an exception anymore. 
+- Erroneous log message removed when assigning permissiosn without datagroups which is not an exception anymore.
 ### Changed
 - UserService
   - Failed operations in User Service now generally return StreamTaskExceptions allowing for better control and handling of failures.
@@ -711,7 +711,7 @@ Clean up of many old components and replaced Stream SDK with Service SDK 14
 ## [2.47.0]
 ### Added
 - Added support for json logging via logstash-logback-encoder. (could be replaced by service-sdk-starter-logging later on)
-In order to have logging in json format it's possible to provide logback.xml config from the external app 
+In order to have logging in json format it's possible to provide logback.xml config from the external app
 via jvm option `-Dlogging.config=file:logback.xml` or specify in the `application.yml` like `logging.config=file:logback.xml`
 
 ## [2.46.3]
@@ -724,7 +724,7 @@ via jvm option `-Dlogging.config=file:logback.xml` or specify in the `applicatio
 
 ## [2.46.2]
 ### Changed
-- Non existing Business function groups from the request should be persisted.  
+- Non existing Business function groups from the request should be persisted.
 
 ## [2.46.1]
 ### Changed
@@ -742,9 +742,9 @@ with empty functions.
 
 ## [2.45.0]
 ### Fixed
-- Legal Entity Saga 
+- Legal Entity Saga
   - Errors happening in the user profile manager must now correctly be dealt with.
-  - Ensure reactive immutability on user service operations. 
+  - Ensure reactive immutability on user service operations.
 ### Changed
 - Use backbase bom pom instead of banking-service and identity boms
 - Update to 2021.07 release (DBS 2.21.0 and Identity 1.9.0)
@@ -754,11 +754,11 @@ with empty functions.
   - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.patchTransactions.
   - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postDelete.
   - Optional parameter (`xTransactionsUserId`) added to TransactionPresentationServiceApi.postRefresh.
-### Maintenance 
+### Maintenance
 - Upgrade Spring Boot 2.5.3
 
 ## [2.44.0]
-### Maintenance 
+### Maintenance
 - Cleaned up versions for boat-maven-plugin
 - Added spring-boot-configuration-processors to modules that have configuration classes
 - Moved Product Catalog Model to own package to prevent deep transitive dependencies
@@ -766,7 +766,7 @@ with empty functions.
 
 ## [2.43.0]
 ### Fixed
-- bugfix NPE for AccessGroupService.getUpdatePermissions  
+- bugfix NPE for AccessGroupService.getUpdatePermissions
 
 ## [2.42.0]
 ### Fixed
@@ -1021,7 +1021,7 @@ Example:
 
 ## [2.15.0]
 ### Fixed
-- Fixed implementation of Reference Job Roles where we can assign a list of reference job roles to a specific user. 
+- Fixed implementation of Reference Job Roles where we can assign a list of reference job roles to a specific user.
   * Example with legal-entity-bootstrap-task on how to create a Reference Job Role in the root legal entity and assign it to a user below the hierarchy (example with a subsidiary):
 ```yaml
 bootstrap:
@@ -1240,4 +1240,3 @@ backbase:
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
 [2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
 [2.75.0]: https://github.com/Backbase/stream-services/compare/2.74.0...2.75.0
-

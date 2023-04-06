@@ -17,7 +17,7 @@ import reactor.core.publisher.Flux;
 
 /**
  * Reactive implementation of {@code InstrumentIngestionService}.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

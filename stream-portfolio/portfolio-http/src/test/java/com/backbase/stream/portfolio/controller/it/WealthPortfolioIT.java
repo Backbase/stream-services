@@ -23,7 +23,7 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 
 /**
  * WealthPortfolio IT.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

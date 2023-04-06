@@ -19,4 +19,3 @@ public class PaymentOrderIngestPushRequest {
     private String serviceAgreementInternalId;
     private List<PaymentOrderPostRequest> paymentOrders;
 }
-

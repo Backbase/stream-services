@@ -21,4 +21,3 @@ public class PaymentOrderIngestPullRequest {
     private String dateRangeEnd;
 
 }
-

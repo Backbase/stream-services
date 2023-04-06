@@ -12,7 +12,7 @@ import lombok.ToString;
 
 /**
  * Portfolio Saga Properties.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

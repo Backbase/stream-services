@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class CursorServiceConfigurationProperties {
 
     /**
-     * Publish Event for each Arrangement logged in User is entitled for. 
+     * Publish Event for each Arrangement logged in User is entitled for.
      */
     private boolean publishEntitledArrangements = true;
 

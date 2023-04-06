@@ -12,7 +12,7 @@ import reactor.core.publisher.Flux;
 
 /**
  * PortfolioIngestion Service.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */
@@ -20,7 +20,7 @@ public interface PortfolioIngestionService {
 
     /**
      * Ingest PortfolioAllcoationsRegionBundles.
-     * 
+     *
      * @param allocationBundle The Flux of {@code AllocationBundle} to be ingested.
      * @return The Flux of ingested {@code AllocationBundle}.
      */
@@ -28,7 +28,7 @@ public interface PortfolioIngestionService {
 
     /**
      * Ingest Portfolios.
-     * 
+     *
      * @param portfolio The Flux of {@code Portfolio} to be ingested.
      * @return The Flux of ingested {@code Portfolio}.
      */
@@ -36,7 +36,7 @@ public interface PortfolioIngestionService {
 
     /**
      * Ingest ValuationsBundles.
-     * 
+     *
      * @param valuationsBundles The Flux of {@code ValuationsBundle} to be ingested.
      * @return The Flux of ingested {@code ValuationsBundle}.
      */
@@ -44,7 +44,7 @@ public interface PortfolioIngestionService {
 
     /**
      * Ingest SubPortfolios.
-     * 
+     *
      * @param portfolio The Flux of {@code SubPortfolioBundle} to be ingested.
      * @return The Flux of ingested {@code SubPortfolioBundle}.
      */
@@ -52,7 +52,7 @@ public interface PortfolioIngestionService {
 
     /**
      * Ingest TransactionCategories.
-     * 
+     *
      * @param transactionCategories The Flux of {@code TransactionCategory} to be ingested.
      * @return The Flux of ingested {@code TransactionCategory}.
      */
@@ -60,7 +60,7 @@ public interface PortfolioIngestionService {
 
     /**
      * Ingest Hierarchiy Bundles.
-     * 
+     *
      * @param hierarchyBundles The Flux of {@code HierarchyBundle} to be ingested.
      * @return The Flux of ingested {@code HierarchyBundle}.
      */
@@ -68,15 +68,15 @@ public interface PortfolioIngestionService {
 
     /**
      * Ingest Position.
-     * 
+     *
      * @param positions The Flux of {@code Position} to be ingested.
      * @return The Flux of the ingested {@code Position}.
      */
     Flux<Position> ingestPositions(Flux<Position> positions);
-    
+
     /**
      * Ingest TransactionBundles.
-     * 
+     *
      * @param transactionBundles The Flux of {@code TransactionBundle} to be ingested.
      * @return The Flux of the ingested {@code TransactionBundle}.
      */

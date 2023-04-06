@@ -38,7 +38,7 @@ public class SetupApprovalsHierarchyConfiguration {
             .flatMap(approvalSaga::executeTask)
             .collectList()
             .block();
-        
+
         log.info("Finished bootstrapping Approvals Structure");
     }
 }

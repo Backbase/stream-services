@@ -1,6 +1,6 @@
 NOTE:
 ```
-    This is an initial implementation. 
+    This is an initial implementation.
     Ingestioin works only on clear DB. Improvement is required!
 ```
 

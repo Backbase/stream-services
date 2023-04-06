@@ -23,4 +23,3 @@ public class ProductIngestPullRequest {
     private Boolean transactionChainEnabled;
     private Boolean paymentOrderChainEnabled;
 }
-

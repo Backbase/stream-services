@@ -1334,5 +1334,3 @@ components:
             $ref: '#/components/schemas/InternalServerError'
           example:
             message: Description of error
-
-

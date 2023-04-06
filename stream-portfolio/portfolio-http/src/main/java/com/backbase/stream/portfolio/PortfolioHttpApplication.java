@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * Portfolio Http Application.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

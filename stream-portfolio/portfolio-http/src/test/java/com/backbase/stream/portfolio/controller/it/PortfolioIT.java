@@ -18,7 +18,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 
 /**
  * Portfolio IT.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */
@@ -752,7 +752,7 @@ class PortfolioIT {
                 .willReturn(WireMock.badRequest()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                         .withBody("")));
-        
+
         WireMock.stubFor(WireMock.put("/portfolio/integration-api/v1/positions/072901772368896/transactions/499015806984935")
                 .willReturn(WireMock.aResponse()
                         .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)

@@ -56,4 +56,3 @@ logging:
       backbase:
         dbs: DEBUG
         buildingblocks: DEBUG
-

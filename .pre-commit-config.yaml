@@ -1,0 +1,17 @@
+# This file is managed by terraform, if you need to change it -> update in baas-devops
+exclude: |
+  (?x)(
+      README.md|
+      .github/.*
+  )
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: trailing-whitespace
+      - id: check-yaml
+        args: ["--allow-multiple-documents"]
+      - id: check-executables-have-shebangs

@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * PortfolioHttpTest Util.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

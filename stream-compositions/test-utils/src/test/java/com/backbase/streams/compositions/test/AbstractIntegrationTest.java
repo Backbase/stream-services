@@ -63,4 +63,3 @@ class SampleIT extends IntegrationTest {
         return super.readContentFromClasspath(resourcePath);
     }
 }
-

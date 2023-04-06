@@ -11,7 +11,7 @@ CREATE TABLE [dbo].[txn_cursor]
     CONSTRAINT [pk_txn_cursor] PRIMARY KEY CLUSTERED (
         [id] ASC
     ),
-    CONSTRAINT [uq_ext_arrangement_id] UNIQUE NONCLUSTERED 
+    CONSTRAINT [uq_ext_arrangement_id] UNIQUE NONCLUSTERED
     (
         [ext_arrangement_id] ASC
     )

@@ -87,7 +87,7 @@ public interface PortfolioMapper {
     @Mapping(target = "transactions", source = "transactions")
     PortfolioTransactionsPostItem mapPortfolioTransactionsPostItem(String positionId,
             List<PositionTransaction> transactions);
-    
+
     PositionTransactionPutRequest mapPositionTransactionPutRequest(PositionTransaction transaction);
 
     PortfolioPositionTransactionsPostItem mapTransactionPostItem(PositionTransaction transaction);

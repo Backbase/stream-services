@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 /**
  * PortfolioSagaConfiguration Test.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

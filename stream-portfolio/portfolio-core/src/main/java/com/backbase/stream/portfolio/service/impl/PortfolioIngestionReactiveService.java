@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * Reactive implementation of {@code InstrumentIngestionService}.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

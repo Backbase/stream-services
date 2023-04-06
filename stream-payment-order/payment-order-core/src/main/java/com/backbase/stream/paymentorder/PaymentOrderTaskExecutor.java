@@ -37,7 +37,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
 
     @Override
     public Mono<PaymentOrderTask> executeTask(PaymentOrderTask streamTask) {
-        
+
       String externalIds = streamTask.getData().stream().map(PaymentOrderIngestRequest::getBankReferenceId)
       .collect(Collectors.joining(","));
 

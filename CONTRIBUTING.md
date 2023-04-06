@@ -23,7 +23,7 @@ git checkout -b support/2.45.x
 git push --set-upstream origin  support/2.45.x
 
 # push support branch
-git push 
+git push
 ```
 
 #### Create hotfix branch for your support branch then update your changes and create a Pull Request `hotfix/<hotfix-branch-name> -> support/2.45.x`
@@ -32,12 +32,12 @@ git push
 git checkout support/2.45.x
 git checkout -b hotfix/<hotfix-branch-name>
 ```
-> **NO!!** 
-> 
+> **NO!!**
+>
 > I know what you are thinking...
-> 
+>
 > The `.x` in the support branch name **IS NOT** an "intuitive" documentation placeholder!
-> 
+>
 > Please do not hardcode the patch version in the name of the support branch, it is supposed to be flexible to receive multiples patches, hence why keep the `.x` in its name.
 
 ### Branching Strategy Flow

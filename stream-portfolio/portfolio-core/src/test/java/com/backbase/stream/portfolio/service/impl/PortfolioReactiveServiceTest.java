@@ -21,7 +21,7 @@ import reactor.test.StepVerifier;
 
 /**
  * PortfolioReactiveService Test.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */

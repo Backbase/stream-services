@@ -55,4 +55,3 @@ eureka:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
-

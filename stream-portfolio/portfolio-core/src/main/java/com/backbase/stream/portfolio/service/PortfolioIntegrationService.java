@@ -182,7 +182,7 @@ public class PortfolioIntegrationService {
 
     /**
      * Create Allocations.
-     * 
+     *
      * @param allocations The allocaitons to be created.
      * @param portfolioCode The code of the root portfolio.
      * @return The created allocaitons.
@@ -193,7 +193,7 @@ public class PortfolioIntegrationService {
 
     /**
      * Create SubPortfolios.
-     * 
+     *
      * @param subPortfolios The subPortfolios to be created.
      * @param portfolioCode The code of the root portfolio.
      * @return The created subPortfolios.
@@ -204,7 +204,7 @@ public class PortfolioIntegrationService {
 
     /**
      * Create TransactionCategories.
-     * 
+     *
      * @param transactionCategories The transactionCategories to be created.
      * @return The created transactionCategories.
      */
@@ -216,7 +216,7 @@ public class PortfolioIntegrationService {
 
     /**
      * Create Hierarchies.
-     * 
+     *
      * @param hierarchies The hierarchies to be created.
      * @param portfolioCode The code of the root portfolio.
      * @return The created hierarchies.
@@ -228,7 +228,7 @@ public class PortfolioIntegrationService {
 
     /**
      * Create PortfolioValuations.
-     * 
+     *
      * @param portfolioValuations The portfolioValuations to be created.
      * @param portfolioCode The code of the root portfolio.
      * @return The created subPortfolios.
