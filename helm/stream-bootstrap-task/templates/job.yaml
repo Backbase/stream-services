@@ -4,6 +4,7 @@ metadata:
   name: {{ template "stream-bootstrap-task.fullname" . }}
   labels:
 {{ include "stream-bootstrap-task.labels" . | indent 4 }}
+
 spec:
   template:
     spec:
