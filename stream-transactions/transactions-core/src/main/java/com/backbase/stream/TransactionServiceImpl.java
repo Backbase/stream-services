@@ -10,6 +10,7 @@ import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionUnitOfWorkExecutor;
 import com.backbase.stream.transaction.TransactionsQuery;
 import com.backbase.stream.worker.model.UnitOfWork;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
@@ -75,7 +76,7 @@ public class TransactionServiceImpl implements TransactionService {
     public Mono<Void> deleteTransactions(Flux<TransactionsDeleteRequestBody> transactionItemDelete) {
         return transactionItemDelete
             .collectList()
-            .flatMap(item -> transactionPresentationServiceApi.postDelete(item, null, null));
+            .flatMap(item -> transactionPresentationServiceApi.postDelete(item, null, null, null));
 
     }
 
@@ -90,6 +91,7 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionPresentationServiceApi.getTransactions(
             null, // xTransactionsUserId
             null, // xTransactionsServiceAgreementId
+            null, // xTransactionsArrangementId
             transactionsQuery.getAmountGreaterThan(),
             transactionsQuery.getAmountLessThan(),
             transactionsQuery.getBookingDateGreaterThan(),
@@ -131,7 +133,7 @@ public class TransactionServiceImpl implements TransactionService {
     public Mono<Void> patchTransactions(Flux<TransactionsPatchRequestBody> transactionItems) {
         return transactionItems
             .collectList()
-            .flatMap(items -> transactionPresentationServiceApi.patchTransactions(items, null, null));
+            .flatMap(items -> transactionPresentationServiceApi.patchTransactions(items, null, null, null));
     }
 
     /**
@@ -144,7 +146,7 @@ public class TransactionServiceImpl implements TransactionService {
     public Mono<Void> postRefresh(Flux<ArrangementItem> arrangementItems) {
         return arrangementItems
             .collectList()
-            .flatMap(item -> transactionPresentationServiceApi.postRefresh(item, null, null));
+            .flatMap(item -> transactionPresentationServiceApi.postRefresh(item, null, null, null));
     }
 
 }

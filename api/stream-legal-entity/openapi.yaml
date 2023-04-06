@@ -4,12 +4,12 @@ info:
   description: Ingestion Saga for Legal Entities and their products
   version: 2.3.0
   x-logo:
-    url: http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png
-    backgroundColor: '#FFFFFF'
-    altText: Backbase logo
+    url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
+    backgroundColor: "#FFFFFF"
+    altText: "Backbase logo"
 servers:
-- url: http://legal-entity-http.proto.backbasecloud.com/
-  description: The server
+  - url: http://legal-entity-http.proto.backbasecloud.com/
+    description: The server
 paths:
   ###############################################
   ## Legal Entity
@@ -17,7 +17,7 @@ paths:
   /legal-entity:
     post:
       tags:
-      - legal-entity
+        - legal-entity
       summary: Create Legal Entity
       description: Create a new Legal Entity and their supporting objects from Legal Entity
       operationId: createLegalEntity
@@ -55,7 +55,7 @@ paths:
   /service-agreement:
     put:
       tags:
-      - service-agreement
+        - service-agreement
       summary: Update Service Agreement
       description: Update a service agreement
       operationId: updateServiceAgreement
@@ -87,7 +87,7 @@ paths:
   /async/legal-entity:
     post:
       tags:
-      - legal-entity
+        - legal-entity
       summary: Process Legal Entity
       description: Asynchronously create new Legal Entties and their supporting objects from Legal Entity
       operationId: processLegalEntitiesAsync
@@ -125,7 +125,7 @@ paths:
   /async/service-agreement:
     put:
       tags:
-      - service-agreement
+        - service-agreement
       summary: Process Service Agreement
       description: Asynchronously update a service agreement
       operationId: updateServiceAgreementAsync
@@ -157,17 +157,17 @@ paths:
   /async/legal-entity/{unitOfWorkId}:
     get:
       tags:
-      - legal-entity
+        - legal-entity
       summary: Process Legal Entity
       description: Asynchronously create new Legal Entties and their supporting objects from Legal Entity
       operationId: getUnitOfWork
       parameters:
-      - name: unitOfWorkId
-        in: path
-        description: ID of Work Unit
-        required: true
-        schema:
-          type: string
+        - name: unitOfWorkId
+          in: path
+          description: ID of Work Unit
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: The created legal entity and all their objects with internal ids
@@ -184,17 +184,17 @@ paths:
   /async/service-agreement/{unitOfWorkId}:
     get:
       tags:
-      - service-agreement
+        - service-agreement
       summary: Process Service Agreement
       description: Asynchronously update a Service Agreement and their supporting objects
       operationId: getUpdateServiceAgreementUnitOfWork
       parameters:
-      - name: unitOfWorkId
-        in: path
-        description: ID of Work Unit
-        required: true
-        schema:
-          type: string
+        - name: unitOfWorkId
+          in: path
+          description: ID of Work Unit
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: The Service Agreement update job status
@@ -217,9 +217,9 @@ components:
     ###############################################
     ProductGroup:
       type: object
-      description: Products assigned to service agreement
+      description: "Products assigned to service agreement"
       allOf:
-      - $ref: '#/components/schemas/BaseProductGroup'
+        - $ref: '#/components/schemas/BaseProductGroup'
       properties:
         serviceAgreement:
           $ref: '#/components/schemas/ServiceAgreement'
@@ -230,7 +230,7 @@ components:
 
     BatchProductGroup:
       type: object
-      description: Product groups assigned to the users within same legal entity
+      description: "Product groups assigned to the users within same legal entity"
       properties:
         serviceAgreement:
           $ref: '#/components/schemas/ServiceAgreement'
@@ -241,7 +241,7 @@ components:
 
     BaseProductGroup:
       type: object
-      description: Product groups assigned to the users within same legal entity
+      description: "Product groups assigned to the users within same legal entity"
       properties:
         internalId:
           $ref: '#/components/schemas/InternalIdentifier'
@@ -249,9 +249,10 @@ components:
           type: string
           default: ARRANGEMENTS
           enum:
-          - ARRANGEMENTS
-          - JOURNEYS
-          - REPOSITORIES
+            - ARRANGEMENTS
+            - JOURNEYS
+            - REPOSITORIES
+            - CUSTOM
         name:
           maxLength: 128
           minLength: 1
@@ -349,10 +350,10 @@ components:
         accountOpeningDate:
           type: string
           description: The date of activation of the account in the bank's system.
-          format: date-time
+          format: 'date-time'
         lastUpdateDate:
           type: string
-          format: date-time
+          format: 'date-time'
           description: Last date of balance (or other) parameter update for the particular product
         externalParentId:
           maxLength: 50
@@ -448,10 +449,10 @@ components:
         accountHolderCountry:
           $ref: '#/components/schemas/AccountHolderCountry'
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
     SavingsAccount:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
@@ -521,8 +522,12 @@ components:
           $ref: '#/components/schemas/DebitAccount'
     DebitCard:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
+        bookedBalance:
+          $ref: '#/components/schemas/BookedBalance'
+        availableBalance:
+          $ref: '#/components/schemas/AvailableBalance'
         number:
           maxLength: 36
           type: string
@@ -549,7 +554,7 @@ components:
           $ref: '#/components/schemas/ValidThru'
     CreditCard:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
@@ -609,7 +614,7 @@ components:
           $ref: '#/components/schemas/CardDetailsItem'
     Loan:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
@@ -663,10 +668,12 @@ components:
           $ref: '#/components/schemas/BankBranchCode'
     TermDeposit:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
+        availableBalance:
+          $ref: '#/components/schemas/AvailableBalance'
         principalAmount:
           $ref: '#/components/schemas/PrincipalAmount'
         accruedInterest:
@@ -713,10 +720,16 @@ components:
           $ref: '#/components/schemas/DebitAccount'
         minimumRequiredBalance:
           $ref: '#/components/schemas/MinimumRequiredBalance'
+        bankBranchCode:
+          "$ref": '#/components/schemas/BankBranchCode'
     InvestmentAccount:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
+        bookedBalance:
+          $ref: '#/components/schemas/BookedBalance'
+        availableBalance:
+          $ref: '#/components/schemas/AvailableBalance'
         currentInvestment:
           $ref: '#/components/schemas/CurrentInvestment'
         urgentTransferAllowed:
@@ -737,7 +750,7 @@ components:
           $ref: '#/components/schemas/BIC'
     Product:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         ### Current Account Fields
         bookedBalance:
@@ -872,7 +885,7 @@ components:
           description: Status of the card ex. Active, Expired etc
     CardDetailsItem:
       required:
-      - cardProvider
+        - cardProvider
       type: object
       properties:
         cardProvider:
@@ -937,8 +950,8 @@ components:
         externalId:
           $ref: '#/components/schemas/ExternalIdentifier'
       required:
-      - internalId
-      - externalId
+        - internalId
+        - externalId
     LegalEntity:
       title: Legal Entity
       description: |
@@ -976,7 +989,7 @@ components:
         productGroups:
           type: array
           items:
-            $ref: '#/components/schemas/ProductGroup'
+            $ref: "#/components/schemas/ProductGroup"
         limit:
           $ref: '#/components/schemas/Limit'
         users:
@@ -1004,11 +1017,11 @@ components:
           additionalProperties:
             type: string
       required:
-      - name
-      - external
-      - legalEntityType
-      - administrators
-      - jobProfile
+        - name
+        - external
+        - legalEntityType
+        - administrators
+        - jobProfile
     JobProfileUser:
       type: object
       properties:
@@ -1032,14 +1045,14 @@ components:
           items:
             $ref: '#/components/schemas/ExternalContact'
       required:
-      - user
+        - user
     LegalEntityType:
       type: string
       title: Legal Entity Type
       description: Type of the legal entity. Bank or Customer.
       enum:
-      - CUSTOMER
-      - BANK
+        - CUSTOMER
+        - BANK
 
     IdentityUserLinkStrategy:
       type: string
@@ -1047,9 +1060,9 @@ components:
       description: Identity User Creation Strategy to Create Users in Identity or Import Users from Identity.
       default: IDENTITY_AGNOSTIC
       enum:
-      - IMPORT_FROM_IDENTIY
-      - CREATE_IN_IDENTITY
-      - IDENTITY_AGNOSTIC
+        - IMPORT_FROM_IDENTIY
+        - CREATE_IN_IDENTITY
+        - IDENTITY_AGNOSTIC
 
     User:
       title: User
@@ -1099,14 +1112,14 @@ components:
           items:
             type: string
       required:
-      - externalId
-      - fullName
+        - externalId
+        - fullName
     EmailAddress:
-      title: The email addresses the user can be reached by.
+      title: "The email addresses the user can be reached by."
       required:
-      - address
-      - key
-      - type
+        - address
+        - key
+        - type
       type: object
       properties:
         key:
@@ -1129,9 +1142,9 @@ components:
           description: Address.
     PhoneNumber:
       required:
-      - key
-      - number
-      - type
+        - key
+        - number
+        - type
       type: object
       properties:
         key:
@@ -1154,8 +1167,8 @@ components:
           description: Phone number.
     PostalAddress:
       required:
-      - key
-      - type
+        - key
+        - type
       type: object
       properties:
         key:
@@ -1290,9 +1303,9 @@ components:
         extended:
           type: object
       required:
-      - userId
-      - externalId
-      - userName
+        - userId
+        - externalId
+        - userName
     Name:
       title: Name
       type: object
@@ -1383,7 +1396,7 @@ components:
           type: boolean
 
     ServiceAgreement:
-      title: Service Agreement
+      title:  Service Agreement
       description: |
         The formal vehicle that allows users of one entity to access products of that or other entities
         A Service agreement is:
@@ -1464,9 +1477,9 @@ components:
             type: number
     LegalEntityParticipant:
       required:
-      - externalId
-      - sharingAccounts
-      - sharingUsers
+        - externalId
+        - sharingAccounts
+        - sharingUsers
       type: object
       properties:
         internalId:
@@ -1492,16 +1505,16 @@ components:
           type: string
           description: the action to perform for this participant. Required for participant update flow
           enum:
-          - ADD
-          - REMOVE
+            - "ADD"
+            - "REMOVE"
         limit:
           $ref: '#/components/schemas/Limit'
     LegalEntityStatus:
       type: string
       description: Status of the entity
       enum:
-      - ENABLED
-      - DISABLED
+        - ENABLED
+        - DISABLED
     ###############################################
     ## Reusable Fields
     ###############################################
@@ -1650,11 +1663,11 @@ components:
       type: string
       description: The period of time and/or the interest rate arranged between Bank and customer.
       enum:
-      - Daily
-      - Weekly
-      - Monthly
-      - Quarterly
-      - Yearly
+        - "Daily"
+        - "Weekly"
+        - "Monthly"
+        - "Quarterly"
+        - "Yearly"
     Town:
       maxLength: 35
       type: string
@@ -1680,7 +1693,7 @@ components:
       description: (This is to accomodate additional country specific fields like Sort Code in UK)
     StartDate:
       type: string
-      format: date-time
+      format: 'date-time'
     PostCode:
       maxLength: 16
       type: string
@@ -1696,18 +1709,18 @@ components:
       type: string
       description: The period of time and/or the interest rate arranged between Bank and customer.
       enum:
-      - Daily
-      - Weekly
-      - Monthly
-      - Quarterly
-      - Yearly
+        - "Daily"
+        - "Weekly"
+        - "Monthly"
+        - "Quarterly"
+        - "Yearly"
     CurrencyCode:
       pattern: ^[A-Z]{3}$
       type: string
       description: The alpha-3 code (complying with ISO 4217) of the currency that qualifies the amount
     BookedBalance:
       type: object
-      description: Booked Balance
+      description: "Booked Balance"
       properties:
         amount:
           type: number
@@ -1716,7 +1729,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     AvailableBalance:
       type: object
-      description: Available Balance
+      description: "Available Balance"
       properties:
         amount:
           type: number
@@ -1725,7 +1738,7 @@ components:
           $ref: '#/components/schemas/CurrencyCode'
     CreditLimit:
       type: object
-      description: Credit Limit
+      description: "Credit Limit"
       properties:
         amount:
           type: number
@@ -1742,40 +1755,46 @@ components:
           minimum: -1E+18
           exclusiveMinimum: true
           type: number
-          description: Last year's interest that was earned (credit interest) or due (debit interest)
+          description: Last year's interest that was earned (credit interest) or due
+            (debit interest)
         dividendWithheldYTD:
           pattern: ^\d+(\.\d+)?%?$
           type: string
-          description: "Total amount of interest that is being withheld up to date and the bank provides 1099 document end of the year for Tax return purpose\n\n*Example*:\n  - *12.32*: as fixed amount\n  - *3.14%*: as percent\n"
+          description: "Total amount of interest that is being withheld up to date\
+                    \ and the bank provides 1099 document end of the year for Tax return purpose\n\
+                    \n*Example*:\n  - *12.32*: as fixed amount\n  - *3.14%*: as percent\n"
         annualPercentageYield:
           maximum: 1E+6
           exclusiveMaximum: true
           minimum: -1E+6
           exclusiveMinimum: true
           type: number
-          description: The real rate of return earned on a savings deposit or investment taking into account the effect of compounding interest.
+          description: The real rate of return earned on a savings deposit or investment
+            taking into account the effect of compounding interest.
         cashAdvanceInterestRate:
           maximum: 1E+6
           exclusiveMaximum: true
           minimum: -1E+6
           exclusiveMinimum: true
           type: number
-          description: The Interest charge that is added monthly on the outstanding cash advance due on a credit card.
+          description: The Interest charge that is added monthly on the outstanding
+            cash advance due on a credit card.
         penaltyInterestRate:
           maximum: 1E+6
           exclusiveMaximum: true
           minimum: -1E+6
           exclusiveMinimum: true
           type: number
-          description: The Interest charge triggered by infractions such as late credit card payments.
+          description: The Interest charge triggered by infractions such as late credit
+            card payments.
     InterestDetails:
       title: InterestDetails
       type: object
       allOf:
-      - $ref: '#/components/schemas/AbstractInterestDetails'
+        - $ref: '#/components/schemas/AbstractInterestDetails'
     PrincipalAmount:
       type: object
-      description: The amount that was (originally) contracted for the respective product. This is mainly used in the context of loans and deposits.
+      description: "The amount that was (originally) contracted for the respective product. This is mainly used in the context of loans and deposits."
       properties:
         amount:
           type: number
@@ -1826,19 +1845,19 @@ components:
       type: string
       description: Presentation approval status
       enum:
-      - APPROVED
-      - PENDING
-      - REJECTED
+        - APPROVED
+        - PENDING
+        - REJECTED
       x-java-type: com.backbase.presentation.accessgroup.rest.spec.v2.accessgroups.ApprovalStatus
       x-java-enum-names:
-      - APPROVED
-      - PENDING
-      - REJECTED
+        - APPROVED
+        - PENDING
+        - REJECTED
 
 
     BusinessFunctionGroup:
       required:
-      - name
+        - name
       type: object
       properties:
         id:
@@ -1862,9 +1881,9 @@ components:
         type:
           type: string
           enum:
-          - DEFAULT
-          - SYSTEM
-          - TEMPLATE
+            - DEFAULT
+            - SYSTEM
+            - TEMPLATE
           description: Type of function group
           default: DEFAULT
         dataGroupsAllowed:
@@ -1876,12 +1895,12 @@ components:
             $ref: '#/components/schemas/BusinessFunction'
     BusinessFunction:
       required:
-      - name
-      - functionCode
-      - functionId
-      - privileges
-      - resourceCode
-      - resourceName
+        - name
+        - functionCode
+        - functionId
+        - privileges
+        - resourceCode
+        - resourceName
       type: object
       properties:
         name:
@@ -1891,7 +1910,7 @@ components:
             <project_prefix> <descriptive name>
           minLength: 1
           type: string
-          example: bankA PISP
+          example: "bankA PISP"
         functionId:
           description: |-
             Unique ID in the system
@@ -1899,7 +1918,7 @@ components:
           maxLength: 36
           minLength: 1
           type: string
-          example: bankA.1000
+          example: "bankA.1000"
         functionCode:
           maxLength: 32
           minLength: 1
@@ -1931,7 +1950,7 @@ components:
             $ref: '#/components/schemas/Privilege'
     Privilege:
       required:
-      - privilege
+        - privilege
       type: object
       properties:
         privilege:
@@ -1965,9 +1984,9 @@ components:
           type: object
           additionalProperties: true
     UserPreferences:
-      description: Users defined preferences for a specific arrangement.
+      description: 'Users defined preferences for a specific arrangement.'
       required:
-      - userExternalId
+        - userExternalId
       type: object
       properties:
         userExternalId:
@@ -1980,7 +1999,8 @@ components:
           description: The name that can be assigned by the user to label the arrangement
         visible:
           type: boolean
-          description: User indicator whether to show or hide the arrangement on the front end
+          description: User indicator whether to show or hide the arrangement on the
+            front end
         favorite:
           type: boolean
           description: Indication whether an arrangement can be favorable for a user
@@ -1990,12 +2010,12 @@ components:
             type: string
 
     ExternalContact:
-      description: External Contacts
+      description: 'External Contacts'
       type: object
       required:
-      - accounts
-      - externalId
-      - name
+        - accounts
+        - externalId
+        - name
       properties:
         accounts:
           minItems: 1
@@ -2017,7 +2037,7 @@ components:
         category:
           maxLength: 70
           type: string
-          description: Category to which the contact belongs to like employee, supplier.
+          description: "Category to which the contact belongs to like employee, supplier."
         contactPerson:
           maxLength: 70
           type: string
@@ -2080,15 +2100,17 @@ components:
         accountType:
           maxLength: 10
           type: string
-          description: The type of the account, e.g. CHECKING/SAVINGS
+          description: "The type of the account, e.g. CHECKING/SAVINGS"
         accountNumber:
           maxLength: 34
           type: string
-          description: An account identifier. At least one of the account identifiers (accountNumber, IBAN, phoneNumber or email) is mandatory
+          description: "An account identifier. At least one of the account identifiers\
+            \ (accountNumber, IBAN, phoneNumber or email) is mandatory"
         IBAN:
           maxLength: 34
           type: string
-          description: An account identifier. At least one of the account identifiers (accountNumber, IBAN, phoneNumber or email) is mandatory
+          description: "An account identifier. At least one of the account identifiers\
+            \ (accountNumber, IBAN, phoneNumber or email) is mandatory"
         phoneNumber:
           $ref: '#/components/schemas/phone-number-identifier'
         email:
@@ -2100,7 +2122,7 @@ components:
         bankCode:
           maxLength: 20
           type: string
-          description: The code assigned by a central bank, e.g. ABA RTN
+          description: "The code assigned by a central bank, e.g. ABA RTN"
         bankName:
           maxLength: 140
           type: string
@@ -2171,10 +2193,11 @@ components:
       description: Reference of an ID from another (external) system.
     AccessContextScope:
       type: string
-      description: "Access context scope of the contact, either ServiceAgreement (SA), LegalEntity (LE) or User (USER).\n"
+      description: "Access context scope of the contact, either ServiceAgreement (SA),\
+        \ LegalEntity (LE) or User (USER).\n"
       enum:
-      - SA
-      - LE
+        - SA
+        - LE
     ActiveContactStatus:
       type: string
       description: |
@@ -2183,16 +2206,18 @@ components:
         ACTIVE - fully approved;
         PENDING_APPROVAL - the contact needs further approval to become active.
       enum:
-      - ACTIVE
-      - PENDING_APPROVAL
+        - ACTIVE
+        - PENDING_APPROVAL
     phone-number-identifier:
       maxLength: 30
       type: string
-      description: A phone number account identifier. At least one of the account identifiers (accountNumber, IBAN, phoneNumber or email) is mandatory.
+      description: "A phone number account identifier. At least one of the account\
+        \ identifiers (accountNumber, IBAN, phoneNumber or email) is mandatory."
     email-identifier:
       maxLength: 255
       type: string
-      description: An email account identifier. At least one of the account identifiers (accountNumber, IBAN, phoneNumber or email) is mandatory.
+      description: "An email account identifier. At least one of the account identifiers\
+        \ (accountNumber, IBAN, phoneNumber or email) is mandatory."
       format: email
     Additions:
       title: Additions
@@ -2210,33 +2235,33 @@ components:
       properties:
         externalId:
           type: string
-          description: Data Group Item Internal Id
+          description: "Data Group Item Internal Id"
         internalId:
           type: string
-          description: Data Group Item External Id
+          description: "Data Group Item External Id"
 
     ###############################################
     ## Async Legal Entity
     ###############################################
     LegalEntityResponse:
       type: object
-      description: Unit of Work processing the Legal Entities.
+      description: "Unit of Work processing the Legal Entities."
       properties:
         id:
           type: string
         state:
           type: string
           enum:
-          - NEW
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - FAILED_RETRIES_EXHAUSTED
-          - COMPLETED
-          - COMPLETED_AFTER_RETRIES
-          - ROLLBACK_IN_PROGRESS
-          - ROLLBACK_COMPLETED
-          - ROLLBACK_FAILED
+            - NEW
+            - ACCEPTED
+            - IN_PROGRESS
+            - FAILED
+            - FAILED_RETRIES_EXHAUSTED
+            - COMPLETED
+            - COMPLETED_AFTER_RETRIES
+            - ROLLBACK_IN_PROGRESS
+            - ROLLBACK_COMPLETED
+            - ROLLBACK_FAILED
         locked:
           type: boolean
         registeredAt:
@@ -2265,10 +2290,10 @@ components:
               state:
                 type: string
                 enum:
-                - ACCEPTED
-                - IN_PROGRESS
-                - FAILED
-                - COMPLETED
+                  - ACCEPTED
+                  - IN_PROGRESS
+                  - FAILED
+                  - COMPLETED
               registeredAt:
                 type: string
                 format: date-time
@@ -2297,11 +2322,11 @@ components:
                       description: Resulted Entity Action
                       type: string
                       enum:
-                      - CREATED
-                      - UDPATED
-                      - DELETED
-                      - REJECTED
-                      - FAILED
+                        - CREATED
+                        - UDPATED
+                        - DELETED
+                        - REJECTED
+                        - FAILED
                     message:
                       description: Message describing operation performed on task
                       type: string
@@ -2309,23 +2334,23 @@ components:
 
     UpdatedServiceAgreementResponse:
       type: object
-      description: Response on Update Service Agreement
+      description: "Response on Update Service Agreement"
       properties:
         id:
           type: string
         state:
           type: string
           enum:
-          - NEW
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - FAILED_RETRIES_EXHAUSTED
-          - COMPLETED
-          - COMPLETED_AFTER_RETRIES
-          - ROLLBACK_IN_PROGRESS
-          - ROLLBACK_COMPLETED
-          - ROLLBACK_FAILED
+            - NEW
+            - ACCEPTED
+            - IN_PROGRESS
+            - FAILED
+            - FAILED_RETRIES_EXHAUSTED
+            - COMPLETED
+            - COMPLETED_AFTER_RETRIES
+            - ROLLBACK_IN_PROGRESS
+            - ROLLBACK_COMPLETED
+            - ROLLBACK_FAILED
         locked:
           type: boolean
         registeredAt:
@@ -2355,10 +2380,10 @@ components:
               state:
                 type: string
                 enum:
-                - ACCEPTED
-                - IN_PROGRESS
-                - FAILED
-                - COMPLETED
+                  - ACCEPTED
+                  - IN_PROGRESS
+                  - FAILED
+                  - COMPLETED
               registeredAt:
                 type: string
                 format: date-time
@@ -2387,11 +2412,11 @@ components:
                       description: Resulted Entity Action
                       type: string
                       enum:
-                      - CREATED
-                      - UDPATED
-                      - DELETED
-                      - REJECTED
-                      - FAILED
+                        - CREATED
+                        - UDPATED
+                        - DELETED
+                        - REJECTED
+                        - FAILED
                     message:
                       description: Message describing operation performed on task
                       type: string
@@ -2416,14 +2441,16 @@ components:
                 description: Default Message. Any further information.
               key:
                 type: string
-                description: "{capability-name}.api.{api-key-name}. For generated validation errors this is the path in the document the error resolves to. e.g. object name + '.' + field"
+                description: '{capability-name}.api.{api-key-name}. For generated
+                  validation errors this is the path in the document the error resolves
+                  to. e.g. object name + ''.'' + field'
               context:
                 type: object
                 description: Context can be anything used to construct localised messages.
                 x-java-type: java.util.Map<String,String>
             description: A validation error
     JobRole:
-      title: Job Role
+      title: "Job Role"
       properties:
         id:
           $ref: '#/components/schemas/InternalIdentifier'
@@ -2467,16 +2494,16 @@ components:
           additionalProperties:
             type: string
       required:
-      - name
-      - description
+        - name
+        - description
     ReferenceJobRole:
-      title: Reference Job Role
+      title: "Reference Job Role"
       allOf:
-      - $ref: '#/components/schemas/JobRole'
+        - $ref: '#/components/schemas/JobRole'
     UpdatedServiceAgreement:
-      title: Updated Service Agreement
+      title: "Updated Service Agreement"
       allOf:
-      - $ref: '#/components/schemas/ServiceAgreement'
+        - $ref: '#/components/schemas/ServiceAgreement'
       properties:
         productGroups:
           type: array
@@ -2491,7 +2518,7 @@ components:
           items:
             $ref: '#/components/schemas/ServiceAgreementUserAction'
     ServiceAgreementUserAction:
-      title: Service Agreement user update action
+      title: "Service Agreement user update action"
       properties:
         userProfile:
           $ref: '#/components/schemas/JobProfileUser'
@@ -2500,868 +2527,868 @@ components:
           type: string
           description: add or remove user from service agreement
           enum:
-          - ADD
-          - REMOVE
+            - "ADD"
+            - "REMOVE"
 
   examples:
     RootLegalEntityHierarchyExample:
-      description: Example Request for setting up Root Legal Entity Structure as described on Backbase Community
+      description: "Example Request for setting up Root Legal Entity Structure as described on Backbase Community"
       value:
-        name: Bank
-        externalId: bank
-        legalEntityType: BANK
+        name: "Bank"
+        externalId: "bank"
+        legalEntityType: "BANK"
         subsidiaries:
-        - name: John
-          externalId: john
-          legalEntityType: CUSTOMER
-          administrators:
-          - externalId: john
-            fullName: John
-        - name: Sara
-          externalId: sara
-          legalEntityType: CUSTOMER
-          administrators:
-          - externalId: sara
-            fullName: Sara
-        - name: Backbase
-          externalId: backbase
-          legalEntityType: CUSTOMER
-          subsidiaries:
-          - name: Cardiff
-            externalId: cardiff
-            legalEntityType: CUSTOMER
-          administrators:
-          - externalId: backbaseAdmin
-            fullName: Backbase Admin
-        - name: ASP
-          externalId: asp
-          legalEntityType: CUSTOMER
-          administrators:
-          - externalId: ASPAdmin
-            fullName: ASP Admin
+          - name: "John"
+            externalId: "john"
+            legalEntityType: "CUSTOMER"
+            administrators:
+              - externalId: "john"
+                fullName: "John"
+          - name: "Sara"
+            externalId: "sara"
+            legalEntityType: "CUSTOMER"
+            administrators:
+              - externalId: "sara"
+                fullName: "Sara"
+          - name: "Backbase"
+            externalId: "backbase"
+            legalEntityType: "CUSTOMER"
+            subsidiaries:
+              - name: "Cardiff"
+                externalId: "cardiff"
+                legalEntityType: "CUSTOMER"
+            administrators:
+              - externalId: "backbaseAdmin"
+                fullName: "Backbase Admin"
+          - name: "ASP"
+            externalId: "asp"
+            legalEntityType: "CUSTOMER"
+            administrators:
+              - externalId: "ASPAdmin"
+                fullName: "ASP Admin"
         administrators:
-        - externalId: admin
-          fullName: Administrator
+          - externalId: "admin"
+            fullName: "Administrator"
     RootLegalEntityForMambu:
-      description: Root Legal Entity Setup for Mambu Integration
+      description: "Root Legal Entity Setup for Mambu Integration"
       value:
-        name: Backbase Root Bank
-        externalId: bank
-        legalEntityType: BANK
+        name: "Backbase Root Bank"
+        externalId: "bank"
+        legalEntityType: "BANK"
         administrators:
-        - externalId: admin
-          fullName: Administrator
-          users:
-          - externalId: admin
-            fullName: admin
-            businessFunctionGroups:
-            - name: Entitlements
-              functions:
-              - functionId: '1019'
-                functionCode: manage.data.groups
-                resourceName: Entitlements
-                resourceCode: entitlements
-                privileges:
-                - privilege: view
-                - privilege: create
-                - privilege: edit
-                - privilege: delete
-              - functionId: '1020'
-                functionCode: manage.function.groups
-                resourceName: Entitlements
-                resourceCode: entitlements
-                privileges:
-                - privilege: view
-                - privilege: create
-                - privilege: edit
-                - privilege: delete
-            - name: Legal Entity
-              functions:
-              - functionId: '1011'
-                functionCode: manage.legalentities
-                resourceName: Legal Entity
-                resourceCode: legalentity
-                privileges:
-                - privilege: create
-                - privilege: edit
-                - privilege: delete
-                - privilege: view
-            - name: Service Agreement
-              functions:
-              - functionId: '1007'
-                functionCode: assign.users
-                resourceName: Service Agreement
-                resourceCode: service.agreement
-                privileges:
-                - privilege: view
-                - privilege: create
-                - privilege: edit
-              - functionId: '1028'
-                functionCode: manage.service.agreements
-                resourceName: Service Agreement
-                resourceCode: service.agreement
-                privileges:
-                - privilege: view
-                - privilege: create
-                - privilege: edit
-                - privilege: delete
-              - functionId: '1009'
-                functionCode: assign.permissions
-                resourceName: Service Agreement
-                resourceCode: service.agreement
-                privileges:
-                - privilege: view
-                - privilege: create
-                - privilege: edit
-            - name: User
-              functions:
-              - functionId: '1010'
-                functionCode: manage.users
-                resourceName: User
-                resourceCode: user
-                privileges:
-                - privilege: view
-        subsidiaries:
-        - name: Mambu
-          externalId: mambu-bank
-          legalEntityType: CUSTOMER
-          administrators:
-          - externalId: mambu-admin
-            fullName: Mambu Admin
-          users:
-          - externalId: mambu-admin
-            fullName: Mambu Admin
-            referenceJobRoles:
-            - admin
-    RootLegalEntityHierarchyWithArrangements:
-      description: Example setup with arrangements
-      value:
-        name: Bank
-        externalId: bank
-        legalEntityType: BANK
-        subsidiaries:
-        - name: John
-          externalId: john
-          legalEntityType: CUSTOMER
-          productGroups:
-          - productGroupType: ARRANGEMENTS
+          - externalId: "admin"
+            fullName: "Administrator"
             users:
-            - user:
-                externalId: john
-                fullName: John
-              referenceJobRoles:
-              - full-access-sepa
-            currentAccounts:
-            - iban: NL40INGB1876219181
-              bookedBalance:
-                amount: 5245070.50
-                currencyCode: EUR
-              availableBalance:
-                amount: 504096.90
-                currencyCode: EUR
-              creditLimit:
-                amount: 732884.60
-                currencyCode: EUR
-              IBAN: NL40INGB1876219181
-              urgentTransferAllowed: true
-              bankBranchCode: ING_AMSTERDAM
-              accruedInterest: 3
-              startDate: '2016-02-10T15:49:55.457+01:00'
-              externalId: current-account
-              productTypeExternalId: current-account
-              name: 'My Current Account '
-              externalTransferAllowed: true
-              crossCurrencyAllowed: true
-              bankAlias: Johns Current Account
-              accountOpeningDate: '2016-02-10T15:49:55.459+01:00'
-              currency: EUR
-              usersPreferences:
-              - userExternalId: john
-                alias: My Bank Account
-                visible: true
-                favorite: false
-            savingAccounts:
-            - iban: NL42INGB4416709382
-              bookedBalance:
-                amount: 8930709.60
-                currencyCode: EUR
-              accruedInterest: 3
-              IBAN: NL42INGB4416709382
-              urgentTransferAllowed: true
-              bankBranchCode: ING_AMSTERDAM
-              startDate: '2016-02-10T15:49:55.465+01:00'
-              externalId: savings-account
-              productTypeExternalId: savings-account
-              name: 'My Savings Account '
-              externalTransferAllowed: true
-              crossCurrencyAllowed: true
-              bankAlias: Johns savings Account
-              accountOpeningDate: '2016-02-10T15:49:55.465+01:00'
-              currency: EUR
-          users:
-          - user:
-              externalId: john
-              fullName: John
-            referenceJobRoles:
-            - full-access-sepa
-          administrators:
-          - externalId: john
-            fullName: John
+              - externalId: "admin"
+                fullName: "admin"
+                businessFunctionGroups:
+                  - name: "Entitlements"
+                    functions:
+                      - functionId: "1019"
+                        functionCode: "manage.data.groups"
+                        resourceName: "Entitlements"
+                        resourceCode: "entitlements"
+                        privileges:
+                          - privilege: "view"
+                          - privilege: "create"
+                          - privilege: "edit"
+                          - privilege: "delete"
+                      - functionId: "1020"
+                        functionCode: "manage.function.groups"
+                        resourceName: "Entitlements"
+                        resourceCode: "entitlements"
+                        privileges:
+                          - privilege: "view"
+                          - privilege: "create"
+                          - privilege: "edit"
+                          - privilege: "delete"
+                  - name: "Legal Entity"
+                    functions:
+                      - functionId: "1011"
+                        functionCode: "manage.legalentities"
+                        resourceName: "Legal Entity"
+                        resourceCode: "legalentity"
+                        privileges:
+                          - privilege: "create"
+                          - privilege: "edit"
+                          - privilege: "delete"
+                          - privilege: "view"
+                  - name: "Service Agreement"
+                    functions:
+                      - functionId: "1007"
+                        functionCode: "assign.users"
+                        resourceName: "Service Agreement"
+                        resourceCode: "service.agreement"
+                        privileges:
+                          - privilege: "view"
+                          - privilege: "create"
+                          - privilege: "edit"
+                      - functionId: "1028"
+                        functionCode: "manage.service.agreements"
+                        resourceName: "Service Agreement"
+                        resourceCode: "service.agreement"
+                        privileges:
+                          - privilege: "view"
+                          - privilege: "create"
+                          - privilege: "edit"
+                          - privilege: "delete"
+                      - functionId: "1009"
+                        functionCode: "assign.permissions"
+                        resourceName: "Service Agreement"
+                        resourceCode: "service.agreement"
+                        privileges:
+                          - privilege: "view"
+                          - privilege: "create"
+                          - privilege: "edit"
+                  - name: "User"
+                    functions:
+                      - functionId: "1010"
+                        functionCode: "manage.users"
+                        resourceName: "User"
+                        resourceCode: "user"
+                        privileges:
+                          - privilege: "view"
+        subsidiaries:
+          - name: "Mambu"
+            externalId: "mambu-bank"
+            legalEntityType: "CUSTOMER"
+            administrators:
+              - externalId: "mambu-admin"
+                fullName: "Mambu Admin"
+            users:
+              - externalId: "mambu-admin"
+                fullName: "Mambu Admin"
+                referenceJobRoles:
+                  - "admin"
+    RootLegalEntityHierarchyWithArrangements:
+      description: "Example setup with arrangements"
+      value:
+        name: "Bank"
+        externalId: "bank"
+        legalEntityType: "BANK"
+        subsidiaries:
+          - name: "John"
+            externalId: "john"
+            legalEntityType: "CUSTOMER"
+            productGroups:
+              - productGroupType: "ARRANGEMENTS"
+                users:
+                  - user:
+                      externalId: "john"
+                      fullName: "John"
+                    referenceJobRoles:
+                      - "full-access-sepa"
+                currentAccounts:
+                  - iban: "NL40INGB1876219181"
+                    bookedBalance:
+                      amount: 5245070.50
+                      currencyCode: "EUR"
+                    availableBalance:
+                      amount: 504096.90
+                      currencyCode: "EUR"
+                    creditLimit:
+                      amount: 732884.60
+                      currencyCode: "EUR"
+                    IBAN: "NL40INGB1876219181"
+                    urgentTransferAllowed: true
+                    bankBranchCode: "ING_AMSTERDAM"
+                    accruedInterest: 3
+                    startDate: "2016-02-10T15:49:55.457+01:00"
+                    externalId: "current-account"
+                    productTypeExternalId: "current-account"
+                    name: "My Current Account "
+                    externalTransferAllowed: true
+                    crossCurrencyAllowed: true
+                    bankAlias: "Johns Current Account"
+                    accountOpeningDate: "2016-02-10T15:49:55.459+01:00"
+                    currency: "EUR"
+                    usersPreferences:
+                      - userExternalId: john
+                        alias: My Bank Account
+                        visible: true
+                        favorite: false
+                savingAccounts:
+                  - iban: "NL42INGB4416709382"
+                    bookedBalance:
+                      amount: 8930709.60
+                      currencyCode: "EUR"
+                    accruedInterest: 3
+                    IBAN: "NL42INGB4416709382"
+                    urgentTransferAllowed: true
+                    bankBranchCode: "ING_AMSTERDAM"
+                    startDate: "2016-02-10T15:49:55.465+01:00"
+                    externalId: "savings-account"
+                    productTypeExternalId: "savings-account"
+                    name: "My Savings Account "
+                    externalTransferAllowed: true
+                    crossCurrencyAllowed: true
+                    bankAlias: "Johns savings Account"
+                    accountOpeningDate: "2016-02-10T15:49:55.465+01:00"
+                    currency: "EUR"
+            users:
+              - user:
+                  externalId: "john"
+                  fullName: "John"
+                referenceJobRoles:
+                  - "full-access-sepa"
+            administrators:
+              - externalId: "john"
+                fullName: "John"
         administrators:
-        - externalId: admin
-          fullName: Administrator
+          - externalId: "admin"
+            fullName: "Administrator"
     LegalEntitiesForMockBack:
-      description: 10 Random Legal Entities
+      description: "10 Random Legal Entities"
       value:
-      - name: Shanell Kiehn
-        externalId: shanell.kiehn
-        legalEntityType: CUSTOMER
-        parentExternalId: bank
-        productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: Generated Product Group
+        - name: "Shanell Kiehn"
+          externalId: "shanell.kiehn"
+          legalEntityType: "CUSTOMER"
+          parentExternalId: "bank"
+          productGroups:
+            - productGroupType: "ARRANGEMENTS"
+              name: "Generated Product Group"
+              users:
+                - user:
+                    externalId: "shanell.kiehn"
+                    fullName: "Shanell Kiehn"
+                  referenceJobRoles:
+                    - "full-access-sepa"
+              currentAccounts:
+                - iban: "GR957435632JKK4ZCPG58KKMGBE"
+                  externalId: "GWIMF64"
+                  productTypeExternalId: "standard-account"
+                  externalTransferAllowed: true
+                  crossCurrencyAllowed: true
+                  sourceId: "stream-product-generator"
+                  accountOpeningDate: "2019-02-24T14:14:11.328+01:00"
+                  lastUpdateDate: "2020-03-08T14:14:11.328+01:00"
+                  currency: "EUR"
+                  availableBalance:
+                    amount: 4308.91
+                    currencyCode: "EUR"
+                  IBAN: "GR957435632JKK4ZCPG58KKMGBE"
+                  urgentTransferAllowed: true
+                  bankBranchCode: "743"
+                  accountInterestRate: 0.05496599201099878
+                  valueDateBalance: 4308.91
+                  creditLimitInterestRate: 0.12436203743926504
+                  creditLimitExpiryDate: "2021-06-08T14:14:11.337+01:00"
+                  accruedInterest: 0
+                  debitCardsItems:
+                    - number: "4929392503720576"
+                      expiryDate: "2020-11-07T14:14:11.339+01:00"
+                      cardId: "^ONR37"
+                      cardholderName: "Shanell Kiehn"
+                      cardType: "VISA"
+                  accountHolderName: "Shanell Kiehn"
+                  startDate: "2019-02-24T14:14:11.328+01:00"
+                  minimumRequiredBalance: 0
+                  accountHolderAddressLine1: "7422 Cristin Roads"
+                  accountHolderAddressLine2: "Apt. 373"
+                  accountHolderStreetName: "Manuel Mountain"
+                  town: "Port Johannaview"
+                  postCode: "34252-9346"
+                  countrySubDivision: "GR"
+                  creditAccount: false
+                  debitAccount: true
+                  accountHolderCountry: "Ecuador"
           users:
-          - user:
-              externalId: shanell.kiehn
-              fullName: Shanell Kiehn
-            referenceJobRoles:
-            - full-access-sepa
-          currentAccounts:
-          - iban: GR957435632JKK4ZCPG58KKMGBE
-            externalId: GWIMF64
-            productTypeExternalId: standard-account
-            externalTransferAllowed: true
-            crossCurrencyAllowed: true
-            sourceId: stream-product-generator
-            accountOpeningDate: '2019-02-24T14:14:11.328+01:00'
-            lastUpdateDate: '2020-03-08T14:14:11.328+01:00'
-            currency: EUR
-            availableBalance:
-              amount: 4308.91
-              currencyCode: EUR
-            IBAN: GR957435632JKK4ZCPG58KKMGBE
-            urgentTransferAllowed: true
-            bankBranchCode: '743'
-            accountInterestRate: 0.05496599201099878
-            valueDateBalance: 4308.91
-            creditLimitInterestRate: 0.12436203743926504
-            creditLimitExpiryDate: '2021-06-08T14:14:11.337+01:00'
-            accruedInterest: 0
-            debitCardsItems:
-            - number: '4929392503720576'
-              expiryDate: '2020-11-07T14:14:11.339+01:00'
-              cardId: ^ONR37
-              cardholderName: Shanell Kiehn
-              cardType: VISA
-            accountHolderName: Shanell Kiehn
-            startDate: '2019-02-24T14:14:11.328+01:00'
-            minimumRequiredBalance: 0
-            accountHolderAddressLine1: 7422 Cristin Roads
-            accountHolderAddressLine2: Apt. 373
-            accountHolderStreetName: Manuel Mountain
-            town: Port Johannaview
-            postCode: 34252-9346
-            countrySubDivision: GR
-            creditAccount: false
-            debitAccount: true
-            accountHolderCountry: Ecuador
-        users:
-        - user:
-            externalId: shanell.kiehn
-            fullName: Shanell Kiehn
-          referenceJobRoles:
-          - full-access-sepa
-        administrators:
-        - externalId: shanell.kiehn
-          fullName: Shanell Kiehn
-      - name: Kenna Botsford
-        externalId: kenna.botsford
-        legalEntityType: CUSTOMER
-        parentExternalId: bank
-        productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: Generated Product Group
+            - user:
+                externalId: "shanell.kiehn"
+                fullName: "Shanell Kiehn"
+              referenceJobRoles:
+                - "full-access-sepa"
+          administrators:
+            - externalId: "shanell.kiehn"
+              fullName: "Shanell Kiehn"
+        - name: "Kenna Botsford"
+          externalId: "kenna.botsford"
+          legalEntityType: "CUSTOMER"
+          parentExternalId: "bank"
+          productGroups:
+            - productGroupType: "ARRANGEMENTS"
+              name: "Generated Product Group"
+              users:
+                - user:
+                    externalId: "kenna.botsford"
+                    fullName: "Kenna Botsford"
+                  referenceJobRoles:
+                    - "full-access-sepa"
+              currentAccounts:
+                - iban: "BH98HWAMPDFFF3TT1UI3DC"
+                  externalId: "KCSXL88"
+                  productTypeExternalId: "deluxe-account"
+                  externalTransferAllowed: true
+                  crossCurrencyAllowed: true
+                  sourceId: "stream-product-generator"
+                  accountOpeningDate: "2019-04-29T14:14:11.396+01:00"
+                  lastUpdateDate: "2020-03-08T14:14:11.396+01:00"
+                  currency: "EUR"
+                  availableBalance:
+                    amount: 4151.51
+                    currencyCode: "EUR"
+                  IBAN: "BH98HWAMPDFFF3TT1UI3DC"
+                  urgentTransferAllowed: true
+                  bankBranchCode: "HWAM"
+                  accountInterestRate: 0.017777512507900908
+                  valueDateBalance: 4151.51
+                  creditLimitInterestRate: 0.1365514940386054
+                  creditLimitExpiryDate: "2020-12-19T14:14:11.396+01:00"
+                  accruedInterest: 0
+                  debitCardsItems:
+                    - number: "2224152121462829"
+                      expiryDate: "2020-07-07T14:14:11.397+01:00"
+                      cardId: "^NQW05"
+                      cardholderName: "Kenna Botsford"
+                      cardType: "MASTERCARD"
+                  accountHolderName: "Kenna Botsford"
+                  startDate: "2019-04-29T14:14:11.396+01:00"
+                  minimumRequiredBalance: 0
+                  accountHolderAddressLine1: "16404 Renner Islands"
+                  accountHolderAddressLine2: "Suite 791"
+                  accountHolderStreetName: "Kelsie Parkway"
+                  town: "South Scarlett"
+                  postCode: "47152"
+                  countrySubDivision: "BH"
+                  creditAccount: false
+                  debitAccount: true
+                  accountHolderCountry: "Guernsey"
           users:
-          - user:
-              externalId: kenna.botsford
-              fullName: Kenna Botsford
-            referenceJobRoles:
-            - full-access-sepa
-          currentAccounts:
-          - iban: BH98HWAMPDFFF3TT1UI3DC
-            externalId: KCSXL88
-            productTypeExternalId: deluxe-account
-            externalTransferAllowed: true
-            crossCurrencyAllowed: true
-            sourceId: stream-product-generator
-            accountOpeningDate: '2019-04-29T14:14:11.396+01:00'
-            lastUpdateDate: '2020-03-08T14:14:11.396+01:00'
-            currency: EUR
-            availableBalance:
-              amount: 4151.51
-              currencyCode: EUR
-            IBAN: BH98HWAMPDFFF3TT1UI3DC
-            urgentTransferAllowed: true
-            bankBranchCode: HWAM
-            accountInterestRate: 0.017777512507900908
-            valueDateBalance: 4151.51
-            creditLimitInterestRate: 0.1365514940386054
-            creditLimitExpiryDate: '2020-12-19T14:14:11.396+01:00'
-            accruedInterest: 0
-            debitCardsItems:
-            - number: '2224152121462829'
-              expiryDate: '2020-07-07T14:14:11.397+01:00'
-              cardId: ^NQW05
-              cardholderName: Kenna Botsford
-              cardType: MASTERCARD
-            accountHolderName: Kenna Botsford
-            startDate: '2019-04-29T14:14:11.396+01:00'
-            minimumRequiredBalance: 0
-            accountHolderAddressLine1: 16404 Renner Islands
-            accountHolderAddressLine2: Suite 791
-            accountHolderStreetName: Kelsie Parkway
-            town: South Scarlett
-            postCode: '47152'
-            countrySubDivision: BH
-            creditAccount: false
-            debitAccount: true
-            accountHolderCountry: Guernsey
-        users:
-        - user:
-            externalId: kenna.botsford
-            fullName: Kenna Botsford
-          referenceJobRoles:
-          - full-access-sepa
-        administrators:
-        - externalId: kenna.botsford
-          fullName: Kenna Botsford
-      - name: Zelda Thompson
-        externalId: zelda.thompson
-        legalEntityType: CUSTOMER
-        parentExternalId: bank
-        productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: Generated Product Group
+            - user:
+                externalId: "kenna.botsford"
+                fullName: "Kenna Botsford"
+              referenceJobRoles:
+                - "full-access-sepa"
+          administrators:
+            - externalId: "kenna.botsford"
+              fullName: "Kenna Botsford"
+        - name: "Zelda Thompson"
+          externalId: "zelda.thompson"
+          legalEntityType: "CUSTOMER"
+          parentExternalId: "bank"
+          productGroups:
+            - productGroupType: "ARRANGEMENTS"
+              name: "Generated Product Group"
+              users:
+                - user:
+                    externalId: "zelda.thompson"
+                    fullName: "Zelda Thompson"
+                  referenceJobRoles:
+                    - "full-access-sepa"
+              currentAccounts:
+                - iban: "PK69686H5908387312580094"
+                  externalId: "CBLDI34"
+                  productTypeExternalId: "deluxe-account"
+                  externalTransferAllowed: true
+                  crossCurrencyAllowed: true
+                  sourceId: "stream-product-generator"
+                  accountOpeningDate: "2018-11-27T14:14:11.439+01:00"
+                  lastUpdateDate: "2020-03-08T14:14:11.439+01:00"
+                  currency: "EUR"
+                  availableBalance:
+                    amount: 587.61
+                    currencyCode: "EUR"
+                  IBAN: "PK69686H5908387312580094"
+                  urgentTransferAllowed: true
+                  bankBranchCode: "686H"
+                  accountInterestRate: 0.013757821618242894
+                  valueDateBalance: 587.61
+                  creditLimitInterestRate: 0.11157122362407977
+                  creditLimitExpiryDate: "2021-01-22T14:14:11.439+01:00"
+                  accruedInterest: 0
+                  debitCardsItems:
+                    - expiryDate: "2020-11-22T14:14:11.440+01:00"
+                      cardId: "^ZAU39"
+                      cardholderName: "Zelda Thompson"
+                      cardType: "MAESTRO"
+                  accountHolderName: "Zelda Thompson"
+                  startDate: "2018-11-27T14:14:11.439+01:00"
+                  minimumRequiredBalance: 0
+                  accountHolderAddressLine1: "99699 Herschel Rapid"
+                  accountHolderAddressLine2: "Suite 083"
+                  accountHolderStreetName: "Tynisha Crossroad"
+                  town: "Pierrestad"
+                  postCode: "68163-0212"
+                  countrySubDivision: "PK"
+                  creditAccount: false
+                  debitAccount: true
+                  accountHolderCountry: "Sierra Leone"
           users:
-          - user:
-              externalId: zelda.thompson
-              fullName: Zelda Thompson
-            referenceJobRoles:
-            - full-access-sepa
-          currentAccounts:
-          - iban: PK69686H5908387312580094
-            externalId: CBLDI34
-            productTypeExternalId: deluxe-account
-            externalTransferAllowed: true
-            crossCurrencyAllowed: true
-            sourceId: stream-product-generator
-            accountOpeningDate: '2018-11-27T14:14:11.439+01:00'
-            lastUpdateDate: '2020-03-08T14:14:11.439+01:00'
-            currency: EUR
-            availableBalance:
-              amount: 587.61
-              currencyCode: EUR
-            IBAN: PK69686H5908387312580094
-            urgentTransferAllowed: true
-            bankBranchCode: 686H
-            accountInterestRate: 0.013757821618242894
-            valueDateBalance: 587.61
-            creditLimitInterestRate: 0.11157122362407977
-            creditLimitExpiryDate: '2021-01-22T14:14:11.439+01:00'
-            accruedInterest: 0
-            debitCardsItems:
-            - expiryDate: '2020-11-22T14:14:11.440+01:00'
-              cardId: ^ZAU39
-              cardholderName: Zelda Thompson
-              cardType: MAESTRO
-            accountHolderName: Zelda Thompson
-            startDate: '2018-11-27T14:14:11.439+01:00'
-            minimumRequiredBalance: 0
-            accountHolderAddressLine1: 99699 Herschel Rapid
-            accountHolderAddressLine2: Suite 083
-            accountHolderStreetName: Tynisha Crossroad
-            town: Pierrestad
-            postCode: 68163-0212
-            countrySubDivision: PK
-            creditAccount: false
-            debitAccount: true
-            accountHolderCountry: Sierra Leone
-        users:
-        - user:
-            externalId: zelda.thompson
-            fullName: Zelda Thompson
-          referenceJobRoles:
-          - full-access-sepa
-        administrators:
-        - externalId: zelda.thompson
-          fullName: Zelda Thompson
-      - name: Vella Wilderman
-        externalId: vella.wilderman
-        legalEntityType: CUSTOMER
-        parentExternalId: bank
-        productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: Generated Product Group
+            - user:
+                externalId: "zelda.thompson"
+                fullName: "Zelda Thompson"
+              referenceJobRoles:
+                - "full-access-sepa"
+          administrators:
+            - externalId: "zelda.thompson"
+              fullName: "Zelda Thompson"
+        - name: "Vella Wilderman"
+          externalId: "vella.wilderman"
+          legalEntityType: "CUSTOMER"
+          parentExternalId: "bank"
+          productGroups:
+            - productGroupType: "ARRANGEMENTS"
+              name: "Generated Product Group"
+              users:
+                - user:
+                    externalId: "vella.wilderman"
+                    fullName: "Vella Wilderman"
+                  referenceJobRoles:
+                    - "full-access-sepa"
+              currentAccounts:
+                - iban: "CZ5061840609411178802888"
+                  externalId: "VLTWA73"
+                  productTypeExternalId: "standard-account"
+                  externalTransferAllowed: true
+                  crossCurrencyAllowed: true
+                  sourceId: "stream-product-generator"
+                  accountOpeningDate: "2019-02-20T14:14:11.483+01:00"
+                  lastUpdateDate: "2020-03-08T14:14:11.483+01:00"
+                  currency: "EUR"
+                  availableBalance:
+                    amount: 327.56
+                    currencyCode: "EUR"
+                  IBAN: "CZ5061840609411178802888"
+                  urgentTransferAllowed: true
+                  bankBranchCode: "6184"
+                  accountInterestRate: 0.0315735855158175
+                  valueDateBalance: 327.56
+                  creditLimitInterestRate: 0.1566414483161877
+                  creditLimitExpiryDate: "2020-10-19T14:14:11.483+01:00"
+                  accruedInterest: 0
+                  debitCardsItems:
+                    - expiryDate: "2020-10-19T14:14:11.484+01:00"
+                      cardId: "^CQM75"
+                      cardholderName: "Vella Wilderman"
+                      cardType: "MAESTRO"
+                  accountHolderName: "Vella Wilderman"
+                  startDate: "2019-02-20T14:14:11.483+01:00"
+                  minimumRequiredBalance: 0
+                  accountHolderAddressLine1: "9708 Scarlett Circle"
+                  accountHolderAddressLine2: "Apt. 610"
+                  accountHolderStreetName: "Bosco Roads"
+                  town: "East Elenore"
+                  postCode: "76225-0566"
+                  countrySubDivision: "CZ"
+                  creditAccount: false
+                  debitAccount: true
+                  accountHolderCountry: "Syrian Arab Republic"
           users:
-          - user:
-              externalId: vella.wilderman
-              fullName: Vella Wilderman
-            referenceJobRoles:
-            - full-access-sepa
-          currentAccounts:
-          - iban: CZ5061840609411178802888
-            externalId: VLTWA73
-            productTypeExternalId: standard-account
-            externalTransferAllowed: true
-            crossCurrencyAllowed: true
-            sourceId: stream-product-generator
-            accountOpeningDate: '2019-02-20T14:14:11.483+01:00'
-            lastUpdateDate: '2020-03-08T14:14:11.483+01:00'
-            currency: EUR
-            availableBalance:
-              amount: 327.56
-              currencyCode: EUR
-            IBAN: CZ5061840609411178802888
-            urgentTransferAllowed: true
-            bankBranchCode: '6184'
-            accountInterestRate: 0.0315735855158175
-            valueDateBalance: 327.56
-            creditLimitInterestRate: 0.1566414483161877
-            creditLimitExpiryDate: '2020-10-19T14:14:11.483+01:00'
-            accruedInterest: 0
-            debitCardsItems:
-            - expiryDate: '2020-10-19T14:14:11.484+01:00'
-              cardId: ^CQM75
-              cardholderName: Vella Wilderman
-              cardType: MAESTRO
-            accountHolderName: Vella Wilderman
-            startDate: '2019-02-20T14:14:11.483+01:00'
-            minimumRequiredBalance: 0
-            accountHolderAddressLine1: 9708 Scarlett Circle
-            accountHolderAddressLine2: Apt. 610
-            accountHolderStreetName: Bosco Roads
-            town: East Elenore
-            postCode: 76225-0566
-            countrySubDivision: CZ
-            creditAccount: false
-            debitAccount: true
-            accountHolderCountry: Syrian Arab Republic
-        users:
-        - user:
-            externalId: vella.wilderman
-            fullName: Vella Wilderman
-          referenceJobRoles:
-          - full-access-sepa
-        administrators:
-        - externalId: vella.wilderman
-          fullName: Vella Wilderman
-      - name: Homer Watsica
-        externalId: homer.watsica
-        legalEntityType: CUSTOMER
-        parentExternalId: bank
-        productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: Generated Product Group
+            - user:
+                externalId: "vella.wilderman"
+                fullName: "Vella Wilderman"
+              referenceJobRoles:
+                - "full-access-sepa"
+          administrators:
+            - externalId: "vella.wilderman"
+              fullName: "Vella Wilderman"
+        - name: "Homer Watsica"
+          externalId: "homer.watsica"
+          legalEntityType: "CUSTOMER"
+          parentExternalId: "bank"
+          productGroups:
+            - productGroupType: "ARRANGEMENTS"
+              name: "Generated Product Group"
+              users:
+                - user:
+                    externalId: "homer.watsica"
+                    fullName: "Homer Watsica"
+                  referenceJobRoles:
+                    - "full-access-sepa"
+              currentAccounts:
+                - iban: "RO74JNRQAD88H2QMMAZL8H3M"
+                  externalId: "UOAGV81"
+                  productTypeExternalId: "8a85878f707c6d9a01708b3f30df60ac"
+                  name: "USD Deposit Account"
+                  externalTransferAllowed: true
+                  crossCurrencyAllowed: true
+                  sourceId: "stream-product-generator"
+                  accountOpeningDate: "2019-02-07T14:14:11.529+01:00"
+                  lastUpdateDate: "2020-03-08T14:14:11.529+01:00"
+                  currency: "EUR"
+                  availableBalance:
+                    amount: 3028.40
+                    currencyCode: "EUR"
+                  IBAN: "RO74JNRQAD88H2QMMAZL8H3M"
+                  urgentTransferAllowed: true
+                  bankBranchCode: "JNRQ"
+                  accountInterestRate: 0.011516100808664363
+                  valueDateBalance: 3028.40
+                  creditLimitInterestRate: 0.12507619729504982
+                  creditLimitExpiryDate: "2021-07-09T14:14:11.529+01:00"
+                  accruedInterest: 0
+                  debitCardsItems:
+                    - number: "2222647076361704"
+                      expiryDate: "2020-10-27T14:14:11.530+01:00"
+                      cardId: "^KSN92"
+                      cardholderName: "Homer Watsica"
+                      cardType: "MASTERCARD"
+                  accountHolderName: "Homer Watsica"
+                  startDate: "2019-02-07T14:14:11.529+01:00"
+                  minimumRequiredBalance: 0
+                  accountHolderAddressLine1: "5128 Salvatore Spring"
+                  accountHolderAddressLine2: "Suite 972"
+                  accountHolderStreetName: "Jody Viaduct"
+                  town: "Nicolasburgh"
+                  postCode: "16661"
+                  countrySubDivision: "RO"
+                  creditAccount: false
+                  debitAccount: true
+                  accountHolderCountry: "Cayman Islands"
           users:
-          - user:
-              externalId: homer.watsica
-              fullName: Homer Watsica
-            referenceJobRoles:
-            - full-access-sepa
-          currentAccounts:
-          - iban: RO74JNRQAD88H2QMMAZL8H3M
-            externalId: UOAGV81
-            productTypeExternalId: 8a85878f707c6d9a01708b3f30df60ac
-            name: USD Deposit Account
-            externalTransferAllowed: true
-            crossCurrencyAllowed: true
-            sourceId: stream-product-generator
-            accountOpeningDate: '2019-02-07T14:14:11.529+01:00'
-            lastUpdateDate: '2020-03-08T14:14:11.529+01:00'
-            currency: EUR
-            availableBalance:
-              amount: 3028.40
-              currencyCode: EUR
-            IBAN: RO74JNRQAD88H2QMMAZL8H3M
-            urgentTransferAllowed: true
-            bankBranchCode: JNRQ
-            accountInterestRate: 0.011516100808664363
-            valueDateBalance: 3028.40
-            creditLimitInterestRate: 0.12507619729504982
-            creditLimitExpiryDate: '2021-07-09T14:14:11.529+01:00'
-            accruedInterest: 0
-            debitCardsItems:
-            - number: '2222647076361704'
-              expiryDate: '2020-10-27T14:14:11.530+01:00'
-              cardId: ^KSN92
-              cardholderName: Homer Watsica
-              cardType: MASTERCARD
-            accountHolderName: Homer Watsica
-            startDate: '2019-02-07T14:14:11.529+01:00'
-            minimumRequiredBalance: 0
-            accountHolderAddressLine1: 5128 Salvatore Spring
-            accountHolderAddressLine2: Suite 972
-            accountHolderStreetName: Jody Viaduct
-            town: Nicolasburgh
-            postCode: '16661'
-            countrySubDivision: RO
-            creditAccount: false
-            debitAccount: true
-            accountHolderCountry: Cayman Islands
-        users:
-        - user:
-            externalId: homer.watsica
-            fullName: Homer Watsica
-          referenceJobRoles:
-          - full-access-sepa
-        administrators:
-        - externalId: homer.watsica
-          fullName: Homer Watsica
-      - name: Nidia Breitenberg
-        externalId: nidia.breitenberg
-        legalEntityType: CUSTOMER
-        parentExternalId: bank
-        productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: Generated Product Group
+            - user:
+                externalId: "homer.watsica"
+                fullName: "Homer Watsica"
+              referenceJobRoles:
+                - "full-access-sepa"
+          administrators:
+            - externalId: "homer.watsica"
+              fullName: "Homer Watsica"
+        - name: "Nidia Breitenberg"
+          externalId: "nidia.breitenberg"
+          legalEntityType: "CUSTOMER"
+          parentExternalId: "bank"
+          productGroups:
+            - productGroupType: "ARRANGEMENTS"
+              name: "Generated Product Group"
+              users:
+                - user:
+                    externalId: "nidia.breitenberg"
+                    fullName: "Nidia Breitenberg"
+                  referenceJobRoles:
+                    - "full-access-sepa"
+              currentAccounts:
+                - iban: "QA48QOTMRL8PVJUEH5SRKRBOJQ51T"
+                  externalId: "YWAVG22"
+                  productTypeExternalId: "8a8587e86fe769dc016febae7ff926e1"
+                  name: "Current Account"
+                  externalTransferAllowed: true
+                  crossCurrencyAllowed: true
+                  sourceId: "stream-product-generator"
+                  accountOpeningDate: "2018-12-04T14:14:11.576+01:00"
+                  lastUpdateDate: "2020-03-08T14:14:11.576+01:00"
+                  currency: "EUR"
+                  availableBalance:
+                    amount: 363.40
+                    currencyCode: "EUR"
+                  IBAN: "QA48QOTMRL8PVJUEH5SRKRBOJQ51T"
+                  urgentTransferAllowed: true
+                  bankBranchCode: "QOTM"
+                  accountInterestRate: 0.010457531089592234
+                  valueDateBalance: 363.40
+                  creditLimitInterestRate: 0.10751141341245168
+                  creditLimitExpiryDate: "2021-03-07T14:14:11.576+01:00"
+                  accruedInterest: 0
+                  debitCardsItems:
+                    - number: "4024007148254682"
+                      expiryDate: "2020-10-29T14:14:11.577+01:00"
+                      cardId: "^ZHU40"
+                      cardholderName: "Nidia Breitenberg"
+                      cardType: "VISA"
+                  accountHolderName: "Nidia Breitenberg"
+                  startDate: "2018-12-04T14:14:11.576+01:00"
+                  minimumRequiredBalance: 0
+                  accountHolderAddressLine1: "3915 Gutkowski Viaduct"
+                  accountHolderAddressLine2: "Suite 150"
+                  accountHolderStreetName: "Michal Meadows"
+                  town: "East Israelmouth"
+                  postCode: "80504"
+                  countrySubDivision: "QA"
+                  creditAccount: false
+                  debitAccount: true
+                  accountHolderCountry: "Isle of Man"
           users:
-          - user:
-              externalId: nidia.breitenberg
-              fullName: Nidia Breitenberg
-            referenceJobRoles:
-            - full-access-sepa
-          currentAccounts:
-          - iban: QA48QOTMRL8PVJUEH5SRKRBOJQ51T
-            externalId: YWAVG22
-            productTypeExternalId: 8a8587e86fe769dc016febae7ff926e1
-            name: Current Account
-            externalTransferAllowed: true
-            crossCurrencyAllowed: true
-            sourceId: stream-product-generator
-            accountOpeningDate: '2018-12-04T14:14:11.576+01:00'
-            lastUpdateDate: '2020-03-08T14:14:11.576+01:00'
-            currency: EUR
-            availableBalance:
-              amount: 363.40
-              currencyCode: EUR
-            IBAN: QA48QOTMRL8PVJUEH5SRKRBOJQ51T
-            urgentTransferAllowed: true
-            bankBranchCode: QOTM
-            accountInterestRate: 0.010457531089592234
-            valueDateBalance: 363.40
-            creditLimitInterestRate: 0.10751141341245168
-            creditLimitExpiryDate: '2021-03-07T14:14:11.576+01:00'
-            accruedInterest: 0
-            debitCardsItems:
-            - number: '4024007148254682'
-              expiryDate: '2020-10-29T14:14:11.577+01:00'
-              cardId: ^ZHU40
-              cardholderName: Nidia Breitenberg
-              cardType: VISA
-            accountHolderName: Nidia Breitenberg
-            startDate: '2018-12-04T14:14:11.576+01:00'
-            minimumRequiredBalance: 0
-            accountHolderAddressLine1: 3915 Gutkowski Viaduct
-            accountHolderAddressLine2: Suite 150
-            accountHolderStreetName: Michal Meadows
-            town: East Israelmouth
-            postCode: '80504'
-            countrySubDivision: QA
-            creditAccount: false
-            debitAccount: true
-            accountHolderCountry: Isle of Man
-        users:
-        - user:
-            externalId: nidia.breitenberg
-            fullName: Nidia Breitenberg
-          referenceJobRoles:
-          - full-access-sepa
-        administrators:
-        - externalId: nidia.breitenberg
-          fullName: Nidia Breitenberg
-      - name: Ferdinand Reinger
-        externalId: ferdinand.reinger
-        legalEntityType: CUSTOMER
-        parentExternalId: bank
-        productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: Generated Product Group
+            - user:
+                externalId: "nidia.breitenberg"
+                fullName: "Nidia Breitenberg"
+              referenceJobRoles:
+                - "full-access-sepa"
+          administrators:
+            - externalId: "nidia.breitenberg"
+              fullName: "Nidia Breitenberg"
+        - name: "Ferdinand Reinger"
+          externalId: "ferdinand.reinger"
+          legalEntityType: "CUSTOMER"
+          parentExternalId: "bank"
+          productGroups:
+            - productGroupType: "ARRANGEMENTS"
+              name: "Generated Product Group"
+              users:
+                - user:
+                    externalId: "ferdinand.reinger"
+                    fullName: "Ferdinand Reinger"
+                  referenceJobRoles:
+                    - "full-access-sepa"
+              currentAccounts:
+                - iban: "AT358933130029393196"
+                  externalId: "LASDS24"
+                  productTypeExternalId: "standard-account"
+                  externalTransferAllowed: true
+                  crossCurrencyAllowed: true
+                  sourceId: "stream-product-generator"
+                  accountOpeningDate: "2019-03-18T14:14:11.62+01:00"
+                  lastUpdateDate: "2020-03-08T14:14:11.62+01:00"
+                  currency: "EUR"
+                  availableBalance:
+                    amount: 593.69
+                    currencyCode: "EUR"
+                  IBAN: "AT358933130029393196"
+                  urgentTransferAllowed: true
+                  bankBranchCode: "89331"
+                  accountInterestRate: 0.0127220220640926
+                  valueDateBalance: 593.69
+                  creditLimitInterestRate: 0.12072777693028541
+                  creditLimitExpiryDate: "2021-01-19T14:14:11.62+01:00"
+                  accruedInterest: 0
+                  debitCardsItems:
+                    - expiryDate: "2020-10-15T14:14:11.621+01:00"
+                      cardId: "^BDR84"
+                      cardholderName: "Ferdinand Reinger"
+                      cardType: "MAESTRO"
+                  accountHolderName: "Ferdinand Reinger"
+                  startDate: "2019-03-18T14:14:11.62+01:00"
+                  minimumRequiredBalance: 0
+                  accountHolderAddressLine1: "56289 Kenneth Wells"
+                  accountHolderAddressLine2: "Suite 412"
+                  accountHolderStreetName: "Beier Villages"
+                  town: "Rheaville"
+                  postCode: "40012-0060"
+                  countrySubDivision: "AT"
+                  creditAccount: false
+                  debitAccount: true
+                  accountHolderCountry: "Timor-Leste"
           users:
-          - user:
-              externalId: ferdinand.reinger
-              fullName: Ferdinand Reinger
-            referenceJobRoles:
-            - full-access-sepa
-          currentAccounts:
-          - iban: AT358933130029393196
-            externalId: LASDS24
-            productTypeExternalId: standard-account
-            externalTransferAllowed: true
-            crossCurrencyAllowed: true
-            sourceId: stream-product-generator
-            accountOpeningDate: '2019-03-18T14:14:11.62+01:00'
-            lastUpdateDate: '2020-03-08T14:14:11.62+01:00'
-            currency: EUR
-            availableBalance:
-              amount: 593.69
-              currencyCode: EUR
-            IBAN: AT358933130029393196
-            urgentTransferAllowed: true
-            bankBranchCode: '89331'
-            accountInterestRate: 0.0127220220640926
-            valueDateBalance: 593.69
-            creditLimitInterestRate: 0.12072777693028541
-            creditLimitExpiryDate: '2021-01-19T14:14:11.62+01:00'
-            accruedInterest: 0
-            debitCardsItems:
-            - expiryDate: '2020-10-15T14:14:11.621+01:00'
-              cardId: ^BDR84
-              cardholderName: Ferdinand Reinger
-              cardType: MAESTRO
-            accountHolderName: Ferdinand Reinger
-            startDate: '2019-03-18T14:14:11.62+01:00'
-            minimumRequiredBalance: 0
-            accountHolderAddressLine1: 56289 Kenneth Wells
-            accountHolderAddressLine2: Suite 412
-            accountHolderStreetName: Beier Villages
-            town: Rheaville
-            postCode: 40012-0060
-            countrySubDivision: AT
-            creditAccount: false
-            debitAccount: true
-            accountHolderCountry: Timor-Leste
-        users:
-        - user:
-            externalId: ferdinand.reinger
-            fullName: Ferdinand Reinger
-          referenceJobRoles:
-          - full-access-sepa
-        administrators:
-        - externalId: ferdinand.reinger
-          fullName: Ferdinand Reinger
-      - name: Lashaun Feil
-        externalId: lashaun.feil
-        legalEntityType: CUSTOMER
-        parentExternalId: bank
-        productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: Generated Product Group
+            - user:
+                externalId: "ferdinand.reinger"
+                fullName: "Ferdinand Reinger"
+              referenceJobRoles:
+                - "full-access-sepa"
+          administrators:
+            - externalId: "ferdinand.reinger"
+              fullName: "Ferdinand Reinger"
+        - name: "Lashaun Feil"
+          externalId: "lashaun.feil"
+          legalEntityType: "CUSTOMER"
+          parentExternalId: "bank"
+          productGroups:
+            - productGroupType: "ARRANGEMENTS"
+              name: "Generated Product Group"
+              users:
+                - user:
+                    externalId: "lashaun.feil"
+                    fullName: "Lashaun Feil"
+                  referenceJobRoles:
+                    - "full-access-sepa"
+              currentAccounts:
+                - iban: "DK0243345319922575"
+                  externalId: "JLAYR35"
+                  productTypeExternalId: "8a8587e86fe769dc016febae7ff926e1"
+                  name: "Current Account"
+                  externalTransferAllowed: true
+                  crossCurrencyAllowed: true
+                  sourceId: "stream-product-generator"
+                  accountOpeningDate: "2019-04-11T14:14:11.664+01:00"
+                  lastUpdateDate: "2020-03-08T14:14:11.664+01:00"
+                  currency: "EUR"
+                  availableBalance:
+                    amount: 3966.24
+                    currencyCode: "EUR"
+                  IBAN: "DK0243345319922575"
+                  urgentTransferAllowed: true
+                  bankBranchCode: "4334"
+                  accountInterestRate: 0.05814652103576375
+                  valueDateBalance: 3966.24
+                  creditLimitInterestRate: 0.15044870259279622
+                  creditLimitExpiryDate: "2021-03-03T14:14:11.664+01:00"
+                  accruedInterest: 0
+                  debitCardsItems:
+                    - expiryDate: "2020-12-03T14:14:11.664+01:00"
+                      cardId: "^LIY08"
+                      cardholderName: "Lashaun Feil"
+                      cardType: "MAESTRO"
+                  accountHolderName: "Lashaun Feil"
+                  startDate: "2019-04-11T14:14:11.664+01:00"
+                  minimumRequiredBalance: 0
+                  accountHolderAddressLine1: "19230 Ledner Manor"
+                  accountHolderAddressLine2: "Apt. 350"
+                  accountHolderStreetName: "Schulist Walks"
+                  town: "Lemkeshire"
+                  postCode: "49463"
+                  countrySubDivision: "DK"
+                  creditAccount: false
+                  debitAccount: true
+                  accountHolderCountry: "Cuba"
           users:
-          - user:
-              externalId: lashaun.feil
-              fullName: Lashaun Feil
-            referenceJobRoles:
-            - full-access-sepa
-          currentAccounts:
-          - iban: DK0243345319922575
-            externalId: JLAYR35
-            productTypeExternalId: 8a8587e86fe769dc016febae7ff926e1
-            name: Current Account
-            externalTransferAllowed: true
-            crossCurrencyAllowed: true
-            sourceId: stream-product-generator
-            accountOpeningDate: '2019-04-11T14:14:11.664+01:00'
-            lastUpdateDate: '2020-03-08T14:14:11.664+01:00'
-            currency: EUR
-            availableBalance:
-              amount: 3966.24
-              currencyCode: EUR
-            IBAN: DK0243345319922575
-            urgentTransferAllowed: true
-            bankBranchCode: '4334'
-            accountInterestRate: 0.05814652103576375
-            valueDateBalance: 3966.24
-            creditLimitInterestRate: 0.15044870259279622
-            creditLimitExpiryDate: '2021-03-03T14:14:11.664+01:00'
-            accruedInterest: 0
-            debitCardsItems:
-            - expiryDate: '2020-12-03T14:14:11.664+01:00'
-              cardId: ^LIY08
-              cardholderName: Lashaun Feil
-              cardType: MAESTRO
-            accountHolderName: Lashaun Feil
-            startDate: '2019-04-11T14:14:11.664+01:00'
-            minimumRequiredBalance: 0
-            accountHolderAddressLine1: 19230 Ledner Manor
-            accountHolderAddressLine2: Apt. 350
-            accountHolderStreetName: Schulist Walks
-            town: Lemkeshire
-            postCode: '49463'
-            countrySubDivision: DK
-            creditAccount: false
-            debitAccount: true
-            accountHolderCountry: Cuba
-        users:
-        - user:
-            externalId: lashaun.feil
-            fullName: Lashaun Feil
-          referenceJobRoles:
-          - full-access-sepa
-        administrators:
-        - externalId: lashaun.feil
-          fullName: Lashaun Feil
-      - name: Chi Kessler
-        externalId: chi.kessler
-        legalEntityType: CUSTOMER
-        parentExternalId: bank
-        productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: Generated Product Group
+            - user:
+                externalId: "lashaun.feil"
+                fullName: "Lashaun Feil"
+              referenceJobRoles:
+                - "full-access-sepa"
+          administrators:
+            - externalId: "lashaun.feil"
+              fullName: "Lashaun Feil"
+        - name: "Chi Kessler"
+          externalId: "chi.kessler"
+          legalEntityType: "CUSTOMER"
+          parentExternalId: "bank"
+          productGroups:
+            - productGroupType: "ARRANGEMENTS"
+              name: "Generated Product Group"
+              users:
+                - user:
+                    externalId: "chi.kessler"
+                    fullName: "Chi Kessler"
+                  referenceJobRoles:
+                    - "full-access-sepa"
+              currentAccounts:
+                - iban: "CR5886314494093857922"
+                  externalId: "ENAJV26"
+                  productTypeExternalId: "8a85878c6a01f12d016a0246708b31a4"
+                  name: "Overdraft Product"
+                  externalTransferAllowed: true
+                  crossCurrencyAllowed: true
+                  sourceId: "stream-product-generator"
+                  accountOpeningDate: "2018-12-08T14:14:11.697+01:00"
+                  lastUpdateDate: "2020-03-08T14:14:11.697+01:00"
+                  currency: "EUR"
+                  availableBalance:
+                    amount: 4774.10
+                    currencyCode: "EUR"
+                  IBAN: "CR5886314494093857922"
+                  urgentTransferAllowed: true
+                  bankBranchCode: "863"
+                  accountInterestRate: 0.040927174170449825
+                  valueDateBalance: 4774.10
+                  creditLimitInterestRate: 0.155185911358849
+                  creditLimitExpiryDate: "2021-05-07T14:14:11.697+01:00"
+                  accruedInterest: 0
+                  debitCardsItems:
+                    - number: "4485589438852566"
+                      expiryDate: "2020-06-21T14:14:11.698+01:00"
+                      cardId: "^PJZ06"
+                      cardholderName: "Chi Kessler"
+                      cardType: "VISA"
+                  accountHolderName: "Chi Kessler"
+                  startDate: "2018-12-08T14:14:11.697+01:00"
+                  minimumRequiredBalance: 0
+                  accountHolderAddressLine1: "5467 Zane Club"
+                  accountHolderAddressLine2: "Suite 187"
+                  accountHolderStreetName: "Kilback Pine"
+                  town: "West Arden"
+                  postCode: "20010"
+                  countrySubDivision: "CR"
+                  creditAccount: false
+                  debitAccount: true
+                  accountHolderCountry: "Aruba"
           users:
-          - user:
-              externalId: chi.kessler
-              fullName: Chi Kessler
-            referenceJobRoles:
-            - full-access-sepa
-          currentAccounts:
-          - iban: CR5886314494093857922
-            externalId: ENAJV26
-            productTypeExternalId: 8a85878c6a01f12d016a0246708b31a4
-            name: Overdraft Product
-            externalTransferAllowed: true
-            crossCurrencyAllowed: true
-            sourceId: stream-product-generator
-            accountOpeningDate: '2018-12-08T14:14:11.697+01:00'
-            lastUpdateDate: '2020-03-08T14:14:11.697+01:00'
-            currency: EUR
-            availableBalance:
-              amount: 4774.10
-              currencyCode: EUR
-            IBAN: CR5886314494093857922
-            urgentTransferAllowed: true
-            bankBranchCode: '863'
-            accountInterestRate: 0.040927174170449825
-            valueDateBalance: 4774.10
-            creditLimitInterestRate: 0.155185911358849
-            creditLimitExpiryDate: '2021-05-07T14:14:11.697+01:00'
-            accruedInterest: 0
-            debitCardsItems:
-            - number: '4485589438852566'
-              expiryDate: '2020-06-21T14:14:11.698+01:00'
-              cardId: ^PJZ06
-              cardholderName: Chi Kessler
-              cardType: VISA
-            accountHolderName: Chi Kessler
-            startDate: '2018-12-08T14:14:11.697+01:00'
-            minimumRequiredBalance: 0
-            accountHolderAddressLine1: 5467 Zane Club
-            accountHolderAddressLine2: Suite 187
-            accountHolderStreetName: Kilback Pine
-            town: West Arden
-            postCode: '20010'
-            countrySubDivision: CR
-            creditAccount: false
-            debitAccount: true
-            accountHolderCountry: Aruba
-        users:
-        - user:
-            externalId: chi.kessler
-            fullName: Chi Kessler
-          referenceJobRoles:
-          - full-access-sepa
-        administrators:
-        - externalId: chi.kessler
-          fullName: Chi Kessler
-      - name: Sam Carroll
-        externalId: sam.carroll
-        legalEntityType: CUSTOMER
-        parentExternalId: bank
-        productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: Generated Product Group
+            - user:
+                externalId: "chi.kessler"
+                fullName: "Chi Kessler"
+              referenceJobRoles:
+                - "full-access-sepa"
+          administrators:
+            - externalId: "chi.kessler"
+              fullName: "Chi Kessler"
+        - name: "Sam Carroll"
+          externalId: "sam.carroll"
+          legalEntityType: "CUSTOMER"
+          parentExternalId: "bank"
+          productGroups:
+            - productGroupType: "ARRANGEMENTS"
+              name: "Generated Product Group"
+              users:
+                - user:
+                    externalId: "sam.carroll"
+                    fullName: "Sam Carroll"
+                  referenceJobRoles:
+                    - "full-access-sepa"
+              currentAccounts:
+                - iban: "KZ74641JWP4KE3PK3Q4E"
+                  externalId: "NICWX71"
+                  productTypeExternalId: "8a8587e86fe769dc016febae7ff926e1"
+                  name: "Current Account"
+                  externalTransferAllowed: true
+                  crossCurrencyAllowed: true
+                  sourceId: "stream-product-generator"
+                  accountOpeningDate: "2018-12-03T14:14:11.724+01:00"
+                  lastUpdateDate: "2020-03-08T14:14:11.724+01:00"
+                  currency: "EUR"
+                  availableBalance:
+                    amount: 2623.82
+                    currencyCode: "EUR"
+                  IBAN: "KZ74641JWP4KE3PK3Q4E"
+                  urgentTransferAllowed: true
+                  bankBranchCode: "641"
+                  accountInterestRate: 0.06885950836213794
+                  valueDateBalance: 2623.82
+                  creditLimitInterestRate: 0.11073714997829028
+                  creditLimitExpiryDate: "2021-04-14T14:14:11.724+01:00"
+                  accruedInterest: 0
+                  debitCardsItems:
+                    - number: "2223012280716731"
+                      expiryDate: "2020-07-27T14:14:11.724+01:00"
+                      cardId: "^QDH18"
+                      cardholderName: "Sam Carroll"
+                      cardType: "MASTERCARD"
+                  accountHolderName: "Sam Carroll"
+                  startDate: "2018-12-03T14:14:11.724+01:00"
+                  minimumRequiredBalance: 0
+                  accountHolderAddressLine1: "165 Gutkowski Field"
+                  accountHolderAddressLine2: "Suite 356"
+                  accountHolderStreetName: "Trudie Streets"
+                  town: "Marksburgh"
+                  postCode: "53617"
+                  countrySubDivision: "KZ"
+                  creditAccount: false
+                  debitAccount: true
+                  accountHolderCountry: "Cuba"
           users:
-          - user:
-              externalId: sam.carroll
-              fullName: Sam Carroll
-            referenceJobRoles:
-            - full-access-sepa
-          currentAccounts:
-          - iban: KZ74641JWP4KE3PK3Q4E
-            externalId: NICWX71
-            productTypeExternalId: 8a8587e86fe769dc016febae7ff926e1
-            name: Current Account
-            externalTransferAllowed: true
-            crossCurrencyAllowed: true
-            sourceId: stream-product-generator
-            accountOpeningDate: '2018-12-03T14:14:11.724+01:00'
-            lastUpdateDate: '2020-03-08T14:14:11.724+01:00'
-            currency: EUR
-            availableBalance:
-              amount: 2623.82
-              currencyCode: EUR
-            IBAN: KZ74641JWP4KE3PK3Q4E
-            urgentTransferAllowed: true
-            bankBranchCode: '641'
-            accountInterestRate: 0.06885950836213794
-            valueDateBalance: 2623.82
-            creditLimitInterestRate: 0.11073714997829028
-            creditLimitExpiryDate: '2021-04-14T14:14:11.724+01:00'
-            accruedInterest: 0
-            debitCardsItems:
-            - number: '2223012280716731'
-              expiryDate: '2020-07-27T14:14:11.724+01:00'
-              cardId: ^QDH18
-              cardholderName: Sam Carroll
-              cardType: MASTERCARD
-            accountHolderName: Sam Carroll
-            startDate: '2018-12-03T14:14:11.724+01:00'
-            minimumRequiredBalance: 0
-            accountHolderAddressLine1: 165 Gutkowski Field
-            accountHolderAddressLine2: Suite 356
-            accountHolderStreetName: Trudie Streets
-            town: Marksburgh
-            postCode: '53617'
-            countrySubDivision: KZ
-            creditAccount: false
-            debitAccount: true
-            accountHolderCountry: Cuba
-        users:
-        - user:
-            externalId: sam.carroll
-            fullName: Sam Carroll
-          referenceJobRoles:
-          - full-access-sepa
-        administrators:
-        - externalId: sam.carroll
-          fullName: Sam Carroll
+            - user:
+                externalId: "sam.carroll"
+                fullName: "Sam Carroll"
+              referenceJobRoles:
+                - "full-access-sepa"
+          administrators:
+            - externalId: "sam.carroll"
+              fullName: "Sam Carroll"
     CustomServiceAgreement:
-      description: Custom Service Agreement
+      description: "Custom Service Agreement"
       value:
-        internalId: serviceAgreement1
-        externalId: serviceAgreementEx1
-        name: service_agreement_1
-        description: service agreement 1
+        internalId: "serviceAgreement1"
+        externalId: "serviceAgreementEx1"
+        name: "service_agreement_1"
+        description: "service agreement 1"
         participants:
-        - externalId: participant1
-          sharingUsers: true
-          sharingAccounts: true
-          action: ADD
-        validFromDate: '2021-03-10'
-        validFromTime: 01:00:00
-        validUntilDate: '2024-03-10'
-        validUntilTime: 01:00:00
-        status: ENABLED
+          - externalId: "participant1"
+            sharingUsers: true
+            sharingAccounts: true
+            action: "ADD"
+        validFromDate: "2021-03-10"
+        validFromTime: "01:00:00"
+        validUntilDate: "2024-03-10"
+        validUntilTime: "01:00:00"
+        status: "ENABLED"
         productGroups:
-        - productGroupType: ARRANGEMENTS
-          name: shared-data-group-with-123456789
-          currentAccounts:
-          - externalId: '48900955'
-          - externalId: '50088189'
+          - productGroupType: "ARRANGEMENTS"
+            name: "shared-data-group-with-123456789"
+            currentAccounts:
+              - externalId: "48900955"
+              - externalId: "50088189"
         saUsers:
-        - userProfile:
-            user:
-              externalId: user1
-            referenceJobRoleNames:
-            - jobRole1
-          actions: ADD
-        - userProfile:
-            user:
-              externalId: user2
-          actions: REMOVE
+          - userProfile:
+              user:
+                externalId: "user1"
+              referenceJobRoleNames:
+                - "jobRole1"
+            actions: "ADD"
+          - userProfile:
+              user:
+                externalId: "user2"
+            actions: "REMOVE"
         saAdmin:
-        - userProfile:
-            user:
-              externalId: admin1
-            referenceJobRoleNames:
-            - adminRole1
-          actions: ADD
+          - userProfile:
+              user:
+                externalId: "admin1"
+              referenceJobRoleNames:
+                - "adminRole1"
+            actions: "ADD"

@@ -1,4 +1,3 @@
----
 # Stream config
 server:
   shutdown: graceful
@@ -27,227 +26,211 @@ backbase:
 # Root Legal Entity Structure Configuration
 bootstrap:
   legalEntity:
-    name: Moustache Bank
-    realmName: backbase
-    externalId: moustache-bank
-    legalEntityType: BANK
+    name: "Moustache Bank"
+    realmName: "backbase"
+    externalId: "moustache-bank"
+    legalEntityType: "BANK"
     referenceJobRoles:
-    - name: Entitlements - Manager
-      description: Full Entitlements administration.
-      functionGroups:
-      - name: Manage Entitlements
-        functions:
-        - functionId: '1019'
-          name: Manage Data Groups
-          privileges:
-          - privilege: view
-          - privilege: create
-          - privilege: edit
-          - privilege: delete
-        - functionId: '1020'
-          name: Manage Function Groups
-          privileges:
-          - privilege: view
-          - privilege: create
-          - privilege: edit
-          - privilege: delete
-        - functionId: '1010'
-          name: Manage Users
-          privileges:
-          - privilege: view
-        - functionId: '1009'
-          name: Assign Permissions
-          privileges:
-          - privilege: view
-          - privilege: create
-          - privilege: edit
-        - functionId: '1028'
-          name: Manage Service Agreements
-          privileges:
-          - privilege: view
-          - privilege: create
-          - privilege: edit
-          - privilege: delete
-        - functionId: '1119'
-          name: Manage Self-approve Permissions
-          privileges:
-          - privilege: view
-        - functionId: '1007'
-          name: Assign Users
-          privileges:
-          - privilege: view
-          - privilege: create
-          - privilege: edit
-        - functionId: '1035'
-          name: Manage User Profiles
-          privileges:
-          - privilege: view
-          - privilege: edit
-        - functionId: '1011'
-          name: Manage Legal Entities
-          privileges:
-          - privilege: view
-          - privilege: create
-          - privilege: edit
-          - privilege: delete
-        - functionId: '1034'
-          name: Manage Identities
-          privileges:
-          - privilege: view
-          - privilege: create
-          - privilege: edit
-        - functionId: '1049'
-          name: Lock User
-          privileges:
-          - privilege: view
-          - privilege: create
-          - privilege: edit
-        - functionId: '1050'
-          name: Unlock User
-          privileges:
-          - privilege: view
-          - privilege: create
-          - privilege: edit
-        - functionId: '1084'
-          name: Revoke access
-          privileges:
-          - privilege: create
-    - name: Retail User - USA
-      description: Retail User Permissions for USA
-      functionGroups:
-      - name: Products, payments, txn, contacts
-        functions:
-        - functionId: '1006'
-          name: Product Summary
-          functionCode: product.summary
-          privileges:
-          - privilege: view
-        - functionId: '1003'
-          name: Transactions
-          functionCode: transactions
-          privileges:
-          - privilege: view
-          - privilege: edit
-        - functionId: '1017'
-          name: US Domestic Wire
-          functionCode: us.domestic.wire
-          privileges:
-          - privilege: view
-          - privilege: create
-        - functionId: '1018'
-          name: US Foreign Wire
-          functionCode: us.foreign.wire
-          privileges:
-          - privilege: view
-          - privilege: create
-        - functionId: '1005'
-          name: Contacts
-          functionCode: contacts
-          privileges:
-          - privilege: view
-          - privilege: create
-          - privilege: edit
-          - privilege: delete
-    administrators:
-    - externalId: admin
-      fullName: Backbase Root Admin
-      identityLinkStrategy: CREATE_IN_IDENTITY
-      emailAddress:
-        address: bbadmin@email.com
-      mobileNumber:
-        number: '1234567890'
+      - name: Entitlements - Manager
+        description: Full Entitlements administration.
+        functionGroups:
+          - name: "Manage Entitlements"
+            functions:
+              - functionId: "1019"
+                name: "Manage Data Groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1020"
+                name: "Manage Function Groups"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1010"
+                name: "Manage Users"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1009"
+                name: "Assign Permissions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+              - functionId: "1028"
+                name: "Manage Service Agreements"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1119"
+                name: "Manage Self-approve Permissions"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1007"
+                name: "Assign Users"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+              - functionId: "1035"
+                name: "Manage User Profiles"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+              - functionId: "1011"
+                name: "Manage Legal Entities"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
+              - functionId: "1034"
+                name: "Manage Identities"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+              - functionId: "1049"
+                name: "Lock User"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+              - functionId: "1050"
+                name: "Unlock User"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+              - functionId: "1084"
+                name: "Revoke access"
+                privileges:
+                  - privilege: "create"
+      - name: Retail User - USA
+        description: Retail User Permissions for USA
+        functionGroups:
+          - name: "Products, payments, txn, contacts"
+            functions:
+              - functionId: "1006"
+                name: "Product Summary"
+                functionCode: "product.summary"
+                privileges:
+                  - privilege: "view"
+              - functionId: "1003"
+                name: "Transactions"
+                functionCode: "transactions"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "edit"
+              - functionId: "1017"
+                name: "US Domestic Wire"
+                functionCode: "us.domestic.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1018"
+                name: "US Foreign Wire"
+                functionCode: "us.foreign.wire"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+              - functionId: "1005"
+                name: "Contacts"
+                functionCode: "contacts"
+                privileges:
+                  - privilege: "view"
+                  - privilege: "create"
+                  - privilege: "edit"
+                  - privilege: "delete"
     users:
-    - user:
-        externalId: admin
-        fullName: Backbase Root Admin
-        identityLinkStrategy: CREATE_IN_IDENTITY
-        emailAddress:
-          address: bbadmin@email.com
-        mobileNumber:
-          number: '1234567890'
-      referenceJobRoleNames:
-      - Entitlements - Manager
+      - user:
+          externalId: "admin"
+          fullName: "Backbase Root Admin"
+          identityLinkStrategy: "CREATE_IN_IDENTITY"
+          emailAddress:
+            address: "bbadmin@email.com"
+          mobileNumber:
+            number: "1234567890"
+        referenceJobRoleNames:
+          - "Entitlements - Manager"
 
 ---
 spring:
   config:
     activate:
-      on-profile: moustache-bank & moustache-bank-subsidiaries
+      on-profile: "moustache-bank & moustache-bank-subsidiaries"
 
 # Subsidiaries Legal Entity Structure Configuration
 bootstrap:
   legalEntity:
     subsidiaries:
-    - name: Moustache Bank USA
-      realmName: backbase
-      externalId: moustache-bank-usa
-      legalEntityType: BANK
-      subsidiaries:
-      - name: Sara
-        realmName: backbase
-        externalId: sara
-        legalEntityType: CUSTOMER
-        administrators:
-        - externalId: sara
-          fullName: Sara Jones
-          identityLinkStrategy: CREATE_IN_IDENTITY
-          emailAddress:
-            address: sara@email.com
-          mobileNumber:
-            number: '1234567890'
-        users:
-        - user:
-            externalId: sara
-            fullName: Sara Jones
-            identityLinkStrategy: CREATE_IN_IDENTITY
-            emailAddress:
-              address: sara@email.com
-            mobileNumber:
-              number: '1234567890'
-          referenceJobRoleNames:
-          - Retail User - USA
-        productGroups:
-        - name: sara-arrangements
-          description: Product group containing user arrangements
-          currentAccounts:
-          - externalId: '021000021'
-            BBAN: '021000021'
-            name: Sara's Current Account 1
-            productTypeExternalId: current-account
-            currency: USD
-            externalTransferAllowed: true
-            availableBalance:
-              currencyCode: USD
-              amount: 1055.5
-            bookedBalance:
-              currencyCode: USD
-              amount: 1055.5
-          savingAccounts:
-          - externalId: '021000022'
-            BBAN: '021000022'
-            name: Sara's Savings Account 1
-            productTypeExternalId: savings-account
-            currency: USD
-            externalTransferAllowed: false
-            availableBalance:
-              currencyCode: USD
-              amount: 3820.2
-            bookedBalance:
-              currencyCode: USD
-              amount: 3820.2
-            accountInterestRate: 0.05
-            termUnit: Quarterly
-          - externalId: '021000023'
-            BBAN: '021000023'
-            name: Sara's Savings Account 2
-            productTypeExternalId: savings-account
-            currency: USD
-            externalTransferAllowed: false
-            availableBalance:
-              currencyCode: USD
-              amount: 155.5
-            bookedBalance:
-              currencyCode: USD
-              amount: 155.5
-            accountInterestRate: 0.05
-            termUnit: Quarterly
+      - name: "Moustache Bank USA"
+        realmName: "backbase"
+        externalId: "moustache-bank-usa"
+        legalEntityType: "BANK"
+        subsidiaries:
+          - name: "Sara"
+            realmName: "backbase"
+            externalId: "sara"
+            legalEntityType: "CUSTOMER"
+            users:
+              - user:
+                  externalId: "sara"
+                  fullName: "Sara Jones"
+                  identityLinkStrategy: "CREATE_IN_IDENTITY"
+                  emailAddress:
+                    address: "sara@email.com"
+                  mobileNumber:
+                    number: "1234567890"
+                referenceJobRoleNames:
+                  - "Retail User - USA"
+            productGroups:
+              - name: "sara-arrangements"
+                description: "Product group containing user arrangements"
+                currentAccounts:
+                  - externalId: "021000021"
+                    BBAN: "021000021"
+                    name: "Sara's Current Account 1"
+                    productTypeExternalId: "current-account"
+                    currency: "USD"
+                    externalTransferAllowed: true
+                    availableBalance:
+                      currencyCode: "USD"
+                      amount: 1055.5
+                    bookedBalance:
+                      currencyCode: "USD"
+                      amount: 1055.5
+                savingAccounts:
+                  - externalId: "021000022"
+                    BBAN: "021000022"
+                    name: "Sara's Savings Account 1"
+                    productTypeExternalId: "savings-account"
+                    currency: "USD"
+                    externalTransferAllowed: false
+                    availableBalance:
+                      currencyCode: "USD"
+                      amount: 3820.2
+                    bookedBalance:
+                      currencyCode: "USD"
+                      amount: 3820.2
+                    accountInterestRate: 0.05
+                    termUnit: "Quarterly"
+                  - externalId: "021000023"
+                    BBAN: "021000023"
+                    name: "Sara's Savings Account 2"
+                    productTypeExternalId: "savings-account"
+                    currency: "USD"
+                    externalTransferAllowed: false
+                    availableBalance:
+                      currencyCode: "USD"
+                      amount: 155.5
+                    bookedBalance:
+                      currencyCode: "USD"
+                      amount: 155.5
+                    accountInterestRate: 0.05
+                    termUnit: "Quarterly"

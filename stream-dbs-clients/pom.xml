@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>3.32.0</version>
+        <version>3.37.1</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -110,7 +110,7 @@
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.arrangement</groupId>
+                                    <groupId>com.backbase.products</groupId>
                                     <artifactId>arrangement-manager</artifactId>
                                     <classifier>api</classifier>
                                     <type>zip</type>

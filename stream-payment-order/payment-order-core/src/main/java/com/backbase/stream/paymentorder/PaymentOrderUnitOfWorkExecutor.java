@@ -112,7 +112,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         return paymentOrdersApi.postFilterPaymentOrders(
                 null, null, null, null, null, null, null, null, null, null, null,
                 internalUserId, null, null, Integer.MAX_VALUE, null,
-                null, paymentOrderPostFilterRequest);
+                null, null, paymentOrderPostFilterRequest);
     }
 
     private Flux<PaymentOrderIngestRequest> getPaymentOrderIngestRequest(PaymentOrderIngestContext paymentOrderIngestContext) {
