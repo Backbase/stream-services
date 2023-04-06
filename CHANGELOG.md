@@ -9,14 +9,14 @@ All notable changes to this project will be documented in this file.
 ## [3.36.0](https://github.com/Backbase/stream-services/compare/3.35.0...3.36.0)
 ### Added
 - Adds `bankBranchCode` field to `term-deposits.json` events
- 
+
 ## [3.35.0](https://github.com/Backbase/stream-services/compare/3.34.0...3.35.0)
 ### Added
 - Support for creating data group of type `CUSTOM`.
 
 ## [3.34.0](https://github.com/Backbase/stream-services/compare/3.33.1...3.34.0)
 ### Changed
-- Upgraded SSDK to 15.2.0 
+- Upgraded SSDK to 15.2.0
 - Upgraded Banking Services to 2023.02-LTS
 - Fix some breaking changes introduced by 2023.02-LTS
 

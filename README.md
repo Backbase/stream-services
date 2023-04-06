@@ -1,8 +1,8 @@
 [![Build Stream Services](https://github.com/Backbase/stream-services/actions/workflows/build.yml/badge.svg)](https://github.com/Backbase/stream-services/actions/workflows/build.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.backbase.stream%3Astream-services&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.backbase.stream%3Astream-services)
 # Stream Services
-Stream Services are an Open-Source accelerator to connect with Backbase "out-of-the-box" components that talk to DBS and are responsible for orchestrating calls to DBS. 
-The orchestration of calling different services is written in a functional programming style on project reactor enabling resiliency and scalability. 
+Stream Services are an Open-Source accelerator to connect with Backbase "out-of-the-box" components that talk to DBS and are responsible for orchestrating calls to DBS.
+The orchestration of calling different services is written in a functional programming style on project reactor enabling resiliency and scalability.
 Stream Services are packaged as libraries that can be included in any project, REST Service and/or Spring Cloud Data Flow Applications.
 
 The Services are listed with Service name and how they are packaged
@@ -12,7 +12,7 @@ Currently, the following DBS services are exposed as Stream Components:
 * [Stream Product Catalog](stream-product-catalog) (Lib, Rest, Task) → Enabled bootstrapping of product types into DBS. Product Types are currently hardcoded in the streamTask definition. Orchestrates calls into Product Summary
 * [Stream Access Control](stream-access-control) (Lib) → The Stream Access Control library provides access to Access Control services from a single library and provides an easier abstraction layer to use these services. It mixes access to persistence and service api's to enable proper service to service comms for non DBS services such as Stream. Requires Access Control, Product Summary
 * [Stream-Cursor](stream-cursor) (Lib, Rest, Source)  → The Stream Cursor Source is listening to predefined DBS events such as On Login. For each login event, it will retrieve a list of products from entitlements and creates an Ingestion Cursor per product. Cursors can be stored in a RDBMS and published on a HTTP Web Socket or Spring Cloud Dataflow Source. Requires RDBMS, Access Control, Product Summary and Transactions. Login Event received from Authentication Starter or Identity (with Audit Events enabled)
-* [Stream Transactions](stream-transactions) (Lib, Rest) → Allows ingestion into DBS in a controlled way with support for retry, rate limiting and configurable batch sizes. 
+* [Stream Transactions](stream-transactions) (Lib, Rest) → Allows ingestion into DBS in a controlled way with support for retry, rate limiting and configurable batch sizes.
 * [Stream DBS Clients](stream-dbs-clients) -> The Stream DBS Clients are generated from Backbase OOTB specs and provide a reactive interface to interact with DBS services.
 * [Stream Portfolio](stream-portfolio) (Lib, Rest) → Allows ingestion into DBS in a controlled way.
 * [Stream Payment Order](stream-portfolio) (Lib) → Allows ingestion into DBS in a controlled way.
@@ -57,4 +57,3 @@ Please see the license terms [here](LICENSE.txt).
 
 ## Contributing
 This is an open-source project! Please check our contribution guidelines [here](CONTRIBUTING.md).
-
