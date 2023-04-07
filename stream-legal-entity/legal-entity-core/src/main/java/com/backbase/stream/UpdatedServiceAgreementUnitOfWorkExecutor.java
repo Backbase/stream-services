@@ -6,12 +6,12 @@ import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 
 public class UpdatedServiceAgreementUnitOfWorkExecutor
-        extends UnitOfWorkExecutor<UpdatedServiceAgreementTask> {
+    extends UnitOfWorkExecutor<UpdatedServiceAgreementTask> {
 
-    public UpdatedServiceAgreementUnitOfWorkExecutor(
-            UnitOfWorkRepository<UpdatedServiceAgreementTask, String> repository,
-            StreamTaskExecutor<UpdatedServiceAgreementTask> streamTaskExecutor,
-            StreamWorkerConfiguration streamWorkerConfiguration) {
-        super(repository, streamTaskExecutor, streamWorkerConfiguration);
-    }
+  public UpdatedServiceAgreementUnitOfWorkExecutor(
+      UnitOfWorkRepository<UpdatedServiceAgreementTask, String> repository,
+      StreamTaskExecutor<UpdatedServiceAgreementTask> streamTaskExecutor,
+      StreamWorkerConfiguration streamWorkerConfiguration) {
+    super(repository, streamTaskExecutor, streamWorkerConfiguration);
+  }
 }

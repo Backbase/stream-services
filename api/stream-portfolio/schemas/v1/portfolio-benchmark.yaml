@@ -1,5 +1,5 @@
 required:
-- name
+  - name
 type: object
 properties:
   name:

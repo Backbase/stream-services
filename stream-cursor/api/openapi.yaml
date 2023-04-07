@@ -7,8 +7,8 @@ info:
     backgroundColor: '#FFFFFF'
     altText: Backbase logo
 servers:
-- url: http://stream-cursor-http.proto.backbasecloud.com/
-  description: The server
+  - url: http://stream-cursor-http.proto.backbasecloud.com/
+    description: The server
 paths:
   ###############################################
   ## Ingestion Cursors
@@ -17,7 +17,7 @@ paths:
     summary: Ingestion Cursors
     post:
       tags:
-      - cursors
+        - cursors
       description: Creates a new Ingestion Cursor which is executed by the the executors
       operationId: createNewIngestionCursor
       requestBody:
@@ -34,7 +34,7 @@ paths:
                 $ref: '#/components/schemas/IngestionCursor'
     get:
       tags:
-      - cursors
+        - cursors
       description: Retrieves a list in ingestion cursors which are used to start the ingestion process
       operationId: getIngestionCursors
       responses:
@@ -52,7 +52,7 @@ paths:
     delete:
       summary: Deletes all ingestion cursors
       tags:
-      - cursors
+        - cursors
       description: |
         # Delete all ingestion cursors
 
@@ -66,17 +66,17 @@ paths:
   /cursors/{cursorId}:
     get:
       tags:
-      - cursors
+        - cursors
       description: Get a cursor
       operationId: getCursorById
       parameters:
-      - name: cursorId
-        in: path
-        description: ID of cursor to update
-        required: true
-        schema:
-          type: string
-          format: uuid
+        - name: cursorId
+          in: path
+          description: ID of cursor to update
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         200:
           description: Ingestion Cursor created
@@ -92,17 +92,17 @@ paths:
                 $ref: '#/components/schemas/Error'
     put:
       tags:
-      - cursors
+        - cursors
       summary: Replace Cursor with new denition
       operationId: updateCursorById
       parameters:
-      - name: cursorId
-        in: path
-        description: ID of cursor to update
-        required: true
-        schema:
-          type: string
-          format: uuid
+        - name: cursorId
+          in: path
+          description: ID of cursor to update
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
         content:
           application/json:
@@ -113,37 +113,37 @@ paths:
           description: Update successfull
     delete:
       tags:
-      - cursors
+        - cursors
       summary: Deletes a cursor
       operationId: deleteCursorById
       parameters:
-      - name: cursorId
-        in: path
-        description: ID of cursor to update
-        required: true
-        schema:
-          type: string
-          format: uuid
+        - name: cursorId
+          in: path
+          description: ID of cursor to update
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         204:
           description: Delete succesfull
   /cursor-stream:
     get:
       tags:
-      - cursor-stream
+        - cursor-stream
       description: Retrieves a list in ingestion cursors which are used to start the ingestion process
       operationId: getIngestionCursorStream
       parameters:
-      - name: source
-        in: query
-        description: The source of events to listen to
-        schema:
-          type: string
-      - name: state
-        in: query
-        description: The state of the cursor
-        schema:
-          type: string
+        - name: source
+          in: query
+          description: The source of events to listen to
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: The state of the cursor
+          schema:
+            type: string
       responses:
         200:
           description: |
@@ -185,15 +185,15 @@ components:
         cursor_type:
           type: string
           description: Type of the Ingestion Cursor. Real Time are generated from Events inside DBS, where as BATCH cursors are created from a scheduled process
-          enum: [BATCH, REAL_TIME]
+          enum: [ BATCH, REAL_TIME ]
         cursor_state:
           type: string
           description: State of the cursor.  Newly created cursors start with NOT_STARTED state.
-          enum: [not_started, abandoned, completed, failed, started, starting, stopped, stopping, unknown]
+          enum: [ not_started, abandoned, completed, failed, started, starting, stopped, stopping, unknown ]
         cursor_source:
           type: string
           description: Event which created the Ingestion Cursor
-          enum: [arrangement_added_event, arrangement_updated_event, login_event, payment_created_event]
+          enum: [ arrangement_added_event, arrangement_updated_event, login_event, payment_created_event ]
         record_uuid:
           type: string
           description: Record UUID from which to start ingestion

@@ -11,21 +11,21 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @Configuration
 public class LegalEntityHttpConfiguration {
 
-    @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange().anyExchange().permitAll().and().csrf().disable().build();
-    }
+  @Bean
+  public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+    return http.authorizeExchange().anyExchange().permitAll().and().csrf().disable().build();
+  }
 
-    /**
-     * To support tracing requests to the services.
-     *
-     * @return In memory HttpTraceRepository.
-     */
-    @Bean
-    @ConditionalOnExpression(
-            "${management.endpoints.enabled-by-default:false} or"
-                    + " ${management.trace.http.enabled:false}")
-    public HttpTraceRepository httpTraceRepository() {
-        return new InMemoryHttpTraceRepository();
-    }
+  /**
+   * To support tracing requests to the services.
+   *
+   * @return In memory HttpTraceRepository.
+   */
+  @Bean
+  @ConditionalOnExpression(
+      "${management.endpoints.enabled-by-default:false} or"
+          + " ${management.trace.http.enabled:false}")
+  public HttpTraceRepository httpTraceRepository() {
+    return new InMemoryHttpTraceRepository();
+  }
 }

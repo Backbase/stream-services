@@ -1,7 +1,6 @@
 package com.backbase.stream.cursor.configuration;
 
 import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /** Cursor Source Configuration. */
@@ -9,6 +8,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 public class CursorServiceConfigurationProperties {
 
-    /** Publish Event for each Arrangement logged in User is entitled for. */
-    private boolean publishEntitledArrangements = true;
+  /** Publish Event for each Arrangement logged in User is entitled for. */
+  private boolean publishEntitledArrangements = true;
 }

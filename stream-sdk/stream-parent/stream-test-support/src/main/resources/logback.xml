@@ -1,22 +1,23 @@
 <configuration>
-  <appender name="COLOR" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>[%date{HH:mm:ss.SSS}] %magenta(%20([%thread])) %highlight([%level]) %cyan([%logger]) %msg%n</pattern>
-    </encoder>
-  </appender>
-  <root level="INFO">
-    <!-- to use enable this mode pass -Dcolor to jvm -->
-    <appender-ref ref="COLOR"/>
-  </root>
-<!--  <logger name="io.lettuce" level="WARN"/>-->
-<!--  <logger name="io.netty" level="INFO"/>-->
-<!--  <logger name="reactor.netty" level="INFO"/>-->
-<!--  <logger name="io.netty" level="INFO"/>-->
-<!--  <logger name="io.netty.util" level="OFF"/>-->
-<!--  <logger name="reactor.netty.http.client" level="DEBUG"/>-->
-<!--  <logger name="reactor.netty.channel.FluxReceive" level="INFO"/>-->
-<!--  <logger name="reactor.netty.resources.PooledConnectionProvider" level="INFO"/>-->
-<!--  <logger name="org.springframework.web.HttpLogging" level="INFO"/>-->
-<!--  <logger name="org.springframework.http.codec.json.Jackson2JsonDecoder" level="INFO"/>-->
-<!--  <logger name="org.springframework.web.reactive.function.client.ExchangeFunctions" level="INFO"/>-->
+    <appender name="COLOR" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%date{HH:mm:ss.SSS}] %magenta(%20([%thread])) %highlight([%level]) %cyan([%logger]) %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+    <root level="INFO">
+        <!-- to use enable this mode pass -Dcolor to jvm -->
+        <appender-ref ref="COLOR"/>
+    </root>
+    <!--  <logger name="io.lettuce" level="WARN"/>-->
+    <!--  <logger name="io.netty" level="INFO"/>-->
+    <!--  <logger name="reactor.netty" level="INFO"/>-->
+    <!--  <logger name="io.netty" level="INFO"/>-->
+    <!--  <logger name="io.netty.util" level="OFF"/>-->
+    <!--  <logger name="reactor.netty.http.client" level="DEBUG"/>-->
+    <!--  <logger name="reactor.netty.channel.FluxReceive" level="INFO"/>-->
+    <!--  <logger name="reactor.netty.resources.PooledConnectionProvider" level="INFO"/>-->
+    <!--  <logger name="org.springframework.web.HttpLogging" level="INFO"/>-->
+    <!--  <logger name="org.springframework.http.codec.json.Jackson2JsonDecoder" level="INFO"/>-->
+    <!--  <logger name="org.springframework.web.reactive.function.client.ExchangeFunctions" level="INFO"/>-->
 </configuration>

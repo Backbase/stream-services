@@ -7,8 +7,8 @@ info:
     backgroundColor: '#FFFFFF'
     altText: Backbase logo
 servers:
-- url: http://stream-product-catalog-http.proto.backbasecloud.com/
-  description: The server
+  - url: http://stream-product-catalog-http.proto.backbasecloud.com/
+    description: The server
 paths:
   ###############################################
   ## Product Catalog
@@ -18,7 +18,7 @@ paths:
       summary: Get Product Catalog
       operationId: getProductCatalog
       tags:
-      - product-catalog
+        - product-catalog
       description: Assemble Product Catalog
       responses:
         200:
@@ -36,7 +36,7 @@ paths:
     post:
       summary: Setup a Product Catalog
       tags:
-      - product-catalog
+        - product-catalog
       description: |
       operationId: setupProductCatalog
       requestBody:
@@ -185,14 +185,14 @@ components:
     BackbaseProductKind:
       type: string
       enum:
-      - Current Account
-      - Credit Card
-      - Debit Card
-      - Loan
-      - Savings Account
-      - Investment Account
-      - Term Deposit
-      - Custom
+        - Current Account
+        - Credit Card
+        - Debit Card
+        - Loan
+        - Savings Account
+        - Investment Account
+        - Term Deposit
+        - Custom
 
     ###############################################
     ## Products
@@ -316,10 +316,10 @@ components:
         accountHolderCountry:
           $ref: '#/components/schemas/AccountHolderCountry'
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
     SavingsAccount:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
@@ -385,7 +385,7 @@ components:
           $ref: '#/components/schemas/DebitAccount'
     DebitCard:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         number:
           maxLength: 36
@@ -409,7 +409,7 @@ components:
           $ref: '#/components/schemas/ValidThru'
     CreditCard:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
@@ -455,7 +455,7 @@ components:
           $ref: '#/components/schemas/AccruedInterest'
     Loan:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
@@ -503,7 +503,7 @@ components:
           $ref: '#/components/schemas/BBAN'
     TermDeposit:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         bookedBalance:
           $ref: '#/components/schemas/BookedBalance'
@@ -551,7 +551,7 @@ components:
           $ref: '#/components/schemas/MinimumRequiredBalance'
     InvestmentAccount:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/BaseProduct'
       properties:
         currentInvestment:
           $ref: '#/components/schemas/CurrentInvestment'
@@ -571,13 +571,13 @@ components:
           $ref: '#/components/schemas/BIC'
     CustomProduct:
       allOf:
-      - $ref: '#/components/schemas/BaseProduct'
-      - $ref: '#/components/schemas/CurrentAccount'
-      - $ref: '#/components/schemas/DebitCard'
-      - $ref: '#/components/schemas/CreditCard'
-      - $ref: '#/components/schemas/Loan'
-      - $ref: '#/components/schemas/TermDeposit'
-      - $ref: '#/components/schemas/InvestmentAccount'
+        - $ref: '#/components/schemas/BaseProduct'
+        - $ref: '#/components/schemas/CurrentAccount'
+        - $ref: '#/components/schemas/DebitCard'
+        - $ref: '#/components/schemas/CreditCard'
+        - $ref: '#/components/schemas/Loan'
+        - $ref: '#/components/schemas/TermDeposit'
+        - $ref: '#/components/schemas/InvestmentAccount'
       properties:
         productTypeExternalId:
           $ref: '#/components/schemas/ExternalIdentifier'
@@ -689,17 +689,17 @@ components:
             $ref: '#/components/schemas/User'
 
       required:
-      - name
-      - external
-      - legalEntityType
-      - administrators
+        - name
+        - external
+        - legalEntityType
+        - administrators
     LegalEntityType:
       type: string
       title: Legal Entity Type
       description: Type of the legal entity. Bank or Customer.
       enum:
-      - CUSTOMER
-      - BANK
+        - CUSTOMER
+        - BANK
     User:
       title: User
       description: |
@@ -720,7 +720,7 @@ components:
         limit:
           $ref: '#/components/schemas/Limit'
       required:
-      - externalId
+        - externalId
     Limit:
       title: Limit
       type: object
@@ -877,11 +877,11 @@ components:
       type: string
       description: The period of time and/or the interest rate arranged between Bank and customer.
       enum:
-      - Daily
-      - Weekly
-      - Monthly
-      - Quarterly
-      - Yearly
+        - Daily
+        - Weekly
+        - Monthly
+        - Quarterly
+        - Yearly
     Town:
       maxLength: 35
       type: string
@@ -923,11 +923,11 @@ components:
       type: string
       description: The period of time and/or the interest rate arranged between Bank and customer.
       enum:
-      - Daily
-      - Weekly
-      - Monthly
-      - Quarterly
-      - Yearly
+        - Daily
+        - Weekly
+        - Monthly
+        - Quarterly
+        - Yearly
     CurrencyCode:
       pattern: ^[A-Z]{3}$
       type: string

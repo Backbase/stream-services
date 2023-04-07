@@ -1,7 +1,6 @@
 package com.backbase.stream.model.response;
 
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutResponse;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
@@ -11,5 +10,5 @@ import lombok.ToString;
 @ToString
 public class UpdatePaymentOrderIngestDbsResponse implements PaymentOrderIngestDbsResponse {
 
-    private final PaymentOrderPutResponse paymentOrderPutResponse;
+  private final PaymentOrderPutResponse paymentOrderPutResponse;
 }

@@ -13,7 +13,6 @@ import com.backbase.stream.clients.config.TransactionManagerClientConfig;
 import com.backbase.stream.clients.config.UserManagerClientConfig;
 import com.backbase.stream.clients.config.UserProfileManagerClientConfig;
 import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -28,19 +27,19 @@ import org.springframework.context.annotation.Import;
  */
 @Configuration
 @Import({
-    DbsWebClientConfiguration.class,
-    AccessControlClientConfig.class,
-    ApprovalClientConfig.class,
-    ArrangementManagerClientConfig.class,
-    ContactManagerClientConfig.class,
-    IdentityIntegrationClientConfig.class,
-    LimitsClientConfig.class,
-    PaymentOrderClientConfig.class,
-    TransactionManagerClientConfig.class,
-    UserManagerClientConfig.class,
-    UserProfileManagerClientConfig.class,
-    InstrumentApiConfiguration.class,
-    PortfolioApiConfiguration.class
+  DbsWebClientConfiguration.class,
+  AccessControlClientConfig.class,
+  ApprovalClientConfig.class,
+  ArrangementManagerClientConfig.class,
+  ContactManagerClientConfig.class,
+  IdentityIntegrationClientConfig.class,
+  LimitsClientConfig.class,
+  PaymentOrderClientConfig.class,
+  TransactionManagerClientConfig.class,
+  UserManagerClientConfig.class,
+  UserProfileManagerClientConfig.class,
+  InstrumentApiConfiguration.class,
+  PortfolioApiConfiguration.class
 })
 @EnableConfigurationProperties
 public class DbsApiClientsAutoConfiguration {}

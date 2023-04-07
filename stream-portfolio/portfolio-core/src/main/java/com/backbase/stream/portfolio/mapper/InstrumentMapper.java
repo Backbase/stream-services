@@ -15,33 +15,31 @@ import com.backbase.stream.portfolio.model.Instrument;
 import com.backbase.stream.portfolio.model.InstrumentHistoryPrice;
 import com.backbase.stream.portfolio.model.Region;
 import com.backbase.stream.portfolio.model.SubAssetClass;
-
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-
-import java.util.List;
 
 @Mapper
 public interface InstrumentMapper {
 
-    RegionsPostRequest mapRegion(Region region);
+  RegionsPostRequest mapRegion(Region region);
 
-    @Mapping(target = ".", source = "country")
-    @Mapping(target = "region", source = "regionCode")
-    CountriesPostRequest mapCountry(String regionCode, Country country);
+  @Mapping(target = ".", source = "country")
+  @Mapping(target = "region", source = "regionCode")
+  CountriesPostRequest mapCountry(String regionCode, Country country);
 
-    InstrumentsPostRequest mapInstrument(Instrument instrument);
+  InstrumentsPostRequest mapInstrument(Instrument instrument);
 
-    InstrumentPutRequest mapPutInstrument(Instrument instrument);
+  InstrumentPutRequest mapPutInstrument(Instrument instrument);
 
-    AssetClassesPostRequest mapAssetClass(AssetClass assetClass);
+  AssetClassesPostRequest mapAssetClass(AssetClass assetClass);
 
-    AssetClassesPutRequest mapPutAssetClass(AssetClass assetClass);
+  AssetClassesPutRequest mapPutAssetClass(AssetClass assetClass);
 
-    SubAssetClassesPostRequest mapSubAssetClass(SubAssetClass assetClass);
+  SubAssetClassesPostRequest mapSubAssetClass(SubAssetClass assetClass);
 
-    SubAssetClassPutRequest mapPutSubAssetClass(SubAssetClass assetClass);
+  SubAssetClassPutRequest mapPutSubAssetClass(SubAssetClass assetClass);
 
-    List<InstrumentHistoryPricesRequestItem> mapHistoryPrices(
-            List<InstrumentHistoryPrice> historyPrices);
+  List<InstrumentHistoryPricesRequestItem> mapHistoryPrices(
+      List<InstrumentHistoryPrice> historyPrices);
 }

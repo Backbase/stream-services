@@ -3,15 +3,15 @@ info:
   title: Product Catalog Composition API
   version: 2.0.0
 servers:
-- url: http://localhost:8080/service-api/v1
-  description: The server
+  - url: http://localhost:8080/service-api/v1
+    description: The server
 tags:
-- name: ProductCatalogComposition
+  - name: ProductCatalogComposition
 paths:
   /service-api/v2/pull-ingestion:
     post:
       tags:
-      - ProductCatalogComposition
+        - ProductCatalogComposition
       summary: Ingests product catalog (in pull mode).
       description: Ingests product catalog (in pull mode).
       operationId: pullIngestProductCatalog
@@ -44,7 +44,7 @@ paths:
   /service-api/v2/push-ingestion:
     post:
       tags:
-      - ProductCatalogComposition
+        - ProductCatalogComposition
       summary: Ingests product catalog (in push mode).
       description: Ingests product catalog (in push mode).
       operationId: pushIngestProductCatalog
@@ -78,7 +78,7 @@ components:
   schemas:
     BadRequest:
       required:
-      - message
+        - message
       type: object
       properties:
         message:
@@ -106,7 +106,7 @@ components:
 
     InternalServerError:
       required:
-      - message
+        - message
       type: object
       properties:
         message:

@@ -1,5 +1,5 @@
 required:
-- price
+  - price
 type: object
 properties:
   price:

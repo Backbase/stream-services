@@ -1,10 +1,10 @@
 required:
-- id
-- name
-- price
-- currency
-- subAssetClassCode
-- country
+  - id
+  - name
+  - price
+  - currency
+  - subAssetClassCode
+  - country
 type: object
 properties:
   id:

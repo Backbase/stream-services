@@ -3,7 +3,7 @@ repos:
     rev: v2.8.0
     hooks:
       - id: pretty-format-java
-        args: [ --autofix, --aosp, --google-java-formatter-version=1.16.0 ]
+        args: [ --autofix, --google-java-formatter-version=1.16.0 ]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:

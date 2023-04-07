@@ -1,6 +1,6 @@
 required:
-- amount
-- currencyCode
+  - amount
+  - currencyCode
 type: object
 properties:
   amount:

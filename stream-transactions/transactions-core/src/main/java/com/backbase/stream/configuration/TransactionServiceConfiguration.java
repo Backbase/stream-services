@@ -8,9 +8,7 @@ import com.backbase.stream.transaction.TransactionTaskExecutor;
 import com.backbase.stream.transaction.TransactionUnitOfWorkExecutor;
 import com.backbase.stream.transaction.repository.TransactionUnitOfWorkRepository;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
-
 import lombok.AllArgsConstructor;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,41 +19,41 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TransactionServiceConfiguration {
 
-    @Bean
-    public TransactionTaskExecutor transactionTaskExecutor(
-            TransactionPresentationServiceApi transactionsApi) {
-        return new TransactionTaskExecutor(transactionsApi);
-    }
+  @Bean
+  public TransactionTaskExecutor transactionTaskExecutor(
+      TransactionPresentationServiceApi transactionsApi) {
+    return new TransactionTaskExecutor(transactionsApi);
+  }
 
-    @Bean
-    public TransactionUnitOfWorkExecutor transactionUnitOfWorkExecutor(
-            TransactionTaskExecutor transactionTaskExecutor,
-            TransactionUnitOfWorkRepository transactionUnitOfWorkRepository,
-            TransactionWorkerConfigurationProperties transactionWorkerConfigurationProperties) {
+  @Bean
+  public TransactionUnitOfWorkExecutor transactionUnitOfWorkExecutor(
+      TransactionTaskExecutor transactionTaskExecutor,
+      TransactionUnitOfWorkRepository transactionUnitOfWorkRepository,
+      TransactionWorkerConfigurationProperties transactionWorkerConfigurationProperties) {
 
-        return new TransactionUnitOfWorkExecutor(
-                transactionUnitOfWorkRepository,
-                transactionTaskExecutor,
-                transactionWorkerConfigurationProperties);
-    }
+    return new TransactionUnitOfWorkExecutor(
+        transactionUnitOfWorkRepository,
+        transactionTaskExecutor,
+        transactionWorkerConfigurationProperties);
+  }
 
-    @Bean
-    @ConditionalOnProperty(
-            name = "backbase.stream.persistence",
-            havingValue = "memory",
-            matchIfMissing = true)
-    public TransactionUnitOfWorkRepository transactionUnitOfWorkRepository() {
-        return new InMemoryTransactionUnitOfWorkRepository();
-    }
+  @Bean
+  @ConditionalOnProperty(
+      name = "backbase.stream.persistence",
+      havingValue = "memory",
+      matchIfMissing = true)
+  public TransactionUnitOfWorkRepository transactionUnitOfWorkRepository() {
+    return new InMemoryTransactionUnitOfWorkRepository();
+  }
 
-    public static class InMemoryTransactionUnitOfWorkRepository
-            extends InMemoryReactiveUnitOfWorkRepository<TransactionTask>
-            implements TransactionUnitOfWorkRepository {}
+  @Bean
+  public TransactionService transactionService(
+      TransactionUnitOfWorkExecutor transactionTaskExecutor,
+      TransactionPresentationServiceApi transactionsApi) {
+    return new TransactionServiceImpl(transactionsApi, transactionTaskExecutor);
+  }
 
-    @Bean
-    public TransactionService transactionService(
-            TransactionUnitOfWorkExecutor transactionTaskExecutor,
-            TransactionPresentationServiceApi transactionsApi) {
-        return new TransactionServiceImpl(transactionsApi, transactionTaskExecutor);
-    }
+  public static class InMemoryTransactionUnitOfWorkRepository
+      extends InMemoryReactiveUnitOfWorkRepository<TransactionTask>
+      implements TransactionUnitOfWorkRepository {}
 }

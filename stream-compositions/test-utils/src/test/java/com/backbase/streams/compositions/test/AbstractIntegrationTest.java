@@ -9,57 +9,55 @@ import com.backbase.buildingblocks.jwt.core.exception.JsonWebTokenException;
 import com.backbase.buildingblocks.jwt.core.properties.JsonWebTokenProperties;
 import com.backbase.buildingblocks.jwt.core.token.JsonWebTokenClaimsSet;
 import com.backbase.buildingblocks.jwt.core.type.JsonWebTokenTypeFactory;
-
+import java.io.IOException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.IOException;
-
 @ExtendWith(MockitoExtension.class)
 class AbstractIntegrationTest {
 
-    @Mock JsonWebTokenProperties jsonWebTokenProperties;
+  @Mock JsonWebTokenProperties jsonWebTokenProperties;
 
-    @Test
-    void testToken() throws JsonWebTokenException {
-        SampleIT sampleIT = new SampleIT();
-        sampleIT.setTokenProperties(jsonWebTokenProperties);
+  @Test
+  void testToken() throws JsonWebTokenException {
+    SampleIT sampleIT = new SampleIT();
+    sampleIT.setTokenProperties(jsonWebTokenProperties);
 
-        JsonWebTokenProducerType<JsonWebTokenClaimsSet, String> tokenFactory = tokenData -> "token";
+    JsonWebTokenProducerType<JsonWebTokenClaimsSet, String> tokenFactory = tokenData -> "token";
 
-        Mockito.mockStatic(JsonWebTokenTypeFactory.class);
-        when(JsonWebTokenTypeFactory.getProducer(any())).thenReturn(tokenFactory);
+    Mockito.mockStatic(JsonWebTokenTypeFactory.class);
+    when(JsonWebTokenTypeFactory.getProducer(any())).thenReturn(tokenFactory);
 
-        assertNull(sampleIT.token());
-        sampleIT.setUpToken();
+    assertNull(sampleIT.token());
+    sampleIT.setUpToken();
 
-        assertEquals("Bearer token", sampleIT.token());
-        sampleIT.clearToken();
-        assertNull(sampleIT.token());
+    assertEquals("Bearer token", sampleIT.token());
+    sampleIT.clearToken();
+    assertNull(sampleIT.token());
 
-        sampleIT.setUpToken("userId", IntegrationTest.TokenType.SERVICE);
-        assertEquals("Bearer token", sampleIT.token());
-    }
+    sampleIT.setUpToken("userId", IntegrationTest.TokenType.SERVICE);
+    assertEquals("Bearer token", sampleIT.token());
+  }
 
-    @Test
-    void testReadResource() throws IOException {
-        SampleIT test = new SampleIT();
-        assertTrue(test.readContentFromClasspath("test.json").startsWith("{}"));
-    }
+  @Test
+  void testReadResource() throws IOException {
+    SampleIT test = new SampleIT();
+    assertTrue(test.readContentFromClasspath("test.json").startsWith("{}"));
+  }
 
-    @Test
-    void testTokenConverterServer() throws IOException {
-        SampleIT test = new SampleIT();
-        test.startTokenConverterServer();
-        test.stopTokenConverterServer();
-    }
+  @Test
+  void testTokenConverterServer() throws IOException {
+    SampleIT test = new SampleIT();
+    test.startTokenConverterServer();
+    test.stopTokenConverterServer();
+  }
 }
 
 class SampleIT extends IntegrationTest {
-    public String readContentFromClasspath(String resourcePath) throws IOException {
-        return super.readContentFromClasspath(resourcePath);
-    }
+  public String readContentFromClasspath(String resourcePath) throws IOException {
+    return super.readContentFromClasspath(resourcePath);
+  }
 }

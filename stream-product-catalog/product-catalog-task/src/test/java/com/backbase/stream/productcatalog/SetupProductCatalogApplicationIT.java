@@ -4,7 +4,6 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 
 import com.backbase.stream.productcatalog.configuration.ProductCatalogConfigurationProperties;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,31 +17,30 @@ import org.springframework.util.Assert;
 @ActiveProfiles({"it", "moustache-bank"})
 public class SetupProductCatalogApplicationIT {
 
-    @Autowired ProductCatalogConfigurationProperties configuration;
+  @RegisterExtension
+  static WireMockExtension wiremock =
+      WireMockExtension.newInstance().options(wireMockConfig().dynamicPort()).build();
 
-    @RegisterExtension
-    static WireMockExtension wiremock =
-            WireMockExtension.newInstance().options(wireMockConfig().dynamicPort()).build();
+  @Autowired ProductCatalogConfigurationProperties configuration;
 
-    @DynamicPropertySource
-    static void registerDynamicProperties(DynamicPropertyRegistry registry) {
-        String wiremockUrl = String.format("http://localhost:%d", wiremock.getPort());
-        registry.add("spring.zipkin.base-url", () -> wiremockUrl);
-        registry.add(
-                "spring.cloud.discovery.client.simple.instances.token-converter[0].uri",
-                () -> wiremockUrl);
-        registry.add(
-                "spring.cloud.discovery.client.simple.instances.arrangement-manager[0].uri",
-                () -> wiremockUrl);
-    }
+  @DynamicPropertySource
+  static void registerDynamicProperties(DynamicPropertyRegistry registry) {
+    String wiremockUrl = String.format("http://localhost:%d", wiremock.getPort());
+    registry.add("spring.zipkin.base-url", () -> wiremockUrl);
+    registry.add(
+        "spring.cloud.discovery.client.simple.instances.token-converter[0].uri", () -> wiremockUrl);
+    registry.add(
+        "spring.cloud.discovery.client.simple.instances.arrangement-manager[0].uri",
+        () -> wiremockUrl);
+  }
 
-    @Test
-    void contextLoads() {
-        // Triggers the CommandLineRunner which will run the boostrap task to be validated by the
-        // WireMock assertions.
-        Assert.notNull(configuration.getProductCatalog(), "Product catalog should be present.");
-        Assert.notEmpty(
-                configuration.getProductCatalog().getProductTypes(),
-                "At least one type should be present.");
-    }
+  @Test
+  void contextLoads() {
+    // Triggers the CommandLineRunner which will run the boostrap task to be validated by the
+    // WireMock assertions.
+    Assert.notNull(configuration.getProductCatalog(), "Product catalog should be present.");
+    Assert.notEmpty(
+        configuration.getProductCatalog().getProductTypes(),
+        "At least one type should be present.");
+  }
 }

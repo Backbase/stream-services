@@ -46,7 +46,11 @@ import com.backbase.stream.legalentity.model.TermUnit;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
-
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import javax.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,358 +62,327 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.Validator;
 
 @ExtendWith(MockitoExtension.class)
 class ProductIngestionServiceImplTest {
 
-    private ProductIngestionService productIngestionService;
+  @Mock Validator validator;
+  ProductPostIngestionService productPostIngestionService;
+  @Mock BatchProductIngestionSaga batchProductIngestionSaga;
+  @Mock EventBus eventBus;
+  ProductConfigurationProperties config = new ProductConfigurationProperties();
+  @Mock TransactionCompositionApi transactionCompositionApi;
+  @Mock PaymentOrderCompositionApi paymentOrderCompositionApi;
+  ProductGroupMapper mapper = Mappers.getMapper(ProductGroupMapper.class);
+  private ProductIngestionService productIngestionService;
+  @Mock private ProductIntegrationService productIntegrationService;
 
-    @Mock private ProductIntegrationService productIntegrationService;
+  @BeforeEach
+  void setUp() {
 
-    @Mock Validator validator;
+    productPostIngestionService =
+        new ProductPostIngestionServiceImpl(
+            eventBus, config, transactionCompositionApi, paymentOrderCompositionApi, mapper);
 
-    ProductPostIngestionService productPostIngestionService;
+    productIngestionService =
+        new ProductIngestionServiceImpl(
+            batchProductIngestionSaga,
+            productIntegrationService,
+            config,
+            validator,
+            productPostIngestionService);
+  }
 
-    @Mock BatchProductIngestionSaga batchProductIngestionSaga;
+  @Test
+  void ingestionInPullMode_Failure() {
+    ProductIngestPullRequest productIngestPullRequest =
+        ProductIngestPullRequest.builder().legalEntityExternalId("externalId").build();
 
-    @Mock EventBus eventBus;
+    when(productIntegrationService.pullProductGroup(productIngestPullRequest))
+        .thenReturn(Mono.error(new RuntimeException("error")));
 
-    ProductConfigurationProperties config = new ProductConfigurationProperties();
+    Events events = new Events();
+    events.setEnableFailed(Boolean.TRUE);
+    config.setEvents(events);
+    Mono<ProductIngestResponse> productIngestResponse =
+        productIngestionService.ingestPull(productIngestPullRequest);
+    StepVerifier.create(productIngestResponse).expectError().verify();
+  }
 
-    @Mock TransactionCompositionApi transactionCompositionApi;
+  @Test
+  @Tag("true")
+  void ingestionInPullModeAsync_success(TestInfo testInfo) {
+    executeIngestionWithPullMode(getTagInfo(testInfo), null);
+  }
 
-    @Mock PaymentOrderCompositionApi paymentOrderCompositionApi;
+  @Test
+  @Tag("false")
+  void ingestionInPullModeSync_success(TestInfo testInfo) {
+    executeIngestionWithPullMode(getTagInfo(testInfo), null);
+  }
 
-    ProductGroupMapper mapper = Mappers.getMapper(ProductGroupMapper.class);
+  @Test
+  void ingestionInPullSkipChainPerRequest_success() {
+    executeIngestionWithPullMode(true, Boolean.FALSE);
+  }
 
-    @BeforeEach
-    void setUp() {
+  Boolean getTagInfo(TestInfo testInfo) {
+    String testConfig = testInfo.getTags().stream().findFirst().orElse("false");
+    return Boolean.valueOf(testConfig);
+  }
 
-        productPostIngestionService =
-                new ProductPostIngestionServiceImpl(
-                        eventBus,
-                        config,
-                        transactionCompositionApi,
-                        paymentOrderCompositionApi,
-                        mapper);
+  void executeIngestionWithPullMode(Boolean isChainAsync, Boolean chainEnabledPerRequest) {
+    configureEventAndChainParameters(isChainAsync, Boolean.TRUE);
 
-        productIngestionService =
-                new ProductIngestionServiceImpl(
-                        batchProductIngestionSaga,
-                        productIntegrationService,
-                        config,
-                        validator,
-                        productPostIngestionService);
-    }
+    ProductIngestPullRequest productIngestPullRequest =
+        ProductIngestPullRequest.builder()
+            .source("nightly_ingestion")
+            .serviceAgreementExternalId("sa_externalId")
+            .serviceAgreementInternalId("sa_internalId")
+            .legalEntityExternalId("le_externalId")
+            .legalEntityInternalId("le_internalId")
+            .userExternalId("user_externalId")
+            .userInternalId("user_internalId")
+            .source("source_of_ingestion_process")
+            .additions(Map.of("addition", "addition1"))
+            .paymentOrderChainEnabled(chainEnabledPerRequest)
+            .transactionChainEnabled(chainEnabledPerRequest)
+            .build();
 
-    @Test
-    void ingestionInPullMode_Failure() {
-        ProductIngestPullRequest productIngestPullRequest =
-                ProductIngestPullRequest.builder().legalEntityExternalId("externalId").build();
+    SavingsAccount savingsAccount = buildSavingsAccount();
+    CurrentAccount currentAccount = buildCurrentAccount();
+    Loan loan = buildLoanAccount();
+    TermDeposit termDeposit = buildTermDeposit();
+    CreditCard creditCard = buildCreditCard();
 
-        when(productIntegrationService.pullProductGroup(productIngestPullRequest))
-                .thenReturn(Mono.error(new RuntimeException("error")));
+    ProductGroup productGroup = new ProductGroup();
+    productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
 
-        Events events = new Events();
-        events.setEnableFailed(Boolean.TRUE);
-        config.setEvents(events);
-        Mono<ProductIngestResponse> productIngestResponse =
-                productIngestionService.ingestPull(productIngestPullRequest);
-        StepVerifier.create(productIngestResponse).expectError().verify();
-    }
+    productGroup
+        .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+        .name("somePgName")
+        .description("somePgDescription")
+        .savingAccounts(Collections.singletonList(savingsAccount))
+        .currentAccounts(Collections.singletonList(currentAccount))
+        .loans(Collections.singletonList(loan))
+        .termDeposits(Collections.singletonList(termDeposit))
+        .creditCards(Collections.singletonList(creditCard));
 
-    @Test
-    @Tag("true")
-    void ingestionInPullModeAsync_success(TestInfo testInfo) {
-        executeIngestionWithPullMode(getTagInfo(testInfo), null);
-    }
+    ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
+    Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-    @Test
-    @Tag("false")
-    void ingestionInPullModeSync_success(TestInfo testInfo) {
-        executeIngestionWithPullMode(getTagInfo(testInfo), null);
-    }
+    ProductIngestResponse ingestResponse =
+        new ProductIngestResponse(
+            "sa_externalId", "sa_internalId", Collections.singletonList(productGroup), Map.of());
+    ingestResponse.setLegalEntityExternalId("le_externalId");
+    ingestResponse.setLegalEntityInternalId("le_internalId");
+    ingestResponse.setUserExternalId("user_externalId");
+    ingestResponse.setUserInternalId("user_internalId");
+    ingestResponse.setSource("source_of_ingestion_process");
+    ingestResponse.setAdditions(Map.of("addition", "addition1"));
+    when(productIntegrationService.pullProductGroup(productIngestPullRequest))
+        .thenReturn(Mono.just(ingestResponse));
 
-    @Test
-    void ingestionInPullSkipChainPerRequest_success() {
-        executeIngestionWithPullMode(true, Boolean.FALSE);
-    }
+    lenient()
+        .when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+        .thenReturn(productGroupTaskMono);
 
-    Boolean getTagInfo(TestInfo testInfo) {
-        String testConfig = testInfo.getTags().stream().findFirst().orElse("false");
-        return Boolean.valueOf(testConfig);
-    }
+    when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
+        .thenReturn(
+            Mono.just(
+                new BatchProductGroupTask()
+                    .data(
+                        new BatchProductGroup()
+                            .productGroups(List.of(productGroup))
+                            .serviceAgreement(productGroup.getServiceAgreement()))));
+    when(transactionCompositionApi.pullTransactions(any()))
+        .thenReturn(
+            Mono.just(
+                new TransactionIngestionResponse()
+                    .withTransactions(
+                        List.of(
+                            new TransactionsPostResponseBody()
+                                .withId("id")
+                                .withExternalId("externalId")))));
+    doReturn(
+            Mono.just(
+                new PaymentOrderIngestionResponse()
+                    .withNewPaymentOrder(List.of(new PaymentOrderPostResponse().withId("id")))))
+        .when(paymentOrderCompositionApi)
+        .pullPaymentOrder(any());
+    Mono<ProductIngestResponse> productIngestResponse =
+        productIngestionService.ingestPull(productIngestPullRequest);
+    StepVerifier.create(productIngestResponse)
+        .assertNext(Assertions::assertNotNull)
+        .verifyComplete();
 
-    void executeIngestionWithPullMode(Boolean isChainAsync, Boolean chainEnabledPerRequest) {
-        configureEventAndChainParameters(isChainAsync, Boolean.TRUE);
+    verifyProductCompletedEvent();
+  }
 
-        ProductIngestPullRequest productIngestPullRequest =
-                ProductIngestPullRequest.builder()
-                        .source("nightly_ingestion")
-                        .serviceAgreementExternalId("sa_externalId")
-                        .serviceAgreementInternalId("sa_internalId")
-                        .legalEntityExternalId("le_externalId")
-                        .legalEntityInternalId("le_internalId")
-                        .userExternalId("user_externalId")
-                        .userInternalId("user_internalId")
-                        .source("source_of_ingestion_process")
-                        .additions(Map.of("addition", "addition1"))
-                        .paymentOrderChainEnabled(chainEnabledPerRequest)
-                        .transactionChainEnabled(chainEnabledPerRequest)
-                        .build();
+  private void verifyProductCompletedEvent() {
+    ArgumentCaptor<EnvelopedEvent<ProductCompletedEvent>> argumentCaptor =
+        ArgumentCaptor.forClass(EnvelopedEvent.class);
+    verify(eventBus, times(1)).emitEvent(argumentCaptor.capture());
+    ProductCompletedEvent event = argumentCaptor.getValue().getEvent();
 
-        SavingsAccount savingsAccount = buildSavingsAccount();
-        CurrentAccount currentAccount = buildCurrentAccount();
-        Loan loan = buildLoanAccount();
-        TermDeposit termDeposit = buildTermDeposit();
-        CreditCard creditCard = buildCreditCard();
+    Map<String, String> additions = event.getAdditions();
+    assertThat(additions.get("addition"), is("addition1"));
+    assertThat(event.getSource(), is("source_of_ingestion_process"));
+    assertThat(event.getLegalEntityExternalId(), is("le_externalId"));
+    assertThat(event.getLegalEntityInternalId(), is("le_internalId"));
+    assertThat(event.getUserExternalId(), is("user_externalId"));
+    assertThat(event.getUserInternalId(), is("user_internalId"));
+    assertThat(event.getProductGroups().get(0).getCurrentAccounts(), notNullValue());
+    assertThat(event.getProductGroups().get(0).getSavingAccounts(), notNullValue());
+    assertThat(event.getProductGroups().get(0).getLoans(), notNullValue());
+    assertThat(event.getProductGroups().get(0).getTermDeposits(), notNullValue());
+    assertThat(event.getProductGroups().get(0).getCreditCards(), notNullValue());
+  }
 
-        ProductGroup productGroup = new ProductGroup();
-        productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
+  @NotNull
+  private TermDeposit buildTermDeposit() {
+    TermDeposit termDeposit =
+        new TermDeposit()
+            .termNumber(BigDecimal.valueOf(21212))
+            .termUnit(TermUnit.DAILY)
+            .BBAN("777151235")
+            .accountHolderName("John Doe")
+            .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
+    termDeposit
+        .externalId("termExtId")
+        .productTypeExternalId("Term Deposit")
+        .currency("GBP")
+        .legalEntities(List.of(new LegalEntityReference().externalId("termInternalId")));
+    return termDeposit;
+  }
 
-        productGroup
-                .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
-                .name("somePgName")
-                .description("somePgDescription")
-                .savingAccounts(Collections.singletonList(savingsAccount))
-                .currentAccounts(Collections.singletonList(currentAccount))
-                .loans(Collections.singletonList(loan))
-                .termDeposits(Collections.singletonList(termDeposit))
-                .creditCards(Collections.singletonList(creditCard));
+  @NotNull
+  private CreditCard buildCreditCard() {
+    CreditCard creditCard =
+        new CreditCard()
+            .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
+            .BBAN("777151236")
+            .accountHolderName("John Doe")
+            .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
+    creditCard
+        .externalId("ccExtId")
+        .productTypeExternalId("Credit Card")
+        .currency("GBP")
+        .legalEntities(List.of(new LegalEntityReference().externalId("ccInternalId")));
+    return creditCard;
+  }
 
-        ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
-        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
+  @NotNull
+  private SavingsAccount buildSavingsAccount() {
+    SavingsAccount savingsAccount = new SavingsAccount();
+    savingsAccount
+        .externalId("someAccountExId")
+        .productTypeExternalId("Account")
+        .currency("GBP")
+        .legalEntities(List.of(new LegalEntityReference().externalId("savInternalId")));
+    return savingsAccount;
+  }
 
-        ProductIngestResponse ingestResponse =
-                new ProductIngestResponse(
-                        "sa_externalId",
-                        "sa_internalId",
-                        Collections.singletonList(productGroup),
-                        Map.of());
-        ingestResponse.setLegalEntityExternalId("le_externalId");
-        ingestResponse.setLegalEntityInternalId("le_internalId");
-        ingestResponse.setUserExternalId("user_externalId");
-        ingestResponse.setUserInternalId("user_internalId");
-        ingestResponse.setSource("source_of_ingestion_process");
-        ingestResponse.setAdditions(Map.of("addition", "addition1"));
-        when(productIntegrationService.pullProductGroup(productIngestPullRequest))
-                .thenReturn(Mono.just(ingestResponse));
+  @NotNull
+  private CurrentAccount buildCurrentAccount() {
+    CurrentAccount currentAccount =
+        new CurrentAccount()
+            .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
+            .BBAN("777151234")
+            .accountHolderName("John Doe")
+            .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
+    currentAccount
+        .externalId("currentAccountExtId")
+        .productTypeExternalId("Current Account")
+        .currency("GBP")
+        .legalEntities(List.of(new LegalEntityReference().externalId("currInternalId")));
+    return currentAccount;
+  }
 
-        lenient()
-                .when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
-                .thenReturn(productGroupTaskMono);
+  @NotNull
+  private Loan buildLoanAccount() {
+    Loan loan =
+        new Loan()
+            .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
+            .BBAN("777151238")
+            .accountHolderName("John Doe")
+            .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
+    loan.externalId("loanAccountExtId")
+        .productTypeExternalId("Loan")
+        .currency("GBP")
+        .legalEntities(List.of(new LegalEntityReference().externalId("loanInternalId")));
+    return loan;
+  }
 
-        when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
-                .thenReturn(
-                        Mono.just(
-                                new BatchProductGroupTask()
-                                        .data(
-                                                new BatchProductGroup()
-                                                        .productGroups(List.of(productGroup))
-                                                        .serviceAgreement(
-                                                                productGroup
-                                                                        .getServiceAgreement()))));
-        when(transactionCompositionApi.pullTransactions(any()))
-                .thenReturn(
-                        Mono.just(
-                                new TransactionIngestionResponse()
-                                        .withTransactions(
-                                                List.of(
-                                                        new TransactionsPostResponseBody()
-                                                                .withId("id")
-                                                                .withExternalId("externalId")))));
-        doReturn(
-                        Mono.just(
-                                new PaymentOrderIngestionResponse()
-                                        .withNewPaymentOrder(
-                                                List.of(
-                                                        new PaymentOrderPostResponse()
-                                                                .withId("id")))))
-                .when(paymentOrderCompositionApi)
-                .pullPaymentOrder(any());
-        Mono<ProductIngestResponse> productIngestResponse =
-                productIngestionService.ingestPull(productIngestPullRequest);
-        StepVerifier.create(productIngestResponse)
-                .assertNext(Assertions::assertNotNull)
-                .verifyComplete();
+  private void configureEventAndChainParameters(Boolean isAsync, Boolean isCompositionEnabled) {
+    Events events = new Events();
+    events.setEnableCompleted(Boolean.TRUE);
+    config.setEvents(events);
 
-        verifyProductCompletedEvent();
-    }
+    Chains chains = new Chains();
+    TransactionComposition transactionComposition = new TransactionComposition();
+    transactionComposition.setAsync(isAsync);
+    transactionComposition.setEnabled(isCompositionEnabled);
+    chains.setTransactionComposition(transactionComposition);
+    ProductConfigurationProperties.PaymentOrderComposition paymentOrderComposition =
+        new ProductConfigurationProperties.PaymentOrderComposition();
+    paymentOrderComposition.setAsync(isAsync);
+    paymentOrderComposition.setEnabled(isCompositionEnabled);
+    chains.setPaymentOrderComposition(paymentOrderComposition);
+    config.setChains(chains);
+  }
 
-    private void verifyProductCompletedEvent() {
-        ArgumentCaptor<EnvelopedEvent<ProductCompletedEvent>> argumentCaptor =
-                ArgumentCaptor.forClass(EnvelopedEvent.class);
-        verify(eventBus, times(1)).emitEvent(argumentCaptor.capture());
-        ProductCompletedEvent event = argumentCaptor.getValue().getEvent();
+  @Test
+  void ingestionInPushMode_Success() {
+    executeIngestionInPushMode(false);
+  }
 
-        Map<String, String> additions = event.getAdditions();
-        assertThat(additions.get("addition"), is("addition1"));
-        assertThat(event.getSource(), is("source_of_ingestion_process"));
-        assertThat(event.getLegalEntityExternalId(), is("le_externalId"));
-        assertThat(event.getLegalEntityInternalId(), is("le_internalId"));
-        assertThat(event.getUserExternalId(), is("user_externalId"));
-        assertThat(event.getUserInternalId(), is("user_internalId"));
-        assertThat(event.getProductGroups().get(0).getCurrentAccounts(), notNullValue());
-        assertThat(event.getProductGroups().get(0).getSavingAccounts(), notNullValue());
-        assertThat(event.getProductGroups().get(0).getLoans(), notNullValue());
-        assertThat(event.getProductGroups().get(0).getTermDeposits(), notNullValue());
-        assertThat(event.getProductGroups().get(0).getCreditCards(), notNullValue());
-    }
+  void executeIngestionInPushMode(Boolean isAsync) {
+    configureEventAndChainParameters(isAsync, Boolean.FALSE);
 
-    @NotNull
-    private TermDeposit buildTermDeposit() {
-        TermDeposit termDeposit =
-                new TermDeposit()
-                        .termNumber(BigDecimal.valueOf(21212))
-                        .termUnit(TermUnit.DAILY)
-                        .BBAN("777151235")
-                        .accountHolderName("John Doe")
-                        .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
-        termDeposit
-                .externalId("termExtId")
-                .productTypeExternalId("Term Deposit")
-                .currency("GBP")
-                .legalEntities(List.of(new LegalEntityReference().externalId("termInternalId")));
-        return termDeposit;
-    }
+    SavingsAccount account = buildSavingsAccount();
+    ProductGroup productGroup = new ProductGroup();
+    productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
+    productGroup
+        .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+        .name("somePgName")
+        .description("somePgDescription")
+        .savingAccounts(Collections.singletonList(account));
 
-    @NotNull
-    private CreditCard buildCreditCard() {
-        CreditCard creditCard =
-                new CreditCard()
-                        .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
-                        .BBAN("777151236")
-                        .accountHolderName("John Doe")
-                        .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
-        creditCard
-                .externalId("ccExtId")
-                .productTypeExternalId("Credit Card")
-                .currency("GBP")
-                .legalEntities(List.of(new LegalEntityReference().externalId("ccInternalId")));
-        return creditCard;
-    }
+    ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
+    Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-    @NotNull
-    private SavingsAccount buildSavingsAccount() {
-        SavingsAccount savingsAccount = new SavingsAccount();
-        savingsAccount
-                .externalId("someAccountExId")
-                .productTypeExternalId("Account")
-                .currency("GBP")
-                .legalEntities(List.of(new LegalEntityReference().externalId("savInternalId")));
-        return savingsAccount;
-    }
+    ProductIngestPushRequest productIngestPushRequest =
+        ProductIngestPushRequest.builder()
+            .productGroup(productGroup)
+            .source("source_of_ingestion_process")
+            .build();
 
-    @NotNull
-    private CurrentAccount buildCurrentAccount() {
-        CurrentAccount currentAccount =
-                new CurrentAccount()
-                        .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
-                        .BBAN("777151234")
-                        .accountHolderName("John Doe")
-                        .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
-        currentAccount
-                .externalId("currentAccountExtId")
-                .productTypeExternalId("Current Account")
-                .currency("GBP")
-                .legalEntities(List.of(new LegalEntityReference().externalId("currInternalId")));
-        return currentAccount;
-    }
+    lenient()
+        .when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+        .thenReturn(productGroupTaskMono);
 
-    @NotNull
-    private Loan buildLoanAccount() {
-        Loan loan =
-                new Loan()
-                        .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
-                        .BBAN("777151238")
-                        .accountHolderName("John Doe")
-                        .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
-        loan.externalId("loanAccountExtId")
-                .productTypeExternalId("Loan")
-                .currency("GBP")
-                .legalEntities(List.of(new LegalEntityReference().externalId("loanInternalId")));
-        return loan;
-    }
+    when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
+        .thenReturn(
+            Mono.just(
+                new BatchProductGroupTask()
+                    .data(
+                        new BatchProductGroup()
+                            .productGroups(List.of(productGroup))
+                            .serviceAgreement(productGroup.getServiceAgreement()))));
 
-    private void configureEventAndChainParameters(Boolean isAsync, Boolean isCompositionEnabled) {
-        Events events = new Events();
-        events.setEnableCompleted(Boolean.TRUE);
-        config.setEvents(events);
+    Mono<ProductIngestResponse> productIngestResponse =
+        productIngestionService.ingestPush(productIngestPushRequest);
+    StepVerifier.create(productIngestResponse)
+        .assertNext(Assertions::assertNotNull)
+        .verifyComplete();
 
-        Chains chains = new Chains();
-        TransactionComposition transactionComposition = new TransactionComposition();
-        transactionComposition.setAsync(isAsync);
-        transactionComposition.setEnabled(isCompositionEnabled);
-        chains.setTransactionComposition(transactionComposition);
-        ProductConfigurationProperties.PaymentOrderComposition paymentOrderComposition =
-                new ProductConfigurationProperties.PaymentOrderComposition();
-        paymentOrderComposition.setAsync(isAsync);
-        paymentOrderComposition.setEnabled(isCompositionEnabled);
-        chains.setPaymentOrderComposition(paymentOrderComposition);
-        config.setChains(chains);
-    }
-
-    @Test
-    void ingestionInPushMode_Success() {
-        executeIngestionInPushMode(false);
-    }
-
-    void executeIngestionInPushMode(Boolean isAsync) {
-        configureEventAndChainParameters(isAsync, Boolean.FALSE);
-
-        SavingsAccount account = buildSavingsAccount();
-        ProductGroup productGroup = new ProductGroup();
-        productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
-        productGroup
-                .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
-                .name("somePgName")
-                .description("somePgDescription")
-                .savingAccounts(Collections.singletonList(account));
-
-        ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
-        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
-
-        ProductIngestPushRequest productIngestPushRequest =
-                ProductIngestPushRequest.builder()
-                        .productGroup(productGroup)
-                        .source("source_of_ingestion_process")
-                        .build();
-
-        lenient()
-                .when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
-                .thenReturn(productGroupTaskMono);
-
-        when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
-                .thenReturn(
-                        Mono.just(
-                                new BatchProductGroupTask()
-                                        .data(
-                                                new BatchProductGroup()
-                                                        .productGroups(List.of(productGroup))
-                                                        .serviceAgreement(
-                                                                productGroup
-                                                                        .getServiceAgreement()))));
-
-        Mono<ProductIngestResponse> productIngestResponse =
-                productIngestionService.ingestPush(productIngestPushRequest);
-        StepVerifier.create(productIngestResponse)
-                .assertNext(Assertions::assertNotNull)
-                .verifyComplete();
-
-        ArgumentCaptor<EnvelopedEvent<ProductCompletedEvent>> argumentCaptor =
-                ArgumentCaptor.forClass(EnvelopedEvent.class);
-        verify(eventBus, times(1)).emitEvent(argumentCaptor.capture());
-        ProductCompletedEvent event = argumentCaptor.getValue().getEvent();
-        assertThat(event.getSource(), is("source_of_ingestion_process"));
-    }
+    ArgumentCaptor<EnvelopedEvent<ProductCompletedEvent>> argumentCaptor =
+        ArgumentCaptor.forClass(EnvelopedEvent.class);
+    verify(eventBus, times(1)).emitEvent(argumentCaptor.capture());
+    ProductCompletedEvent event = argumentCaptor.getValue().getEvent();
+    assertThat(event.getSource(), is("source_of_ingestion_process"));
+  }
 }

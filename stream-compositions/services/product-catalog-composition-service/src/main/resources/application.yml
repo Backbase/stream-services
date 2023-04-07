@@ -34,38 +34,38 @@ bootstrap:
   product-catalog:
 
     productTypes:
-    - productTypeName: Certificate of Deposit
-      typeName: Certificate of Deposit
-      externalProductKindId: kind6
-      productKindName: Term Deposit
-      externalProductId: CD
-      externalId: CD
-      externalProductTypeId: CD
-      externalTypeId: CD
-    - productTypeName: Checking Account
-      typeName: Checking Account
-      externalProductKindId: kind1
-      productKindName: Checking Account
-      externalProductId: checking-account
-      externalId: checking-account
-      externalProductTypeId: checking-account
-      externalTypeId: checking-account
-    - productTypeName: Savings Account
-      typeName: Savings Account
-      externalProductKindId: kind2
-      productKindName: Savings Account
-      externalProductId: savings-account
-      externalId: savings-account
-      externalProductTypeId: savings-account
-      externalTypeId: savings-account
-    - productTypeName: Loan
-      typeName: Loan
-      externalProductKindId: kind3
-      productKindName: Loan Account
-      externalProductId: loan-account
-      externalId: loan-account
-      externalProductTypeId: loan-account
-      externalTypeId: loan-account
+      - productTypeName: Certificate of Deposit
+        typeName: Certificate of Deposit
+        externalProductKindId: kind6
+        productKindName: Term Deposit
+        externalProductId: CD
+        externalId: CD
+        externalProductTypeId: CD
+        externalTypeId: CD
+      - productTypeName: Checking Account
+        typeName: Checking Account
+        externalProductKindId: kind1
+        productKindName: Checking Account
+        externalProductId: checking-account
+        externalId: checking-account
+        externalProductTypeId: checking-account
+        externalTypeId: checking-account
+      - productTypeName: Savings Account
+        typeName: Savings Account
+        externalProductKindId: kind2
+        productKindName: Savings Account
+        externalProductId: savings-account
+        externalId: savings-account
+        externalProductTypeId: savings-account
+        externalTypeId: savings-account
+      - productTypeName: Loan
+        typeName: Loan
+        externalProductKindId: kind3
+        productKindName: Loan Account
+        externalProductId: loan-account
+        externalId: loan-account
+        externalProductTypeId: loan-account
+        externalTypeId: loan-account
 
 logging:
   level:

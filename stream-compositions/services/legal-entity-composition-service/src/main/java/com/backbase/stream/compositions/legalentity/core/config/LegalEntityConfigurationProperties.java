@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Setter
@@ -13,60 +12,60 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("backbase.stream.compositions.legal-entity")
 public class LegalEntityConfigurationProperties {
 
-    private String integrationBaseUrl = "http://legal-entity-integration:9000";
-    private Chains chains = new Chains();
-    private Events events = new Events();
-    private Cursor cursor = new Cursor();
+  private String integrationBaseUrl = "http://legal-entity-integration:9000";
+  private Chains chains = new Chains();
+  private Events events = new Events();
+  private Cursor cursor = new Cursor();
 
-    @Data
-    @NoArgsConstructor
-    public static class Events {
+  public Boolean isCompletedEventEnabled() {
+    return Boolean.TRUE.equals(events.getEnableCompleted());
+  }
 
-        private Boolean enableCompleted = Boolean.FALSE;
-        private Boolean enableFailed = Boolean.FALSE;
-    }
+  public Boolean isFailedEventEnabled() {
+    return Boolean.TRUE.equals(events.getEnableFailed());
+  }
 
-    @Data
-    @NoArgsConstructor
-    public static class Cursor {
+  public boolean isProductChainEnabled() {
+    return Boolean.TRUE.equals(chains.getProductComposition().getEnabled());
+  }
 
-        private Boolean enabled = Boolean.FALSE;
-        private String baseUrl = "http://legal-entity-cursor:9000";
-    }
+  public boolean isProductChainAsync() {
+    return Boolean.TRUE.equals(chains.getProductComposition().getAsync());
+  }
 
-    @Data
-    @NoArgsConstructor
-    public static class Chains {
+  @Data
+  @NoArgsConstructor
+  public static class Events {
 
-        private Boolean includeSubsidiaries = Boolean.FALSE;
+    private Boolean enableCompleted = Boolean.FALSE;
+    private Boolean enableFailed = Boolean.FALSE;
+  }
 
-        private ProductComposition productComposition = new ProductComposition();
-    }
+  @Data
+  @NoArgsConstructor
+  public static class Cursor {
 
-    @Data
-    public abstract static class BaseComposition {
+    private Boolean enabled = Boolean.FALSE;
+    private String baseUrl = "http://legal-entity-cursor:9000";
+  }
 
-        private Boolean enabled = Boolean.FALSE;
-        private String baseUrl = "http://localhost:9002/";
-        private Boolean async = Boolean.FALSE;
-    }
+  @Data
+  @NoArgsConstructor
+  public static class Chains {
 
-    @NoArgsConstructor
-    public static class ProductComposition extends BaseComposition {}
+    private Boolean includeSubsidiaries = Boolean.FALSE;
 
-    public Boolean isCompletedEventEnabled() {
-        return Boolean.TRUE.equals(events.getEnableCompleted());
-    }
+    private ProductComposition productComposition = new ProductComposition();
+  }
 
-    public Boolean isFailedEventEnabled() {
-        return Boolean.TRUE.equals(events.getEnableFailed());
-    }
+  @Data
+  public abstract static class BaseComposition {
 
-    public boolean isProductChainEnabled() {
-        return Boolean.TRUE.equals(chains.getProductComposition().getEnabled());
-    }
+    private Boolean enabled = Boolean.FALSE;
+    private String baseUrl = "http://localhost:9002/";
+    private Boolean async = Boolean.FALSE;
+  }
 
-    public boolean isProductChainAsync() {
-        return Boolean.TRUE.equals(chains.getProductComposition().getAsync());
-    }
+  @NoArgsConstructor
+  public static class ProductComposition extends BaseComposition {}
 }

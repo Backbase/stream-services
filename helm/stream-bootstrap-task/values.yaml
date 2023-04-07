@@ -1,4 +1,4 @@
-imagePullSecrets: []
+imagePullSecrets: [ ]
 image:
   registry: repo.backbase.com/backbase-stream-images
   repository: # legal-entity-bootstrap-task
@@ -6,12 +6,12 @@ image:
   pullPolicy: Always
   restartPolicy: OnFailure
 backoffLimit: 1
-dependencies: []
+dependencies: [ ]
 #  - serviceName: identity-integration-service
 #  - serviceName: backbase-identity
 #    path: "/auth/realms/backbase/.well-known/openid-configuration"
 #    healthIndicator: "backbase"
-initContainers: []
+initContainers: [ ]
 #  - name: init-product-catalog
 #    image: repo.backbase.com/backbase-stream-images/product-catalog-task:3.8.0
 #    env:

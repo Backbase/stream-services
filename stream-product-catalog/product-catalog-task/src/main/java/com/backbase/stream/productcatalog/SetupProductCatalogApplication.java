@@ -11,10 +11,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SetupProductCatalogApplication {
 
-    public static void main(String[] args) {
-        SpringApplication springApplication =
-                new SpringApplication(SetupProductCatalogApplication.class);
-        springApplication.setWebApplicationType(WebApplicationType.NONE);
-        springApplication.run(args);
-    }
+  public static void main(String[] args) {
+    SpringApplication springApplication =
+        new SpringApplication(SetupProductCatalogApplication.class);
+    springApplication.setWebApplicationType(WebApplicationType.NONE);
+    springApplication.run(args);
+  }
 }

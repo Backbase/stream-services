@@ -1,7 +1,7 @@
 required:
-- dateFrom
-- dateTo
-- valuePct
+  - dateFrom
+  - dateTo
+  - valuePct
 type: object
 properties:
   dateFrom:

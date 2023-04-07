@@ -12,7 +12,7 @@ import com.backbase.stream.paymentorder.PaymentOrderTaskExecutor;
 import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
-
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,94 +20,83 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.List;
-
 @ExtendWith(MockitoExtension.class)
 public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
-    @Mock private PaymentOrdersApi paymentOrdersApi;
+  private final PaymentOrderWorkerConfigurationProperties streamWorkerConfiguration =
+      new PaymentOrderWorkerConfigurationProperties();
+  @Mock private PaymentOrdersApi paymentOrdersApi;
+  private final PaymentOrderTaskExecutor streamTaskExecutor =
+      new PaymentOrderTaskExecutor(paymentOrdersApi);
 
-    @Mock private UnitOfWorkRepository<PaymentOrderTask, String> repository;
+  @InjectMocks
+  private PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor =
+      new PaymentOrderUnitOfWorkExecutor(
+          repository,
+          streamTaskExecutor,
+          streamWorkerConfiguration,
+          paymentOrdersApi,
+          paymentOrderTypeMapper);
 
-    private final PaymentOrderTaskExecutor streamTaskExecutor =
-            new PaymentOrderTaskExecutor(paymentOrdersApi);
+  @Mock private UnitOfWorkRepository<PaymentOrderTask, String> repository;
 
-    private final PaymentOrderWorkerConfigurationProperties streamWorkerConfiguration =
-            new PaymentOrderWorkerConfigurationProperties();
+  ;
 
-    @InjectMocks
-    private PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor =
-            new PaymentOrderUnitOfWorkExecutor(
-                    repository,
-                    streamTaskExecutor,
-                    streamWorkerConfiguration,
-                    paymentOrdersApi,
-                    paymentOrderTypeMapper);
+  @Test
+  void test_prepareUnitOfWork_paymentOrderIngestRequestList() {
+    List<PaymentOrderIngestRequest> paymentOrderIngestRequestList =
+        List.of(
+            new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(0)),
+            new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(1)));
 
-    ;
+    PaymentOrderPostResponse paymentOrderPostResponse =
+        new PaymentOrderPostResponse().id("po_post_resp_id").putAdditionsItem("key", "val");
 
-    @Test
-    void test_prepareUnitOfWork_paymentOrderIngestRequestList() {
-        List<PaymentOrderIngestRequest> paymentOrderIngestRequestList =
-                List.of(
-                        new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(0)),
-                        new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(1)));
+    Mockito.lenient()
+        .when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
+        .thenReturn(Mono.just(paymentOrderPostResponse));
 
-        PaymentOrderPostResponse paymentOrderPostResponse =
-                new PaymentOrderPostResponse().id("po_post_resp_id").putAdditionsItem("key", "val");
+    StepVerifier.create(
+            paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderIngestRequestList))
+        .assertNext(
+            unitOfWork -> {
+              Assertions.assertTrue(
+                  unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
+              Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
+              Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
+              Assertions.assertEquals(
+                  paymentOrderIngestRequestList.size(),
+                  unitOfWork.getStreamTasks().get(0).getData().size());
+            });
+  }
 
-        Mockito.lenient()
-                .when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
-                .thenReturn(Mono.just(paymentOrderPostResponse));
+  @Test
+  void test_prepareUnitOfWork_paymentOrderPostRequestFlux() {
+    Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux =
+        Flux.fromIterable(paymentOrderPostRequest);
 
-        StepVerifier.create(
-                        paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(
-                                paymentOrderIngestRequestList))
-                .assertNext(
-                        unitOfWork -> {
-                            Assertions.assertTrue(
-                                    unitOfWork
-                                            .getUnitOfOWorkId()
-                                            .startsWith("payment-orders-mixed-"));
-                            Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
-                            Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
-                            Assertions.assertEquals(
-                                    paymentOrderIngestRequestList.size(),
-                                    unitOfWork.getStreamTasks().get(0).getData().size());
-                        });
-    }
+    PaymentOrderPostResponse paymentOrderPostResponse =
+        new PaymentOrderPostResponse().id("po_post_resp_id").putAdditionsItem("key", "val");
 
-    @Test
-    void test_prepareUnitOfWork_paymentOrderPostRequestFlux() {
-        Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux =
-                Flux.fromIterable(paymentOrderPostRequest);
+    Mockito.lenient()
+        .when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
+        .thenReturn(Mono.just(paymentOrderPostResponse));
 
-        PaymentOrderPostResponse paymentOrderPostResponse =
-                new PaymentOrderPostResponse().id("po_post_resp_id").putAdditionsItem("key", "val");
-
-        Mockito.lenient()
-                .when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
-                .thenReturn(Mono.just(paymentOrderPostResponse));
-
-        StepVerifier.create(
-                        paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(
-                                paymentOrderPostRequestFlux))
-                .assertNext(
-                        unitOfWork -> {
-                            Assertions.assertTrue(
-                                    unitOfWork
-                                            .getUnitOfOWorkId()
-                                            .startsWith("payment-orders-mixed-"));
-                            Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
-                            Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
-                            Assertions.assertEquals(
-                                    paymentOrderPostRequest.size(),
-                                    unitOfWork.getStreamTasks().get(0).getData().size());
-                        });
-    }
+    StepVerifier.create(
+            paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
+        .assertNext(
+            unitOfWork -> {
+              Assertions.assertTrue(
+                  unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
+              Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
+              Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
+              Assertions.assertEquals(
+                  paymentOrderPostRequest.size(),
+                  unitOfWork.getStreamTasks().get(0).getData().size());
+            });
+  }
 }

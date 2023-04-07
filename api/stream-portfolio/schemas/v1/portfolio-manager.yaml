@@ -1,6 +1,6 @@
 required:
-- id
-- name
+  - id
+  - name
 type: object
 properties:
   id:

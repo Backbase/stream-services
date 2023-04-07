@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SetupLegalEntityHierarchyTaskApplication {
 
-    public static void main(String[] args) {
-        SpringApplication springApplication =
-                new SpringApplication(SetupLegalEntityHierarchyTaskApplication.class);
-        springApplication.setWebApplicationType(WebApplicationType.NONE);
-        springApplication.run(args);
-    }
+  public static void main(String[] args) {
+    SpringApplication springApplication =
+        new SpringApplication(SetupLegalEntityHierarchyTaskApplication.class);
+    springApplication.setWebApplicationType(WebApplicationType.NONE);
+    springApplication.run(args);
+  }
 }

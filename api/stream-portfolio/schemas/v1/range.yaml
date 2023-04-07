@@ -1,6 +1,6 @@
 required:
-- min
-- max
+  - min
+  - max
 type: object
 properties:
   min:

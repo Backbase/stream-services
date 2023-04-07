@@ -11,12 +11,9 @@ import com.backbase.stream.compositions.product.core.service.ArrangementPostInge
 import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
 import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
 import com.backbase.stream.compositions.transaction.client.model.TransactionPullIngestionRequest;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
-
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -25,109 +22,102 @@ import reactor.core.scheduler.Schedulers;
 @AllArgsConstructor
 public class ArrangementPostIngestionServiceImpl implements ArrangementPostIngestionService {
 
-    private final EventBus eventBus;
-    private final ProductConfigurationProperties config;
-    private final TransactionCompositionApi transactionCompositionApi;
+  private final EventBus eventBus;
+  private final ProductConfigurationProperties config;
+  private final TransactionCompositionApi transactionCompositionApi;
 
-    @Override
-    public Mono<ArrangementIngestResponse> handleSuccess(ArrangementIngestResponse res) {
-        return Mono.just(res)
-                .doOnNext(
-                        r ->
-                                log.info(
-                                        "Arrangement ingestion completed successfully for external"
-                                                + " id {}",
-                                        res.getArrangement().getExternalArrangementId()))
-                .flatMap(this::processTransactionChains)
-                .doOnNext(this::processSuccessEvent)
-                .doOnNext(r -> log.debug("Ingested arrangement: {}", res.getArrangement()));
+  @Override
+  public Mono<ArrangementIngestResponse> handleSuccess(ArrangementIngestResponse res) {
+    return Mono.just(res)
+        .doOnNext(
+            r ->
+                log.info(
+                    "Arrangement ingestion completed successfully for external" + " id {}",
+                    res.getArrangement().getExternalArrangementId()))
+        .flatMap(this::processTransactionChains)
+        .doOnNext(this::processSuccessEvent)
+        .doOnNext(r -> log.debug("Ingested arrangement: {}", res.getArrangement()));
+  }
+
+  @Override
+  public void handleFailure(Throwable error) {
+    log.error("Arrangement ingestion failed. {}", error.getMessage());
+    if (Boolean.TRUE.equals(config.getEvents().getEnableFailed())) {
+      ProductFailedEvent event = new ProductFailedEvent().withMessage(error.getMessage());
+      EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
+      envelopedEvent.setEvent(event);
+      eventBus.emitEvent(envelopedEvent);
+    }
+  }
+
+  private Mono<ArrangementIngestResponse> processTransactionChains(ArrangementIngestResponse res) {
+    Mono<ArrangementIngestResponse> transactionChainMono;
+
+    if (!config.isTransactionChainEnabled(res.getConfig())) {
+      log.debug("Transaction Chain is disabled");
+      transactionChainMono = Mono.just(res);
+    } else if (config.isTransactionChainAsync(res.getConfig())) {
+      transactionChainMono = ingestTransactionsAsync(res);
+    } else {
+      transactionChainMono = ingestTransactions(res);
     }
 
-    @Override
-    public void handleFailure(Throwable error) {
-        log.error("Arrangement ingestion failed. {}", error.getMessage());
-        if (Boolean.TRUE.equals(config.getEvents().getEnableFailed())) {
-            ProductFailedEvent event = new ProductFailedEvent().withMessage(error.getMessage());
-            EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
-            envelopedEvent.setEvent(event);
-            eventBus.emitEvent(envelopedEvent);
-        }
+    return transactionChainMono;
+  }
+
+  private Mono<ArrangementIngestResponse> ingestTransactions(ArrangementIngestResponse res) {
+    return Mono.just(res)
+        .map(this::buildTransactionPullRequest)
+        .flatMap(transactionCompositionApi::pullTransactions)
+        .onErrorResume(this::handleTransactionError)
+        .doOnNext(
+            response ->
+                log.debug("Response from Transaction Composition: {}", response.getTransactions()))
+        .map(p -> res);
+  }
+
+  private Mono<ArrangementIngestResponse> ingestTransactionsAsync(ArrangementIngestResponse res) {
+    return Mono.just(res)
+        .map(this::buildTransactionPullRequest)
+        .publishOn(Schedulers.boundedElastic())
+        .doOnNext(request -> transactionCompositionApi.pullTransactions(request).subscribe())
+        .doOnNext(
+            t ->
+                log.info(
+                    "Async transaction ingestion called for arrangement: {}", t.getArrangementId()))
+        .map(p -> res);
+  }
+
+  private void processSuccessEvent(ArrangementIngestResponse res) {
+    if (Boolean.TRUE.equals(config.isCompletedEventEnabled())) {
+      log.info(
+          "Emitting arrangement update completed event for externalArrangementId: {},"
+              + " source: {}",
+          res.getArrangement().getExternalArrangementId(),
+          res.getSource());
+      ArrangementCompletedEvent event =
+          new ArrangementCompletedEvent()
+              .withArrangementExternalId(res.getArrangement().getExternalArrangementId())
+              .withSource(res.getSource());
+      EnvelopedEvent<ArrangementCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
+      envelopedEvent.setEvent(event);
+      eventBus.emitEvent(envelopedEvent);
+      log.info(
+          "Emitted arrangement update completed event for externalArrangementId: {},"
+              + " source: {}",
+          res.getArrangement().getExternalArrangementId(),
+          res.getSource());
     }
+  }
 
-    private Mono<ArrangementIngestResponse> processTransactionChains(
-            ArrangementIngestResponse res) {
-        Mono<ArrangementIngestResponse> transactionChainMono;
+  private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
+    log.error("Error while calling Transaction Composition: {}", t.getMessage());
+    return Mono.error(new InternalServerErrorException(t.getMessage()));
+  }
 
-        if (!config.isTransactionChainEnabled(res.getConfig())) {
-            log.debug("Transaction Chain is disabled");
-            transactionChainMono = Mono.just(res);
-        } else if (config.isTransactionChainAsync(res.getConfig())) {
-            transactionChainMono = ingestTransactionsAsync(res);
-        } else {
-            transactionChainMono = ingestTransactions(res);
-        }
-
-        return transactionChainMono;
-    }
-
-    private Mono<ArrangementIngestResponse> ingestTransactions(ArrangementIngestResponse res) {
-        return Mono.just(res)
-                .map(this::buildTransactionPullRequest)
-                .flatMap(transactionCompositionApi::pullTransactions)
-                .onErrorResume(this::handleTransactionError)
-                .doOnNext(
-                        response ->
-                                log.debug(
-                                        "Response from Transaction Composition: {}",
-                                        response.getTransactions()))
-                .map(p -> res);
-    }
-
-    private Mono<ArrangementIngestResponse> ingestTransactionsAsync(ArrangementIngestResponse res) {
-        return Mono.just(res)
-                .map(this::buildTransactionPullRequest)
-                .publishOn(Schedulers.boundedElastic())
-                .doOnNext(
-                        request -> transactionCompositionApi.pullTransactions(request).subscribe())
-                .doOnNext(
-                        t ->
-                                log.info(
-                                        "Async transaction ingestion called for arrangement: {}",
-                                        t.getArrangementId()))
-                .map(p -> res);
-    }
-
-    private void processSuccessEvent(ArrangementIngestResponse res) {
-        if (Boolean.TRUE.equals(config.isCompletedEventEnabled())) {
-            log.info(
-                    "Emitting arrangement update completed event for externalArrangementId: {},"
-                            + " source: {}",
-                    res.getArrangement().getExternalArrangementId(),
-                    res.getSource());
-            ArrangementCompletedEvent event =
-                    new ArrangementCompletedEvent()
-                            .withArrangementExternalId(
-                                    res.getArrangement().getExternalArrangementId())
-                            .withSource(res.getSource());
-            EnvelopedEvent<ArrangementCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
-            envelopedEvent.setEvent(event);
-            eventBus.emitEvent(envelopedEvent);
-            log.info(
-                    "Emitted arrangement update completed event for externalArrangementId: {},"
-                            + " source: {}",
-                    res.getArrangement().getExternalArrangementId(),
-                    res.getSource());
-        }
-    }
-
-    private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
-        log.error("Error while calling Transaction Composition: {}", t.getMessage());
-        return Mono.error(new InternalServerErrorException(t.getMessage()));
-    }
-
-    private TransactionPullIngestionRequest buildTransactionPullRequest(
-            ArrangementIngestResponse res) {
-        return new TransactionPullIngestionRequest()
-                .withExternalArrangementId(res.getArrangement().getExternalArrangementId());
-    }
+  private TransactionPullIngestionRequest buildTransactionPullRequest(
+      ArrangementIngestResponse res) {
+    return new TransactionPullIngestionRequest()
+        .withExternalArrangementId(res.getArrangement().getExternalArrangementId());
+  }
 }

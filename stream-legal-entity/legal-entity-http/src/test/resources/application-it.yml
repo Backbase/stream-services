@@ -7,19 +7,19 @@ spring:
         simple:
           instances:
             token-converter:
-            - uri: http://localhost:10000
+              - uri: http://localhost:10000
             user-manager:
-            - uri: http://localhost:10000
-              metadata:
-                contextPath: /user-manager
+              - uri: http://localhost:10000
+                metadata:
+                  contextPath: /user-manager
             access-control:
-            - uri: http://localhost:10000
-              metadata:
-                contextPath: /access-control
+              - uri: http://localhost:10000
+                metadata:
+                  contextPath: /access-control
             arrangement-manager:
-            - uri: http://localhost:10000
-              metadata:
-                contextPath: /arrangement-manager
+              - uri: http://localhost:10000
+                metadata:
+                  contextPath: /arrangement-manager
     kubernetes:
       config:
         enabled: false

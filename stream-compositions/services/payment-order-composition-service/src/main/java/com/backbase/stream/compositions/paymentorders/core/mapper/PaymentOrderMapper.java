@@ -13,13 +13,11 @@ import com.backbase.stream.model.response.DeletePaymentOrderIngestDbsResponse;
 import com.backbase.stream.model.response.NewPaymentOrderIngestDbsResponse;
 import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
 import com.backbase.stream.model.response.UpdatePaymentOrderIngestDbsResponse;
-
+import java.util.List;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * This is a mapper for various Payment Order request and response objects used in: - dbs model -
@@ -32,51 +30,48 @@ import java.util.List;
 @Component
 public interface PaymentOrderMapper {
 
-    PaymentOrderPostRequest mapIntegrationToStream(
-            com.backbase.stream.compositions.paymentorder.integration.client.model
-                            .PaymentOrderPostRequest
-                    source);
+  PaymentOrderPostRequest mapIntegrationToStream(
+      com.backbase.stream.compositions.paymentorder.integration.client.model.PaymentOrderPostRequest
+          source);
 
-    com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse
-            mapStreamNewPaymentOrderToComposition(PaymentOrderPostResponse source);
+  com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse
+      mapStreamNewPaymentOrderToComposition(PaymentOrderPostResponse source);
 
-    @Mapping(target = "id", source = "bankReferenceId")
-    com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse
-            mapStreamUpdatePaymentOrderToComposition(PaymentOrderPutResponse source);
+  @Mapping(target = "id", source = "bankReferenceId")
+  com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostResponse
+      mapStreamUpdatePaymentOrderToComposition(PaymentOrderPutResponse source);
 
-    PullIngestionRequest mapStreamToIntegration(PaymentOrderIngestPullRequest source);
+  PullIngestionRequest mapStreamToIntegration(PaymentOrderIngestPullRequest source);
 
-    PaymentOrderIngestPullRequest mapPullRequest(PaymentOrderPullIngestionRequest source);
+  PaymentOrderIngestPullRequest mapPullRequest(PaymentOrderPullIngestionRequest source);
 
-    PaymentOrderIngestPushRequest mapPushRequest(PaymentOrderPushIngestionRequest source);
+  PaymentOrderIngestPushRequest mapPushRequest(PaymentOrderPushIngestionRequest source);
 
-    default PaymentOrderIngestionResponse mapPaymentOrderIngestionResponse(
-            List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses) {
-        PaymentOrderIngestionResponse paymentOrderIngestionResponse =
-                new PaymentOrderIngestionResponse();
-        for (PaymentOrderIngestDbsResponse paymentOrderIngestDbsResponse :
-                paymentOrderIngestDbsResponses) {
-            if (paymentOrderIngestDbsResponse instanceof NewPaymentOrderIngestDbsResponse) {
-                NewPaymentOrderIngestDbsResponse newPaymentOrderIngestDbsResponse =
-                        (NewPaymentOrderIngestDbsResponse) paymentOrderIngestDbsResponse;
-                paymentOrderIngestionResponse.addNewPaymentOrderItem(
-                        this.mapStreamNewPaymentOrderToComposition(
-                                newPaymentOrderIngestDbsResponse.getPaymentOrderPostResponse()));
-            } else if (paymentOrderIngestDbsResponse
-                    instanceof UpdatePaymentOrderIngestDbsResponse) {
-                UpdatePaymentOrderIngestDbsResponse updatePaymentOrderIngestDbsResponse =
-                        (UpdatePaymentOrderIngestDbsResponse) paymentOrderIngestDbsResponse;
-                paymentOrderIngestionResponse.addUpdatedPaymentOrderItem(
-                        this.mapStreamUpdatePaymentOrderToComposition(
-                                updatePaymentOrderIngestDbsResponse.getPaymentOrderPutResponse()));
-            } else if (paymentOrderIngestDbsResponse
-                    instanceof DeletePaymentOrderIngestDbsResponse) {
-                DeletePaymentOrderIngestDbsResponse deletePaymentOrderIngestDbsResponse =
-                        (DeletePaymentOrderIngestDbsResponse) paymentOrderIngestDbsResponse;
-                paymentOrderIngestionResponse.addDeletedPaymentOrderItem(
-                        deletePaymentOrderIngestDbsResponse.getPaymentOrderId());
-            }
-        }
-        return paymentOrderIngestionResponse;
+  default PaymentOrderIngestionResponse mapPaymentOrderIngestionResponse(
+      List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses) {
+    PaymentOrderIngestionResponse paymentOrderIngestionResponse =
+        new PaymentOrderIngestionResponse();
+    for (PaymentOrderIngestDbsResponse paymentOrderIngestDbsResponse :
+        paymentOrderIngestDbsResponses) {
+      if (paymentOrderIngestDbsResponse instanceof NewPaymentOrderIngestDbsResponse) {
+        NewPaymentOrderIngestDbsResponse newPaymentOrderIngestDbsResponse =
+            (NewPaymentOrderIngestDbsResponse) paymentOrderIngestDbsResponse;
+        paymentOrderIngestionResponse.addNewPaymentOrderItem(
+            this.mapStreamNewPaymentOrderToComposition(
+                newPaymentOrderIngestDbsResponse.getPaymentOrderPostResponse()));
+      } else if (paymentOrderIngestDbsResponse instanceof UpdatePaymentOrderIngestDbsResponse) {
+        UpdatePaymentOrderIngestDbsResponse updatePaymentOrderIngestDbsResponse =
+            (UpdatePaymentOrderIngestDbsResponse) paymentOrderIngestDbsResponse;
+        paymentOrderIngestionResponse.addUpdatedPaymentOrderItem(
+            this.mapStreamUpdatePaymentOrderToComposition(
+                updatePaymentOrderIngestDbsResponse.getPaymentOrderPutResponse()));
+      } else if (paymentOrderIngestDbsResponse instanceof DeletePaymentOrderIngestDbsResponse) {
+        DeletePaymentOrderIngestDbsResponse deletePaymentOrderIngestDbsResponse =
+            (DeletePaymentOrderIngestDbsResponse) paymentOrderIngestDbsResponse;
+        paymentOrderIngestionResponse.addDeletedPaymentOrderItem(
+            deletePaymentOrderIngestDbsResponse.getPaymentOrderId());
+      }
     }
+    return paymentOrderIngestionResponse;
+  }
 }

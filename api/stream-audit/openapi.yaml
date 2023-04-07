@@ -27,18 +27,18 @@ info:
     url: https://www.backbase.com
   version: 1.7.17
 servers:
-- url: /audit-presentation-service/service-api/v2
-  description: The server
-  variables: {}
+  - url: /audit-presentation-service/service-api/v2
+    description: The server
+    variables: { }
 tags:
-- name: audit
+  - name: audit
 paths:
   /audit-messages:
     summary: Audit Messages
     description: Endpoint to create audit messages
     post:
       tags:
-      - audit-messages
+        - audit-messages
       summary: Create new audit log entry that contains one or more audit messages. Single string values that are longer than the specified limits will be truncated.
       description: Create new audit log entry that contains one or more audit messages. Single string values that are longer than the specified limits will be truncated.
       operationId: postAuditmessages
@@ -52,21 +52,21 @@ paths:
               example:
                 value:
                   auditMessages:
-                  - messageSetId: c7cad0df-8d09-4fe7-8f50-5a662ac863e1
-                    eventCategory: Security
-                    objectType: Authentication
-                    eventAction: Login
-                    status: Successful
-                    username: atester
-                    userId: f8501d76-a86b-442a-a4da-43119ce5ecd4
-                    timestamp: '2018-08-10T16:39:57.123+02:00'
-                    eventDescription: User atester logged in
-                    legalEntityId: 04d6b7b6-bc28-4fbe-8aec-58f954348da2
-                    serviceAgreementId: 87418545-59db-42e4-b671-e5cf8c341ed0
-                    ipAddress: 90.192.221.10
-                    userAgent: Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
-                    eventMetaData:
-                      First Key: OTC
+                    - messageSetId: c7cad0df-8d09-4fe7-8f50-5a662ac863e1
+                      eventCategory: Security
+                      objectType: Authentication
+                      eventAction: Login
+                      status: Successful
+                      username: atester
+                      userId: f8501d76-a86b-442a-a4da-43119ce5ecd4
+                      timestamp: '2018-08-10T16:39:57.123+02:00'
+                      eventDescription: User atester logged in
+                      legalEntityId: 04d6b7b6-bc28-4fbe-8aec-58f954348da2
+                      serviceAgreementId: 87418545-59db-42e4-b671-e5cf8c341ed0
+                      ipAddress: 90.192.221.10
+                      userAgent: Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
+                      eventMetaData:
+                        First Key: OTC
       responses:
         '201':
           description: Audit message created
@@ -79,10 +79,10 @@ paths:
                   value:
                     message: Validation warnings occurred
                     warnings:
-                    - message: 'Field truncated: size must be between 36 and 36'
-                      key: auditMessages[0].messageSetId
-                      context:
-                        code: '1003'
+                      - message: 'Field truncated: size must be between 36 and 36'
+                        key: auditMessages[0].messageSetId
+                        context:
+                          code: '1003'
         '405':
           description: NotAllowedError
           content:
@@ -126,17 +126,17 @@ paths:
                   value:
                     message: Bad Request
                     errors:
-                    - message: Value Exceeded. Must be between {min} and {max}.
-                      key: common.api.shoesize
-                      context:
-                        max: '50'
-                        min: '1'
+                      - message: Value Exceeded. Must be between {min} and {max}.
+                        key: common.api.shoesize
+                        context:
+                          max: '50'
+                          min: '1'
   /async/audit-messages:
     summary: Audit Messages
     description: Endpoint to create audit messages
     post:
       tags:
-      - audit-messages
+        - audit-messages
       summary: Create new audit log entry that contains one or more audit messages. Single string values that are longer than the specified limits will be truncated.
       description: Create new audit log entry that contains one or more audit messages. Single string values that are longer than the specified limits will be truncated.
       operationId: asyncPostAuditmessages
@@ -148,21 +148,21 @@ paths:
               $ref: '#/components/schemas/AuditMessagesPostRequestBody'
             example:
               auditMessages:
-              - messageSetId: c7cad0df-8d09-4fe7-8f50-5a662ac863e1
-                eventCategory: Security
-                objectType: Authentication
-                eventAction: Login
-                status: Successful
-                username: atester
-                userId: f8501d76-a86b-442a-a4da-43119ce5ecd4
-                timestamp: 2018-08-10T16:39:57.123000+02:00
-                eventDescription: User atester logged in
-                legalEntityId: 04d6b7b6-bc28-4fbe-8aec-58f954348da2
-                serviceAgreementId: 87418545-59db-42e4-b671-e5cf8c341ed0
-                ipAddress: 90.192.221.10
-                userAgent: Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
-                eventMetaData:
-                  First Key: OTC
+                - messageSetId: c7cad0df-8d09-4fe7-8f50-5a662ac863e1
+                  eventCategory: Security
+                  objectType: Authentication
+                  eventAction: Login
+                  status: Successful
+                  username: atester
+                  userId: f8501d76-a86b-442a-a4da-43119ce5ecd4
+                  timestamp: 2018-08-10T16:39:57.123000+02:00
+                  eventDescription: User atester logged in
+                  legalEntityId: 04d6b7b6-bc28-4fbe-8aec-58f954348da2
+                  serviceAgreementId: 87418545-59db-42e4-b671-e5cf8c341ed0
+                  ipAddress: 90.192.221.10
+                  userAgent: Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
+                  eventMetaData:
+                    First Key: OTC
       responses:
         '202':
           description: Accepted Audit message
@@ -175,305 +175,305 @@ paths:
     description: Endpoint to query audit messages
     get:
       tags:
-      - audit-log
+        - audit-log
       summary: Get audit log messages in the system. Supports filtering and pagination of retrieved audit messages based on the provided filter and pagination parameters.
       description: Get audit log messages in the system. Supports filtering and pagination of retrieved audit messages based on the provided filter and pagination parameters.
       operationId: getMessages
       parameters:
-      - name: startDate
-        in: query
-        description: Restrict results to audit logs with a timestamp of, or after, this value.
-        required: false
-        schema:
-          type: string
-          format: date-time
-        examples:
-          example:
-            summary: example
-            value: 2017-06-28T16:41:41Z
-      - name: endDate
-        in: query
-        description: Restrict results to audit logs with a timestamp of, or before, this value.
-        required: false
-        schema:
-          type: string
-          format: date-time
-        examples:
-          example:
-            summary: example
-            value: 2017-07-28T16:41:41Z
-      - name: eventCategories
-        in: query
-        description: Restrict results to audit logs with an event category matching any of the supplied event categories, comma separated list.
-        required: false
-        schema:
-          type: array
-          items:
+        - name: startDate
+          in: query
+          description: Restrict results to audit logs with a timestamp of, or after, this value.
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - Bill Pay
-            - Payments
-      - name: status
-        in: query
-        description: Restrict results to audit logs with a status matching any of the supplied status names, comma separated list.
-        required: false
-        schema:
-          type: array
-          items:
+            format: date-time
+          examples:
+            example:
+              summary: example
+              value: 2017-06-28T16:41:41Z
+        - name: endDate
+          in: query
+          description: Restrict results to audit logs with a timestamp of, or before, this value.
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - Initiated
-            - Successful
-      - name: ipAddresses
-        in: query
-        description: Restrict results to audit logs with an IP address matching any of the supplied IP addresses in IPv4 format, comma separated list.
-        required: false
-        schema:
-          type: array
-          items:
+            format: date-time
+          examples:
+            example:
+              summary: example
+              value: 2017-07-28T16:41:41Z
+        - name: eventCategories
+          in: query
+          description: Restrict results to audit logs with an event category matching any of the supplied event categories, comma separated list.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - Bill Pay
+                - Payments
+        - name: status
+          in: query
+          description: Restrict results to audit logs with a status matching any of the supplied status names, comma separated list.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - Initiated
+                - Successful
+        - name: ipAddresses
+          in: query
+          description: Restrict results to audit logs with an IP address matching any of the supplied IP addresses in IPv4 format, comma separated list.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - 192.0.2.2
+                - 192.0.2.3
+        - name: objectType
+          in: query
+          description: Deprecated in favour of objectTypes. This query parameter will be removed in DBS 2.17.0
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - 192.0.2.2
-            - 192.0.2.3
-      - name: objectType
-        in: query
-        description: Deprecated in favour of objectTypes. This query parameter will be removed in DBS 2.17.0
-        required: false
-        schema:
-          type: string
-        examples:
-          example:
-            summary: example
-            value: Payment
-      - name: objectTypes
-        in: query
-        description: Restrict results to audit logs with an event object type matching any of the supplied values.
-        required: false
-        schema:
-          type: array
-          items:
+          examples:
+            example:
+              summary: example
+              value: Payment
+        - name: objectTypes
+          in: query
+          description: Restrict results to audit logs with an event object type matching any of the supplied values.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - Ingestion
+                - Permissions
+        - name: eventAction
+          in: query
+          description: Deprecated in favour of eventActions. This query parameter will be removed in DBS 2.17.0
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - Ingestion
-            - Permissions
-      - name: eventAction
-        in: query
-        description: Deprecated in favour of eventActions. This query parameter will be removed in DBS 2.17.0
-        required: false
-        schema:
-          type: string
-        examples:
-          example:
-            summary: example
-            value: Update
-      - name: eventActions
-        in: query
-        description: Restrict results to audit logs with an event action matching any of the supplied values.
-        required: false
-        schema:
-          type: array
-          items:
+          examples:
+            example:
+              summary: example
+              value: Update
+        - name: eventActions
+          in: query
+          description: Restrict results to audit logs with an event action matching any of the supplied values.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - Create
+                - Update
+        - name: usernames
+          in: query
+          description: Restrict results to audit logs with a username matching any of the supplied usernames, comma separated list.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - User1
+                - User2
+        - name: userId
+          in: query
+          description: Deprecated in favour of userIds. This query parameter will be removed in DBS 2.17.0
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - Create
-            - Update
-      - name: usernames
-        in: query
-        description: Restrict results to audit logs with a username matching any of the supplied usernames, comma separated list.
-        required: false
-        schema:
-          type: array
-          items:
+          examples:
+            example:
+              summary: example
+              value: f8501d76-a86b-442a-a4da-43119ce5ecd4
+        - name: userIds
+          in: query
+          description: Restrict results to audit logs with user IDs matching any of the supplied values.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - f8501d76-a86b-442a-a4da-43119ce5ecd4
+                - f8501d76-a86b-442a-a4da-43119ce5ecc3
+        - name: legalEntityIds
+          in: query
+          description: Restrict results to audit logs with a legalEntityId matching any of the supplied legalEntityIds, comma separated list.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - 04d6b7b6-bc28-4fbe-8aec-58f954348da2
+                - 87418545-59db-42e4-b671-e5cf8c341ed0
+        - name: serviceAgreementId
+          in: query
+          description: Restrict results to audit logs with a service agreement ID matching the supplied value.
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - User1
-            - User2
-      - name: userId
-        in: query
-        description: Deprecated in favour of userIds. This query parameter will be removed in DBS 2.17.0
-        required: false
-        schema:
-          type: string
-        examples:
-          example:
-            summary: example
-            value: f8501d76-a86b-442a-a4da-43119ce5ecd4
-      - name: userIds
-        in: query
-        description: Restrict results to audit logs with user IDs matching any of the supplied values.
-        required: false
-        schema:
-          type: array
-          items:
+          examples:
+            example:
+              summary: example
+              value: 87418545-59db-42e4-b671-e5cf8c341ed0
+        - name: messageSetId
+          in: query
+          description: Restrict results to audit logs with a message set ID matching the supplied value.
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - f8501d76-a86b-442a-a4da-43119ce5ecd4
-            - f8501d76-a86b-442a-a4da-43119ce5ecc3
-      - name: legalEntityIds
-        in: query
-        description: Restrict results to audit logs with a legalEntityId matching any of the supplied legalEntityIds, comma separated list.
-        required: false
-        schema:
-          type: array
-          items:
+          examples:
+            example:
+              summary: example
+              value: cb9c6d77-a32b-4921-ae5c-008dc17539b1
+        - name: schemaVersions
+          in: query
+          description: Restrict results to audit logs with a schema version matching the supplied value.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - DBS-2.16.3
+                - DBS-2.16.4
+        - name: userAgents
+          in: query
+          description: Restrict results to audit logs with a user agents matching the supplied value.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
+                - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML
+                - like Gecko) Chrome/76.0.3809.132 Safari/537.36
+        - name: eventMetaDataKey
+          in: query
+          description: Restrict results to audit records with a metadata key matching the provided entry. If used in conjunction with the eventMetaDataValue parameter the intersect of both filters is returned.
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - 04d6b7b6-bc28-4fbe-8aec-58f954348da2
-            - 87418545-59db-42e4-b671-e5cf8c341ed0
-      - name: serviceAgreementId
-        in: query
-        description: Restrict results to audit logs with a service agreement ID matching the supplied value.
-        required: false
-        schema:
-          type: string
-        examples:
-          example:
-            summary: example
-            value: 87418545-59db-42e4-b671-e5cf8c341ed0
-      - name: messageSetId
-        in: query
-        description: Restrict results to audit logs with a message set ID matching the supplied value.
-        required: false
-        schema:
-          type: string
-        examples:
-          example:
-            summary: example
-            value: cb9c6d77-a32b-4921-ae5c-008dc17539b1
-      - name: schemaVersions
-        in: query
-        description: Restrict results to audit logs with a schema version matching the supplied value.
-        required: false
-        schema:
-          type: array
-          items:
+          examples:
+            example:
+              summary: example
+              value: paymentAmount
+        - name: eventMetaDataValue
+          in: query
+          description: Restrict results to audit records with a metadata value matching the provided entry. If used in conjunction with the eventMetaDataKey parameter the intersect of both filters is returned.
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - DBS-2.16.3
-            - DBS-2.16.4
-      - name: userAgents
-        in: query
-        description: Restrict results to audit logs with a user agents matching the supplied value.
-        required: false
-        schema:
-          type: array
-          items:
+          examples:
+            example:
+              summary: example
+              value: 100.0
+        - name: partialMatchAgainst
+          in: query
+          description: Apply partial matching to provided fields.
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+          examples:
+            example:
+              summary: example
+              value:
+                - username
+                - eventMetaDataKey
+        - name: from
+          in: query
+          description: Page Number. Skip over pages of elements by specifying a start value for the query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+          examples:
+            example:
+              summary: example
+              value: 20
+        - name: size
+          in: query
+          description: Limit the number of elements on the response.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 25
+          examples:
+            example:
+              summary: example
+              value: 80
+        - name: orderBy
+          in: query
+          description: |
+            Order by field: "eventCategory", "objectType", "eventAction", "username", "userId", "timestamp", "eventDescription", "legalEntityId", "serviceAgreementId", "messageSetId"
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko
-            - Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML
-            - like Gecko) Chrome/76.0.3809.132 Safari/537.36
-      - name: eventMetaDataKey
-        in: query
-        description: Restrict results to audit records with a metadata key matching the provided entry. If used in conjunction with the eventMetaDataValue parameter the intersect of both filters is returned.
-        required: false
-        schema:
-          type: string
-        examples:
-          example:
-            summary: example
-            value: paymentAmount
-      - name: eventMetaDataValue
-        in: query
-        description: Restrict results to audit records with a metadata value matching the provided entry. If used in conjunction with the eventMetaDataKey parameter the intersect of both filters is returned.
-        required: false
-        schema:
-          type: string
-        examples:
-          example:
-            summary: example
-            value: 100.0
-      - name: partialMatchAgainst
-        in: query
-        description: Apply partial matching to provided fields.
-        required: false
-        schema:
-          type: array
-          items:
+          examples:
+            example:
+              summary: example
+        - name: direction
+          in: query
+          description: Direction
+          required: false
+          schema:
             type: string
-        examples:
-          example:
-            summary: example
-            value:
-            - username
-            - eventMetaDataKey
-      - name: from
-        in: query
-        description: Page Number. Skip over pages of elements by specifying a start value for the query
-        required: false
-        schema:
-          type: integer
-          format: int32
-          default: 0
-        examples:
-          example:
-            summary: example
-            value: 20
-      - name: size
-        in: query
-        description: Limit the number of elements on the response.
-        required: false
-        schema:
-          type: integer
-          format: int32
-          default: 25
-        examples:
-          example:
-            summary: example
-            value: 80
-      - name: orderBy
-        in: query
-        description: |
-          Order by field: "eventCategory", "objectType", "eventAction", "username", "userId", "timestamp", "eventDescription", "legalEntityId", "serviceAgreementId", "messageSetId"
-        required: false
-        schema:
-          type: string
-        examples:
-          example:
-            summary: example
-      - name: direction
-        in: query
-        description: Direction
-        required: false
-        schema:
-          type: string
-          enum:
-          - ASC
-          - DESC
-          default: DESC
-        examples:
-          example:
-            summary: example
+            enum:
+              - ASC
+              - DESC
+            default: DESC
+          examples:
+            example:
+              summary: example
       responses:
         '200':
           description: No description available
@@ -486,680 +486,680 @@ paths:
                   value:
                     totalCount: 48
                     auditMessages:
-                    - eventCategory: Payments
-                      objectType: Standing order
-                      eventAction: Fully Authorised
-                      status: Successful
-                      username: JSmart
-                      userId: JSM12051978
-                      messageSetId: messageSetId - Query Dates - SDD -49
-                      timestamp: 2017-09-03T07:44:57.896000Z
-                      eventDescription: Standing order was fully authorised
-                      legalEntityId: LE-111111111111111111-SDD-9999999951
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999951
-                      ipAddress: 90.192.221.10
-                      schemaVersion: DBS-2.16.3
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 49: OTC
-                    - eventCategory: Payments
-                      objectType: Standing order
-                      eventAction: Part Authorised
-                      status: Successful
-                      username: JPetersen
-                      userId: JPE12051978
-                      messageSetId: messageSetId - Query Dates - SDD -48
-                      timestamp: 2017-09-02T07:52:42.023000Z
-                      eventDescription: Standing order was part authorised
-                      legalEntityId: LE-111111111111111111-SDD-9999999952
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999952
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 48: OTC
-                    - eventCategory: Payments
-                      objectType: Standing order
-                      eventAction: Deleted
-                      status: Successful
-                      username: PPoe
-                      userId: PPO12051978
-                      messageSetId: messageSetId - Query Dates - SDD -47
-                      timestamp: 2017-09-01T08:48:45.856000Z
-                      eventDescription: Standing order was deleted
-                      legalEntityId: LE-111111111111111111-SDD-9999999953
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999953
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 47: OTC
-                    - eventCategory: Payments
-                      objectType: Standing order
-                      eventAction: Updated
-                      status: Successful
-                      username: JGate
-                      userId: JGA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -46
-                      timestamp: 2017-08-31T08:02:56.109000Z
-                      eventDescription: Standing order was updated
-                      legalEntityId: LE-111111111111111111-SDD-9999999954
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999954
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 46: OTC
-                    - eventCategory: Payments
-                      objectType: Standing order
-                      eventAction: Created
-                      status: Successful
-                      username: ZAvery
-                      userId: ZAV12051978
-                      messageSetId: messageSetId - Query Dates - SDD -45
-                      timestamp: 2017-08-30T06:06:03.195000Z
-                      eventDescription: Standing order was created
-                      legalEntityId: LE-111111111111111111-SDD-9999999955
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999955
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 45: OTC
-                    - eventCategory: Payments
-                      objectType: Direct Debit
-                      eventAction: Fully Authorised
-                      status: Successful
-                      username: AWright
-                      userId: AWR12051978
-                      messageSetId: messageSetId - Query Dates - SDD -44
-                      timestamp: 2017-08-29T06:21:54.380000Z
-                      eventDescription: Direct debit payment was fully authorised
-                      legalEntityId: LE-111111111111111111-SDD-9999999956
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999956
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 44: OTC
-                    - eventCategory: Payments
-                      objectType: Direct Debit
-                      eventAction: Part Authorised
-                      status: Successful
-                      username: RJones
-                      userId: RJO12051978
-                      messageSetId: messageSetId - Query Dates - SDD -43
-                      timestamp: 2017-08-28T08:04:56.433000Z
-                      eventDescription: Direct debit was part authorised
-                      legalEntityId: LE-111111111111111111-SDD-9999999957
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999957
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 43: OTC
-                    - eventCategory: Payments
-                      objectType: Direct Debit
-                      eventAction: Deleted
-                      status: Successful
-                      username: JSmart
-                      userId: JSM12051978
-                      messageSetId: messageSetId - Query Dates - SDD -42
-                      timestamp: 2017-08-27T06:33:44.154000Z
-                      eventDescription: Direct debit was deleted
-                      legalEntityId: LE-111111111111111111-SDD-9999999958
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999958
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 42: OTC
-                    - eventCategory: Payments
-                      objectType: Direct Debit
-                      eventAction: Updated
-                      status: Successful
-                      username: KNeil
-                      userId: KNE12051978
-                      messageSetId: messageSetId - Query Dates - SDD -41
-                      timestamp: 2017-08-26T08:56:56.662000Z
-                      eventDescription: Direct debit information was updated
-                      legalEntityId: LE-111111111111111111-SDD-9999999959
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999959
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 41: OTC
-                    - eventCategory: Payments
-                      objectType: Direct Debit
-                      eventAction: Created
-                      status: Successful
-                      username: LParr
-                      userId: LPA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -40
-                      timestamp: 2017-08-25T08:26:30.254000Z
-                      eventDescription: Direct debit was created
-                      legalEntityId: LE-111111111111111111-SDD-9999999960
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999960
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 40: OTC
-                    - eventCategory: Payments
-                      objectType: Payments
-                      eventAction: Fully Authorised
-                      status: Successful
-                      username: JSmart
-                      userId: JSM12051978
-                      messageSetId: messageSetId - Query Dates - SDD -39
-                      timestamp: 2017-08-24T08:54:56.483000Z
-                      eventDescription: Payment was fully authorised
-                      legalEntityId: LE-111111111111111111-SDD-9999999961
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999961
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 39: OTC
-                    - eventCategory: Payments
-                      objectType: Payments
-                      eventAction: Part Authorised
-                      status: Successful
-                      username: KNeil
-                      userId: KNE12051978
-                      messageSetId: messageSetId - Query Dates - SDD -38
-                      timestamp: 2017-08-23T06:52:50.045000Z
-                      eventDescription: This is record 13
-                      legalEntityId: LE-111111111111111111-SDD-9999999962
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999962
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 38: OTC
-                    - eventCategory: Payments
-                      objectType: Payments
-                      eventAction: Deleted
-                      status: Successful
-                      username: KNeil
-                      userId: KNE12051978
-                      messageSetId: messageSetId - Query Dates - SDD -37
-                      timestamp: 2017-08-22T08:29:16.214000Z
-                      eventDescription: Payment was deleted
-                      legalEntityId: LE-111111111111111111-SDD-9999999963
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999963
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 37: OTC
-                    - eventCategory: Payments
-                      objectType: Payments
-                      eventAction: Updated
-                      status: Successful
-                      username: LParr
-                      userId: LPA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -36
-                      timestamp: 2017-08-21T06:00:50.946000Z
-                      eventDescription: Payment was updated
-                      legalEntityId: LE-111111111111111111-SDD-9999999964
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999964
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 36: OTC
-                    - eventCategory: Payments
-                      objectType: Payments
-                      eventAction: Created
-                      status: Successful
-                      username: JSmart
-                      userId: JSM12051978
-                      messageSetId: messageSetId - Query Dates - SDD -35
-                      timestamp: 2017-08-20T06:33:45.261000Z
-                      eventDescription: Payment was created
-                      legalEntityId: LE-111111111111111111-SDD-9999999965
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999965
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 35: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Ingestion
-                      eventAction: Initial Admin Ingested
-                      status: Successful
-                      username: ZAvery
-                      userId: ZAV12051978
-                      messageSetId: messageSetId - Query Dates - SDD -34
-                      timestamp: 2017-08-19T08:57:22.604000Z
-                      eventDescription: Initial Admin was ingested by user entitlements
-                      legalEntityId: LE-111111111111111111-SDD-9999999966
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999966
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 34: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Ingestion
-                      eventAction: Legal Entity Ingested
-                      status: Successful
-                      username: TBarnet
-                      userId: TBA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -33
-                      timestamp: 2017-08-18T06:14:12.718000Z
-                      eventDescription: Legal Entity was ingested by user entitlements
-                      legalEntityId: LE-111111111111111111-SDD-9999999967
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999967
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 33: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Ingestion
-                      eventAction: User Ingested
-                      status: Successful
-                      username: AWright
-                      userId: AWR12051978
-                      messageSetId: messageSetId - Query Dates - SDD -32
-                      timestamp: 2017-08-17T07:23:38.616000Z
-                      eventDescription: User was ingested by user entitlements
-                      legalEntityId: LE-111111111111111111-SDD-9999999968
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999968
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 32: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Service Agreement
-                      eventAction: Permission Assigned
-                      status: Successful
-                      username: LParr
-                      userId: LPA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -31
-                      timestamp: 2017-08-16T07:58:56.350000Z
-                      eventDescription: Permission was assigned to the service agreement
-                      legalEntityId: LE-111111111111111111-SDD-9999999969
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999969
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 31: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Service Agreement
-                      eventAction: User Removed
-                      status: Successful
-                      username: LParr
-                      userId: LPA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -30
-                      timestamp: 2017-08-15T08:29:09.353000Z
-                      eventDescription: User was removed from the service agreement
-                      legalEntityId: LE-111111111111111111-SDD-9999999970
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999970
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 30: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Service Agreement
-                      eventAction: User Assigned
-                      status: Successful
-                      username: PPoe
-                      userId: PPO12051978
-                      messageSetId: messageSetId - Query Dates - SDD -29
-                      timestamp: 2017-08-14T06:22:41.488000Z
-                      eventDescription: User was assigned to the service agreement
-                      legalEntityId: LE-111111111111111111-SDD-9999999971
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999971
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 29: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Service Agreement
-                      eventAction: Pairs removed
-                      status: Successful
-                      username: KNeil
-                      userId: KNE12051978
-                      messageSetId: messageSetId - Query Dates - SDD -28
-                      timestamp: 2017-08-13T07:50:48.716000Z
-                      eventDescription: Pairs were removed from the service agreement
-                      legalEntityId: LE-111111111111111111-SDD-9999999972
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999972
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 28: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Service Agreement
-                      eventAction: Pairs Assigned
-                      status: Successful
-                      username: RJones
-                      userId: RJO12051978
-                      messageSetId: messageSetId - Query Dates - SDD -27
-                      timestamp: 2017-08-12T06:37:47.491000Z
-                      eventDescription: Pairs were assigned to the service agreement
-                      legalEntityId: LE-111111111111111111-SDD-9999999973
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999973
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 27: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Service Agreement
-                      eventAction: removed
-                      status: Successful
-                      username: JGate
-                      userId: JGA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -26
-                      timestamp: 2017-08-11T08:18:50.828000Z
-                      eventDescription: Service agreement was removed
-                      legalEntityId: LE-111111111111111111-SDD-9999999974
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999974
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 26: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Service Agreement
-                      eventAction: Updated
-                      status: Successful
-                      username: RJones
-                      userId: RJO12051978
-                      messageSetId: messageSetId - Query Dates - SDD -25
-                      timestamp: 2017-08-10T06:54:01.985000Z
-                      eventDescription: Service agreement was updated
-                      legalEntityId: LE-111111111111111111-SDD-9999999975
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999975
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 25: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Service Agreement
-                      eventAction: Added
-                      status: Successful
-                      username: LParr
-                      userId: LPA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -24
-                      timestamp: 2017-08-09T07:49:40.964000Z
-                      eventDescription: Service agreement was added
-                      legalEntityId: LE-1111111111111111111-SDD-999999976
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999976
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 24: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Permissions
-                      eventAction: Date Group Removed
-                      status: Successful
-                      username: TBarnet
-                      userId: TBA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -23
-                      timestamp: 2017-08-08T07:34:51.154000Z
-                      eventDescription: Data group was removed from permissions
-                      legalEntityId: LE-111111111111111111-SDD-9999999977
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999977
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 23: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Permissions
-                      eventAction: Data Group Assigned
-                      status: Successful
-                      username: LParr
-                      userId: LPA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -22
-                      timestamp: 2017-08-07T06:57:18.169000Z
-                      eventDescription: Data group was assigned new permissions
-                      legalEntityId: LE-111111111111111111-SDD-9999999978
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999978
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 22: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Permissions
-                      eventAction: Removed from Data Group
-                      status: Successful
-                      username: AWright
-                      userId: AWR12051978
-                      messageSetId: messageSetId - Query Dates - SDD -21
-                      timestamp: 2017-08-06T06:33:33.044000Z
-                      eventDescription: Permissions were removed from the data group
-                      legalEntityId: LE-111111111111111111-SDD-9999999979
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999979
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 21: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Permissions
-                      eventAction: Assigned to Data Group
-                      status: Successful
-                      username: KNeil
-                      userId: KNE12051978
-                      messageSetId: messageSetId - Query Dates - SDD -20
-                      timestamp: 2017-08-05T08:32:00.726000Z
-                      eventDescription: Permissions were assigned to the data group
-                      legalEntityId: LE-111111111111111111-SDD-9999999980
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999980
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 20: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Permissions
-                      eventAction: Removed from Function Group
-                      status: Successful
-                      username: ZAvery
-                      userId: ZAV12051978
-                      messageSetId: messageSetId - Query Dates - SDD -19
-                      timestamp: 2017-08-04T06:38:51.765000Z
-                      eventDescription: Remissions were removed from the function group
-                      legalEntityId: LE-111111111111111111-SDD-9999999981
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999981
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 19: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Permissions
-                      eventAction: Assigned to Function Group
-                      status: Successful
-                      username: PPoe
-                      userId: PPO12051978
-                      messageSetId: messageSetId - Query Dates - SDD -18
-                      timestamp: 2017-08-03T08:59:22.220000Z
-                      eventDescription: Permissions were assigned to the function group
-                      legalEntityId: LE-111111111111111111-SDD-9999999982
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999982
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 18: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Data Group
-                      eventAction: Deleted
-                      status: Successful
-                      username: LParr
-                      userId: LPA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -17
-                      timestamp: 2017-08-02T06:23:31.254000Z
-                      eventDescription: Data group was deleted
-                      legalEntityId: LE-111111111111111111-SDD-9999999983
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999983
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 17: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Data Group
-                      eventAction: Updated
-                      status: Successful
-                      username: KNeil
-                      userId: KNE12051978
-                      messageSetId: messageSetId - Query Dates - SDD -16
-                      timestamp: 2017-08-01T07:17:13.529000Z
-                      eventDescription: Data group was updated
-                      legalEntityId: LE-111111111111111111-SDD-9999999984
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999984
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 16: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Data Group
-                      eventAction: Added
-                      status: Successful
-                      username: LParr
-                      userId: LPA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -15
-                      timestamp: 2017-07-31T06:38:11.980000Z
-                      eventDescription: Data group was added
-                      legalEntityId: LE-111111111111111111-SDD-9999999985
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999985
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 15: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Function Group
-                      eventAction: Deleted
-                      status: Successful
-                      username: PPoe
-                      userId: PPO12051978
-                      messageSetId: messageSetId - Query Dates - SDD -14
-                      timestamp: 2017-07-30T06:07:59.472000Z
-                      eventDescription: Function group was deleted
-                      legalEntityId: LE-111111111111111111-SDD-9999999986
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999986
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 14: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Function Group
-                      eventAction: Updated
-                      status: Successful
-                      username: AWright
-                      userId: AWR12051978
-                      messageSetId: messageSetId - Query Dates - SDD -13
-                      timestamp: 2017-07-29T08:32:52.773000Z
-                      eventDescription: Function Group was updated
-                      legalEntityId: LE-111111111111111111-SDD-9999999987
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999987
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 13: OTC
-                    - eventCategory: User Entitlement
-                      objectType: Function Group
-                      eventAction: Added
-                      status: Successful
-                      username: TBarnet
-                      userId: TBA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -12
-                      timestamp: 2017-07-28T07:12:58.798000Z
-                      eventDescription: Function group was added
-                      legalEntityId: LE-111111111111111111-SDD-9999999988
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999988
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 12: OTC
-                    - eventCategory: Contact
-                      objectType: Contact
-                      eventAction: Deleted
-                      status: Successful
-                      username: JGate
-                      userId: JGA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -11
-                      timestamp: 2017-07-27T08:10:39.385000Z
-                      eventDescription: Contact was deleted
-                      legalEntityId: LE-111111111111111111-SDD-9999999989
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999989
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 11: OTC
-                    - eventCategory: Contact
-                      objectType: Contact
-                      eventAction: Updated
-                      status: Successful
-                      username: JPetersen
-                      userId: JPE12051978
-                      messageSetId: messageSetId - Query Dates - SDD -10
-                      timestamp: 2017-07-26T06:20:29.821000Z
-                      eventDescription: Contact was updated
-                      legalEntityId: LE-111111111111111111-SDD-9999999990
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999990
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 10: OTC
-                    - eventCategory: Contact
-                      objectType: Contact
-                      eventAction: Created
-                      status: Successful
-                      username: ZAvery
-                      userId: ZAV12051978
-                      messageSetId: messageSetId - Query Dates - SDD -09
-                      timestamp: 2017-07-25T06:28:44.186000Z
-                      eventDescription: Contact was created
-                      legalEntityId: LE-111111111111111111-SDD-9999999991
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999991
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 9: OTC
-                    - eventCategory: Contact
-                      objectType: Contact
-                      eventAction: Authorised
-                      status: Successful
-                      username: TBarnet
-                      userId: TBA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -08
-                      timestamp: 2017-07-24T06:37:44.762000Z
-                      eventDescription: Contact was authorised
-                      legalEntityId: LE-111111111111111111-SDD-9999999992
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999992
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 8: OTC
-                    - eventCategory: Authentication
-                      objectType: Account
-                      eventAction: Revoked
-                      status: Successful
-                      username: RJones
-                      userId: RJO12051978
-                      messageSetId: messageSetId - Query Dates - SDD -07
-                      timestamp: 2017-07-23T08:37:06.489000Z
-                      eventDescription: Account was revoked
-                      legalEntityId: LE-111111111111111111-SDD-9999999993
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999993
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 7: OTC
-                    - eventCategory: Authentication
-                      objectType: Account
-                      eventAction: Locked
-                      status: Successful
-                      username: KNeil
-                      userId: KNE12051978
-                      messageSetId: messageSetId - Query Dates - SDD -06
-                      timestamp: 2017-07-22T07:25:03.183000Z
-                      eventDescription: Account was locked
-                      legalEntityId: LE-111111111111111111-SDD-9999999994
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999994
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 6: OTC
-                    - eventCategory: Authentication
-                      objectType: Account
-                      eventAction: Not Activated
-                      status: Failed
-                      username: JGate
-                      userId: JGA12051978
-                      messageSetId: messageSetId - Query Dates - SDD -05
-                      timestamp: 2017-07-21T06:07:25.652000Z
-                      eventDescription: Account was not activated
-                      legalEntityId: LE-111111111111111111-SDD-9999999995
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999995
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 5: OTC
-                    - eventCategory: Authentication
-                      objectType: OTC
-                      eventAction: Expired
-                      status: Failed
-                      username: AWright
-                      userId: AWR12051978
-                      messageSetId: messageSetId - Query Dates - SDD -04
-                      timestamp: 2017-07-20T08:29:34.822000Z
-                      eventDescription: OTC expired
-                      legalEntityId: LE-111111111111111111-SDD-9999999996
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999996
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 4: OTC
-                    - eventCategory: Authentication
-                      objectType: OTC
-                      eventAction: Invalid
-                      status: Failed
-                      username: PPoe
-                      userId: PPO12051978
-                      messageSetId: messageSetId - Query Dates - SDD -03
-                      timestamp: 2017-07-19T08:19:10.855000Z
-                      eventDescription: OTC was invalid
-                      legalEntityId: LE-111111111111111111-SDD-9999999997
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999997
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 3: OTC
-                    - eventCategory: Authentication
-                      objectType: Password
-                      eventAction: Error
-                      status: Failed
-                      username: ZAvery
-                      userId: ZAV12051978
-                      messageSetId: messageSetId - Query Dates - SDD -02
-                      timestamp: 2017-07-18T08:13:06.661000Z
-                      eventDescription: Password error encountered
-                      legalEntityId: LE-111111111111111111-SDD-9999999998
-                      serviceAgreementId: SE-SDD-10000000000000-Service-999998
-                      userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
-                      eventMetaData:
-                        First Key for Audit Message 2: OTC
+                      - eventCategory: Payments
+                        objectType: Standing order
+                        eventAction: Fully Authorised
+                        status: Successful
+                        username: JSmart
+                        userId: JSM12051978
+                        messageSetId: messageSetId - Query Dates - SDD -49
+                        timestamp: 2017-09-03T07:44:57.896000Z
+                        eventDescription: Standing order was fully authorised
+                        legalEntityId: LE-111111111111111111-SDD-9999999951
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999951
+                        ipAddress: 90.192.221.10
+                        schemaVersion: DBS-2.16.3
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 49: OTC
+                      - eventCategory: Payments
+                        objectType: Standing order
+                        eventAction: Part Authorised
+                        status: Successful
+                        username: JPetersen
+                        userId: JPE12051978
+                        messageSetId: messageSetId - Query Dates - SDD -48
+                        timestamp: 2017-09-02T07:52:42.023000Z
+                        eventDescription: Standing order was part authorised
+                        legalEntityId: LE-111111111111111111-SDD-9999999952
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999952
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 48: OTC
+                      - eventCategory: Payments
+                        objectType: Standing order
+                        eventAction: Deleted
+                        status: Successful
+                        username: PPoe
+                        userId: PPO12051978
+                        messageSetId: messageSetId - Query Dates - SDD -47
+                        timestamp: 2017-09-01T08:48:45.856000Z
+                        eventDescription: Standing order was deleted
+                        legalEntityId: LE-111111111111111111-SDD-9999999953
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999953
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 47: OTC
+                      - eventCategory: Payments
+                        objectType: Standing order
+                        eventAction: Updated
+                        status: Successful
+                        username: JGate
+                        userId: JGA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -46
+                        timestamp: 2017-08-31T08:02:56.109000Z
+                        eventDescription: Standing order was updated
+                        legalEntityId: LE-111111111111111111-SDD-9999999954
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999954
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 46: OTC
+                      - eventCategory: Payments
+                        objectType: Standing order
+                        eventAction: Created
+                        status: Successful
+                        username: ZAvery
+                        userId: ZAV12051978
+                        messageSetId: messageSetId - Query Dates - SDD -45
+                        timestamp: 2017-08-30T06:06:03.195000Z
+                        eventDescription: Standing order was created
+                        legalEntityId: LE-111111111111111111-SDD-9999999955
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999955
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 45: OTC
+                      - eventCategory: Payments
+                        objectType: Direct Debit
+                        eventAction: Fully Authorised
+                        status: Successful
+                        username: AWright
+                        userId: AWR12051978
+                        messageSetId: messageSetId - Query Dates - SDD -44
+                        timestamp: 2017-08-29T06:21:54.380000Z
+                        eventDescription: Direct debit payment was fully authorised
+                        legalEntityId: LE-111111111111111111-SDD-9999999956
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999956
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 44: OTC
+                      - eventCategory: Payments
+                        objectType: Direct Debit
+                        eventAction: Part Authorised
+                        status: Successful
+                        username: RJones
+                        userId: RJO12051978
+                        messageSetId: messageSetId - Query Dates - SDD -43
+                        timestamp: 2017-08-28T08:04:56.433000Z
+                        eventDescription: Direct debit was part authorised
+                        legalEntityId: LE-111111111111111111-SDD-9999999957
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999957
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 43: OTC
+                      - eventCategory: Payments
+                        objectType: Direct Debit
+                        eventAction: Deleted
+                        status: Successful
+                        username: JSmart
+                        userId: JSM12051978
+                        messageSetId: messageSetId - Query Dates - SDD -42
+                        timestamp: 2017-08-27T06:33:44.154000Z
+                        eventDescription: Direct debit was deleted
+                        legalEntityId: LE-111111111111111111-SDD-9999999958
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999958
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 42: OTC
+                      - eventCategory: Payments
+                        objectType: Direct Debit
+                        eventAction: Updated
+                        status: Successful
+                        username: KNeil
+                        userId: KNE12051978
+                        messageSetId: messageSetId - Query Dates - SDD -41
+                        timestamp: 2017-08-26T08:56:56.662000Z
+                        eventDescription: Direct debit information was updated
+                        legalEntityId: LE-111111111111111111-SDD-9999999959
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999959
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 41: OTC
+                      - eventCategory: Payments
+                        objectType: Direct Debit
+                        eventAction: Created
+                        status: Successful
+                        username: LParr
+                        userId: LPA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -40
+                        timestamp: 2017-08-25T08:26:30.254000Z
+                        eventDescription: Direct debit was created
+                        legalEntityId: LE-111111111111111111-SDD-9999999960
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999960
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 40: OTC
+                      - eventCategory: Payments
+                        objectType: Payments
+                        eventAction: Fully Authorised
+                        status: Successful
+                        username: JSmart
+                        userId: JSM12051978
+                        messageSetId: messageSetId - Query Dates - SDD -39
+                        timestamp: 2017-08-24T08:54:56.483000Z
+                        eventDescription: Payment was fully authorised
+                        legalEntityId: LE-111111111111111111-SDD-9999999961
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999961
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 39: OTC
+                      - eventCategory: Payments
+                        objectType: Payments
+                        eventAction: Part Authorised
+                        status: Successful
+                        username: KNeil
+                        userId: KNE12051978
+                        messageSetId: messageSetId - Query Dates - SDD -38
+                        timestamp: 2017-08-23T06:52:50.045000Z
+                        eventDescription: This is record 13
+                        legalEntityId: LE-111111111111111111-SDD-9999999962
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999962
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 38: OTC
+                      - eventCategory: Payments
+                        objectType: Payments
+                        eventAction: Deleted
+                        status: Successful
+                        username: KNeil
+                        userId: KNE12051978
+                        messageSetId: messageSetId - Query Dates - SDD -37
+                        timestamp: 2017-08-22T08:29:16.214000Z
+                        eventDescription: Payment was deleted
+                        legalEntityId: LE-111111111111111111-SDD-9999999963
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999963
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 37: OTC
+                      - eventCategory: Payments
+                        objectType: Payments
+                        eventAction: Updated
+                        status: Successful
+                        username: LParr
+                        userId: LPA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -36
+                        timestamp: 2017-08-21T06:00:50.946000Z
+                        eventDescription: Payment was updated
+                        legalEntityId: LE-111111111111111111-SDD-9999999964
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999964
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 36: OTC
+                      - eventCategory: Payments
+                        objectType: Payments
+                        eventAction: Created
+                        status: Successful
+                        username: JSmart
+                        userId: JSM12051978
+                        messageSetId: messageSetId - Query Dates - SDD -35
+                        timestamp: 2017-08-20T06:33:45.261000Z
+                        eventDescription: Payment was created
+                        legalEntityId: LE-111111111111111111-SDD-9999999965
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999965
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 35: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Ingestion
+                        eventAction: Initial Admin Ingested
+                        status: Successful
+                        username: ZAvery
+                        userId: ZAV12051978
+                        messageSetId: messageSetId - Query Dates - SDD -34
+                        timestamp: 2017-08-19T08:57:22.604000Z
+                        eventDescription: Initial Admin was ingested by user entitlements
+                        legalEntityId: LE-111111111111111111-SDD-9999999966
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999966
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 34: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Ingestion
+                        eventAction: Legal Entity Ingested
+                        status: Successful
+                        username: TBarnet
+                        userId: TBA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -33
+                        timestamp: 2017-08-18T06:14:12.718000Z
+                        eventDescription: Legal Entity was ingested by user entitlements
+                        legalEntityId: LE-111111111111111111-SDD-9999999967
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999967
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 33: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Ingestion
+                        eventAction: User Ingested
+                        status: Successful
+                        username: AWright
+                        userId: AWR12051978
+                        messageSetId: messageSetId - Query Dates - SDD -32
+                        timestamp: 2017-08-17T07:23:38.616000Z
+                        eventDescription: User was ingested by user entitlements
+                        legalEntityId: LE-111111111111111111-SDD-9999999968
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999968
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 32: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Service Agreement
+                        eventAction: Permission Assigned
+                        status: Successful
+                        username: LParr
+                        userId: LPA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -31
+                        timestamp: 2017-08-16T07:58:56.350000Z
+                        eventDescription: Permission was assigned to the service agreement
+                        legalEntityId: LE-111111111111111111-SDD-9999999969
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999969
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 31: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Service Agreement
+                        eventAction: User Removed
+                        status: Successful
+                        username: LParr
+                        userId: LPA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -30
+                        timestamp: 2017-08-15T08:29:09.353000Z
+                        eventDescription: User was removed from the service agreement
+                        legalEntityId: LE-111111111111111111-SDD-9999999970
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999970
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 30: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Service Agreement
+                        eventAction: User Assigned
+                        status: Successful
+                        username: PPoe
+                        userId: PPO12051978
+                        messageSetId: messageSetId - Query Dates - SDD -29
+                        timestamp: 2017-08-14T06:22:41.488000Z
+                        eventDescription: User was assigned to the service agreement
+                        legalEntityId: LE-111111111111111111-SDD-9999999971
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999971
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 29: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Service Agreement
+                        eventAction: Pairs removed
+                        status: Successful
+                        username: KNeil
+                        userId: KNE12051978
+                        messageSetId: messageSetId - Query Dates - SDD -28
+                        timestamp: 2017-08-13T07:50:48.716000Z
+                        eventDescription: Pairs were removed from the service agreement
+                        legalEntityId: LE-111111111111111111-SDD-9999999972
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999972
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 28: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Service Agreement
+                        eventAction: Pairs Assigned
+                        status: Successful
+                        username: RJones
+                        userId: RJO12051978
+                        messageSetId: messageSetId - Query Dates - SDD -27
+                        timestamp: 2017-08-12T06:37:47.491000Z
+                        eventDescription: Pairs were assigned to the service agreement
+                        legalEntityId: LE-111111111111111111-SDD-9999999973
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999973
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 27: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Service Agreement
+                        eventAction: removed
+                        status: Successful
+                        username: JGate
+                        userId: JGA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -26
+                        timestamp: 2017-08-11T08:18:50.828000Z
+                        eventDescription: Service agreement was removed
+                        legalEntityId: LE-111111111111111111-SDD-9999999974
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999974
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 26: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Service Agreement
+                        eventAction: Updated
+                        status: Successful
+                        username: RJones
+                        userId: RJO12051978
+                        messageSetId: messageSetId - Query Dates - SDD -25
+                        timestamp: 2017-08-10T06:54:01.985000Z
+                        eventDescription: Service agreement was updated
+                        legalEntityId: LE-111111111111111111-SDD-9999999975
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999975
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 25: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Service Agreement
+                        eventAction: Added
+                        status: Successful
+                        username: LParr
+                        userId: LPA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -24
+                        timestamp: 2017-08-09T07:49:40.964000Z
+                        eventDescription: Service agreement was added
+                        legalEntityId: LE-1111111111111111111-SDD-999999976
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999976
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 24: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Permissions
+                        eventAction: Date Group Removed
+                        status: Successful
+                        username: TBarnet
+                        userId: TBA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -23
+                        timestamp: 2017-08-08T07:34:51.154000Z
+                        eventDescription: Data group was removed from permissions
+                        legalEntityId: LE-111111111111111111-SDD-9999999977
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999977
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 23: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Permissions
+                        eventAction: Data Group Assigned
+                        status: Successful
+                        username: LParr
+                        userId: LPA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -22
+                        timestamp: 2017-08-07T06:57:18.169000Z
+                        eventDescription: Data group was assigned new permissions
+                        legalEntityId: LE-111111111111111111-SDD-9999999978
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999978
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 22: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Permissions
+                        eventAction: Removed from Data Group
+                        status: Successful
+                        username: AWright
+                        userId: AWR12051978
+                        messageSetId: messageSetId - Query Dates - SDD -21
+                        timestamp: 2017-08-06T06:33:33.044000Z
+                        eventDescription: Permissions were removed from the data group
+                        legalEntityId: LE-111111111111111111-SDD-9999999979
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999979
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 21: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Permissions
+                        eventAction: Assigned to Data Group
+                        status: Successful
+                        username: KNeil
+                        userId: KNE12051978
+                        messageSetId: messageSetId - Query Dates - SDD -20
+                        timestamp: 2017-08-05T08:32:00.726000Z
+                        eventDescription: Permissions were assigned to the data group
+                        legalEntityId: LE-111111111111111111-SDD-9999999980
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999980
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 20: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Permissions
+                        eventAction: Removed from Function Group
+                        status: Successful
+                        username: ZAvery
+                        userId: ZAV12051978
+                        messageSetId: messageSetId - Query Dates - SDD -19
+                        timestamp: 2017-08-04T06:38:51.765000Z
+                        eventDescription: Remissions were removed from the function group
+                        legalEntityId: LE-111111111111111111-SDD-9999999981
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999981
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 19: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Permissions
+                        eventAction: Assigned to Function Group
+                        status: Successful
+                        username: PPoe
+                        userId: PPO12051978
+                        messageSetId: messageSetId - Query Dates - SDD -18
+                        timestamp: 2017-08-03T08:59:22.220000Z
+                        eventDescription: Permissions were assigned to the function group
+                        legalEntityId: LE-111111111111111111-SDD-9999999982
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999982
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 18: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Data Group
+                        eventAction: Deleted
+                        status: Successful
+                        username: LParr
+                        userId: LPA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -17
+                        timestamp: 2017-08-02T06:23:31.254000Z
+                        eventDescription: Data group was deleted
+                        legalEntityId: LE-111111111111111111-SDD-9999999983
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999983
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 17: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Data Group
+                        eventAction: Updated
+                        status: Successful
+                        username: KNeil
+                        userId: KNE12051978
+                        messageSetId: messageSetId - Query Dates - SDD -16
+                        timestamp: 2017-08-01T07:17:13.529000Z
+                        eventDescription: Data group was updated
+                        legalEntityId: LE-111111111111111111-SDD-9999999984
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999984
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 16: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Data Group
+                        eventAction: Added
+                        status: Successful
+                        username: LParr
+                        userId: LPA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -15
+                        timestamp: 2017-07-31T06:38:11.980000Z
+                        eventDescription: Data group was added
+                        legalEntityId: LE-111111111111111111-SDD-9999999985
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999985
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 15: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Function Group
+                        eventAction: Deleted
+                        status: Successful
+                        username: PPoe
+                        userId: PPO12051978
+                        messageSetId: messageSetId - Query Dates - SDD -14
+                        timestamp: 2017-07-30T06:07:59.472000Z
+                        eventDescription: Function group was deleted
+                        legalEntityId: LE-111111111111111111-SDD-9999999986
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999986
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 14: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Function Group
+                        eventAction: Updated
+                        status: Successful
+                        username: AWright
+                        userId: AWR12051978
+                        messageSetId: messageSetId - Query Dates - SDD -13
+                        timestamp: 2017-07-29T08:32:52.773000Z
+                        eventDescription: Function Group was updated
+                        legalEntityId: LE-111111111111111111-SDD-9999999987
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999987
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 13: OTC
+                      - eventCategory: User Entitlement
+                        objectType: Function Group
+                        eventAction: Added
+                        status: Successful
+                        username: TBarnet
+                        userId: TBA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -12
+                        timestamp: 2017-07-28T07:12:58.798000Z
+                        eventDescription: Function group was added
+                        legalEntityId: LE-111111111111111111-SDD-9999999988
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999988
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 12: OTC
+                      - eventCategory: Contact
+                        objectType: Contact
+                        eventAction: Deleted
+                        status: Successful
+                        username: JGate
+                        userId: JGA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -11
+                        timestamp: 2017-07-27T08:10:39.385000Z
+                        eventDescription: Contact was deleted
+                        legalEntityId: LE-111111111111111111-SDD-9999999989
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999989
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 11: OTC
+                      - eventCategory: Contact
+                        objectType: Contact
+                        eventAction: Updated
+                        status: Successful
+                        username: JPetersen
+                        userId: JPE12051978
+                        messageSetId: messageSetId - Query Dates - SDD -10
+                        timestamp: 2017-07-26T06:20:29.821000Z
+                        eventDescription: Contact was updated
+                        legalEntityId: LE-111111111111111111-SDD-9999999990
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999990
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 10: OTC
+                      - eventCategory: Contact
+                        objectType: Contact
+                        eventAction: Created
+                        status: Successful
+                        username: ZAvery
+                        userId: ZAV12051978
+                        messageSetId: messageSetId - Query Dates - SDD -09
+                        timestamp: 2017-07-25T06:28:44.186000Z
+                        eventDescription: Contact was created
+                        legalEntityId: LE-111111111111111111-SDD-9999999991
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999991
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 9: OTC
+                      - eventCategory: Contact
+                        objectType: Contact
+                        eventAction: Authorised
+                        status: Successful
+                        username: TBarnet
+                        userId: TBA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -08
+                        timestamp: 2017-07-24T06:37:44.762000Z
+                        eventDescription: Contact was authorised
+                        legalEntityId: LE-111111111111111111-SDD-9999999992
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999992
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 8: OTC
+                      - eventCategory: Authentication
+                        objectType: Account
+                        eventAction: Revoked
+                        status: Successful
+                        username: RJones
+                        userId: RJO12051978
+                        messageSetId: messageSetId - Query Dates - SDD -07
+                        timestamp: 2017-07-23T08:37:06.489000Z
+                        eventDescription: Account was revoked
+                        legalEntityId: LE-111111111111111111-SDD-9999999993
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999993
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 7: OTC
+                      - eventCategory: Authentication
+                        objectType: Account
+                        eventAction: Locked
+                        status: Successful
+                        username: KNeil
+                        userId: KNE12051978
+                        messageSetId: messageSetId - Query Dates - SDD -06
+                        timestamp: 2017-07-22T07:25:03.183000Z
+                        eventDescription: Account was locked
+                        legalEntityId: LE-111111111111111111-SDD-9999999994
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999994
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 6: OTC
+                      - eventCategory: Authentication
+                        objectType: Account
+                        eventAction: Not Activated
+                        status: Failed
+                        username: JGate
+                        userId: JGA12051978
+                        messageSetId: messageSetId - Query Dates - SDD -05
+                        timestamp: 2017-07-21T06:07:25.652000Z
+                        eventDescription: Account was not activated
+                        legalEntityId: LE-111111111111111111-SDD-9999999995
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999995
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 5: OTC
+                      - eventCategory: Authentication
+                        objectType: OTC
+                        eventAction: Expired
+                        status: Failed
+                        username: AWright
+                        userId: AWR12051978
+                        messageSetId: messageSetId - Query Dates - SDD -04
+                        timestamp: 2017-07-20T08:29:34.822000Z
+                        eventDescription: OTC expired
+                        legalEntityId: LE-111111111111111111-SDD-9999999996
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999996
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 4: OTC
+                      - eventCategory: Authentication
+                        objectType: OTC
+                        eventAction: Invalid
+                        status: Failed
+                        username: PPoe
+                        userId: PPO12051978
+                        messageSetId: messageSetId - Query Dates - SDD -03
+                        timestamp: 2017-07-19T08:19:10.855000Z
+                        eventDescription: OTC was invalid
+                        legalEntityId: LE-111111111111111111-SDD-9999999997
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999997
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 3: OTC
+                      - eventCategory: Authentication
+                        objectType: Password
+                        eventAction: Error
+                        status: Failed
+                        username: ZAvery
+                        userId: ZAV12051978
+                        messageSetId: messageSetId - Query Dates - SDD -02
+                        timestamp: 2017-07-18T08:13:06.661000Z
+                        eventDescription: Password error encountered
+                        legalEntityId: LE-111111111111111111-SDD-9999999998
+                        serviceAgreementId: SE-SDD-10000000000000-Service-999998
+                        userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A
+                        eventMetaData:
+                          First Key for Audit Message 2: OTC
         '405':
           description: NotAllowedError
           content:
@@ -1203,10 +1203,10 @@ paths:
                   value:
                     message: Access to requested resource denied.
                     errors:
-                    - message: Resource access denied due to an insufficient user quota of {quota}.
-                      key: common.api.quota
-                      context:
-                        quota: someQuota
+                      - message: Resource access denied due to an insufficient user quota of {quota}.
+                        key: common.api.quota
+                        context:
+                          quota: someQuota
         '406':
           description: NotAcceptable
           content:
@@ -1218,7 +1218,7 @@ paths:
                   value:
                     message: Could not find acceptable representation
                     supportedMediaTypes:
-                    - application/json
+                      - application/json
         '400':
           description: BadRequest
           content:
@@ -1230,17 +1230,17 @@ paths:
                   value:
                     message: Bad Request
                     errors:
-                    - message: Value Exceeded. Must be between {min} and {max}.
-                      key: common.api.shoesize
-                      context:
-                        max: '50'
-                        min: '1'
+                      - message: Value Exceeded. Must be between {min} and {max}.
+                        key: common.api.shoesize
+                        context:
+                          max: '50'
+                          min: '1'
   /audit-log/event-categories:
     summary: Audit Event Categories
     description: Endpoint to query event categories, object types, and event actions.
     get:
       tags:
-      - audit-log
+        - audit-log
       summary: Gets the distinct event categories, object types, and event actions.
       description: Gets the distinct event categories, object types, and event actions.
       operationId: getEventcategories
@@ -1255,79 +1255,79 @@ paths:
                 example:
                   value:
                     eventCategories:
-                    - eventCategory: Audit
-                      objectTypes:
-                      - objectType: Audit Log
-                        eventActions:
-                        - Read
-                        - Export
-                    - eventCategory: Contact
-                      objectTypes:
-                      - objectType: Contact
-                        eventActions:
-                        - Delete
-                        - Update
-                        - Create
-                        - Authorised
-                        - Revoked
-                    - eventCategory: Payments
-                      objectTypes:
-                      - objectType: Direct Debit
-                        eventActions:
-                        - Fully Authorized
-                        - Part Authorized
-                        - Delete
-                        - Update
-                        - Create
-                      - objectType: Payments
-                        eventActions:
-                        - Fully Authorized
-                        - Part Authorized
-                        - Delete
-                        - Update
-                        - Create
-                      - objectType: Standing order
-                        eventActions:
-                        - Fully Authorized
-                        - Part Authorized
-                        - Delete
-                        - Update
-                        - Create
-                    - eventCategory: User Entitlement
-                      objectTypes:
-                      - objectType: Data Group
-                        eventActions:
-                        - Delete
-                        - Update
-                        - Create
-                      - objectType: Function Group
-                        eventActions:
-                        - Delete
-                        - Update
-                        - Create
-                      - objectType: Ingestion
-                        eventActions:
-                        - Initial Admin Ingested
-                        - Legal Entity Ingested
-                        - User Ingested
-                      - objectType: Permissions
-                        eventActions:
-                        - Data Group Removed
-                        - Data Group Assigned
-                        - Removed from Data Group
-                        - Assigned to Date Group
-                        - Removed from Function Group
-                        - Assigned to Function Group
-                      - objectType: Service Agreement
-                        eventActions:
-                        - Permission Assigned
-                        - User Removed
-                        - User Assigned
-                        - Pairs removed
-                        - Pairs Assigned
-                        - Removed
-                        - Update
-                        - Create
+                      - eventCategory: Audit
+                        objectTypes:
+                          - objectType: Audit Log
+                            eventActions:
+                              - Read
+                              - Export
+                      - eventCategory: Contact
+                        objectTypes:
+                          - objectType: Contact
+                            eventActions:
+                              - Delete
+                              - Update
+                              - Create
+                              - Authorised
+                              - Revoked
+                      - eventCategory: Payments
+                        objectTypes:
+                          - objectType: Direct Debit
+                            eventActions:
+                              - Fully Authorized
+                              - Part Authorized
+                              - Delete
+                              - Update
+                              - Create
+                          - objectType: Payments
+                            eventActions:
+                              - Fully Authorized
+                              - Part Authorized
+                              - Delete
+                              - Update
+                              - Create
+                          - objectType: Standing order
+                            eventActions:
+                              - Fully Authorized
+                              - Part Authorized
+                              - Delete
+                              - Update
+                              - Create
+                      - eventCategory: User Entitlement
+                        objectTypes:
+                          - objectType: Data Group
+                            eventActions:
+                              - Delete
+                              - Update
+                              - Create
+                          - objectType: Function Group
+                            eventActions:
+                              - Delete
+                              - Update
+                              - Create
+                          - objectType: Ingestion
+                            eventActions:
+                              - Initial Admin Ingested
+                              - Legal Entity Ingested
+                              - User Ingested
+                          - objectType: Permissions
+                            eventActions:
+                              - Data Group Removed
+                              - Data Group Assigned
+                              - Removed from Data Group
+                              - Assigned to Date Group
+                              - Removed from Function Group
+                              - Assigned to Function Group
+                          - objectType: Service Agreement
+                            eventActions:
+                              - Permission Assigned
+                              - User Removed
+                              - User Assigned
+                              - Pairs removed
+                              - Pairs Assigned
+                              - Removed
+                              - Update
+                              - Create
         '405':
           description: NotAllowedError
           content:
@@ -1371,10 +1371,10 @@ paths:
                   value:
                     message: Access to requested resource denied.
                     errors:
-                    - message: Resource access denied due to an insufficient user quota of {quota}.
-                      key: common.api.quota
-                      context:
-                        quota: someQuota
+                      - message: Resource access denied due to an insufficient user quota of {quota}.
+                        key: common.api.quota
+                        context:
+                          quota: someQuota
         '406':
           description: NotAcceptable
           content:
@@ -1386,66 +1386,66 @@ paths:
                   value:
                     message: Could not find acceptable representation
                     supportedMediaTypes:
-                    - application/json
+                      - application/json
   /audit-log/legal-entities:
     summary: Legal Entities
     description: Endpoint to query the legal entities
     get:
       tags:
-      - audit-log
+        - audit-log
       summary: Gets the legal entities.
       description: Gets the legal entities
       operationId: getLegalentities
       parameters:
-      - name: query
-        in: query
-        description: The search term used to search.
-        required: false
-        schema:
-          type: string
-        examples:
-          example:
-            summary: example
-            value: backb
-      - name: from
-        in: query
-        description: Page Number. Skip over pages of elements by specifying a start value for the query
-        required: false
-        schema:
-          type: integer
-          format: int32
-          default: 0
-        examples:
-          example:
-            summary: example
-            value: 20
-      - name: cursor
-        in: query
-        description: |
-          Record UUID. As an alternative for specifying 'from' this allows to point to the record to start the selection from.
-        required: false
-        schema:
-          type: string
-          default: ''
-        examples:
-          example:
-            summary: example
-            value: 76d5be8b-e80d-4842-8ce6-ea67519e8f74
-      - name: size
-        in: query
-        description: |
-          Limit the number of elements on the response. When used in combination with cursor, the value
-          is allowed to be a negative number to indicate requesting records upwards from the starting point indicated
-          by the cursor.
-        required: false
-        schema:
-          type: integer
-          format: int32
-          default: 10
-        examples:
-          example:
-            summary: example
-            value: 80
+        - name: query
+          in: query
+          description: The search term used to search.
+          required: false
+          schema:
+            type: string
+          examples:
+            example:
+              summary: example
+              value: backb
+        - name: from
+          in: query
+          description: Page Number. Skip over pages of elements by specifying a start value for the query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 0
+          examples:
+            example:
+              summary: example
+              value: 20
+        - name: cursor
+          in: query
+          description: |
+            Record UUID. As an alternative for specifying 'from' this allows to point to the record to start the selection from.
+          required: false
+          schema:
+            type: string
+            default: ''
+          examples:
+            example:
+              summary: example
+              value: 76d5be8b-e80d-4842-8ce6-ea67519e8f74
+        - name: size
+          in: query
+          description: |
+            Limit the number of elements on the response. When used in combination with cursor, the value
+            is allowed to be a negative number to indicate requesting records upwards from the starting point indicated
+            by the cursor.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 10
+          examples:
+            example:
+              summary: example
+              value: 80
       responses:
         '200':
           description: No description available
@@ -1456,26 +1456,26 @@ paths:
               examples:
                 example:
                   value:
-                  - id: c7a382786d514262b75ab9531b749a2b
-                    externalId: Bank
-                    name: Bank
-                    type: BANK
-                  - id: dbc9e566d44f4cd9a1f09ad3f6729f15
-                    externalId: KPMG
-                    name: KPMG
-                    type: CUSTOMER
-                  - id: 77f8c4cd11c8436ba77f8ca34e6a173d
-                    externalId: Backbase
-                    name: Backbase
-                    type: CUSTOMER
-                  - id: c9fc30f4e5fb492c97ed0a05f926aecc
-                    externalId: Backbase Amsterdam
-                    name: Backbase Amsterdam
-                    type: CUSTOMER
-                  - id: 0f6d14f40e064deeaee351befd53d3e7
-                    externalId: Backbase Cardiff
-                    name: Backbase Cardiff
-                    type: CUSTOMER
+                    - id: c7a382786d514262b75ab9531b749a2b
+                      externalId: Bank
+                      name: Bank
+                      type: BANK
+                    - id: dbc9e566d44f4cd9a1f09ad3f6729f15
+                      externalId: KPMG
+                      name: KPMG
+                      type: CUSTOMER
+                    - id: 77f8c4cd11c8436ba77f8ca34e6a173d
+                      externalId: Backbase
+                      name: Backbase
+                      type: CUSTOMER
+                    - id: c9fc30f4e5fb492c97ed0a05f926aecc
+                      externalId: Backbase Amsterdam
+                      name: Backbase Amsterdam
+                      type: CUSTOMER
+                    - id: 0f6d14f40e064deeaee351befd53d3e7
+                      externalId: Backbase Cardiff
+                      name: Backbase Cardiff
+                      type: CUSTOMER
         '405':
           description: NotAllowedError
           content:
@@ -1519,10 +1519,10 @@ paths:
                   value:
                     message: Access to requested resource denied.
                     errors:
-                    - message: Resource access denied due to an insufficient user quota of {quota}.
-                      key: common.api.quota
-                      context:
-                        quota: someQuota
+                      - message: Resource access denied due to an insufficient user quota of {quota}.
+                        key: common.api.quota
+                        context:
+                          quota: someQuota
         '406':
           description: NotAcceptable
           content:
@@ -1534,7 +1534,7 @@ paths:
                   value:
                     message: Could not find acceptable representation
                     supportedMediaTypes:
-                    - application/json
+                      - application/json
 components:
   schemas:
     AuditEventCategoriesGetResponseBody:
@@ -1547,79 +1547,79 @@ components:
             $ref: '#/components/schemas/EventCategory'
       example:
         eventCategories:
-        - eventCategory: Audit
-          objectTypes:
-          - objectType: Audit Log
-            eventActions:
-            - Read
-            - Export
-        - eventCategory: Contact
-          objectTypes:
-          - objectType: Contact
-            eventActions:
-            - Delete
-            - Update
-            - Create
-            - Authorised
-            - Revoked
-        - eventCategory: Payments
-          objectTypes:
-          - objectType: Direct Debit
-            eventActions:
-            - Fully Authorized
-            - Part Authorized
-            - Delete
-            - Update
-            - Create
-          - objectType: Payments
-            eventActions:
-            - Fully Authorized
-            - Part Authorized
-            - Delete
-            - Update
-            - Create
-          - objectType: Standing order
-            eventActions:
-            - Fully Authorized
-            - Part Authorized
-            - Delete
-            - Update
-            - Create
-        - eventCategory: User Entitlement
-          objectTypes:
-          - objectType: Data Group
-            eventActions:
-            - Delete
-            - Update
-            - Create
-          - objectType: Function Group
-            eventActions:
-            - Delete
-            - Update
-            - Create
-          - objectType: Ingestion
-            eventActions:
-            - Initial Admin Ingested
-            - Legal Entity Ingested
-            - User Ingested
-          - objectType: Permissions
-            eventActions:
-            - Data Group Removed
-            - Data Group Assigned
-            - Removed from Data Group
-            - Assigned to Date Group
-            - Removed from Function Group
-            - Assigned to Function Group
-          - objectType: Service Agreement
-            eventActions:
-            - Permission Assigned
-            - User Removed
-            - User Assigned
-            - Pairs removed
-            - Pairs Assigned
-            - Removed
-            - Update
-            - Create
+          - eventCategory: Audit
+            objectTypes:
+              - objectType: Audit Log
+                eventActions:
+                  - Read
+                  - Export
+          - eventCategory: Contact
+            objectTypes:
+              - objectType: Contact
+                eventActions:
+                  - Delete
+                  - Update
+                  - Create
+                  - Authorised
+                  - Revoked
+          - eventCategory: Payments
+            objectTypes:
+              - objectType: Direct Debit
+                eventActions:
+                  - Fully Authorized
+                  - Part Authorized
+                  - Delete
+                  - Update
+                  - Create
+              - objectType: Payments
+                eventActions:
+                  - Fully Authorized
+                  - Part Authorized
+                  - Delete
+                  - Update
+                  - Create
+              - objectType: Standing order
+                eventActions:
+                  - Fully Authorized
+                  - Part Authorized
+                  - Delete
+                  - Update
+                  - Create
+          - eventCategory: User Entitlement
+            objectTypes:
+              - objectType: Data Group
+                eventActions:
+                  - Delete
+                  - Update
+                  - Create
+              - objectType: Function Group
+                eventActions:
+                  - Delete
+                  - Update
+                  - Create
+              - objectType: Ingestion
+                eventActions:
+                  - Initial Admin Ingested
+                  - Legal Entity Ingested
+                  - User Ingested
+              - objectType: Permissions
+                eventActions:
+                  - Data Group Removed
+                  - Data Group Assigned
+                  - Removed from Data Group
+                  - Assigned to Date Group
+                  - Removed from Function Group
+                  - Assigned to Function Group
+              - objectType: Service Agreement
+                eventActions:
+                  - Permission Assigned
+                  - User Removed
+                  - User Assigned
+                  - Pairs removed
+                  - Pairs Assigned
+                  - Removed
+                  - Update
+                  - Create
     AuditLogGetResponseBody:
       type: object
       properties:
@@ -1634,7 +1634,7 @@ components:
           x-java-type: java.lang.Long
     AuditLogMessagesGetResponseBody:
       required:
-      - message
+        - message
       type: object
       properties:
         status:
@@ -1650,14 +1650,14 @@ components:
       x-java-type: com.backbase.audit.presentation.rest.spec.v2.exception.NotAllowedErrorException
     AuditMessage:
       required:
-      - eventAction
-      - eventCategory
-      - eventDescription
-      - objectType
-      - status
-      - timestamp
-      - userId
-      - username
+        - eventAction
+        - eventCategory
+        - eventDescription
+        - objectType
+        - status
+        - timestamp
+        - userId
+        - username
       type: object
       properties:
         eventCategory:
@@ -1679,9 +1679,9 @@ components:
           type: string
           description: The status to which this audit message relates.
           enum:
-          - Initiated
-          - Successful
-          - Failed
+            - Initiated
+            - Successful
+            - Failed
         username:
           maxLength: 64
           minLength: 1
@@ -1739,7 +1739,7 @@ components:
       x-java-type: com.backbase.audit.presentation.rest.spec.v2.model.AuditMessage
     AuditMessagesPostRequestBody:
       required:
-      - auditMessages
+        - auditMessages
       type: object
       properties:
         auditMessages:
@@ -1749,7 +1749,7 @@ components:
             $ref: '#/components/schemas/AuditMessage'
     AuditMessagesPostResponseBody:
       required:
-      - warnings
+        - warnings
       type: object
       properties:
         message:
@@ -1762,7 +1762,7 @@ components:
             $ref: '#/components/schemas/ErrorItem'
     BadRequestError:
       required:
-      - message
+        - message
       type: object
       properties:
         message:
@@ -1776,9 +1776,9 @@ components:
       x-java-type: com.backbase.buildingblocks.presentation.errors.BadRequestException
     BbAccessControl:
       required:
-      - function
-      - privilege
-      - resource
+        - function
+        - privilege
+        - resource
       type: object
       properties:
         resource:
@@ -1792,10 +1792,10 @@ components:
           description: The privilege required, e.g. 'view'
     BbApiDeprecation:
       required:
-      - deprecatedFromVersion
-      - description
-      - reason
-      - removedFromVersion
+        - deprecatedFromVersion
+        - description
+        - reason
+        - removedFromVersion
       type: object
       properties:
         removedFromVersion:
@@ -1843,7 +1843,7 @@ components:
       x-java-type: com.backbase.buildingblocks.presentation.errors.ForbiddenException
     InternalServerError:
       required:
-      - message
+        - message
       type: object
       properties:
         message:
@@ -1855,34 +1855,34 @@ components:
       type: array
       description: The collection of legal entities.
       example:
-      - id: c7a382786d514262b75ab9531b749a2b
-        externalId: Bank
-        name: Bank
-        type: BANK
-      - id: dbc9e566d44f4cd9a1f09ad3f6729f15
-        externalId: KPMG
-        name: KPMG
-        type: CUSTOMER
-      - id: 77f8c4cd11c8436ba77f8ca34e6a173d
-        externalId: Backbase
-        name: Backbase
-        type: CUSTOMER
-      - id: c9fc30f4e5fb492c97ed0a05f926aecc
-        externalId: Backbase Amsterdam
-        name: Backbase Amsterdam
-        type: CUSTOMER
-      - id: 0f6d14f40e064deeaee351befd53d3e7
-        externalId: Backbase Cardiff
-        name: Backbase Cardiff
-        type: CUSTOMER
+        - id: c7a382786d514262b75ab9531b749a2b
+          externalId: Bank
+          name: Bank
+          type: BANK
+        - id: dbc9e566d44f4cd9a1f09ad3f6729f15
+          externalId: KPMG
+          name: KPMG
+          type: CUSTOMER
+        - id: 77f8c4cd11c8436ba77f8ca34e6a173d
+          externalId: Backbase
+          name: Backbase
+          type: CUSTOMER
+        - id: c9fc30f4e5fb492c97ed0a05f926aecc
+          externalId: Backbase Amsterdam
+          name: Backbase Amsterdam
+          type: CUSTOMER
+        - id: 0f6d14f40e064deeaee351befd53d3e7
+          externalId: Backbase Cardiff
+          name: Backbase Cardiff
+          type: CUSTOMER
       items:
         $ref: '#/components/schemas/LegalEntity'
     LegalEntity:
       required:
-      - externalId
-      - id
-      - name
-      - type
+        - externalId
+        - id
+        - name
+        - type
       type: object
       properties:
         id:
@@ -1904,8 +1904,8 @@ components:
           type: string
           description: Type of the legal entity. Bank or Customer.
           enum:
-          - CUSTOMER
-          - BANK
+            - CUSTOMER
+            - BANK
       x-java-type: com.backbase.audit.presentation.rest.spec.v2.model.LegalEntity
     NotAcceptableError:
       type: object
@@ -1955,7 +1955,7 @@ components:
       x-java-type: com.backbase.buildingblocks.presentation.errors.UnauthorizedException
     UnauthorizedError:
       required:
-      - message
+        - message
       type: object
       properties:
         message:
@@ -1981,15 +1981,15 @@ components:
         state:
           type: string
           enum:
-          - NEW
-          - ACCEPTED
-          - IN_PROGRESS
-          - FAILED
-          - FAILED_RETRIES_EXHAUSTED
-          - COMPLETED
-          - ROLLBACK_IN_PROGRESS
-          - ROLLBACK_COMPLETED
-          - ROLLBACK_FAILED
+            - NEW
+            - ACCEPTED
+            - IN_PROGRESS
+            - FAILED
+            - FAILED_RETRIES_EXHAUSTED
+            - COMPLETED
+            - ROLLBACK_IN_PROGRESS
+            - ROLLBACK_COMPLETED
+            - ROLLBACK_FAILED
         locked:
           type: boolean
         registeredAt:
@@ -2022,10 +2022,10 @@ components:
               state:
                 type: string
                 enum:
-                - ACCEPTED
-                - IN_PROGRESS
-                - FAILED
-                - COMPLETED
+                  - ACCEPTED
+                  - IN_PROGRESS
+                  - FAILED
+                  - COMPLETED
 
               history:
                 type: array
@@ -2064,8 +2064,8 @@ components:
                       description: Severity of message
                       type: string
                       enum:
-                      - INFO
-                      - WARN
-                      - ERROR
+                        - INFO
+                        - WARN
+                        - ERROR
 
       readOnly: true

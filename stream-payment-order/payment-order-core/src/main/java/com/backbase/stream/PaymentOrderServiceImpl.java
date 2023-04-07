@@ -4,9 +4,7 @@ import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostReques
 import com.backbase.stream.paymentorder.PaymentOrderTask;
 import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
 import com.backbase.stream.worker.model.UnitOfWork;
-
 import lombok.extern.slf4j.Slf4j;
-
 import reactor.core.publisher.Flux;
 
 /**
@@ -16,18 +14,18 @@ import reactor.core.publisher.Flux;
 @Slf4j
 public class PaymentOrderServiceImpl implements PaymentOrderService {
 
-    private final PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor;
+  private final PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor;
 
-    public PaymentOrderServiceImpl(PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
-        this.paymentOrderUnitOfWorkExecutor = paymentOrderUnitOfWorkExecutor;
-    }
+  public PaymentOrderServiceImpl(PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
+    this.paymentOrderUnitOfWorkExecutor = paymentOrderUnitOfWorkExecutor;
+  }
 
-    @Override
-    public Flux<UnitOfWork<PaymentOrderTask>> processPaymentOrder(
-            Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux) {
+  @Override
+  public Flux<UnitOfWork<PaymentOrderTask>> processPaymentOrder(
+      Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux) {
 
-        Flux<UnitOfWork<PaymentOrderTask>> unitOfWorkFlux =
-                paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux);
-        return unitOfWorkFlux.flatMap(paymentOrderUnitOfWorkExecutor::executeUnitOfWork);
-    }
+    Flux<UnitOfWork<PaymentOrderTask>> unitOfWorkFlux =
+        paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux);
+    return unitOfWorkFlux.flatMap(paymentOrderUnitOfWorkExecutor::executeUnitOfWork);
+  }
 }

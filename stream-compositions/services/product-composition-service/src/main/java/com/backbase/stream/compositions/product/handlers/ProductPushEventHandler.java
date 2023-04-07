@@ -6,37 +6,32 @@ import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPush
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
-
 import lombok.AllArgsConstructor;
-
 import org.springframework.stereotype.Component;
-
 import reactor.core.publisher.Mono;
 
 @Component
 @AllArgsConstructor
 public class ProductPushEventHandler implements EventHandler<ProductPushEvent> {
-    private final ProductIngestionService productIngestionService;
-    private final ProductGroupMapper mapper;
+  private final ProductIngestionService productIngestionService;
+  private final ProductGroupMapper mapper;
 
-    @Override
-    public void handle(EnvelopedEvent<ProductPushEvent> envelopedEvent) {
-        buildRequest(envelopedEvent).flatMap(productIngestionService::ingestPush).subscribe();
-    }
+  @Override
+  public void handle(EnvelopedEvent<ProductPushEvent> envelopedEvent) {
+    buildRequest(envelopedEvent).flatMap(productIngestionService::ingestPush).subscribe();
+  }
 
-    /**
-     * Builds ingestion request for downstream service.
-     *
-     * @param envelopedEvent EnvelopedEvent<ProductsIngestPushEvent>
-     * @return ProductIngestPushRequest
-     */
-    private Mono<ProductIngestPushRequest> buildRequest(
-            EnvelopedEvent<ProductPushEvent> envelopedEvent) {
-        return Mono.just(
-                ProductIngestPushRequest.builder()
-                        .productGroup(
-                                mapper.mapEventToStream(
-                                        envelopedEvent.getEvent().getProductGroup()))
-                        .build());
-    }
+  /**
+   * Builds ingestion request for downstream service.
+   *
+   * @param envelopedEvent EnvelopedEvent<ProductsIngestPushEvent>
+   * @return ProductIngestPushRequest
+   */
+  private Mono<ProductIngestPushRequest> buildRequest(
+      EnvelopedEvent<ProductPushEvent> envelopedEvent) {
+    return Mono.just(
+        ProductIngestPushRequest.builder()
+            .productGroup(mapper.mapEventToStream(envelopedEvent.getEvent().getProductGroup()))
+            .build());
+  }
 }

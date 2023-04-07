@@ -1,108 +1,106 @@
 package com.backbase.stream.compositions.transaction.cursor.core.domain;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import java.sql.Timestamp;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import org.hibernate.annotations.GenericGenerator;
 
 /** The Domain Model for the transaction cursor service */
 @Entity
 @Table(name = "txn_cursor")
 public class TransactionCursorEntity {
 
-    public String getId() {
-        return id;
-    }
+  @Id
+  @GeneratedValue(generator = "system-uuid")
+  @GenericGenerator(name = "system-uuid", strategy = "uuid2")
+  @Column(name = "id", updatable = false, nullable = false, length = 36)
+  private String id;
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  @Column(name = "arrangement_id", updatable = false, nullable = false, length = 36)
+  private String arrangementId;
 
-    public String getArrangementId() {
-        return arrangementId;
-    }
+  @Column(name = "ext_arrangement_id", nullable = false, length = 50)
+  private String extArrangementId;
 
-    public void setArrangementId(String arrangementId) {
-        this.arrangementId = arrangementId;
-    }
+  @Column(name = "last_txn_date", nullable = false)
+  private Timestamp lastTxnDate;
 
-    public String getExtArrangementId() {
-        return extArrangementId;
-    }
+  @Column(name = "last_txn_ids", nullable = false, length = 2600)
+  private String lastTxnIds;
 
-    public void setExtArrangementId(String extArrangementId) {
-        this.extArrangementId = extArrangementId;
-    }
+  @Column(name = "legal_entity_id", nullable = false, length = 36)
+  private String legalEntityId;
 
-    public Timestamp getLastTxnDate() {
-        return lastTxnDate;
-    }
+  @Column(name = "additions", nullable = false)
+  private String additions;
 
-    public void setLastTxnDate(Timestamp lastTxnDate) {
-        this.lastTxnDate = lastTxnDate;
-    }
+  @Column(name = "status", nullable = false, length = 45)
+  private String status;
 
-    public String getLastTxnIds() {
-        return lastTxnIds;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public void setLastTxnIds(String lastTxnIds) {
-        this.lastTxnIds = lastTxnIds;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public String getLegalEntityId() {
-        return legalEntityId;
-    }
+  public String getArrangementId() {
+    return arrangementId;
+  }
 
-    public void setLegalEntityId(String legalEntityId) {
-        this.legalEntityId = legalEntityId;
-    }
+  public void setArrangementId(String arrangementId) {
+    this.arrangementId = arrangementId;
+  }
 
-    public String getAdditions() {
-        return additions;
-    }
+  public String getExtArrangementId() {
+    return extArrangementId;
+  }
 
-    public void setAdditions(String additions) {
-        this.additions = additions;
-    }
+  public void setExtArrangementId(String extArrangementId) {
+    this.extArrangementId = extArrangementId;
+  }
 
-    public String getStatus() {
-        return status;
-    }
+  public Timestamp getLastTxnDate() {
+    return lastTxnDate;
+  }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+  public void setLastTxnDate(Timestamp lastTxnDate) {
+    this.lastTxnDate = lastTxnDate;
+  }
 
-    @Id
-    @GeneratedValue(generator = "system-uuid")
-    @GenericGenerator(name = "system-uuid", strategy = "uuid2")
-    @Column(name = "id", updatable = false, nullable = false, length = 36)
-    private String id;
+  public String getLastTxnIds() {
+    return lastTxnIds;
+  }
 
-    @Column(name = "arrangement_id", updatable = false, nullable = false, length = 36)
-    private String arrangementId;
+  public void setLastTxnIds(String lastTxnIds) {
+    this.lastTxnIds = lastTxnIds;
+  }
 
-    @Column(name = "ext_arrangement_id", nullable = false, length = 50)
-    private String extArrangementId;
+  public String getLegalEntityId() {
+    return legalEntityId;
+  }
 
-    @Column(name = "last_txn_date", nullable = false)
-    private Timestamp lastTxnDate;
+  public void setLegalEntityId(String legalEntityId) {
+    this.legalEntityId = legalEntityId;
+  }
 
-    @Column(name = "last_txn_ids", nullable = false, length = 2600)
-    private String lastTxnIds;
+  public String getAdditions() {
+    return additions;
+  }
 
-    @Column(name = "legal_entity_id", nullable = false, length = 36)
-    private String legalEntityId;
+  public void setAdditions(String additions) {
+    this.additions = additions;
+  }
 
-    @Column(name = "additions", nullable = false)
-    private String additions;
+  public String getStatus() {
+    return status;
+  }
 
-    @Column(name = "status", nullable = false, length = 45)
-    private String status;
+  public void setStatus(String status) {
+    this.status = status;
+  }
 }

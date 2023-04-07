@@ -4,7 +4,6 @@ import com.backbase.stream.portfolio.PortfolioSaga;
 import com.backbase.stream.portfolio.service.InstrumentIntegrationService;
 import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
 import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -18,10 +17,10 @@ import org.springframework.context.annotation.Import;
 @Import({DbsWebClientConfiguration.class})
 public class PortfolioSagaConfiguration {
 
-    @Bean
-    PortfolioSaga portfolioSaga(
-            PortfolioIntegrationService portfolioIntegrationService,
-            InstrumentIntegrationService instrumentIntegrationService) {
-        return new PortfolioSaga(portfolioIntegrationService, instrumentIntegrationService);
-    }
+  @Bean
+  PortfolioSaga portfolioSaga(
+      PortfolioIntegrationService portfolioIntegrationService,
+      InstrumentIntegrationService instrumentIntegrationService) {
+    return new PortfolioSaga(portfolioIntegrationService, instrumentIntegrationService);
+  }
 }

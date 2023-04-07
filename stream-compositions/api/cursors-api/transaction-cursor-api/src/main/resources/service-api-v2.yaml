@@ -3,24 +3,24 @@ info:
   title: Transaction Cursor API
   version: 2.0.0
 servers:
-- url: http://localhost:8080/service-api/v2
-  description: The server
+  - url: http://localhost:8080/service-api/v2
+    description: The server
 tags:
-- name: TransactionCursor
+  - name: TransactionCursor
 paths:
   /service-api/v2/cursor/{id}:
     get:
       tags:
-      - TransactionCursor
+        - TransactionCursor
       summary: Gets Cursor by the internal id of the cursor.
       operationId: getById
       parameters:
-      - name: id
-        in: path
-        required: true
-        description: internal id of the cursor
-        schema:
-          type: string
+        - name: id
+          in: path
+          required: true
+          description: internal id of the cursor
+          schema:
+            type: string
 
       responses:
         '200':
@@ -44,16 +44,16 @@ paths:
   /service-api/v2/cursor/arrangement/{arrangementId}:
     get:
       tags:
-      - TransactionCursor
+        - TransactionCursor
       summary: Gets Cursor by the internal Arrangement id.
       operationId: getByArrangementId
       parameters:
-      - name: arrangementId
-        in: path
-        required: true
-        description: internal id of the arrangement
-        schema:
-          type: string
+        - name: arrangementId
+          in: path
+          required: true
+          description: internal id of the arrangement
+          schema:
+            type: string
       responses:
         '200':
           description: Transaction Cursor Details.
@@ -75,17 +75,17 @@ paths:
                 $ref: '#/components/schemas/InternalServerError'
     patch:
       tags:
-      - TransactionCursor
+        - TransactionCursor
       summary: Patches Transaction Cursor by arrangement id.
       description: Patches Transaction Cursor by Arrangement Id.
       operationId: patchByArrangementId
       parameters:
-      - name: arrangementId
-        in: path
-        required: true
-        description: internal id of the arrangement
-        schema:
-          type: string
+        - name: arrangementId
+          in: path
+          required: true
+          description: internal id of the arrangement
+          schema:
+            type: string
       requestBody:
         description: Patch Transaction Cursor
         content:
@@ -109,17 +109,17 @@ paths:
                 $ref: '#/components/schemas/InternalServerError'
     delete:
       tags:
-      - TransactionCursor
+        - TransactionCursor
       summary: Deletes Transaction Cursor by arrangement id.
       description: Delete Transaction Cursor by Arrangement Id.
       operationId: deleteByArrangementId
       parameters:
-      - name: arrangementId
-        in: path
-        required: true
-        description: internal id of the arrangement
-        schema:
-          type: string
+        - name: arrangementId
+          in: path
+          required: true
+          description: internal id of the arrangement
+          schema:
+            type: string
       responses:
         '200':
           description: Transaction Cursor Deleted.
@@ -138,7 +138,7 @@ paths:
   /service-api/v2/cursor/upsert:
     post:
       tags:
-      - TransactionCursor
+        - TransactionCursor
       summary: Upserts the Transaction Cursor record.
       description: Upserts the Transaction Cursor record.
       operationId: upsertCursor
@@ -170,7 +170,7 @@ paths:
   /service-api/v2/cursor/filter:
     post:
       tags:
-      - TransactionCursor
+        - TransactionCursor
       summary: Filters the Transaction Cursor records.
       description: Filters the Transaction Cursor records.
       operationId: filterCursor
@@ -206,7 +206,7 @@ components:
   schemas:
     BadRequest:
       required:
-      - message
+        - message
       type: object
       properties:
         message:
@@ -215,7 +215,7 @@ components:
     TransactionCursor:
       type: object
       required:
-      - arrangementId
+        - arrangementId
       properties:
         id:
           type: string
@@ -242,9 +242,9 @@ components:
           type: string
           description: The status of the cursor
           enum:
-          - IN_PROGRESS
-          - FAILED
-          - SUCCESS
+            - IN_PROGRESS
+            - FAILED
+            - SUCCESS
         additions:
           type: object
           additionalProperties:
@@ -289,7 +289,7 @@ components:
 
     InternalServerError:
       required:
-      - message
+        - message
       type: object
       properties:
         message:

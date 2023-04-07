@@ -14,94 +14,87 @@ import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import com.backbase.stream.legalentity.model.ProductGroup;
-
+import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import reactor.core.publisher.Mono;
-
-import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class ProductIngestPullEventHandlerTest {
 
-    @Mock private ProductIngestionService productIngestionService;
+  @Mock ProductGroupMapper mapper;
+  @Mock EventBus eventBus;
+  @Mock private ProductIngestionService productIngestionService;
 
-    @Mock ProductGroupMapper mapper;
+  @Test
+  @Tag("true")
+  void testEnableHandleEvent_Completed(TestInfo testInfo) {
+    String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+    testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
+  }
 
-    @Mock EventBus eventBus;
+  @Test
+  @Tag("false")
+  void testDisableHandleEvent_Completed(TestInfo testInfo) {
+    String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+    testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
+  }
 
-    @Test
-    @Tag("true")
-    void testEnableHandleEvent_Completed(TestInfo testInfo) {
-        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
-        testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
-    }
+  @Test
+  @Tag("true")
+  void testEnableHandleEvent_Failed(TestInfo testInfo) {
+    String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+    testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
+  }
 
-    @Test
-    @Tag("false")
-    void testDisableHandleEvent_Completed(TestInfo testInfo) {
-        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
-        testHandleEvent_Completed(Boolean.valueOf(eventsConfig));
-    }
+  @Test
+  @Tag("false")
+  void testDisableHandleEvent_Failed(TestInfo testInfo) {
+    String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
+    testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
+  }
 
-    @Test
-    @Tag("true")
-    void testEnableHandleEvent_Failed(TestInfo testInfo) {
-        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
-        testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
-    }
+  void testHandleEvent_Completed(Boolean isCompletedEvents) {
+    ProductGroup productGroup = new ProductGroup();
 
-    @Test
-    @Tag("false")
-    void testDisableHandleEvent_Failed(TestInfo testInfo) {
-        String eventsConfig = testInfo.getTags().stream().findFirst().orElse("false");
-        testHandleEvent_Failed(Boolean.valueOf(eventsConfig));
-    }
+    Mono<ProductIngestResponse> responseMono =
+        Mono.just(
+            ProductIngestResponse.builder().productGroups(Arrays.asList(productGroup)).build());
 
-    void testHandleEvent_Completed(Boolean isCompletedEvents) {
-        ProductGroup productGroup = new ProductGroup();
+    lenient().when(productIngestionService.ingestPull(any())).thenReturn(responseMono);
+    ProductConfigurationProperties properties = new ProductConfigurationProperties();
+    Events events = new Events();
+    events.setEnableCompleted(isCompletedEvents);
+    properties.setEvents(events);
 
-        Mono<ProductIngestResponse> responseMono =
-                Mono.just(
-                        ProductIngestResponse.builder()
-                                .productGroups(Arrays.asList(productGroup))
-                                .build());
+    ProductPullEventHandler handler =
+        new ProductPullEventHandler(properties, productIngestionService, mapper, eventBus);
 
-        lenient().when(productIngestionService.ingestPull(any())).thenReturn(responseMono);
-        ProductConfigurationProperties properties = new ProductConfigurationProperties();
-        Events events = new Events();
-        events.setEnableCompleted(isCompletedEvents);
-        properties.setEvents(events);
+    EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
+    envelopedEvent.setEvent(new ProductPullEvent());
 
-        ProductPullEventHandler handler =
-                new ProductPullEventHandler(properties, productIngestionService, mapper, eventBus);
+    handler.handle(envelopedEvent);
+    verify(productIngestionService).ingestPull(any());
+  }
 
-        EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(new ProductPullEvent());
+  void testHandleEvent_Failed(Boolean isFailedEvents) {
+    when(productIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
 
-        handler.handle(envelopedEvent);
-        verify(productIngestionService).ingestPull(any());
-    }
+    ProductConfigurationProperties properties = new ProductConfigurationProperties();
+    Events events = new Events();
+    events.setEnableFailed(isFailedEvents);
+    properties.setEvents(events);
 
-    void testHandleEvent_Failed(Boolean isFailedEvents) {
-        when(productIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
+    ProductPullEventHandler handler =
+        new ProductPullEventHandler(properties, productIngestionService, mapper, eventBus);
 
-        ProductConfigurationProperties properties = new ProductConfigurationProperties();
-        Events events = new Events();
-        events.setEnableFailed(isFailedEvents);
-        properties.setEvents(events);
-
-        ProductPullEventHandler handler =
-                new ProductPullEventHandler(properties, productIngestionService, mapper, eventBus);
-
-        EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
-        ProductPullEvent event = new ProductPullEvent().withLegalEntityExternalId("externalId");
-        envelopedEvent.setEvent(event);
-        handler.handle(envelopedEvent);
-    }
+    EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
+    ProductPullEvent event = new ProductPullEvent().withLegalEntityExternalId("externalId");
+    envelopedEvent.setEvent(event);
+    handler.handle(envelopedEvent);
+  }
 }

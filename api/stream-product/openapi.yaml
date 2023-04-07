@@ -4,24 +4,24 @@ info:
   description: This API allows other DBS services to operate on products
   version: 2.8.1
 servers:
-- url: http://localhost:4010
-  description: Arrangement manager mock server
+  - url: http://localhost:4010
+    description: Arrangement manager mock server
 tags:
-- name: accounts
-- name: arrangement-state
-- name: arrangements
-- name: balance-history
-- name: balances
-- name: product-kinds
-- name: product-summary
-- name: products
+  - name: accounts
+  - name: arrangement-state
+  - name: arrangements
+  - name: balance-history
+  - name: balances
+  - name: product-kinds
+  - name: product-summary
+  - name: products
 paths:
   /service-api/v2/arrangements:
     summary: Arrangements
     description: Arrangements
     put:
       tags:
-      - arrangements
+        - arrangements
       description: Update arrangement by an arrangement id
       operationId: putArrangements
       requestBody:
@@ -76,18 +76,18 @@ paths:
               minimumPaymentDueDate: 2018-02-28T16:41:41.090000Z
               totalInvestmentValue: 110.2
               debitCards:
-              - number: '4578'
-                expiryDate: 2020-08-22
-                cardId: id2
-                cardholderName: John Doe
-                cardType: Visa Electron
-                cardStatus: Active
-              - number: '3241'
-                expiryDate: 2019-01-14
-                cardId: id1
-                cardholderName: John Doe
-                cardType: Visa
-                cardStatus: Active
+                - number: '4578'
+                  expiryDate: 2020-08-22
+                  cardId: id2
+                  cardholderName: John Doe
+                  cardType: Visa Electron
+                  cardStatus: Active
+                - number: '3241'
+                  expiryDate: 2019-01-14
+                  cardId: id1
+                  cardholderName: John Doe
+                  cardType: Visa
+                  cardStatus: Active
               accountHolderAddressLine1: accountHolderAddressLine11
               accountHolderAddressLine2: accountHolderAddressLine12
               accountHolderStreetName: street1
@@ -118,7 +118,7 @@ components:
     AccountArrangementItemPut:
       title: AccountArrangementItemPut
       required:
-      - internalArrangementId
+        - internalArrangementId
       properties:
         externalArrangementId:
           maxLength: 50
@@ -457,12 +457,12 @@ components:
           items:
             $ref: '#/components/schemas/TranslationItem'
       allOf:
-      - $ref: '#/components/schemas/ExternalProductItem'
+        - $ref: '#/components/schemas/ExternalProductItem'
     AccountStateItem:
       title: AccountStateItem
       required:
-      - externalStateId
-      - state
+        - externalStateId
+        - state
       type: object
       properties:
         externalStateId:
@@ -482,7 +482,7 @@ components:
     AccountUserPreferencesItem:
       title: AccountUserPreferencesItem
       required:
-      - arrangementId
+        - arrangementId
       type: object
       properties:
         arrangementId:
@@ -502,21 +502,21 @@ components:
           description: Indication whether an arrangement can be favorable for a user
       description: "User defined preferences for a specific arrangement.\nNote: each user might have different preferences\n"
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     CardDetails:
       title: CardDetails
       type: object
       allOf:
-      - $ref: '#/components/schemas/AbstractCardDetails'
+        - $ref: '#/components/schemas/AbstractCardDetails'
     InterestDetails:
       title: InterestDetails
       type: object
       allOf:
-      - $ref: '#/components/schemas/AbstractInterestDetails'
+        - $ref: '#/components/schemas/AbstractInterestDetails'
     ApiError:
       title: ApiError
       required:
-      - message
+        - message
       type: object
       properties:
         message:
@@ -527,29 +527,29 @@ components:
       example:
         message: Bad Request
         errors:
-        - message: Value Exceeded. Must be between {min} and {max}.
-          key: common.api.shoesize
-          context:
-            max: '50'
-            min: '1'
+          - message: Value Exceeded. Must be between {min} and {max}.
+            key: common.api.shoesize
+            context:
+              max: '50'
+              min: '1'
       allOf:
-      - $ref: '#/components/schemas/ErrorAwareApi'
+        - $ref: '#/components/schemas/ErrorAwareApi'
     ConflictError:
       title: ConflictError
       type: object
       example:
         message: Conflict error
         errors:
-        - message: The request could not be completed due to a conflict with the current state of the resource.
-          key: transactions.api.billingstatus.transaction
-          context:
-            billingStatus: BILLED
+          - message: The request could not be completed due to a conflict with the current state of the resource.
+            key: transactions.api.billingstatus.transaction
+            context:
+              billingStatus: BILLED
       allOf:
-      - $ref: '#/components/schemas/ErrorAwareApi'
+        - $ref: '#/components/schemas/ErrorAwareApi'
     ErrorAwareApi:
       title: ApiErrorExt
       required:
-      - errors
+        - errors
       type: object
       properties:
         errors:
@@ -558,7 +558,7 @@ components:
           items:
             $ref: '#/components/schemas/ErrorItem'
       allOf:
-      - $ref: '#/components/schemas/ApiError'
+        - $ref: '#/components/schemas/ApiError'
     ErrorItem:
       title: ErrorItem
       type: object
@@ -586,19 +586,19 @@ components:
       example:
         message: Access to requested resource denied.
         errors:
-        - message: Resource access denied due to an insufficient user quota of {quota}.
-          key: common.api.quota
-          context:
-            quota: someQuota
+          - message: Resource access denied due to an insufficient user quota of {quota}.
+            key: common.api.quota
+            context:
+              quota: someQuota
       allOf:
-      - $ref: '#/components/schemas/ErrorAwareApi'
+        - $ref: '#/components/schemas/ErrorAwareApi'
     InternalServerError:
       title: InternalServerError
       type: object
       example:
         message: Description of error
       allOf:
-      - $ref: '#/components/schemas/ApiError'
+        - $ref: '#/components/schemas/ApiError'
     NotAcceptableError:
       title: NotAcceptableError
       type: object
@@ -611,49 +611,49 @@ components:
       example:
         message: Could not find acceptable representation
         supportedMediaTypes:
-        - application/json
+          - application/json
       allOf:
-      - $ref: '#/components/schemas/ApiError'
+        - $ref: '#/components/schemas/ApiError'
     NotFoundError:
       title: NotFoundError
       type: object
       example:
         message: Resource not found.
         errors:
-        - message: 'Unable to find the resource requested resource: {resource}.'
-          key: common.api.resource
-          context:
-            resource: aResource
+          - message: 'Unable to find the resource requested resource: {resource}.'
+            key: common.api.resource
+            context:
+              resource: aResource
       allOf:
-      - $ref: '#/components/schemas/ErrorAwareApi'
+        - $ref: '#/components/schemas/ErrorAwareApi'
     UnauthorizedError:
       title: UnauthorizedError
       type: object
       example:
         message: Access to requested resource denied.
         errors:
-        - message: Resource access denied due to invalid credentials.
-          key: common.api.token
-          context:
-            accessToken: expired
+          - message: Resource access denied due to invalid credentials.
+            key: common.api.token
+            context:
+              accessToken: expired
       allOf:
-      - $ref: '#/components/schemas/ErrorAwareApi'
+        - $ref: '#/components/schemas/ErrorAwareApi'
     UnsupportedMediaTypeError:
       title: UnsupportedMediaTypeError
       type: object
       example:
         message: Unsupported media type.
         errors:
-        - message: The request entity has a media type {mediaType} which the resource does not support.
-          key: common.api.mediaType
-          context:
-            mediaType: application/javascript
+          - message: The request entity has a media type {mediaType} which the resource does not support.
+            key: common.api.mediaType
+            context:
+              mediaType: application/javascript
       allOf:
-      - $ref: '#/components/schemas/ErrorAwareApi'
+        - $ref: '#/components/schemas/ErrorAwareApi'
     AbstractCardDetails:
       title: AbstractCardDetails
       required:
-      - cardProvider
+        - cardProvider
       type: object
       properties:
         cardProvider:
@@ -706,7 +706,7 @@ components:
           type: number
           description: "The amount owed on the credit card as of the latest billing cycle. \n"
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     AbstractInterestDetails:
       title: AbstractInterestDetails
       type: object
@@ -744,7 +744,7 @@ components:
           type: number
           description: The Interest charge triggered by infractions such as late credit card payments.
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     AbstractDebitCardItem:
       title: AbstractDebitCardItem
       type: object
@@ -773,7 +773,7 @@ components:
           description: Status of the card ex. Active, Expired etc
       description: Debit Card item
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     AdditionalProperties:
       title: AdditionalProperties
       type: object
@@ -794,8 +794,8 @@ components:
     CurrencyType:
       title: CurrencyType
       required:
-      - amount
-      - currencyCode
+        - amount
+        - currencyCode
       type: object
       properties:
         amount:
@@ -808,12 +808,12 @@ components:
         currencyCode:
           $ref: '#/components/schemas/CurrencyCode'
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     DebitCardItem:
       title: DebitCardItem
       type: object
       allOf:
-      - $ref: '#/components/schemas/AbstractDebitCardItem'
+        - $ref: '#/components/schemas/AbstractDebitCardItem'
     ExternalProductItem:
       type: object
       properties:
@@ -832,13 +832,13 @@ components:
         productKind:
           $ref: '#/components/schemas/ExternalProductKindItem'
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     ExternalProductKindItem:
       title: ExternalProductKindItem
       required:
-      - externalKindId
-      - kindName
-      - kindUri
+        - externalKindId
+        - kindName
+        - kindUri
       type: object
       properties:
         externalKindId:
@@ -858,12 +858,12 @@ components:
           type: string
           description: unique product kind uri
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     LocaleTranslationItem:
       title: LocaleTranslationItem
       required:
-      - fieldName
-      - fieldValue
+        - fieldName
+        - fieldValue
       type: object
       properties:
         fieldName:
@@ -878,80 +878,80 @@ components:
           description: Defines the translated value of the field.
       description: Locale Translation item
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     MaskableAttribute:
       title: MaskableAttribute
       type: string
       description: The name of the supported maskable attribute.
       enum:
-      - IBAN
-      - BBAN
-      - number
+        - IBAN
+        - BBAN
+        - number
     OrderByField:
       title: OrderByField
       type: string
       description: The property name used for ordering.
       enum:
-      - name
-      - bankAlias
-      - bookedBalance
-      - availableBalance
-      - creditLimit
-      - displayName
-      - IBAN
-      - BBAN
-      - BIC
-      - currency
-      - externalTransferAllowed
-      - urgentTransferAllowed
-      - accruedInterest
-      - principalAmount
-      - currentInvestmentValue
-      - productNumber
-      - accountOpeningDate
-      - accountInterestRate
-      - valueDateBalance
-      - creditLimitUsage
-      - creditLimitInterestRate
-      - creditLimitExpiryDate
-      - startDate
-      - termUnit
-      - termNumber
-      - maturityDate
-      - maturityAmount
-      - autoRenewalIndicator
-      - interestPaymentFrequencyUnit
-      - interestPaymentFrequencyNumber
-      - interestSettlementAccount
-      - outstandingPrincipalAmount
-      - monthlyInstalmentAmount
-      - amountInArrear
-      - minimumRequiredBalance
-      - creditCardAccountNumber
-      - validThru
-      - applicableInterestRate
-      - remainingCredit
-      - outstandingPayment
-      - minimumPayment
-      - minimumPaymentDueDate
-      - totalInvestmentValue
-      - accountHolderAddressLine1
-      - accountHolderAddressLine2
-      - accountHolderStreetName
-      - postCode
-      - town
-      - countrySubDivision
-      - accountHolderCountry
-      - creditAccount
-      - debitAccount
-      - productKindName
-      - productTypeName
-      - sourceId
+        - name
+        - bankAlias
+        - bookedBalance
+        - availableBalance
+        - creditLimit
+        - displayName
+        - IBAN
+        - BBAN
+        - BIC
+        - currency
+        - externalTransferAllowed
+        - urgentTransferAllowed
+        - accruedInterest
+        - principalAmount
+        - currentInvestmentValue
+        - productNumber
+        - accountOpeningDate
+        - accountInterestRate
+        - valueDateBalance
+        - creditLimitUsage
+        - creditLimitInterestRate
+        - creditLimitExpiryDate
+        - startDate
+        - termUnit
+        - termNumber
+        - maturityDate
+        - maturityAmount
+        - autoRenewalIndicator
+        - interestPaymentFrequencyUnit
+        - interestPaymentFrequencyNumber
+        - interestSettlementAccount
+        - outstandingPrincipalAmount
+        - monthlyInstalmentAmount
+        - amountInArrear
+        - minimumRequiredBalance
+        - creditCardAccountNumber
+        - validThru
+        - applicableInterestRate
+        - remainingCredit
+        - outstandingPayment
+        - minimumPayment
+        - minimumPaymentDueDate
+        - totalInvestmentValue
+        - accountHolderAddressLine1
+        - accountHolderAddressLine2
+        - accountHolderStreetName
+        - postCode
+        - town
+        - countrySubDivision
+        - accountHolderCountry
+        - creditAccount
+        - debitAccount
+        - productKindName
+        - productTypeName
+        - sourceId
     ProductKindItem:
       title: ProductKindItem
       required:
-      - id
-      - kindName
+        - id
+        - kindName
       type: object
       properties:
         id:
@@ -983,10 +983,10 @@ components:
           items:
             $ref: '#/components/schemas/TranslationItem'
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     ProductKindsResult:
       required:
-      - productKinds
+        - productKinds
       type: object
       properties:
         productKinds:
@@ -995,34 +995,34 @@ components:
             $ref: '#/components/schemas/ProductKindItem'
       example:
         productKinds:
-        - id: 1
-          externalKindId: 123123-123f
-          kindName: Current Account
-          kindUri: current-account
-          translations:
-          - locale: de_DE
-            localeTranslations:
-            - fieldName: kind_name
-              fieldValue: Aktuelles Konto
-          - locale: ar_JO
-            localeTranslations:
-            - fieldName: kind_name
-              fieldValue: الحساب الحالي
-        - id: 2
-          externalKindId: asdads67-asd
-          kindName: Savings Account
-          kindUri: savings-account
-          translations:
-          - locale: de_DE
-            localeTranslations:
-            - fieldName: kind_name
-              fieldValue: Sparkonto
-          - locale: ar_JO
-            localeTranslations:
-            - fieldName: kind_name
-              fieldValue: حساب التوفير
+          - id: 1
+            externalKindId: 123123-123f
+            kindName: Current Account
+            kindUri: current-account
+            translations:
+              - locale: de_DE
+                localeTranslations:
+                  - fieldName: kind_name
+                    fieldValue: Aktuelles Konto
+              - locale: ar_JO
+                localeTranslations:
+                  - fieldName: kind_name
+                    fieldValue: الحساب الحالي
+          - id: 2
+            externalKindId: asdads67-asd
+            kindName: Savings Account
+            kindUri: savings-account
+            translations:
+              - locale: de_DE
+                localeTranslations:
+                  - fieldName: kind_name
+                    fieldValue: Sparkonto
+              - locale: ar_JO
+                localeTranslations:
+                  - fieldName: kind_name
+                    fieldValue: حساب التوفير
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     StateItem:
       title: StateItem
       type: object
@@ -1036,10 +1036,10 @@ components:
           type: string
           description: Name that describes the specific arrangement state.
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     Subscription:
       required:
-      - identifier
+        - identifier
       type: object
       properties:
         identifier:
@@ -1052,20 +1052,20 @@ components:
       title: TimePeriod
       type: string
       enum:
-      - lastDay
-      - lastWeek
-      - lastMonth
-      - lastYear
-      - all
+        - lastDay
+        - lastWeek
+        - lastMonth
+        - lastYear
+        - all
     TimeUnit:
       title: TimeUnit
       type: string
       description: The period of time for the product arranged between Bank and customer
       enum:
-      - D
-      - W
-      - M
-      - Y
+        - D
+        - W
+        - M
+        - Y
     TranslationItem:
       title: TranslationItem
       type: object
@@ -1082,7 +1082,7 @@ components:
             $ref: '#/components/schemas/LocaleTranslationItem'
       description: Translation item
       allOf:
-      - $ref: '#/components/schemas/AdditionalProperties'
+        - $ref: '#/components/schemas/AdditionalProperties'
     DisplayName:
       maxLength: 50
       type: string
@@ -1143,11 +1143,11 @@ components:
             message: Bad Request
             key: GENERAL_ERROR
             errors:
-            - message: Value Exceeded. Must be between {min} and {max}.
-              key: common.api.shoesize
-              context:
-                max: '50'
-                min: '1'
+              - message: Value Exceeded. Must be between {min} and {max}.
+                key: common.api.shoesize
+                context:
+                  max: '50'
+                  min: '1'
     '401':
       description: Unauthorized
       content:
@@ -1158,10 +1158,10 @@ components:
             message: Access to requested resource denied.
             key: GENERAL_ERROR
             errors:
-            - message: Resource access denied due to invalid credentials.
-              key: common.api.token
-              context:
-                accessToken: expired
+              - message: Resource access denied due to invalid credentials.
+                key: common.api.token
+                context:
+                  accessToken: expired
     '403':
       description: Forbidden
       content:
@@ -1172,10 +1172,10 @@ components:
             message: Access to requested resource denied.
             key: GENERAL_ERROR
             errors:
-            - message: Resource access denied due to an insufficient user quota of {quota}.
-              key: common.api.quota
-              context:
-                quota: someQuota
+              - message: Resource access denied due to an insufficient user quota of {quota}.
+                key: common.api.quota
+                context:
+                  quota: someQuota
     '404':
       description: NotFound
       content:
@@ -1186,10 +1186,10 @@ components:
             message: Resource not found.
             key: GENERAL_ERROR
             errors:
-            - message: 'Unable to find the resource requested resource: {resource}.'
-              key: common.api.resource
-              context:
-                resource: aResource
+              - message: 'Unable to find the resource requested resource: {resource}.'
+                key: common.api.resource
+                context:
+                  resource: aResource
     '406':
       description: NotAcceptable
       content:
@@ -1199,7 +1199,7 @@ components:
           example:
             message: Could not find acceptable representation
             supportedMediaTypes:
-            - application/json
+              - application/json
     '409':
       description: Conflict
       content:
@@ -1210,10 +1210,10 @@ components:
             message: Conflict error
             key: GENERAL_ERROR
             errors:
-            - message: The request could not be completed due to a conflict with the current state of the resource.
-              key: transactions.api.billingstatus.transaction
-              context:
-                billingStatus: BILLED
+              - message: The request could not be completed due to a conflict with the current state of the resource.
+                key: transactions.api.billingstatus.transaction
+                context:
+                  billingStatus: BILLED
     '415':
       description: UnsupportedMediaType
       content:
@@ -1224,10 +1224,10 @@ components:
             message: Unsupported media type.
             key: GENERAL_ERROR
             errors:
-            - message: The request entity has a media type {mediaType} which the resource does not support.
-              key: common.api.mediaType
-              context:
-                mediaType: application/javascript
+              - message: The request entity has a media type {mediaType} which the resource does not support.
+                key: common.api.mediaType
+                context:
+                  mediaType: application/javascript
     '500':
       description: InternalServerError
       content:

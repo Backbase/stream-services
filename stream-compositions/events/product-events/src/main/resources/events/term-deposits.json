@@ -1,38 +1,38 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "properties" : {
-    "bookedBalance" : {
-      "$ref" : "base-schema.json#/schemas/BookedBalance"
+  "properties": {
+    "bookedBalance": {
+      "$ref": "base-schema.json#/schemas/BookedBalance"
     },
-    "principalAmount" : {
-      "$ref" : "base-schema.json#/schemas/PrincipalAmount"
+    "principalAmount": {
+      "$ref": "base-schema.json#/schemas/PrincipalAmount"
     },
-    "IBAN" : {
-      "$ref" : "base-schema.json#/schemas/IBAN"
+    "IBAN": {
+      "$ref": "base-schema.json#/schemas/IBAN"
     },
-    "BBAN" : {
-      "$ref" : "base-schema.json#/schemas/BBAN"
+    "BBAN": {
+      "$ref": "base-schema.json#/schemas/BBAN"
     },
-    "termNumber" : {
-      "$ref" : "base-schema.json#/schemas/TermNumber"
+    "termNumber": {
+      "$ref": "base-schema.json#/schemas/TermNumber"
     },
-    "maturityDate" : {
-      "$ref" : "base-schema.json#/schemas/MaturityDate"
+    "maturityDate": {
+      "$ref": "base-schema.json#/schemas/MaturityDate"
     },
-    "maturityAmount" : {
-      "$ref" : "base-schema.json#/schemas/MaturityAmount"
+    "maturityAmount": {
+      "$ref": "base-schema.json#/schemas/MaturityAmount"
     },
-    "creditAccount" : {
-      "$ref" : "base-schema.json#/schemas/CreditAccount"
+    "creditAccount": {
+      "$ref": "base-schema.json#/schemas/CreditAccount"
     },
-    "debitAccount" : {
-      "$ref" : "base-schema.json#/schemas/DebitAccount"
+    "debitAccount": {
+      "$ref": "base-schema.json#/schemas/DebitAccount"
     },
-    "bankBranchCode" : {
-      "$ref" : "base-schema.json#/schemas/BankBranchCode"
+    "bankBranchCode": {
+      "$ref": "base-schema.json#/schemas/BankBranchCode"
     }
   },
-  "extends" : {
-    "$ref" : "base-schema.json#/schemas/BaseProduct"
+  "extends": {
+    "$ref": "base-schema.json#/schemas/BaseProduct"
   }
 }

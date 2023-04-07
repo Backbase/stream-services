@@ -1,6 +1,6 @@
 required:
-- name
-- percentage
+  - name
+  - percentage
 type: object
 properties:
   name:

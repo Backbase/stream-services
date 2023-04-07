@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -14,7 +15,8 @@
     <name>Stream :: Legal Entity Core</name>
 
     <properties>
-        <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
+        <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml
+        </raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
     </properties>
@@ -119,8 +121,8 @@
                                 <modelPackage>com.backbase.stream.legalentity.model</modelPackage>
                                 <apiPackage>com.backbase.stream.legalentity.api</apiPackage>
                                 <skipDefaultInterface>true</skipDefaultInterface>
-                                <apis />
-                                <models />
+                                <apis/>
+                                <models/>
                             </configOptions>
                             <typeMappings>
                                 <typeMapping>Double=java.math.BigDecimal</typeMapping>

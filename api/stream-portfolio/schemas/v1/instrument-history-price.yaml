@@ -1,8 +1,8 @@
 required:
-- price
-- currency
-- date
-- priceType
+  - price
+  - currency
+  - date
+  - priceType
 type: object
 properties:
   price:
@@ -16,7 +16,7 @@ properties:
     type: string
     description: Type of the price. Can be opening, closing, minimal or maximal.
     enum:
-    - OPEN
-    - CLOSE
-    - HIGH
-    - LOW
+      - OPEN
+      - CLOSE
+      - HIGH
+      - LOW

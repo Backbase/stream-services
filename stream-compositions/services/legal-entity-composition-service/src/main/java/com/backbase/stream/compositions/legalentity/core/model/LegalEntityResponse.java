@@ -1,14 +1,12 @@
 package com.backbase.stream.compositions.legalentity.core.model;
 
 import com.backbase.stream.legalentity.model.LegalEntity;
-
+import java.util.List;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
-import java.util.Map;
 
 @Data
 @Builder
@@ -16,8 +14,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class LegalEntityResponse {
 
-    private Boolean productChainEnabledFromRequest;
-    private LegalEntity legalEntity;
-    private List<String> membershipAccounts;
-    private Map<String, String> additions;
+  private Boolean productChainEnabledFromRequest;
+  private LegalEntity legalEntity;
+  private List<String> membershipAccounts;
+  private Map<String, String> additions;
 }

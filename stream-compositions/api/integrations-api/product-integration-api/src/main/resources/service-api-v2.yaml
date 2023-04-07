@@ -3,15 +3,15 @@ info:
   title: Product Integration API
   version: 2.0.0
 servers:
-- url: http://localhost:8080/service-api/v1
-  description: The server
+  - url: http://localhost:8080/service-api/v1
+    description: The server
 tags:
-- name: ProductIntegration
+  - name: ProductIntegration
 paths:
   /service-api/v2/product-group:
     post:
       tags:
-      - ProductIntegration
+        - ProductIntegration
       summary: Pulls product group.
       description: Pulls product group.
       operationId: pullProductGroup
@@ -45,7 +45,7 @@ paths:
   /service-api/v2/arrangement:
     put:
       tags:
-      - ArrangementIntegration
+        - ArrangementIntegration
       summary: Pulls arrangement.
       description: Pulls Arrangement.
       operationId: pullArrangement
@@ -80,7 +80,7 @@ components:
   schemas:
     BadRequest:
       required:
-      - message
+        - message
       type: object
       properties:
         message:
@@ -153,7 +153,7 @@ components:
 
     InternalServerError:
       required:
-      - message
+        - message
       type: object
       properties:
         message:

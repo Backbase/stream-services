@@ -15,6 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ArrangementAddedEvent extends AbstractDbsEvent {
 
-    private String arrangementPostId;
-    private String internalId;
+  private String arrangementPostId;
+  private String internalId;
 }

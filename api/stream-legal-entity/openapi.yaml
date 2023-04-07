@@ -1396,7 +1396,7 @@ components:
           type: boolean
 
     ServiceAgreement:
-      title:  Service Agreement
+      title: Service Agreement
       description: |
         The formal vehicle that allows users of one entity to access products of that or other entities
         A Service agreement is:

@@ -3,15 +3,15 @@ info:
   title: Product composition API
   version: 2.0.0
 servers:
-- url: http://localhost:8080/service-api/v2
-  description: The server
+  - url: http://localhost:8080/service-api/v2
+    description: The server
 tags:
-- name: ProductComposition
+  - name: ProductComposition
 paths:
   /service-api/v2/ingest/pull:
     post:
       tags:
-      - ProductComposition
+        - ProductComposition
       summary: Ingests products (in pull mode).
       description: Ingests products (in pull mode).
       operationId: pullIngestProduct
@@ -44,7 +44,7 @@ paths:
   /service-api/v2/ingest/push:
     post:
       tags:
-      - ProductComposition
+        - ProductComposition
       summary: Ingests products (in push mode).
       description: Ingests products (in push mode).
       operationId: pushIngestProduct
@@ -77,7 +77,7 @@ paths:
   /service-api/v2/ingest/arrangement/pull:
     put:
       tags:
-      - ProductComposition
+        - ProductComposition
       summary: Ingests arrangement (in pull mode).
       description: Ingests arrangement (in pull mode).
       operationId: pullIngestArrangement
@@ -110,7 +110,7 @@ paths:
   /service-api/v2/ingest/arrangement/push:
     put:
       tags:
-      - ProductComposition
+        - ProductComposition
       summary: Ingests arrangement (in push mode).
       description: Ingests arrangement (in push mode).
       operationId: pushIngestArrangement
@@ -144,7 +144,7 @@ components:
   schemas:
     BadRequest:
       required:
-      - message
+        - message
       type: object
       properties:
         message:
@@ -277,7 +277,7 @@ components:
 
     InternalServerError:
       required:
-      - message
+        - message
       type: object
       properties:
         message:

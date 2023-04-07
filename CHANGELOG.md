@@ -305,7 +305,8 @@ spring:
 > All configuration properties prefixes can be found
 > at [stream-dbs-clients](stream-dbs-clients/src/main/java/com/backbase/stream/clients/config) module, and they are
 > compliant to
-> SSDK [configuration properties](https://community.backbase.com/documentation/ServiceSDK/latest/generate_clients_from_openapi).
+>
+SSDK [configuration properties](https://community.backbase.com/documentation/ServiceSDK/latest/generate_clients_from_openapi).
 
 ## [3.8.2](https://github.com/Backbase/stream-services/compare/3.8.1...3.8.2)
 
@@ -1166,8 +1167,10 @@ bootstrap:
 - added lock identity user on creation flag.
 
 > New conditionally mandatory property added in legal entity
-> stream: `backbase.stream.identity.identity-integration-base-url` to indicate BackBase Identity base URL for clients that
-> integrate with it. This property must be defined when: `backbase.stream.legalentity.sink.use-identity-integration=true`
+> stream: `backbase.stream.identity.identity-integration-base-url` to indicate BackBase Identity base URL for clients
+> that
+> integrate with it. This property must be defined
+> when: `backbase.stream.legalentity.sink.use-identity-integration=true`
 
 ## [2.31.0]
 
