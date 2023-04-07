@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -218,9 +217,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.service.v2.model</modelPackage>
                         </configuration>
@@ -232,9 +229,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.integration.v2.model</modelPackage>
                         </configuration>
@@ -246,9 +241,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.arrangement.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.arrangement.api.service.v2.model</modelPackage>
                         </configuration>
@@ -260,8 +253,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.user.api.service.v2.model</modelPackage>
                         </configuration>
@@ -273,9 +265,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.profile.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.user.profile.api.service.v2.model</modelPackage>
                         </configuration>
@@ -287,9 +277,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.transaction.api.service.v2.model</modelPackage>
                         </configuration>
@@ -307,8 +295,7 @@
                             <importMappings>
                                 <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
                             </importMappings>
-                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.paymentorder.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.paymentorder.api.service.v2.model</modelPackage>
                         </configuration>
@@ -344,8 +331,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.approval.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.approval.api.service.v2.model</modelPackage>
                         </configuration>
@@ -357,9 +343,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/identity/identity-integration-outbound-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/identity/identity-integration-outbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.identity.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.identity.integration.api.service.v1.model</modelPackage>
                         </configuration>
@@ -371,12 +355,9 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/portfolio/portfolio-instrument-integration-inbound-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-instrument-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.portfolio.instrument.integration.api.service.v1</apiPackage>
-                            <modelPackage>com.backbase.portfolio.instrument.integration.api.service.v1.model
-                            </modelPackage>
+                            <modelPackage>com.backbase.portfolio.instrument.integration.api.service.v1.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
@@ -386,9 +367,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/portfolio/portfolio-integration-inbound-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.portfolio.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.portfolio.api.service.integration.v1.model</modelPackage>
                         </configuration>
@@ -400,9 +379,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/contact-manager/contact-manager-service-api-v2*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/contact-manager/contact-manager-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.contact.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.contact.api.service.v2.model</modelPackage>
                         </configuration>

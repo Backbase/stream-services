@@ -29,6 +29,15 @@ public abstract class StreamTask {
     this.id = id;
   }
 
+  /**
+   * @param entity
+   * @param operation
+   * @param result
+   * @param externalId
+   * @param internalId
+   * @param message
+   * @param messageArgs
+   */
   public void info(
       String entity,
       String operation,

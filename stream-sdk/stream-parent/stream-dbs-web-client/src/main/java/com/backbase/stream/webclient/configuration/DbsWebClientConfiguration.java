@@ -24,8 +24,8 @@ public class DbsWebClientConfiguration {
   /**
    * Adds reactive server filter to chain.
    *
-   * @param properties
-   * @return
+   * @param properties Dbs webclient properties
+   * @return HeadersForwardingServerFilter
    */
   @Bean
   public HeadersForwardingServerFilter headersForwardingServerFilter(
@@ -36,8 +36,8 @@ public class DbsWebClientConfiguration {
   /**
    * Add customizer to the SSDK's Web Client to include extra headers.
    *
-   * @param properties
-   * @return
+   * @param properties Dbs webclient properties
+   * @return InterServiceWebClientCustomizer
    */
   @Bean
   public InterServiceWebClientCustomizer webClientCustomizer(

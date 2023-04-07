@@ -14,6 +14,13 @@ public class WebClientTestUtils {
 
   private WebClientTestUtils() {}
 
+  /**
+   * Build web response exception.
+   *
+   * @param exType WebClientResponseException type
+   * @param httpMethod http method
+   * @return Mono
+   */
   public static <T> Mono<T> buildWebResponseExceptionMono(
       Class<? extends WebClientResponseException> exType, HttpMethod httpMethod) {
     WebClientResponseException ex = buildWebClientResponseException(exType, httpMethod);

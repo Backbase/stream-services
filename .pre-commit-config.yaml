@@ -1,9 +1,4 @@
 repos:
-  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.8.0
-    hooks:
-      - id: pretty-format-java
-        args: [ --autofix, --google-java-formatter-version=1.16.0 ]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -14,15 +9,35 @@ repos:
       - id: check-executables-have-shebangs
       - id: destroyed-symlinks
       - id: check-xml
+
+#  - repo: local
+#    hooks:
+#      - id: checkstyle
+#        name: checkstyle
+#        description: "Runs the Checkstyle static code analysis tool."
+#        language: system
+#        entry: mvn checkstyle:check -q
+#        pass_filenames: false
+#        files: \.java$
+#        require_serial: true
+
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.8.0
+    hooks:
+      - id: pretty-format-java
+        args: [ --autofix, --google-java-formatter-version=1.16.0 ]
+
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.30.0
     hooks:
       - id: yamllint
         exclude: ^helm/stream-bootstrap-task/templates/job.yaml
+
   - repo: https://github.com/pryorda/dockerfilelint-precommit-hooks
     rev: v0.1.0
     hooks:
       - id: dockerfilelint
+
 #  - repo: https://github.com/igorshubovych/markdownlint-cli
 #    rev: v0.33.0
 #    hooks:
