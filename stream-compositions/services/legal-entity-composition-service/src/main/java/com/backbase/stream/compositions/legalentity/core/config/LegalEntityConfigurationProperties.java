@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Setter
@@ -43,7 +44,7 @@ public class LegalEntityConfigurationProperties {
     }
 
     @Data
-    public static abstract class BaseComposition {
+    public abstract static class BaseComposition {
 
         private Boolean enabled = Boolean.FALSE;
         private String baseUrl = "http://localhost:9002/";
@@ -51,9 +52,7 @@ public class LegalEntityConfigurationProperties {
     }
 
     @NoArgsConstructor
-    public static class ProductComposition extends BaseComposition {
-
-    }
+    public static class ProductComposition extends BaseComposition {}
 
     public Boolean isCompletedEventEnabled() {
         return Boolean.TRUE.equals(events.getEnableCompleted());

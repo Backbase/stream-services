@@ -6,18 +6,17 @@ import com.backbase.stream.compositions.product.core.config.ProductConfiguration
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Chains;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Cursor;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Events;
-import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.TransactionComposition;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.PaymentOrderComposition;
-
-import java.util.List;
+import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.TransactionComposition;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 @ExtendWith(MockitoExtension.class)
 class ProductConfigurationPropertiesTest {
-
 
     @Test
     void testConfigurationProperties() {
@@ -51,20 +50,27 @@ class ProductConfigurationPropertiesTest {
         properties.setEvents(events);
         properties.setCursor(cursor);
 
-        assertTrue(properties.getIntegrationBaseUrl().contains("product"),
-                "Correct config spotted");
         assertTrue(
-                properties.getChains().getTransactionComposition().getBaseUrl()
+                properties.getIntegrationBaseUrl().contains("product"), "Correct config spotted");
+        assertTrue(
+                properties
+                        .getChains()
+                        .getTransactionComposition()
+                        .getBaseUrl()
                         .contains("transaction-composition"),
                 "Correct config spotted");
         assertTrue(
-                properties.getChains().getPaymentOrderComposition().getBaseUrl()
+                properties
+                        .getChains()
+                        .getPaymentOrderComposition()
+                        .getBaseUrl()
                         .contains("payment-order-composition"),
                 "Correct config spotted");
         assertTrue(properties.getEvents().getEnableCompleted());
         assertTrue(properties.getEvents().getEnableFailed());
         assertTrue(properties.getCursor().getEnabled());
-        assertTrue(properties.getCursor().getBaseUrl().contains("cursor"), "Correct config spotted");
+        assertTrue(
+                properties.getCursor().getBaseUrl().contains("cursor"), "Correct config spotted");
         assertTrue(properties.isCompletedEventEnabled());
         assertTrue(properties.isFailedEventEnabled());
         assertTrue(properties.isTransactionChainEnabled());

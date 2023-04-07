@@ -10,13 +10,6 @@ public class StreamCursorApplicationConfiguration {
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange()
-            .anyExchange()
-            .permitAll()
-            .and()
-            .csrf()
-            .disable()
-            .build();
+        return http.authorizeExchange().anyExchange().permitAll().and().csrf().disable().build();
     }
-
 }

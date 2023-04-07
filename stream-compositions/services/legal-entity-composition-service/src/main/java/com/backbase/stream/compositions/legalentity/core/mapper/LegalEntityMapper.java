@@ -7,6 +7,7 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityRespon
 import com.backbase.stream.compositions.legalentity.integration.client.model.LegalEntity;
 import com.backbase.stream.compositions.legalentity.integration.client.model.PullLegalEntityRequest;
 import com.backbase.stream.compositions.legalentity.integration.client.model.PullLegalEntityResponse;
+
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
@@ -14,11 +15,10 @@ import org.springframework.stereotype.Component;
 /**
  * This is a mapper for LegalEntity objects used in: - stream-models/legal-entity-model -
  * legal-entity-composition-api - legal-entity-integration-api - legal-entity-evens
- * <p>
- * All LegalEntity objects used in above modules have exactly same structures they are built from
+ *
+ * <p>All LegalEntity objects used in above modules have exactly same structures they are built from
  * the common /api folder.
  */
-
 @Component
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface LegalEntityMapper {
@@ -102,5 +102,4 @@ public interface LegalEntityMapper {
      */
     LegalEntityResponse mapResponseIntegrationToStream(
             PullLegalEntityResponse pullLegalEntityResponse);
-
 }

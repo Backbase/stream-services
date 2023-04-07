@@ -1,5 +1,10 @@
 package com.backbase.stream.contact;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.backbase.dbs.contact.api.service.v2.ContactsApi;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
@@ -8,28 +13,23 @@ import com.backbase.dbs.contact.api.service.v2.model.ExternalAccessContext;
 import com.backbase.dbs.contact.api.service.v2.model.ExternalAccountInformation;
 import com.backbase.dbs.contact.api.service.v2.model.ExternalContact;
 import com.backbase.dbs.contact.api.service.v2.model.IngestMode;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class ContactsSagaTest {
 
-    @InjectMocks
-    private ContactsSaga contactsSaga;
+    @InjectMocks private ContactsSaga contactsSaga;
 
-    @Mock
-    private ContactsApi contactsApi;
+    @Mock private ContactsApi contactsApi;
 
     @Test
     void test_executeTask() {
@@ -56,7 +56,7 @@ class ContactsSagaTest {
 
         // Then
         assertEquals(2, result.getResponse().getSuccessCount());
-        assertEquals("contact",  result.getName());
+        assertEquals("contact", result.getName());
     }
 
     private ContactsTask createTask() {
@@ -80,7 +80,5 @@ class ContactsSagaTest {
         ContactsBulkPostResponseBody responseBody = new ContactsBulkPostResponseBody();
         responseBody.setSuccessCount(2);
         return responseBody;
-
     }
-
 }

@@ -3,13 +3,16 @@ package com.backbase.stream.compositions.productcatalog.core.service;
 import com.backbase.stream.compositions.productcatalog.core.config.BootstrapConfigurationProperties;
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;

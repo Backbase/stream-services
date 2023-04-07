@@ -9,16 +9,20 @@ import com.backbase.stream.compositions.transaction.core.model.TransactionIngest
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPushRequest;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
+
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
 import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 @RestController
 @AllArgsConstructor
@@ -28,19 +32,20 @@ public class TransactionController implements TransactionCompositionApi {
     private final TransactionMapper mapper;
 
     @Override
-    public Mono<ResponseEntity<TransactionIngestionResponse>> pullTransactions(Mono<TransactionPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+    public Mono<ResponseEntity<TransactionIngestionResponse>> pullTransactions(
+            Mono<TransactionPullIngestionRequest> pullIngestionRequest,
+            ServerWebExchange exchange) {
         return pullIngestionRequest
                 .map(this::buildPullRequest)
                 .flatMap(transactionIngestionService::ingestPull)
                 .map(this::mapIngestionToResponse);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public Mono<ResponseEntity<TransactionIngestionResponse>> pushIngestTransactions(
-            @Valid Mono<TransactionPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+            @Valid Mono<TransactionPushIngestionRequest> pushIngestionRequest,
+            ServerWebExchange exchange) {
         return pushIngestionRequest
                 .map(this::buildPushRequest)
                 .flatMap(transactionIngestionService::ingestPush)
@@ -54,8 +59,7 @@ public class TransactionController implements TransactionCompositionApi {
      * @return ProductIngestPullRequest
      */
     private TransactionIngestPullRequest buildPullRequest(TransactionPullIngestionRequest request) {
-        return TransactionIngestPullRequest
-                .builder()
+        return TransactionIngestPullRequest.builder()
                 .arrangementId(request.getArrangementId())
                 .legalEntityInternalId(request.getLegalEntityInternalId())
                 .externalArrangementId(request.getExternalArrangementId())
@@ -74,7 +78,8 @@ public class TransactionController implements TransactionCompositionApi {
     private TransactionIngestPushRequest buildPushRequest(TransactionPushIngestionRequest request) {
         return TransactionIngestPushRequest.builder()
                 .transactions(
-                        request.getTransactions().stream().map(mapper::mapCompositionToStream)
+                        request.getTransactions().stream()
+                                .map(mapper::mapCompositionToStream)
                                 .collect(Collectors.toList()))
                 .build();
     }
@@ -85,11 +90,14 @@ public class TransactionController implements TransactionCompositionApi {
      * @param response ProductCatalogIngestResponse
      * @return IngestionResponse
      */
-    private ResponseEntity<TransactionIngestionResponse> mapIngestionToResponse(TransactionIngestResponse response) {
+    private ResponseEntity<TransactionIngestionResponse> mapIngestionToResponse(
+            TransactionIngestResponse response) {
         return new ResponseEntity<>(
                 new TransactionIngestionResponse()
                         .withTransactions(
-                                response.getTransactions().stream().map(mapper::mapStreamToComposition).collect(Collectors.toList())),
+                                response.getTransactions().stream()
+                                        .map(mapper::mapStreamToComposition)
+                                        .collect(Collectors.toList())),
                 HttpStatus.CREATED);
     }
 }

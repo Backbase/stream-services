@@ -46,11 +46,7 @@ import com.backbase.stream.legalentity.model.TermUnit;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import javax.validation.Validator;
+
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,58 +58,64 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Validator;
 
 @ExtendWith(MockitoExtension.class)
 class ProductIngestionServiceImplTest {
 
     private ProductIngestionService productIngestionService;
 
-    @Mock
-    private ProductIntegrationService productIntegrationService;
+    @Mock private ProductIntegrationService productIntegrationService;
 
-    @Mock
-    Validator validator;
+    @Mock Validator validator;
 
     ProductPostIngestionService productPostIngestionService;
 
-    @Mock
-    BatchProductIngestionSaga batchProductIngestionSaga;
+    @Mock BatchProductIngestionSaga batchProductIngestionSaga;
 
-    @Mock
-    EventBus eventBus;
+    @Mock EventBus eventBus;
 
     ProductConfigurationProperties config = new ProductConfigurationProperties();
 
-    @Mock
-    TransactionCompositionApi transactionCompositionApi;
+    @Mock TransactionCompositionApi transactionCompositionApi;
 
-    @Mock
-    PaymentOrderCompositionApi paymentOrderCompositionApi;
+    @Mock PaymentOrderCompositionApi paymentOrderCompositionApi;
 
     ProductGroupMapper mapper = Mappers.getMapper(ProductGroupMapper.class);
-
 
     @BeforeEach
     void setUp() {
 
-        productPostIngestionService = new ProductPostIngestionServiceImpl(eventBus, config,
-                transactionCompositionApi, paymentOrderCompositionApi, mapper);
+        productPostIngestionService =
+                new ProductPostIngestionServiceImpl(
+                        eventBus,
+                        config,
+                        transactionCompositionApi,
+                        paymentOrderCompositionApi,
+                        mapper);
 
-        productIngestionService = new ProductIngestionServiceImpl(
-                batchProductIngestionSaga,
-                productIntegrationService,
-                config,
-                validator,
-                productPostIngestionService);
+        productIngestionService =
+                new ProductIngestionServiceImpl(
+                        batchProductIngestionSaga,
+                        productIntegrationService,
+                        config,
+                        validator,
+                        productPostIngestionService);
     }
 
     @Test
     void ingestionInPullMode_Failure() {
-        ProductIngestPullRequest productIngestPullRequest = ProductIngestPullRequest.builder()
-                .legalEntityExternalId("externalId")
-                .build();
+        ProductIngestPullRequest productIngestPullRequest =
+                ProductIngestPullRequest.builder().legalEntityExternalId("externalId").build();
 
         when(productIntegrationService.pullProductGroup(productIngestPullRequest))
                 .thenReturn(Mono.error(new RuntimeException("error")));
@@ -121,11 +123,9 @@ class ProductIngestionServiceImplTest {
         Events events = new Events();
         events.setEnableFailed(Boolean.TRUE);
         config.setEvents(events);
-        Mono<ProductIngestResponse> productIngestResponse = productIngestionService
-                .ingestPull(productIngestPullRequest);
-        StepVerifier.create(productIngestResponse)
-                .expectError().verify();
-
+        Mono<ProductIngestResponse> productIngestResponse =
+                productIngestionService.ingestPull(productIngestPullRequest);
+        StepVerifier.create(productIngestResponse).expectError().verify();
     }
 
     @Test
@@ -153,19 +153,20 @@ class ProductIngestionServiceImplTest {
     void executeIngestionWithPullMode(Boolean isChainAsync, Boolean chainEnabledPerRequest) {
         configureEventAndChainParameters(isChainAsync, Boolean.TRUE);
 
-        ProductIngestPullRequest productIngestPullRequest = ProductIngestPullRequest.builder()
-                .source("nightly_ingestion")
-                .serviceAgreementExternalId("sa_externalId")
-                .serviceAgreementInternalId("sa_internalId")
-                .legalEntityExternalId("le_externalId")
-                .legalEntityInternalId("le_internalId")
-                .userExternalId("user_externalId")
-                .userInternalId("user_internalId")
-                .source("source_of_ingestion_process")
-                .additions(Map.of("addition","addition1"))
-                .paymentOrderChainEnabled(chainEnabledPerRequest)
-                .transactionChainEnabled(chainEnabledPerRequest)
-                .build();
+        ProductIngestPullRequest productIngestPullRequest =
+                ProductIngestPullRequest.builder()
+                        .source("nightly_ingestion")
+                        .serviceAgreementExternalId("sa_externalId")
+                        .serviceAgreementInternalId("sa_internalId")
+                        .legalEntityExternalId("le_externalId")
+                        .legalEntityInternalId("le_internalId")
+                        .userExternalId("user_externalId")
+                        .userInternalId("user_internalId")
+                        .source("source_of_ingestion_process")
+                        .additions(Map.of("addition", "addition1"))
+                        .paymentOrderChainEnabled(chainEnabledPerRequest)
+                        .transactionChainEnabled(chainEnabledPerRequest)
+                        .build();
 
         SavingsAccount savingsAccount = buildSavingsAccount();
         CurrentAccount currentAccount = buildCurrentAccount();
@@ -176,45 +177,68 @@ class ProductIngestionServiceImplTest {
         ProductGroup productGroup = new ProductGroup();
         productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
 
-        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+        productGroup
+                .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
                 .name("somePgName")
                 .description("somePgDescription")
                 .savingAccounts(Collections.singletonList(savingsAccount))
                 .currentAccounts(Collections.singletonList(currentAccount))
                 .loans(Collections.singletonList(loan))
-        .termDeposits(Collections.singletonList(termDeposit))
-        .creditCards(Collections.singletonList(creditCard));
+                .termDeposits(Collections.singletonList(termDeposit))
+                .creditCards(Collections.singletonList(creditCard));
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-        ProductIngestResponse ingestResponse = new ProductIngestResponse("sa_externalId", "sa_internalId",
-                Collections.singletonList(productGroup), Map.of());
+        ProductIngestResponse ingestResponse =
+                new ProductIngestResponse(
+                        "sa_externalId",
+                        "sa_internalId",
+                        Collections.singletonList(productGroup),
+                        Map.of());
         ingestResponse.setLegalEntityExternalId("le_externalId");
         ingestResponse.setLegalEntityInternalId("le_internalId");
         ingestResponse.setUserExternalId("user_externalId");
         ingestResponse.setUserInternalId("user_internalId");
         ingestResponse.setSource("source_of_ingestion_process");
-        ingestResponse.setAdditions(Map.of("addition","addition1"));
+        ingestResponse.setAdditions(Map.of("addition", "addition1"));
         when(productIntegrationService.pullProductGroup(productIngestPullRequest))
                 .thenReturn(Mono.just(ingestResponse));
 
-        lenient().when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+        lenient()
+                .when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
                 .thenReturn(productGroupTaskMono);
 
         when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
-                .thenReturn(Mono.just(new BatchProductGroupTask()
-                        .data(new BatchProductGroup().productGroups(List.of(productGroup))
-                                .serviceAgreement(productGroup.getServiceAgreement()))));
+                .thenReturn(
+                        Mono.just(
+                                new BatchProductGroupTask()
+                                        .data(
+                                                new BatchProductGroup()
+                                                        .productGroups(List.of(productGroup))
+                                                        .serviceAgreement(
+                                                                productGroup
+                                                                        .getServiceAgreement()))));
         when(transactionCompositionApi.pullTransactions(any()))
-                .thenReturn(Mono.just(new TransactionIngestionResponse()
-                        .withTransactions(List.of(
-                                new TransactionsPostResponseBody().withId("id").withExternalId("externalId")))));
-        doReturn(Mono.just(new PaymentOrderIngestionResponse()
-                .withNewPaymentOrder(List.of(
-                        new PaymentOrderPostResponse().withId("id"))))).when(paymentOrderCompositionApi).pullPaymentOrder(any());
-        Mono<ProductIngestResponse> productIngestResponse = productIngestionService
-                .ingestPull(productIngestPullRequest);
+                .thenReturn(
+                        Mono.just(
+                                new TransactionIngestionResponse()
+                                        .withTransactions(
+                                                List.of(
+                                                        new TransactionsPostResponseBody()
+                                                                .withId("id")
+                                                                .withExternalId("externalId")))));
+        doReturn(
+                        Mono.just(
+                                new PaymentOrderIngestionResponse()
+                                        .withNewPaymentOrder(
+                                                List.of(
+                                                        new PaymentOrderPostResponse()
+                                                                .withId("id")))))
+                .when(paymentOrderCompositionApi)
+                .pullPaymentOrder(any());
+        Mono<ProductIngestResponse> productIngestResponse =
+                productIngestionService.ingestPull(productIngestPullRequest);
         StepVerifier.create(productIngestResponse)
                 .assertNext(Assertions::assertNotNull)
                 .verifyComplete();
@@ -223,7 +247,8 @@ class ProductIngestionServiceImplTest {
     }
 
     private void verifyProductCompletedEvent() {
-        ArgumentCaptor<EnvelopedEvent<ProductCompletedEvent>> argumentCaptor = ArgumentCaptor.forClass(EnvelopedEvent.class);
+        ArgumentCaptor<EnvelopedEvent<ProductCompletedEvent>> argumentCaptor =
+                ArgumentCaptor.forClass(EnvelopedEvent.class);
         verify(eventBus, times(1)).emitEvent(argumentCaptor.capture());
         ProductCompletedEvent event = argumentCaptor.getValue().getEvent();
 
@@ -243,25 +268,33 @@ class ProductIngestionServiceImplTest {
 
     @NotNull
     private TermDeposit buildTermDeposit() {
-        TermDeposit termDeposit = new TermDeposit()
-                .termNumber(BigDecimal.valueOf(21212))
-                .termUnit(TermUnit.DAILY)
-                .BBAN("777151235")
-                .accountHolderName("John Doe")
-                .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
-        termDeposit.externalId("termExtId").productTypeExternalId("Term Deposit").currency("GBP")
+        TermDeposit termDeposit =
+                new TermDeposit()
+                        .termNumber(BigDecimal.valueOf(21212))
+                        .termUnit(TermUnit.DAILY)
+                        .BBAN("777151235")
+                        .accountHolderName("John Doe")
+                        .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
+        termDeposit
+                .externalId("termExtId")
+                .productTypeExternalId("Term Deposit")
+                .currency("GBP")
                 .legalEntities(List.of(new LegalEntityReference().externalId("termInternalId")));
         return termDeposit;
     }
 
     @NotNull
     private CreditCard buildCreditCard() {
-        CreditCard creditCard = new CreditCard()
-                .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
-                .BBAN("777151236")
-                .accountHolderName("John Doe")
-                .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
-        creditCard.externalId("ccExtId").productTypeExternalId("Credit Card").currency("GBP")
+        CreditCard creditCard =
+                new CreditCard()
+                        .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
+                        .BBAN("777151236")
+                        .accountHolderName("John Doe")
+                        .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
+        creditCard
+                .externalId("ccExtId")
+                .productTypeExternalId("Credit Card")
+                .currency("GBP")
                 .legalEntities(List.of(new LegalEntityReference().externalId("ccInternalId")));
         return creditCard;
     }
@@ -269,30 +302,41 @@ class ProductIngestionServiceImplTest {
     @NotNull
     private SavingsAccount buildSavingsAccount() {
         SavingsAccount savingsAccount = new SavingsAccount();
-        savingsAccount.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP")
+        savingsAccount
+                .externalId("someAccountExId")
+                .productTypeExternalId("Account")
+                .currency("GBP")
                 .legalEntities(List.of(new LegalEntityReference().externalId("savInternalId")));
         return savingsAccount;
     }
 
     @NotNull
     private CurrentAccount buildCurrentAccount() {
-        CurrentAccount currentAccount = new CurrentAccount()
-                .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
-                .BBAN("777151234")
-                .accountHolderName("John Doe")
-                .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
-        currentAccount.externalId("currentAccountExtId").productTypeExternalId("Current Account").currency("GBP")
+        CurrentAccount currentAccount =
+                new CurrentAccount()
+                        .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
+                        .BBAN("777151234")
+                        .accountHolderName("John Doe")
+                        .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
+        currentAccount
+                .externalId("currentAccountExtId")
+                .productTypeExternalId("Current Account")
+                .currency("GBP")
                 .legalEntities(List.of(new LegalEntityReference().externalId("currInternalId")));
         return currentAccount;
     }
 
     @NotNull
     private Loan buildLoanAccount() {
-        Loan loan = new Loan().availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
-                .BBAN("777151238")
-                .accountHolderName("John Doe")
-                .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
-        loan.externalId("loanAccountExtId").productTypeExternalId("Loan").currency("GBP")
+        Loan loan =
+                new Loan()
+                        .availableBalance(new AvailableBalance().amount(BigDecimal.valueOf(100)))
+                        .BBAN("777151238")
+                        .accountHolderName("John Doe")
+                        .bookedBalance(new BookedBalance().amount(BigDecimal.valueOf(50)));
+        loan.externalId("loanAccountExtId")
+                .productTypeExternalId("Loan")
+                .currency("GBP")
                 .legalEntities(List.of(new LegalEntityReference().externalId("loanInternalId")));
         return loan;
     }
@@ -307,7 +351,8 @@ class ProductIngestionServiceImplTest {
         transactionComposition.setAsync(isAsync);
         transactionComposition.setEnabled(isCompositionEnabled);
         chains.setTransactionComposition(transactionComposition);
-        ProductConfigurationProperties.PaymentOrderComposition paymentOrderComposition = new ProductConfigurationProperties.PaymentOrderComposition();
+        ProductConfigurationProperties.PaymentOrderComposition paymentOrderComposition =
+                new ProductConfigurationProperties.PaymentOrderComposition();
         paymentOrderComposition.setAsync(isAsync);
         paymentOrderComposition.setEnabled(isCompositionEnabled);
         chains.setPaymentOrderComposition(paymentOrderComposition);
@@ -325,32 +370,44 @@ class ProductIngestionServiceImplTest {
         SavingsAccount account = buildSavingsAccount();
         ProductGroup productGroup = new ProductGroup();
         productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
-        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+        productGroup
+                .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
                 .name("somePgName")
-                .description("somePgDescription").savingAccounts(Collections.singletonList(account));
+                .description("somePgDescription")
+                .savingAccounts(Collections.singletonList(account));
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-        ProductIngestPushRequest productIngestPushRequest = ProductIngestPushRequest.builder()
-                .productGroup(productGroup)
-                .source("source_of_ingestion_process")
-                .build();
+        ProductIngestPushRequest productIngestPushRequest =
+                ProductIngestPushRequest.builder()
+                        .productGroup(productGroup)
+                        .source("source_of_ingestion_process")
+                        .build();
 
-        lenient().when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+        lenient()
+                .when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
                 .thenReturn(productGroupTaskMono);
 
         when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
-                .thenReturn(Mono.just(new BatchProductGroupTask()
-                        .data(new BatchProductGroup().productGroups(List.of(productGroup))
-                                .serviceAgreement(productGroup.getServiceAgreement()))));
+                .thenReturn(
+                        Mono.just(
+                                new BatchProductGroupTask()
+                                        .data(
+                                                new BatchProductGroup()
+                                                        .productGroups(List.of(productGroup))
+                                                        .serviceAgreement(
+                                                                productGroup
+                                                                        .getServiceAgreement()))));
 
-        Mono<ProductIngestResponse> productIngestResponse = productIngestionService
-                .ingestPush(productIngestPushRequest);
+        Mono<ProductIngestResponse> productIngestResponse =
+                productIngestionService.ingestPush(productIngestPushRequest);
         StepVerifier.create(productIngestResponse)
-                .assertNext(Assertions::assertNotNull).verifyComplete();
+                .assertNext(Assertions::assertNotNull)
+                .verifyComplete();
 
-        ArgumentCaptor<EnvelopedEvent<ProductCompletedEvent>> argumentCaptor = ArgumentCaptor.forClass(EnvelopedEvent.class);
+        ArgumentCaptor<EnvelopedEvent<ProductCompletedEvent>> argumentCaptor =
+                ArgumentCaptor.forClass(EnvelopedEvent.class);
         verify(eventBus, times(1)).emitEvent(argumentCaptor.capture());
         ProductCompletedEvent event = argumentCaptor.getValue().getEvent();
         assertThat(event.getSource(), is("source_of_ingestion_process"));

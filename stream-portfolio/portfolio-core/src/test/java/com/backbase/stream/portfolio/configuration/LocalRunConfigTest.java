@@ -1,7 +1,6 @@
 package com.backbase.stream.portfolio.configuration;
 
-import java.text.DateFormat;
-import java.util.stream.Stream;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,13 +12,13 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.Builder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.DateFormat;
+import java.util.stream.Stream;
 
 @ExtendWith(MockitoExtension.class)
 class LocalRunConfigTest {
 
-    @InjectMocks
-    private LocalRunConfig localRunConfig;
+    @InjectMocks private LocalRunConfig localRunConfig;
 
     @Test
     void objectMapper() {
@@ -43,9 +42,9 @@ class LocalRunConfigTest {
         Mockito.when(builder.build()).thenReturn(mockWebClient);
         Mockito.when(interServiceWebClientCustomizers.orderedStream()).thenReturn(Stream.empty());
 
-        WebClient webClient = localRunConfig.interServiceWebClient(interServiceWebClientCustomizers, builder);
+        WebClient webClient =
+                localRunConfig.interServiceWebClient(interServiceWebClientCustomizers, builder);
         Assertions.assertNotNull(webClient);
         Assertions.assertSame(mockWebClient, webClient);
     }
-
 }

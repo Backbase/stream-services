@@ -5,11 +5,14 @@ import com.backbase.stream.compositions.product.api.model.ArrangementPullIngesti
 import com.backbase.stream.compositions.product.api.model.ArrangementPushIngestionRequest;
 import com.backbase.stream.compositions.product.core.mapper.ArrangementRestMapper;
 import com.backbase.stream.compositions.product.core.service.ArrangementIngestionService;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;
+
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -20,7 +23,8 @@ class ArrangementSubController {
     private final ArrangementRestMapper arrangementRestMapper;
 
     Mono<ResponseEntity<ArrangementIngestionResponse>> pullIngestArrangement(
-            Mono<ArrangementPullIngestionRequest> arrangementPullIngestionRequest, ServerWebExchange exchange) {
+            Mono<ArrangementPullIngestionRequest> arrangementPullIngestionRequest,
+            ServerWebExchange exchange) {
         return arrangementPullIngestionRequest
                 .map(arrangementRestMapper::mapPullRequest)
                 .flatMap(arrangementIngestionService::ingestPull)
@@ -28,7 +32,8 @@ class ArrangementSubController {
     }
 
     Mono<ResponseEntity<ArrangementIngestionResponse>> pushIngestArrangement(
-            Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest, ServerWebExchange exchange) {
+            Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest,
+            ServerWebExchange exchange) {
         return arrangementPushIngestionRequest
                 .map(arrangementRestMapper::mapPushRequest)
                 .flatMap(arrangementIngestionService::ingestPush)

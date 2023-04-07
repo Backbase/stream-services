@@ -1,10 +1,5 @@
 package com.backbase.stream.portfolio.mapper;
 
-import java.util.List;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ValueMapping;
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AllocationType;
@@ -36,6 +31,13 @@ import com.backbase.stream.portfolio.model.PositionTransaction;
 import com.backbase.stream.portfolio.model.SubPortfolio;
 import com.backbase.stream.portfolio.model.TransactionCategory;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.ValueMapping;
+
+import java.util.List;
+
 @Mapper
 public interface PortfolioMapper {
 
@@ -56,10 +58,11 @@ public interface PortfolioMapper {
     @ValueMapping(source = MappingConstants.ANY_UNMAPPED, target = MappingConstants.NULL)
     AllocationType map(String allocationTypeEnum);
 
-    List<PortfolioPositionsHierarchyItem> mapHierarchies(List<PortfolioPositionsHierarchy> hierarchies);
+    List<PortfolioPositionsHierarchyItem> mapHierarchies(
+            List<PortfolioPositionsHierarchy> hierarchies);
 
-    List<PortfolioCumulativePerformancesItem>
-            mapCumulativePerformances(List<PortfolioCumulativePerformances> cumulativePerformances);
+    List<PortfolioCumulativePerformancesItem> mapCumulativePerformances(
+            List<PortfolioCumulativePerformances> cumulativePerformances);
 
     @Mapping(target = "name", source = "benchmarkName")
     PortfolioBenchmarkPutRequest mapBenchmark(String benchmarkName);
@@ -85,17 +88,17 @@ public interface PortfolioMapper {
 
     @Mapping(target = "positionId", source = "positionId")
     @Mapping(target = "transactions", source = "transactions")
-    PortfolioTransactionsPostItem mapPortfolioTransactionsPostItem(String positionId,
-            List<PositionTransaction> transactions);
+    PortfolioTransactionsPostItem mapPortfolioTransactionsPostItem(
+            String positionId, List<PositionTransaction> transactions);
 
     PositionTransactionPutRequest mapPositionTransactionPutRequest(PositionTransaction transaction);
 
     PortfolioPositionTransactionsPostItem mapTransactionPostItem(PositionTransaction transaction);
 
-    List<PortfolioPositionTransactionsPostItem> mapTransactionPostItems(List<PositionTransaction> transactions);
+    List<PortfolioPositionTransactionsPostItem> mapTransactionPostItems(
+            List<PositionTransaction> transactions);
 
     TransactionCategoryPostRequest mapTransactionCategory(TransactionCategory tc);
 
     TransactionCategoryPutRequest mapPutTransactionCategory(TransactionCategory tc);
-
 }

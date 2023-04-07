@@ -16,13 +16,15 @@ import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper
 public interface AccessGroupMapper {
@@ -46,8 +48,7 @@ public interface AccessGroupMapper {
 
     PresentationIngestFunctionGroup toPresentation(JobRole referenceJobRole);
 
-    com.backbase.stream.legalentity.model.ApprovalStatus map(
-        ApprovalStatus approvalStatus);
+    com.backbase.stream.legalentity.model.ApprovalStatus map(ApprovalStatus approvalStatus);
 
     /**
      * Map {@link BusinessFunctionGroup} with privileges to {@link PresentationPermission}.
@@ -55,47 +56,53 @@ public interface AccessGroupMapper {
      * @param functionGroups defined function groups
      * @return mapped object
      */
-    default List<PresentationPermission> toPresentation(List<BusinessFunctionGroup> functionGroups) {
+    default List<PresentationPermission> toPresentation(
+            List<BusinessFunctionGroup> functionGroups) {
         if (Objects.isNull(functionGroups)) {
             return Collections.emptyList();
         }
 
         return functionGroups.stream()
-            .filter(Objects::nonNull)
-            .map(BusinessFunctionGroup::getFunctions)
-            .flatMap(Collection::stream)
-            .map(f -> {
-                PresentationPermission presentationPermission = new PresentationPermission();
-                presentationPermission.setFunctionId(f.getFunctionId());
-                f.getPrivileges().stream()
-                    .filter(Objects::nonNull)
-                    .map(Privilege::getPrivilege)
-                    .forEach(presentationPermission::addPrivilegesItem);
+                .filter(Objects::nonNull)
+                .map(BusinessFunctionGroup::getFunctions)
+                .flatMap(Collection::stream)
+                .map(
+                        f -> {
+                            PresentationPermission presentationPermission =
+                                    new PresentationPermission();
+                            presentationPermission.setFunctionId(f.getFunctionId());
+                            f.getPrivileges().stream()
+                                    .filter(Objects::nonNull)
+                                    .map(Privilege::getPrivilege)
+                                    .forEach(presentationPermission::addPrivilegesItem);
 
-                return presentationPermission;
-            }).collect(Collectors.toList());
+                            return presentationPermission;
+                        })
+                .collect(Collectors.toList());
     }
 
-    default List<PresentationPermissionFunctionGroupUpdate> toUpdate(List<BusinessFunctionGroup> functionGroups) {
+    default List<PresentationPermissionFunctionGroupUpdate> toUpdate(
+            List<BusinessFunctionGroup> functionGroups) {
         if (Objects.isNull(functionGroups)) {
             return Collections.emptyList();
         }
 
         return functionGroups.stream()
-            .filter(Objects::nonNull)
-            .map(BusinessFunctionGroup::getFunctions)
-            .flatMap(Collection::stream)
-            .map(f -> {
-                PresentationPermissionFunctionGroupUpdate presentationPermission
-                    = new PresentationPermissionFunctionGroupUpdate();
-                presentationPermission.functionName(f.getName());
-                f.getPrivileges().stream()
-                    .filter(Objects::nonNull)
-                    .map(Privilege::getPrivilege)
-                    .forEach(presentationPermission::addPrivilegesItem);
+                .filter(Objects::nonNull)
+                .map(BusinessFunctionGroup::getFunctions)
+                .flatMap(Collection::stream)
+                .map(
+                        f -> {
+                            PresentationPermissionFunctionGroupUpdate presentationPermission =
+                                    new PresentationPermissionFunctionGroupUpdate();
+                            presentationPermission.functionName(f.getName());
+                            f.getPrivileges().stream()
+                                    .filter(Objects::nonNull)
+                                    .map(Privilege::getPrivilege)
+                                    .forEach(presentationPermission::addPrivilegesItem);
 
-                return presentationPermission;
-            }).collect(Collectors.toList());
+                            return presentationPermission;
+                        })
+                .collect(Collectors.toList());
     }
-
 }

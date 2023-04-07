@@ -3,16 +3,7 @@ package com.backbase.stream.it;
 import static com.backbase.stream.it.LegalEntitySagaIT.NotEmptyPattern.notEmpty;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import java.util.Arrays;
-import java.util.Collections;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.reactive.server.WebTestClient;
+
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.CurrentAccount;
@@ -33,236 +24,358 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.github.tomakehurst.wiremock.matching.MatchResult;
 import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+import java.util.Arrays;
+import java.util.Collections;
+
 @SpringBootTest
 @ActiveProfiles("it")
 @WireMockTest(httpPort = 10000)
 @AutoConfigureWebTestClient(timeout = "20000")
 class LegalEntitySagaIT {
 
-    @Autowired
-    private WebTestClient webTestClient;
+    @Autowired private WebTestClient webTestClient;
 
     private static LegalEntityTask defaultLegalEntityTask() {
         return new LegalEntityTask()
-            .data(
-                new LegalEntity()
-                    .name("Legal Entity")
-                    .externalId("100000")
-                    .parentExternalId("parent-100000")
-                    .legalEntityType(LegalEntityType.CUSTOMER)
-                    .realmName("customer-bank")
-                    .productGroups(Arrays.asList(
-                        (ProductGroup) new ProductGroup()
-                            .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
-                            .name("Default PG")
-                            .users(Collections.singletonList(
-                                new JobProfileUser()
-                                    .user(
-                                        new User()
-                                            .externalId("john.doe")
-                                            .fullName("John Doe")
-                                            .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
-                                    )
-                                    .referenceJobRoleNames(Collections.singletonList("Private - Read only"))
-                            ))
-                            .currentAccounts(Collections.singletonList(
-                                (CurrentAccount) new CurrentAccount()
-                                    .BBAN("01318000")
-                                    .externalId("7155000")
-                                    .productTypeExternalId("privateCurrentAccount")
-                                    .name("Account 1")
-                                    .currency("GBP")
-                            )),
-                        (ProductGroup) new ProductGroup()
-                            .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
-                            .name("Mixed PG")
-                            .users(Collections.singletonList(
-                                new JobProfileUser()
-                                    .user(
-                                        new User()
-                                            .externalId("john.doe")
-                                            .fullName("John Doe")
-                                            .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
-                                    )
-                                    .referenceJobRoleNames(Collections.singletonList("Private - Full access"))
-                            ))
-                            .currentAccounts(Collections.singletonList(
-                                (CurrentAccount) new CurrentAccount()
-                                    .BBAN("01318001")
-                                    .externalId("7155001")
-                                    .productTypeExternalId("privateCurrentAccount")
-                                    .name("Account 2")
-                                    .currency("GBP")
-                            ))
-                    ))
-                    .users(Collections.singletonList(
-                        new JobProfileUser()
-                            .user(
-                                new User()
-                                    .externalId("john.doe")
-                                    .fullName("John Doe")
-                                    .identityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY)
-                                    .locked(false)
-                                    .emailAddress(new EmailAddress().address("test@example.com"))
-                                    .mobileNumber(new PhoneNumber().number("+12345"))
-                            )
-                            .referenceJobRoleNames(Arrays.asList(
-                                "Private - Read only", "Private - Full access"
-                            ))
-                    ))
-                    .administrators(Collections.emptyList())
-                    .customServiceAgreement(
-                        new ServiceAgreement()
-                            .externalId("Service_Agreement_Id")
-                            .name("Service Agreement")
-                            .description("Custom Service Agreement")
-                            .participants(Collections.singletonList(
-                                new LegalEntityParticipant()
-                                    .externalId("user-external-id")
-                                    .sharingUsers(true)
-                                    .sharingAccounts(true)
-                                    .users(Collections.singletonList("john.doe"))
-                            ))
-                            .status(LegalEntityStatus.ENABLED)
-                            .isMaster(false)
-                    )
-            );
+                .data(
+                        new LegalEntity()
+                                .name("Legal Entity")
+                                .externalId("100000")
+                                .parentExternalId("parent-100000")
+                                .legalEntityType(LegalEntityType.CUSTOMER)
+                                .realmName("customer-bank")
+                                .productGroups(
+                                        Arrays.asList(
+                                                (ProductGroup)
+                                                        new ProductGroup()
+                                                                .productGroupType(
+                                                                        BaseProductGroup
+                                                                                .ProductGroupTypeEnum
+                                                                                .ARRANGEMENTS)
+                                                                .name("Default PG")
+                                                                .users(
+                                                                        Collections.singletonList(
+                                                                                new JobProfileUser()
+                                                                                        .user(
+                                                                                                new User()
+                                                                                                        .externalId(
+                                                                                                                "john.doe")
+                                                                                                        .fullName(
+                                                                                                                "John Doe")
+                                                                                                        .identityLinkStrategy(
+                                                                                                                IdentityUserLinkStrategy
+                                                                                                                        .IDENTITY_AGNOSTIC))
+                                                                                        .referenceJobRoleNames(
+                                                                                                Collections
+                                                                                                        .singletonList(
+                                                                                                                "Private"
+                                                                                                                    + " - Read"
+                                                                                                                    + " only"))))
+                                                                .currentAccounts(
+                                                                        Collections.singletonList(
+                                                                                (CurrentAccount)
+                                                                                        new CurrentAccount()
+                                                                                                .BBAN(
+                                                                                                        "01318000")
+                                                                                                .externalId(
+                                                                                                        "7155000")
+                                                                                                .productTypeExternalId(
+                                                                                                        "privateCurrentAccount")
+                                                                                                .name(
+                                                                                                        "Account"
+                                                                                                            + " 1")
+                                                                                                .currency(
+                                                                                                        "GBP"))),
+                                                (ProductGroup)
+                                                        new ProductGroup()
+                                                                .productGroupType(
+                                                                        BaseProductGroup
+                                                                                .ProductGroupTypeEnum
+                                                                                .ARRANGEMENTS)
+                                                                .name("Mixed PG")
+                                                                .users(
+                                                                        Collections.singletonList(
+                                                                                new JobProfileUser()
+                                                                                        .user(
+                                                                                                new User()
+                                                                                                        .externalId(
+                                                                                                                "john.doe")
+                                                                                                        .fullName(
+                                                                                                                "John Doe")
+                                                                                                        .identityLinkStrategy(
+                                                                                                                IdentityUserLinkStrategy
+                                                                                                                        .IDENTITY_AGNOSTIC))
+                                                                                        .referenceJobRoleNames(
+                                                                                                Collections
+                                                                                                        .singletonList(
+                                                                                                                "Private"
+                                                                                                                    + " - Full"
+                                                                                                                    + " access"))))
+                                                                .currentAccounts(
+                                                                        Collections.singletonList(
+                                                                                (CurrentAccount)
+                                                                                        new CurrentAccount()
+                                                                                                .BBAN(
+                                                                                                        "01318001")
+                                                                                                .externalId(
+                                                                                                        "7155001")
+                                                                                                .productTypeExternalId(
+                                                                                                        "privateCurrentAccount")
+                                                                                                .name(
+                                                                                                        "Account"
+                                                                                                            + " 2")
+                                                                                                .currency(
+                                                                                                        "GBP")))))
+                                .users(
+                                        Collections.singletonList(
+                                                new JobProfileUser()
+                                                        .user(
+                                                                new User()
+                                                                        .externalId("john.doe")
+                                                                        .fullName("John Doe")
+                                                                        .identityLinkStrategy(
+                                                                                IdentityUserLinkStrategy
+                                                                                        .CREATE_IN_IDENTITY)
+                                                                        .locked(false)
+                                                                        .emailAddress(
+                                                                                new EmailAddress()
+                                                                                        .address(
+                                                                                                "test@example.com"))
+                                                                        .mobileNumber(
+                                                                                new PhoneNumber()
+                                                                                        .number(
+                                                                                                "+12345")))
+                                                        .referenceJobRoleNames(
+                                                                Arrays.asList(
+                                                                        "Private - Read only",
+                                                                        "Private - Full access"))))
+                                .administrators(Collections.emptyList())
+                                .customServiceAgreement(
+                                        new ServiceAgreement()
+                                                .externalId("Service_Agreement_Id")
+                                                .name("Service Agreement")
+                                                .description("Custom Service Agreement")
+                                                .participants(
+                                                        Collections.singletonList(
+                                                                new LegalEntityParticipant()
+                                                                        .externalId(
+                                                                                "user-external-id")
+                                                                        .sharingUsers(true)
+                                                                        .sharingAccounts(true)
+                                                                        .users(
+                                                                                Collections
+                                                                                        .singletonList(
+                                                                                                "john.doe"))))
+                                                .status(LegalEntityStatus.ENABLED)
+                                                .isMaster(false)));
     }
 
     private void setupWireMock() {
         stubFor(
-            WireMock.post("/oauth/token")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\n\"access_token\": \"access-token\",\n\"expires_in\": 600,\n\"refresh_expires_in\": 1800,\n\"refresh_token\": \"refresh-token\",\n\"token_type\": \"bearer\",\n\"id_token\": \"id-token\",\n\"not-before-policy\": 1633622545,\n\"session_state\": \"72a28739-3d20-4965-bd86-64410df53d04\",\n\"scope\": \"openid\"\n}"))
-        );
+                WireMock.post("/oauth/token")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "{\n"
+                                                    + "\"access_token\": \"access-token\",\n"
+                                                    + "\"expires_in\": 600,\n"
+                                                    + "\"refresh_expires_in\": 1800,\n"
+                                                    + "\"refresh_token\": \"refresh-token\",\n"
+                                                    + "\"token_type\": \"bearer\",\n"
+                                                    + "\"id_token\": \"id-token\",\n"
+                                                    + "\"not-before-policy\": 1633622545,\n"
+                                                    + "\"session_state\":"
+                                                    + " \"72a28739-3d20-4965-bd86-64410df53d04\",\n"
+                                                    + "\"scope\": \"openid\"\n"
+                                                    + "}")));
 
         stubFor(
-            WireMock.get("/access-control/service-api/v2/legalentities/external/100000")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\n\"additions\":{},\"id\":\"500000\",\"externalId\":\"100000\",\"name\":\"Legal Entity\",\"type\":\"CUSTOMER\"\n}"))
-        );
+                WireMock.get("/access-control/service-api/v2/legalentities/external/100000")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "{\n"
+                                                    + "\"additions\":{},\"id\":\"500000\",\"externalId\":\"100000\",\"name\":\"Legal"
+                                                    + " Entity\",\"type\":\"CUSTOMER\"\n"
+                                                    + "}")));
 
         stubFor(
-            WireMock.get("/access-control/service-api/v2/legalentities/500000")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\n\"additions\":{},\"id\":\"500000\",\"externalId\":\"100000\",\"name\":\"Legal Entity\",\"type\":\"CUSTOMER\"\n}"))
-        );
+                WireMock.get("/access-control/service-api/v2/legalentities/500000")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "{\n"
+                                                    + "\"additions\":{},\"id\":\"500000\",\"externalId\":\"100000\",\"name\":\"Legal"
+                                                    + " Entity\",\"type\":\"CUSTOMER\"\n"
+                                                    + "}")));
 
         stubFor(
-            WireMock.put("/access-control/service-api/v2/legalentities")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\n\"additions\":{},\"id\":\"500000\",\"externalId\":\"100000\",\"name\":\"Legal Entity\",\"type\":\"CUSTOMER\"\n}"))
-        );
+                WireMock.put("/access-control/service-api/v2/legalentities")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "{\n"
+                                                    + "\"additions\":{},\"id\":\"500000\",\"externalId\":\"100000\",\"name\":\"Legal"
+                                                    + " Entity\",\"type\":\"CUSTOMER\"\n"
+                                                    + "}")));
 
         stubFor(
-            WireMock.get("/user-manager/service-api/v2/users/identities/realms")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                    .withBody("[{\"id\":\"0006f11c\",\"realmName\":\"customer-bank\"}]"))
-        );
+                WireMock.get("/user-manager/service-api/v2/users/identities/realms")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "[{\"id\":\"0006f11c\",\"realmName\":\"customer-bank\"}]")));
 
         stubFor(
-            WireMock.post("/user-manager/service-api/v2/users/identities/realms/customer-bank/legalentities")
-                .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
-        );
+                WireMock.post(
+                                "/user-manager/service-api/v2/users/identities/realms/customer-bank/legalentities")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value())));
 
         stubFor(
-            WireMock.get("/user-manager/service-api/v2/users/externalids/john.doe?skipHierarchyCheck=true")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\"id\":\"9ac44fca\",\"externalId\":\"john.doe\",\"legalEntityId\":\"500000\",\"fullName\":\"John Doe\"}"))
-        );
+                WireMock.get(
+                                "/user-manager/service-api/v2/users/externalids/john.doe?skipHierarchyCheck=true")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "{\"id\":\"9ac44fca\",\"externalId\":\"john.doe\",\"legalEntityId\":\"500000\",\"fullName\":\"John"
+                                                    + " Doe\"}")));
 
         stubFor(
-            WireMock.put("/user-manager/service-api/v2/users")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\"id\":\"9ac44fca\",\"externalId\":\"john.doe\",\"legalEntityId\":\"500000\",\"fullName\":\"John Doe\"}"))
-        );
+                WireMock.put("/user-manager/service-api/v2/users")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "{\"id\":\"9ac44fca\",\"externalId\":\"john.doe\",\"legalEntityId\":\"500000\",\"fullName\":\"John"
+                                                    + " Doe\"}")));
 
         stubFor(
-            WireMock.get("/access-control/service-api/v2/accessgroups/serviceagreements/external/Service_Agreement_Id")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\"additions\":{},\"creatorLegalEntity\":\"500000\",\"status\":\"ENABLED\",\"id\":\"500001\",\"externalId\":\"Service_Agreement_Id\",\"name\":\"\",\"description\":\"Custom Service Agreement\",\"isMaster\":false,\"validFromDate\":null,\"validFromTime\":null,\"validUntilDate\":null,\"validUntilTime\":null}"))
-        );
+                WireMock.get(
+                                "/access-control/service-api/v2/accessgroups/serviceagreements/external/Service_Agreement_Id")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "{\"additions\":{},\"creatorLegalEntity\":\"500000\",\"status\":\"ENABLED\",\"id\":\"500001\",\"externalId\":\"Service_Agreement_Id\",\"name\":\"\",\"description\":\"Custom"
+                                                    + " Service"
+                                                    + " Agreement\",\"isMaster\":false,\"validFromDate\":null,\"validFromTime\":null,\"validUntilDate\":null,\"validUntilTime\":null}")));
 
         stubFor(
-            WireMock.get("/access-control/service-api/v2/accessgroups/service-agreements/500001/participants")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("[{\"additions\":{},\"id\":\"500000\",\"externalId\":\"100000\",\"name\":\"Legal Entity\",\"sharingUsers\":true,\"sharingAccounts\":true}]"))
-        );
+                WireMock.get(
+                                "/access-control/service-api/v2/accessgroups/service-agreements/500001/participants")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "[{\"additions\":{},\"id\":\"500000\",\"externalId\":\"100000\",\"name\":\"Legal"
+                                                    + " Entity\",\"sharingUsers\":true,\"sharingAccounts\":true}]")));
 
         stubFor(
-                WireMock.put("/access-control/service-api/v2/accessgroups/serviceagreements/ingest/service-agreements/participants")
-                .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
-        );
+                WireMock.put(
+                                "/access-control/service-api/v2/accessgroups/serviceagreements/ingest/service-agreements/participants")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value())));
 
         stubFor(
-            WireMock.get("/access-control/service-api/v2/accesscontrol/accessgroups/serviceagreements/500001/users")
-                .willReturn(WireMock.aResponse().withStatus(HttpStatus.NOT_FOUND.value()))
-        );
+                WireMock.get(
+                                "/access-control/service-api/v2/accesscontrol/accessgroups/serviceagreements/500001/users")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.NOT_FOUND.value())));
 
         stubFor(
-                WireMock.put("/access-control/service-api/v2/accessgroups/serviceagreements/ingest/service-agreements/users")
-                .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
-        );
+                WireMock.put(
+                                "/access-control/service-api/v2/accessgroups/serviceagreements/ingest/service-agreements/users")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value())));
 
         stubFor(
-                WireMock.get("/access-control/service-api/v2/accesscontrol/accessgroups/function-groups?serviceAgreementId=500001")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("[{\"additions\":{},\"id\":\"500002\",\"serviceAgreementId\":\"500001\",\"name\":\"Private - Read only\",\"description\":\"Private - Read only\",\"type\":\"TEMPLATE\",\"permissions\":[{\"functionId\":\"1029\",\"assignedPrivileges\":[{\"additions\":{},\"privilege\":\"view\"}]}]},{\"additions\":{},\"id\":\"500003\",\"serviceAgreementId\":\"500001\",\"name\":\"Private - Full access\",\"description\":\"Private - Full access\",\"type\":\"TEMPLATE\",\"permissions\":[{\"functionId\":\"1029\",\"assignedPrivileges\":[{\"additions\":{},\"privilege\":\"create\"},{\"additions\":{},\"privilege\":\"edit\"},{\"additions\":{},\"privilege\":\"delete\"},{\"additions\":{},\"privilege\":\"execute\"},{\"additions\":{},\"privilege\":\"view\"}]}]}]"))
-        );
+                WireMock.get(
+                                "/access-control/service-api/v2/accesscontrol/accessgroups/function-groups?serviceAgreementId=500001")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "[{\"additions\":{},\"id\":\"500002\",\"serviceAgreementId\":\"500001\",\"name\":\"Private"
+                                                    + " - Read only\",\"description\":\"Private -"
+                                                    + " Read"
+                                                    + " only\",\"type\":\"TEMPLATE\",\"permissions\":[{\"functionId\":\"1029\",\"assignedPrivileges\":[{\"additions\":{},\"privilege\":\"view\"}]}]},{\"additions\":{},\"id\":\"500003\",\"serviceAgreementId\":\"500001\",\"name\":\"Private"
+                                                    + " - Full access\",\"description\":\"Private -"
+                                                    + " Full"
+                                                    + " access\",\"type\":\"TEMPLATE\",\"permissions\":[{\"functionId\":\"1029\",\"assignedPrivileges\":[{\"additions\":{},\"privilege\":\"create\"},{\"additions\":{},\"privilege\":\"edit\"},{\"additions\":{},\"privilege\":\"delete\"},{\"additions\":{},\"privilege\":\"execute\"},{\"additions\":{},\"privilege\":\"view\"}]}]}]")));
 
         stubFor(
-            WireMock.put("/access-control/service-api/v2/accessgroups/function-groups/batch/update")
-                .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
-        );
+                WireMock.put(
+                                "/access-control/service-api/v2/accessgroups/function-groups/batch/update")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value())));
 
         stubFor(
-            WireMock.put("/access-control/service-api/v2/accessgroups/users/permissions/user-permissions")
-                .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
-        );
+                WireMock.put(
+                                "/access-control/service-api/v2/accessgroups/users/permissions/user-permissions")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value())));
 
         stubFor(
-                WireMock.get("/access-control/service-api/v2/accesscontrol/accessgroups/users/9ac44fca/service-agreements/500001/permissions")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("{\"additions\":{},\"approvalId\":null,\"items\":[{\"additions\":{},\"functionGroupId\":\"500002\",\"dataGroupIds\":[],\"selfApprovalPolicies\":[]},{\"additions\":{},\"functionGroupId\":\"500003\",\"dataGroupIds\":[],\"selfApprovalPolicies\":[]}]}"))
-        );
+                WireMock.get(
+                                "/access-control/service-api/v2/accesscontrol/accessgroups/users/9ac44fca/service-agreements/500001/permissions")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "{\"additions\":{},\"approvalId\":null,\"items\":[{\"additions\":{},\"functionGroupId\":\"500002\",\"dataGroupIds\":[],\"selfApprovalPolicies\":[]},{\"additions\":{},\"functionGroupId\":\"500003\",\"dataGroupIds\":[],\"selfApprovalPolicies\":[]}]}")));
 
         stubFor(
-            WireMock.post("/arrangement-manager/service-api/v2/arrangements/batch")
-                .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
-        );
+                WireMock.post("/arrangement-manager/service-api/v2/arrangements/batch")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value())));
 
         stubFor(
                 WireMock.post("/access-control/service-api/v2/accessgroups/data-groups")
-                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.CREATED.value()))
-        );
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.CREATED.value())));
 
         stubFor(
-                WireMock.get("/access-control/service-api/v2/accesscontrol/accessgroups/data-groups?serviceAgreementId=500001&includeItems=true")
-                .willReturn(WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                                .withBody("[{\"additions\":{},\"id\":\"4002\",\"name\":\"Default PG\",\"description\":\"Default data group description\",\"serviceAgreementId\":\"500001\",\"type\":\"ARRANGEMENTS\",\"approvalId\":null,\"items\":[\"arrangement-id-1\"]},{\"additions\":{},\"id\":\"4003\",\"name\":\"Mixed PG\",\"description\":\"Default data group description\",\"serviceAgreementId\":\"500001\",\"type\":\"ARRANGEMENTS\",\"approvalId\":null,\"items\":[\"arrangement-id-2\"]}]"))
-        );
+                WireMock.get(
+                                "/access-control/service-api/v2/accesscontrol/accessgroups/data-groups?serviceAgreementId=500001&includeItems=true")
+                        .willReturn(
+                                WireMock.aResponse()
+                                        .withHeader(
+                                                "Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                        .withBody(
+                                                "[{\"additions\":{},\"id\":\"4002\",\"name\":\"Default"
+                                                    + " PG\",\"description\":\"Default data group"
+                                                    + " description\",\"serviceAgreementId\":\"500001\",\"type\":\"ARRANGEMENTS\",\"approvalId\":null,\"items\":[\"arrangement-id-1\"]},{\"additions\":{},\"id\":\"4003\",\"name\":\"Mixed"
+                                                    + " PG\",\"description\":\"Default data group"
+                                                    + " description\",\"serviceAgreementId\":\"500001\",\"type\":\"ARRANGEMENTS\",\"approvalId\":null,\"items\":[\"arrangement-id-2\"]}]")));
 
         stubFor(
-            WireMock.put("/access-control/service-api/v2/accessgroups/data-groups/batch/update/data-items")
-                .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
-        );
+                WireMock.put(
+                                "/access-control/service-api/v2/accessgroups/data-groups/batch/update/data-items")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value())));
     }
 
     /**
-     * Intention of this test is to verify that custom header which passed to legal entity controller is re-propagated
-     * to downstream call as well.
+     * Intention of this test is to verify that custom header which passed to legal entity
+     * controller is re-propagated to downstream call as well.
      */
     @Test
     void legalEntitySaga() {
@@ -271,19 +384,24 @@ class LegalEntitySagaIT {
         LegalEntityTask legalEntityTask = defaultLegalEntityTask();
 
         // When
-        webTestClient.post()
-            .uri("/legal-entity")
-            .header("Content-Type", "application/json")
+        webTestClient
+                .post()
+                .uri("/legal-entity")
+                .header("Content-Type", "application/json")
                 .header("X-TID", "tenant-id")
-            .bodyValue(legalEntityTask.getLegalEntity())
-            .exchange()
-            .expectStatus().isEqualTo(200);
+                .bodyValue(legalEntityTask.getLegalEntity())
+                .exchange()
+                .expectStatus()
+                .isEqualTo(200);
 
         // Then
-        verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v2/legalentities/500000"))
-            .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-            .withHeader("X-B3-TraceId", notEmpty())
-            .withHeader("X-B3-SpanId", notEmpty()));
+        verify(
+                WireMock.getRequestedFor(
+                                WireMock.urlEqualTo(
+                                        "/access-control/service-api/v2/legalentities/500000"))
+                        .withHeader("X-TID", WireMock.equalTo("tenant-id"))
+                        .withHeader("X-B3-TraceId", notEmpty())
+                        .withHeader("X-B3-SpanId", notEmpty()));
     }
 
     @Test
@@ -292,22 +410,30 @@ class LegalEntitySagaIT {
         setupWireMock();
         LegalEntityTask legalEntityTask = defaultLegalEntityTask();
         ProductGroup productGroup = new ProductGroup();
-        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-                .description("somePgDescription").savingAccounts(Collections.emptyList());
+        productGroup
+                .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+                .name("somePgName")
+                .description("somePgDescription")
+                .savingAccounts(Collections.emptyList());
         legalEntityTask.getLegalEntity().productGroups(Collections.singletonList(productGroup));
 
         // When
-        webTestClient.post()
+        webTestClient
+                .post()
                 .uri("/legal-entity")
                 .header("Content-Type", "application/json")
                 .bodyValue(legalEntityTask.getLegalEntity())
                 .exchange()
-                .expectStatus().isEqualTo(200);
+                .expectStatus()
+                .isEqualTo(200);
 
         // Then
-        verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v2/legalentities/500000"))
-            .withHeader("X-B3-TraceId", notEmpty())
-            .withHeader("X-B3-SpanId", notEmpty()));
+        verify(
+                WireMock.getRequestedFor(
+                                WireMock.urlEqualTo(
+                                        "/access-control/service-api/v2/legalentities/500000"))
+                        .withHeader("X-B3-TraceId", notEmpty())
+                        .withHeader("X-B3-SpanId", notEmpty()));
     }
 
     @Test
@@ -317,28 +443,34 @@ class LegalEntitySagaIT {
         LegalEntityTask legalEntityTask = defaultLegalEntityTask();
 
         // When
-        webTestClient.post()
-            .uri("/legal-entity")
-            .header("Content-Type", "application/json")
-            .header("X-TID", "tenant-id")
-            .bodyValue(legalEntityTask.getLegalEntity())
-            .exchange()
-            .expectStatus().isEqualTo(200);
-
-        webTestClient.post()
-            .uri("/legal-entity")
-            .header("Content-Type", "application/json")
+        webTestClient
+                .post()
+                .uri("/legal-entity")
+                .header("Content-Type", "application/json")
                 .header("X-TID", "tenant-id")
-            .bodyValue(legalEntityTask.getLegalEntity().name("Updated name"))
-            .exchange()
-            .expectStatus().isEqualTo(200);
+                .bodyValue(legalEntityTask.getLegalEntity())
+                .exchange()
+                .expectStatus()
+                .isEqualTo(200);
 
+        webTestClient
+                .post()
+                .uri("/legal-entity")
+                .header("Content-Type", "application/json")
+                .header("X-TID", "tenant-id")
+                .bodyValue(legalEntityTask.getLegalEntity().name("Updated name"))
+                .exchange()
+                .expectStatus()
+                .isEqualTo(200);
 
         // Then
-        verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v2/legalentities/500000"))
-            .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-            .withHeader("X-B3-TraceId", notEmpty())
-            .withHeader("X-B3-SpanId", notEmpty()));
+        verify(
+                WireMock.getRequestedFor(
+                                WireMock.urlEqualTo(
+                                        "/access-control/service-api/v2/legalentities/500000"))
+                        .withHeader("X-TID", WireMock.equalTo("tenant-id"))
+                        .withHeader("X-B3-TraceId", notEmpty())
+                        .withHeader("X-B3-SpanId", notEmpty()));
     }
 
     static class NotEmptyPattern extends StringValuePattern {

@@ -4,7 +4,9 @@ import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.stream.compositions.paymentorder.integration.ApiClient;
 import com.backbase.stream.compositions.paymentorder.integration.client.PaymentOrderIntegrationApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +31,8 @@ public class PaymentOrderCompositionConfiguration {
 
     @Bean
     @Primary
-    public PaymentOrderIntegrationApi paymentOrderIntegrationApi(ApiClient paymentOrderIntegrationClient) {
+    public PaymentOrderIntegrationApi paymentOrderIntegrationApi(
+            ApiClient paymentOrderIntegrationClient) {
         return new PaymentOrderIntegrationApi(paymentOrderIntegrationClient);
     }
 

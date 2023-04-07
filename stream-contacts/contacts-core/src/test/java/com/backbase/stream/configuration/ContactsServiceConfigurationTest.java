@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsUnitOfWorkExecutor;
 import com.backbase.stream.contact.repository.ContactsUnitOfWorkRepository;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,11 +19,9 @@ import org.springframework.context.annotation.Import;
 @Import(ContactsServiceConfiguration.class)
 class ContactsServiceConfigurationTest {
 
-    @Mock
-    private ContactsUnitOfWorkRepository repository;
+    @Mock private ContactsUnitOfWorkRepository repository;
 
-    @Mock
-    private ContactsSaga contactsSaga;
+    @Mock private ContactsSaga contactsSaga;
 
     ContactsServiceConfiguration configuration;
 
@@ -32,39 +31,43 @@ class ContactsServiceConfigurationTest {
     }
 
     @Test
-     void test_contactsUnitOfWorkExecutor() {
-        ContactsWorkerConfigurationProperties contactsWorkerConfigurationProperties = Mockito.mock(ContactsWorkerConfigurationProperties.class);
+    void test_contactsUnitOfWorkExecutor() {
+        ContactsWorkerConfigurationProperties contactsWorkerConfigurationProperties =
+                Mockito.mock(ContactsWorkerConfigurationProperties.class);
         when(contactsWorkerConfigurationProperties.getTaskExecutors()).thenReturn(1);
 
-        ContactsUnitOfWorkExecutor workExecutor = configuration.contactsUnitOfWorkExecutor(repository, contactsSaga, contactsWorkerConfigurationProperties);
+        ContactsUnitOfWorkExecutor workExecutor =
+                configuration.contactsUnitOfWorkExecutor(
+                        repository, contactsSaga, contactsWorkerConfigurationProperties);
         Assertions.assertNotNull(workExecutor);
-
     }
 
     @Test
     void test_contactsUnitOfWorkRepository() {
-        ContactsWorkerConfigurationProperties contactsWorkerConfigurationProperties = Mockito.mock(ContactsWorkerConfigurationProperties.class);
+        ContactsWorkerConfigurationProperties contactsWorkerConfigurationProperties =
+                Mockito.mock(ContactsWorkerConfigurationProperties.class);
         when(contactsWorkerConfigurationProperties.getTaskExecutors()).thenReturn(1);
 
-        ContactsUnitOfWorkExecutor workExecutor = configuration.contactsUnitOfWorkExecutor(repository, contactsSaga, contactsWorkerConfigurationProperties);
+        ContactsUnitOfWorkExecutor workExecutor =
+                configuration.contactsUnitOfWorkExecutor(
+                        repository, contactsSaga, contactsWorkerConfigurationProperties);
         Assertions.assertNotNull(workExecutor);
     }
 
     @Test
-    void ContactsUnitOfWorkRepository () {
+    void ContactsUnitOfWorkRepository() {
         ContactsUnitOfWorkRepository repo = configuration.contactsUnitOfWorkRepository();
         Assertions.assertNotNull(repo);
     }
 
     @Test
-    void ContactsUnitOfWorkRepositoryProperties () {
-        ContactsWorkerConfigurationProperties propertiesLocal = new ContactsWorkerConfigurationProperties();
+    void ContactsUnitOfWorkRepositoryProperties() {
+        ContactsWorkerConfigurationProperties propertiesLocal =
+                new ContactsWorkerConfigurationProperties();
         propertiesLocal.setContinueOnError(true);
 
-        ContactsUnitOfWorkExecutor workExecutor = configuration.contactsUnitOfWorkExecutor(repository, contactsSaga, propertiesLocal);
+        ContactsUnitOfWorkExecutor workExecutor =
+                configuration.contactsUnitOfWorkExecutor(repository, contactsSaga, propertiesLocal);
         Assertions.assertNotNull(workExecutor);
-
-
     }
-
 }

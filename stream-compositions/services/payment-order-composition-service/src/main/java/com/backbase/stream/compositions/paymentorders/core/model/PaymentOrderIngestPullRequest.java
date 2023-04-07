@@ -19,5 +19,4 @@ public class PaymentOrderIngestPullRequest {
     private Map<String, String> additions;
     private String dateRangeStart;
     private String dateRangeEnd;
-
 }

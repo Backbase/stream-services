@@ -11,16 +11,18 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRe
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
 
-import javax.validation.Valid;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
+
 import reactor.core.publisher.Mono;
+
+import javax.validation.Valid;
 
 @RestController
 @AllArgsConstructor
@@ -31,27 +33,25 @@ public class LegalEntityController implements LegalEntityCompositionApi {
     private final LegalEntityIngestionService legalEntityIngestionService;
     private final LegalEntityMapper mapper;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public Mono<ResponseEntity<LegalEntityIngestionResponse>> pullLegalEntity(
             @Valid Mono<LegalEntityPullIngestionRequest> pullIngestionRequest,
             ServerWebExchange exchange) {
         log.info("Start synchronous ingestion of Legal Entity");
-        return pullIngestionRequest.map(this::buildPullRequest)
+        return pullIngestionRequest
+                .map(this::buildPullRequest)
                 .flatMap(legalEntityIngestionService::ingestPull)
                 .map(this::mapIngestionToResponse);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     @Override
     public Mono<ResponseEntity<LegalEntityIngestionResponse>> pushLegalEntity(
             @Valid Mono<LegalEntityPushIngestionRequest> pushIngestionRequest,
             ServerWebExchange exchange) {
-        return pushIngestionRequest.map(this::buildPushRequest)
+        return pushIngestionRequest
+                .map(this::buildPushRequest)
                 .flatMap(legalEntityIngestionService::ingestPush)
                 .map(this::mapIngestionToResponse);
     }
@@ -73,8 +73,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
      * @return LegalEntityIngestPushRequest
      */
     private LegalEntityPushRequest buildPushRequest(LegalEntityPushIngestionRequest request) {
-        return LegalEntityPushRequest
-                .builder()
+        return LegalEntityPushRequest.builder()
                 .legalEntity(mapper.mapCompostionToStream(request.getLegalEntity()))
                 .build();
     }
@@ -92,6 +91,4 @@ public class LegalEntityController implements LegalEntityCompositionApi {
                         .withLegalEntity(mapper.mapStreamToComposition(response.getLegalEntity())),
                 HttpStatus.CREATED);
     }
-
-
 }

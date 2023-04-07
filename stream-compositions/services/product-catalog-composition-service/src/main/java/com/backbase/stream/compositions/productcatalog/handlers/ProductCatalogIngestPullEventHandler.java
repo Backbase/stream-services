@@ -11,16 +11,21 @@ import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalog
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
-import java.util.UUID;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
 @EnableConfigurationProperties(ProductCatalogConfigurationProperties.class)
-public class ProductCatalogIngestPullEventHandler implements EventHandler<ProductCatalogIngestPullEvent> {
+public class ProductCatalogIngestPullEventHandler
+        implements EventHandler<ProductCatalogIngestPullEvent> {
     private final ProductCatalogConfigurationProperties configProperties;
     private final ProductCatalogIngestionService productCatalogIngestionService;
     private final ProductCatalogMapper mapper;
@@ -49,7 +54,8 @@ public class ProductCatalogIngestPullEventHandler implements EventHandler<Produc
      * @param productCatalogIngestPullEvent ProductCatalogIngestPullEvent
      * @return ProductCatalogIngestPullRequest
      */
-    private Mono<ProductCatalogIngestPullRequest> buildRequest(ProductCatalogIngestPullEvent productCatalogIngestPullEvent) {
+    private Mono<ProductCatalogIngestPullRequest> buildRequest(
+            ProductCatalogIngestPullEvent productCatalogIngestPullEvent) {
         return Mono.just(
                 ProductCatalogIngestPullRequest.builder()
                         .additionalParameters(productCatalogIngestPullEvent.getAdditions())
@@ -65,9 +71,10 @@ public class ProductCatalogIngestPullEventHandler implements EventHandler<Produc
         if (Boolean.FALSE.equals(configProperties.getEnableCompletedEvents())) {
             return;
         }
-        ProductCatalogIngestCompletedEvent event = new ProductCatalogIngestCompletedEvent()
-                .withEventId(UUID.randomUUID().toString())
-                .withProductCatalog(mapper.mapStreamToEvent(response.getProductCatalog()));
+        ProductCatalogIngestCompletedEvent event =
+                new ProductCatalogIngestCompletedEvent()
+                        .withEventId(UUID.randomUUID().toString())
+                        .withProductCatalog(mapper.mapStreamToEvent(response.getProductCatalog()));
 
         EnvelopedEvent<ProductCatalogIngestCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);
@@ -83,9 +90,10 @@ public class ProductCatalogIngestPullEventHandler implements EventHandler<Produc
         if (Boolean.FALSE.equals(configProperties.getEnableFailedEvents())) {
             return;
         }
-        ProductCatalogIngestFailedEvent event = new ProductCatalogIngestFailedEvent()
-                .withEventId(UUID.randomUUID().toString())
-                .withMessage(ex.getMessage());
+        ProductCatalogIngestFailedEvent event =
+                new ProductCatalogIngestFailedEvent()
+                        .withEventId(UUID.randomUUID().toString())
+                        .withMessage(ex.getMessage());
 
         EnvelopedEvent<ProductCatalogIngestFailedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);

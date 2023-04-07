@@ -8,11 +8,13 @@ import com.backbase.dbs.user.profile.api.service.v2.model.ReplaceUserProfile;
 import com.backbase.stream.legalentity.model.Multivalued;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.legalentity.model.UserProfile;
-import java.util.ArrayList;
-import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mapper
 public abstract class UserProfileMapper {
@@ -61,9 +63,8 @@ public abstract class UserProfileMapper {
     protected List<MultiValued> mapEmails(User user) {
 
         List<MultiValued> emails = new ArrayList<>();
-        MultiValued mainAddress = new MultiValued()
-            .primary(true)
-            .value(user.getEmailAddress().getAddress());
+        MultiValued mainAddress =
+                new MultiValued().primary(true).value(user.getEmailAddress().getAddress());
         emails.add(mainAddress);
         if (user.getUserProfile().getAdditionalEmails() != null) {
             emails.addAll(mapAll(user.getUserProfile().getAdditionalEmails()));
@@ -75,9 +76,8 @@ public abstract class UserProfileMapper {
     protected List<MultiValued> mapPhones(User user) {
 
         List<MultiValued> phones = new ArrayList<>();
-        MultiValued mainPhone = new MultiValued()
-            .primary(true)
-            .value(user.getMobileNumber().getNumber());
+        MultiValued mainPhone =
+                new MultiValued().primary(true).value(user.getMobileNumber().getNumber());
         phones.add(mainPhone);
         if (user.getUserProfile().getAdditionalPhoneNumbers() != null) {
             phones.addAll(mapAll(user.getUserProfile().getAdditionalPhoneNumbers()));
@@ -92,5 +92,4 @@ public abstract class UserProfileMapper {
     public abstract ReplaceUserProfile toUpdate(CreateUserProfile userItem);
 
     public abstract UserProfile toUserProfile(GetUserProfile userItem);
-
 }

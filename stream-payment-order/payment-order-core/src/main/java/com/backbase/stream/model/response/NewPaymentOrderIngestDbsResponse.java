@@ -12,5 +12,4 @@ import lombok.ToString;
 public class NewPaymentOrderIngestDbsResponse implements PaymentOrderIngestDbsResponse {
 
     private final PaymentOrderPostResponse paymentOrderPostResponse;
-
 }

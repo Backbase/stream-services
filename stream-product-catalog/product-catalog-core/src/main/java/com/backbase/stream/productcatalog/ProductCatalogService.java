@@ -2,12 +2,11 @@ package com.backbase.stream.productcatalog;
 
 import com.backbase.stream.productcatalog.model.ProductCatalog;
 import com.backbase.stream.productcatalog.model.ProductType;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Blocking version of the {@link ProductCatalogService}.
- */
+/** Blocking version of the {@link ProductCatalogService}. */
 @Slf4j
 @AllArgsConstructor
 public class ProductCatalogService {
@@ -34,6 +33,8 @@ public class ProductCatalogService {
     }
 
     public ProductType getProductTypeByExternalId(String productTypeExternalId) {
-        return reactiveProductCatalogService.getProductTypeByExternalId(productTypeExternalId).block();
+        return reactiveProductCatalogService
+                .getProductTypeByExternalId(productTypeExternalId)
+                .block();
     }
 }

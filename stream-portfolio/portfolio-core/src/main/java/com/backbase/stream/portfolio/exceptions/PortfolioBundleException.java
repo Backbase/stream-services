@@ -8,7 +8,8 @@ public class PortfolioBundleException extends RuntimeException {
     private final String message;
     private final String httpResponse;
 
-    public PortfolioBundleException(Object object, String message, WebClientResponseException exception) {
+    public PortfolioBundleException(
+            Object object, String message, WebClientResponseException exception) {
         super(exception);
         httpResponse = exception.getResponseBodyAsString();
         this.object = object;
@@ -18,5 +19,4 @@ public class PortfolioBundleException extends RuntimeException {
     public String getHttpResponse() {
         return httpResponse;
     }
-
 }

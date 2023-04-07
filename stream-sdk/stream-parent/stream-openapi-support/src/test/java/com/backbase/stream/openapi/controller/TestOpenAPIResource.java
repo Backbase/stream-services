@@ -1,10 +1,12 @@
 package com.backbase.stream.openapi.controller;
 
-import com.backbase.stream.openapi.controller.OpenApiResource;
 import io.swagger.v3.oas.models.OpenAPI;
-import java.io.FileNotFoundException;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.junit.jupiter.api.Test;
+
+import java.io.FileNotFoundException;
 
 @Slf4j
 public class TestOpenAPIResource {
@@ -16,7 +18,5 @@ public class TestOpenAPIResource {
         OpenAPI openApi = openApiResource.getOpenApi("http://myserver");
 
         log.info("OpenAPI: \n{}", OpenApiResource.toYamlString(openApi));
-
     }
-
 }

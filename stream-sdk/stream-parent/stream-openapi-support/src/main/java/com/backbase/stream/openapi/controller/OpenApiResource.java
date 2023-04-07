@@ -10,24 +10,29 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import reactor.core.publisher.Mono;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * Open API Resource that returns an OpenAPI document with the correct Server URL already filled in.
@@ -43,13 +48,14 @@ public class OpenApiResource {
      * Open API Document with transformed server url.
      *
      * @param serverHttpRequest The current request
-     * @param apiDocsUrl        The URL the openapi document is served on
+     * @param apiDocsUrl The URL the openapi document is served on
      * @return Transformed YAML representation of the OpenAPI document
      * @throws FileNotFoundException thrown if Open API document is not found.
      */
     @GetMapping(value = API_DOCS_URL, produces = "application/vnd.oai.openapi")
-    public Mono<String> getOpenApi(ServerHttpRequest serverHttpRequest, @Value(API_DOCS_URL) String apiDocsUrl)
-        throws FileNotFoundException {
+    public Mono<String> getOpenApi(
+            ServerHttpRequest serverHttpRequest, @Value(API_DOCS_URL) String apiDocsUrl)
+            throws FileNotFoundException {
         String serverUrl = calculateServerUrl(serverHttpRequest, apiDocsUrl);
         OpenAPI openAPI = this.getOpenApi(serverUrl);
         return Mono.just(toYamlString(openAPI));
@@ -62,8 +68,8 @@ public class OpenApiResource {
         OpenAPIParser openAPIParser = new OpenAPIParser();
         ParseOptions parseOptions = new ParseOptions();
         parseOptions.setFlatten(true);
-        SwaggerParseResult swaggerParseResult = openAPIParser
-            .readLocation(file.toString(), new ArrayList<>(), parseOptions);
+        SwaggerParseResult swaggerParseResult =
+                openAPIParser.readLocation(file.toString(), new ArrayList<>(), parseOptions);
 
         OpenAPI openAPI = swaggerParseResult.getOpenAPI();
         Server e = new Server();
@@ -78,14 +84,12 @@ public class OpenApiResource {
         return openAPI;
     }
 
-
     private String calculateServerUrl(ServerHttpRequest serverHttpRequest, String apiDocsUrl) {
         String requestUrl = serverHttpRequest.getURI().toString();
         String serverBaseUrl = requestUrl.substring(0, requestUrl.length() - apiDocsUrl.length());
         log.debug("calculated server url: {}", serverBaseUrl);
         return serverBaseUrl;
     }
-
 
     protected static String toYamlString(OpenAPI openAPI) {
         if (openAPI == null) {
@@ -94,9 +98,10 @@ public class OpenApiResource {
         SimpleModule module = new SimpleModule("OpenAPIModule");
         module.addSerializer(OpenAPI.class, new OpenAPISerializer());
         try {
-            ObjectMapper mapper = Yaml.mapper()
-                .registerModule(module)
-                .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
+            ObjectMapper mapper =
+                    Yaml.mapper()
+                            .registerModule(module)
+                            .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, false);
 
             YAMLFactory factory = (YAMLFactory) mapper.getFactory();
             factory.disable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
@@ -109,11 +114,11 @@ public class OpenApiResource {
         return null;
     }
 
-
     private static class OpenAPISerializer extends JsonSerializer<OpenAPI> {
 
         @Override
-        public void serialize(OpenAPI value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        public void serialize(OpenAPI value, JsonGenerator gen, SerializerProvider serializers)
+                throws IOException {
             if (value != null) {
                 gen.writeStartObject();
                 gen.writeStringField("openapi", value.getOpenapi());

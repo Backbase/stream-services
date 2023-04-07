@@ -3,34 +3,46 @@ package com.backbase.stream.worker.repository.impl;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
-import java.time.OffsetDateTime;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+
 import org.reactivestreams.Publisher;
 import org.springframework.data.domain.Sort;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.NonNullApi;
 import org.springframework.util.CollectionUtils;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 @SuppressWarnings("NullableProblems")
-public class InMemoryReactiveUnitOfWorkRepository<T extends StreamTask> implements UnitOfWorkRepository<T, String> {
+public class InMemoryReactiveUnitOfWorkRepository<T extends StreamTask>
+        implements UnitOfWorkRepository<T, String> {
 
     private ConcurrentHashMap<String, UnitOfWork<T>> inMemStorage = new ConcurrentHashMap<>();
 
     @Override
     public Flux<UnitOfWork<T>> findAllByRegisteredAtBefore(OffsetDateTime currentDateTime) {
-        return Flux.fromStream(inMemStorage.values().stream()
-            .filter(legalEntityUnitOfWork -> legalEntityUnitOfWork.getRegisteredAt() != null
-                && legalEntityUnitOfWork.getRegisteredAt().isBefore(currentDateTime)));
+        return Flux.fromStream(
+                inMemStorage.values().stream()
+                        .filter(
+                                legalEntityUnitOfWork ->
+                                        legalEntityUnitOfWork.getRegisteredAt() != null
+                                                && legalEntityUnitOfWork
+                                                        .getRegisteredAt()
+                                                        .isBefore(currentDateTime)));
     }
 
     @Override
     public Flux<UnitOfWork<T>> findAllByNextAttemptAtBefore(OffsetDateTime currentDateTime) {
-        return Flux.fromStream(inMemStorage.values().stream()
-            .filter(legalEntityUnitOfWork -> legalEntityUnitOfWork.getNextAttemptAt() != null
-                && legalEntityUnitOfWork.getNextAttemptAt().isBefore(currentDateTime)));
+        return Flux.fromStream(
+                inMemStorage.values().stream()
+                        .filter(
+                                legalEntityUnitOfWork ->
+                                        legalEntityUnitOfWork.getNextAttemptAt() != null
+                                                && legalEntityUnitOfWork
+                                                        .getNextAttemptAt()
+                                                        .isBefore(currentDateTime)));
     }
 
     @Override
@@ -43,15 +55,13 @@ public class InMemoryReactiveUnitOfWorkRepository<T extends StreamTask> implemen
     }
 
     @Override
-    public <S extends UnitOfWork<T>> Flux<S> saveAll(Iterable <S> entities) {
-        return Flux.fromIterable(entities)
-            .flatMap(this::save);
+    public <S extends UnitOfWork<T>> Flux<S> saveAll(Iterable<S> entities) {
+        return Flux.fromIterable(entities).flatMap(this::save);
     }
 
     @Override
     public <S extends UnitOfWork<T>> Flux<S> saveAll(Publisher<S> entityStream) {
-        return Flux.from(entityStream)
-            .flatMap(this::save);
+        return Flux.from(entityStream).flatMap(this::save);
     }
 
     @Override
@@ -65,14 +75,13 @@ public class InMemoryReactiveUnitOfWorkRepository<T extends StreamTask> implemen
     }
 
     @Override
-    public Mono<Boolean> existsById( String s) {
+    public Mono<Boolean> existsById(String s) {
         return Mono.just(inMemStorage.containsKey(s));
     }
 
     @Override
     public Mono<Boolean> existsById(Publisher<String> id) {
-        return Mono.from(id)
-            .flatMap(this::existsById);
+        return Mono.from(id).flatMap(this::existsById);
     }
 
     @Override
@@ -82,8 +91,11 @@ public class InMemoryReactiveUnitOfWorkRepository<T extends StreamTask> implemen
 
     @Override
     public Flux<UnitOfWork<T>> findAllById(Iterable<String> strings) {
-        return findAll().filter(unitOfWork ->
-            CollectionUtils.contains(strings.iterator(), unitOfWork.getUnitOfOWorkId()));
+        return findAll()
+                .filter(
+                        unitOfWork ->
+                                CollectionUtils.contains(
+                                        strings.iterator(), unitOfWork.getUnitOfOWorkId()));
     }
 
     @Override
@@ -114,9 +126,7 @@ public class InMemoryReactiveUnitOfWorkRepository<T extends StreamTask> implemen
 
     @Override
     public Mono<Void> deleteAllById(Iterable<? extends String> iterable) {
-        return Flux.fromIterable(iterable)
-            .map(this::deleteById)
-            .then();
+        return Flux.fromIterable(iterable).map(this::deleteById).then();
     }
 
     @Override
@@ -138,6 +148,5 @@ public class InMemoryReactiveUnitOfWorkRepository<T extends StreamTask> implemen
     @Override
     public Flux<UnitOfWork<T>> findAll(Sort sort) {
         return findAll();
-
     }
 }

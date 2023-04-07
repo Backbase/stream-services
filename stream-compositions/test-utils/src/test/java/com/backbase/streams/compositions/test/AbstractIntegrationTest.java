@@ -1,10 +1,15 @@
 package com.backbase.streams.compositions.test;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import com.backbase.buildingblocks.jwt.core.JsonWebTokenProducerType;
 import com.backbase.buildingblocks.jwt.core.exception.JsonWebTokenException;
 import com.backbase.buildingblocks.jwt.core.properties.JsonWebTokenProperties;
 import com.backbase.buildingblocks.jwt.core.token.JsonWebTokenClaimsSet;
 import com.backbase.buildingblocks.jwt.core.type.JsonWebTokenTypeFactory;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -13,15 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class AbstractIntegrationTest {
 
-    @Mock
-    JsonWebTokenProperties jsonWebTokenProperties;
+    @Mock JsonWebTokenProperties jsonWebTokenProperties;
 
     @Test
     void testToken() throws JsonWebTokenException {

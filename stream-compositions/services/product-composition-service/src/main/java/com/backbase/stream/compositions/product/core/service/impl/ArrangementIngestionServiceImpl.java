@@ -10,17 +10,21 @@ import com.backbase.stream.compositions.product.core.service.ArrangementIngestio
 import com.backbase.stream.compositions.product.core.service.ArrangementIntegrationService;
 import com.backbase.stream.compositions.product.core.service.ArrangementPostIngestionService;
 import com.backbase.stream.product.service.ArrangementService;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import reactor.core.publisher.Mono;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 @Slf4j
 @Service
@@ -60,21 +64,28 @@ public class ArrangementIngestionServiceImpl implements ArrangementIngestionServ
     }
 
     public Mono<ArrangementIngestResponse> pushArrangement(ArrangementIngestPushRequest request) {
-        return Mono.just(ArrangementIngestResponse.builder()
-                .arrangement(request.getArrangement())
-                .arrangementInternalId(request.getArrangementInternalId())
-                .config(request.getConfig())
-                .source(request.getSource())
-                .build());
+        return Mono.just(
+                ArrangementIngestResponse.builder()
+                        .arrangement(request.getArrangement())
+                        .arrangementInternalId(request.getArrangementInternalId())
+                        .config(request.getConfig())
+                        .source(request.getSource())
+                        .build());
     }
 
     private Mono<ArrangementIngestResponse> validate(ArrangementIngestResponse res) {
-        Set<ConstraintViolation<AccountArrangementItemPut>> violations = validator.validate(res.getArrangement());
+        Set<ConstraintViolation<AccountArrangementItemPut>> violations =
+                validator.validate(res.getArrangement());
 
         if (!CollectionUtils.isEmpty(violations)) {
-            List<Error> errors = violations.stream().map(c -> new Error()
-                    .withMessage(c.getMessage())
-                    .withKey(Error.INVALID_INPUT_MESSAGE)).collect(Collectors.toList());
+            List<Error> errors =
+                    violations.stream()
+                            .map(
+                                    c ->
+                                            new Error()
+                                                    .withMessage(c.getMessage())
+                                                    .withKey(Error.INVALID_INPUT_MESSAGE))
+                            .collect(Collectors.toList());
             return Mono.error(new BadRequestException().withErrors(errors));
         }
 
@@ -82,10 +93,13 @@ public class ArrangementIngestionServiceImpl implements ArrangementIngestionServ
     }
 
     private Mono<ArrangementIngestResponse> sendToDbs(ArrangementIngestResponse res) {
-        return arrangementService.updateArrangement(res.getArrangement())
-                .map(item -> ArrangementIngestResponse.builder()
-                        .arrangement(res.getArrangement())
-                        .config(res.getConfig())
-                        .build());
+        return arrangementService
+                .updateArrangement(res.getArrangement())
+                .map(
+                        item ->
+                                ArrangementIngestResponse.builder()
+                                        .arrangement(res.getArrangement())
+                                        .config(res.getConfig())
+                                        .build());
     }
 }

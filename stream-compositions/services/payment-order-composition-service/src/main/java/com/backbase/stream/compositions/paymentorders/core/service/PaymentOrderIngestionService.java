@@ -3,6 +3,7 @@ package com.backbase.stream.compositions.paymentorders.core.service;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPullRequest;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPushRequest;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestResponse;
+
 import reactor.core.publisher.Mono;
 
 public interface PaymentOrderIngestionService {
@@ -14,7 +15,6 @@ public interface PaymentOrderIngestionService {
      * @return PaymentOrderIngestResponse
      */
     Mono<PaymentOrderIngestResponse> ingestPull(PaymentOrderIngestPullRequest ingestPullRequest);
-
 
     /**
      * Ingests Payment Order in push mode.

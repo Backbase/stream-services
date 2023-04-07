@@ -7,7 +7,9 @@ import com.backbase.stream.compositions.integration.product.api.ProductIntegrati
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -27,9 +29,7 @@ public class ProductCompositionConfiguration {
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http
-                .csrf().disable()
-                .build();
+        return http.csrf().disable().build();
     }
 
     @Bean
@@ -64,8 +64,13 @@ public class ProductCompositionConfiguration {
             ObjectMapper objectMapper,
             DateFormat dateFormat) {
         com.backbase.stream.compositions.transaction.ApiClient apiClient =
-                new com.backbase.stream.compositions.transaction.ApiClient(dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(productConfigurationProperties.getChains().getTransactionComposition().getBaseUrl());
+                new com.backbase.stream.compositions.transaction.ApiClient(
+                        dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(
+                productConfigurationProperties
+                        .getChains()
+                        .getTransactionComposition()
+                        .getBaseUrl());
 
         return apiClient;
     }
@@ -76,8 +81,13 @@ public class ProductCompositionConfiguration {
             ObjectMapper objectMapper,
             DateFormat dateFormat) {
         com.backbase.stream.compositions.paymentorder.ApiClient apiClient =
-                new com.backbase.stream.compositions.paymentorder.ApiClient(dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(productConfigurationProperties.getChains().getPaymentOrderComposition().getBaseUrl());
+                new com.backbase.stream.compositions.paymentorder.ApiClient(
+                        dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(
+                productConfigurationProperties
+                        .getChains()
+                        .getPaymentOrderComposition()
+                        .getBaseUrl());
 
         return apiClient;
     }

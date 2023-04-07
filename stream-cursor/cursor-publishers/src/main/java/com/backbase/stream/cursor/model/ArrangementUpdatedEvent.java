@@ -5,9 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * Arrangement Updated Event.
- */
+/** Arrangement Updated Event. */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
@@ -15,5 +13,4 @@ import lombok.NoArgsConstructor;
 public class ArrangementUpdatedEvent extends AbstractDbsEvent {
 
     private String arrangementPutId;
-
 }

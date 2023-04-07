@@ -1,17 +1,11 @@
 package com.backbase.stream.portfolio.service.impl;
 
 import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import java.util.List;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.backbase.stream.portfolio.configuration.PortfolioSagaProperties;
 import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.HierarchyBundle;
@@ -31,26 +25,33 @@ import com.backbase.stream.portfolio.model.WealthSubPortfolioBundle;
 import com.backbase.stream.portfolio.model.WealthTransactionCategoriesBundle;
 import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
 import com.backbase.stream.portfolio.util.PortfolioTestUtil;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.List;
 
 /**
  * PortfolioIngestionReactiveService Test.
  *
  * @author Vladimir Kirchev
- *
  */
 @ExtendWith(MockitoExtension.class)
 class PortfolioIngestionReactiveServiceTest {
-    @Mock
-    private PortfolioSagaProperties portfolioSagaProperties;
+    @Mock private PortfolioSagaProperties portfolioSagaProperties;
 
-    @Mock
-    private PortfolioIntegrationService portfolioIntegrationService;
+    @Mock private PortfolioIntegrationService portfolioIntegrationService;
 
-    @InjectMocks
-    private PortfolioIngestionReactiveService portfolioIngestionReactiveService;
+    @InjectMocks private PortfolioIngestionReactiveService portfolioIngestionReactiveService;
 
     @Test
     void shouldIngestPortfolioAllocationBundles() throws Exception {
@@ -66,8 +67,9 @@ class PortfolioIngestionReactiveServiceTest {
         Mockito.when(portfolioIntegrationService.upsertAllocations(any(), any()))
                 .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
-        Flux<AllocationBundle> ingestedPortfolioAllocationBundles = portfolioIngestionReactiveService
-                .ingestPortfolioAllocationBundles(Flux.fromIterable(batchPortfolioAllocations));
+        Flux<AllocationBundle> ingestedPortfolioAllocationBundles =
+                portfolioIngestionReactiveService.ingestPortfolioAllocationBundles(
+                        Flux.fromIterable(batchPortfolioAllocations));
 
         Assertions.assertNotNull(ingestedPortfolioAllocationBundles);
 
@@ -90,7 +92,8 @@ class PortfolioIngestionReactiveServiceTest {
                 .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         Flux<Portfolio> ingestedWealthPortfolios =
-                portfolioIngestionReactiveService.ingestWealthPortfolios(Flux.fromIterable(portfolios));
+                portfolioIngestionReactiveService.ingestWealthPortfolios(
+                        Flux.fromIterable(portfolios));
 
         Assertions.assertNotNull(ingestedWealthPortfolios);
 
@@ -104,7 +107,8 @@ class PortfolioIngestionReactiveServiceTest {
     void shouldIngestWealthPortfolioValuationsBundles() throws Exception {
         WealthPortfolioValuationsBundle wealthPortfolioValuationsBundle =
                 PortfolioTestUtil.getWealthPortfolioValuationsBundle();
-        List<ValuationsBundle> batchPortfolioValuations = wealthPortfolioValuationsBundle.getBatchPortfolioValuations();
+        List<ValuationsBundle> batchPortfolioValuations =
+                wealthPortfolioValuationsBundle.getBatchPortfolioValuations();
 
         ValuationsBundle valuationsBundle0 = batchPortfolioValuations.get(0);
 
@@ -113,17 +117,22 @@ class PortfolioIngestionReactiveServiceTest {
                 .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         Flux<ValuationsBundle> ingestedValuationsBundles =
-                portfolioIngestionReactiveService.ingestValuationsBundles(Flux.fromIterable(batchPortfolioValuations));
+                portfolioIngestionReactiveService.ingestValuationsBundles(
+                        Flux.fromIterable(batchPortfolioValuations));
 
         Assertions.assertNotNull(ingestedValuationsBundles);
 
-        StepVerifier.create(ingestedValuationsBundles).assertNext(assertEqualsTo(valuationsBundle0)).verifyComplete();
+        StepVerifier.create(ingestedValuationsBundles)
+                .assertNext(assertEqualsTo(valuationsBundle0))
+                .verifyComplete();
     }
 
     @Test
     void shouldIngestWealthSubPortfolioBundles() throws Exception {
-        WealthSubPortfolioBundle wealthSubPortfolioBundle = PortfolioTestUtil.getWealthSubPortfolioBundle();
-        List<SubPortfolioBundle> batchSubPortfolios = wealthSubPortfolioBundle.getBatchSubPortfolios();
+        WealthSubPortfolioBundle wealthSubPortfolioBundle =
+                PortfolioTestUtil.getWealthSubPortfolioBundle();
+        List<SubPortfolioBundle> batchSubPortfolios =
+                wealthSubPortfolioBundle.getBatchSubPortfolios();
 
         SubPortfolioBundle subPortfolioBundle0 = batchSubPortfolios.get(0);
         SubPortfolioBundle subPortfolioBundle1 = batchSubPortfolios.get(1);
@@ -133,7 +142,8 @@ class PortfolioIngestionReactiveServiceTest {
                 .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         Flux<SubPortfolioBundle> ingestedWealthSubPortfolios =
-                portfolioIngestionReactiveService.ingestWealthSubPortfolios(Flux.fromIterable(batchSubPortfolios));
+                portfolioIngestionReactiveService.ingestWealthSubPortfolios(
+                        Flux.fromIterable(batchSubPortfolios));
 
         Assertions.assertNotNull(ingestedWealthSubPortfolios);
 
@@ -147,7 +157,8 @@ class PortfolioIngestionReactiveServiceTest {
     void shouldIngestWealthTransactionCategoriesBundles() throws Exception {
         WealthTransactionCategoriesBundle wealthTransactionCategoriesBundle =
                 PortfolioTestUtil.getWealthTransactionCategoriesBundle();
-        List<TransactionCategory> transactionCategories = wealthTransactionCategoriesBundle.getTransactionCategories();
+        List<TransactionCategory> transactionCategories =
+                wealthTransactionCategoriesBundle.getTransactionCategories();
 
         TransactionCategory transactionCategory0 = transactionCategories.get(0);
         TransactionCategory transactionCategory1 = transactionCategories.get(1);
@@ -157,7 +168,8 @@ class PortfolioIngestionReactiveServiceTest {
                 .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
         Flux<TransactionCategory> ingestedTransactionCategories =
-                portfolioIngestionReactiveService.ingestTransactionCategories(Flux.fromIterable(transactionCategories));
+                portfolioIngestionReactiveService.ingestTransactionCategories(
+                        Flux.fromIterable(transactionCategories));
 
         Assertions.assertNotNull(ingestedTransactionCategories);
 
@@ -180,12 +192,15 @@ class PortfolioIngestionReactiveServiceTest {
         Mockito.when(portfolioIntegrationService.upsertHierarchies(any(), anyString()))
                 .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
-        Flux<HierarchyBundle> ingestedHierarchyBundles = portfolioIngestionReactiveService
-                .ingestHierarchyBundles(Flux.fromIterable(batchPortfolioPositionsHierarchies));
+        Flux<HierarchyBundle> ingestedHierarchyBundles =
+                portfolioIngestionReactiveService.ingestHierarchyBundles(
+                        Flux.fromIterable(batchPortfolioPositionsHierarchies));
 
         Assertions.assertNotNull(ingestedHierarchyBundles);
 
-        StepVerifier.create(ingestedHierarchyBundles).assertNext(assertEqualsTo(hierarchyBundle0)).verifyComplete();
+        StepVerifier.create(ingestedHierarchyBundles)
+                .assertNext(assertEqualsTo(hierarchyBundle0))
+                .verifyComplete();
     }
 
     @Test
@@ -204,7 +219,9 @@ class PortfolioIngestionReactiveServiceTest {
 
         Assertions.assertNotNull(ingestedPositions);
 
-        StepVerifier.create(ingestedPositions).assertNext(assertEqualsTo(position0)).verifyComplete();
+        StepVerifier.create(ingestedPositions)
+                .assertNext(assertEqualsTo(position0))
+                .verifyComplete();
     }
 
     @Test
@@ -217,14 +234,19 @@ class PortfolioIngestionReactiveServiceTest {
         TransactionBundle transactionBundle0 = batchPortfolioTransactions.get(0);
 
         Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
-        Mockito.when(portfolioIntegrationService.upsertTransactions(anyList(), anyString(), anyString()))
+        Mockito.when(
+                        portfolioIntegrationService.upsertTransactions(
+                                anyList(), anyString(), anyString()))
                 .thenAnswer(i -> Flux.fromIterable(i.getArgument(0)));
 
-        Flux<TransactionBundle> ingestedTransactionBundles = portfolioIngestionReactiveService
-                .ingestTransactionBundles(Flux.fromIterable(batchPortfolioTransactions));
+        Flux<TransactionBundle> ingestedTransactionBundles =
+                portfolioIngestionReactiveService.ingestTransactionBundles(
+                        Flux.fromIterable(batchPortfolioTransactions));
 
         Assertions.assertNotNull(ingestedTransactionBundles);
 
-        StepVerifier.create(ingestedTransactionBundles).assertNext(assertEqualsTo(transactionBundle0)).verifyComplete();
+        StepVerifier.create(ingestedTransactionBundles)
+                .assertNext(assertEqualsTo(transactionBundle0))
+                .verifyComplete();
     }
 }

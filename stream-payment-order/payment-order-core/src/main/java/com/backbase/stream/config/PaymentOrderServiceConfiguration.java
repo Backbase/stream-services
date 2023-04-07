@@ -9,15 +9,15 @@ import com.backbase.stream.paymentorder.PaymentOrderTaskExecutor;
 import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
 import com.backbase.stream.paymentorder.repository.PaymentOrderUnitOfWorkRepository;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@EnableConfigurationProperties({
-    PaymentOrderWorkerConfigurationProperties.class
-})
+@EnableConfigurationProperties({PaymentOrderWorkerConfigurationProperties.class})
 @AllArgsConstructor
 @Configuration
 public class PaymentOrderServiceConfiguration {
@@ -31,28 +31,35 @@ public class PaymentOrderServiceConfiguration {
 
     @Bean
     public PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor(
-        PaymentOrderTaskExecutor paymentOrderTaskExecutor,
-        PaymentOrderUnitOfWorkRepository paymentOrderUnitOfWorkRepository,
-        PaymentOrderWorkerConfigurationProperties paymentOrderWorkerConfigurationProperties,
-        PaymentOrdersApi paymentOrdersApi) {
+            PaymentOrderTaskExecutor paymentOrderTaskExecutor,
+            PaymentOrderUnitOfWorkRepository paymentOrderUnitOfWorkRepository,
+            PaymentOrderWorkerConfigurationProperties paymentOrderWorkerConfigurationProperties,
+            PaymentOrdersApi paymentOrdersApi) {
 
-        return new PaymentOrderUnitOfWorkExecutor(paymentOrderUnitOfWorkRepository, paymentOrderTaskExecutor,
-                paymentOrderWorkerConfigurationProperties, paymentOrdersApi, paymentOrderTypeMapper);
+        return new PaymentOrderUnitOfWorkExecutor(
+                paymentOrderUnitOfWorkRepository,
+                paymentOrderTaskExecutor,
+                paymentOrderWorkerConfigurationProperties,
+                paymentOrdersApi,
+                paymentOrderTypeMapper);
     }
 
     @Bean
-    @ConditionalOnProperty(name = "backbase.stream.persistence", havingValue = "memory", matchIfMissing = true)
+    @ConditionalOnProperty(
+            name = "backbase.stream.persistence",
+            havingValue = "memory",
+            matchIfMissing = true)
     public PaymentOrderUnitOfWorkRepository paymentOrderUnitOfWorkRepository() {
         return new InMemoryPaymentOrderUnitOfWorkRepository();
     }
 
-    public static class InMemoryPaymentOrderUnitOfWorkRepository extends
-        InMemoryReactiveUnitOfWorkRepository<PaymentOrderTask> implements PaymentOrderUnitOfWorkRepository {
-
-    }
+    public static class InMemoryPaymentOrderUnitOfWorkRepository
+            extends InMemoryReactiveUnitOfWorkRepository<PaymentOrderTask>
+            implements PaymentOrderUnitOfWorkRepository {}
 
     @Bean
-    public PaymentOrderService paymentOrderService(PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
+    public PaymentOrderService paymentOrderService(
+            PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
         return new PaymentOrderServiceImpl(paymentOrderUnitOfWorkExecutor);
     }
 }

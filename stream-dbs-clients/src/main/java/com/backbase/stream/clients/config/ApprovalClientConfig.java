@@ -6,11 +6,13 @@ import com.backbase.dbs.approval.api.service.v2.ApprovalTypesApi;
 import com.backbase.dbs.approval.api.service.v2.PoliciesApi;
 import com.backbase.dbs.approval.api.service.v2.PolicyAssignmentsApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.DateFormat;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.text.DateFormat;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.approval")
@@ -26,7 +28,7 @@ public class ApprovalClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public ApiClient approvalsApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
-            .setBasePath(createBasePath());
+                .setBasePath(createBasePath());
     }
 
     @Bean
@@ -52,5 +54,4 @@ public class ApprovalClientConfig extends CompositeApiClientConfig {
     public PolicyAssignmentsApi policyAssignmentsApi(ApiClient approvalsApiClient) {
         return new PolicyAssignmentsApi(approvalsApiClient);
     }
-
 }

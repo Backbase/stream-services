@@ -1,14 +1,17 @@
 package com.backbase.stream.portfolio;
 
-import org.springframework.cloud.sleuth.annotation.ContinueSpan;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
 import com.backbase.stream.portfolio.exceptions.PortfolioBundleException;
 import com.backbase.stream.portfolio.service.InstrumentIntegrationService;
 import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
 import com.backbase.stream.portfolio.service.ReactiveStreamHandler;
 import com.backbase.stream.worker.StreamTaskExecutor;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.cloud.sleuth.annotation.ContinueSpan;
+import org.springframework.cloud.sleuth.annotation.SpanTag;
+
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -35,11 +38,11 @@ public class PortfolioSaga implements StreamTaskExecutor<PortfolioTask> {
     @Override
     public Mono<PortfolioTask> executeTask(PortfolioTask streamTask) {
         return upsertRegions(streamTask)
-            .flatMap(this::upsertAssetClasses)
-            .flatMap(this::upsertInstruments)
-            .flatMap(this::upsertPortfolios)
-            .flatMap(this::upsertPositions)
-            .flatMap(this::upsertAggregatePortfolios);
+                .flatMap(this::upsertAssetClasses)
+                .flatMap(this::upsertInstruments)
+                .flatMap(this::upsertPortfolios)
+                .flatMap(this::upsertPositions)
+                .flatMap(this::upsertAggregatePortfolios);
     }
 
     @Override
@@ -52,53 +55,67 @@ public class PortfolioSaga implements StreamTaskExecutor<PortfolioTask> {
     private Mono<PortfolioTask> upsertPositions(@SpanTag(value = "streamTask") PortfolioTask task) {
         task.info(INSTRUMENT_ENTITY, UPSERT, null, null, null, "Upsert positions");
         return ReactiveStreamHandler.getFluxStream(task.getData().getPositions())
-            .flatMap(portfolioIntegrationService::upsertPosition)
-            .onErrorResume(PortfolioBundleException.class,
-                ReactiveStreamHandler.error(task, POSITION_ENTITY, UPSERT_POSITIONS))
-            .collectList()
-            .map(o -> task);
+                .flatMap(portfolioIntegrationService::upsertPosition)
+                .onErrorResume(
+                        PortfolioBundleException.class,
+                        ReactiveStreamHandler.error(task, POSITION_ENTITY, UPSERT_POSITIONS))
+                .collectList()
+                .map(o -> task);
     }
 
     @ContinueSpan(log = UPSERT_INSTRUMENTS)
-    private Mono<PortfolioTask> upsertInstruments(@SpanTag(value = "streamTask") PortfolioTask task) {
+    private Mono<PortfolioTask> upsertInstruments(
+            @SpanTag(value = "streamTask") PortfolioTask task) {
         task.info(INSTRUMENT_ENTITY, UPSERT, null, null, null, "Upsert instruments");
         return ReactiveStreamHandler.getFluxStream(task.getData().getInstruments())
-            .flatMap(instrumentIntegrationService::upsertInstrument)
-            .onErrorResume(PortfolioBundleException.class,
-                ReactiveStreamHandler.error(task, INSTRUMENT_ENTITY, UPSERT_INSTRUMENTS))
-            .collectList()
-            .map(o -> task);
-
+                .flatMap(instrumentIntegrationService::upsertInstrument)
+                .onErrorResume(
+                        PortfolioBundleException.class,
+                        ReactiveStreamHandler.error(task, INSTRUMENT_ENTITY, UPSERT_INSTRUMENTS))
+                .collectList()
+                .map(o -> task);
     }
 
     @ContinueSpan(log = INSERT_AGGREGATE_PORTFOLIOS)
-    private Mono<PortfolioTask> upsertAggregatePortfolios(@SpanTag(value = "streamTask") PortfolioTask task) {
-        task.info(AGGREGATE_PORTFOLIO_ENTITY, UPSERT, null, null, null, "Upsert aggregate portfolios");
+    private Mono<PortfolioTask> upsertAggregatePortfolios(
+            @SpanTag(value = "streamTask") PortfolioTask task) {
+        task.info(
+                AGGREGATE_PORTFOLIO_ENTITY,
+                UPSERT,
+                null,
+                null,
+                null,
+                "Upsert aggregate portfolios");
         return ReactiveStreamHandler.getFluxStream(task.getData().getAggregatePortfolios())
-            .flatMap(portfolioIntegrationService::createAggregatePortfolio)
-            .onErrorResume(PortfolioBundleException.class,
-                ReactiveStreamHandler.error(task, AGGREGATE_PORTFOLIO_ENTITY, INSERT_AGGREGATE_PORTFOLIOS))
-            .collectList()
-            .map(o -> task);
-
+                .flatMap(portfolioIntegrationService::createAggregatePortfolio)
+                .onErrorResume(
+                        PortfolioBundleException.class,
+                        ReactiveStreamHandler.error(
+                                task, AGGREGATE_PORTFOLIO_ENTITY, INSERT_AGGREGATE_PORTFOLIOS))
+                .collectList()
+                .map(o -> task);
     }
 
     @ContinueSpan(log = UPSERT_ASSET_CLASSES)
-    private Mono<PortfolioTask> upsertAssetClasses(@SpanTag(value = "streamTask") PortfolioTask task) {
+    private Mono<PortfolioTask> upsertAssetClasses(
+            @SpanTag(value = "streamTask") PortfolioTask task) {
         task.info(ASSET_CLASS_ENTITY, UPSERT, null, null, null, "Upsert asset classes");
-        return instrumentIntegrationService.upsertAssetClass(task.getData().getAssetClasses())
-            .map(o -> task);
+        return instrumentIntegrationService
+                .upsertAssetClass(task.getData().getAssetClasses())
+                .map(o -> task);
     }
 
     @ContinueSpan(log = UPSERT_PORTFOLIOS)
-    private Mono<PortfolioTask> upsertPortfolios(@SpanTag(value = "streamTask") PortfolioTask task) {
+    private Mono<PortfolioTask> upsertPortfolios(
+            @SpanTag(value = "streamTask") PortfolioTask task) {
         task.info(PORTFOLIO_ENTITY, UPSERT, null, null, null, "Upsert portfolios");
         return ReactiveStreamHandler.getFluxStream(task.getData().getPortfolios())
-            .flatMap(portfolioIntegrationService::upsertPortfolio)
-            .onErrorResume(PortfolioBundleException.class,
-                ReactiveStreamHandler.error(task, PORTFOLIO_ENTITY, UPSERT_PORTFOLIOS))
-            .collectList()
-            .map(o -> task);
+                .flatMap(portfolioIntegrationService::upsertPortfolio)
+                .onErrorResume(
+                        PortfolioBundleException.class,
+                        ReactiveStreamHandler.error(task, PORTFOLIO_ENTITY, UPSERT_PORTFOLIOS))
+                .collectList()
+                .map(o -> task);
     }
 
     @ContinueSpan(log = UPSERT_REGIONS)
@@ -106,8 +123,7 @@ public class PortfolioSaga implements StreamTaskExecutor<PortfolioTask> {
         task.info(REGION_ENTITY, UPSERT, null, null, null, "Upsert Regions");
         log.info("upsert region");
         return instrumentIntegrationService
-            .upsertRegions(task.getData().getRegions())
-            .map(o -> task);
+                .upsertRegions(task.getData().getRegions())
+                .map(o -> task);
     }
-
 }

@@ -4,7 +4,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipa
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantPutBody;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
-import java.util.List;
+
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,11 +19,16 @@ public interface ParticipantMapper {
     PresentationParticipantPutBody toPresentation(LegalEntityParticipant participant);
 
     @AfterMapping
-    default void afterMapping(ServiceAgreement serviceAgreement,
-                              @MappingTarget PresentationParticipantBatchUpdate participants) {
+    default void afterMapping(
+            ServiceAgreement serviceAgreement,
+            @MappingTarget PresentationParticipantBatchUpdate participants) {
         if (participants.getParticipants() != null) {
-            participants.getParticipants().forEach(participant ->
-                participant.setExternalServiceAgreementId(serviceAgreement.getExternalId()));
+            participants
+                    .getParticipants()
+                    .forEach(
+                            participant ->
+                                    participant.setExternalServiceAgreementId(
+                                            serviceAgreement.getExternalId()));
         }
     }
 }

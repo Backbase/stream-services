@@ -1,12 +1,13 @@
 package com.backbase.stream.compositions.product.core.mapper;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.backbase.stream.compositions.product.api.model.ArrangementIngestionConfig;
 import com.backbase.stream.compositions.product.api.model.ArrangementsChainsConfig;
 import com.backbase.stream.compositions.product.api.model.TransactionCompositionChainConfig;
 import com.backbase.stream.compositions.product.core.model.RequestConfig;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class ConfigMapperTest {
     @Test
@@ -30,9 +31,7 @@ class ConfigMapperTest {
     @Test
     void mapNullTransactionComposition() {
         ArrangementIngestionConfig config =
-                new ArrangementIngestionConfig()
-                        .withChains(
-                                new ArrangementsChainsConfig());
+                new ArrangementIngestionConfig().withChains(new ArrangementsChainsConfig());
 
         ConfigMapper configMapper = new ConfigMapper();
         RequestConfig requestConfig = configMapper.map(config);
@@ -42,8 +41,7 @@ class ConfigMapperTest {
 
     @Test
     void mapNullChains() {
-        ArrangementIngestionConfig config =
-                new ArrangementIngestionConfig();
+        ArrangementIngestionConfig config = new ArrangementIngestionConfig();
 
         ConfigMapper configMapper = new ConfigMapper();
         RequestConfig requestConfig = configMapper.map(config);

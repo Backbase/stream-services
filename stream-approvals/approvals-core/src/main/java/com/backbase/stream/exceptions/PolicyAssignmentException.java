@@ -1,6 +1,7 @@
 package com.backbase.stream.exceptions;
 
 import com.backbase.stream.approval.model.PolicyAssignment;
+
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class PolicyAssignmentException extends RuntimeException {
@@ -9,8 +10,10 @@ public class PolicyAssignmentException extends RuntimeException {
     private final String message;
     private final String httpResponse;
 
-    public PolicyAssignmentException(PolicyAssignment policyAssignment, String message,
-        WebClientResponseException exception) {
+    public PolicyAssignmentException(
+            PolicyAssignment policyAssignment,
+            String message,
+            WebClientResponseException exception) {
 
         super(exception);
         httpResponse = exception.getResponseBodyAsString();

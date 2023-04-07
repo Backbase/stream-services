@@ -1,29 +1,28 @@
 package com.backbase.stream.compositions.product.http;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.backbase.stream.compositions.product.api.model.*;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class ProductControllerTest {
-    @InjectMocks
-    ProductController controller;
+    @InjectMocks ProductController controller;
 
-    @Mock
-    ProductSubController productSubController;
+    @Mock ProductSubController productSubController;
 
-    @Mock
-    ArrangementSubController arrangementSubController;
+    @Mock ArrangementSubController arrangementSubController;
 
     @Test
     void pullProductIngestion_Success() {
@@ -35,9 +34,7 @@ class ProductControllerTest {
         Mono<ResponseEntity<ProductIngestionResponse>> responseEntityMono =
                 controller.pullIngestProduct(Mono.just(request), null);
 
-        StepVerifier.create(responseEntityMono)
-                .expectNext(responseEntity)
-                .verifyComplete();
+        StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
     }
 
     @Test
@@ -50,9 +47,7 @@ class ProductControllerTest {
         Mono<ResponseEntity<ProductIngestionResponse>> responseEntityMono =
                 controller.pushIngestProduct(Mono.just(request), null);
 
-        StepVerifier.create(responseEntityMono)
-                .expectNext(responseEntity)
-                .verifyComplete();
+        StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
     }
 
     @Test
@@ -65,9 +60,7 @@ class ProductControllerTest {
         Mono<ResponseEntity<ArrangementIngestionResponse>> responseEntityMono =
                 controller.pullIngestArrangement(Mono.just(request), null);
 
-        StepVerifier.create(responseEntityMono)
-                .expectNext(responseEntity)
-                .verifyComplete();
+        StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
     }
 
     @Test
@@ -80,8 +73,6 @@ class ProductControllerTest {
         Mono<ResponseEntity<ArrangementIngestionResponse>> responseEntityMono =
                 controller.pushIngestArrangement(Mono.just(request), null);
 
-        StepVerifier.create(responseEntityMono)
-                .expectNext(responseEntity)
-                .verifyComplete();
+        StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
     }
 }

@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.legalentity.core.service;
 
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
+
 import reactor.core.publisher.Mono;
 
 public interface LegalEntityIntegrationService {

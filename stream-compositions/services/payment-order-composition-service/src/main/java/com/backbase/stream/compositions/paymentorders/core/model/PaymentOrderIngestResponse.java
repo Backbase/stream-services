@@ -1,12 +1,12 @@
 package com.backbase.stream.compositions.paymentorders.core.model;
 
-import java.util.List;
-
 import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 @Builder

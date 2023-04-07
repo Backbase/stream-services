@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class DeletePaymentOrderIngestRequest implements PaymentOrderIngestRequest  {
+public class DeletePaymentOrderIngestRequest implements PaymentOrderIngestRequest {
 
     private final String paymentOrderId;
     private final String bankReferenceId;
@@ -14,5 +14,4 @@ public class DeletePaymentOrderIngestRequest implements PaymentOrderIngestReques
     public String getBankReferenceId() {
         return bankReferenceId;
     }
-
 }

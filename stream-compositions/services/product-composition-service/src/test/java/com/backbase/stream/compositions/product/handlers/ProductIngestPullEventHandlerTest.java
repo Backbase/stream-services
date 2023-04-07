@@ -14,26 +14,26 @@ import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import com.backbase.stream.legalentity.model.ProductGroup;
-import java.util.Arrays;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
 
 @ExtendWith(MockitoExtension.class)
 class ProductIngestPullEventHandlerTest {
 
-    @Mock
-    private ProductIngestionService productIngestionService;
+    @Mock private ProductIngestionService productIngestionService;
 
-    @Mock
-    ProductGroupMapper mapper;
+    @Mock ProductGroupMapper mapper;
 
-    @Mock
-    EventBus eventBus;
+    @Mock EventBus eventBus;
 
     @Test
     @Tag("true")
@@ -66,9 +66,11 @@ class ProductIngestPullEventHandlerTest {
     void testHandleEvent_Completed(Boolean isCompletedEvents) {
         ProductGroup productGroup = new ProductGroup();
 
-        Mono<ProductIngestResponse> responseMono = Mono.just(
-                ProductIngestResponse
-                        .builder().productGroups(Arrays.asList(productGroup)).build());
+        Mono<ProductIngestResponse> responseMono =
+                Mono.just(
+                        ProductIngestResponse.builder()
+                                .productGroups(Arrays.asList(productGroup))
+                                .build());
 
         lenient().when(productIngestionService.ingestPull(any())).thenReturn(responseMono);
         ProductConfigurationProperties properties = new ProductConfigurationProperties();
@@ -76,11 +78,8 @@ class ProductIngestPullEventHandlerTest {
         events.setEnableCompleted(isCompletedEvents);
         properties.setEvents(events);
 
-        ProductPullEventHandler handler = new ProductPullEventHandler(
-                properties,
-                productIngestionService,
-                mapper,
-                eventBus);
+        ProductPullEventHandler handler =
+                new ProductPullEventHandler(properties, productIngestionService, mapper, eventBus);
 
         EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(new ProductPullEvent());
@@ -97,11 +96,8 @@ class ProductIngestPullEventHandlerTest {
         events.setEnableFailed(isFailedEvents);
         properties.setEvents(events);
 
-        ProductPullEventHandler handler = new ProductPullEventHandler(
-                properties,
-                productIngestionService,
-                mapper,
-                eventBus);
+        ProductPullEventHandler handler =
+                new ProductPullEventHandler(properties, productIngestionService, mapper, eventBus);
 
         EnvelopedEvent<ProductPullEvent> envelopedEvent = new EnvelopedEvent<>();
         ProductPullEvent event = new ProductPullEvent().withLegalEntityExternalId("externalId");

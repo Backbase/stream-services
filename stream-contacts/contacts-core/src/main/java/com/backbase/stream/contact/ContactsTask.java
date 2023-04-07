@@ -3,6 +3,7 @@ package com.backbase.stream.contact;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostResponseBody;
 import com.backbase.stream.worker.model.StreamTask;
+
 import lombok.Data;
 
 @Data

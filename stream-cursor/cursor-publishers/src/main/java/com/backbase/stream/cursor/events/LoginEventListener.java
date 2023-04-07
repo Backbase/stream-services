@@ -5,23 +5,26 @@ import com.backbase.stream.cursor.configuration.CursorServiceConfigurationProper
 import com.backbase.stream.cursor.model.LoginEvent;
 import com.backbase.stream.service.EntitlementsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.jms.annotation.JmsListener;
 
-/**
- * Simple Login Event Listener listening to events emitted by Authentication Service.
- */
+import java.io.IOException;
+
+/** Simple Login Event Listener listening to events emitted by Authentication Service. */
 @Slf4j
 public class LoginEventListener extends AbstractLoginEventListener {
 
-    private static final String VIRTUAL_TOPIC_BACKBASE_AUTH_LOGIN = "VirtualTopic.Backbase.auth.login";
+    private static final String VIRTUAL_TOPIC_BACKBASE_AUTH_LOGIN =
+            "VirtualTopic.Backbase.auth.login";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public LoginEventListener(EntitlementsService entitlementsService,
-                              TransactionService transactionService,
-                              CursorServiceConfigurationProperties properties) {
+    public LoginEventListener(
+            EntitlementsService entitlementsService,
+            TransactionService transactionService,
+            CursorServiceConfigurationProperties properties) {
         super(entitlementsService, transactionService, properties);
     }
 

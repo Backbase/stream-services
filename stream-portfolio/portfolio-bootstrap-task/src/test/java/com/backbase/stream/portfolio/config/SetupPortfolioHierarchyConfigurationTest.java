@@ -4,10 +4,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import com.backbase.stream.portfolio.PortfolioSaga;
 import com.backbase.stream.portfolio.PortfolioTask;
 import com.backbase.stream.portfolio.model.WealthBundle;
-import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,17 +16,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class SetupPortfolioHierarchyConfigurationTest {
 
-    @Mock
-    private PortfolioSaga portfolioSaga;
-    @Spy
-    private BootstrapConfigurationProperties bootstrapConfigurationProperties;
-    @InjectMocks
-    SetupPortfolioHierarchyConfiguration configuration;
+    @Mock private PortfolioSaga portfolioSaga;
+    @Spy private BootstrapConfigurationProperties bootstrapConfigurationProperties;
+    @InjectMocks SetupPortfolioHierarchyConfiguration configuration;
 
     @Test
     void commandLineRunner() {
@@ -36,8 +37,10 @@ class SetupPortfolioHierarchyConfigurationTest {
 
         configuration.execute();
 
-        verify(portfolioSaga).executeTask(
-            Mockito.argThat(portfolioTask -> portfolioTask.getData().equals(wealthBundle)));
+        verify(portfolioSaga)
+                .executeTask(
+                        Mockito.argThat(
+                                portfolioTask -> portfolioTask.getData().equals(wealthBundle)));
     }
 
     @Test
@@ -47,5 +50,4 @@ class SetupPortfolioHierarchyConfigurationTest {
 
         verify(portfolioSaga, never()).executeTask(any());
     }
-
 }

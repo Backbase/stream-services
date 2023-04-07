@@ -2,9 +2,11 @@ package com.backbase.stream.portfolio.configuration;
 
 import com.backbase.portfolio.integration.api.service.ApiClient;
 import com.backbase.stream.clients.config.PortfolioApiConfiguration;
+
 import org.junit.jupiter.api.Test;
 
-class PortfolioApiConfigurationTest extends BaseApiConfigurationTest<PortfolioApiConfiguration, ApiClient> {
+class PortfolioApiConfigurationTest
+        extends BaseApiConfigurationTest<PortfolioApiConfiguration, ApiClient> {
 
     @Override
     public ApiClient getClient() {
@@ -48,7 +50,8 @@ class PortfolioApiConfigurationTest extends BaseApiConfigurationTest<PortfolioAp
 
     @Test
     void portfolioPositionsHierarchyManagementApi() {
-        assertBaseUrl(getConfig().portfolioPositionsHierarchyManagementApi(getClient()).getApiClient());
+        assertBaseUrl(
+                getConfig().portfolioPositionsHierarchyManagementApi(getClient()).getApiClient());
     }
 
     @Test
@@ -58,7 +61,10 @@ class PortfolioApiConfigurationTest extends BaseApiConfigurationTest<PortfolioAp
 
     @Test
     void portfolioCumulativePerformanceManagementApi() {
-        assertBaseUrl(getConfig().portfolioCumulativePerformanceManagementApi(getClient()).getApiClient());
+        assertBaseUrl(
+                getConfig()
+                        .portfolioCumulativePerformanceManagementApi(getClient())
+                        .getApiClient());
     }
 
     @Test
@@ -70,5 +76,4 @@ class PortfolioApiConfigurationTest extends BaseApiConfigurationTest<PortfolioAp
     void subPortfolioManagementApi() {
         assertBaseUrl(getConfig().subPortfolioManagementApi(getClient()).getApiClient());
     }
-
 }

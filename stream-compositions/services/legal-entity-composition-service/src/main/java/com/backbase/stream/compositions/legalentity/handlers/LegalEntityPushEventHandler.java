@@ -6,7 +6,9 @@ import com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntity
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,7 +20,7 @@ public class LegalEntityPushEventHandler implements EventHandler<LegalEntityPush
 
     @Override
     public void handle(EnvelopedEvent<LegalEntityPushEvent> envelopedEvent) {
-        //TODO: TBD implementation of Push events
+        // TODO: TBD implementation of Push events
         legalEntityIngestionService.ingestPush(buildRequest(envelopedEvent));
     }
 
@@ -28,7 +30,8 @@ public class LegalEntityPushEventHandler implements EventHandler<LegalEntityPush
      * @param envelopedEvent EnvelopedEvent<LegalEntityIngestPushEvent>
      * @return LegalEntityIngestPullRequest
      */
-    private LegalEntityPushRequest buildRequest(EnvelopedEvent<LegalEntityPushEvent> envelopedEvent) {
+    private LegalEntityPushRequest buildRequest(
+            EnvelopedEvent<LegalEntityPushEvent> envelopedEvent) {
         return LegalEntityPushRequest.builder()
                 .legalEntity(mapper.mapEventToStream(envelopedEvent.getEvent().getLegalEntity()))
                 .build();

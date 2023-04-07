@@ -8,9 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SetupApprovalsHierarchyTaskApplication {
 
     public static void main(String[] args) {
-        SpringApplication springApplication = new SpringApplication(SetupApprovalsHierarchyTaskApplication.class);
+        SpringApplication springApplication =
+                new SpringApplication(SetupApprovalsHierarchyTaskApplication.class);
         springApplication.setWebApplicationType(WebApplicationType.NONE);
         springApplication.run(args);
     }
-
 }

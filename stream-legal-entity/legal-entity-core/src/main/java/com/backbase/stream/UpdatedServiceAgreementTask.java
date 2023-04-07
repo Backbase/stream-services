@@ -2,6 +2,7 @@ package com.backbase.stream;
 
 import com.backbase.stream.legalentity.model.UpdatedServiceAgreement;
 import com.backbase.stream.worker.model.StreamTask;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,9 @@
 repos:
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.8.0
+    hooks:
+      - id: pretty-format-java
+        args: [ --autofix, --aosp, --google-java-formatter-version=1.16.0 ]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -7,8 +12,10 @@ repos:
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: check-executables-have-shebangs
+      - id: destroyed-symlinks
+      - id: check-xml
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.29.0
+    rev: v1.30.0
     hooks:
       - id: yamllint
         exclude: ^helm/stream-bootstrap-task/templates/job.yaml

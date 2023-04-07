@@ -10,15 +10,17 @@ import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionUnitOfWorkExecutor;
 import com.backbase.stream.transaction.TransactionsQuery;
 import com.backbase.stream.worker.model.UnitOfWork;
-import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Main Transaction Ingestion Service. Supports Retry and back pressure and controller number of transactions to ingest
- * per second.
+ * Main Transaction Ingestion Service. Supports Retry and back pressure and controller number of
+ * transactions to ingest per second.
  */
 @Slf4j
 public class TransactionServiceImpl implements TransactionService {
@@ -26,8 +28,9 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionPresentationServiceApi transactionPresentationServiceApi;
     private final TransactionUnitOfWorkExecutor transactionTaskExecutor;
 
-    public TransactionServiceImpl(TransactionPresentationServiceApi transactionPresentationServiceApi,
-                                  TransactionUnitOfWorkExecutor transactionTaskExecutor) {
+    public TransactionServiceImpl(
+            TransactionPresentationServiceApi transactionPresentationServiceApi,
+            TransactionUnitOfWorkExecutor transactionTaskExecutor) {
         this.transactionTaskExecutor = transactionTaskExecutor;
         this.transactionPresentationServiceApi = transactionPresentationServiceApi;
     }
@@ -39,17 +42,18 @@ public class TransactionServiceImpl implements TransactionService {
      * @return Ingestion Transactions IDs
      */
     @Override
-    public Flux<UnitOfWork<TransactionTask>> processTransactions(Flux<TransactionsPostRequestBody> transactions) {
-        Flux<UnitOfWork<TransactionTask>> unitOfWorkFlux = transactionTaskExecutor.prepareUnitOfWork(transactions);
+    public Flux<UnitOfWork<TransactionTask>> processTransactions(
+            Flux<TransactionsPostRequestBody> transactions) {
+        Flux<UnitOfWork<TransactionTask>> unitOfWorkFlux =
+                transactionTaskExecutor.prepareUnitOfWork(transactions);
         return unitOfWorkFlux.flatMap(transactionTaskExecutor::executeUnitOfWork);
     }
-
 
     /**
      * Retrieve latest transactions for an Arrangement.
      *
      * @param arrangementId external productId
-     * @param size          number of transactions to return.
+     * @param size number of transactions to return.
      * @return List of transactions
      */
     @Override
@@ -58,12 +62,17 @@ public class TransactionServiceImpl implements TransactionService {
         transactionsQuery.setArrangementId(arrangementId);
         transactionsQuery.setSize(size);
         return getTransactions(transactionsQuery)
-            .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
-                log.info("No transactions found for: {} message: {}", arrangementId, ex.getResponseBodyAsString());
-                return Flux.empty();
-            }).doOnError(Throwable.class, ex -> log.error("Error: {}", ex.getMessage(), ex));
+                .onErrorResume(
+                        WebClientResponseException.NotFound.class,
+                        ex -> {
+                            log.info(
+                                    "No transactions found for: {} message: {}",
+                                    arrangementId,
+                                    ex.getResponseBodyAsString());
+                            return Flux.empty();
+                        })
+                .doOnError(Throwable.class, ex -> log.error("Error: {}", ex.getMessage(), ex));
     }
-
 
     /**
      * Remove transactions from DBS.
@@ -73,11 +82,14 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     @SuppressWarnings("WeakerAccess")
-    public Mono<Void> deleteTransactions(Flux<TransactionsDeleteRequestBody> transactionItemDelete) {
+    public Mono<Void> deleteTransactions(
+            Flux<TransactionsDeleteRequestBody> transactionItemDelete) {
         return transactionItemDelete
-            .collectList()
-            .flatMap(item -> transactionPresentationServiceApi.postDelete(item, null, null, null));
-
+                .collectList()
+                .flatMap(
+                        item ->
+                                transactionPresentationServiceApi.postDelete(
+                                        item, null, null, null));
     }
 
     /**
@@ -89,42 +101,42 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Flux<TransactionItem> getTransactions(TransactionsQuery transactionsQuery) {
         return transactionPresentationServiceApi.getTransactions(
-            null, // xTransactionsUserId
-            null, // xTransactionsServiceAgreementId
-            null, // xTransactionsArrangementId
-            transactionsQuery.getAmountGreaterThan(),
-            transactionsQuery.getAmountLessThan(),
-            transactionsQuery.getBookingDateGreaterThan(),
-            transactionsQuery.getBookingDateLessThan(),
-            transactionsQuery.getTypes(),
-            transactionsQuery.getDescription(),
-            transactionsQuery.getReference(),
-            transactionsQuery.getTypeGroups(),
-            transactionsQuery.getCounterPartyName(),
-            transactionsQuery.getCounterPartyAccountNumber(),
-            transactionsQuery.getCreditDebitIndicator(),
-            transactionsQuery.getCategories(),
-            transactionsQuery.getBillingStatus(),
-            transactionsQuery.getState(),
-            transactionsQuery.getCurrency(),
-            transactionsQuery.getNotes(),
-            transactionsQuery.getId(),
-            transactionsQuery.getArrangementId(),
-            transactionsQuery.getArrangementsIds(),
-            transactionsQuery.getFromCheckSerialNumber(),
-            transactionsQuery.getToCheckSerialNumber(),
-            transactionsQuery.getCheckSerialNumbers(),
-            transactionsQuery.getQuery(),
-            transactionsQuery.getFrom(),
-            transactionsQuery.getCursor(),
-            transactionsQuery.getSize(),
-            transactionsQuery.getOrderBy(),
-            transactionsQuery.getDirection(),
-            transactionsQuery.getSecDirection());
+                null, // xTransactionsUserId
+                null, // xTransactionsServiceAgreementId
+                null, // xTransactionsArrangementId
+                transactionsQuery.getAmountGreaterThan(),
+                transactionsQuery.getAmountLessThan(),
+                transactionsQuery.getBookingDateGreaterThan(),
+                transactionsQuery.getBookingDateLessThan(),
+                transactionsQuery.getTypes(),
+                transactionsQuery.getDescription(),
+                transactionsQuery.getReference(),
+                transactionsQuery.getTypeGroups(),
+                transactionsQuery.getCounterPartyName(),
+                transactionsQuery.getCounterPartyAccountNumber(),
+                transactionsQuery.getCreditDebitIndicator(),
+                transactionsQuery.getCategories(),
+                transactionsQuery.getBillingStatus(),
+                transactionsQuery.getState(),
+                transactionsQuery.getCurrency(),
+                transactionsQuery.getNotes(),
+                transactionsQuery.getId(),
+                transactionsQuery.getArrangementId(),
+                transactionsQuery.getArrangementsIds(),
+                transactionsQuery.getFromCheckSerialNumber(),
+                transactionsQuery.getToCheckSerialNumber(),
+                transactionsQuery.getCheckSerialNumbers(),
+                transactionsQuery.getQuery(),
+                transactionsQuery.getFrom(),
+                transactionsQuery.getCursor(),
+                transactionsQuery.getSize(),
+                transactionsQuery.getOrderBy(),
+                transactionsQuery.getDirection(),
+                transactionsQuery.getSecDirection());
     }
 
     /**
-     * Update Transactions  with a new category or billing status.
+     * Update Transactions with a new category or billing status.
      *
      * @param transactionItems Updated category and billing status fields
      * @return empty mono on completion
@@ -132,8 +144,11 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Mono<Void> patchTransactions(Flux<TransactionsPatchRequestBody> transactionItems) {
         return transactionItems
-            .collectList()
-            .flatMap(items -> transactionPresentationServiceApi.patchTransactions(items, null, null, null));
+                .collectList()
+                .flatMap(
+                        items ->
+                                transactionPresentationServiceApi.patchTransactions(
+                                        items, null, null, null));
     }
 
     /**
@@ -145,8 +160,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Mono<Void> postRefresh(Flux<ArrangementItem> arrangementItems) {
         return arrangementItems
-            .collectList()
-            .flatMap(item -> transactionPresentationServiceApi.postRefresh(item, null, null, null));
+                .collectList()
+                .flatMap(
+                        item ->
+                                transactionPresentationServiceApi.postRefresh(
+                                        item, null, null, null));
     }
-
 }

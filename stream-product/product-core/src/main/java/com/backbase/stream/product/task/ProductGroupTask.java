@@ -2,6 +2,7 @@ package com.backbase.stream.product.task;
 
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.worker.model.StreamTask;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,6 @@ public class ProductGroupTask extends StreamTask {
     public ProductGroup getData() {
         return productGroup;
     }
-
 
     public ProductGroupTask data(ProductGroup productGroup) {
         this.productGroup = productGroup;

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.configuration.AccessControlConfiguration;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
@@ -20,42 +21,50 @@ public class BatchResponseUtilsTest {
     @Test
     void shouldThrowExceptionWhenBatchIsInconsistentByDefault() {
         contextRunner
-            .withBean(WebClientAutoConfiguration.class)
-            .withBean(DbsApiClientsAutoConfiguration.class)
-            .withBean(InterServiceWebClientConfiguration.class)
-            .withUserConfiguration(AccessControlConfiguration.class)
-            .run(context -> {
-                assertThat(context)
-                    .getBean(BatchResponseUtils.class)
-                    .hasFieldOrProperty("validateAtomicResponse")
-                    .extracting("validateAtomicResponse")
-                    .isEqualTo(true);
+                .withBean(WebClientAutoConfiguration.class)
+                .withBean(DbsApiClientsAutoConfiguration.class)
+                .withBean(InterServiceWebClientConfiguration.class)
+                .withUserConfiguration(AccessControlConfiguration.class)
+                .run(
+                        context -> {
+                            assertThat(context)
+                                    .getBean(BatchResponseUtils.class)
+                                    .hasFieldOrProperty("validateAtomicResponse")
+                                    .extracting("validateAtomicResponse")
+                                    .isEqualTo(true);
 
-                BatchResponseUtils utils = context.getBean(BatchResponseUtils.class);
-                Assertions.assertThrows(WebClientResponseException.class,
-                    () -> utils.checkBatchResponseItem(null, null, "400", null, null),
-                    "WebClientResponseException was expected");
-            });
+                            BatchResponseUtils utils = context.getBean(BatchResponseUtils.class);
+                            Assertions.assertThrows(
+                                    WebClientResponseException.class,
+                                    () ->
+                                            utils.checkBatchResponseItem(
+                                                    null, null, "400", null, null),
+                                    "WebClientResponseException was expected");
+                        });
     }
 
     @Test
     void shouldNotThrowExceptionWhenBatchIsInconsistentIfDisabled() {
         contextRunner
-            .withBean(WebClientAutoConfiguration.class)
-            .withBean(DbsApiClientsAutoConfiguration.class)
-            .withBean(InterServiceWebClientConfiguration.class)
-            .withUserConfiguration(AccessControlConfiguration.class)
-            .withPropertyValues("backbase.stream.dbs.batch.validate-atomic-response=false")
-            .run(context -> {
-                assertThat(context)
-                    .getBean(BatchResponseUtils.class)
-                    .hasFieldOrProperty("validateAtomicResponse")
-                    .extracting("validateAtomicResponse")
-                    .isEqualTo(false);
+                .withBean(WebClientAutoConfiguration.class)
+                .withBean(DbsApiClientsAutoConfiguration.class)
+                .withBean(InterServiceWebClientConfiguration.class)
+                .withUserConfiguration(AccessControlConfiguration.class)
+                .withPropertyValues("backbase.stream.dbs.batch.validate-atomic-response=false")
+                .run(
+                        context -> {
+                            assertThat(context)
+                                    .getBean(BatchResponseUtils.class)
+                                    .hasFieldOrProperty("validateAtomicResponse")
+                                    .extracting("validateAtomicResponse")
+                                    .isEqualTo(false);
 
-                BatchResponseUtils utils = context.getBean(BatchResponseUtils.class);
-                String response = utils.checkBatchResponseItem("Expected Response", null, "400", null, null);
-                Assertions.assertEquals("Expected Response", response, "Validation should be disabled");
-            });
+                            BatchResponseUtils utils = context.getBean(BatchResponseUtils.class);
+                            String response =
+                                    utils.checkBatchResponseItem(
+                                            "Expected Response", null, "400", null, null);
+                            Assertions.assertEquals(
+                                    "Expected Response", response, "Validation should be disabled");
+                        });
     }
 }

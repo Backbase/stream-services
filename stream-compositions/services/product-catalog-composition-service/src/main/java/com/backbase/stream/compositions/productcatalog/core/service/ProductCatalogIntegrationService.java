@@ -2,6 +2,7 @@ package com.backbase.stream.compositions.productcatalog.core.service;
 
 import com.backbase.stream.compositions.integration.productcatalog.model.ProductCatalog;
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestPullRequest;
+
 import reactor.core.publisher.Mono;
 
 public interface ProductCatalogIntegrationService {

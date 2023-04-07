@@ -4,18 +4,16 @@ import com.backbase.stream.compositions.integration.product.model.PullProductGro
 import com.backbase.stream.compositions.integration.product.model.PullProductGroupResponse;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 /**
- * This is a mapper for ProductGroup objects used in:
- * - stream-models/legal-entity-model
- * - product-composition-api
- * - product-integration-api
- * - product-events
- * <p>
- * All ProductGroup objects used in above modules have exactly same structures they are built
+ * This is a mapper for ProductGroup objects used in: - stream-models/legal-entity-model -
+ * product-composition-api - product-integration-api - product-events
+ *
+ * <p>All ProductGroup objects used in above modules have exactly same structures they are built
  * from the common /api folder.
  */
 @Component
@@ -64,7 +62,8 @@ public interface ProductGroupMapper {
      * @return Stream product group
      */
     com.backbase.stream.legalentity.model.ProductGroup mapEventToStream(
-            com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductGroup productGroup);
+            com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductGroup
+                    productGroup);
 
     /**
      * Maps steam ProductGroup to event ProductGroup model.
@@ -81,7 +80,8 @@ public interface ProductGroupMapper {
      * @param productIngestPullRequest
      * @return Pull Product Group Request object
      */
-    PullProductGroupRequest mapStreamToIntegration(ProductIngestPullRequest productIngestPullRequest);
+    PullProductGroupRequest mapStreamToIntegration(
+            ProductIngestPullRequest productIngestPullRequest);
 
     /**
      * Maps integration response to Stream response
@@ -89,5 +89,6 @@ public interface ProductGroupMapper {
      * @param pullProductGroupResponse
      * @return Stream Product Response
      */
-    ProductIngestResponse mapResponseIntegrationToStream(PullProductGroupResponse pullProductGroupResponse);
+    ProductIngestResponse mapResponseIntegrationToStream(
+            PullProductGroupResponse pullProductGroupResponse);
 }

@@ -5,8 +5,10 @@ import com.backbase.dbs.approval.api.service.v2.ApprovalTypesApi;
 import com.backbase.dbs.approval.api.service.v2.PoliciesApi;
 import com.backbase.dbs.approval.api.service.v2.PolicyAssignmentsApi;
 import com.backbase.stream.service.ApprovalsIntegrationService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -18,12 +20,13 @@ import org.springframework.context.annotation.Import;
 public class ApprovalsServiceConfiguration {
 
     @Bean
-    public ApprovalsIntegrationService approvalIntegrationService(ApprovalTypesApi approvalTypesApi,
-        ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi, PoliciesApi policiesApi,
-        PolicyAssignmentsApi policyAssignmentsApi) {
+    public ApprovalsIntegrationService approvalIntegrationService(
+            ApprovalTypesApi approvalTypesApi,
+            ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi,
+            PoliciesApi policiesApi,
+            PolicyAssignmentsApi policyAssignmentsApi) {
 
-        return new ApprovalsIntegrationService(approvalTypesApi, approvalTypeAssignmentsApi,
-            policiesApi, policyAssignmentsApi);
+        return new ApprovalsIntegrationService(
+                approvalTypesApi, approvalTypeAssignmentsApi, policiesApi, policyAssignmentsApi);
     }
-
 }

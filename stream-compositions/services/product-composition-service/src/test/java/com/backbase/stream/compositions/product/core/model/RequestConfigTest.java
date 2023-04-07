@@ -1,10 +1,11 @@
 package com.backbase.stream.compositions.product.core.model;
 
-import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
+
+import org.junit.jupiter.api.Test;
 
 class RequestConfigTest {
     @Test
@@ -26,17 +27,16 @@ class RequestConfigTest {
     }
 
     private RequestConfig buiildRequestConfig(Boolean enabled, Boolean async) {
-        return RequestConfig
-                .builder()
-                .chains(RequestConfig.Chains
-                        .builder()
-                        .transactionComposition(
-                                ProductConfigurationProperties.TransactionComposition
-                                        .builder()
-                                        .enabled(enabled)
-                                        .async(async)
-                                        .build())
-                        .build())
+        return RequestConfig.builder()
+                .chains(
+                        RequestConfig.Chains.builder()
+                                .transactionComposition(
+                                        ProductConfigurationProperties.TransactionComposition
+                                                .builder()
+                                                .enabled(enabled)
+                                                .async(async)
+                                                .build())
+                                .build())
                 .build();
     }
 }

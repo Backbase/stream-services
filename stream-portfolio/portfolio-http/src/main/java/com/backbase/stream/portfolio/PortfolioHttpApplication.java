@@ -7,12 +7,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * Portfolio Http Application.
  *
  * @author Vladimir Kirchev
- *
  */
 @SpringBootApplication
 public class PortfolioHttpApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PortfolioHttpApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PortfolioHttpApplication.class, args);
+    }
 }

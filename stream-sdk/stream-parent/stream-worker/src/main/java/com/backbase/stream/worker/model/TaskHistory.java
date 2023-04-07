@@ -1,7 +1,8 @@
 package com.backbase.stream.worker.model;
 
-import java.time.OffsetDateTime;
 import lombok.Data;
+
+import java.time.OffsetDateTime;
 
 @Data
 public class TaskHistory {
@@ -28,16 +29,30 @@ public class TaskHistory {
 
     /**
      * To String method.
+     *
      * @return A human-readable string
      */
     public String toDisplayString() {
         String entityType = entity != null ? entity.toLowerCase() : "";
-        if(errorMessage == null) {
-            return String.format("%s [%s] [%s] [%s] %s - %s", timestamp, severity, String.format("%1$25s", entityType), String.format("%1$15s", operation), externalId, message);
+        if (errorMessage == null) {
+            return String.format(
+                    "%s [%s] [%s] [%s] %s - %s",
+                    timestamp,
+                    severity,
+                    String.format("%1$25s", entityType),
+                    String.format("%1$15s", operation),
+                    externalId,
+                    message);
         } else {
-            return String.format("%s [%s] [%s] [%s] %s - %s: Error Message: %s", timestamp, severity, String.format("%1$25s", entityType), String.format("%1$15s", operation), externalId, message, errorMessage);
-
+            return String.format(
+                    "%s [%s] [%s] [%s] %s - %s: Error Message: %s",
+                    timestamp,
+                    severity,
+                    String.format("%1$25s", entityType),
+                    String.format("%1$15s", operation),
+                    externalId,
+                    message,
+                    errorMessage);
         }
-
     }
 }

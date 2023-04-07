@@ -10,23 +10,24 @@ import com.backbase.dbs.limit.api.service.v2.model.Entity;
 import com.backbase.dbs.limit.api.service.v2.model.LimitByUuidPutResponseBody;
 import com.backbase.dbs.limit.api.service.v2.model.LimitsPostResponseBody;
 import com.backbase.dbs.limit.api.service.v2.model.LimitsRetrievalPostResponseBody;
-import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class LimitsSagaTest {
 
-    @InjectMocks
-    private LimitsSaga limitsSaga;
+    @InjectMocks private LimitsSaga limitsSaga;
 
-    @Mock
-    private LimitsServiceApi limitsApi;
+    @Mock private LimitsServiceApi limitsApi;
 
     @Test
     void createLimits() {
@@ -53,7 +54,8 @@ class LimitsSagaTest {
         var retrieval = new LimitsRetrievalPostResponseBody();
         retrieval.uuid("uuid");
         when(limitsApi.postLimitsRetrieval(any())).thenReturn(Flux.just(retrieval));
-        when(limitsApi.putLimitByUuid(any(), any())).thenReturn(Mono.just(new LimitByUuidPutResponseBody()));
+        when(limitsApi.putLimitByUuid(any(), any()))
+                .thenReturn(Mono.just(new LimitByUuidPutResponseBody()));
 
         // When
         Mono<LimitsTask> result = limitsSaga.executeTask(limitsTask);
@@ -62,7 +64,6 @@ class LimitsSagaTest {
         // Then
         verify(limitsApi).postLimitsRetrieval(any());
         verify(limitsApi).putLimitByUuid(any(), any());
-
     }
 
     private LimitsTask createTask() {
@@ -75,5 +76,4 @@ class LimitsSagaTest {
         request.setUserBBID("internalUserId");
         return new LimitsTask("1", request);
     }
-
 }

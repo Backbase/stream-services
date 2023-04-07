@@ -13,8 +13,7 @@ import com.backbase.stream.productcatalog.model.ProductCatalog;
 import com.backbase.streams.compositions.test.IntegrationTest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URI;
+
 import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,7 +30,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.net.URI;
 
 @DirtiesContext
 @SpringBootTest(classes = {ProductCatalogCompositionApplication.class})
@@ -43,11 +46,9 @@ class ProductCatalogControllerIT extends IntegrationTest {
     private MockServerClient integrationServerClient;
     private static BrokerService broker;
 
-    @MockBean
-    ReactiveProductCatalogService reactiveProductCatalogService;
+    @MockBean ReactiveProductCatalogService reactiveProductCatalogService;
 
-    @Autowired
-    ProductCatalogController productCatalogController;
+    @Autowired ProductCatalogController productCatalogController;
 
     @BeforeAll
     static void initActiveMqBroker() throws Exception {
@@ -62,16 +63,15 @@ class ProductCatalogControllerIT extends IntegrationTest {
     void initializeIntegrationServer() throws IOException {
         integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
         integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
-        integrationServerClient.when(
-                request()
-                        .withMethod("GET")
-                        .withPath("/service-api/v2/product-catalog"))
+        integrationServerClient
+                .when(request().withMethod("GET").withPath("/service-api/v2/product-catalog"))
                 .respond(
                         response()
                                 .withStatusCode(200)
                                 .withContentType(MediaType.APPLICATION_JSON)
-                                .withBody(readContentFromClasspath("integration-data/response.json"))
-                );
+                                .withBody(
+                                        readContentFromClasspath(
+                                                "integration-data/response.json")));
     }
 
     @AfterEach
@@ -82,8 +82,9 @@ class ProductCatalogControllerIT extends IntegrationTest {
     @Test
     void pullIngestLegalEntity_Success() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode node = mapper.readTree(readContentFromClasspath("integration-data/response.json"))
-            .get("productCatalog");
+        JsonNode node =
+                mapper.readTree(readContentFromClasspath("integration-data/response.json"))
+                        .get("productCatalog");
         ProductCatalog productCatalog = mapper.treeToValue(node, ProductCatalog.class);
 
         when(reactiveProductCatalogService.setupProductCatalog(any()))
@@ -97,8 +98,15 @@ class ProductCatalogControllerIT extends IntegrationTest {
 
         ProductCatalogPushIngestionRequest request = new ProductCatalogPushIngestionRequest();
         URI uri = URI.create("/service-api/v2/pull-ingestion");
-        WebTestClient webTestClient = WebTestClient.bindToController(productCatalogController).build();
+        WebTestClient webTestClient =
+                WebTestClient.bindToController(productCatalogController).build();
 
-        webTestClient.post().uri(uri).body(Mono.just(request), ProductCatalogPushIngestionRequest.class).exchange().expectStatus().isCreated();
+        webTestClient
+                .post()
+                .uri(uri)
+                .body(Mono.just(request), ProductCatalogPushIngestionRequest.class)
+                .exchange()
+                .expectStatus()
+                .isCreated();
     }
 }

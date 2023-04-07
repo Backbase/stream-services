@@ -1,11 +1,13 @@
 package com.backbase.stream.transaction;
 
 import com.backbase.dbs.transaction.api.service.v2.model.TransactionState;
-import java.math.BigDecimal;
-import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -41,5 +43,4 @@ public class TransactionsQuery {
     private String orderBy;
     private String direction;
     private String secDirection;
-
 }

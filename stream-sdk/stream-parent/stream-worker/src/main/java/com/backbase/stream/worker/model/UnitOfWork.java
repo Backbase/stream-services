@@ -1,13 +1,13 @@
 package com.backbase.stream.worker.model;
 
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.annotation.Id;
+
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.annotation.Id;
-import org.springframework.util.CollectionUtils;
 
 @Data
 @Slf4j
@@ -19,6 +19,7 @@ public class UnitOfWork<T extends StreamTask> {
 
     /**
      * Create Unit Of Work for list of tasks.
+     *
      * @param unitOfOWorkId The ID of the unit of work
      * @param tasks The list of Stream Tasks to execute
      * @param <T> Class extending StreamTask
@@ -46,8 +47,7 @@ public class UnitOfWork<T extends StreamTask> {
         ROLLBACK_FAILED,
     }
 
-    @Id
-    private String unitOfOWorkId;
+    @Id private String unitOfOWorkId;
 
     private List<T> streamTasks;
 
@@ -61,18 +61,15 @@ public class UnitOfWork<T extends StreamTask> {
 
     private int retries = 0;
 
-    /**
-     * Outputs the summary of the unit of work to the log in debug.
-     */
+    /** Outputs the summary of the unit of work to the log in debug. */
     public void logSummary() {
         if (log.isDebugEnabled()) {
-            log.debug("UnitOfWork: {} Started at: {} Finished at: {} State: {}",
-                unitOfOWorkId,
-                startedAt,
-                finishedAt,
-                state
-            );
+            log.debug(
+                    "UnitOfWork: {} Started at: {} Finished at: {} State: {}",
+                    unitOfOWorkId,
+                    startedAt,
+                    finishedAt,
+                    state);
         }
     }
-
 }

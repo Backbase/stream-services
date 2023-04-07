@@ -3,12 +3,14 @@ package com.backbase.stream.clients.config;
 import com.backbase.identity.integration.api.service.ApiClient;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.DateFormat;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.text.DateFormat;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.identity.integration")
@@ -25,13 +27,13 @@ public class IdentityIntegrationClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public ApiClient identityApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
-            .setBasePath(createBasePath());
+                .setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public IdentityIntegrationServiceApi identityIntegrationServiceApi(ApiClient identityApiClient) {
+    public IdentityIntegrationServiceApi identityIntegrationServiceApi(
+            ApiClient identityApiClient) {
         return new IdentityIntegrationServiceApi(identityApiClient);
     }
-
 }

@@ -1,6 +1,7 @@
 package com.backbase.stream.compositions.product.core.model;
 
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -10,6 +10,7 @@ import com.backbase.stream.compositions.transaction.cursor.core.service.Transact
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursor;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,13 +18,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionCursorControllerTest {
 
-    @Mock
-    TransactionCursorService transactionCursorService;
+    @Mock TransactionCursorService transactionCursorService;
 
     TransactionCursorController transactionCursorController;
 
@@ -34,8 +35,7 @@ class TransactionCursorControllerTest {
 
     @Test
     void testDeleteCursor_success() {
-        when(transactionCursorService.deleteByArrangementId(any()))
-                .thenReturn(Mono.empty());
+        when(transactionCursorService.deleteByArrangementId(any())).thenReturn(Mono.empty());
         transactionCursorController.deleteByArrangementId(any(), null);
         verify(transactionCursorService).deleteByArrangementId(any());
     }
@@ -43,10 +43,14 @@ class TransactionCursorControllerTest {
     @Test
     void testFindByArrangementId_success() {
         when(transactionCursorService.findByArrangementId(any()))
-                .thenReturn(Mono.just(new ResponseEntity<>
-                        (new TransactionCursorResponse().withCursor(new TransactionCursor()), HttpStatus.OK)));
-        Mono<ResponseEntity<TransactionCursorResponse>> responseEntity = transactionCursorController
-                .getByArrangementId(anyString(), null);
+                .thenReturn(
+                        Mono.just(
+                                new ResponseEntity<>(
+                                        new TransactionCursorResponse()
+                                                .withCursor(new TransactionCursor()),
+                                        HttpStatus.OK)));
+        Mono<ResponseEntity<TransactionCursorResponse>> responseEntity =
+                transactionCursorController.getByArrangementId(anyString(), null);
         assertNotNull(responseEntity.block().getBody());
         verify(transactionCursorService).findByArrangementId(any());
     }
@@ -54,14 +58,17 @@ class TransactionCursorControllerTest {
     @Test
     void testFindById_success() {
         when(transactionCursorService.findById(any()))
-                .thenReturn(Mono.just(new ResponseEntity<>
-                        (new TransactionCursorResponse().withCursor(new TransactionCursor()), HttpStatus.OK)));
-        Mono<ResponseEntity<TransactionCursorResponse>> responseEntity = transactionCursorController
-                .getById(anyString(), null);
+                .thenReturn(
+                        Mono.just(
+                                new ResponseEntity<>(
+                                        new TransactionCursorResponse()
+                                                .withCursor(new TransactionCursor()),
+                                        HttpStatus.OK)));
+        Mono<ResponseEntity<TransactionCursorResponse>> responseEntity =
+                transactionCursorController.getById(anyString(), null);
         assertNotNull(responseEntity.block().getBody());
         verify(transactionCursorService).findById(any());
     }
-
 
     @Test
     void testPatchByArrangementId_success() {
@@ -74,10 +81,11 @@ class TransactionCursorControllerTest {
     @Test
     void testUpsertCursor_success() {
         when(transactionCursorService.upsertCursor(any()))
-                .thenReturn(Mono.just(new ResponseEntity<>
-                        (new TransactionCursorUpsertResponse(), HttpStatus.OK)));
+                .thenReturn(
+                        Mono.just(
+                                new ResponseEntity<>(
+                                        new TransactionCursorUpsertResponse(), HttpStatus.OK)));
         transactionCursorController.upsertCursor(any(), null);
         verify(transactionCursorService).upsertCursor(any());
     }
-
 }

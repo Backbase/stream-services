@@ -1,5 +1,8 @@
 package com.backbase.stream.contact;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.dbs.contact.api.service.v2.model.ExternalAccessContext;
@@ -9,17 +12,16 @@ import com.backbase.dbs.contact.api.service.v2.model.IngestMode;
 import com.backbase.stream.configuration.ContactsServiceConfiguration;
 import com.backbase.stream.configuration.ContactsWorkerConfigurationProperties;
 import com.backbase.stream.contact.repository.ContactsUnitOfWorkRepository;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Import;
+
 import reactor.core.publisher.Flux;
 
 import java.util.Collections;
-
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @Import(ContactsServiceConfiguration.class)
@@ -27,20 +29,20 @@ class ContactsUnitOfWorkTest {
 
     private ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor;
 
-    @Mock
-    private ContactsUnitOfWorkRepository repository;
+    @Mock private ContactsUnitOfWorkRepository repository;
 
-    @Mock
-    private ContactsSaga streamTaskExecutor;
+    @Mock private ContactsSaga streamTaskExecutor;
 
-    @Mock
-    ContactsWorkerConfigurationProperties streamWorkerConfiguration;
+    @Mock ContactsWorkerConfigurationProperties streamWorkerConfiguration;
 
     @Test
     void test_executeTask() {
         when(streamWorkerConfiguration.getTaskExecutors()).thenReturn(1);
-        this.contactsUnitOfWorkExecutor = new ContactsUnitOfWorkExecutor(repository, streamTaskExecutor, streamWorkerConfiguration);
-        contactsUnitOfWorkExecutor.prepareUnitOfWork(Collections.singletonList(getContactsBulkPostRequestBody()));
+        this.contactsUnitOfWorkExecutor =
+                new ContactsUnitOfWorkExecutor(
+                        repository, streamTaskExecutor, streamWorkerConfiguration);
+        contactsUnitOfWorkExecutor.prepareUnitOfWork(
+                Collections.singletonList(getContactsBulkPostRequestBody()));
         verify(streamWorkerConfiguration).getTaskExecutors();
     }
 
@@ -48,9 +50,12 @@ class ContactsUnitOfWorkTest {
     void test_executeTaskReturnResponse() {
         when(streamWorkerConfiguration.getTaskExecutors()).thenReturn(1);
         when(streamWorkerConfiguration.getBufferSize()).thenReturn(2);
-        this.contactsUnitOfWorkExecutor = new ContactsUnitOfWorkExecutor(repository, streamTaskExecutor, streamWorkerConfiguration);
+        this.contactsUnitOfWorkExecutor =
+                new ContactsUnitOfWorkExecutor(
+                        repository, streamTaskExecutor, streamWorkerConfiguration);
 
-        Flux<ContactsBulkPostRequestBody> contactsBulkPostRequestBodyFlux = Flux.just(getContactsBulkPostRequestBody());
+        Flux<ContactsBulkPostRequestBody> contactsBulkPostRequestBodyFlux =
+                Flux.just(getContactsBulkPostRequestBody());
         contactsUnitOfWorkExecutor.prepareUnitOfWork(contactsBulkPostRequestBodyFlux);
         verify(streamWorkerConfiguration).getBufferSize();
     }
@@ -71,5 +76,4 @@ class ContactsUnitOfWorkTest {
         request.setContacts(Collections.singletonList(contact));
         return request;
     }
-
 }

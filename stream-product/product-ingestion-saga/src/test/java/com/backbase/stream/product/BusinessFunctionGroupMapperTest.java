@@ -1,14 +1,15 @@
 package com.backbase.stream.product;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.Permission;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.Privilege;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class BusinessFunctionGroupMapperTest {
 
@@ -48,8 +49,8 @@ class BusinessFunctionGroupMapperTest {
     private Permission createPermisson() {
         Permission permission = new Permission();
         permission.setFunctionId("F001");
-        permission.setAssignedPrivileges(Collections.singletonList(new Privilege().privilege("CREATE")));
+        permission.setAssignedPrivileges(
+                Collections.singletonList(new Privilege().privilege("CREATE")));
         return permission;
     }
-
 }

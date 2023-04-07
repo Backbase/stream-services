@@ -8,11 +8,9 @@ public class ArrangementUpdateException extends RuntimeException {
     public ArrangementUpdateException(WebClientResponseException throwable, String message) {
         super(message, throwable);
         this.httpResponse = throwable.getResponseBodyAsString();
-
     }
 
     public String getHttpResponse() {
         return httpResponse;
     }
-
 }

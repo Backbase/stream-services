@@ -5,7 +5,9 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
+
 import org.springframework.http.ResponseEntity;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,8 +27,7 @@ public interface TransactionCursorService {
      * @param arrangementId ArrangementId of the Cursor
      * @return Response Entity
      */
-    Mono<ResponseEntity<Void>> deleteByArrangementId(
-            String arrangementId);
+    Mono<ResponseEntity<Void>> deleteByArrangementId(String arrangementId);
 
     /**
      * The Service to filter the cursor based on id
@@ -49,12 +50,13 @@ public interface TransactionCursorService {
      * The Service to patch the cursor to update lastTxnIds, lastTxnDate & status based on
      * arrangementId
      *
-     * @param arrangementId                 ArrangementId of the Cursor
+     * @param arrangementId ArrangementId of the Cursor
      * @param transactionCursorPatchRequest TransactionCursorPatchRequest Payload
      * @return Response Entity
      */
-    Mono<ResponseEntity<Void>> patchByArrangementId(String arrangementId,
-                                                    Mono<TransactionCursorPatchRequest> transactionCursorPatchRequest);
+    Mono<ResponseEntity<Void>> patchByArrangementId(
+            String arrangementId,
+            Mono<TransactionCursorPatchRequest> transactionCursorPatchRequest);
 
     /**
      * The Service to filter the cursor based on status & lastTxnDate

@@ -5,16 +5,12 @@ import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 /**
- * This is a mapper for ProductCatalog objects used in:
- * - stream-models/product-catalog-model
- * - product-catalog-composition-api
- * - product-catalog-integration-api
- * - product-catalog-events
- * <p>
- * All ProductCatalog objects used in above modules have exactly same structures they are built
+ * This is a mapper for ProductCatalog objects used in: - stream-models/product-catalog-model -
+ * product-catalog-composition-api - product-catalog-integration-api - product-catalog-events
+ *
+ * <p>All ProductCatalog objects used in above modules have exactly same structures they are built
  * from the common /api folder.
  */
-
 @Component
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ProductCatalogMapper {
@@ -25,7 +21,8 @@ public interface ProductCatalogMapper {
      * @return Stream product catalog
      */
     com.backbase.stream.productcatalog.model.ProductCatalog mapIntegrationToStream(
-            com.backbase.stream.compositions.integration.productcatalog.model.ProductCatalog productCatalog);
+            com.backbase.stream.compositions.integration.productcatalog.model.ProductCatalog
+                    productCatalog);
 
     /**
      * Maps integration ProductCatalog to composition ProductCatalog model.
@@ -33,8 +30,10 @@ public interface ProductCatalogMapper {
      * @param productCatalog Integration product catalog
      * @return Composition product catalog
      */
-    com.backbase.stream.compositions.productcatalog.model.ProductCatalog mapIntegrationToComposition(
-            com.backbase.stream.compositions.integration.productcatalog.model.ProductCatalog productCatalog);
+    com.backbase.stream.compositions.productcatalog.model.ProductCatalog
+            mapIntegrationToComposition(
+                    com.backbase.stream.compositions.integration.productcatalog.model.ProductCatalog
+                            productCatalog);
 
     /**
      * Maps composition ProductCatalog to stream ProductCatalog model.
@@ -61,7 +60,8 @@ public interface ProductCatalogMapper {
      * @return Stream product catalog
      */
     com.backbase.stream.productcatalog.model.ProductCatalog mapEventToStream(
-            com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalog productCatalog);
+            com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductCatalog
+                    productCatalog);
 
     /**
      * Maps steam ProductCatalog to event ProductCatalog model.

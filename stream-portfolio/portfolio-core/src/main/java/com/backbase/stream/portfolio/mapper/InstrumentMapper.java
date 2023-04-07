@@ -15,9 +15,11 @@ import com.backbase.stream.portfolio.model.Instrument;
 import com.backbase.stream.portfolio.model.InstrumentHistoryPrice;
 import com.backbase.stream.portfolio.model.Region;
 import com.backbase.stream.portfolio.model.SubAssetClass;
-import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import java.util.List;
 
 @Mapper
 public interface InstrumentMapper {
@@ -40,6 +42,6 @@ public interface InstrumentMapper {
 
     SubAssetClassPutRequest mapPutSubAssetClass(SubAssetClass assetClass);
 
-    List<InstrumentHistoryPricesRequestItem> mapHistoryPrices(List<InstrumentHistoryPrice> historyPrices);
-
+    List<InstrumentHistoryPricesRequestItem> mapHistoryPrices(
+            List<InstrumentHistoryPrice> historyPrices);
 }

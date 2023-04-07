@@ -14,9 +14,7 @@ import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfi
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.streams.compositions.test.IntegrationTest;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URI;
-import java.util.concurrent.TimeUnit;
+
 import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -34,7 +32,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
+
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @DirtiesContext
@@ -47,14 +50,11 @@ class LegalEntityControllerIT extends IntegrationTest {
     private MockServerClient integrationServerClient;
     private static BrokerService broker;
 
-    @Autowired
-    LegalEntityConfiguration legalEntityConfiguration;
+    @Autowired LegalEntityConfiguration legalEntityConfiguration;
 
-    @Autowired
-    LegalEntityController legalEntityController;
+    @Autowired LegalEntityController legalEntityController;
 
-    @MockBean
-    private LegalEntitySaga legalEntitySaga;
+    @MockBean private LegalEntitySaga legalEntitySaga;
 
     @BeforeAll
     static void initActiveMqBroker() throws Exception {
@@ -69,30 +69,30 @@ class LegalEntityControllerIT extends IntegrationTest {
     void initializeIntegrationServer() throws IOException {
         integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
         integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
-        integrationServerClient.when(
-                        request()
-                                .withMethod("POST")
-                                .withPath("/service-api/v2/legal-entity"))
+        integrationServerClient
+                .when(request().withMethod("POST").withPath("/service-api/v2/legal-entity"))
                 .respond(
                         response()
                                 .withStatusCode(200)
                                 .withContentType(MediaType.APPLICATION_JSON)
-                                .withBody(readContentFromClasspath("integration-data/response.json"))
-                );
+                                .withBody(
+                                        readContentFromClasspath(
+                                                "integration-data/response.json")));
     }
 
     @AfterEach
     void stopMockServer() {
         integrationServer.stop();
-        while (!integrationServer.hasStopped(5, 100L, TimeUnit.MILLISECONDS)) {
-        }
+        while (!integrationServer.hasStopped(5, 100L, TimeUnit.MILLISECONDS)) {}
     }
 
     @Test
     void pullIngestLegalEntity_Success() throws Exception {
-        LegalEntity legalEntity = new ObjectMapper()
-                .readValue(readContentFromClasspath("integration-data/legal-entity.json"),
-                        LegalEntity.class);
+        LegalEntity legalEntity =
+                new ObjectMapper()
+                        .readValue(
+                                readContentFromClasspath("integration-data/legal-entity.json"),
+                                LegalEntity.class);
 
         when(legalEntitySaga.executeTask(any()))
                 .thenReturn(Mono.just(new LegalEntityTask(legalEntity)));
@@ -102,25 +102,36 @@ class LegalEntityControllerIT extends IntegrationTest {
                 new LegalEntityPullIngestionRequest().withLegalEntityExternalId("externalId");
 
         WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
-        webTestClient.post().uri(uri)
+        webTestClient
+                .post()
+                .uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(Mono.just(pullIngestionRequest), LegalEntityPullIngestionRequest.class).exchange()
-                .expectStatus().isCreated()
-                .expectHeader().valueEquals("Content-Type", "application/json")
-                .expectBody().jsonPath("$.legalEntity.name").isEqualTo("Test Legal Entity");
+                .body(Mono.just(pullIngestionRequest), LegalEntityPullIngestionRequest.class)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .valueEquals("Content-Type", "application/json")
+                .expectBody()
+                .jsonPath("$.legalEntity.name")
+                .isEqualTo("Test Legal Entity");
     }
 
     @Test
     void pushIngestLegalEntity_Fail() {
         URI uri = URI.create("/service-api/v2/ingest/push");
 
-        LegalEntityPushIngestionRequest pushIngestionRequest = Mockito
-                .mock(LegalEntityPushIngestionRequest.class);
+        LegalEntityPushIngestionRequest pushIngestionRequest =
+                Mockito.mock(LegalEntityPushIngestionRequest.class);
 
         WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
-        webTestClient.post().uri(uri)
+        webTestClient
+                .post()
+                .uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .body(Mono.just(pushIngestionRequest), LegalEntityPushIngestionRequest.class).exchange()
-                .expectStatus().is5xxServerError();
+                .body(Mono.just(pushIngestionRequest), LegalEntityPushIngestionRequest.class)
+                .exchange()
+                .expectStatus()
+                .is5xxServerError();
     }
 }

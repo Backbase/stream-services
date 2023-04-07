@@ -1,106 +1,82 @@
 package com.backbase.stream.openapi.config;
 
-
 import com.backbase.stream.openapi.Constants;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.CollectionUtils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.util.CollectionUtils;
 
 /**
- * Please refer to the swagger.
- * <a href="https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md">configuration.md</a>
+ * Please refer to the swagger. <a
+ * href="https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/configuration.md">configuration.md</a>
  * to get the idea what each parameter does.
  */
 @ConfigurationProperties(prefix = "backbase.swagger-ui")
 public class SwaggerUiConfigProperties {
     /**
-     * The path for the Swagger UI pages to load. Will redirect to the springdoc.webjars.prefix property.
+     * The path for the Swagger UI pages to load. Will redirect to the springdoc.webjars.prefix
+     * property.
      */
     private String path = Constants.DEFAULT_SWAGGER_UI_PATH;
 
     /**
-     * The name of a component available via the plugin system to use as the top-level layout for Swagger UI.
+     * The name of a component available via the plugin system to use as the top-level layout for
+     * Swagger UI.
      */
     private String layout;
-    /**
-     * URL to fetch external configuration document from.
-     */
+    /** URL to fetch external configuration document from. */
     private String configUrl;
     /**
-     * If set, enables filtering. The top bar will show an edit box that could be used to filter the tagged operations that are shown.
+     * If set, enables filtering. The top bar will show an edit box that could be used to filter the
+     * tagged operations that are shown.
      */
     private String filter;
 
-    /**
-     * Apply a sort to the operation list of each API.
-     */
+    /** Apply a sort to the operation list of each API. */
     private String operationsSorter;
-    /**
-     * Apply a sort to the tag list of each API.
-     */
+    /** Apply a sort to the tag list of each API. */
     private String tagsSorter;
 
     /**
      * Enables or disables deep linking for tags and operations.
      *
-     * @see <a href="https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/deep-linking.md">deep-linking.md</a>
+     * @see <a
+     *     href="https://github.com/swagger-api/swagger-ui/blob/master/docs/usage/deep-linking.md">deep-linking.md</a>
      */
     private Boolean deepLinking;
-    /**
-     * Controls the display of operationId in operations list.
-     */
+    /** Controls the display of operationId in operations list. */
     private Boolean displayOperationId;
-    /**
-     * The default expansion depth for models (set to -1 completely hide the models).
-     */
+    /** The default expansion depth for models (set to -1 completely hide the models). */
     private Integer defaultModelsExpandDepth;
-    /**
-     * The default expansion depth for the model on the model-example section.
-     */
+    /** The default expansion depth for the model on the model-example section. */
     private Integer defaultModelExpandDepth;
 
-    /**
-     * Controls how the model is shown when the API is first rendered.
-     */
+    /** Controls how the model is shown when the API is first rendered. */
     private String defaultModelRendering;
-    /**
-     * Controls the display of the request duration (in milliseconds) for Try-It-Out requests.
-     */
+    /** Controls the display of the request duration (in milliseconds) for Try-It-Out requests. */
     private Boolean displayRequestDuration;
-    /**
-     * Controls the default expansion setting for the operations and tags.
-     */
+    /** Controls the default expansion setting for the operations and tags. */
     private String docExpansion;
-    /**
-     * If set, limits the number of tagged operations displayed to at most this many.
-     */
+    /** If set, limits the number of tagged operations displayed to at most this many. */
     private Integer maxDisplayedTags;
-    /**
-     * Controls the display of vendor extension (x-) fields and values.
-     */
+    /** Controls the display of vendor extension (x-) fields and values. */
     private Boolean showExtensions;
-    /**
-     * Controls the display of extensions.
-     */
+    /** Controls the display of extensions. */
     private Boolean showCommonExtensions;
 
-    /**
-     * The supported try it out methods.
-     */
+    /** The supported try it out methods. */
     private List<String> supportedSubmitMethods;
 
-    /**
-     * OAuth redirect URL.
-     */
+    /** OAuth redirect URL. */
     private String oauth2RedirectUrl;
 
     /**
      * Config Parameters used by Swagger UI.
+     *
      * @return Map of Config Parameters
      */
     public Map<String, String> getConfigParameters() {
@@ -128,6 +104,7 @@ public class SwaggerUiConfigProperties {
 
     /**
      * Set Config Parameter.
+     *
      * @param name Param name
      * @param value Param value
      * @param params Parameters to set param in
@@ -140,6 +117,7 @@ public class SwaggerUiConfigProperties {
 
     /**
      * Set Config Parameter.
+     *
      * @param name Param name
      * @param value Param value
      * @param params Parameters to set param in
@@ -152,6 +130,7 @@ public class SwaggerUiConfigProperties {
 
     /**
      * Set Config Parameter.
+     *
      * @param name Param name
      * @param value Param value
      * @param params Parameters to set param in

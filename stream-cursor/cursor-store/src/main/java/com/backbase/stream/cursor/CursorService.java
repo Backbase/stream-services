@@ -3,14 +3,17 @@ package com.backbase.stream.cursor;
 import com.backbase.stream.cursor.configuration.CursorRepository;
 import com.backbase.stream.cursor.mapper.CursorMapper;
 import com.backbase.stream.cursor.model.IngestionCursor;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.mapstruct.factory.Mappers;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 @Slf4j
@@ -37,28 +40,33 @@ public class CursorService {
      * @return Ingestion Cursor
      */
     public Mono<IngestionCursor> create(Mono<IngestionCursor> ingestionCursor) {
-        return ingestionCursor.map(cursorMapper::toCursorItem)
-            .flatMap(cursorRepository::save)
-            .map(cursorMapper::toIngestionCursor);
+        return ingestionCursor
+                .map(cursorMapper::toCursorItem)
+                .flatMap(cursorRepository::save)
+                .map(cursorMapper::toIngestionCursor);
     }
 
     /**
      * Update Ingestion Cursor.
      *
-     * @param cursorId        The ID to update
+     * @param cursorId The ID to update
      * @param ingestionCursor Ingestion Cursor
      * @return updated Ingestion Cursor
      */
-    public Mono<IngestionCursor> updateCursorById(UUID cursorId, Mono<IngestionCursor> ingestionCursor) {
-        return ingestionCursor.flatMap(cursor -> updateCursorById(cursorId, cursor))
-            .doOnError(throwable -> log.error("Error while patching cursor: " + ingestionCursor));
+    public Mono<IngestionCursor> updateCursorById(
+            UUID cursorId, Mono<IngestionCursor> ingestionCursor) {
+        return ingestionCursor
+                .flatMap(cursor -> updateCursorById(cursorId, cursor))
+                .doOnError(
+                        throwable -> log.error("Error while patching cursor: " + ingestionCursor));
     }
 
     private Mono<IngestionCursor> updateCursorById(UUID cursorId, IngestionCursor cursor) {
-        return Mono.just(cursor).map(ingestionCursor -> cursor.id(cursorId).cursorModifiedAt(OffsetDateTime.now()))
-            .map(cursorMapper::toCursorItem)
-            .flatMap(cursorRepository::save)
-            .map(cursorMapper::toIngestionCursor);
+        return Mono.just(cursor)
+                .map(ingestionCursor -> cursor.id(cursorId).cursorModifiedAt(OffsetDateTime.now()))
+                .map(cursorMapper::toCursorItem)
+                .flatMap(cursorRepository::save)
+                .map(cursorMapper::toIngestionCursor);
     }
 
     /**

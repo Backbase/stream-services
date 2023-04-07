@@ -1,16 +1,16 @@
 package com.backbase.stream.cursor.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import java.io.Serializable;
-import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * Audit Message Event.
- */
+import java.io.Serializable;
+import java.util.List;
+
+/** Audit Message Event. */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
@@ -31,7 +31,5 @@ public class AuditMessagesEvent extends AbstractDbsEvent {
         private String status;
         private String username;
         private String userId;
-
     }
-
 }

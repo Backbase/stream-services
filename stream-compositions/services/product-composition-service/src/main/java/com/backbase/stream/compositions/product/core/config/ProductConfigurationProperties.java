@@ -2,8 +2,10 @@ package com.backbase.stream.compositions.product.core.config;
 
 import com.backbase.stream.compositions.product.core.model.RequestConfig;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
+
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.ArrayList;
@@ -82,16 +84,19 @@ public class ProductConfigurationProperties {
     @Data
     @NoArgsConstructor
     public static class IngestionMode {
-        private BatchProductIngestionMode.FunctionGroupsMode functionGroups = BatchProductIngestionMode.FunctionGroupsMode.UPSERT;
-        private BatchProductIngestionMode.DataGroupsMode dataGroups = BatchProductIngestionMode.DataGroupsMode.UPSERT;
-        private BatchProductIngestionMode.ArrangementsMode arrangements = BatchProductIngestionMode.ArrangementsMode.UPSERT;
+        private BatchProductIngestionMode.FunctionGroupsMode functionGroups =
+                BatchProductIngestionMode.FunctionGroupsMode.UPSERT;
+        private BatchProductIngestionMode.DataGroupsMode dataGroups =
+                BatchProductIngestionMode.DataGroupsMode.UPSERT;
+        private BatchProductIngestionMode.ArrangementsMode arrangements =
+                BatchProductIngestionMode.ArrangementsMode.UPSERT;
     }
 
     @Data
     @SuperBuilder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static abstract class BaseComposition {
+    public abstract static class BaseComposition {
         private Boolean enabled = Boolean.FALSE;
         private String baseUrl = "http://localhost:9003/";
         private Boolean async = Boolean.FALSE;

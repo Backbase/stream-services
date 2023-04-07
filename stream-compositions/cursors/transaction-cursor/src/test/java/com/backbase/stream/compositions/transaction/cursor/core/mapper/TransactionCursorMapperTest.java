@@ -12,30 +12,27 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-
 class TransactionCursorMapperTest {
 
-    TransactionCursorMapper mapper =
-            Mappers.getMapper(TransactionCursorMapper.class);
+    TransactionCursorMapper mapper = Mappers.getMapper(TransactionCursorMapper.class);
 
     @Test
     void testMapToModel_Success() {
-        TransactionCursorResponse transactionCursorResponse =
-                mapper.mapToModel(getMockDomain());
+        TransactionCursorResponse transactionCursorResponse = mapper.mapToModel(getMockDomain());
         assertNotNull(transactionCursorResponse);
     }
 
     @Test
     void testmapToDomain_Success() {
-        TransactionCursorEntity transactionCursorEntity =
-                mapper.mapToDomain(getMockModel());
+        TransactionCursorEntity transactionCursorEntity = mapper.mapToDomain(getMockModel());
         assertNotNull(transactionCursorEntity);
     }
 
@@ -44,12 +41,12 @@ class TransactionCursorMapperTest {
         List<String> txnList = mapper.convertLastTransToListFormat(getMockDomain().getLastTxnIds());
         assertEquals(4, txnList.size());
 
-        String txnIds = mapper
-                .convertLastTransToStringFormat(getMockModel().getCursor().getLastTxnIds());
+        String txnIds =
+                mapper.convertLastTransToStringFormat(getMockModel().getCursor().getLastTxnIds());
         assertEquals(txnIds, getMockDomain().getLastTxnIds());
 
-        Map<String, String> additionsMap = mapper
-                .convertJsonToMapFormat(getMockDomain().getAdditions());
+        Map<String, String> additionsMap =
+                mapper.convertJsonToMapFormat(getMockDomain().getAdditions());
         assertEquals(additionsMap, getMockModel().getCursor().getAdditions());
 
         String additions = mapper.convertMapToJsonFormat(getMockModel().getCursor().getAdditions());
@@ -71,21 +68,21 @@ class TransactionCursorMapperTest {
     @Test
     void testMapper_Fail() {
 
-        assertThrows(JsonProcessingException.class,
-                () -> mapper.convertJsonToMapFormat("~"));
+        assertThrows(JsonProcessingException.class, () -> mapper.convertJsonToMapFormat("~"));
     }
 
     private TransactionCursorUpsertRequest getMockModel() {
         return new TransactionCursorUpsertRequest()
-                .withCursor(new TransactionCursor()
-                        .withId("3337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-                        .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-                        .withExtArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-                        .withLegalEntityId("test-ext-emp")
-                        .withLastTxnDate("2022-05-24 03:18:19")
-                        .withStatus(StatusEnum.IN_PROGRESS)
-                        .withLastTxnIds(List.of("11", "12", "13", "14"))
-                        .withAdditions(Map.of("key1", "val1")));
+                .withCursor(
+                        new TransactionCursor()
+                                .withId("3337f8cc-d66d-41b3-a00e-f71ff15d93cq")
+                                .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq")
+                                .withExtArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq")
+                                .withLegalEntityId("test-ext-emp")
+                                .withLastTxnDate("2022-05-24 03:18:19")
+                                .withStatus(StatusEnum.IN_PROGRESS)
+                                .withLastTxnIds(List.of("11", "12", "13", "14"))
+                                .withAdditions(Map.of("key1", "val1")));
     }
 
     private TransactionCursorEntity getMockDomain() {

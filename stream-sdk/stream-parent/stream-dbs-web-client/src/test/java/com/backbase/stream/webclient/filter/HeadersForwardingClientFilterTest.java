@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.will;
 import static org.mockito.Mockito.doReturn;
 
 import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -16,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
+
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.util.context.Context;
@@ -23,11 +25,9 @@ import reactor.util.context.Context;
 @ExtendWith(MockitoExtension.class)
 public class HeadersForwardingClientFilterTest {
 
-    @Mock
-    ClientRequest clientRequest;
+    @Mock ClientRequest clientRequest;
 
-    @Mock
-    ExchangeFunction exchangeFunction;
+    @Mock ExchangeFunction exchangeFunction;
 
     @Test
     void shouldEnrichWithAdditionalHeaders() {
@@ -35,7 +35,8 @@ public class HeadersForwardingClientFilterTest {
         doReturn(new LinkedMultiValueMap()).when(clientRequest).cookies();
 
         will(a -> assertClientRequestHeader(a.getArgument(0), "X-HEADER"))
-            .given(exchangeFunction).exchange(any());
+                .given(exchangeFunction)
+                .exchange(any());
 
         MultiValueMap<String, String> headersToBeIncluded = new LinkedMultiValueMap();
         headersToBeIncluded.add("x-header", "extra-value");
@@ -44,8 +45,7 @@ public class HeadersForwardingClientFilterTest {
         properties.setAdditionalHeaders(headersToBeIncluded);
         ExchangeFilterFunction underTest = new HeadersForwardingClientFilter(properties);
 
-        StepVerifier.create(underTest.filter(clientRequest, exchangeFunction))
-            .verifyComplete();
+        StepVerifier.create(underTest.filter(clientRequest, exchangeFunction)).verifyComplete();
     }
 
     @Test
@@ -54,16 +54,20 @@ public class HeadersForwardingClientFilterTest {
         doReturn(new LinkedMultiValueMap()).when(clientRequest).cookies();
 
         will(a -> assertClientRequestHeader(a.getArgument(0), "x-tid"))
-            .given(exchangeFunction).exchange(any());
+                .given(exchangeFunction)
+                .exchange(any());
 
         var serverRequestHeaders = new LinkedMultiValueMap<>();
         serverRequestHeaders.add("X-TID", "tenant1");
 
-        ExchangeFilterFunction underTest = new HeadersForwardingClientFilter(new DbsWebClientConfigurationProperties());
+        ExchangeFilterFunction underTest =
+                new HeadersForwardingClientFilter(new DbsWebClientConfigurationProperties());
 
-        StepVerifier.create(underTest.filter(clientRequest, exchangeFunction)
-                .contextWrite(Context.of("headers", serverRequestHeaders)))
-            .verifyComplete();
+        StepVerifier.create(
+                        underTest
+                                .filter(clientRequest, exchangeFunction)
+                                .contextWrite(Context.of("headers", serverRequestHeaders)))
+                .verifyComplete();
     }
 
     @Test
@@ -72,7 +76,8 @@ public class HeadersForwardingClientFilterTest {
         doReturn(new LinkedMultiValueMap()).when(clientRequest).cookies();
 
         will(a -> assertClientRequestHeader(a.getArgument(0), "x-tid", "tenant1"))
-            .given(exchangeFunction).exchange(any());
+                .given(exchangeFunction)
+                .exchange(any());
 
         MultiValueMap<String, String> headersToBeIncluded = new LinkedMultiValueMap();
         headersToBeIncluded.add("x-tid", "tenant2");
@@ -84,16 +89,18 @@ public class HeadersForwardingClientFilterTest {
         var serverRequestHeaders = new LinkedMultiValueMap<>();
         serverRequestHeaders.add("X-TID", "tenant1");
 
-        StepVerifier.create(underTest.filter(clientRequest, exchangeFunction)
-                .contextWrite(Context.of("headers", serverRequestHeaders)))
-            .verifyComplete();
+        StepVerifier.create(
+                        underTest
+                                .filter(clientRequest, exchangeFunction)
+                                .contextWrite(Context.of("headers", serverRequestHeaders)))
+                .verifyComplete();
     }
 
     /**
-     * Given the nature of reactive applications we are asserting when the exchangeFunction is activated, where we
-     * validate the processed client request after the header enrichment.
+     * Given the nature of reactive applications we are asserting when the exchangeFunction is
+     * activated, where we validate the processed client request after the header enrichment.
      *
-     * @param request     Captured client request after enrichment.
+     * @param request Captured client request after enrichment.
      * @param expectedKey Expected header key.
      * @return Empty mono given we don't actually validate the response here.
      */
@@ -103,12 +110,12 @@ public class HeadersForwardingClientFilterTest {
         return Mono.empty();
     }
 
-    private Mono<Void> assertClientRequestHeader(ClientRequest request, String expectedKey, String expectedValue) {
+    private Mono<Void> assertClientRequestHeader(
+            ClientRequest request, String expectedKey, String expectedValue) {
         Assert.notNull(request, "Invalid request");
-        Assert.isTrue(request.headers().get(expectedKey).stream().allMatch(v -> v.equals(expectedValue)),
-            "Wrong header value");
+        Assert.isTrue(
+                request.headers().get(expectedKey).stream().allMatch(v -> v.equals(expectedValue)),
+                "Wrong header value");
         return Mono.empty();
     }
-
-
 }

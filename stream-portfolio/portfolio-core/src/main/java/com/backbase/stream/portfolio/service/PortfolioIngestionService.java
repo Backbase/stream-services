@@ -8,13 +8,13 @@ import com.backbase.stream.portfolio.model.SubPortfolioBundle;
 import com.backbase.stream.portfolio.model.TransactionBundle;
 import com.backbase.stream.portfolio.model.TransactionCategory;
 import com.backbase.stream.portfolio.model.ValuationsBundle;
+
 import reactor.core.publisher.Flux;
 
 /**
  * PortfolioIngestion Service.
  *
  * @author Vladimir Kirchev
- *
  */
 public interface PortfolioIngestionService {
 
@@ -24,7 +24,8 @@ public interface PortfolioIngestionService {
      * @param allocationBundle The Flux of {@code AllocationBundle} to be ingested.
      * @return The Flux of ingested {@code AllocationBundle}.
      */
-    Flux<AllocationBundle> ingestPortfolioAllocationBundles(Flux<AllocationBundle> allocationBundle);
+    Flux<AllocationBundle> ingestPortfolioAllocationBundles(
+            Flux<AllocationBundle> allocationBundle);
 
     /**
      * Ingest Portfolios.
@@ -48,7 +49,8 @@ public interface PortfolioIngestionService {
      * @param portfolio The Flux of {@code SubPortfolioBundle} to be ingested.
      * @return The Flux of ingested {@code SubPortfolioBundle}.
      */
-    Flux<SubPortfolioBundle> ingestWealthSubPortfolios(Flux<SubPortfolioBundle> subPortfolioBundles);
+    Flux<SubPortfolioBundle> ingestWealthSubPortfolios(
+            Flux<SubPortfolioBundle> subPortfolioBundles);
 
     /**
      * Ingest TransactionCategories.
@@ -56,7 +58,8 @@ public interface PortfolioIngestionService {
      * @param transactionCategories The Flux of {@code TransactionCategory} to be ingested.
      * @return The Flux of ingested {@code TransactionCategory}.
      */
-    Flux<TransactionCategory> ingestTransactionCategories(Flux<TransactionCategory> transactionCategories);
+    Flux<TransactionCategory> ingestTransactionCategories(
+            Flux<TransactionCategory> transactionCategories);
 
     /**
      * Ingest Hierarchiy Bundles.

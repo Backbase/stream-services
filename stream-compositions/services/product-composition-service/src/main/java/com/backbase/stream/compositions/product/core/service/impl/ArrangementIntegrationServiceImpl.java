@@ -7,9 +7,12 @@ import com.backbase.stream.compositions.product.core.mapper.ArrangementMapper;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ArrangementIntegrationService;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
+
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -22,19 +25,19 @@ public class ArrangementIntegrationServiceImpl implements ArrangementIntegration
     @Override
     public Mono<ArrangementIngestResponse> pullArrangement(
             ArrangementIngestPullRequest ingestionRequest) {
-        return arrangementIntegrationApi.pullArrangement(
+        return arrangementIntegrationApi
+                .pullArrangement(
                         new PullArrangementRequest()
                                 .arrangementInternalId(ingestionRequest.getArrangementId())
                                 .arrangementExternalId(ingestionRequest.getExternalArrangementId()))
                 .map(item -> arrangementMapper.mapIntegrationToStream(item.getArrangement()))
-                .map(item -> ArrangementIngestResponse.builder()
-                        .arrangement(item)
-                        .build())
+                .map(item -> ArrangementIngestResponse.builder().arrangement(item).build())
                 .onErrorResume(this::handleIntegrationError)
                 .flatMap(this::handleIntegrationResponse);
     }
 
-    private Mono<ArrangementIngestResponse> handleIntegrationResponse(ArrangementIngestResponse res) {
+    private Mono<ArrangementIngestResponse> handleIntegrationResponse(
+            ArrangementIngestResponse res) {
         log.debug("Arrangement from Integration: {}", res.getArrangement());
         return Mono.just(res);
     }

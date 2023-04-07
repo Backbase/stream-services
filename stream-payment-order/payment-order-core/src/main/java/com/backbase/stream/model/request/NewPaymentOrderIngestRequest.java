@@ -15,5 +15,4 @@ public class NewPaymentOrderIngestRequest implements PaymentOrderIngestRequest {
     public String getBankReferenceId() {
         return paymentOrderPostRequest.getBankReferenceId();
     }
-
 }

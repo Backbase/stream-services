@@ -2,11 +2,14 @@ package com.backbase.stream.compositions.product.http;
 
 import com.backbase.stream.compositions.product.api.ProductCompositionApi;
 import com.backbase.stream.compositions.product.api.model.*;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
+
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -18,25 +21,31 @@ public class ProductController implements ProductCompositionApi {
 
     @Override
     public Mono<ResponseEntity<ArrangementIngestionResponse>> pullIngestArrangement(
-            Mono<ArrangementPullIngestionRequest> arrangementPullIngestionRequest, ServerWebExchange exchange) {
-        return arrangementSubController.pullIngestArrangement(arrangementPullIngestionRequest, exchange);
+            Mono<ArrangementPullIngestionRequest> arrangementPullIngestionRequest,
+            ServerWebExchange exchange) {
+        return arrangementSubController.pullIngestArrangement(
+                arrangementPullIngestionRequest, exchange);
     }
 
     @Override
     public Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProduct(
-            Mono<ProductPullIngestionRequest> productPullIngestionRequest, ServerWebExchange exchange) {
+            Mono<ProductPullIngestionRequest> productPullIngestionRequest,
+            ServerWebExchange exchange) {
         return productSubController.pullIngestProduct(productPullIngestionRequest, exchange);
     }
 
     @Override
     public Mono<ResponseEntity<ArrangementIngestionResponse>> pushIngestArrangement(
-            Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest, ServerWebExchange exchange) {
-        return arrangementSubController.pushIngestArrangement(arrangementPushIngestionRequest, exchange);
+            Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest,
+            ServerWebExchange exchange) {
+        return arrangementSubController.pushIngestArrangement(
+                arrangementPushIngestionRequest, exchange);
     }
 
     @Override
     public Mono<ResponseEntity<ProductIngestionResponse>> pushIngestProduct(
-            Mono<ProductPushIngestionRequest> productPushIngestionRequest, ServerWebExchange exchange) {
+            Mono<ProductPushIngestionRequest> productPushIngestionRequest,
+            ServerWebExchange exchange) {
         return productSubController.pushIngestProduct(productPushIngestionRequest, exchange);
     }
 }

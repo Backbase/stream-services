@@ -13,11 +13,12 @@ import com.backbase.stream.legalentity.model.ApsIdentifiers;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
-import java.time.LocalDate;
-import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
 
 @ExtendWith(MockitoExtension.class)
 class AccessGroupMapperTest {
@@ -36,38 +37,45 @@ class AccessGroupMapperTest {
         final String validUntilTime = "23:59:59";
         final String userExId = "someUserExternalId";
 
-        ServiceAgreement input = new ServiceAgreement()
-            .externalId(externalId)
-            .isMaster(isMaster)
-            .description(description)
-            .status(LegalEntityStatus.ENABLED)
-            .addParticipantsItem(new LegalEntityParticipant().externalId("someLeExId").addUsersItem(userExId))
-            .name(name)
-            .validFromDate(LocalDate.parse(validFromDate))
-            .validFromTime(validFromTime)
-            .validUntilDate(LocalDate.parse(validUntilDate))
-            .validUntilTime(validUntilTime)
-            .regularUserAps(new ApsIdentifiers().addNameIdentifiersItem(userExId));
-
+        ServiceAgreement input =
+                new ServiceAgreement()
+                        .externalId(externalId)
+                        .isMaster(isMaster)
+                        .description(description)
+                        .status(LegalEntityStatus.ENABLED)
+                        .addParticipantsItem(
+                                new LegalEntityParticipant()
+                                        .externalId("someLeExId")
+                                        .addUsersItem(userExId))
+                        .name(name)
+                        .validFromDate(LocalDate.parse(validFromDate))
+                        .validFromTime(validFromTime)
+                        .validUntilDate(LocalDate.parse(validUntilDate))
+                        .validUntilTime(validUntilTime)
+                        .regularUserAps(new ApsIdentifiers().addNameIdentifiersItem(userExId));
 
         ServicesAgreementIngest actual = subject.toPresentation(input);
 
-
-        ServicesAgreementIngest expected = new ServicesAgreementIngest()
-            .externalId(externalId)
-            .isMaster(isMaster)
-            .description(description)
-            .status(CreateStatus.ENABLED)
-            .addParticipantsToIngestItem(new ParticipantIngest().externalId("someLeExId").addUsersItem(userExId))
-            .name(name)
-            .validFromDate(validFromDate)
-            .validFromTime(validFromTime)
-            .validUntilDate(validUntilDate)
-            .validUntilTime(validUntilTime)
-            .regularUserAps(new PresentationUserApsIdentifiers().addNameIdentifiersItem(userExId));
+        ServicesAgreementIngest expected =
+                new ServicesAgreementIngest()
+                        .externalId(externalId)
+                        .isMaster(isMaster)
+                        .description(description)
+                        .status(CreateStatus.ENABLED)
+                        .addParticipantsToIngestItem(
+                                new ParticipantIngest()
+                                        .externalId("someLeExId")
+                                        .addUsersItem(userExId))
+                        .name(name)
+                        .validFromDate(validFromDate)
+                        .validFromTime(validFromTime)
+                        .validUntilDate(validUntilDate)
+                        .validUntilTime(validUntilTime)
+                        .regularUserAps(
+                                new PresentationUserApsIdentifiers()
+                                        .addNameIdentifiersItem(userExId));
         assertEquals(expected, actual);
     }
-
 
     @Test
     void toStreamMapsServiceAgreementItemToServiceAgreement() {
@@ -81,31 +89,31 @@ class AccessGroupMapperTest {
         final String validUntilDate = "2022-03-08";
         final String validUntilTime = "23:59:59";
 
-        ServiceAgreementItem input = new ServiceAgreementItem()
-            .id(internalId)
-            .externalId(externalId)
-            .isMaster(isMaster)
-            .description(description)
-            .name(name)
-            .validFromDate(validFromDate)
-            .validFromTime(validFromTime)
-            .validUntilDate(validUntilDate)
-            .validUntilTime(validUntilTime);
-
+        ServiceAgreementItem input =
+                new ServiceAgreementItem()
+                        .id(internalId)
+                        .externalId(externalId)
+                        .isMaster(isMaster)
+                        .description(description)
+                        .name(name)
+                        .validFromDate(validFromDate)
+                        .validFromTime(validFromTime)
+                        .validUntilDate(validUntilDate)
+                        .validUntilTime(validUntilTime);
 
         ServiceAgreement actual = subject.toStream(input);
 
-
-        ServiceAgreement expected = new ServiceAgreement()
-            .internalId(internalId)
-            .externalId(externalId)
-            .isMaster(isMaster)
-            .description(description)
-            .name(name)
-            .validFromDate(LocalDate.parse(validFromDate))
-            .validFromTime(validFromTime)
-            .validUntilDate(LocalDate.parse(validUntilDate))
-            .validUntilTime(validUntilTime);
+        ServiceAgreement expected =
+                new ServiceAgreement()
+                        .internalId(internalId)
+                        .externalId(externalId)
+                        .isMaster(isMaster)
+                        .description(description)
+                        .name(name)
+                        .validFromDate(LocalDate.parse(validFromDate))
+                        .validFromTime(validFromTime)
+                        .validUntilDate(LocalDate.parse(validUntilDate))
+                        .validUntilTime(validUntilTime);
 
         assertEquals(expected, actual);
     }
@@ -121,31 +129,30 @@ class AccessGroupMapperTest {
         final String validUntilTime = "23:59:59";
         final LegalEntityStatus status = LegalEntityStatus.ENABLED;
 
-        ServiceAgreement input = new ServiceAgreement()
-            .externalId(externalId)
-            .description(description)
-            .name(name)
-            .validFromDate(LocalDate.parse(validFromDate))
-            .validFromTime(validFromTime)
-            .validUntilDate(LocalDate.parse(validUntilDate))
-            .validUntilTime(validUntilTime)
-            .status(status);
-
+        ServiceAgreement input =
+                new ServiceAgreement()
+                        .externalId(externalId)
+                        .description(description)
+                        .name(name)
+                        .validFromDate(LocalDate.parse(validFromDate))
+                        .validFromTime(validFromTime)
+                        .validUntilDate(LocalDate.parse(validUntilDate))
+                        .validUntilTime(validUntilTime)
+                        .status(status);
 
         ServiceAgreementPut actual = subject.toPresentationPut(input);
 
-
-        ServiceAgreementPut expected = new ServiceAgreementPut()
-            .externalId(externalId)
-            .description(description)
-            .name(name)
-            .validFromDate(validFromDate)
-            .validFromTime(validFromTime)
-            .validUntilDate(validUntilDate)
-            .validUntilTime(validUntilTime)
-            .status(Status.ENABLED);
+        ServiceAgreementPut expected =
+                new ServiceAgreementPut()
+                        .externalId(externalId)
+                        .description(description)
+                        .name(name)
+                        .validFromDate(validFromDate)
+                        .validFromTime(validFromTime)
+                        .validUntilDate(validUntilDate)
+                        .validUntilTime(validUntilTime)
+                        .status(Status.ENABLED);
 
         assertEquals(expected, actual);
     }
-
 }

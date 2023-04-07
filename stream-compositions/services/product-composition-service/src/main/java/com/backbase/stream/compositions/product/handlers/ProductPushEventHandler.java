@@ -6,8 +6,11 @@ import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPush
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.stereotype.Component;
+
 import reactor.core.publisher.Mono;
 
 @Component
@@ -18,9 +21,7 @@ public class ProductPushEventHandler implements EventHandler<ProductPushEvent> {
 
     @Override
     public void handle(EnvelopedEvent<ProductPushEvent> envelopedEvent) {
-        buildRequest(envelopedEvent)
-                .flatMap(productIngestionService::ingestPush)
-                .subscribe();
+        buildRequest(envelopedEvent).flatMap(productIngestionService::ingestPush).subscribe();
     }
 
     /**
@@ -29,10 +30,13 @@ public class ProductPushEventHandler implements EventHandler<ProductPushEvent> {
      * @param envelopedEvent EnvelopedEvent<ProductsIngestPushEvent>
      * @return ProductIngestPushRequest
      */
-    private Mono<ProductIngestPushRequest> buildRequest(EnvelopedEvent<ProductPushEvent> envelopedEvent) {
+    private Mono<ProductIngestPushRequest> buildRequest(
+            EnvelopedEvent<ProductPushEvent> envelopedEvent) {
         return Mono.just(
                 ProductIngestPushRequest.builder()
-                        .productGroup(mapper.mapEventToStream(envelopedEvent.getEvent().getProductGroup()))
+                        .productGroup(
+                                mapper.mapEventToStream(
+                                        envelopedEvent.getEvent().getProductGroup()))
                         .build());
     }
 }

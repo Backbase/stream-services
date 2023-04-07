@@ -10,5 +10,4 @@ import lombok.ToString;
 public class DeletePaymentOrderIngestDbsResponse implements PaymentOrderIngestDbsResponse {
 
     private final String paymentOrderId;
-
 }

@@ -6,6 +6,7 @@ import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfi
 import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties.Cursor;
 import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties.Events;
 import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties.ProductComposition;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,15 +38,21 @@ class LegalEntityConfigurationPropertiesTest {
         properties.setEvents(events);
         properties.setCursor(cursor);
 
-        assertTrue(properties.getIntegrationBaseUrl().contains("legal-entity"),
+        assertTrue(
+                properties.getIntegrationBaseUrl().contains("legal-entity"),
                 "Correct config spotted");
         assertTrue(
-                properties.getChains().getProductComposition().getBaseUrl().contains("product-composition"),
+                properties
+                        .getChains()
+                        .getProductComposition()
+                        .getBaseUrl()
+                        .contains("product-composition"),
                 "Correct config spotted");
         assertTrue(properties.getEvents().getEnableCompleted());
         assertTrue(properties.getEvents().getEnableFailed());
         assertTrue(properties.getCursor().getEnabled());
-        assertTrue(properties.getCursor().getBaseUrl().contains("cursor"), "Correct config spotted");
+        assertTrue(
+                properties.getCursor().getBaseUrl().contains("cursor"), "Correct config spotted");
         assertTrue(properties.isCompletedEventEnabled());
         assertTrue(properties.isFailedEventEnabled());
         assertTrue(properties.isProductChainEnabled());

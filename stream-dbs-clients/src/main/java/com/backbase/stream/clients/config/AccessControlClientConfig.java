@@ -14,11 +14,13 @@ import com.backbase.dbs.accesscontrol.api.service.v2.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.DateFormat;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.text.DateFormat;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.access-control")
@@ -34,7 +36,7 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public ApiClient accessControlApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
-            .setBasePath(createBasePath());
+                .setBasePath(createBasePath());
     }
 
     @Bean
@@ -108,5 +110,4 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
     public UserContextApi userContextApi(ApiClient accessControlApiClient) {
         return new UserContextApi(accessControlApiClient);
     }
-
 }

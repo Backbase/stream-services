@@ -1,6 +1,7 @@
 package com.backbase.stream.worker.exception;
 
 import com.backbase.stream.worker.model.StreamTask;
+
 import reactor.core.publisher.Mono;
 
 public class StreamTaskException extends RuntimeException {
@@ -22,16 +23,15 @@ public class StreamTaskException extends RuntimeException {
         this.task = task;
     }
 
-
     /**
      * Generic exception thrown when StreamTask fails to execute.
+     *
      * @param streamTask The Stream Task
      * @param throwable The cause
      */
     public StreamTaskException(StreamTask streamTask, Throwable throwable) {
         super(throwable);
         this.task = streamTask;
-
     }
 
     public Mono<StreamTaskException> getMono() {

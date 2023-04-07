@@ -8,7 +8,6 @@ import org.springframework.web.reactive.function.client.WebClient;
  * IT Test Configuration.
  *
  * @author Vladimir Kirchev
- *
  */
 @TestConfiguration
 class ItTestConfiguration {

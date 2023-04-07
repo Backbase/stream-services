@@ -11,9 +11,12 @@ import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMappe
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -35,7 +38,8 @@ public class LegalEntityPullEventHandler implements EventHandler<LegalEntityPull
      */
     @Override
     public void handle(EnvelopedEvent<LegalEntityPullEvent> envelopedEvent) {
-        legalEntityIngestionService.ingestPull(buildRequest(envelopedEvent.getEvent()))
+        legalEntityIngestionService
+                .ingestPull(buildRequest(envelopedEvent.getEvent()))
                 .doOnSuccess(this::handleResponse)
                 .onErrorResume(this::handleError)
                 .subscribe();
@@ -63,8 +67,9 @@ public class LegalEntityPullEventHandler implements EventHandler<LegalEntityPull
     }
 
     private void sendCompletedEvent(LegalEntityResponse response) {
-        LegalEntityCompletedEvent event = new LegalEntityCompletedEvent()
-                .withLegalEntity(mapper.mapStreamToEvent(response.getLegalEntity()));
+        LegalEntityCompletedEvent event =
+                new LegalEntityCompletedEvent()
+                        .withLegalEntity(mapper.mapStreamToEvent(response.getLegalEntity()));
 
         EnvelopedEvent<LegalEntityCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);
@@ -78,9 +83,10 @@ public class LegalEntityPullEventHandler implements EventHandler<LegalEntityPull
      */
     private Mono<LegalEntityResponse> handleError(Throwable ex) {
         if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
-            LegalEntityFailedEvent event = new LegalEntityFailedEvent()
-                    .withEventId(UUID.randomUUID().toString())
-                    .withMessage(ex.getMessage());
+            LegalEntityFailedEvent event =
+                    new LegalEntityFailedEvent()
+                            .withEventId(UUID.randomUUID().toString())
+                            .withMessage(ex.getMessage());
 
             EnvelopedEvent<LegalEntityFailedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);

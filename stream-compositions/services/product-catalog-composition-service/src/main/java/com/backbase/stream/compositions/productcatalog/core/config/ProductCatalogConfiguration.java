@@ -4,7 +4,9 @@ import com.backbase.buildingblocks.webclient.WebClientConstants;
 import com.backbase.stream.compositions.integration.productcatalog.ApiClient;
 import com.backbase.stream.compositions.integration.productcatalog.api.ProductCatalogIntegrationApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

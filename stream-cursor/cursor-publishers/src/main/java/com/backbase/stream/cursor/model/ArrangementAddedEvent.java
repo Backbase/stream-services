@@ -17,5 +17,4 @@ public class ArrangementAddedEvent extends AbstractDbsEvent {
 
     private String arrangementPostId;
     private String internalId;
-
 }

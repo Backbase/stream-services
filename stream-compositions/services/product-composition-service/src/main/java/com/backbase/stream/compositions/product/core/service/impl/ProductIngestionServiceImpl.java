@@ -15,17 +15,22 @@ import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import reactor.core.publisher.Mono;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
@@ -75,12 +80,15 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
     }
 
     private Mono<ProductIngestResponse> pushProductGroup(ProductIngestPushRequest request) {
-        return Mono.just(ProductIngestResponse.builder()
-                .productGroups(Collections.singletonList(request.getProductGroup()))
-                .serviceAgreementExternalId(request.getProductGroup().getServiceAgreement().getExternalId())
-                .serviceAgreementInternalId(request.getProductGroup().getServiceAgreement().getInternalId())
-                .source(request.getSource())
-                .build());
+        return Mono.just(
+                ProductIngestResponse.builder()
+                        .productGroups(Collections.singletonList(request.getProductGroup()))
+                        .serviceAgreementExternalId(
+                                request.getProductGroup().getServiceAgreement().getExternalId())
+                        .serviceAgreementInternalId(
+                                request.getProductGroup().getServiceAgreement().getInternalId())
+                        .source(request.getSource())
+                        .build());
     }
 
     /**
@@ -90,32 +98,45 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
      * @return Ingested product group
      */
     private Mono<ProductIngestResponse> sendToDbs(ProductIngestResponse res) {
-        return batchProductIngestionSaga.process(buildBatchTask(res))
+        return batchProductIngestionSaga
+                .process(buildBatchTask(res))
                 .map(BatchProductGroupTask::getData)
-                .map(pg -> ProductIngestResponse.builder()
-                        .productGroups(pg.getProductGroups().stream().map(g -> (ProductGroup) g).collect(Collectors.toList()))
-                        .serviceAgreementExternalId(res.getServiceAgreementExternalId())
-                        .serviceAgreementInternalId(res.getServiceAgreementInternalId())
-                        .userExternalId(res.getUserExternalId())
-                        .userInternalId(res.getUserInternalId())
-                        .legalEntityExternalId(res.getLegalEntityExternalId())
-                        .legalEntityInternalId(res.getLegalEntityInternalId())
-                        .source(res.getSource())
-                        .additions(res.getAdditions())
-                        .transactionChainEnabledFromRequest(res.getTransactionChainEnabledFromRequest())
-                        .paymentOrderChainEnabledFromRequest(res.getPaymentOrderChainEnabledFromRequest())
-                        .build());
+                .map(
+                        pg ->
+                                ProductIngestResponse.builder()
+                                        .productGroups(
+                                                pg.getProductGroups().stream()
+                                                        .map(g -> (ProductGroup) g)
+                                                        .collect(Collectors.toList()))
+                                        .serviceAgreementExternalId(
+                                                res.getServiceAgreementExternalId())
+                                        .serviceAgreementInternalId(
+                                                res.getServiceAgreementInternalId())
+                                        .userExternalId(res.getUserExternalId())
+                                        .userInternalId(res.getUserInternalId())
+                                        .legalEntityExternalId(res.getLegalEntityExternalId())
+                                        .legalEntityInternalId(res.getLegalEntityInternalId())
+                                        .source(res.getSource())
+                                        .additions(res.getAdditions())
+                                        .transactionChainEnabledFromRequest(
+                                                res.getTransactionChainEnabledFromRequest())
+                                        .paymentOrderChainEnabledFromRequest(
+                                                res.getPaymentOrderChainEnabledFromRequest())
+                                        .build());
     }
 
     private BatchProductGroupTask buildBatchTask(ProductIngestResponse res) {
         BatchProductGroup bpg = new BatchProductGroup();
         res.getProductGroups().forEach(bpg::addProductGroupsItem);
 
-        bpg.setServiceAgreement(new ServiceAgreement()
-                .internalId(res.getServiceAgreementInternalId())
-                .externalId(res.getServiceAgreementExternalId()));
+        bpg.setServiceAgreement(
+                new ServiceAgreement()
+                        .internalId(res.getServiceAgreementInternalId())
+                        .externalId(res.getServiceAgreementExternalId()));
 
-        return new BatchProductGroupTask(res.getServiceAgreementInternalId(), bpg,
+        return new BatchProductGroupTask(
+                res.getServiceAgreementInternalId(),
+                bpg,
                 BatchProductIngestionMode.builder()
                         .functionGroupsMode(config.getIngestionMode().getFunctionGroups())
                         .dataGroupIngestionMode(config.getIngestionMode().getDataGroups())
@@ -130,12 +151,18 @@ public class ProductIngestionServiceImpl implements ProductIngestionService {
             return Mono.empty();
         }
 
-        Set<ConstraintViolation<List<ProductGroup>>> violations = validator.validate(res.getProductGroups());
+        Set<ConstraintViolation<List<ProductGroup>>> violations =
+                validator.validate(res.getProductGroups());
 
         if (!CollectionUtils.isEmpty(violations)) {
-            List<Error> errors = violations.stream().map(c -> new Error()
-                    .withMessage(c.getMessage())
-                    .withKey(Error.INVALID_INPUT_MESSAGE)).collect(Collectors.toList());
+            List<Error> errors =
+                    violations.stream()
+                            .map(
+                                    c ->
+                                            new Error()
+                                                    .withMessage(c.getMessage())
+                                                    .withKey(Error.INVALID_INPUT_MESSAGE))
+                            .collect(Collectors.toList());
             return Mono.error(new BadRequestException().withErrors(errors));
         }
 

@@ -6,7 +6,9 @@ import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRe
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -25,8 +27,7 @@ public class ProductRestMapper {
      * @return ProductIngestPullRequest
      */
     public ProductIngestPullRequest mapPullRequest(ProductPullIngestionRequest request) {
-        return ProductIngestPullRequest
-                .builder()
+        return ProductIngestPullRequest.builder()
                 .legalEntityInternalId(request.getLegalEntityInternalId())
                 .legalEntityExternalId(request.getLegalEntityExternalId())
                 .serviceAgreementExternalId(request.getServiceAgreementExternalId())
@@ -52,7 +53,6 @@ public class ProductRestMapper {
                 .source(request.getSource())
                 .build();
     }
-
 
     /**
      * Builds ingestion response for API endpoint.

@@ -7,9 +7,11 @@ import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.limit.api.service.v2.model.Entity;
 import com.backbase.dbs.limit.api.service.v2.model.PeriodicLimitsBounds;
 import com.backbase.dbs.limit.api.service.v2.model.TransactionalLimitsBound;
+
+import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.util.List;
-import org.junit.jupiter.api.Test;
 
 class LimitsMapperTest {
 
@@ -50,13 +52,14 @@ class LimitsMapperTest {
         var fagEntity = new Entity().etype("FAG").eref("internalFagId");
         var funEntity = new Entity().etype("FUN").eref("1018");
         var prvEntity = new Entity().etype("PRV").eref("approve");
-        var createLimitRequestBody = new CreateLimitRequestBody()
-            .periodicLimitsBounds(new PeriodicLimitsBounds().daily(BigDecimal.TEN))
-            .transactionalLimitsBound(new TransactionalLimitsBound().amount(BigDecimal.TEN));
+        var createLimitRequestBody =
+                new CreateLimitRequestBody()
+                        .periodicLimitsBounds(new PeriodicLimitsBounds().daily(BigDecimal.TEN))
+                        .transactionalLimitsBound(
+                                new TransactionalLimitsBound().amount(BigDecimal.TEN));
         createLimitRequestBody.entities(List.of(saEntity, fagEntity, funEntity, prvEntity));
         createLimitRequestBody.setUserBBID("internalUserId");
         createLimitRequestBody.currency("USD");
         return createLimitRequestBody;
     }
-
 }

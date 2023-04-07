@@ -9,11 +9,14 @@ import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapp
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalogIngestionResponse;
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalogPullIngestionRequest;
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalogPushIngestionRequest;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
+
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
@@ -26,7 +29,8 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
 
     @Override
     public Mono<ResponseEntity<ProductCatalogIngestionResponse>> pullIngestProductCatalog(
-            @Valid Mono<ProductCatalogPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+            @Valid Mono<ProductCatalogPullIngestionRequest> pullIngestionRequest,
+            ServerWebExchange exchange) {
         return productCatalogIngestionService
                 .ingestPull(pullIngestionRequest.map(this::buildPullRequest))
                 .map(this::mapIngestionToResponse);
@@ -34,7 +38,8 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
 
     @Override
     public Mono<ResponseEntity<ProductCatalogIngestionResponse>> pushIngestProductCatalog(
-            @Valid Mono<ProductCatalogPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+            @Valid Mono<ProductCatalogPushIngestionRequest> pushIngestionRequest,
+            ServerWebExchange exchange) {
         return productCatalogIngestionService
                 .ingestPush(pushIngestionRequest.map(this::buildPushRequest))
                 .map(this::mapIngestionToResponse);
@@ -46,7 +51,8 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
      * @param request PullIngestionRequest
      * @return ProductIngestPullRequest
      */
-    private ProductCatalogIngestPullRequest buildPullRequest(ProductCatalogPullIngestionRequest request) {
+    private ProductCatalogIngestPullRequest buildPullRequest(
+            ProductCatalogPullIngestionRequest request) {
         return ProductCatalogIngestPullRequest.builder()
                 .additionalParameters(request.getAdditionalParameters())
                 .build();
@@ -58,11 +64,11 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
      * @param request PushIngestionRequest
      * @return LegalEntityIngestPushRequest
      */
-    private ProductCatalogIngestPushRequest buildPushRequest(ProductCatalogPushIngestionRequest request) {
+    private ProductCatalogIngestPushRequest buildPushRequest(
+            ProductCatalogPushIngestionRequest request) {
         return ProductCatalogIngestPushRequest.builder()
                 .productCatalog(mapper.mapCompositionToStream(request.getProductCatalog()))
                 .build();
-
     }
 
     /**
@@ -71,10 +77,12 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
      * @param response ProductCatalogIngestResponse
      * @return IngestionResponse
      */
-    private ResponseEntity<ProductCatalogIngestionResponse> mapIngestionToResponse(ProductCatalogIngestResponse response) {
+    private ResponseEntity<ProductCatalogIngestionResponse> mapIngestionToResponse(
+            ProductCatalogIngestResponse response) {
         return new ResponseEntity<>(
                 new ProductCatalogIngestionResponse()
-                        .withProductCatalog(mapper.mapStreamToComposition(response.getProductCatalog())),
+                        .withProductCatalog(
+                                mapper.mapStreamToComposition(response.getProductCatalog())),
                 HttpStatus.CREATED);
     }
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.service.AccessGroupService;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -18,13 +19,13 @@ class AccessControlConfigurationTest {
     @Test
     void configurationTest() {
         contextRunner
-            .withBean(WebClientAutoConfiguration.class)
-            .withBean(DbsApiClientsAutoConfiguration.class)
-            .withBean(InterServiceWebClientConfiguration.class)
-            .withUserConfiguration(AccessControlConfiguration.class)
-            .run(context -> {
-                assertThat(context).hasSingleBean(AccessGroupService.class);
-            });
+                .withBean(WebClientAutoConfiguration.class)
+                .withBean(DbsApiClientsAutoConfiguration.class)
+                .withBean(InterServiceWebClientConfiguration.class)
+                .withUserConfiguration(AccessControlConfiguration.class)
+                .run(
+                        context -> {
+                            assertThat(context).hasSingleBean(AccessGroupService.class);
+                        });
     }
-
 }

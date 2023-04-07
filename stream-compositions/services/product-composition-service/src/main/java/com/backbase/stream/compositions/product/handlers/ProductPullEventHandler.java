@@ -11,12 +11,16 @@ import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
-import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+
 import reactor.core.publisher.Mono;
+
+import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
@@ -63,11 +67,12 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
         if (Boolean.FALSE.equals(configProperties.getEvents().getEnableCompleted())) {
             return;
         }
-        ProductCompletedEvent event = new ProductCompletedEvent()
-                .withProductGroups(
-                        response.getProductGroups().stream()
-                                .map( productGroup -> mapper.mapStreamToEvent(productGroup))
-                                .collect(Collectors.toList()));
+        ProductCompletedEvent event =
+                new ProductCompletedEvent()
+                        .withProductGroups(
+                                response.getProductGroups().stream()
+                                        .map(productGroup -> mapper.mapStreamToEvent(productGroup))
+                                        .collect(Collectors.toList()));
 
         EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);
@@ -83,8 +88,7 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
         log.error("Error ingesting legal entity using the Pull event: {}", ex.getMessage());
 
         if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
-            ProductFailedEvent event = new ProductFailedEvent()
-                    .withMessage(ex.getMessage());
+            ProductFailedEvent event = new ProductFailedEvent().withMessage(ex.getMessage());
 
             EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);

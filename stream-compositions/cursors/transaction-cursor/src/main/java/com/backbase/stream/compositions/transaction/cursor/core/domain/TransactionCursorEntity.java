@@ -1,17 +1,16 @@
 package com.backbase.stream.compositions.transaction.cursor.core.domain;
 
+import org.hibernate.annotations.GenericGenerator;
+
 import java.sql.Timestamp;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.GenericGenerator;
-
-/**
- * The Domain Model for the transaction cursor service
- */
+/** The Domain Model for the transaction cursor service */
 @Entity
 @Table(name = "txn_cursor")
 public class TransactionCursorEntity {
@@ -81,68 +80,29 @@ public class TransactionCursorEntity {
     }
 
     @Id
-    @GeneratedValue(
-            generator = "system-uuid"
-    )
-    @GenericGenerator(
-            name = "system-uuid",
-            strategy = "uuid2"
-    )
-    @Column(
-            name = "id",
-            updatable = false,
-            nullable = false,
-            length = 36
-    )
+    @GeneratedValue(generator = "system-uuid")
+    @GenericGenerator(name = "system-uuid", strategy = "uuid2")
+    @Column(name = "id", updatable = false, nullable = false, length = 36)
     private String id;
 
-    @Column(
-            name = "arrangement_id",
-            updatable = false,
-            nullable = false,
-            length = 36
-    )
+    @Column(name = "arrangement_id", updatable = false, nullable = false, length = 36)
     private String arrangementId;
 
-    @Column(
-            name = "ext_arrangement_id",
-            nullable = false,
-            length = 50
-    )
+    @Column(name = "ext_arrangement_id", nullable = false, length = 50)
     private String extArrangementId;
 
-
-    @Column(
-            name = "last_txn_date",
-            nullable = false
-    )
+    @Column(name = "last_txn_date", nullable = false)
     private Timestamp lastTxnDate;
 
-    @Column(
-            name = "last_txn_ids",
-            nullable = false,
-            length = 2600
-    )
+    @Column(name = "last_txn_ids", nullable = false, length = 2600)
     private String lastTxnIds;
 
-    @Column(
-            name = "legal_entity_id",
-            nullable = false,
-            length = 36
-    )
+    @Column(name = "legal_entity_id", nullable = false, length = 36)
     private String legalEntityId;
 
-    @Column(
-            name = "additions",
-            nullable = false
-    )
+    @Column(name = "additions", nullable = false)
     private String additions;
 
-    @Column(
-            name = "status",
-            nullable = false,
-            length = 45
-    )
+    @Column(name = "status", nullable = false, length = 45)
     private String status;
-
 }

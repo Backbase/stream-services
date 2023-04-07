@@ -3,6 +3,7 @@ package com.backbase.stream.compositions.paymentorders.core.config;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Setter

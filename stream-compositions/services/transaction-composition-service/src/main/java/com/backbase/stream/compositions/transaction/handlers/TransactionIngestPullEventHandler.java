@@ -12,10 +12,13 @@ import com.backbase.stream.compositions.transaction.core.mapper.TransactionMappe
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPullRequest;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
+
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Collectors;
@@ -37,11 +40,11 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
      */
     @Override
     public void handle(EnvelopedEvent<TransactionsPullEvent> envelopedEvent) {
-        transactionIngestionService.ingestPull(buildRequest(envelopedEvent.getEvent()))
+        transactionIngestionService
+                .ingestPull(buildRequest(envelopedEvent.getEvent()))
                 .onErrorResume(this::handleError)
                 .subscribe(this::handleResponse);
     }
-
 
     /**
      * Handles reponse from ingestion service.
@@ -52,9 +55,13 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
         if (Boolean.FALSE.equals(configProperties.getEvents().getEnableCompleted())) {
             return;
         }
-        TransactionsCompletedEvent event = new TransactionsCompletedEvent()
-                .withTransactionIds(response.getTransactions().stream().map(TransactionsPostResponseBody::getId).collect(Collectors.toList()))
-                .withInternalArrangementId(response.getArrangementId());
+        TransactionsCompletedEvent event =
+                new TransactionsCompletedEvent()
+                        .withTransactionIds(
+                                response.getTransactions().stream()
+                                        .map(TransactionsPostResponseBody::getId)
+                                        .collect(Collectors.toList()))
+                        .withInternalArrangementId(response.getArrangementId());
 
         EnvelopedEvent<TransactionsCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(event);
@@ -70,8 +77,8 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
         log.error("Error ingesting legal entity using the Pull event: {}", ex.getMessage());
 
         if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
-            TransactionsFailedEvent event = new TransactionsFailedEvent()
-                    .withMessage(ex.getMessage());
+            TransactionsFailedEvent event =
+                    new TransactionsFailedEvent().withMessage(ex.getMessage());
 
             EnvelopedEvent<TransactionsFailedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);

@@ -1,6 +1,7 @@
 package com.backbase.stream.compositions.product.core.service;
 
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+
 import reactor.core.publisher.Mono;
 
 public interface ProductPostIngestionService {

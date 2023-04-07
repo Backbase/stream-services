@@ -2,9 +2,11 @@ package com.backbase.stream.portfolio.configuration;
 
 import com.backbase.portfolio.instrument.integration.api.service.ApiClient;
 import com.backbase.stream.clients.config.InstrumentApiConfiguration;
+
 import org.junit.jupiter.api.Test;
 
-class InstrumentApiConfigurationTest extends BaseApiConfigurationTest<InstrumentApiConfiguration, ApiClient> {
+class InstrumentApiConfigurationTest
+        extends BaseApiConfigurationTest<InstrumentApiConfiguration, ApiClient> {
 
     @Override
     public ApiClient getClient() {
@@ -50,5 +52,4 @@ class InstrumentApiConfigurationTest extends BaseApiConfigurationTest<Instrument
     void instrumentApiClient() {
         assertBaseUrl(getConfig().instrumentApiClient(objectMapper, dateFormat));
     }
-
 }

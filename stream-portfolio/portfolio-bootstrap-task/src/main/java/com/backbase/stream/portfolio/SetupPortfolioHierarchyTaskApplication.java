@@ -8,9 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class SetupPortfolioHierarchyTaskApplication {
 
     public static void main(String[] args) {
-        SpringApplication springApplication = new SpringApplication(SetupPortfolioHierarchyTaskApplication.class);
+        SpringApplication springApplication =
+                new SpringApplication(SetupPortfolioHierarchyTaskApplication.class);
         springApplication.setWebApplicationType(WebApplicationType.NONE);
         springApplication.run(args);
     }
-
 }

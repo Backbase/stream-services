@@ -8,18 +8,19 @@ import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.service.ArrangementService;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
-/**
- * Entitlement Service contains functions to query access control .
- */
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/** Entitlement Service contains functions to query access control . */
 @Slf4j
 @AllArgsConstructor
 public class EntitlementsService {
@@ -30,8 +31,9 @@ public class EntitlementsService {
     private final LegalEntityService legalEntityService;
 
     /**
-     * Get Assigned permissions for external user for resource and function name with a privilege. First retrieves
-     * internal user id to then query master service agreement in order to query assigned permissions
+     * Get Assigned permissions for external user for resource and function name with a privilege.
+     * First retrieves internal user id to then query master service agreement in order to query
+     * assigned permissions
      *
      * @param externalUserId External User ID
      * @param resourceName Business Resource Name (i.e. Transactions)
@@ -40,35 +42,45 @@ public class EntitlementsService {
      * @return List of assigned permissions
      */
     public Flux<AssignedPermission> getAssignedPermissions(
-        String externalUserId,
-        String resourceName,
-        String functionName,
-        String privilege) {
+            String externalUserId, String resourceName, String functionName, String privilege) {
 
-        return userService.getUserByExternalId(externalUserId).flux().flatMap(user ->
-            getAssignedPermissionsForUser(resourceName, functionName, privilege, user));
+        return userService
+                .getUserByExternalId(externalUserId)
+                .flux()
+                .flatMap(
+                        user ->
+                                getAssignedPermissionsForUser(
+                                        resourceName, functionName, privilege, user));
     }
 
-    public Flux<AssignedPermission> getAssignedPermissionsForUser(String resourceName, String functionName,
-        String privilege, User user) {
-        return legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(user.getLegalEntityId())
-            .flux()
-            .flatMap(sa ->
-                getAssignedPermissionForServiceAgreement(resourceName, functionName, privilege, user, sa));
+    public Flux<AssignedPermission> getAssignedPermissionsForUser(
+            String resourceName, String functionName, String privilege, User user) {
+        return legalEntityService
+                .getMasterServiceAgreementForInternalLegalEntityId(user.getLegalEntityId())
+                .flux()
+                .flatMap(
+                        sa ->
+                                getAssignedPermissionForServiceAgreement(
+                                        resourceName, functionName, privilege, user, sa));
     }
 
     private Flux<AssignedPermission> getAssignedPermissionForServiceAgreement(
-        String resourceName,
-        String functionName,
-        String privilege,
-        User user,
-        ServiceAgreement sa) {
-        return accessGroupService.getAssignedPermissions(sa, user, resourceName, functionName, privilege)
-            .flatMap(permission ->
-                Flux.fromIterable(permission.getPermittedObjectInternalIds())
-                    .flatMap(arrangementService::getArrangement)
-                    .collectList()
-                    .map(products -> setAssignedPermissionForArrangements(permission, products)));
+            String resourceName,
+            String functionName,
+            String privilege,
+            User user,
+            ServiceAgreement sa) {
+        return accessGroupService
+                .getAssignedPermissions(sa, user, resourceName, functionName, privilege)
+                .flatMap(
+                        permission ->
+                                Flux.fromIterable(permission.getPermittedObjectInternalIds())
+                                        .flatMap(arrangementService::getArrangement)
+                                        .collectList()
+                                        .map(
+                                                products ->
+                                                        setAssignedPermissionForArrangements(
+                                                                permission, products)));
     }
 
     /**
@@ -78,10 +90,13 @@ public class EntitlementsService {
      * @return List of Products
      */
     public Flux<AccountArrangementItem> getProductsForInternalLegalEntityId(String legalEntityId) {
-        return legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntityId)
-            .flatMapMany(sa -> accessGroupService.getDataGroupItemIdsByServiceAgreementId(sa.getInternalId())
-                .flatMap(arrangementService::getArrangement)
-            );
+        return legalEntityService
+                .getMasterServiceAgreementForInternalLegalEntityId(legalEntityId)
+                .flatMapMany(
+                        sa ->
+                                accessGroupService
+                                        .getDataGroupItemIdsByServiceAgreementId(sa.getInternalId())
+                                        .flatMap(arrangementService::getArrangement));
     }
 
     /**
@@ -91,34 +106,54 @@ public class EntitlementsService {
      * @return List of Products
      */
     public Flux<AccountArrangementItem> getProductsForExternalLegalEntityId(String legalEntityId) {
-        return legalEntityService.getLegalEntityByExternalId(legalEntityId).flux()
-            .flatMap(legalEntity -> getProductsForInternalLegalEntityId(legalEntity.getInternalId()));
+        return legalEntityService
+                .getLegalEntityByExternalId(legalEntityId)
+                .flux()
+                .flatMap(
+                        legalEntity ->
+                                getProductsForInternalLegalEntityId(legalEntity.getInternalId()));
     }
 
-    private AssignedPermission setAssignedPermissionForJourneys(AssignedPermission permission, List<String> externalIds,
-        ProductGroup.ProductGroupTypeEnum productGroupTypeEnum) {
+    private AssignedPermission setAssignedPermissionForJourneys(
+            AssignedPermission permission,
+            List<String> externalIds,
+            ProductGroup.ProductGroupTypeEnum productGroupTypeEnum) {
         permission.setPermittedObjectExternalIds(externalIds);
         return permission;
     }
 
-    private AssignedPermission setAssignedPermissionForArrangements(AssignedPermission permission,
-        List<AccountArrangementItem> products) {
-        List<String> externalIds = products.stream().map(AccountArrangementItem::getExternalArrangementId)
-            .collect(Collectors.toList());
+    private AssignedPermission setAssignedPermissionForArrangements(
+            AssignedPermission permission, List<AccountArrangementItem> products) {
+        List<String> externalIds =
+                products.stream()
+                        .map(AccountArrangementItem::getExternalArrangementId)
+                        .collect(Collectors.toList());
         permission.setPermittedObjects(
-            Collections.singletonMap(ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS.name(), products));
+                Collections.singletonMap(
+                        ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS.name(), products));
         permission.setPermittedObjectExternalIds(externalIds);
         return permission;
     }
 
     public Mono<Tuple2<User, LegalEntity>> getLegalEntityForUserName(String username) {
-        return userService.getUserByExternalId(username)
-            .doOnNext(user -> log.info("Found user: {} for username: {}", user.getInternalId(), username))
-            .switchIfEmpty(Mono.error(new UserNotFoundException("User not found for username: " + username)))
-            .flatMap(user -> {
-                return Mono.just(user).zipWith(legalEntityService.getLegalEntityByInternalId(user.getLegalEntityId()));
-            });
+        return userService
+                .getUserByExternalId(username)
+                .doOnNext(
+                        user ->
+                                log.info(
+                                        "Found user: {} for username: {}",
+                                        user.getInternalId(),
+                                        username))
+                .switchIfEmpty(
+                        Mono.error(
+                                new UserNotFoundException(
+                                        "User not found for username: " + username)))
+                .flatMap(
+                        user -> {
+                            return Mono.just(user)
+                                    .zipWith(
+                                            legalEntityService.getLegalEntityByInternalId(
+                                                    user.getLegalEntityId()));
+                        });
     }
-
-
 }

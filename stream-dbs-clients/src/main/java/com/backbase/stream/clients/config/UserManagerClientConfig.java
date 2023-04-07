@@ -4,11 +4,13 @@ import com.backbase.dbs.user.api.service.ApiClient;
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.DateFormat;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.text.DateFormat;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.usermanager")
@@ -24,7 +26,7 @@ public class UserManagerClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public ApiClient userManagerClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
-            .setBasePath(createBasePath());
+                .setBasePath(createBasePath());
     }
 
     @Bean
@@ -38,5 +40,4 @@ public class UserManagerClientConfig extends CompositeApiClientConfig {
     public IdentityManagementApi identityManagementApi(ApiClient userManagerClient) {
         return new IdentityManagementApi(userManagerClient);
     }
-
 }

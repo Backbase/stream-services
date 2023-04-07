@@ -2,16 +2,15 @@ package com.backbase.stream.compositions.transaction.core.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionMapperTest {
@@ -26,15 +25,22 @@ class TransactionMapperTest {
 
     @Test
     void testMapperWithDateTimeFormatter() {
-        OffsetDateTime offsetDateTime = transactionMapper.map(OffsetDateTime.now().format(
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXX")));
+        OffsetDateTime offsetDateTime =
+                transactionMapper.map(
+                        OffsetDateTime.now()
+                                .format(
+                                        DateTimeFormatter.ofPattern(
+                                                "yyyy-MM-dd'T'HH:mm:ss.SSSXX")));
         assertThat(offsetDateTime).isNotNull();
     }
 
     // @Test
     void testMapperWithDateTimeException() throws DateTimeParseException {
-        String localDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'Z'"));
-        String offsetDateTime = OffsetDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
+        String localDateTime =
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'Z'"));
+        String offsetDateTime =
+                OffsetDateTime.now()
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"));
         transactionMapper.map(offsetDateTime);
         assertThat(offsetDateTime).isNotNull();
     }

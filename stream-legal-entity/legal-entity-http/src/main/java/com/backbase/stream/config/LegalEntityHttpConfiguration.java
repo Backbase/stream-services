@@ -13,13 +13,7 @@ public class LegalEntityHttpConfiguration {
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.authorizeExchange()
-            .anyExchange()
-            .permitAll()
-            .and()
-            .csrf()
-            .disable()
-            .build();
+        return http.authorizeExchange().anyExchange().permitAll().and().csrf().disable().build();
     }
 
     /**
@@ -28,9 +22,10 @@ public class LegalEntityHttpConfiguration {
      * @return In memory HttpTraceRepository.
      */
     @Bean
-    @ConditionalOnExpression("${management.endpoints.enabled-by-default:false} or ${management.trace.http.enabled:false}")
+    @ConditionalOnExpression(
+            "${management.endpoints.enabled-by-default:false} or"
+                    + " ${management.trace.http.enabled:false}")
     public HttpTraceRepository httpTraceRepository() {
         return new InMemoryHttpTraceRepository();
     }
-
 }

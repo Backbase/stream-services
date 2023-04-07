@@ -15,9 +15,6 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
 
-import java.text.ParseException;
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,8 +23,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.text.ParseException;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionCursorServiceImplTest {
@@ -37,14 +38,12 @@ class TransactionCursorServiceImplTest {
     // @Mock
     TransactionCursorMapper mapper = Mappers.getMapper(TransactionCursorMapper.class);
 
-    @Mock
-    TransactionCursorRepository transactionCursorRepository;
-
+    @Mock TransactionCursorRepository transactionCursorRepository;
 
     @BeforeEach
     void setUp() {
-        transactionCursorService = new TransactionCursorServiceImpl(transactionCursorRepository,
-                mapper);
+        transactionCursorService =
+                new TransactionCursorServiceImpl(transactionCursorRepository, mapper);
     }
 
     @Test
@@ -65,8 +64,8 @@ class TransactionCursorServiceImplTest {
 
     @Test
     void deleteByArrangementId_success() {
-        Mono<ResponseEntity<Void>> responseEntity = transactionCursorService
-                .deleteByArrangementId("");
+        Mono<ResponseEntity<Void>> responseEntity =
+                transactionCursorService.deleteByArrangementId("");
         assertNotNull(responseEntity);
     }
 
@@ -91,32 +90,40 @@ class TransactionCursorServiceImplTest {
         TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
         transactionCursorEntity.setId("1234567890");
         when(transactionCursorRepository.save(any())).thenReturn(transactionCursorEntity);
-        TransactionCursorUpsertRequest transactionCursorUpsertRequest = new TransactionCursorUpsertRequest()
-                .withCursor(new TransactionCursor().withArrangementId("123"));
-        TransactionCursorUpsertResponse transactionCursorUpsertResponse = new TransactionCursorUpsertResponse()
-                .withId("1234567890");
-        StepVerifier
-                .create(transactionCursorService.upsertCursor(Mono.just(transactionCursorUpsertRequest)))
-                .expectNext(new ResponseEntity<>
-                        (transactionCursorUpsertResponse, HttpStatus.CREATED)).verifyComplete();
+        TransactionCursorUpsertRequest transactionCursorUpsertRequest =
+                new TransactionCursorUpsertRequest()
+                        .withCursor(new TransactionCursor().withArrangementId("123"));
+        TransactionCursorUpsertResponse transactionCursorUpsertResponse =
+                new TransactionCursorUpsertResponse().withId("1234567890");
+        StepVerifier.create(
+                        transactionCursorService.upsertCursor(
+                                Mono.just(transactionCursorUpsertRequest)))
+                .expectNext(
+                        new ResponseEntity<>(transactionCursorUpsertResponse, HttpStatus.CREATED))
+                .verifyComplete();
     }
 
     @Test
     void patchByArrangementId_success() {
-        lenient().when(transactionCursorRepository.patchByArrangementId(anyString(), any()))
+        lenient()
+                .when(transactionCursorRepository.patchByArrangementId(anyString(), any()))
                 .thenReturn(1);
 
-        StepVerifier.create(transactionCursorService
-                        .patchByArrangementId("123", Mono.just(new TransactionCursorPatchRequest())))
+        StepVerifier.create(
+                        transactionCursorService.patchByArrangementId(
+                                "123", Mono.just(new TransactionCursorPatchRequest())))
                 .expectNext(new ResponseEntity<>(HttpStatus.OK));
     }
 
     @Test
     void patchByArrangementId_error() {
-        StepVerifier.create(transactionCursorService.patchByArrangementId("123",
-                Mono.just(new TransactionCursorPatchRequest().withLastTxnDate("123-123-123")
-                        .withStatus(StatusEnum.SUCCESS.getValue())))).expectError(ParseException.class);
+        StepVerifier.create(
+                        transactionCursorService.patchByArrangementId(
+                                "123",
+                                Mono.just(
+                                        new TransactionCursorPatchRequest()
+                                                .withLastTxnDate("123-123-123")
+                                                .withStatus(StatusEnum.SUCCESS.getValue()))))
+                .expectError(ParseException.class);
     }
-
-
 }

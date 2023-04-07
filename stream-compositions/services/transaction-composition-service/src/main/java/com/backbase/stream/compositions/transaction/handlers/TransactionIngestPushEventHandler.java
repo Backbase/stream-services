@@ -6,8 +6,11 @@ import com.backbase.stream.compositions.events.ingress.event.spec.v1.Transaction
 import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPushRequest;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.stereotype.Component;
+
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
@@ -20,9 +23,7 @@ public class TransactionIngestPushEventHandler implements EventHandler<Transacti
 
     @Override
     public void handle(EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
-        buildRequest(envelopedEvent)
-                .flatMap(transactionIngestionService::ingestPush)
-                .subscribe();
+        buildRequest(envelopedEvent).flatMap(transactionIngestionService::ingestPush).subscribe();
     }
 
     /**
@@ -31,12 +32,16 @@ public class TransactionIngestPushEventHandler implements EventHandler<Transacti
      * @param envelopedEvent EnvelopedEvent<TransactionsIngestPushEvent>
      * @return TransactionsIngestPushEvent
      */
-    private Mono<TransactionIngestPushRequest> buildRequest(EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
+    private Mono<TransactionIngestPushRequest> buildRequest(
+            EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
         return Mono.just(
                 TransactionIngestPushRequest.builder()
-                        .transactions(Collections.singletonList(
-                                mapper.mapPushEventToStream(
-                                        envelopedEvent.getEvent().getTransactionsPostRequestBody())))
+                        .transactions(
+                                Collections.singletonList(
+                                        mapper.mapPushEventToStream(
+                                                envelopedEvent
+                                                        .getEvent()
+                                                        .getTransactionsPostRequestBody())))
                         .build());
     }
 }

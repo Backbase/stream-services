@@ -2,16 +2,16 @@ package com.backbase.stream.cursor.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
-import java.util.Date;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-/**
- * Payment Created Event.
- */
+import java.io.Serializable;
+import java.util.Date;
+
+/** Payment Created Event. */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
@@ -28,10 +28,10 @@ public class PaymentCreatedEvent extends AbstractDbsEvent {
 
         @JsonProperty("createdBy")
         private String externalUserId;
+
         @JsonProperty("id")
         private String paymentId;
+
         private Date createdAt;
-
     }
-
 }

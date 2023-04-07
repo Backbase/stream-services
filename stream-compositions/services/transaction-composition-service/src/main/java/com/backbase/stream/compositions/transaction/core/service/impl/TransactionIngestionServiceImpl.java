@@ -15,10 +15,13 @@ import com.backbase.stream.compositions.transaction.cursor.client.TransactionCur
 import com.backbase.stream.compositions.transaction.cursor.client.model.*;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.worker.model.UnitOfWork;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -43,7 +46,8 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
 
     private final TransactionConfigurationProperties config;
 
-    private final DateTimeFormatter offsetDateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+    private final DateTimeFormatter offsetDateTimeFormatter =
+            DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
     /**
      * Ingests transactions in pull mode.
@@ -51,42 +55,47 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
      * @param ingestPullRequest Ingest pull request
      * @return TransactionIngestResponse
      */
-    public Mono<TransactionIngestResponse> ingestPull(TransactionIngestPullRequest ingestPullRequest) {
+    public Mono<TransactionIngestResponse> ingestPull(
+            TransactionIngestPullRequest ingestPullRequest) {
         return buildIntegrationRequest(ingestPullRequest)
                 .map(this::pullTransactions)
                 .map(f -> filterExisting(f, ingestPullRequest.getLastIngestedExternalIds()))
                 .flatMap(this::sendToDbs)
-                .doOnSuccess(list -> handleSuccess(
-                        ingestPullRequest.getArrangementId(), true, list))
-                .onErrorResume(e -> handleError(
-                        ingestPullRequest.getArrangementId(), true, e))
+                .doOnSuccess(
+                        list -> handleSuccess(ingestPullRequest.getArrangementId(), true, list))
+                .onErrorResume(e -> handleError(ingestPullRequest.getArrangementId(), true, e))
                 .map(list -> buildResponse(list, ingestPullRequest));
     }
 
     /*
-        Filter by existing/already ingested external ids only works
-        - if the list is not empty
-        - if the filter is enabled in configuration
-     */
-    private Flux<TransactionsPostRequestBody> filterExisting(Flux<TransactionsPostRequestBody> transactionsPostRequestBodyFlux,
-                                                             List<String> lastIngestedExternalIds) {
-        if (!config.isTransactionIdsFilterEnabled() ||
-                CollectionUtils.isEmpty(lastIngestedExternalIds)) {
+       Filter by existing/already ingested external ids only works
+       - if the list is not empty
+       - if the filter is enabled in configuration
+    */
+    private Flux<TransactionsPostRequestBody> filterExisting(
+            Flux<TransactionsPostRequestBody> transactionsPostRequestBodyFlux,
+            List<String> lastIngestedExternalIds) {
+        if (!config.isTransactionIdsFilterEnabled()
+                || CollectionUtils.isEmpty(lastIngestedExternalIds)) {
             return transactionsPostRequestBodyFlux;
         }
 
-        return transactionsPostRequestBodyFlux.filter(t -> !lastIngestedExternalIds.contains(t.getExternalId()));
+        return transactionsPostRequestBodyFlux.filter(
+                t -> !lastIngestedExternalIds.contains(t.getExternalId()));
     }
 
-    private Mono<TransactionIngestPullRequest> buildIntegrationRequest(TransactionIngestPullRequest transactionIngestPullRequest) {
+    private Mono<TransactionIngestPullRequest> buildIntegrationRequest(
+            TransactionIngestPullRequest transactionIngestPullRequest) {
         OffsetDateTime currentTime = OffsetDateTime.now();
         OffsetDateTime dateRangeStartFromRequest = transactionIngestPullRequest.getDateRangeStart();
         OffsetDateTime dateRangeEndFromRequest = transactionIngestPullRequest.getDateRangeEnd();
 
-        transactionIngestPullRequest.setDateRangeStart(dateRangeStartFromRequest == null
-                ? currentTime.minusDays(config.getDefaultStartOffsetInDays()) : dateRangeStartFromRequest);
-        transactionIngestPullRequest.setDateRangeEnd(dateRangeEndFromRequest == null
-                ? currentTime : dateRangeEndFromRequest);
+        transactionIngestPullRequest.setDateRangeStart(
+                dateRangeStartFromRequest == null
+                        ? currentTime.minusDays(config.getDefaultStartOffsetInDays())
+                        : dateRangeStartFromRequest);
+        transactionIngestPullRequest.setDateRangeEnd(
+                dateRangeEndFromRequest == null ? currentTime : dateRangeEndFromRequest);
 
         if (dateRangeStartFromRequest == null && config.isCursorEnabled()) {
             log.info("Transaction Cursor is enabled and Request has no Start Date");
@@ -103,13 +112,13 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
      * @param ingestPushRequest Ingest push request
      * @return ProductIngestResponse
      */
-    public Mono<TransactionIngestResponse> ingestPush(TransactionIngestPushRequest ingestPushRequest) {
+    public Mono<TransactionIngestResponse> ingestPush(
+            TransactionIngestPushRequest ingestPushRequest) {
         return Mono.just(Flux.fromIterable(ingestPushRequest.getTransactions()))
                 .flatMap(this::sendToDbs)
-                .doOnSuccess(list -> handleSuccess(
-                        ingestPushRequest.getArrangementId(), false, list))
-                .onErrorResume(e -> handleError(
-                        ingestPushRequest.getArrangementId(), false, e))
+                .doOnSuccess(
+                        list -> handleSuccess(ingestPushRequest.getArrangementId(), false, list))
+                .onErrorResume(e -> handleError(ingestPushRequest.getArrangementId(), false, e))
                 .map(list -> buildResponse(list, ingestPushRequest));
     }
 
@@ -119,31 +128,38 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
      * @param request TransactionIngestPullRequest
      * @return Flux<TransactionsPostRequestBody>
      */
-    private Flux<TransactionsPostRequestBody> pullTransactions(TransactionIngestPullRequest request) {
-        return transactionIntegrationService.pullTransactions(request)
+    private Flux<TransactionsPostRequestBody> pullTransactions(
+            TransactionIngestPullRequest request) {
+        return transactionIntegrationService
+                .pullTransactions(request)
                 .map(mapper::mapIntegrationToStream);
     }
 
     private Mono<TransactionIngestPullRequest> getCursor(TransactionIngestPullRequest request) {
-        return transactionCursorApi.getByArrangementId(request.getArrangementId())
+        return transactionCursorApi
+                .getByArrangementId(request.getArrangementId())
                 .map(TransactionCursorResponse::getCursor)
                 .flatMap(cursor -> mapCursorToIntegrationRequest(request, cursor))
-                .doOnNext(r -> {
-                    log.info("Patch Transaction Cursor to IN_PROGRESS for :: {}", r.getArrangementId());
-                    patchCursor(r.getArrangementId(),
-                            buildPatchCursorRequest(
-                                    TransactionCursor.StatusEnum.IN_PROGRESS, null, null));
-                });
+                .doOnNext(
+                        r -> {
+                            log.info(
+                                    "Patch Transaction Cursor to IN_PROGRESS for :: {}",
+                                    r.getArrangementId());
+                            patchCursor(
+                                    r.getArrangementId(),
+                                    buildPatchCursorRequest(
+                                            TransactionCursor.StatusEnum.IN_PROGRESS, null, null));
+                        });
     }
 
     private void patchCursor(String arrangementId, TransactionCursorPatchRequest request) {
         transactionCursorApi.patchByArrangementId(arrangementId, request).subscribe();
     }
 
-    private TransactionCursorPatchRequest buildPatchCursorRequest(TransactionCursor.StatusEnum statusEnum,
-                                                                  String lastTxnDate, String lastTxnIds) {
-        TransactionCursorPatchRequest cursorPatchRequest = new TransactionCursorPatchRequest()
-                .withStatus(statusEnum.toString());
+    private TransactionCursorPatchRequest buildPatchCursorRequest(
+            TransactionCursor.StatusEnum statusEnum, String lastTxnDate, String lastTxnIds) {
+        TransactionCursorPatchRequest cursorPatchRequest =
+                new TransactionCursorPatchRequest().withStatus(statusEnum.toString());
 
         if (TransactionCursor.StatusEnum.SUCCESS.equals(statusEnum)) {
             cursorPatchRequest.setLastTxnDate(lastTxnDate);
@@ -154,7 +170,8 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
     }
 
     private Mono<TransactionIngestPullRequest> createCursor(TransactionIngestPullRequest request) {
-        return transactionCursorApi.upsertCursor(buildUpsertCursorRequest(request))
+        return transactionCursorApi
+                .upsertCursor(buildUpsertCursorRequest(request))
                 .map(TransactionCursorUpsertResponse::getId)
                 .flatMap(this::getCursorById)
                 .map(TransactionCursorResponse::getCursor)
@@ -169,7 +186,8 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
             TransactionIngestPullRequest request, TransactionCursor cursor) {
 
         if (cursor.getLastTxnDate() != null) {
-            OffsetDateTime dateRangeStart = OffsetDateTime.parse(cursor.getLastTxnDate(), offsetDateTimeFormatter);
+            OffsetDateTime dateRangeStart =
+                    OffsetDateTime.parse(cursor.getLastTxnDate(), offsetDateTimeFormatter);
             request.setDateRangeStart(dateRangeStart);
         }
 
@@ -180,14 +198,15 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
         return Mono.just(request);
     }
 
-
-    private TransactionCursorUpsertRequest buildUpsertCursorRequest(TransactionIngestPullRequest request) {
+    private TransactionCursorUpsertRequest buildUpsertCursorRequest(
+            TransactionIngestPullRequest request) {
         return new TransactionCursorUpsertRequest()
-                .withCursor(new TransactionCursor()
-                        .withArrangementId(request.getArrangementId())
-                        .withLegalEntityId(request.getLegalEntityInternalId())
-                        .withExtArrangementId(request.getExternalArrangementId())
-                        .withStatus(TransactionCursor.StatusEnum.IN_PROGRESS));
+                .withCursor(
+                        new TransactionCursor()
+                                .withArrangementId(request.getArrangementId())
+                                .withLegalEntityId(request.getLegalEntityInternalId())
+                                .withExtArrangementId(request.getExternalArrangementId())
+                                .withStatus(TransactionCursor.StatusEnum.IN_PROGRESS));
     }
 
     /**
@@ -196,7 +215,8 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
      * @param transactions Transactions
      * @return Ingested transactions
      */
-    private Mono<List<TransactionsPostResponseBody>> sendToDbs(Flux<TransactionsPostRequestBody> transactions) {
+    private Mono<List<TransactionsPostResponseBody>> sendToDbs(
+            Flux<TransactionsPostRequestBody> transactions) {
         return transactions
                 .publish(transactionService::processTransactions)
                 .flatMapIterable(UnitOfWork::getStreamTasks)
@@ -204,35 +224,43 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
                 .collectList();
     }
 
-    private TransactionIngestResponse buildResponse(List<TransactionsPostResponseBody> transactions,
-                                                    TransactionIngestPushRequest ingestRequest) {
+    private TransactionIngestResponse buildResponse(
+            List<TransactionsPostResponseBody> transactions,
+            TransactionIngestPushRequest ingestRequest) {
         return TransactionIngestResponse.builder()
                 .transactions(transactions)
                 .arrangementId(ingestRequest.getArrangementId())
                 .build();
     }
 
-    private TransactionIngestResponse buildResponse(List<TransactionsPostResponseBody> transactions,
-                                                    TransactionIngestPullRequest ingestRequest) {
+    private TransactionIngestResponse buildResponse(
+            List<TransactionsPostResponseBody> transactions,
+            TransactionIngestPullRequest ingestRequest) {
         return TransactionIngestResponse.builder()
                 .transactions(transactions)
                 .arrangementId(ingestRequest.getArrangementId())
                 .build();
     }
 
-    private void handleSuccess(String arrangementId, boolean pullMode,
-                               List<TransactionsPostResponseBody> transactions) {
+    private void handleSuccess(
+            String arrangementId,
+            boolean pullMode,
+            List<TransactionsPostResponseBody> transactions) {
         if (config.isCursorEnabled() && pullMode) {
             String lastTxnIds = null;
             if (config.isTransactionIdsFilterEnabled()) {
                 log.info("Transaction Id based filter is enabled");
-                lastTxnIds = transactions.stream().map(TransactionsPostResponseBody::getExternalId)
-                        .collect(Collectors.joining(DELIMITER));
+                lastTxnIds =
+                        transactions.stream()
+                                .map(TransactionsPostResponseBody::getExternalId)
+                                .collect(Collectors.joining(DELIMITER));
             }
-            patchCursor(arrangementId, buildPatchCursorRequest(
-                    TransactionCursor.StatusEnum.SUCCESS,
-                    OffsetDateTime.now().format(DateTimeFormatter.ofPattern(dateFormat)),
-                    lastTxnIds));
+            patchCursor(
+                    arrangementId,
+                    buildPatchCursorRequest(
+                            TransactionCursor.StatusEnum.SUCCESS,
+                            OffsetDateTime.now().format(DateTimeFormatter.ofPattern(dateFormat)),
+                            lastTxnIds));
         }
 
         transactionPostIngestionService.handleSuccess(transactions);
@@ -240,14 +268,13 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
         log.debug("Ingested transactions: {}", transactions);
     }
 
-    private Mono<List<TransactionsPostResponseBody>> handleError(String arrangementId,
-                                                                 boolean pullMode, Throwable e) {
+    private Mono<List<TransactionsPostResponseBody>> handleError(
+            String arrangementId, boolean pullMode, Throwable e) {
         if (config.isCursorEnabled() && pullMode) {
-            patchCursor(arrangementId, buildPatchCursorRequest(
-                    TransactionCursor.StatusEnum.FAILED,
-                    null, null));
+            patchCursor(
+                    arrangementId,
+                    buildPatchCursorRequest(TransactionCursor.StatusEnum.FAILED, null, null));
         }
         return transactionPostIngestionService.handleFailure(e);
     }
-
 }

@@ -13,24 +13,23 @@ import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalog
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class ProductCatalogIngestPullEventHandlerTest {
-    @Mock
-    private ProductCatalogIngestionService productCatalogIngestionService;
+    @Mock private ProductCatalogIngestionService productCatalogIngestionService;
 
-    @Mock
-    ProductCatalogMapper mapper;
+    @Mock ProductCatalogMapper mapper;
 
-    @Mock
-    EventBus eventBus;
+    @Mock EventBus eventBus;
 
     @Test
     @Tag("true")
@@ -63,18 +62,19 @@ class ProductCatalogIngestPullEventHandlerTest {
     void testHandleEvent_Completed(Boolean isCompletedEvents) {
         ProductCatalog productCatalog = new ProductCatalog();
 
-        Mono<ProductCatalogIngestResponse> responseMono = Mono.just(
-                ProductCatalogIngestResponse
-                        .builder().productCatalog(productCatalog).build());
+        Mono<ProductCatalogIngestResponse> responseMono =
+                Mono.just(
+                        ProductCatalogIngestResponse.builder()
+                                .productCatalog(productCatalog)
+                                .build());
 
         lenient().when(productCatalogIngestionService.ingestPull(any())).thenReturn(responseMono);
-        ProductCatalogConfigurationProperties properties = new ProductCatalogConfigurationProperties();
+        ProductCatalogConfigurationProperties properties =
+                new ProductCatalogConfigurationProperties();
         properties.setEnableCompletedEvents(isCompletedEvents);
-        ProductCatalogIngestPullEventHandler handler = new ProductCatalogIngestPullEventHandler(
-                properties,
-                productCatalogIngestionService,
-                mapper,
-                eventBus);
+        ProductCatalogIngestPullEventHandler handler =
+                new ProductCatalogIngestPullEventHandler(
+                        properties, productCatalogIngestionService, mapper, eventBus);
 
         EnvelopedEvent<ProductCatalogIngestPullEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(new ProductCatalogIngestPullEvent());
@@ -85,13 +85,12 @@ class ProductCatalogIngestPullEventHandlerTest {
 
     void testHandleEvent_Failed(Boolean isFailedEvents) {
         when(productCatalogIngestionService.ingestPull(any())).thenThrow(new RuntimeException());
-        ProductCatalogConfigurationProperties properties = new ProductCatalogConfigurationProperties();
+        ProductCatalogConfigurationProperties properties =
+                new ProductCatalogConfigurationProperties();
         properties.setEnableFailedEvents(isFailedEvents);
-        ProductCatalogIngestPullEventHandler handler = new ProductCatalogIngestPullEventHandler(
-                properties,
-                productCatalogIngestionService,
-                mapper,
-                eventBus);
+        ProductCatalogIngestPullEventHandler handler =
+                new ProductCatalogIngestPullEventHandler(
+                        properties, productCatalogIngestionService, mapper, eventBus);
 
         EnvelopedEvent<ProductCatalogIngestPullEvent> envelopedEvent = new EnvelopedEvent<>();
         envelopedEvent.setEvent(new ProductCatalogIngestPullEvent());

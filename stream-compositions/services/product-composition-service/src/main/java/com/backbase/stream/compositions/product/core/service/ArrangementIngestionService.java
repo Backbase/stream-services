@@ -3,6 +3,7 @@ package com.backbase.stream.compositions.product.core.service;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
+
 import reactor.core.publisher.Mono;
 
 public interface ArrangementIngestionService {

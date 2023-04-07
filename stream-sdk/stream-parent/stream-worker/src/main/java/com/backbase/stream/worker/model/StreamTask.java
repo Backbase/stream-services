@@ -1,15 +1,16 @@
 package com.backbase.stream.worker.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.cloud.sleuth.annotation.ContinueSpan;
+import org.springframework.cloud.sleuth.annotation.SpanTag;
+
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.sleuth.annotation.ContinueSpan;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
 
 @Data
 @NoArgsConstructor
@@ -30,21 +31,50 @@ public abstract class StreamTask {
         this.id = id;
     }
 
-    public void info(String entity, String operation, String result, String externalId, String internalId,
-                     String message, Object... messageArgs) {
-        addHistory(entity, operation, result, externalId, internalId, String.format(message, messageArgs),
-            TaskHistory.Severity.INFO, null, null);
+    public void info(
+            String entity,
+            String operation,
+            String result,
+            String externalId,
+            String internalId,
+            String message,
+            Object... messageArgs) {
+        addHistory(
+                entity,
+                operation,
+                result,
+                externalId,
+                internalId,
+                String.format(message, messageArgs),
+                TaskHistory.Severity.INFO,
+                null,
+                null);
     }
 
-    public void warn(String entity, String operation, String result, String externalId, String internalId,
-                     String message, Object... messageArgs) {
-        addHistory(entity, operation, result, externalId, internalId, String.format(message, messageArgs),
-            TaskHistory.Severity.WARN, null, null);
+    public void warn(
+            String entity,
+            String operation,
+            String result,
+            String externalId,
+            String internalId,
+            String message,
+            Object... messageArgs) {
+        addHistory(
+                entity,
+                operation,
+                result,
+                externalId,
+                internalId,
+                String.format(message, messageArgs),
+                TaskHistory.Severity.WARN,
+                null,
+                null);
     }
 
     /**
      * Added error to task history.
-     * @param entity  The entity being processed
+     *
+     * @param entity The entity being processed
      * @param operation the operation on the entity
      * @param result the result of the operation
      * @param externalId The extenral id of the entity
@@ -52,16 +82,31 @@ public abstract class StreamTask {
      * @param message The message (can include formatting placeholders)
      * @param messageArgs The arguments for formatting the message
      */
-    public void error(String entity, String operation, String result, String externalId, String internalId,
-                      String message, Object... messageArgs) {
-        addHistory(entity, operation, result, externalId, internalId, String.format(message, messageArgs),
-            TaskHistory.Severity.ERROR, null, null);
+    public void error(
+            String entity,
+            String operation,
+            String result,
+            String externalId,
+            String internalId,
+            String message,
+            Object... messageArgs) {
+        addHistory(
+                entity,
+                operation,
+                result,
+                externalId,
+                internalId,
+                String.format(message, messageArgs),
+                TaskHistory.Severity.ERROR,
+                null,
+                null);
         error = message;
     }
 
     /**
      * Added error to task history.
-     * @param entity  The entity being processed
+     *
+     * @param entity The entity being processed
      * @param operation The operation on the entity
      * @param result The result of the operation
      * @param externalId The extenral id of the entity
@@ -70,16 +115,33 @@ public abstract class StreamTask {
      * @param message The message (can include formatting placeholders)
      * @param messageArgs The arguments for formatting the message
      */
-    public void error(String entity, String operation, String result, String externalId, String internalId,
-                      Throwable throwable, String errorMessage, String message, Object... messageArgs) {
-        addHistory(entity, operation, result, externalId, internalId, String.format(message, messageArgs),
-            TaskHistory.Severity.ERROR, throwable, errorMessage);
+    public void error(
+            String entity,
+            String operation,
+            String result,
+            String externalId,
+            String internalId,
+            Throwable throwable,
+            String errorMessage,
+            String message,
+            Object... messageArgs) {
+        addHistory(
+                entity,
+                operation,
+                result,
+                externalId,
+                internalId,
+                String.format(message, messageArgs),
+                TaskHistory.Severity.ERROR,
+                throwable,
+                errorMessage);
         error = message;
     }
 
     /**
      * Added item to task history.
-     * @param entity  The entity being processed
+     *
+     * @param entity The entity being processed
      * @param operation The operation on the entity
      * @param result The result of the operation
      * @param externalId The extenral id of the entity
@@ -90,15 +152,15 @@ public abstract class StreamTask {
      */
     @ContinueSpan
     public void addHistory(
-        @SpanTag("entity") String entity,
-        @SpanTag("operation") String operation,
-        @SpanTag("result") String result,
-        @SpanTag("externalId") String externalId,
-        @SpanTag("internalId") String internalId,
-        @SpanTag("message") String message,
-        @SpanTag("severity") TaskHistory.Severity severity,
-        @SpanTag("severity") Throwable throwable,
-        @SpanTag("severity") String errorMessage) {
+            @SpanTag("entity") String entity,
+            @SpanTag("operation") String operation,
+            @SpanTag("result") String result,
+            @SpanTag("externalId") String externalId,
+            @SpanTag("internalId") String internalId,
+            @SpanTag("message") String message,
+            @SpanTag("severity") TaskHistory.Severity severity,
+            @SpanTag("severity") Throwable throwable,
+            @SpanTag("severity") String errorMessage) {
         TaskHistory taskHistory = new TaskHistory();
         taskHistory.setTimestamp(OffsetDateTime.now());
         taskHistory.setEntity(entity);
@@ -126,6 +188,7 @@ public abstract class StreamTask {
 
     /**
      * Checks if the taks is failed.
+     *
      * @return True if task failed.
      */
     public boolean isFailed() {
@@ -141,21 +204,20 @@ public abstract class StreamTask {
         COMPLETED
     }
 
-    /**
-     * Logs the summary of a task on INFO.
-     */
+    /** Logs the summary of a task on INFO. */
     public void logSummary() {
-        log.info("\n\n" +
-                "Stream Task: {}\n" +
-                "Status: {}\n\n" +
-                (isFailed() ? "error: {}\n\n" : "") +
-                "History:\n{}\n",
-            this.getId(),
-            this.getState(),
-            this.getError(),
-            "\t" + this.getHistory().stream().map(TaskHistory::toDisplayString)
-                .collect(Collectors.joining("\n\t")));
+        log.info(
+                "\n\n"
+                        + "Stream Task: {}\n"
+                        + "Status: {}\n\n"
+                        + (isFailed() ? "error: {}\n\n" : "")
+                        + "History:\n{}\n",
+                this.getId(),
+                this.getState(),
+                this.getError(),
+                "\t"
+                        + this.getHistory().stream()
+                                .map(TaskHistory::toDisplayString)
+                                .collect(Collectors.joining("\n\t")));
     }
-
-
 }

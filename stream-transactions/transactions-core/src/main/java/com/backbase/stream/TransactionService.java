@@ -4,6 +4,7 @@ import com.backbase.dbs.transaction.api.service.v2.model.*;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionsQuery;
 import com.backbase.stream.worker.model.UnitOfWork;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -11,12 +12,15 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 public interface TransactionService {
-    Flux<UnitOfWork<TransactionTask>> processTransactions(Flux<TransactionsPostRequestBody> transactions);
+    Flux<UnitOfWork<TransactionTask>> processTransactions(
+            Flux<TransactionsPostRequestBody> transactions);
 
-    default Flux<TransactionsPostResponseBody> getTransactionIdsFlux(UnitOfWork<TransactionTask> unitOfWork) {
-        Stream<TransactionsPostResponseBody> transactionIdsStream = unitOfWork.getStreamTasks().stream()
-            .map(TransactionTask::getResponse)
-            .flatMap(Collection::stream);
+    default Flux<TransactionsPostResponseBody> getTransactionIdsFlux(
+            UnitOfWork<TransactionTask> unitOfWork) {
+        Stream<TransactionsPostResponseBody> transactionIdsStream =
+                unitOfWork.getStreamTasks().stream()
+                        .map(TransactionTask::getResponse)
+                        .flatMap(Collection::stream);
         return Flux.fromStream(transactionIdsStream);
     }
 

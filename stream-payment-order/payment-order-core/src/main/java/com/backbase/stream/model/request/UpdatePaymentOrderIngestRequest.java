@@ -15,5 +15,4 @@ public class UpdatePaymentOrderIngestRequest implements PaymentOrderIngestReques
     public String getBankReferenceId() {
         return paymentOrderPutRequest.getBankReferenceId();
     }
-
 }

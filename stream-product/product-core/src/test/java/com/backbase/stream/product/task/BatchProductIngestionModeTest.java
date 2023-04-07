@@ -1,8 +1,8 @@
 package com.backbase.stream.product.task;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class BatchProductIngestionModeTest {
     @Test
@@ -31,9 +31,10 @@ class BatchProductIngestionModeTest {
 
     @Test
     void testFunctionGroupsReplaceOnlyMode() {
-        BatchProductIngestionMode ingestionMode = BatchProductIngestionMode.builder()
-                .functionGroupsMode(BatchProductIngestionMode.FunctionGroupsMode.REPLACE)
-                .build();
+        BatchProductIngestionMode ingestionMode =
+                BatchProductIngestionMode.builder()
+                        .functionGroupsMode(BatchProductIngestionMode.FunctionGroupsMode.REPLACE)
+                        .build();
 
         assertTrue(ingestionMode.isFunctionGroupsReplaceEnabled());
         assertFalse(ingestionMode.isDataGroupsReplaceEnabled());
@@ -42,9 +43,10 @@ class BatchProductIngestionModeTest {
 
     @Test
     void testDataGroupsReplaceOnlyMode() {
-        BatchProductIngestionMode ingestionMode = BatchProductIngestionMode.builder()
-                .dataGroupIngestionMode(BatchProductIngestionMode.DataGroupsMode.REPLACE)
-                .build();
+        BatchProductIngestionMode ingestionMode =
+                BatchProductIngestionMode.builder()
+                        .dataGroupIngestionMode(BatchProductIngestionMode.DataGroupsMode.REPLACE)
+                        .build();
 
         assertFalse(ingestionMode.isFunctionGroupsReplaceEnabled());
         assertTrue(ingestionMode.isDataGroupsReplaceEnabled());
@@ -53,9 +55,10 @@ class BatchProductIngestionModeTest {
 
     @Test
     void testArrangementsReplaceOnlyMode() {
-        BatchProductIngestionMode ingestionMode = BatchProductIngestionMode.builder()
-                .arrangementsMode(BatchProductIngestionMode.ArrangementsMode.REPLACE)
-                .build();
+        BatchProductIngestionMode ingestionMode =
+                BatchProductIngestionMode.builder()
+                        .arrangementsMode(BatchProductIngestionMode.ArrangementsMode.REPLACE)
+                        .build();
 
         assertFalse(ingestionMode.isFunctionGroupsReplaceEnabled());
         assertFalse(ingestionMode.isDataGroupsReplaceEnabled());

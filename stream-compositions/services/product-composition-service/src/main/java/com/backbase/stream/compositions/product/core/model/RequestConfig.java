@@ -1,6 +1,7 @@
 package com.backbase.stream.compositions.product.core.model;
 
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
+
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -18,16 +19,16 @@ public class RequestConfig {
 
     public Optional<Boolean> isTransactionChainEnabled() {
         return chains == null
-                || chains.getTransactionComposition() == null
-                || chains.getTransactionComposition().getEnabled() == null
+                        || chains.getTransactionComposition() == null
+                        || chains.getTransactionComposition().getEnabled() == null
                 ? Optional.empty()
                 : Optional.of(Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled()));
     }
 
     public Optional<Boolean> isTransactionChainAsync() {
         return chains == null
-                || chains.getTransactionComposition() == null
-                || chains.getTransactionComposition().getAsync() == null
+                        || chains.getTransactionComposition() == null
+                        || chains.getTransactionComposition().getAsync() == null
                 ? Optional.empty()
                 : Optional.of(Boolean.TRUE.equals(chains.getTransactionComposition().getAsync()));
     }
@@ -44,7 +45,7 @@ public class RequestConfig {
     @SuperBuilder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static abstract class BaseComposition {
+    public abstract static class BaseComposition {
         private Boolean enabled = Boolean.FALSE;
         private Boolean async = Boolean.FALSE;
     }
@@ -53,7 +54,8 @@ public class RequestConfig {
     @NoArgsConstructor
     @AllArgsConstructor
     @SuperBuilder
-    public static class TransactionComposition extends ProductConfigurationProperties.BaseComposition {
+    public static class TransactionComposition
+            extends ProductConfigurationProperties.BaseComposition {
         private List<String> excludeProductTypeExternalIds = new ArrayList<>();
     }
 }

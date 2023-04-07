@@ -6,7 +6,9 @@ import com.backbase.stream.compositions.product.api.model.ArrangementPushIngesti
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -34,9 +36,12 @@ public class ArrangementRestMapper {
                 .build();
     }
 
-    public ResponseEntity<ArrangementIngestionResponse> mapResponse(ArrangementIngestResponse response) {
-        return ResponseEntity.ok(new ArrangementIngestionResponse()
-                .withArrangement(
-                        arrangementMapper.mapStreamToComposition(response.getArrangement())));
+    public ResponseEntity<ArrangementIngestionResponse> mapResponse(
+            ArrangementIngestResponse response) {
+        return ResponseEntity.ok(
+                new ArrangementIngestionResponse()
+                        .withArrangement(
+                                arrangementMapper.mapStreamToComposition(
+                                        response.getArrangement())));
     }
 }

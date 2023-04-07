@@ -8,11 +8,14 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -31,12 +34,13 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
      * @return TransactionCursorResponse
      */
     @Override
-    public Mono<ResponseEntity<TransactionCursorResponse>> findByArrangementId(String arrangementId) {
+    public Mono<ResponseEntity<TransactionCursorResponse>> findByArrangementId(
+            String arrangementId) {
         log.debug("TransactionCursorService :: findByArrangementId {} ", arrangementId);
-        return transactionCursorRepository.findByArrangementId(arrangementId)
+        return transactionCursorRepository
+                .findByArrangementId(arrangementId)
                 .map(this::mapModelToResponse)
-                .orElse(
-                        Mono.just(new ResponseEntity<>(HttpStatus.NO_CONTENT)));
+                .orElse(Mono.just(new ResponseEntity<>(HttpStatus.NO_CONTENT)));
     }
 
     /**
@@ -46,8 +50,7 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
      * @return Response Entity
      */
     @Override
-    public Mono<ResponseEntity<Void>> deleteByArrangementId(
-            String arrangementId) {
+    public Mono<ResponseEntity<Void>> deleteByArrangementId(String arrangementId) {
         log.debug("TransactionCursorService :: deleteByArrangementId {} ", arrangementId);
         transactionCursorRepository.deleteByArrangementId(arrangementId);
         return Mono.empty();
@@ -62,10 +65,10 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
     @Override
     public Mono<ResponseEntity<TransactionCursorResponse>> findById(String id) {
         log.debug("TransactionCursorService :: findById {} ", id);
-        return transactionCursorRepository.findById(id)
+        return transactionCursorRepository
+                .findById(id)
                 .map(this::mapModelToResponse)
-                .orElse(
-                        Mono.just(new ResponseEntity<>(HttpStatus.NO_CONTENT)));
+                .orElse(Mono.just(new ResponseEntity<>(HttpStatus.NO_CONTENT)));
     }
 
     /**
@@ -78,30 +81,37 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
     public Mono<ResponseEntity<TransactionCursorUpsertResponse>> upsertCursor(
             Mono<TransactionCursorUpsertRequest> transactionCursorUpsertRequest) {
         log.debug("TransactionCursorService :: upsertCursor");
-        return transactionCursorUpsertRequest.map(mapper::mapToDomain)
+        return transactionCursorUpsertRequest
+                .map(mapper::mapToDomain)
                 .map(transactionCursorRepository::save)
                 .doOnNext(entity -> log.info("Id is {}", entity.getId()))
-                .map(entity -> new ResponseEntity<>(
-                        new TransactionCursorUpsertResponse().withId(entity.getId()),
-                        HttpStatus.CREATED));
+                .map(
+                        entity ->
+                                new ResponseEntity<>(
+                                        new TransactionCursorUpsertResponse()
+                                                .withId(entity.getId()),
+                                        HttpStatus.CREATED));
     }
 
     /**
      * The Service to patch the cursor to update lastTxnIds, lastTxnDate & status based on
      * arrangementId
      *
-     * @param arrangementId                 ArrangementId of the Cursor
+     * @param arrangementId ArrangementId of the Cursor
      * @param transactionCursorPatchRequest TransactionCursorPatchRequest Payload
      * @return Response Entity
      */
     @Override
-    public Mono<ResponseEntity<Void>> patchByArrangementId(String arrangementId,
-                                                           Mono<TransactionCursorPatchRequest> transactionCursorPatchRequest) {
+    public Mono<ResponseEntity<Void>> patchByArrangementId(
+            String arrangementId,
+            Mono<TransactionCursorPatchRequest> transactionCursorPatchRequest) {
         log.debug("TransactionCursorService :: patchByArrangementId {} ", arrangementId);
 
         return transactionCursorPatchRequest
-                .map(transactionCursorPatchReq -> transactionCursorRepository
-                        .patchByArrangementId(arrangementId, transactionCursorPatchReq))
+                .map(
+                        transactionCursorPatchReq ->
+                                transactionCursorRepository.patchByArrangementId(
+                                        arrangementId, transactionCursorPatchReq))
                 .doOnNext(result -> log.debug("Patch By ArrangementId result {} ", result))
                 .doOnError(result -> new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR))
                 .map(result -> new ResponseEntity<>(HttpStatus.OK));
@@ -111,9 +121,10 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
     public Mono<ResponseEntity<Flux<TransactionCursorResponse>>> filterCursor(
             Mono<TransactionCursorFilterRequest> transactionCursorFilterRequest) {
         log.debug("TransactionCursorService :: filterCursor");
-        Flux<TransactionCursorResponse> filteredCursors = transactionCursorFilterRequest
-                .map(transactionCursorRepository::filterCursor)
-                .flatMapIterable(mapper::mapToListModel);
+        Flux<TransactionCursorResponse> filteredCursors =
+                transactionCursorFilterRequest
+                        .map(transactionCursorRepository::filterCursor)
+                        .flatMapIterable(mapper::mapToListModel);
         return Mono.just(ResponseEntity.ok(filteredCursors));
     }
 
@@ -127,5 +138,4 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
             TransactionCursorEntity response) {
         return Mono.just(new ResponseEntity<>(mapper.mapToModel(response), HttpStatus.OK));
     }
-
 }

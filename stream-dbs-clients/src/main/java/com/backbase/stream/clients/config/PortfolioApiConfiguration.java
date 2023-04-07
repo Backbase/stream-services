@@ -12,11 +12,13 @@ import com.backbase.portfolio.integration.api.service.v1.SubPortfolioManagementA
 import com.backbase.portfolio.integration.api.service.v1.TransactionCategoryManagementApi;
 import com.backbase.portfolio.integration.api.service.v1.TransactionManagementApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.DateFormat;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.text.DateFormat;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.portfolio")
@@ -32,12 +34,13 @@ public class PortfolioApiConfiguration extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public ApiClient portfolioApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
-            .setBasePath(createBasePath());
+                .setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TransactionCategoryManagementApi transactionCategoryManagementApi(ApiClient portfolioApiClient) {
+    public TransactionCategoryManagementApi transactionCategoryManagementApi(
+            ApiClient portfolioApiClient) {
         return new TransactionCategoryManagementApi(portfolioApiClient);
     }
 
@@ -55,33 +58,36 @@ public class PortfolioApiConfiguration extends CompositeApiClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public AggregatePortfolioManagementApi aggregatePortfolioManagementApi(ApiClient portfolioApiClient) {
+    public AggregatePortfolioManagementApi aggregatePortfolioManagementApi(
+            ApiClient portfolioApiClient) {
         return new AggregatePortfolioManagementApi(portfolioApiClient);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public PortfolioValuationManagementApi portfolioValuationManagementApi(ApiClient portfolioApiClient) {
+    public PortfolioValuationManagementApi portfolioValuationManagementApi(
+            ApiClient portfolioApiClient) {
         return new PortfolioValuationManagementApi(portfolioApiClient);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PortfolioPositionsHierarchyManagementApi portfolioPositionsHierarchyManagementApi(
-        ApiClient portfolioApiClient) {
+            ApiClient portfolioApiClient) {
         return new PortfolioPositionsHierarchyManagementApi(portfolioApiClient);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public PortfolioBenchmarksManagementApi portfolioBenchmarksManagementApi(ApiClient portfolioApiClient) {
+    public PortfolioBenchmarksManagementApi portfolioBenchmarksManagementApi(
+            ApiClient portfolioApiClient) {
         return new PortfolioBenchmarksManagementApi(portfolioApiClient);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PortfolioCumulativePerformanceManagementApi portfolioCumulativePerformanceManagementApi(
-        ApiClient portfolioApiClient) {
+            ApiClient portfolioApiClient) {
 
         return new PortfolioCumulativePerformanceManagementApi(portfolioApiClient);
     }
@@ -97,5 +103,4 @@ public class PortfolioApiConfiguration extends CompositeApiClientConfig {
     public SubPortfolioManagementApi subPortfolioManagementApi(ApiClient portfolioApiClient) {
         return new SubPortfolioManagementApi(portfolioApiClient);
     }
-
 }

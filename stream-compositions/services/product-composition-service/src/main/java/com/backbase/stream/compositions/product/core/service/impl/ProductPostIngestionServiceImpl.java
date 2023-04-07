@@ -17,10 +17,13 @@ import com.backbase.stream.compositions.transaction.client.model.TransactionInge
 import com.backbase.stream.compositions.transaction.client.model.TransactionPullIngestionRequest;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.ProductGroup;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,22 +47,25 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     @Override
     public Mono<ProductIngestResponse> handleSuccess(ProductIngestResponse res) {
         return Mono.just(res)
-                .doOnNext(r -> log.info("Product ingestion completed successfully for SA {}",
-                        res.getServiceAgreementInternalId()))
+                .doOnNext(
+                        r ->
+                                log.info(
+                                        "Product ingestion completed successfully for SA {}",
+                                        res.getServiceAgreementInternalId()))
                 .flatMap(this::processTransactionChains)
                 .flatMap(this::processPaymentOrderChains)
                 .doOnNext(this::processSuccessEvent)
-                .doOnNext(r -> {
-                    log.debug("Ingested product groups: {}", res.getProductGroups());
-                });
+                .doOnNext(
+                        r -> {
+                            log.debug("Ingested product groups: {}", res.getProductGroups());
+                        });
     }
 
     @Override
     public void handleFailure(Throwable error) {
         log.error("Product ingestion failed. {}", error.getMessage());
         if (Boolean.TRUE.equals(config.getEvents().getEnableFailed())) {
-            ProductFailedEvent event = new ProductFailedEvent()
-                    .withMessage(error.getMessage());
+            ProductFailedEvent event = new ProductFailedEvent().withMessage(error.getMessage());
             EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
@@ -69,9 +75,10 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     private Mono<ProductIngestResponse> processTransactionChains(ProductIngestResponse res) {
         Mono<ProductIngestResponse> transactionChainMono;
 
-        boolean isTransactionChainEnabled = res.getTransactionChainEnabledFromRequest() == null
-            ? config.isTransactionChainEnabled()
-            : res.getTransactionChainEnabledFromRequest();
+        boolean isTransactionChainEnabled =
+                res.getTransactionChainEnabledFromRequest() == null
+                        ? config.isTransactionChainEnabled()
+                        : res.getTransactionChainEnabledFromRequest();
 
         if (!isTransactionChainEnabled) {
             log.debug("Transaction Chain is disabled");
@@ -88,9 +95,10 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     private Mono<ProductIngestResponse> processPaymentOrderChains(ProductIngestResponse res) {
         Mono<ProductIngestResponse> paymentOrderChainMono;
 
-        boolean isPaymentOrderChainEnabled = res.getPaymentOrderChainEnabledFromRequest() == null
-            ? config.isPaymentOrderChainEnabled()
-            : res.getPaymentOrderChainEnabledFromRequest();
+        boolean isPaymentOrderChainEnabled =
+                res.getPaymentOrderChainEnabledFromRequest() == null
+                        ? config.isPaymentOrderChainEnabled()
+                        : res.getPaymentOrderChainEnabledFromRequest();
 
         if (!isPaymentOrderChainEnabled) {
             log.debug("Payment Order Chain is disabled");
@@ -109,10 +117,12 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .map(product -> buildTransactionPullRequest(product, res))
                 .flatMap(transactionCompositionApi::pullTransactions)
                 .onErrorResume(this::handleTransactionError)
-                .doOnNext(response -> {
-                    log.debug("Response from Transaction Composition: {}",
-                            response.getTransactions());
-                })
+                .doOnNext(
+                        response -> {
+                            log.debug(
+                                    "Response from Transaction Composition: {}",
+                                    response.getTransactions());
+                        })
                 .collectList()
                 .map(p -> res);
     }
@@ -121,50 +131,71 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         return Mono.just(buildPaymentOrderPullRequest(res))
                 .flatMap(paymentOrderCompositionApi::pullPaymentOrder)
                 .onErrorResume(this::handlePaymentOrderError)
-                .doOnNext(response -> {
-                    log.debug("Response from Payment Order Composition: {} ",
-                            response.getNewPaymentOrder());
-                })
+                .doOnNext(
+                        response -> {
+                            log.debug(
+                                    "Response from Payment Order Composition: {} ",
+                                    response.getNewPaymentOrder());
+                        })
                 .map(p -> res);
     }
 
     private Mono<ProductIngestResponse> ingestTransactionsAsync(ProductIngestResponse res) {
         return extractProducts(res.getProductGroups())
                 .map(product -> buildTransactionPullRequest(product, res))
-                .doOnNext(request -> transactionCompositionApi.pullTransactions(request).subscribe())
-                .doOnNext(t -> log.info("Async transaction ingestion called for arrangement: {}",
-                        t.getArrangementId()))
+                .doOnNext(
+                        request -> transactionCompositionApi.pullTransactions(request).subscribe())
+                .doOnNext(
+                        t ->
+                                log.info(
+                                        "Async transaction ingestion called for arrangement: {}",
+                                        t.getArrangementId()))
                 .collectList()
                 .map(p -> res);
     }
 
     private Mono<ProductIngestResponse> ingestPaymentOrderAsync(ProductIngestResponse res) {
         return Mono.just(buildPaymentOrderPullRequest(res))
-                .doOnNext(request -> paymentOrderCompositionApi.pullPaymentOrder(request).subscribe())
-                .doOnNext(t -> log.info("Async payment order ingestion called for Legal Entity: {}",
-                        t.getLegalEntityExternalId()))
+                .doOnNext(
+                        request -> paymentOrderCompositionApi.pullPaymentOrder(request).subscribe())
+                .doOnNext(
+                        t ->
+                                log.info(
+                                        "Async payment order ingestion called for Legal Entity: {}",
+                                        t.getLegalEntityExternalId()))
                 .map(p -> res);
     }
 
     private void processSuccessEvent(ProductIngestResponse res) {
         if (Boolean.TRUE.equals(config.isCompletedEventEnabled())) {
-            log.info("Emitting product completed event for userExternalId: {}, legalEntityExternalId: {}",
-                    res.getUserExternalId(), res.getLegalEntityExternalId());
-            ProductCompletedEvent event = new ProductCompletedEvent()
-                    .withProductGroups(res.getProductGroups().stream().map(p -> mapper.mapStreamToEvent(p)).toList())
-                    .withUserExternalId(res.getUserExternalId())
-                    .withUserInternalId(res.getUserInternalId())
-                    .withLegalEntityInternalId(res.getLegalEntityInternalId())
-                    .withLegalEntityExternalId(res.getLegalEntityExternalId())
-                    .withServiceAgreementInternalId(res.getServiceAgreementInternalId())
-                    .withServiceAgreementExternalId(res.getServiceAgreementExternalId())
-                    .withSource(res.getSource());
+            log.info(
+                    "Emitting product completed event for userExternalId: {},"
+                            + " legalEntityExternalId: {}",
+                    res.getUserExternalId(),
+                    res.getLegalEntityExternalId());
+            ProductCompletedEvent event =
+                    new ProductCompletedEvent()
+                            .withProductGroups(
+                                    res.getProductGroups().stream()
+                                            .map(p -> mapper.mapStreamToEvent(p))
+                                            .toList())
+                            .withUserExternalId(res.getUserExternalId())
+                            .withUserInternalId(res.getUserInternalId())
+                            .withLegalEntityInternalId(res.getLegalEntityInternalId())
+                            .withLegalEntityExternalId(res.getLegalEntityExternalId())
+                            .withServiceAgreementInternalId(res.getServiceAgreementInternalId())
+                            .withServiceAgreementExternalId(res.getServiceAgreementExternalId())
+                            .withSource(res.getSource());
             event.setAdditions(res.getAdditions());
             EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
-            log.debug("Emitted product completed event for userExternalId: {}, legalEntityExternalId: {}, SA: {}, source: {}",
-                    res.getUserExternalId(), res.getLegalEntityExternalId(), res.getServiceAgreementInternalId(),
+            log.debug(
+                    "Emitted product completed event for userExternalId: {}, legalEntityExternalId:"
+                            + " {}, SA: {}, source: {}",
+                    res.getUserExternalId(),
+                    res.getLegalEntityExternalId(),
+                    res.getServiceAgreementInternalId(),
                     res.getSource());
         }
     }
@@ -181,47 +212,85 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Flux<BaseProduct> extractProducts(List<ProductGroup> productGroups) {
         return Flux.concat(
-                        Flux.fromIterable(Optional.of(productGroups.stream()
-                                        .flatMap(group -> productStream(group.getLoans()))
-                                        .toList())
-                                .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(Optional.of(productGroups.stream()
-                                        .flatMap(group -> productStream(group.getTermDeposits()))
-                                        .toList())
-                                .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(Optional.of(productGroups.stream()
-                                        .flatMap(group -> productStream(group.getCurrentAccounts()))
-                                        .toList())
-                                .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(Optional.of(productGroups.stream()
-                                        .flatMap(group -> productStream(group.getSavingAccounts()))
-                                        .toList())
-                                .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(Optional.of(productGroups.stream()
-                                        .flatMap(group -> productStream(group.getCreditCards()))
-                                        .toList())
-                                .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(Optional.of(productGroups.stream()
-                                        .flatMap(group -> productStream(group.getInvestmentAccounts()))
-                                        .toList())
-                                .orElseGet(Collections::emptyList)),
-                        Flux.fromIterable(Optional.of(productGroups.stream()
-                                        .flatMap(group -> productStream(group.getCustomProducts()))
-                                        .toList())
-                                .orElseGet(Collections::emptyList)))
+                        Flux.fromIterable(
+                                Optional.of(
+                                                productGroups.stream()
+                                                        .flatMap(
+                                                                group ->
+                                                                        productStream(
+                                                                                group.getLoans()))
+                                                        .toList())
+                                        .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(
+                                Optional.of(
+                                                productGroups.stream()
+                                                        .flatMap(
+                                                                group ->
+                                                                        productStream(
+                                                                                group
+                                                                                        .getTermDeposits()))
+                                                        .toList())
+                                        .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(
+                                Optional.of(
+                                                productGroups.stream()
+                                                        .flatMap(
+                                                                group ->
+                                                                        productStream(
+                                                                                group
+                                                                                        .getCurrentAccounts()))
+                                                        .toList())
+                                        .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(
+                                Optional.of(
+                                                productGroups.stream()
+                                                        .flatMap(
+                                                                group ->
+                                                                        productStream(
+                                                                                group
+                                                                                        .getSavingAccounts()))
+                                                        .toList())
+                                        .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(
+                                Optional.of(
+                                                productGroups.stream()
+                                                        .flatMap(
+                                                                group ->
+                                                                        productStream(
+                                                                                group
+                                                                                        .getCreditCards()))
+                                                        .toList())
+                                        .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(
+                                Optional.of(
+                                                productGroups.stream()
+                                                        .flatMap(
+                                                                group ->
+                                                                        productStream(
+                                                                                group
+                                                                                        .getInvestmentAccounts()))
+                                                        .toList())
+                                        .orElseGet(Collections::emptyList)),
+                        Flux.fromIterable(
+                                Optional.of(
+                                                productGroups.stream()
+                                                        .flatMap(
+                                                                group ->
+                                                                        productStream(
+                                                                                group
+                                                                                        .getCustomProducts()))
+                                                        .toList())
+                                        .orElseGet(Collections::emptyList)))
                 .filter(this::excludeProducts);
     }
 
     private Stream<? extends BaseProduct> productStream(List<? extends BaseProduct> products) {
-        return Optional.ofNullable(products)
-                .map(Collection::stream)
-                .orElseGet(Stream::empty);
+        return Optional.ofNullable(products).map(Collection::stream).orElseGet(Stream::empty);
     }
 
     private Boolean excludeProducts(BaseProduct product) {
-        List<String> excludeList = config
-                .getChains().getTransactionComposition()
-                .getExcludeProductTypeExternalIds();
+        List<String> excludeList =
+                config.getChains().getTransactionComposition().getExcludeProductTypeExternalIds();
 
         if (CollectionUtils.isEmpty(excludeList)) {
             return Boolean.TRUE;
@@ -230,7 +299,8 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         return !excludeList.contains(product.getProductTypeExternalId());
     }
 
-    private TransactionPullIngestionRequest buildTransactionPullRequest(BaseProduct product, ProductIngestResponse res) {
+    private TransactionPullIngestionRequest buildTransactionPullRequest(
+            BaseProduct product, ProductIngestResponse res) {
         return new TransactionPullIngestionRequest()
                 .withLegalEntityInternalId(product.getLegalEntities().get(0).getInternalId())
                 .withAdditions(res.getAdditions())
@@ -238,7 +308,8 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .withExternalArrangementId(product.getExternalId());
     }
 
-    private PaymentOrderPullIngestionRequest buildPaymentOrderPullRequest(ProductIngestResponse res) {
+    private PaymentOrderPullIngestionRequest buildPaymentOrderPullRequest(
+            ProductIngestResponse res) {
         return new PaymentOrderPullIngestionRequest()
                 .withLegalEntityInternalId(res.getLegalEntityInternalId())
                 .withLegalEntityExternalId(res.getLegalEntityExternalId())

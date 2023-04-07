@@ -2,6 +2,7 @@ package com.backbase.stream;
 
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.worker.model.StreamTask;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,6 @@ public class LegalEntityTask extends StreamTask {
     public LegalEntityTask(LegalEntity data) {
         super(data.getExternalId());
         this.legalEntity = data;
-
     }
 
     public LegalEntity getData() {

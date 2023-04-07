@@ -1,19 +1,18 @@
 package com.backbase.stream.cursor.model;
 
+import lombok.Data;
+
+import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
-import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 @Data
 public class CursorItem {
 
-    /**
-     * State of the cursor.  Newly created cursors start with NOT_STARTED state.
-     */
+    /** State of the cursor. Newly created cursors start with NOT_STARTED state. */
     public enum CursorStateEnum {
         NOT_STARTED,
         ABANDONED,
@@ -31,8 +30,7 @@ public class CursorItem {
         REAL_TIME;
     }
 
-    @Id
-    private UUID id;
+    @Id private UUID id;
     private OffsetDateTime cursorCreatedAt;
     private OffsetDateTime cursorModifiedAt;
     private IngestionCursor.CursorTypeEnum cursorType;
@@ -52,5 +50,4 @@ public class CursorItem {
     private OffsetDateTime dateTimeFrom;
     private OffsetDateTime dateTimeTo;
     private Map<String, Object> additionalProperties = null;
-
 }

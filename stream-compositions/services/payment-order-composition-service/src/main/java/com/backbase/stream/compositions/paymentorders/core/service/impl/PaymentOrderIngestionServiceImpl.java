@@ -1,10 +1,5 @@
 package com.backbase.stream.compositions.paymentorders.core.service.impl;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.compositions.paymentorders.core.mapper.PaymentOrderMapper;
@@ -19,8 +14,14 @@ import com.backbase.stream.worker.model.UnitOfWork;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Service;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,26 +35,33 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
     private final PaymentOrderMapper paymentOrderMapper;
 
     @Override
-    public Mono<PaymentOrderIngestResponse> ingestPull(PaymentOrderIngestPullRequest ingestPullRequest) {
+    public Mono<PaymentOrderIngestResponse> ingestPull(
+            PaymentOrderIngestPullRequest ingestPullRequest) {
 
         return buildIntegrationRequest(ingestPullRequest)
                 .map(this::pullPaymentOrder)
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(this::handleSuccess)
                 .onErrorResume(this::handleError)
-                .map(paymentOrderIngestDbsResponses -> buildResponse(paymentOrderIngestDbsResponses, ingestPullRequest));
+                .map(
+                        paymentOrderIngestDbsResponses ->
+                                buildResponse(paymentOrderIngestDbsResponses, ingestPullRequest));
     }
 
     @Override
-    public Mono<PaymentOrderIngestResponse> ingestPush(PaymentOrderIngestPushRequest ingestPushRequest) {
+    public Mono<PaymentOrderIngestResponse> ingestPush(
+            PaymentOrderIngestPushRequest ingestPushRequest) {
         return Mono.just(Flux.fromIterable(ingestPushRequest.getPaymentOrders()))
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(this::handleSuccess)
                 .onErrorResume(this::handleError)
-                .map(paymentOrderIngestDbsResponses -> buildResponse(paymentOrderIngestDbsResponses, ingestPushRequest));
+                .map(
+                        paymentOrderIngestDbsResponses ->
+                                buildResponse(paymentOrderIngestDbsResponses, ingestPushRequest));
     }
 
-    private Mono<PaymentOrderIngestPullRequest> buildIntegrationRequest(PaymentOrderIngestPullRequest paymentOrderIngestPullRequest) {
+    private Mono<PaymentOrderIngestPullRequest> buildIntegrationRequest(
+            PaymentOrderIngestPullRequest paymentOrderIngestPullRequest) {
         return Mono.just(paymentOrderIngestPullRequest);
     }
 
@@ -64,38 +72,48 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
      * @return Flux<PaymentOrderPostRequestBody>
      */
     private Flux<PaymentOrderPostRequest> pullPaymentOrder(PaymentOrderIngestPullRequest request) {
-       return paymentOrderIntegrationService.pullPaymentOrder(request)
+        return paymentOrderIntegrationService
+                .pullPaymentOrder(request)
                 .map(paymentOrderMapper::mapIntegrationToStream);
     }
 
-    private Mono<List<PaymentOrderIngestDbsResponse>> sendToDbs(Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux) {
+    private Mono<List<PaymentOrderIngestDbsResponse>> sendToDbs(
+            Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux) {
 
         return paymentOrderPostRequestFlux
                 .publish(paymentOrderService::processPaymentOrder)
                 .flatMapIterable(UnitOfWork::getStreamTasks)
                 .collectList()
-                .flatMap(paymentOrderTaskList -> {
-                    List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses = paymentOrderTaskList.stream()
-                    .flatMap(paymentOrderTask -> paymentOrderTask.getResponses().stream())
-                    .collect(Collectors.toList());
-                   return Mono.just(paymentOrderIngestDbsResponses);
-                });
+                .flatMap(
+                        paymentOrderTaskList -> {
+                            List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses =
+                                    paymentOrderTaskList.stream()
+                                            .flatMap(
+                                                    paymentOrderTask ->
+                                                            paymentOrderTask
+                                                                    .getResponses()
+                                                                    .stream())
+                                            .collect(Collectors.toList());
+                            return Mono.just(paymentOrderIngestDbsResponses);
+                        });
     }
 
-    private PaymentOrderIngestResponse buildResponse(List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses,
-                                                    PaymentOrderIngestPullRequest ingestPullRequest) {
+    private PaymentOrderIngestResponse buildResponse(
+            List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses,
+            PaymentOrderIngestPullRequest ingestPullRequest) {
         return PaymentOrderIngestResponse.builder()
                 .paymentOrderIngestDbsResponses(paymentOrderIngestDbsResponses)
                 .memberNumber(ingestPullRequest.getMemberNumber())
                 .build();
     }
 
-    private PaymentOrderIngestResponse buildResponse(List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses,
-                                                    PaymentOrderIngestPushRequest ingestPushRequest) {
+    private PaymentOrderIngestResponse buildResponse(
+            List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses,
+            PaymentOrderIngestPushRequest ingestPushRequest) {
         return PaymentOrderIngestResponse.builder()
-        .paymentOrderIngestDbsResponses(paymentOrderIngestDbsResponses)
-        .memberNumber(ingestPushRequest.getMemberNumber())
-        .build();
+                .paymentOrderIngestDbsResponses(paymentOrderIngestDbsResponses)
+                .memberNumber(ingestPushRequest.getMemberNumber())
+                .build();
     }
 
     private void handleSuccess(List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses) {

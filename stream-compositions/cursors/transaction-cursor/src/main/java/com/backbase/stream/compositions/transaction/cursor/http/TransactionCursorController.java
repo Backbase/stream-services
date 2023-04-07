@@ -7,11 +7,14 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertResponse;
+
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -24,8 +27,7 @@ public class TransactionCursorController implements TransactionCursorApi {
 
     @Override
     public Mono<ResponseEntity<Void>> deleteByArrangementId(
-            String arrangementId,
-            ServerWebExchange exchange) {
+            String arrangementId, ServerWebExchange exchange) {
         log.debug("TransactionCursorController :: deleteByArrangementId");
         return transactionCursorService.deleteByArrangementId(arrangementId);
     }
@@ -38,18 +40,16 @@ public class TransactionCursorController implements TransactionCursorApi {
         return transactionCursorService.filterCursor(transactionCursorFilterRequest);
     }
 
-
     @Override
     public Mono<ResponseEntity<TransactionCursorResponse>> getByArrangementId(
-            String arrangementId,
-            ServerWebExchange exchange) {
+            String arrangementId, ServerWebExchange exchange) {
         log.debug("TransactionCursorController :: getByArrangementId {} ", arrangementId);
         return transactionCursorService.findByArrangementId(arrangementId);
     }
 
     @Override
-    public Mono<ResponseEntity<TransactionCursorResponse>> getById(String id,
-                                                                   ServerWebExchange exchange) {
+    public Mono<ResponseEntity<TransactionCursorResponse>> getById(
+            String id, ServerWebExchange exchange) {
         log.debug("TransactionCursorController :: getById {} ", id);
         return transactionCursorService.findById(id);
     }
@@ -60,8 +60,8 @@ public class TransactionCursorController implements TransactionCursorApi {
             Mono<TransactionCursorPatchRequest> transactionCursorPatchRequest,
             ServerWebExchange exchange) {
         log.debug("TransactionCursorController :: patchByArrangementId {} ", arrangementId);
-        return transactionCursorService
-                .patchByArrangementId(arrangementId, transactionCursorPatchRequest);
+        return transactionCursorService.patchByArrangementId(
+                arrangementId, transactionCursorPatchRequest);
     }
 
     @Override

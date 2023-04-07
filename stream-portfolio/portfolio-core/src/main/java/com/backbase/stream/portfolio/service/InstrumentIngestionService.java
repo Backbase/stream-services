@@ -3,13 +3,13 @@ package com.backbase.stream.portfolio.service;
 import com.backbase.stream.portfolio.model.AssetClassBundle;
 import com.backbase.stream.portfolio.model.InstrumentBundle;
 import com.backbase.stream.portfolio.model.RegionBundle;
+
 import reactor.core.publisher.Flux;
 
 /**
  * WealthAssets Service.
  *
  * @author Vladimir Kirchev
- *
  */
 public interface InstrumentIngestionService {
 

@@ -1,13 +1,15 @@
 package com.backbase.stream.compositions.product.core.model;
 
 import com.backbase.stream.legalentity.model.ProductGroup;
-import java.util.List;
-import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.With;
+
+import java.util.List;
+import java.util.Map;
 
 @Setter
 @Getter
@@ -15,10 +17,11 @@ import lombok.With;
 @AllArgsConstructor
 public class ProductIngestResponse {
 
-    public ProductIngestResponse(String serviceAgreementExternalId,
-                                 String serviceAgreementInternalId,
-                                 List<ProductGroup> productGroups,
-                                 Map<String, String> additions) {
+    public ProductIngestResponse(
+            String serviceAgreementExternalId,
+            String serviceAgreementInternalId,
+            List<ProductGroup> productGroups,
+            Map<String, String> additions) {
         this.serviceAgreementExternalId = serviceAgreementExternalId;
         this.serviceAgreementInternalId = serviceAgreementInternalId;
         this.productGroups = productGroups;
@@ -34,8 +37,7 @@ public class ProductIngestResponse {
     private String serviceAgreementInternalId;
 
     private final List<ProductGroup> productGroups;
-    @With
-    private Map<String, String> additions;
+    @With private Map<String, String> additions;
     private String source;
     private Boolean transactionChainEnabledFromRequest;
     private Boolean paymentOrderChainEnabledFromRequest;

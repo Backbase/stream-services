@@ -12,17 +12,20 @@ import com.backbase.stream.compositions.legalentity.core.service.LegalEntityInte
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityPostIngestionService;
 import com.backbase.stream.legalentity.model.LegalEntity;
 
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import reactor.core.publisher.Mono;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
@@ -34,9 +37,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
     private final Validator validator;
     private final LegalEntityPostIngestionService legalEntityPostIngestionService;
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public Mono<LegalEntityResponse> ingestPull(LegalEntityPullRequest ingestPullRequest) {
         return pullLegalEntity(ingestPullRequest)
                 .flatMap(this::validate)
@@ -45,9 +46,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
                 .doOnError(legalEntityPostIngestionService::handleFailure);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public Mono<LegalEntityResponse> ingestPush(LegalEntityPushRequest ingestPushRequest) {
         return pushLegalEntity(ingestPushRequest)
                 .flatMap(this::validate)
@@ -62,8 +61,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
      * @return LegalEntity
      */
     private Mono<LegalEntityResponse> pullLegalEntity(LegalEntityPullRequest request) {
-        return legalEntityIntegrationService
-                .pullLegalEntity(request);
+        return legalEntityIntegrationService.pullLegalEntity(request);
     }
 
     /**
@@ -73,13 +71,17 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
      * @return LegalEntity
      */
     private Mono<LegalEntityResponse> sendToDbs(LegalEntityResponse res) {
-        return legalEntitySaga.executeTask(new LegalEntityTask(res.getLegalEntity()))
+        return legalEntitySaga
+                .executeTask(new LegalEntityTask(res.getLegalEntity()))
                 .map(LegalEntityTask::getData)
-                .map(le -> LegalEntityResponse.builder()
-                        .legalEntity(le)
-                        .membershipAccounts(res.getMembershipAccounts())
-                        .productChainEnabledFromRequest(res.getProductChainEnabledFromRequest())
-                        .build());
+                .map(
+                        le ->
+                                LegalEntityResponse.builder()
+                                        .legalEntity(le)
+                                        .membershipAccounts(res.getMembershipAccounts())
+                                        .productChainEnabledFromRequest(
+                                                res.getProductChainEnabledFromRequest())
+                                        .build());
     }
 
     /**
@@ -92,19 +94,25 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
         Set<ConstraintViolation<LegalEntity>> violations = validator.validate(res.getLegalEntity());
 
         if (!CollectionUtils.isEmpty(violations)) {
-            List<Error> errors = violations.stream().map(c -> new Error()
-                    .withMessage(c.getMessage())
-                    .withKey(Error.INVALID_INPUT_MESSAGE)).collect(Collectors.toList());
+            List<Error> errors =
+                    violations.stream()
+                            .map(
+                                    c ->
+                                            new Error()
+                                                    .withMessage(c.getMessage())
+                                                    .withKey(Error.INVALID_INPUT_MESSAGE))
+                            .collect(Collectors.toList());
             return Mono.error(new BadRequestException().withErrors(errors));
         }
 
         return Mono.just(res);
     }
 
-    private Mono<LegalEntityResponse> pushLegalEntity(LegalEntityPushRequest legalEntityPushRequest) {
-        return Mono.just(LegalEntityResponse.builder()
-                .legalEntity(legalEntityPushRequest.getLegalEntity())
-                .build());
+    private Mono<LegalEntityResponse> pushLegalEntity(
+            LegalEntityPushRequest legalEntityPushRequest) {
+        return Mono.just(
+                LegalEntityResponse.builder()
+                        .legalEntity(legalEntityPushRequest.getLegalEntity())
+                        .build());
     }
-
 }

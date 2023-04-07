@@ -2,9 +2,11 @@ package com.backbase.stream.portfolio;
 
 import com.backbase.stream.portfolio.model.WealthBundle;
 import com.backbase.stream.worker.model.StreamTask;
-import java.util.UUID;
+
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -25,5 +27,4 @@ public class PortfolioTask extends StreamTask {
     public String getName() {
         return getId();
     }
-
 }

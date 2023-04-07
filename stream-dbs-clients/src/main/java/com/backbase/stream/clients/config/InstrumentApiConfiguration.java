@@ -7,11 +7,13 @@ import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentMa
 import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentPriceManagementApi;
 import com.backbase.portfolio.instrument.integration.api.service.v1.InstrumentRegionManagementApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.text.DateFormat;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.text.DateFormat;
 
 @Configuration
 @ConfigurationProperties("backbase.communication.services.instrument")
@@ -27,7 +29,7 @@ public class InstrumentApiConfiguration extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public ApiClient instrumentApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
-            .setBasePath(createBasePath());
+                .setBasePath(createBasePath());
     }
 
     @Bean
@@ -38,26 +40,29 @@ public class InstrumentApiConfiguration extends CompositeApiClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public InstrumentPriceManagementApi instrumentPriceManagementApi(ApiClient instrumentApiClient) {
+    public InstrumentPriceManagementApi instrumentPriceManagementApi(
+            ApiClient instrumentApiClient) {
         return new InstrumentPriceManagementApi(instrumentApiClient);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public InstrumentRegionManagementApi instrumentRegionManagementApi(ApiClient instrumentApiClient) {
+    public InstrumentRegionManagementApi instrumentRegionManagementApi(
+            ApiClient instrumentApiClient) {
         return new InstrumentRegionManagementApi(instrumentApiClient);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public InstrumentCountryManagementApi instrumentCountryManagementApi(ApiClient instrumentApiClient) {
+    public InstrumentCountryManagementApi instrumentCountryManagementApi(
+            ApiClient instrumentApiClient) {
         return new InstrumentCountryManagementApi(instrumentApiClient);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public InstrumentAssetClassManagementApi instrumentAssetClassManagementApi(ApiClient instrumentApiClient) {
+    public InstrumentAssetClassManagementApi instrumentAssetClassManagementApi(
+            ApiClient instrumentApiClient) {
         return new InstrumentAssetClassManagementApi(instrumentApiClient);
     }
-
 }

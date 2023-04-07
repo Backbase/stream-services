@@ -1,5 +1,9 @@
 package com.backbase.stream.compositions.transaction.core.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
 import com.backbase.stream.TransactionService;
@@ -19,10 +23,9 @@ import com.backbase.stream.compositions.transaction.cursor.client.model.Transact
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorResponse;
 import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorUpsertResponse;
 import com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody;
-import com.backbase.stream.compositions.transaction.core.service.impl.TransactionIngestionServiceImpl;
-import com.backbase.stream.compositions.transaction.core.service.impl.TransactionPostIngestionServiceImpl;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.worker.model.UnitOfWork;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -39,29 +43,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class TransactionIngestionServiceImplTest {
 
     private TransactionIngestionService transactionIngestionService;
 
-    @Mock
-    private TransactionIntegrationService transactionIntegrationService;
+    @Mock private TransactionIntegrationService transactionIntegrationService;
 
     TransactionPostIngestionService transactionPostIngestionService;
 
     TransactionConfigurationProperties config = new TransactionConfigurationProperties();
 
-    @Mock
-    EventBus eventBus;
+    @Mock EventBus eventBus;
 
-    @Mock
-    TransactionService transactionService;
-    @Mock
-    TransactionCursorApi transactionCursorApi;
+    @Mock TransactionService transactionService;
+    @Mock TransactionCursorApi transactionCursorApi;
 
     TransactionMapper mapper = Mappers.getMapper(TransactionMapper.class);
 
@@ -69,10 +65,14 @@ class TransactionIngestionServiceImplTest {
     void setUp() {
         transactionPostIngestionService = new TransactionPostIngestionServiceImpl(eventBus, config);
 
-        transactionIngestionService = new TransactionIngestionServiceImpl(mapper,
-                transactionService, transactionIntegrationService, transactionPostIngestionService,
-                transactionCursorApi, config);
-
+        transactionIngestionService =
+                new TransactionIngestionServiceImpl(
+                        mapper,
+                        transactionService,
+                        transactionIntegrationService,
+                        transactionPostIngestionService,
+                        transactionCursorApi,
+                        config);
     }
 
     void mockConfigForTransaction() {
@@ -86,14 +86,12 @@ class TransactionIngestionServiceImplTest {
         cursor.setEnabled(Boolean.TRUE);
         cursor.setTransactionIdsFilterEnabled(Boolean.TRUE);
         config.setCursor(cursor);
-
     }
 
-    void mockCursorApiForTransactions(TransactionCursorResponse transactionCursorResponse,
-                                      boolean isNewCursor) {
+    void mockCursorApiForTransactions(
+            TransactionCursorResponse transactionCursorResponse, boolean isNewCursor) {
         if (isNewCursor) {
-            when(transactionCursorApi.getByArrangementId(any()))
-                    .thenReturn(Mono.empty());
+            when(transactionCursorApi.getByArrangementId(any())).thenReturn(Mono.empty());
             when(transactionCursorApi.getById(any()))
                     .thenReturn(Mono.just(mockTransactionCursorResponse()));
         } else {
@@ -101,40 +99,47 @@ class TransactionIngestionServiceImplTest {
                     .thenReturn(Mono.just(transactionCursorResponse));
         }
         when(transactionCursorApi.upsertCursor(any()))
-                .thenReturn(Mono.just(
-                        new TransactionCursorUpsertResponse().withId("7337f8cc-d66d-41b3-a00e-f71ff15d93cg")));
-        when(transactionCursorApi.patchByArrangementId(anyString(), any())).thenReturn(Mono.empty());
+                .thenReturn(
+                        Mono.just(
+                                new TransactionCursorUpsertResponse()
+                                        .withId("7337f8cc-d66d-41b3-a00e-f71ff15d93cg")));
+        when(transactionCursorApi.patchByArrangementId(anyString(), any()))
+                .thenReturn(Mono.empty());
     }
 
     TransactionIngestPullRequest mockTransactionIngestPullRequest() {
-        return
-                TransactionIngestPullRequest.builder()
-                        .arrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
-                        .billingCycles(3)
-                        .externalArrangementId("externalArrangementId")
-                        .legalEntityInternalId("leInternalId")
-                        .lastIngestedExternalIds(List.of("ext1", "ext2"))
-                        .build();
+        return TransactionIngestPullRequest.builder()
+                .arrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
+                .billingCycles(3)
+                .externalArrangementId("externalArrangementId")
+                .legalEntityInternalId("leInternalId")
+                .lastIngestedExternalIds(List.of("ext1", "ext2"))
+                .build();
     }
 
     TransactionCursorResponse mockTransactionCursorResponse() {
-        return
-                new TransactionCursorResponse()
-                        .withCursor(new TransactionCursor().withId("1").withStatus(StatusEnum.IN_PROGRESS)
+        return new TransactionCursorResponse()
+                .withCursor(
+                        new TransactionCursor()
+                                .withId("1")
+                                .withStatus(StatusEnum.IN_PROGRESS)
                                 .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
                                 .withLegalEntityId("leInternalId"));
     }
 
     void mockTransactionService() {
         List<TransactionsPostResponseBody> transactionsPostResponses =
-                List.of(new TransactionsPostResponseBody().id("1")
-                        .externalId("externalId").additions(Map.of()));
+                List.of(
+                        new TransactionsPostResponseBody()
+                                .id("1")
+                                .externalId("externalId")
+                                .additions(Map.of()));
 
         TransactionTask dbsResTask = new TransactionTask("id", null);
         dbsResTask.setResponse(transactionsPostResponses);
 
-        when(transactionService.processTransactions(any())).thenReturn(
-                Flux.just(UnitOfWork.from("id", dbsResTask)));
+        when(transactionService.processTransactions(any()))
+                .thenReturn(Flux.just(UnitOfWork.from("id", dbsResTask)));
     }
 
     @Test
@@ -143,28 +148,32 @@ class TransactionIngestionServiceImplTest {
         TransactionCursorResponse transactionCursorResponse = mockTransactionCursorResponse();
         mockCursorApiForTransactions(transactionCursorResponse, false);
         mockTransactionService();
-        TransactionIngestPullRequest transactionIngestPullRequest = mockTransactionIngestPullRequest();
+        TransactionIngestPullRequest transactionIngestPullRequest =
+                mockTransactionIngestPullRequest();
 
         when(transactionIntegrationService.pullTransactions(transactionIngestPullRequest))
-                .thenReturn(Flux.just(new TransactionsPostRequestBody().withType("type1").
-                        withArrangementId("1234").withReference("ref")
-                        .withExternalArrangementId("externalArrId")));
+                .thenReturn(
+                        Flux.just(
+                                new TransactionsPostRequestBody()
+                                        .withType("type1")
+                                        .withArrangementId("1234")
+                                        .withReference("ref")
+                                        .withExternalArrangementId("externalArrId")));
 
-        Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
-                .ingestPull(transactionIngestPullRequest);
+        Mono<TransactionIngestResponse> productIngestResponse =
+                transactionIngestionService.ingestPull(transactionIngestPullRequest);
         StepVerifier.create(productIngestResponse)
-                .assertNext(Assertions::assertNotNull).verifyComplete();
-
+                .assertNext(Assertions::assertNotNull)
+                .verifyComplete();
     }
 
     @Test
     void ingestionInPullMode_Failure() {
         mockConfigForTransaction();
         mockCursorApiForTransactions(new TransactionCursorResponse(), false);
-        Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
-                .ingestPull(mockTransactionIngestPullRequest());
-        StepVerifier.create(productIngestResponse)
-                .verifyComplete();
+        Mono<TransactionIngestResponse> productIngestResponse =
+                transactionIngestionService.ingestPull(mockTransactionIngestPullRequest());
+        StepVerifier.create(productIngestResponse).verifyComplete();
     }
 
     @Test
@@ -172,20 +181,27 @@ class TransactionIngestionServiceImplTest {
 
         mockConfigForTransaction();
         mockTransactionService();
-        when(transactionCursorApi.patchByArrangementId(anyString(), any())).thenReturn(Mono.empty());
+        when(transactionCursorApi.patchByArrangementId(anyString(), any()))
+                .thenReturn(Mono.empty());
 
-        TransactionIngestPullRequest transactionIngestPullRequest = mockTransactionIngestPullRequest();
+        TransactionIngestPullRequest transactionIngestPullRequest =
+                mockTransactionIngestPullRequest();
         transactionIngestPullRequest.setDateRangeStart(OffsetDateTime.now());
 
         when(transactionIntegrationService.pullTransactions(transactionIngestPullRequest))
-                .thenReturn(Flux.just(new TransactionsPostRequestBody().withType("type1").
-                        withArrangementId("1234").withReference("ref")
-                        .withExternalArrangementId("externalArrId")));
+                .thenReturn(
+                        Flux.just(
+                                new TransactionsPostRequestBody()
+                                        .withType("type1")
+                                        .withArrangementId("1234")
+                                        .withReference("ref")
+                                        .withExternalArrangementId("externalArrId")));
 
-        Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
-                .ingestPull(transactionIngestPullRequest);
+        Mono<TransactionIngestResponse> productIngestResponse =
+                transactionIngestionService.ingestPull(transactionIngestPullRequest);
         StepVerifier.create(productIngestResponse)
-                .assertNext(Assertions::assertNotNull).verifyComplete();
+                .assertNext(Assertions::assertNotNull)
+                .verifyComplete();
     }
 
     @Test
@@ -194,21 +210,28 @@ class TransactionIngestionServiceImplTest {
         mockConfigForTransaction();
         mockTransactionService();
         TransactionCursorResponse transactionCursorResponse = mockTransactionCursorResponse();
-        transactionCursorResponse.getCursor().withLastTxnDate("2022-05-24T03:18:59+01:00")
+        transactionCursorResponse
+                .getCursor()
+                .withLastTxnDate("2022-05-24T03:18:59+01:00")
                 .withLastTxnIds(List.of("123", "345"));
         mockCursorApiForTransactions(transactionCursorResponse, false);
-        TransactionIngestPullRequest transactionIngestPullRequest = mockTransactionIngestPullRequest();
+        TransactionIngestPullRequest transactionIngestPullRequest =
+                mockTransactionIngestPullRequest();
 
         when(transactionIntegrationService.pullTransactions(transactionIngestPullRequest))
-                .thenReturn(Flux.just(new TransactionsPostRequestBody().withType("type1").
-                        withArrangementId("1234").withReference("ref")
-                        .withExternalArrangementId("externalArrId")));
+                .thenReturn(
+                        Flux.just(
+                                new TransactionsPostRequestBody()
+                                        .withType("type1")
+                                        .withArrangementId("1234")
+                                        .withReference("ref")
+                                        .withExternalArrangementId("externalArrId")));
 
-        Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
-                .ingestPull(transactionIngestPullRequest);
+        Mono<TransactionIngestResponse> productIngestResponse =
+                transactionIngestionService.ingestPull(transactionIngestPullRequest);
         StepVerifier.create(productIngestResponse)
-                .assertNext(Assertions::assertNotNull).verifyComplete();
-
+                .assertNext(Assertions::assertNotNull)
+                .verifyComplete();
     }
 
     @Test
@@ -217,35 +240,45 @@ class TransactionIngestionServiceImplTest {
         mockTransactionService();
         TransactionCursorResponse transactionCursorResponse = mockTransactionCursorResponse();
         mockCursorApiForTransactions(transactionCursorResponse, true);
-        TransactionIngestPullRequest transactionIngestPullRequest = mockTransactionIngestPullRequest();
+        TransactionIngestPullRequest transactionIngestPullRequest =
+                mockTransactionIngestPullRequest();
 
         when(transactionIntegrationService.pullTransactions(transactionIngestPullRequest))
-                .thenReturn(Flux.just(new TransactionsPostRequestBody().withType("type1").
-                        withArrangementId("1234").withReference("ref")
-                        .withExternalArrangementId("externalArrId")));
+                .thenReturn(
+                        Flux.just(
+                                new TransactionsPostRequestBody()
+                                        .withType("type1")
+                                        .withArrangementId("1234")
+                                        .withReference("ref")
+                                        .withExternalArrangementId("externalArrId")));
 
-        Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
-                .ingestPull(transactionIngestPullRequest);
+        Mono<TransactionIngestResponse> productIngestResponse =
+                transactionIngestionService.ingestPull(transactionIngestPullRequest);
         StepVerifier.create(productIngestResponse)
-                .assertNext(Assertions::assertNotNull).verifyComplete();
+                .assertNext(Assertions::assertNotNull)
+                .verifyComplete();
     }
 
     @Test
     void ingestionInPushMode_Success() {
         mockConfigForTransaction();
         mockTransactionService();
-        TransactionIngestPushRequest request = TransactionIngestPushRequest.builder()
-                .arrangementId("id1")
-                .transactions(Collections.singletonList(
-                        new com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody()
-                                .arrangementId("id1")
-                                .externalArrangementId("extId1")
-                                .description("Transaction Desc")))
-                .build();
+        TransactionIngestPushRequest request =
+                TransactionIngestPushRequest.builder()
+                        .arrangementId("id1")
+                        .transactions(
+                                Collections.singletonList(
+                                        new com.backbase.dbs.transaction.api.service.v2.model
+                                                        .TransactionsPostRequestBody()
+                                                .arrangementId("id1")
+                                                .externalArrangementId("extId1")
+                                                .description("Transaction Desc")))
+                        .build();
 
-        Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
-                .ingestPush(request);
+        Mono<TransactionIngestResponse> productIngestResponse =
+                transactionIngestionService.ingestPush(request);
         StepVerifier.create(productIngestResponse)
-                .assertNext(Assertions::assertNotNull).verifyComplete();
+                .assertNext(Assertions::assertNotNull)
+                .verifyComplete();
     }
 }

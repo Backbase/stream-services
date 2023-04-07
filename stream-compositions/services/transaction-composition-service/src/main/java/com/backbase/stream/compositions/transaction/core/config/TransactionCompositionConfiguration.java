@@ -5,7 +5,9 @@ import com.backbase.stream.compositions.transaction.cursor.client.TransactionCur
 import com.backbase.stream.compositions.transaction.integration.ApiClient;
 import com.backbase.stream.compositions.transaction.integration.client.TransactionIntegrationApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +32,8 @@ public class TransactionCompositionConfiguration {
 
     @Bean
     @Primary
-    public TransactionIntegrationApi transactionIntegrationApi(ApiClient transactionIntegrationClient) {
+    public TransactionIntegrationApi transactionIntegrationApi(
+            ApiClient transactionIntegrationClient) {
         return new TransactionIntegrationApi(transactionIntegrationClient);
     }
 
@@ -58,7 +61,8 @@ public class TransactionCompositionConfiguration {
             ObjectMapper objectMapper,
             DateFormat dateFormat) {
         com.backbase.stream.compositions.transaction.cursor.ApiClient apiClient =
-                new com.backbase.stream.compositions.transaction.cursor.ApiClient(dbsWebClient, objectMapper, dateFormat);
+                new com.backbase.stream.compositions.transaction.cursor.ApiClient(
+                        dbsWebClient, objectMapper, dateFormat);
         apiClient.setBasePath(transactionConfigurationProperties.getCursor().getBaseUrl());
 
         return apiClient;

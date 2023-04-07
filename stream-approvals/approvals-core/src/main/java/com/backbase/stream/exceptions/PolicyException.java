@@ -1,6 +1,7 @@
 package com.backbase.stream.exceptions;
 
 import com.backbase.stream.approval.model.Policy;
+
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class PolicyException extends RuntimeException {

@@ -7,9 +7,9 @@ import java.time.temporal.ChronoUnit;
 
 public class HealthCheck {
 
-    private final static String DEFAULT_URI = "http://localhost:8080/actuator/health/readiness";
-    private final static String DEFAULT_HEALTH_INDICATOR = "UP";
-    private final static long DEFAULT_TIMEOUT = 10;
+    private static final String DEFAULT_URI = "http://localhost:8080/actuator/health/readiness";
+    private static final String DEFAULT_HEALTH_INDICATOR = "UP";
+    private static final long DEFAULT_TIMEOUT = 10;
 
     public static void main(String[] args) {
         var uri = DEFAULT_URI;
@@ -27,16 +27,21 @@ public class HealthCheck {
 
     private static void healthCheck(String uri, String healthIndicator) {
         try {
-            System.out.println("Performing health check on " + uri + " with health indicator: " + healthIndicator);
+            System.out.println(
+                    "Performing health check on "
+                            + uri
+                            + " with health indicator: "
+                            + healthIndicator);
 
-            HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI(uri))
-                .timeout(Duration.of(DEFAULT_TIMEOUT, ChronoUnit.SECONDS))
-                .GET()
-                .build();
+            HttpRequest request =
+                    HttpRequest.newBuilder()
+                            .uri(new URI(uri))
+                            .timeout(Duration.of(DEFAULT_TIMEOUT, ChronoUnit.SECONDS))
+                            .GET()
+                            .build();
 
-            HttpResponse<String> response = HttpClient.newHttpClient()
-                .send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response =
+                    HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
                 System.out.println("Service unavailable, code: " + response.statusCode());
@@ -54,5 +59,4 @@ public class HealthCheck {
             System.exit(6);
         }
     }
-
 }
