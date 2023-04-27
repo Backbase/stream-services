@@ -4,6 +4,19 @@ import static com.backbase.stream.it.LegalEntitySagaIT.NotEmptyPattern.notEmpty;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
+
+import com.backbase.stream.legalentity.model.Loan;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.CurrentAccount;
@@ -95,6 +108,7 @@ class LegalEntitySagaIT {
                                     .name("Account 2")
                                     .currency("GBP")
                             ))
+                            .loans(List.of(new Loan().IBAN("IBAN")))
                     ))
                     .users(Collections.singletonList(
                         new JobProfileUser()
@@ -258,6 +272,12 @@ class LegalEntitySagaIT {
         stubFor(
             WireMock.put("/access-control/service-api/v3/accesscontrol/data-groups/batch/update/data-items")
                 .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
+        );
+        stubFor(
+            WireMock.post("/loan/service-api/v1/loans/batch")
+                .willReturn(WireMock.aResponse().withStatus(HttpStatus.MULTI_STATUS.value())
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("[{\"arrangementId\":\"arrId1\",\"resourceId\":\"resId1\"}]"))
         );
     }
 

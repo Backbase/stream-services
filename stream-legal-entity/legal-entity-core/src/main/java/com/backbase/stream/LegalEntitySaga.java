@@ -40,6 +40,7 @@ import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityReference;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.Limit;
+import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
@@ -48,6 +49,8 @@ import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.legalentity.model.UserProfile;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
+import com.backbase.stream.loan.LoansSaga;
+import com.backbase.stream.loan.LoansTask;
 import com.backbase.stream.mapper.ExternalContactMapper;
 import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.BatchProductIngestionSaga;
@@ -148,8 +151,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
         ProductIngestionSaga productIngestionSaga,
-        BatchProductIngestionSaga batchProductIngestionSaga, LimitsSaga limitsSaga,
-                           ContactsSaga contactsSaga,
+        BatchProductIngestionSaga batchProductIngestionSaga,
+        LimitsSaga limitsSaga,
+        ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
@@ -176,6 +180,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::postContacts)
             .flatMap(this::processSubsidiaries);
     }
+
 
     private Mono<LegalEntityTask> postContacts(LegalEntityTask streamTask) {
         return Mono.just(streamTask)

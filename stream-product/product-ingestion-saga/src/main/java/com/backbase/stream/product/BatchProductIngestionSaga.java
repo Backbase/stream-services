@@ -4,7 +4,6 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
 
-
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPost;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -12,9 +11,12 @@ import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.loan.LoansSaga;
+import com.backbase.stream.loan.LoansTask;
 import com.backbase.stream.product.configuration.ProductIngestionSagaConfigurationProperties;
 import com.backbase.stream.product.service.ArrangementService;
 import com.backbase.stream.product.task.BatchProductGroupTask;
@@ -30,6 +32,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -52,8 +56,8 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
     public static final String BATCH_PRODUCT_GROUP = "batch-product-group";
 
 
-    public BatchProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties) {
-        super(arrangementService, accessGroupService, userService,  configurationProperties);
+    public BatchProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties, LoansSaga loansSaga) {
+        super(arrangementService, accessGroupService, userService,  configurationProperties, loansSaga);
     }
 
     public Mono<ProductGroupTask> process(ProductGroupTask streamTask) {
@@ -97,7 +101,30 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 })
                 .flatMap(this::upsertArrangementsBatch)
                 .flatMap(this::setupProductGroupsBatch)
-                .flatMap(this::setupBusinessFunctionsAndPermissionsBatch);
+                .flatMap(this::setupBusinessFunctionsAndPermissionsBatch)
+                .flatMap(this::setupLoans);
+    }
+
+    @SuppressWarnings("java:S2259")
+    private Mono<BatchProductGroupTask> setupLoans(BatchProductGroupTask batchProductGroupTask) {
+        BatchProductGroup data = batchProductGroupTask.getData();
+        List<Loan> loans = Optional.ofNullable(data)
+            .map(BatchProductGroup::getProductGroups).stream()
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .map(BaseProductGroup::getLoans)
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream)
+            .toList();
+
+        if (!loans.isEmpty()) {
+            LoansTask loansTask = new LoansTask(
+                String.format(data.getServiceAgreement().getExternalId(), batchProductGroupTask.getId()), loans);
+            return Mono.just(loansTask)
+                .map(loansSaga::executeTask)
+                .thenReturn(batchProductGroupTask);
+        }
+        return Mono.just(batchProductGroupTask);
     }
 
 

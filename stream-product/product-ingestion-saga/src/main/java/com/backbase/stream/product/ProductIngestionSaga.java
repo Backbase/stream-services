@@ -25,6 +25,7 @@ import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.loan.LoansSaga;
 import com.backbase.stream.product.configuration.ProductIngestionSagaConfigurationProperties;
 import com.backbase.stream.product.exception.ArrangementCreationException;
 import com.backbase.stream.product.exception.ArrangementUpdateException;
@@ -80,12 +81,14 @@ public class ProductIngestionSaga {
     protected final AccessGroupService accessGroupService;
     protected final UserService userService;
     protected final ProductIngestionSagaConfigurationProperties configurationProperties;
+    protected final LoansSaga loansSaga;
 
-    public ProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties) {
+    public ProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties, LoansSaga loansSaga) {
         this.arrangementService = arrangementService;
         this.accessGroupService = accessGroupService;
         this.userService = userService;
         this.configurationProperties = configurationProperties;
+        this.loansSaga = loansSaga;
     }
 
     @ContinueSpan(log = "processProducts")

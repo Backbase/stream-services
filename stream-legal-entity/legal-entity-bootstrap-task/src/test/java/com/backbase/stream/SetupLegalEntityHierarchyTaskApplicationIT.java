@@ -4,6 +4,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 
 import com.backbase.stream.config.BootstrapConfigurationProperties;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ public class SetupLegalEntityHierarchyTaskApplicationIT {
         registry.add("spring.cloud.discovery.client.simple.instances.arrangement-manager[0].uri", () -> wiremockUrl);
         registry.add("spring.cloud.discovery.client.simple.instances.arrangement-manager[0].metadata.contextPath",
             () -> "/arrangement-manager");
+        registry.add("spring.cloud.discovery.client.simple.instances.loan[0].uri", () -> wiremockUrl);
+        registry.add("spring.cloud.discovery.client.simple.instances.loan[0].metadata.contextPath",
+            () -> "/loan");
     }
 
     @Test

@@ -47,6 +47,22 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
+            <artifactId>loans-core</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>backbase-bom</artifactId>
+                    <groupId>com.backbase</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>backbase-bom</artifactId>
+                    <groupId>com.backbase</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
             <artifactId>product-catalog-core</artifactId>
             <version>${project.version}</version>
         </dependency>
