@@ -110,5 +110,5 @@ jobs:
           branch: ${{ github.ref }}
 
       - name: Upload to Repo
-        if: "contains(github.ref, 'master') || contains(github.ref, 'support/') || contains(github.ref, 'develop')" # In case of develop branch it will upload the snapshot version
+        if: "contains(github.ref, 'master') || contains(github.ref, 'support/') || contains(github.ref, 'develop' || contains(github.ref, 'feature/servicebus-compatibility')" # In case of develop branch it will upload the snapshot version
         run: mvn -B deploy -Pdocker-image,no-latest-tag -Dmaven.test.skip=true -Ddocker.default.tag=${{ env.DOCKER_TAG_VERSION }} -Ddocker.repo.url=repo.backbase.com -Ddocker.repo.project=backbase-stream-images -Djib.to.auth.username=${{ secrets.REPO_USERNAME }} -Djib.to.auth.password=${{ secrets.REPO_PASSWORD }} -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
