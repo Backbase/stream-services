@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.38.0](https://github.com/Backbase/stream-services/compare/3.37.0...3.38.0)
+### Added
+- Updated Product Mapper to map panSuffix to all product types `panSuffix` to `number`
+
 ## [3.37.0](https://github.com/Backbase/stream-services/compare/3.36.0...3.37.0)
 ### Added
 - Adds `bankBranchCode` field to `TermDeposit` openapi schema
