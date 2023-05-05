@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.39.0](https://github.com/Backbase/stream-services/compare/3.38.0...3.39.0)
+### Added
+- Add PermissionSetApi to stream-dbs-clients for APS ingestion scenarios
+
 ## [3.38.0](https://github.com/Backbase/stream-services/compare/3.37.0...3.38.0)
 ### Added
 - Updated Product Mapper to map panSuffix to all product types `panSuffix` to `number`
