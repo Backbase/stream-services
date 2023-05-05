@@ -77,6 +77,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
                 .map(LegalEntityTask::getData)
                 .map(le -> LegalEntityResponse.builder()
                         .legalEntity(le)
+                        .additions(res.getAdditions())
                         .membershipAccounts(res.getMembershipAccounts())
                         .productChainEnabledFromRequest(res.getProductChainEnabledFromRequest())
                         .build());
