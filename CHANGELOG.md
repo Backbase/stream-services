@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.39.1](https://github.com/Backbase/stream-services/compare/3.39.0...3.39.1)
+### Added
+- Ensure addition propagation from legal entity composition to product composition through chaining 
+
 ## [3.39.0](https://github.com/Backbase/stream-services/compare/3.38.0...3.39.0)
 ### Added
 - Add PermissionSetApi to stream-dbs-clients for APS ingestion scenarios
