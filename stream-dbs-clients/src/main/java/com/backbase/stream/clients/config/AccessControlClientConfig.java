@@ -13,6 +13,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
+import com.backbase.dbs.accesscontrol.api.service.v2.PermissionSetApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -107,6 +108,12 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public UserContextApi userContextApi(ApiClient accessControlApiClient) {
         return new UserContextApi(accessControlApiClient);
+    }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    public PermissionSetApi permissionSetApi(ApiClient accessControlApiClient) {
+        return new PermissionSetApi(accessControlApiClient);
     }
 
 }
