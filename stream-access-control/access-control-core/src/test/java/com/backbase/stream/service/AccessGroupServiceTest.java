@@ -351,7 +351,8 @@ class AccessGroupServiceTest {
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
-        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"), Collections.emptyList());
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"),
+            List.of(new BaseProductGroup().internalId("data-group-id")));
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
         usersPermissions.put(
@@ -372,7 +373,7 @@ class AccessGroupServiceTest {
                     ).dataGroupIdentifiers(Collections.emptyList()),
                     new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
                         new PresentationIdentifier().idIdentifier("business-function-group-id-1")
-                    ).dataGroupIdentifiers(Collections.emptyList())
+                    ).dataGroupIdentifiers(List.of(new PresentationDataGroupIdentifier().idIdentifier("data-group-id")))
                 ))
         );
 
@@ -386,7 +387,8 @@ class AccessGroupServiceTest {
             .thenReturn(Mono.just(new PersistenceApprovalPermissions().items(Arrays.asList(
                 new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("system-group-id-1").dataGroupIds(Collections.emptyList()),
                 new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("system-group-id-2").dataGroupIds(Collections.emptyList()),
-                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("system-group-id-3").dataGroupIds(Collections.emptyList())
+                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("system-group-id-3").dataGroupIds(Collections.emptyList()),
+                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("business-function-group-id-1").dataGroupIds(List.of("data-group-id"))
             ))));
 
         when(accessControlUsersApi.putAssignUserPermissions(expectedPermissions))
