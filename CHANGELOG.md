@@ -1,8 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [3.40.0](https://github.com/Backbase/stream-services/compare/3.39.0...3.40.0)
-### Added
+## [3.39.1](https://github.com/Backbase/stream-services/compare/3.39.0...3.40.1)
+### Changed
 - Bugfix for putAssignUserPermissions error `Data groups cannot be duplicated in scope of a single function group during assigning permissions`
 
 ## [3.39.0](https://github.com/Backbase/stream-services/compare/3.38.0...3.39.0)
