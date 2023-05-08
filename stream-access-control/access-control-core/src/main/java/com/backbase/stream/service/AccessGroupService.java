@@ -643,17 +643,17 @@ public class AccessGroupService {
                                             .filter(mergedFunctionDataGroup -> hasTheSameFunctionGroupId(mergedFunctionDataGroup, requestFunctionDataGroup))
                                             .findFirst();
 
-                            // If requested function group is already ingested, merge the request and existing function group
-                            if (mergedFunctionGroupOptional.isPresent()) {
-                                PresentationFunctionGroupDataGroup mergedFunctionGroup = mergedFunctionGroupOptional.get();
-
-                                if (mergedFunctionGroup.getDataGroupIdentifiers() != null) {
-                                    mergedFunctionGroup.getDataGroupIdentifiers().addAll(requestFunctionDataGroup.getDataGroupIdentifiers());
-                                }
-                            // otherwise we should copy the function group from the request completely
-                            } else {
-                                mergedUserPermissions.addFunctionGroupDataGroupsItem(requestFunctionDataGroup);
-                            }
+                            mergedFunctionGroupOptional.ifPresentOrElse(mergedFunctionGroup ->
+                                    // If requested function group is already ingested, merge the request and existing function group
+                                    mergedFunctionGroup.setDataGroupIdentifiers(
+                                        Stream.of(mergedFunctionGroup.getDataGroupIdentifiers(),
+                                                requestFunctionDataGroup.getDataGroupIdentifiers())
+                                            .filter(Objects::nonNull)
+                                            .flatMap(List::stream)
+                                            .distinct()
+                                            .toList()),
+                                // otherwise we should copy the function group from the request completely
+                                () -> mergedUserPermissions.addFunctionGroupDataGroupsItem(requestFunctionDataGroup));
                         });
                     }
                     return mergedUserPermissions;
