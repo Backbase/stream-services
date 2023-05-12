@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "PUT",
-    "url": "/access-control/service-api/v2/legalentities",
+    "url": "/access-control/service-api/v3/accesscontrol/legal-entities",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"

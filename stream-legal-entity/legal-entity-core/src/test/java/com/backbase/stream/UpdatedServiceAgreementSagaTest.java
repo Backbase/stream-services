@@ -7,7 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -30,8 +30,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

@@ -1,10 +1,9 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantPutBody;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationParticipantBatchUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationParticipantPutBody;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
-import java.util.List;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

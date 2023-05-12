@@ -217,9 +217,9 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.accesscontrol.api.service.v2</apiPackage>
-                            <modelPackage>com.backbase.dbs.accesscontrol.api.service.v2.model</modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v3*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.accesscontrol.api.service.v3</apiPackage>
+                            <modelPackage>com.backbase.dbs.accesscontrol.api.service.v3.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
