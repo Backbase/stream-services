@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.39.2](https://github.com/Backbase/stream-services/compare/3.39.0...3.40.1)
+### Changed
+- Propagate additions returned by the Product and Transaction integration Response to the Product and Transaction composition Response.
+
 ## [3.39.1](https://github.com/Backbase/stream-services/compare/3.39.0...3.40.1)
 ### Changed
 - Bugfix for putAssignUserPermissions error `Data groups cannot be duplicated in scope of a single function group during assigning permissions`
