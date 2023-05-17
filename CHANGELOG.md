@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.40.0](https://github.com/Backbase/stream-services/compare/3.39.2...3.40.0)
+### Added
+- Add support for propagating additions from the legal entity ingestion request.
+
 ## [3.39.2](https://github.com/Backbase/stream-services/compare/3.39.0...3.40.1)
 ### Changed
 - Propagate additions returned by the Product and Transaction integration Response to the Product and Transaction composition Response.
