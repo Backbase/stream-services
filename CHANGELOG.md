@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.41.0](https://github.com/Backbase/stream-services/compare/3.40.0...3.41.0)
+### Added
+- Added additions to `DebitCardItem` openapi schema.
+
 ## [3.40.0](https://github.com/Backbase/stream-services/compare/3.39.2...3.40.0)
 ### Added
 - Add support for propagating additions from the legal entity ingestion request.

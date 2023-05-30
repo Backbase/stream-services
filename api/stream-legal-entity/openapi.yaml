@@ -883,6 +883,10 @@ components:
           maxLength: 32
           type: string
           description: Status of the card ex. Active, Expired etc
+        additions:
+          type: object
+          additionalProperties:
+            type: string
     CardDetailsItem:
       required:
         - cardProvider
