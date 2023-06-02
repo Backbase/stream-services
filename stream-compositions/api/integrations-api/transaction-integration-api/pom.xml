@@ -6,7 +6,7 @@
     <parent>
         <artifactId>integrations-api</artifactId>
         <groupId>com.backbase.stream.compositions</groupId>
-        <version>3.40.0</version>
+        <version>3.41.0</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions.api</groupId>
