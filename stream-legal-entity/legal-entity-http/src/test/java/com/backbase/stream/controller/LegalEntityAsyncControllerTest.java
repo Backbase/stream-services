@@ -17,6 +17,7 @@ import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserProfileManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.loan.inbound.api.service.v1.LoansApi;
+import com.backbase.stream.audiences.UserKindSegmentationSaga;
 import com.backbase.stream.config.LegalEntityHttpConfiguration;
 import com.backbase.stream.configuration.LegalEntitySagaConfiguration;
 import com.backbase.stream.configuration.UpdatedServiceAgreementSagaConfiguration;
@@ -109,6 +110,9 @@ class LegalEntityAsyncControllerTest {
 
     @MockBean
     private ArrangementsApi arrangementsApi;
+
+    @MockBean
+    private UserKindSegmentationSaga userKindSegmentationSaga;
 
     @Autowired
     private WebTestClient webTestClient;

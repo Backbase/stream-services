@@ -1,5 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.49.0](https://github.com/Backbase/stream-services/compare/3.48.0...3.49.0)
+### Added
+- Added Support for ingesting LE customers into audiences user-kind segments (for both Retail and Business banking)
+- The customer category is taken from the LE and if not present the default property will be used.
+- UserKindSegmentationSage Needs to be enabled explicitly through these properties:
+    ```properties
+    backbase.stream.audiences.segmentation.user-kind.enabled=true|false
+    backbase.stream.audiences.segmentation.user-kind.default-customer-category=RETAIL|BUSINESS
+    ``` 
+
 ## [3.48.0](https://github.com/Backbase/stream-services/compare/3.47.0...3.48.0)
 ### Changed
 - Updated UserService.createOrImportIdentityUser to populate user's additions to DBS with IMPORT_FROM_IDENTITY linking strategy
