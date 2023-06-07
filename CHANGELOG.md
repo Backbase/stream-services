@@ -1,5 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.42.0](https://github.com/Backbase/stream-services/compare/3.41.0...3.42.0)
+### Added
+- support for populating audiences customers segment (for both Retail and Business banking)
 
 ## [3.41.0](https://github.com/Backbase/stream-services/compare/3.41.0...3.40.0)
 ### Added
