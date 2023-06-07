@@ -11,6 +11,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItemBase;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityPut;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.Status;
+import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.LegalEntityType;
@@ -28,6 +29,7 @@ class LegalEntityMapperTest {
         .externalId("externalId")
         .internalId("internalId")
         .legalEntityType(com.backbase.stream.legalentity.model.LegalEntityType.BANK)
+        .customerCategory(com.backbase.stream.legalentity.model.CustomerCategory.RETAIL)
         .parentExternalId("parentExternalId")
         .activateSingleServiceAgreement(true)
         .additions(Map.of("k1", "v1", "k2", "v2"));
@@ -51,6 +53,10 @@ class LegalEntityMapperTest {
                 com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityType.BANK,
                 presentation.getType()
             ),
+            () -> assertEquals(
+                com.backbase.dbs.accesscontrol.api.service.v3.model.CustomerCategory.RETAIL,
+                presentation.getCustomerCategory()
+            ),
             () -> assertEquals("parentExternalId", presentation.getParentExternalId()),
             () -> assertEquals(Boolean.TRUE, presentation.getActivateSingleServiceAgreement())
         );
@@ -68,6 +74,7 @@ class LegalEntityMapperTest {
             .id("internalId")
             .externalId("externalId")
             .type(com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityType.CUSTOMER)
+            .customerCategory(com.backbase.dbs.accesscontrol.api.service.v3.model.CustomerCategory.BUSINESS)
             .additions(Map.of("k1", "v1", "k2", "v2"));
         LegalEntity model = mapper.toStream(legalEntityItemBase);
         assertAll(
@@ -75,7 +82,8 @@ class LegalEntityMapperTest {
             () -> assertEquals("externalId", model.getExternalId()),
             () -> assertEquals("internalId", model.getInternalId()),
             () -> assertEquals("Test Legal Entity", model.getName()),
-            () -> assertEquals(LegalEntityType.CUSTOMER, model.getLegalEntityType())
+            () -> assertEquals(LegalEntityType.CUSTOMER, model.getLegalEntityType()),
+            () -> assertEquals(CustomerCategory.BUSINESS, model.getCustomerCategory())
         );
 
     }

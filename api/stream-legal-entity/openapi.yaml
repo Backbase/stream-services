@@ -979,6 +979,8 @@ components:
           $ref: '#/components/schemas/ExternalIdentifier'
         legalEntityType:
           $ref: '#/components/schemas/LegalEntityType'
+        customerCategory:
+          $ref: '#/components/schemas/CustomerCategory'
         realmName:
           type: string
           description: Realm to which the Legal Entity should be mapped.
@@ -2533,6 +2535,13 @@ components:
           enum:
             - "ADD"
             - "REMOVE"
+    CustomerCategory:
+      type: string
+      title: Customer Category
+      description: Property to differentiate between Retail and SME Service Agreement / Legal Entity.
+      enum:
+        - RETAIL
+        - BUSINESS
 
   examples:
     RootLegalEntityHierarchyExample:
