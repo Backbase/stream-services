@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.41.0](https://github.com/Backbase/stream-services/compare/3.41.0...3.40.0)
+### Added
+- Added Pull Request template for Stream contributors.
+
 ## [3.41.0](https://github.com/Backbase/stream-services/compare/3.40.0...3.41.0)
 ### Added
 - Added additions to `DebitCardItem` openapi schema.
