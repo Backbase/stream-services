@@ -1,15 +1,14 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ApprovalStatus;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ParticipantIngest;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermissionFunctionGroupUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItemQuery;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementPut;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIngestFunctionGroup;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermission;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermissionFunctionGroupUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItemQuery;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobRole;
@@ -45,9 +44,6 @@ public interface AccessGroupMapper {
     ParticipantIngest toPresentation(LegalEntityParticipant legalEntityParticipant);
 
     PresentationIngestFunctionGroup toPresentation(JobRole referenceJobRole);
-
-    com.backbase.stream.legalentity.model.ApprovalStatus map(
-        ApprovalStatus approvalStatus);
 
     /**
      * Map {@link BusinessFunctionGroup} with privileges to {@link PresentationPermission}.
