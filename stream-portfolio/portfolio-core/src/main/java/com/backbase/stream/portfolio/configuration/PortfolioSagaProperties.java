@@ -19,4 +19,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 @ConfigurationProperties("backbase.stream.portfolio.sink")
-public class PortfolioSagaProperties extends StreamWorkerConfiguration {}
+public class PortfolioSagaProperties extends StreamWorkerConfiguration {
+
+}

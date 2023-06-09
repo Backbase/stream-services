@@ -10,8 +10,7 @@ import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalanc
 import org.springframework.validation.annotation.Validated;
 
 /**
- * This specialization make it flexible to use direct uris when client-side load balancing is not
- * desired/supported.
+ * This specialization make it flexible to use direct uris when client-side load balancing is not desired/supported.
  *
  * <p>In order to use the `direct-uri` property, the value of `spring.cloud.loadbalancer.enabled`
  * needs to be set to false in services with support to client-side load balancing.
@@ -19,55 +18,61 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 class CompositeApiClientConfig extends ApiClientConfig {
 
-  /** Direct uri used as base path when load balancing is not available. */
-  private String directUri;
+    /**
+     * Direct uri used as base path when load balancing is not available.
+     */
+    private String directUri;
 
-  /** Fallback when ports are the same for all service clients. */
-  @Positive
-  @Value("${backbase.communication.http.default-service-port:}")
-  private Integer defaultServicePort;
+    /**
+     * Fallback when ports are the same for all service clients.
+     */
+    @Positive
+    @Value("${backbase.communication.http.default-service-port:}")
+    private Integer defaultServicePort;
 
-  /** Indicator whether load balancing is enabled or not. */
-  private boolean loadBalancerEnabled;
+    /**
+     * Indicator whether load balancing is enabled or not.
+     */
+    private boolean loadBalancerEnabled;
 
-  public CompositeApiClientConfig(String serviceId) {
-    super(serviceId);
-  }
-
-  @Override
-  public Integer getServicePort() {
-    if (super.getServicePort() == null && getDefaultServicePort() != null) {
-      return getDefaultServicePort();
+    public CompositeApiClientConfig(String serviceId) {
+        super(serviceId);
     }
-    return super.getServicePort();
-  }
 
-  @Override
-  public String createBasePath() {
-    if (!loadBalancerEnabled && getDirectUri() != null) {
-      return getDirectUri();
+    @Override
+    public Integer getServicePort() {
+        if (super.getServicePort() == null && getDefaultServicePort() != null) {
+            return getDefaultServicePort();
+        }
+        return super.getServicePort();
     }
-    return super.createBasePath();
-  }
 
-  @Autowired
-  protected void setLoadBalancerEnabled(Optional<Factory<ServiceInstance>> loadBalancerFactory) {
-    this.loadBalancerEnabled = loadBalancerFactory.isPresent();
-  }
+    @Override
+    public String createBasePath() {
+        if (!loadBalancerEnabled && getDirectUri() != null) {
+            return getDirectUri();
+        }
+        return super.createBasePath();
+    }
 
-  public String getDirectUri() {
-    return directUri;
-  }
+    @Autowired
+    protected void setLoadBalancerEnabled(Optional<Factory<ServiceInstance>> loadBalancerFactory) {
+        this.loadBalancerEnabled = loadBalancerFactory.isPresent();
+    }
 
-  public void setDirectUri(String directUri) {
-    this.directUri = directUri;
-  }
+    public String getDirectUri() {
+        return directUri;
+    }
 
-  public Integer getDefaultServicePort() {
-    return defaultServicePort;
-  }
+    public void setDirectUri(String directUri) {
+        this.directUri = directUri;
+    }
 
-  public void setDefaultServicePort(Integer defaultServicePort) {
-    this.defaultServicePort = defaultServicePort;
-  }
+    public Integer getDefaultServicePort() {
+        return defaultServicePort;
+    }
+
+    public void setDefaultServicePort(Integer defaultServicePort) {
+        this.defaultServicePort = defaultServicePort;
+    }
 }

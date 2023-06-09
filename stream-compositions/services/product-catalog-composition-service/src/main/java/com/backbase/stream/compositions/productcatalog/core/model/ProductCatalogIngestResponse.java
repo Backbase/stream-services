@@ -9,5 +9,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class ProductCatalogIngestResponse {
-  private ProductCatalog productCatalog;
+
+    private ProductCatalog productCatalog;
 }

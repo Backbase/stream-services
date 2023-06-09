@@ -1,6 +1,7 @@
 package com.backbase.stream.compositions.product.core.mapper;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.backbase.stream.compositions.product.api.model.ArrangementIngestionConfig;
 import com.backbase.stream.compositions.product.api.model.ArrangementsChainsConfig;
@@ -9,48 +10,49 @@ import com.backbase.stream.compositions.product.core.model.RequestConfig;
 import org.junit.jupiter.api.Test;
 
 class ConfigMapperTest {
-  @Test
-  void map() {
-    ArrangementIngestionConfig config =
-        new ArrangementIngestionConfig()
-            .withChains(
-                new ArrangementsChainsConfig()
-                    .withTransactionComposition(
-                        new TransactionCompositionChainConfig().withEnabled(true).withAsync(true)));
 
-    ConfigMapper configMapper = new ConfigMapper();
-    RequestConfig requestConfig = configMapper.map(config);
+    @Test
+    void map() {
+        ArrangementIngestionConfig config =
+            new ArrangementIngestionConfig()
+                .withChains(
+                    new ArrangementsChainsConfig()
+                        .withTransactionComposition(
+                            new TransactionCompositionChainConfig().withEnabled(true).withAsync(true)));
 
-    assertEquals(true, requestConfig.getChains().getTransactionComposition().getEnabled());
-    assertEquals(true, requestConfig.getChains().getTransactionComposition().getAsync());
-  }
+        ConfigMapper configMapper = new ConfigMapper();
+        RequestConfig requestConfig = configMapper.map(config);
 
-  @Test
-  void mapNullTransactionComposition() {
-    ArrangementIngestionConfig config =
-        new ArrangementIngestionConfig().withChains(new ArrangementsChainsConfig());
+        assertEquals(true, requestConfig.getChains().getTransactionComposition().getEnabled());
+        assertEquals(true, requestConfig.getChains().getTransactionComposition().getAsync());
+    }
 
-    ConfigMapper configMapper = new ConfigMapper();
-    RequestConfig requestConfig = configMapper.map(config);
+    @Test
+    void mapNullTransactionComposition() {
+        ArrangementIngestionConfig config =
+            new ArrangementIngestionConfig().withChains(new ArrangementsChainsConfig());
 
-    assertNull(requestConfig.getChains().getTransactionComposition());
-  }
+        ConfigMapper configMapper = new ConfigMapper();
+        RequestConfig requestConfig = configMapper.map(config);
 
-  @Test
-  void mapNullChains() {
-    ArrangementIngestionConfig config = new ArrangementIngestionConfig();
+        assertNull(requestConfig.getChains().getTransactionComposition());
+    }
 
-    ConfigMapper configMapper = new ConfigMapper();
-    RequestConfig requestConfig = configMapper.map(config);
+    @Test
+    void mapNullChains() {
+        ArrangementIngestionConfig config = new ArrangementIngestionConfig();
 
-    assertNull(requestConfig.getChains());
-  }
+        ConfigMapper configMapper = new ConfigMapper();
+        RequestConfig requestConfig = configMapper.map(config);
 
-  @Test
-  void mapNull() {
-    ConfigMapper configMapper = new ConfigMapper();
-    RequestConfig requestConfig = configMapper.map(null);
+        assertNull(requestConfig.getChains());
+    }
 
-    assertNull(requestConfig);
-  }
+    @Test
+    void mapNull() {
+        ConfigMapper configMapper = new ConfigMapper();
+        RequestConfig requestConfig = configMapper.map(null);
+
+        assertNull(requestConfig);
+    }
 }

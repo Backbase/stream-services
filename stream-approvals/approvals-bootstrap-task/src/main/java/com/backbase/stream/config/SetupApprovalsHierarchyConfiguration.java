@@ -20,25 +20,25 @@ import reactor.core.publisher.Flux;
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
 public class SetupApprovalsHierarchyConfiguration {
 
-  private final ApprovalSaga approvalSaga;
-  private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
+    private final ApprovalSaga approvalSaga;
+    private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
 
-  @Bean
-  public CommandLineRunner commandLineRunner() {
-    return this::run;
-  }
+    @Bean
+    public CommandLineRunner commandLineRunner() {
+        return this::run;
+    }
 
-  private void run(String... args) {
-    List<Approval> approvals = bootstrapConfigurationProperties.getApprovals();
-    log.debug("Approvals: {}", approvals);
-    log.info("Bootstrapping Root Approvals Structure");
+    private void run(String... args) {
+        List<Approval> approvals = bootstrapConfigurationProperties.getApprovals();
+        log.debug("Approvals: {}", approvals);
+        log.info("Bootstrapping Root Approvals Structure");
 
-    Flux.fromIterable(bootstrapConfigurationProperties.getApprovals())
-        .map(ApprovalTask::new)
-        .flatMap(approvalSaga::executeTask)
-        .collectList()
-        .block();
+        Flux.fromIterable(bootstrapConfigurationProperties.getApprovals())
+            .map(ApprovalTask::new)
+            .flatMap(approvalSaga::executeTask)
+            .collectList()
+            .block();
 
-    log.info("Finished bootstrapping Approvals Structure");
-  }
+        log.info("Finished bootstrapping Approvals Structure");
+    }
 }

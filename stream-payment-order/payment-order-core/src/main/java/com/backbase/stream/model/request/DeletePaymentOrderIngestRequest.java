@@ -7,11 +7,11 @@ import lombok.Getter;
 @Getter
 public class DeletePaymentOrderIngestRequest implements PaymentOrderIngestRequest {
 
-  private final String paymentOrderId;
-  private final String bankReferenceId;
+    private final String paymentOrderId;
+    private final String bankReferenceId;
 
-  @Override
-  public String getBankReferenceId() {
-    return bankReferenceId;
-  }
+    @Override
+    public String getBankReferenceId() {
+        return bankReferenceId;
+    }
 }

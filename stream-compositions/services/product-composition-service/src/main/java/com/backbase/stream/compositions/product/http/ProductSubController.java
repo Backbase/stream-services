@@ -17,22 +17,23 @@ import reactor.core.publisher.Mono;
 @Service
 @AllArgsConstructor
 class ProductSubController {
-  private final ProductIngestionService productIngestionService;
-  private final ProductRestMapper productRestMapper;
 
-  Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProduct(
-      @Valid Mono<ProductPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-    return pullIngestionRequest
-        .map(productRestMapper::mapPullRequest)
-        .flatMap(productIngestionService::ingestPull)
-        .map(productRestMapper::mapResponse);
-  }
+    private final ProductIngestionService productIngestionService;
+    private final ProductRestMapper productRestMapper;
 
-  Mono<ResponseEntity<ProductIngestionResponse>> pushIngestProduct(
-      @Valid Mono<ProductPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
-    return pushIngestionRequest
-        .map(productRestMapper::mapPushRequest)
-        .flatMap(productIngestionService::ingestPush)
-        .map(productRestMapper::mapResponse);
-  }
+    Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProduct(
+        @Valid Mono<ProductPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+        return pullIngestionRequest
+            .map(productRestMapper::mapPullRequest)
+            .flatMap(productIngestionService::ingestPull)
+            .map(productRestMapper::mapResponse);
+    }
+
+    Mono<ResponseEntity<ProductIngestionResponse>> pushIngestProduct(
+        @Valid Mono<ProductPushIngestionRequest> pushIngestionRequest, ServerWebExchange exchange) {
+        return pushIngestionRequest
+            .map(productRestMapper::mapPushRequest)
+            .flatMap(productIngestionService::ingestPush)
+            .map(productRestMapper::mapResponse);
+    }
 }

@@ -22,121 +22,123 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
-/** From a Login Event, Get Assigned Permissions and retrieve last transaction. */
+/**
+ * From a Login Event, Get Assigned Permissions and retrieve last transaction.
+ */
 @Slf4j
 public class AbstractLoginEventListener {
 
-  public static final String RESOURCE_NAME = "Transactions";
-  public static final String PRIVILEGE = "view";
+    public static final String RESOURCE_NAME = "Transactions";
+    public static final String PRIVILEGE = "view";
 
-  private static final String LATEST_TRANSACTION = "latestTransaction";
+    private static final String LATEST_TRANSACTION = "latestTransaction";
 
-  private final DirectProcessor<IngestionCursor> processor = DirectProcessor.create();
-  private final FluxSink<IngestionCursor> sink = processor.sink();
+    private final DirectProcessor<IngestionCursor> processor = DirectProcessor.create();
+    private final FluxSink<IngestionCursor> sink = processor.sink();
 
-  private final EntitlementsService entitlementsService;
-  private final TransactionService transactionService;
-  private final CursorServiceConfigurationProperties cursorServiceConfigurationProperties;
+    private final EntitlementsService entitlementsService;
+    private final TransactionService transactionService;
+    private final CursorServiceConfigurationProperties cursorServiceConfigurationProperties;
 
-  public AbstractLoginEventListener(
-      EntitlementsService entitlementsService,
-      TransactionService transactionService,
-      CursorServiceConfigurationProperties cursorServiceConfigurationProperties) {
-    this.entitlementsService = entitlementsService;
-    this.transactionService = transactionService;
-    this.cursorServiceConfigurationProperties = cursorServiceConfigurationProperties;
-  }
-
-  /**
-   * Publisher emitting Ingestion Cursors.
-   *
-   * @return Publisher of Ingestion Cursors
-   */
-  public Publisher<IngestionCursor> getLoginEventProcessor() {
-    return processor;
-  }
-
-  public void publishIngestionCursorsFor(Object loginEvent, String username) {
-    entitlementsService
-        .getLegalEntityForUserName(username)
-        .doOnError(
-            UserNotFoundException.class, e -> log.info("User: {} not found in DBS", username))
-        .onErrorResume(UserNotFoundException.class, e -> Mono.empty())
-        .doOnNext(
-            userAndLegalEntity -> {
-              log.info(
-                  "Retrieved legalEntity: {} with user: {}",
-                  userAndLegalEntity.getT2().getInternalId(),
-                  username);
-              // Send Login Event
-              User user = userAndLegalEntity.getT1();
-              LegalEntity legalEntity = userAndLegalEntity.getT2();
-              IngestionCursor loginIngestionCursor =
-                  createLoginIngestionCursor(loginEvent, user, legalEntity);
-              log.info(
-                  "Publishing Login Event for user: {} with legal entity : {}",
-                  user.getExternalId(),
-                  legalEntity.getExternalId());
-              sink.next(loginIngestionCursor);
-
-              if (cursorServiceConfigurationProperties.isPublishEntitledArrangements()) {
-                entitlementsService
-                    .getAssignedPermissionsForUser(RESOURCE_NAME, RESOURCE_NAME, PRIVILEGE, user)
-                    .flatMap(
-                        assignedPermission ->
-                            createIngestionCursor(
-                                user, legalEntity, loginEvent, assignedPermission))
-                    .subscribe(sink::next);
-              }
-            })
-        .subscribe();
-  }
-
-  private Flux<IngestionCursor> createIngestionCursor(
-      User user,
-      LegalEntity legalEntity,
-      Object loginEvent,
-      AssignedPermission assignedPermission) {
-    List<IngestionCursor> ingestionCursors = new ArrayList<>();
-    ProductGroup.ProductGroupTypeEnum arrangements1 =
-        ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS;
-    Object arrangements = assignedPermission.getPermittedObjects().get(arrangements1.name());
-    if (arrangements instanceof List
-        && (((List) arrangements).get(0) instanceof AccountArrangementItem)) {
-      List<AccountArrangementItem> products = (List<AccountArrangementItem>) arrangements;
-
-      for (AccountArrangementItem product : products) {
-
-        IngestionCursor ingestionCursor = createLoginIngestionCursor(loginEvent, user, legalEntity);
-
-        ingestionCursor.setArrangementId(product.getId());
-        ingestionCursor.setExternalArrangementId(product.getExternalArrangementId());
-        // Make this configurable?
-        ingestionCursor.setCursorState(IngestionCursor.CursorStateEnum.NOT_STARTED);
-        ingestionCursor.setCursorSource(IngestionCursor.CursorSourceEnum.LOGIN_EVENT);
-        ingestionCursor.getAdditionalProperties().put("product", product);
-        ingestionCursors.add(ingestionCursor);
-      }
+    public AbstractLoginEventListener(
+        EntitlementsService entitlementsService,
+        TransactionService transactionService,
+        CursorServiceConfigurationProperties cursorServiceConfigurationProperties) {
+        this.entitlementsService = entitlementsService;
+        this.transactionService = transactionService;
+        this.cursorServiceConfigurationProperties = cursorServiceConfigurationProperties;
     }
 
-    return Flux.fromIterable(ingestionCursors);
-  }
+    /**
+     * Publisher emitting Ingestion Cursors.
+     *
+     * @return Publisher of Ingestion Cursors
+     */
+    public Publisher<IngestionCursor> getLoginEventProcessor() {
+        return processor;
+    }
 
-  private IngestionCursor createLoginIngestionCursor(
-      Object loginEvent, User user, LegalEntity legalEntity) {
-    IngestionCursor ingestionCursor = new IngestionCursor();
-    ingestionCursor.setId(UUID.randomUUID());
-    ingestionCursor.setCursorState(IngestionCursor.CursorStateEnum.NOT_STARTED);
-    ingestionCursor.setCursorSource(IngestionCursor.CursorSourceEnum.LOGIN_EVENT);
-    ingestionCursor.setExternalUserId(user.getExternalId());
-    ingestionCursor.setInternalUserId(user.getInternalId());
-    ingestionCursor.setCursorCreatedAt(OffsetDateTime.now());
-    ingestionCursor.setInternalLegalEntityId(legalEntity.getInternalId());
-    ingestionCursor.setExternalLegalEntityId(legalEntity.getExternalId());
-    ingestionCursor.setAdditionalProperties(new LinkedHashMap<>());
-    ingestionCursor.getAdditionalProperties().put("loginEvent", loginEvent);
-    ingestionCursor.getAdditionalProperties().put("legalEntity", legalEntity);
-    ingestionCursor.getAdditionalProperties().put("user", user);
-    return ingestionCursor;
-  }
+    public void publishIngestionCursorsFor(Object loginEvent, String username) {
+        entitlementsService
+            .getLegalEntityForUserName(username)
+            .doOnError(
+                UserNotFoundException.class, e -> log.info("User: {} not found in DBS", username))
+            .onErrorResume(UserNotFoundException.class, e -> Mono.empty())
+            .doOnNext(
+                userAndLegalEntity -> {
+                    log.info(
+                        "Retrieved legalEntity: {} with user: {}",
+                        userAndLegalEntity.getT2().getInternalId(),
+                        username);
+                    // Send Login Event
+                    User user = userAndLegalEntity.getT1();
+                    LegalEntity legalEntity = userAndLegalEntity.getT2();
+                    IngestionCursor loginIngestionCursor =
+                        createLoginIngestionCursor(loginEvent, user, legalEntity);
+                    log.info(
+                        "Publishing Login Event for user: {} with legal entity : {}",
+                        user.getExternalId(),
+                        legalEntity.getExternalId());
+                    sink.next(loginIngestionCursor);
+
+                    if (cursorServiceConfigurationProperties.isPublishEntitledArrangements()) {
+                        entitlementsService
+                            .getAssignedPermissionsForUser(RESOURCE_NAME, RESOURCE_NAME, PRIVILEGE, user)
+                            .flatMap(
+                                assignedPermission ->
+                                    createIngestionCursor(
+                                        user, legalEntity, loginEvent, assignedPermission))
+                            .subscribe(sink::next);
+                    }
+                })
+            .subscribe();
+    }
+
+    private Flux<IngestionCursor> createIngestionCursor(
+        User user,
+        LegalEntity legalEntity,
+        Object loginEvent,
+        AssignedPermission assignedPermission) {
+        List<IngestionCursor> ingestionCursors = new ArrayList<>();
+        ProductGroup.ProductGroupTypeEnum arrangements1 =
+            ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS;
+        Object arrangements = assignedPermission.getPermittedObjects().get(arrangements1.name());
+        if (arrangements instanceof List
+            && (((List) arrangements).get(0) instanceof AccountArrangementItem)) {
+            List<AccountArrangementItem> products = (List<AccountArrangementItem>) arrangements;
+
+            for (AccountArrangementItem product : products) {
+
+                IngestionCursor ingestionCursor = createLoginIngestionCursor(loginEvent, user, legalEntity);
+
+                ingestionCursor.setArrangementId(product.getId());
+                ingestionCursor.setExternalArrangementId(product.getExternalArrangementId());
+                // Make this configurable?
+                ingestionCursor.setCursorState(IngestionCursor.CursorStateEnum.NOT_STARTED);
+                ingestionCursor.setCursorSource(IngestionCursor.CursorSourceEnum.LOGIN_EVENT);
+                ingestionCursor.getAdditionalProperties().put("product", product);
+                ingestionCursors.add(ingestionCursor);
+            }
+        }
+
+        return Flux.fromIterable(ingestionCursors);
+    }
+
+    private IngestionCursor createLoginIngestionCursor(
+        Object loginEvent, User user, LegalEntity legalEntity) {
+        IngestionCursor ingestionCursor = new IngestionCursor();
+        ingestionCursor.setId(UUID.randomUUID());
+        ingestionCursor.setCursorState(IngestionCursor.CursorStateEnum.NOT_STARTED);
+        ingestionCursor.setCursorSource(IngestionCursor.CursorSourceEnum.LOGIN_EVENT);
+        ingestionCursor.setExternalUserId(user.getExternalId());
+        ingestionCursor.setInternalUserId(user.getInternalId());
+        ingestionCursor.setCursorCreatedAt(OffsetDateTime.now());
+        ingestionCursor.setInternalLegalEntityId(legalEntity.getInternalId());
+        ingestionCursor.setExternalLegalEntityId(legalEntity.getExternalId());
+        ingestionCursor.setAdditionalProperties(new LinkedHashMap<>());
+        ingestionCursor.getAdditionalProperties().put("loginEvent", loginEvent);
+        ingestionCursor.getAdditionalProperties().put("legalEntity", legalEntity);
+        ingestionCursor.getAdditionalProperties().put("user", user);
+        return ingestionCursor;
+    }
 }

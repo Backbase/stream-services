@@ -22,46 +22,50 @@ import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class ProductSubControllerTest {
-  @InjectMocks ProductSubController productSubController;
 
-  @Mock ProductIngestionService productIngestionService;
+    @InjectMocks
+    ProductSubController productSubController;
 
-  @Mock ProductRestMapper productRestMapper;
+    @Mock
+    ProductIngestionService productIngestionService;
 
-  @Test
-  void pullIngestProduct_Success() {
-    ProductPullIngestionRequest request = new ProductPullIngestionRequest();
-    ProductIngestPullRequest pullRequest = ProductIngestPullRequest.builder().build();
+    @Mock
+    ProductRestMapper productRestMapper;
 
-    when(productRestMapper.mapPullRequest(request)).thenReturn(pullRequest);
+    @Test
+    void pullIngestProduct_Success() {
+        ProductPullIngestionRequest request = new ProductPullIngestionRequest();
+        ProductIngestPullRequest pullRequest = ProductIngestPullRequest.builder().build();
 
-    ProductIngestResponse ingestResponse = ProductIngestResponse.builder().build();
-    when(productIngestionService.ingestPull(pullRequest)).thenReturn(Mono.just(ingestResponse));
+        when(productRestMapper.mapPullRequest(request)).thenReturn(pullRequest);
 
-    ResponseEntity<ProductIngestionResponse> responseEntity = mock(ResponseEntity.class);
-    when(productRestMapper.mapResponse(ingestResponse)).thenReturn(responseEntity);
+        ProductIngestResponse ingestResponse = ProductIngestResponse.builder().build();
+        when(productIngestionService.ingestPull(pullRequest)).thenReturn(Mono.just(ingestResponse));
 
-    Mono<ResponseEntity<ProductIngestionResponse>> responseEntityMono =
-        productSubController.pullIngestProduct(Mono.just(request), null);
+        ResponseEntity<ProductIngestionResponse> responseEntity = mock(ResponseEntity.class);
+        when(productRestMapper.mapResponse(ingestResponse)).thenReturn(responseEntity);
 
-    StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
-  }
+        Mono<ResponseEntity<ProductIngestionResponse>> responseEntityMono =
+            productSubController.pullIngestProduct(Mono.just(request), null);
 
-  @Test
-  void pushIngestProducts_Success() {
-    ProductPushIngestionRequest request = new ProductPushIngestionRequest();
-    ProductIngestPushRequest pushRequest = ProductIngestPushRequest.builder().build();
-    when(productRestMapper.mapPushRequest(request)).thenReturn(pushRequest);
+        StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
+    }
 
-    ProductIngestResponse ingestResponse = ProductIngestResponse.builder().build();
-    when(productIngestionService.ingestPush(pushRequest)).thenReturn(Mono.just(ingestResponse));
+    @Test
+    void pushIngestProducts_Success() {
+        ProductPushIngestionRequest request = new ProductPushIngestionRequest();
+        ProductIngestPushRequest pushRequest = ProductIngestPushRequest.builder().build();
+        when(productRestMapper.mapPushRequest(request)).thenReturn(pushRequest);
 
-    ResponseEntity<ProductIngestionResponse> responseEntity = mock(ResponseEntity.class);
-    when(productRestMapper.mapResponse(ingestResponse)).thenReturn(responseEntity);
+        ProductIngestResponse ingestResponse = ProductIngestResponse.builder().build();
+        when(productIngestionService.ingestPush(pushRequest)).thenReturn(Mono.just(ingestResponse));
 
-    Mono<ResponseEntity<ProductIngestionResponse>> responseEntityMono =
-        productSubController.pushIngestProduct(Mono.just(request), null);
+        ResponseEntity<ProductIngestionResponse> responseEntity = mock(ResponseEntity.class);
+        when(productRestMapper.mapResponse(ingestResponse)).thenReturn(responseEntity);
 
-    StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
-  }
+        Mono<ResponseEntity<ProductIngestionResponse>> responseEntityMono =
+            productSubController.pushIngestProduct(Mono.just(request), null);
+
+        StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
+    }
 }

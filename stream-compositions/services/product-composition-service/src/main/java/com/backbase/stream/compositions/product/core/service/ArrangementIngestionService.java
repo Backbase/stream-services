@@ -6,19 +6,20 @@ import com.backbase.stream.compositions.product.core.model.ArrangementIngestResp
 import reactor.core.publisher.Mono;
 
 public interface ArrangementIngestionService {
-  /**
-   * Ingests arrangement in pull mode.
-   *
-   * @param ingestionRequest Ingest pull request
-   * @return ArrangementIngestionResponse
-   */
-  Mono<ArrangementIngestResponse> ingestPull(ArrangementIngestPullRequest ingestionRequest);
 
-  /**
-   * Ingests arrangement in push mode.
-   *
-   * @param ingestPushRequest Ingest push request
-   * @return ProductIngestResponse
-   */
-  Mono<ArrangementIngestResponse> ingestPush(ArrangementIngestPushRequest ingestPushRequest);
+    /**
+     * Ingests arrangement in pull mode.
+     *
+     * @param ingestionRequest Ingest pull request
+     * @return ArrangementIngestionResponse
+     */
+    Mono<ArrangementIngestResponse> ingestPull(ArrangementIngestPullRequest ingestionRequest);
+
+    /**
+     * Ingests arrangement in push mode.
+     *
+     * @param ingestPushRequest Ingest push request
+     * @return ProductIngestResponse
+     */
+    Mono<ArrangementIngestResponse> ingestPush(ArrangementIngestPushRequest ingestPushRequest);
 }

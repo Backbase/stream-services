@@ -1,24 +1,24 @@
 <configuration>
-    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
-    <appender name="COLOR" class="ch.qos.logback.core.ConsoleAppender">
+    <appender class="ch.qos.logback.core.ConsoleAppender" name="COLOR">
         <encoder>
             <pattern>[%date{HH:mm:ss.SSS}] %magenta(%20([%thread])) %highlight([%level]) %cyan([%logger]) %msg%n
             </pattern>
         </encoder>
     </appender>
+    <logger level="WARN" name="org.eclipse.jetty"/>
+    <logger level="WARN" name="io.netty"/>
+    <!--    <logger name="com.backbase.stream" level="debug"/>-->
+    <logger level="WARN" name="reactor.netty"/>
+    <!--    <logger name="io.lettuce" level="WARN"/>-->
+    <logger level="WARN" name="io.netty"/>
+    <logger level="WARN" name="io.netty.util"/>
+    <logger level="WARN" name="reactor.netty.http.client"/>
+    <logger level="WARN" name="reactor.netty.channel.FluxReceive"/>
     <root level="info">
         <!-- to use enable this mode pass -Dcolor to jvm -->
         <appender-ref ref="COLOR"/>
     </root>
-    <!--    <logger name="com.backbase.stream" level="debug"/>-->
-    <logger name="org.eclipse.jetty" level="WARN"/>
-    <!--    <logger name="io.lettuce" level="WARN"/>-->
-    <logger name="io.netty" level="WARN"/>
-    <logger name="reactor.netty" level="WARN"/>
-    <logger name="io.netty" level="WARN"/>
-    <logger name="io.netty.util" level="WARN"/>
-    <logger name="reactor.netty.http.client" level="WARN"/>
-    <logger name="reactor.netty.channel.FluxReceive" level="WARN"/>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
     <!--    <logger name="org.springframework" level="WARN"/>-->
     <!--    <logger name="reactor.netty.resources.PooledConnectionProvider" level="INFO"/>-->
     <!--    <logger name="org.springframework.web.reactive.function.client.ExchangeFunctions" level="WARN"/>-->

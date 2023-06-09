@@ -21,27 +21,27 @@ import reactor.core.publisher.Flux;
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
 public class SetupLegalEntityHierarchyConfiguration {
 
-  private final LegalEntitySaga legalEntitySaga;
-  private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
+    private final LegalEntitySaga legalEntitySaga;
+    private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
 
-  @Bean
-  public CommandLineRunner commandLineRunner() {
-    return this::run;
-  }
+    @Bean
+    public CommandLineRunner commandLineRunner() {
+        return this::run;
+    }
 
-  private void run(String... args) {
-    LegalEntity legalEntity = bootstrapConfigurationProperties.getLegalEntity();
-    log.info("Bootstrapping Root Legal Entity Structure: {}", legalEntity.getName());
+    private void run(String... args) {
+        LegalEntity legalEntity = bootstrapConfigurationProperties.getLegalEntity();
+        log.info("Bootstrapping Root Legal Entity Structure: {}", legalEntity.getName());
 
-    List<LegalEntity> aggregates =
-        Collections.singletonList(bootstrapConfigurationProperties.getLegalEntity());
+        List<LegalEntity> aggregates =
+            Collections.singletonList(bootstrapConfigurationProperties.getLegalEntity());
 
-    Flux.fromIterable(aggregates)
-        .map(LegalEntityTask::new)
-        .flatMap(legalEntitySaga::executeTask)
-        .collectList()
-        .block();
+        Flux.fromIterable(aggregates)
+            .map(LegalEntityTask::new)
+            .flatMap(legalEntitySaga::executeTask)
+            .collectList()
+            .block();
 
-    log.info("Finished bootstrapping Legal Entity Structure");
-  }
+        log.info("Finished bootstrapping Legal Entity Structure");
+    }
 }

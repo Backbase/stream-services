@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <artifactId>stream-sdk</artifactId>
 
     <groupId>com.backbase.stream</groupId>
-    <artifactId>stream-sdk</artifactId>
-    <version>3.37.1</version>
-    <packaging>pom</packaging>
-
-    <name>Stream :: SDK</name>
-
+    <modelVersion>4.0.0</modelVersion>
     <modules>
         <module>stream-parent</module>
         <module>stream-starter-parents</module>
     </modules>
+    <name>Stream :: SDK</name>
+
+    <packaging>pom</packaging>
+
+    <version>3.37.1</version>
 
 </project>

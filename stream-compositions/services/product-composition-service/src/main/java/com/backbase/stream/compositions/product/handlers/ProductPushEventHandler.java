@@ -13,25 +13,26 @@ import reactor.core.publisher.Mono;
 @Component
 @AllArgsConstructor
 public class ProductPushEventHandler implements EventHandler<ProductPushEvent> {
-  private final ProductIngestionService productIngestionService;
-  private final ProductGroupMapper mapper;
 
-  @Override
-  public void handle(EnvelopedEvent<ProductPushEvent> envelopedEvent) {
-    buildRequest(envelopedEvent).flatMap(productIngestionService::ingestPush).subscribe();
-  }
+    private final ProductIngestionService productIngestionService;
+    private final ProductGroupMapper mapper;
 
-  /**
-   * Builds ingestion request for downstream service.
-   *
-   * @param envelopedEvent EnvelopedEvent<ProductsIngestPushEvent>
-   * @return ProductIngestPushRequest
-   */
-  private Mono<ProductIngestPushRequest> buildRequest(
-      EnvelopedEvent<ProductPushEvent> envelopedEvent) {
-    return Mono.just(
-        ProductIngestPushRequest.builder()
-            .productGroup(mapper.mapEventToStream(envelopedEvent.getEvent().getProductGroup()))
-            .build());
-  }
+    @Override
+    public void handle(EnvelopedEvent<ProductPushEvent> envelopedEvent) {
+        buildRequest(envelopedEvent).flatMap(productIngestionService::ingestPush).subscribe();
+    }
+
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param envelopedEvent EnvelopedEvent<ProductsIngestPushEvent>
+     * @return ProductIngestPushRequest
+     */
+    private Mono<ProductIngestPushRequest> buildRequest(
+        EnvelopedEvent<ProductPushEvent> envelopedEvent) {
+        return Mono.just(
+            ProductIngestPushRequest.builder()
+                .productGroup(mapper.mapEventToStream(envelopedEvent.getEvent().getProductGroup()))
+                .build());
+    }
 }

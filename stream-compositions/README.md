@@ -3,7 +3,7 @@
 - Module Path -> ./stream-services/stream-compositions
 - Build all service-api, integration-api, cursors-api & events specifications -> mvn clean install
 
-## Local Profile Server Ports Information
+### Local Profile Server Ports Information
 
 | Name               | Composition Server Port | Integration Server Port |
 |--------------------|-------------------------|-------------------------|
@@ -13,7 +13,7 @@
 | Transaction        | 9004                    | 7004                    |
 | Transaction Cursor | 9005                    | NA                      |
 
-## Postman for composition chaining
+### Postman for composition chaining
 
 - Stream Composition PostMan -> ./stream-services/stream-compositions/docs/postman/services/
 

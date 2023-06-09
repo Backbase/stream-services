@@ -2,7 +2,10 @@ package com.backbase.stream.compositions.productcatalog.http;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
@@ -22,63 +25,66 @@ import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class ProductCatalogControllerTest {
-  @Mock ProductCatalogMapper mapper;
 
-  @Mock ProductCatalogIngestionService productCatalogIngestionService;
+    @Mock
+    ProductCatalogMapper mapper;
 
-  ProductCatalogController controller;
+    @Mock
+    ProductCatalogIngestionService productCatalogIngestionService;
 
-  @BeforeEach
-  void setUp() {
-    controller = new ProductCatalogController(productCatalogIngestionService, mapper);
+    ProductCatalogController controller;
 
-    lenient()
-        .when(mapper.mapCompositionToStream(any()))
-        .thenReturn(new com.backbase.stream.productcatalog.model.ProductCatalog());
-    lenient().when(mapper.mapStreamToComposition(any())).thenReturn(new ProductCatalog());
-  }
+    @BeforeEach
+    void setUp() {
+        controller = new ProductCatalogController(productCatalogIngestionService, mapper);
 
-  @Test
-  void testPullIngestion_Success() {
-    when(productCatalogIngestionService.ingestPull(any()))
-        .thenReturn(Mono.just(ProductCatalogIngestResponse.builder().build()));
+        lenient()
+            .when(mapper.mapCompositionToStream(any()))
+            .thenReturn(new com.backbase.stream.productcatalog.model.ProductCatalog());
+        lenient().when(mapper.mapStreamToComposition(any())).thenReturn(new ProductCatalog());
+    }
 
-    ProductCatalogPullIngestionRequest request = new ProductCatalogPullIngestionRequest();
-    ResponseEntity<ProductCatalogIngestionResponse> responseEntity =
-        controller.pullIngestProductCatalog(Mono.just(request), null).block();
-    ProductCatalogIngestionResponse ingestionResponse = responseEntity.getBody();
-    assertNotNull(ingestionResponse);
-    assertNotNull(ingestionResponse.getProductCatalog());
-    verify(productCatalogIngestionService).ingestPull(any());
-  }
+    @Test
+    void testPullIngestion_Success() {
+        when(productCatalogIngestionService.ingestPull(any()))
+            .thenReturn(Mono.just(ProductCatalogIngestResponse.builder().build()));
 
-  @Test
-  void testPushIngestion_Success() {
-    Mono<ProductCatalogPushIngestionRequest> requestMono =
-        Mono.just(
-            new ProductCatalogPushIngestionRequest().withProductCatalog(new ProductCatalog()));
+        ProductCatalogPullIngestionRequest request = new ProductCatalogPullIngestionRequest();
+        ResponseEntity<ProductCatalogIngestionResponse> responseEntity =
+            controller.pullIngestProductCatalog(Mono.just(request), null).block();
+        ProductCatalogIngestionResponse ingestionResponse = responseEntity.getBody();
+        assertNotNull(ingestionResponse);
+        assertNotNull(ingestionResponse.getProductCatalog());
+        verify(productCatalogIngestionService).ingestPull(any());
+    }
 
-    doAnswer(
+    @Test
+    void testPushIngestion_Success() {
+        Mono<ProductCatalogPushIngestionRequest> requestMono =
+            Mono.just(
+                new ProductCatalogPushIngestionRequest().withProductCatalog(new ProductCatalog()));
+
+        doAnswer(
             invocation -> {
-              Mono mono = invocation.getArgument(0);
-              mono.block();
+                Mono mono = invocation.getArgument(0);
+                mono.block();
 
-              return Mono.just(
-                  ProductCatalogIngestResponse.builder()
-                      .productCatalog(
-                          new com.backbase.stream.productcatalog.model.ProductCatalog()
-                              .productKinds(new ArrayList<>())
-                              .productTypes(new ArrayList<>()))
-                      .build());
+                return Mono.just(
+                    ProductCatalogIngestResponse.builder()
+                        .productCatalog(
+                            new com.backbase.stream.productcatalog.model.ProductCatalog()
+                                .productKinds(new ArrayList<>())
+                                .productTypes(new ArrayList<>()))
+                        .build());
             })
-        .when(productCatalogIngestionService)
-        .ingestPush(any());
+            .when(productCatalogIngestionService)
+            .ingestPush(any());
 
-    ResponseEntity<ProductCatalogIngestionResponse> responseEntity =
-        controller.pushIngestProductCatalog(requestMono, null).block();
-    ProductCatalogIngestionResponse ingestionResponse = responseEntity.getBody();
-    assertNotNull(ingestionResponse);
-    assertNotNull(ingestionResponse.getProductCatalog());
-    verify(productCatalogIngestionService).ingestPush(any());
-  }
+        ResponseEntity<ProductCatalogIngestionResponse> responseEntity =
+            controller.pushIngestProductCatalog(requestMono, null).block();
+        ProductCatalogIngestionResponse ingestionResponse = responseEntity.getBody();
+        assertNotNull(ingestionResponse);
+        assertNotNull(ingestionResponse.getProductCatalog());
+        verify(productCatalogIngestionService).ingestPush(any());
+    }
 }

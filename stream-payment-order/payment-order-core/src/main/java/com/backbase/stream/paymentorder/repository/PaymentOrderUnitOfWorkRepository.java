@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PaymentOrderUnitOfWorkRepository
-    extends UnitOfWorkRepository<PaymentOrderTask, String> {}
+    extends UnitOfWorkRepository<PaymentOrderTask, String> {
+
+}

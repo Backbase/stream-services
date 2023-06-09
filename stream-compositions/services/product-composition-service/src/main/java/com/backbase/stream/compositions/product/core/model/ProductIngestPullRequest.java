@@ -10,16 +10,17 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class ProductIngestPullRequest {
-  private String legalEntityExternalId;
-  private String legalEntityInternalId;
-  private String serviceAgreementExternalId;
-  private String serviceAgreementInternalId;
-  private String userExternalId;
-  private String userInternalId;
-  private List<String> referenceJobRoleNames;
-  private List<String> membershipAccounts;
-  private Map<String, String> additions;
-  private String source;
-  private Boolean transactionChainEnabled;
-  private Boolean paymentOrderChainEnabled;
+
+    private String legalEntityExternalId;
+    private String legalEntityInternalId;
+    private String serviceAgreementExternalId;
+    private String serviceAgreementInternalId;
+    private String userExternalId;
+    private String userInternalId;
+    private List<String> referenceJobRoleNames;
+    private List<String> membershipAccounts;
+    private Map<String, String> additions;
+    private String source;
+    private Boolean transactionChainEnabled;
+    private Boolean paymentOrderChainEnabled;
 }

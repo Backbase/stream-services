@@ -5,4 +5,6 @@ import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ContactsUnitOfWorkRepository extends UnitOfWorkRepository<ContactsTask, String> {}
+public interface ContactsUnitOfWorkRepository extends UnitOfWorkRepository<ContactsTask, String> {
+
+}

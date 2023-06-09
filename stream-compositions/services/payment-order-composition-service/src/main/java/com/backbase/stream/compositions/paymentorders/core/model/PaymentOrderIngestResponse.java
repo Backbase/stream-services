@@ -10,6 +10,7 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class PaymentOrderIngestResponse {
-  private final String memberNumber;
-  private final List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses;
+
+    private final String memberNumber;
+    private final List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses;
 }

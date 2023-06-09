@@ -21,32 +21,34 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class TransactionIngestPushEventHandlerTest {
 
-  @Mock TransactionMapper mapper;
-  @Mock private TransactionIngestionService transactionIngestionService;
+    @Mock
+    TransactionMapper mapper;
+    @Mock
+    private TransactionIngestionService transactionIngestionService;
 
-  @Test
-  void testHandleEvent_Completed() {
+    @Test
+    void testHandleEvent_Completed() {
 
-    Mono<TransactionIngestResponse> responseMono =
-        Mono.just(
-            TransactionIngestResponse.builder()
-                .transactions(
-                    List.of(
-                        new TransactionsPostResponseBody()
-                            .id("1")
-                            .externalId("externalId")
-                            .additions(Map.of())))
-                .build());
+        Mono<TransactionIngestResponse> responseMono =
+            Mono.just(
+                TransactionIngestResponse.builder()
+                    .transactions(
+                        List.of(
+                            new TransactionsPostResponseBody()
+                                .id("1")
+                                .externalId("externalId")
+                                .additions(Map.of())))
+                    .build());
 
-    lenient().when(transactionIngestionService.ingestPush(any())).thenReturn(responseMono);
+        lenient().when(transactionIngestionService.ingestPush(any())).thenReturn(responseMono);
 
-    TransactionIngestPushEventHandler handler =
-        new TransactionIngestPushEventHandler(transactionIngestionService, mapper);
+        TransactionIngestPushEventHandler handler =
+            new TransactionIngestPushEventHandler(transactionIngestionService, mapper);
 
-    EnvelopedEvent<TransactionsPushEvent> envelopedEvent = new EnvelopedEvent<>();
-    envelopedEvent.setEvent(new TransactionsPushEvent());
+        EnvelopedEvent<TransactionsPushEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(new TransactionsPushEvent());
 
-    handler.handle(envelopedEvent);
-    verify(transactionIngestionService).ingestPush(any());
-  }
+        handler.handle(envelopedEvent);
+        verify(transactionIngestionService).ingestPush(any());
+    }
 }

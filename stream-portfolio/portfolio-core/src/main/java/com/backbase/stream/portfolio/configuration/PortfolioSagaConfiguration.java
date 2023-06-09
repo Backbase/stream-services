@@ -17,10 +17,10 @@ import org.springframework.context.annotation.Import;
 @Import({DbsWebClientConfiguration.class})
 public class PortfolioSagaConfiguration {
 
-  @Bean
-  PortfolioSaga portfolioSaga(
-      PortfolioIntegrationService portfolioIntegrationService,
-      InstrumentIntegrationService instrumentIntegrationService) {
-    return new PortfolioSaga(portfolioIntegrationService, instrumentIntegrationService);
-  }
+    @Bean
+    PortfolioSaga portfolioSaga(
+        PortfolioIntegrationService portfolioIntegrationService,
+        InstrumentIntegrationService instrumentIntegrationService) {
+        return new PortfolioSaga(portfolioIntegrationService, instrumentIntegrationService);
+    }
 }

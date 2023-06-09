@@ -47,198 +47,204 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class InstrumentIntegrationServiceTest {
 
-  @SuppressWarnings("unused")
-  @Spy
-  private InstrumentMapper instrumentMapper;
+    @SuppressWarnings("unused")
+    @Spy
+    private InstrumentMapper instrumentMapper;
 
-  @Mock private InstrumentRegionManagementApi instrumentRegionManagementApi;
-  @Mock private InstrumentCountryManagementApi instrumentCountryManagementApi;
-  @Mock private InstrumentAssetClassManagementApi assetClassManagementApi;
-  @Mock private InstrumentManagementApi instrumentManagementApi;
-  @Mock private InstrumentPriceManagementApi instrumentPriceManagementApi;
+    @Mock
+    private InstrumentRegionManagementApi instrumentRegionManagementApi;
+    @Mock
+    private InstrumentCountryManagementApi instrumentCountryManagementApi;
+    @Mock
+    private InstrumentAssetClassManagementApi assetClassManagementApi;
+    @Mock
+    private InstrumentManagementApi instrumentManagementApi;
+    @Mock
+    private InstrumentPriceManagementApi instrumentPriceManagementApi;
 
-  @InjectMocks private InstrumentIntegrationService instrumentIntegrationService;
+    @InjectMocks
+    private InstrumentIntegrationService instrumentIntegrationService;
 
-  @Test
-  void createRegion() {
-    String regionName = "EU";
-    String regionCode = "154";
-    String uaName = "Ukraine";
-    String uaCode = "UA";
-    RegionBundle regionBundle =
-        new RegionBundle()
-            .region(new Region().code(regionCode).name(regionName))
-            .countries(List.of(new Country().code(uaCode).name(uaName)));
+    @Test
+    void createRegion() {
+        String regionName = "EU";
+        String regionCode = "154";
+        String uaName = "Ukraine";
+        String uaCode = "UA";
+        RegionBundle regionBundle =
+            new RegionBundle()
+                .region(new Region().code(regionCode).name(regionName))
+                .countries(List.of(new Country().code(uaCode).name(uaName)));
 
-    Mockito.when(instrumentRegionManagementApi.postRegion(any(RegionsPostRequest.class)))
-        .thenReturn(Mono.empty());
-    Mockito.when(instrumentCountryManagementApi.postCountry(any(CountriesPostRequest.class)))
-        .thenReturn(Mono.empty());
-    Mockito.when(instrumentRegionManagementApi.getRegion(0, Integer.MAX_VALUE))
-        .thenReturn(Mono.empty());
-    Mockito.when(
-            instrumentCountryManagementApi.getCountriesByRegion(
-                anyString(), eq(0), eq(Integer.MAX_VALUE)))
-        .thenReturn(Mono.empty());
+        Mockito.when(instrumentRegionManagementApi.postRegion(any(RegionsPostRequest.class)))
+            .thenReturn(Mono.empty());
+        Mockito.when(instrumentCountryManagementApi.postCountry(any(CountriesPostRequest.class)))
+            .thenReturn(Mono.empty());
+        Mockito.when(instrumentRegionManagementApi.getRegion(0, Integer.MAX_VALUE))
+            .thenReturn(Mono.empty());
+        Mockito.when(
+                instrumentCountryManagementApi.getCountriesByRegion(
+                    anyString(), eq(0), eq(Integer.MAX_VALUE)))
+            .thenReturn(Mono.empty());
 
-    instrumentIntegrationService.upsertRegions(List.of(regionBundle)).block();
+        instrumentIntegrationService.upsertRegions(List.of(regionBundle)).block();
 
-    Mockito.verify(instrumentRegionManagementApi)
-        .postRegion(new RegionsPostRequest().code(regionCode).name(regionName));
-    Mockito.verify(instrumentCountryManagementApi)
-        .postCountry(new CountriesPostRequest().code(uaCode).name(uaName).region(regionCode));
-  }
+        Mockito.verify(instrumentRegionManagementApi)
+            .postRegion(new RegionsPostRequest().code(regionCode).name(regionName));
+        Mockito.verify(instrumentCountryManagementApi)
+            .postCountry(new CountriesPostRequest().code(uaCode).name(uaName).region(regionCode));
+    }
 
-  @Test
-  void updateRegion() {
-    String regionName = "EU test ";
-    String regionCode = "154";
-    String uaCode = "UA";
-    String uaName = "Ukraine";
-    String testName = "new test name";
-    RegionBundle regionBundle =
-        new RegionBundle()
-            .region(new Region().code(regionCode).name(testName))
-            .countries(List.of(new Country().code(uaCode).name(testName)));
+    @Test
+    void updateRegion() {
+        String regionName = "EU test ";
+        String regionCode = "154";
+        String uaCode = "UA";
+        String uaName = "Ukraine";
+        String testName = "new test name";
+        RegionBundle regionBundle =
+            new RegionBundle()
+                .region(new Region().code(regionCode).name(testName))
+                .countries(List.of(new Country().code(uaCode).name(testName)));
 
-    Mockito.when(instrumentRegionManagementApi.putRegion(anyString(), anyString(), anyString()))
-        .thenReturn(Mono.empty());
-    Mockito.when(instrumentCountryManagementApi.putCountry(anyString(), anyString(), anyString()))
-        .thenReturn(Mono.empty());
+        Mockito.when(instrumentRegionManagementApi.putRegion(anyString(), anyString(), anyString()))
+            .thenReturn(Mono.empty());
+        Mockito.when(instrumentCountryManagementApi.putCountry(anyString(), anyString(), anyString()))
+            .thenReturn(Mono.empty());
 
-    Mockito.when(instrumentRegionManagementApi.getRegion(0, Integer.MAX_VALUE))
-        .thenReturn(
-            Mono.just(
-                new RegionsGetRequest()
-                    .addRegionsItem(new RegionsGetItem().code(regionCode).name(regionName))));
-    Mockito.when(
-            instrumentCountryManagementApi.getCountriesByRegion(
-                anyString(), eq(0), eq(Integer.MAX_VALUE)))
-        .thenReturn(
-            Mono.just(
-                new CountriesGetRequest()
-                    .addCoutriesItem(new CountriesGetItem().code(uaCode).name(uaName))));
+        Mockito.when(instrumentRegionManagementApi.getRegion(0, Integer.MAX_VALUE))
+            .thenReturn(
+                Mono.just(
+                    new RegionsGetRequest()
+                        .addRegionsItem(new RegionsGetItem().code(regionCode).name(regionName))));
+        Mockito.when(
+                instrumentCountryManagementApi.getCountriesByRegion(
+                    anyString(), eq(0), eq(Integer.MAX_VALUE)))
+            .thenReturn(
+                Mono.just(
+                    new CountriesGetRequest()
+                        .addCoutriesItem(new CountriesGetItem().code(uaCode).name(uaName))));
 
-    instrumentIntegrationService.upsertRegions(List.of(regionBundle)).block();
+        instrumentIntegrationService.upsertRegions(List.of(regionBundle)).block();
 
-    Mockito.verify(instrumentRegionManagementApi, Mockito.never())
-        .postRegion(any(RegionsPostRequest.class));
-    Mockito.verify(instrumentCountryManagementApi, Mockito.never())
-        .postCountry(any(CountriesPostRequest.class));
-    Mockito.verify(instrumentRegionManagementApi).putRegion(regionCode, testName, regionCode);
-    Mockito.verify(instrumentCountryManagementApi).putCountry(uaCode, testName, uaCode);
-  }
+        Mockito.verify(instrumentRegionManagementApi, Mockito.never())
+            .postRegion(any(RegionsPostRequest.class));
+        Mockito.verify(instrumentCountryManagementApi, Mockito.never())
+            .postCountry(any(CountriesPostRequest.class));
+        Mockito.verify(instrumentRegionManagementApi).putRegion(regionCode, testName, regionCode);
+        Mockito.verify(instrumentCountryManagementApi).putCountry(uaCode, testName, uaCode);
+    }
 
-  @Test
-  void updateSameEntriesRegion() {
-    String regionName = "EU";
-    String regionCode = "154";
-    String uaCode = "UA";
-    String uaName = "Ukraine";
-    RegionBundle regionBundle =
-        new RegionBundle()
-            .region(new Region().code(regionCode).name(regionName))
-            .countries(List.of(new Country().code(uaCode).name(uaName)));
+    @Test
+    void updateSameEntriesRegion() {
+        String regionName = "EU";
+        String regionCode = "154";
+        String uaCode = "UA";
+        String uaName = "Ukraine";
+        RegionBundle regionBundle =
+            new RegionBundle()
+                .region(new Region().code(regionCode).name(regionName))
+                .countries(List.of(new Country().code(uaCode).name(uaName)));
 
-    Mockito.when(instrumentRegionManagementApi.getRegion(0, Integer.MAX_VALUE))
-        .thenReturn(
-            Mono.just(
-                new RegionsGetRequest()
-                    .addRegionsItem(new RegionsGetItem().code(regionCode).name(regionName))));
-    Mockito.when(
-            instrumentCountryManagementApi.getCountriesByRegion(
-                anyString(), eq(0), eq(Integer.MAX_VALUE)))
-        .thenReturn(
-            Mono.just(
-                new CountriesGetRequest()
-                    .addCoutriesItem(new CountriesGetItem().code(uaCode).name(uaName))));
+        Mockito.when(instrumentRegionManagementApi.getRegion(0, Integer.MAX_VALUE))
+            .thenReturn(
+                Mono.just(
+                    new RegionsGetRequest()
+                        .addRegionsItem(new RegionsGetItem().code(regionCode).name(regionName))));
+        Mockito.when(
+                instrumentCountryManagementApi.getCountriesByRegion(
+                    anyString(), eq(0), eq(Integer.MAX_VALUE)))
+            .thenReturn(
+                Mono.just(
+                    new CountriesGetRequest()
+                        .addCoutriesItem(new CountriesGetItem().code(uaCode).name(uaName))));
 
-    instrumentIntegrationService.upsertRegions(List.of(regionBundle)).block();
+        instrumentIntegrationService.upsertRegions(List.of(regionBundle)).block();
 
-    Mockito.verify(instrumentRegionManagementApi, Mockito.never())
-        .postRegion(any(RegionsPostRequest.class));
-    Mockito.verify(instrumentCountryManagementApi, Mockito.never())
-        .postCountry(any(CountriesPostRequest.class));
-    Mockito.verify(instrumentRegionManagementApi, Mockito.never())
-        .putRegion(regionCode, regionName, regionCode);
-    Mockito.verify(instrumentCountryManagementApi, Mockito.never())
-        .putCountry(uaCode, uaName, uaCode);
-  }
+        Mockito.verify(instrumentRegionManagementApi, Mockito.never())
+            .postRegion(any(RegionsPostRequest.class));
+        Mockito.verify(instrumentCountryManagementApi, Mockito.never())
+            .postCountry(any(CountriesPostRequest.class));
+        Mockito.verify(instrumentRegionManagementApi, Mockito.never())
+            .putRegion(regionCode, regionName, regionCode);
+        Mockito.verify(instrumentCountryManagementApi, Mockito.never())
+            .putCountry(uaCode, uaName, uaCode);
+    }
 
-  @Test
-  void createAssetClass() {
-    String assetCode = "123";
-    String assetName = "Test";
-    String subAssetCode = "sub-123";
-    String subAssetName = "sub test";
+    @Test
+    void createAssetClass() {
+        String assetCode = "123";
+        String assetName = "Test";
+        String subAssetCode = "sub-123";
+        String subAssetName = "sub test";
 
-    AssetClassBundle assetClassBundle =
-        new AssetClassBundle()
-            .assetClass(new AssetClass().code(assetCode).name(assetName))
-            .subAssetClasses(List.of(new SubAssetClass().code(subAssetCode).name(subAssetName)));
+        AssetClassBundle assetClassBundle =
+            new AssetClassBundle()
+                .assetClass(new AssetClass().code(assetCode).name(assetName))
+                .subAssetClasses(List.of(new SubAssetClass().code(subAssetCode).name(subAssetName)));
 
-    Mockito.when(assetClassManagementApi.postAssetClass(any(AssetClassesPostRequest.class)))
-        .thenReturn(Mono.empty());
-    Mockito.when(
-            assetClassManagementApi.postSubAssetClass(
-                anyString(), any(SubAssetClassesPostRequest.class)))
-        .thenReturn(Mono.empty());
-    Mockito.when(assetClassManagementApi.getAssetClasses(0, Integer.MAX_VALUE))
-        .thenReturn(Mono.empty());
-    Mockito.when(
-            assetClassManagementApi.getSubAssetClasses(anyString(), eq(0), eq(Integer.MAX_VALUE)))
-        .thenReturn(Mono.empty());
+        Mockito.when(assetClassManagementApi.postAssetClass(any(AssetClassesPostRequest.class)))
+            .thenReturn(Mono.empty());
+        Mockito.when(
+                assetClassManagementApi.postSubAssetClass(
+                    anyString(), any(SubAssetClassesPostRequest.class)))
+            .thenReturn(Mono.empty());
+        Mockito.when(assetClassManagementApi.getAssetClasses(0, Integer.MAX_VALUE))
+            .thenReturn(Mono.empty());
+        Mockito.when(
+                assetClassManagementApi.getSubAssetClasses(anyString(), eq(0), eq(Integer.MAX_VALUE)))
+            .thenReturn(Mono.empty());
 
-    instrumentIntegrationService.upsertAssetClass(List.of(assetClassBundle)).block();
+        instrumentIntegrationService.upsertAssetClass(List.of(assetClassBundle)).block();
 
-    Mockito.verify(assetClassManagementApi)
-        .postAssetClass(new AssetClassesPostRequest().code(assetCode).name(assetName));
-    Mockito.verify(assetClassManagementApi)
-        .postSubAssetClass(
-            assetCode, new SubAssetClassesPostRequest().code(subAssetCode).name(subAssetName));
-  }
+        Mockito.verify(assetClassManagementApi)
+            .postAssetClass(new AssetClassesPostRequest().code(assetCode).name(assetName));
+        Mockito.verify(assetClassManagementApi)
+            .postSubAssetClass(
+                assetCode, new SubAssetClassesPostRequest().code(subAssetCode).name(subAssetName));
+    }
 
-  @Test
-  void createInstrument() {
-    String instrumentId = "externalId";
-    LocalDate localDate = LocalDate.now();
+    @Test
+    void createInstrument() {
+        String instrumentId = "externalId";
+        LocalDate localDate = LocalDate.now();
 
-    Money money = new Money().amount(BigDecimal.ONE).currencyCode("USD");
-    InstrumentBundle instrumentBundle =
-        new InstrumentBundle()
-            .instrument(new Instrument().id(instrumentId))
-            .historyPrices(
-                List.of(
-                    new InstrumentHistoryPrice()
-                        .date(localDate)
-                        .price(money)
-                        .priceType(PriceTypeEnum.OPEN)));
-
-    Mockito.when(instrumentManagementApi.postInstrument(any(InstrumentsPostRequest.class)))
-        .thenReturn(Mono.empty());
-    Mockito.when(
-            instrumentPriceManagementApi.putInstrumentHistoryPrices(
-                anyString(), any(InstrumentPricesHistoryPutRequest.class)))
-        .thenReturn(Mono.empty());
-    Mockito.when(instrumentManagementApi.getInstrument(anyString())).thenReturn(Mono.empty());
-
-    instrumentIntegrationService.upsertInstrument(instrumentBundle).block();
-
-    Mockito.verify(instrumentManagementApi)
-        .postInstrument(new InstrumentsPostRequest().id(instrumentId));
-    Mockito.verify(instrumentPriceManagementApi)
-        .putInstrumentHistoryPrices(
-            instrumentId,
-            new InstrumentPricesHistoryPutRequest()
-                .priceData(
+        Money money = new Money().amount(BigDecimal.ONE).currencyCode("USD");
+        InstrumentBundle instrumentBundle =
+            new InstrumentBundle()
+                .instrument(new Instrument().id(instrumentId))
+                .historyPrices(
                     List.of(
-                        new InstrumentHistoryPricesRequestItem()
+                        new InstrumentHistoryPrice()
                             .date(localDate)
-                            .price(
-                                new com.backbase.portfolio.instrument.integration.api.service.v1
+                            .price(money)
+                            .priceType(PriceTypeEnum.OPEN)));
+
+        Mockito.when(instrumentManagementApi.postInstrument(any(InstrumentsPostRequest.class)))
+            .thenReturn(Mono.empty());
+        Mockito.when(
+                instrumentPriceManagementApi.putInstrumentHistoryPrices(
+                    anyString(), any(InstrumentPricesHistoryPutRequest.class)))
+            .thenReturn(Mono.empty());
+        Mockito.when(instrumentManagementApi.getInstrument(anyString())).thenReturn(Mono.empty());
+
+        instrumentIntegrationService.upsertInstrument(instrumentBundle).block();
+
+        Mockito.verify(instrumentManagementApi)
+            .postInstrument(new InstrumentsPostRequest().id(instrumentId));
+        Mockito.verify(instrumentPriceManagementApi)
+            .putInstrumentHistoryPrices(
+                instrumentId,
+                new InstrumentPricesHistoryPutRequest()
+                    .priceData(
+                        List.of(
+                            new InstrumentHistoryPricesRequestItem()
+                                .date(localDate)
+                                .price(
+                                    new com.backbase.portfolio.instrument.integration.api.service.v1
                                         .model.Money()
-                                    .amount(BigDecimal.ONE)
-                                    .currencyCode("USD"))
-                            .priceType(InstrumentHistoryPricesRequestItem.PriceTypeEnum.OPEN))));
-  }
+                                        .amount(BigDecimal.ONE)
+                                        .currencyCode("USD"))
+                                .priceType(InstrumentHistoryPricesRequestItem.PriceTypeEnum.OPEN))));
+    }
 }

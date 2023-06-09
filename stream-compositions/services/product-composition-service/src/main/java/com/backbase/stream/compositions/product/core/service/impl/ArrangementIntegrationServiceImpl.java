@@ -16,30 +16,31 @@ import reactor.core.publisher.Mono;
 @Service
 @AllArgsConstructor
 public class ArrangementIntegrationServiceImpl implements ArrangementIntegrationService {
-  private final ArrangementIntegrationApi arrangementIntegrationApi;
-  private final ArrangementMapper arrangementMapper;
 
-  @Override
-  public Mono<ArrangementIngestResponse> pullArrangement(
-      ArrangementIngestPullRequest ingestionRequest) {
-    return arrangementIntegrationApi
-        .pullArrangement(
-            new PullArrangementRequest()
-                .arrangementInternalId(ingestionRequest.getArrangementId())
-                .arrangementExternalId(ingestionRequest.getExternalArrangementId()))
-        .map(item -> arrangementMapper.mapIntegrationToStream(item.getArrangement()))
-        .map(item -> ArrangementIngestResponse.builder().arrangement(item).build())
-        .onErrorResume(this::handleIntegrationError)
-        .flatMap(this::handleIntegrationResponse);
-  }
+    private final ArrangementIntegrationApi arrangementIntegrationApi;
+    private final ArrangementMapper arrangementMapper;
 
-  private Mono<ArrangementIngestResponse> handleIntegrationResponse(ArrangementIngestResponse res) {
-    log.debug("Arrangement from Integration: {}", res.getArrangement());
-    return Mono.just(res);
-  }
+    @Override
+    public Mono<ArrangementIngestResponse> pullArrangement(
+        ArrangementIngestPullRequest ingestionRequest) {
+        return arrangementIntegrationApi
+            .pullArrangement(
+                new PullArrangementRequest()
+                    .arrangementInternalId(ingestionRequest.getArrangementId())
+                    .arrangementExternalId(ingestionRequest.getExternalArrangementId()))
+            .map(item -> arrangementMapper.mapIntegrationToStream(item.getArrangement()))
+            .map(item -> ArrangementIngestResponse.builder().arrangement(item).build())
+            .onErrorResume(this::handleIntegrationError)
+            .flatMap(this::handleIntegrationResponse);
+    }
 
-  private Mono<ArrangementIngestResponse> handleIntegrationError(Throwable e) {
-    log.error("Error while pulling arrangement: {}", e.getMessage());
-    return Mono.error(new InternalServerErrorException().withMessage(e.getMessage()));
-  }
+    private Mono<ArrangementIngestResponse> handleIntegrationResponse(ArrangementIngestResponse res) {
+        log.debug("Arrangement from Integration: {}", res.getArrangement());
+        return Mono.just(res);
+    }
+
+    private Mono<ArrangementIngestResponse> handleIntegrationError(Throwable e) {
+        log.error("Error while pulling arrangement: {}", e.getMessage());
+        return Mono.error(new InternalServerErrorException().withMessage(e.getMessage()));
+    }
 }

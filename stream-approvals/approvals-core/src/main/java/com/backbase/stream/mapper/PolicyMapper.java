@@ -15,20 +15,20 @@ import org.mapstruct.MappingTarget;
 @Mapper
 public interface PolicyMapper {
 
-  PostPolicyRequest mapPolicy(Policy policy);
+    PostPolicyRequest mapPolicy(Policy policy);
 
-  @Mapping(source = "policyAssignmentItems", target = "policyAssignments")
-  PresentationPostPolicyAssignmentBulkRequest mapPolicyAssignments(
-      PolicyAssignment policyAssignment);
+    @Mapping(source = "policyAssignmentItems", target = "policyAssignments")
+    PresentationPostPolicyAssignmentBulkRequest mapPolicyAssignments(
+        PolicyAssignment policyAssignment);
 
-  @AfterMapping
-  default void afterPolicyAssignmentsMapping(
-      PolicyAssignment policyAssignment,
-      @MappingTarget PresentationPostPolicyAssignmentBulkRequest bulkRequest) {
-    Optional.ofNullable(bulkRequest.getPolicyAssignments()).orElse(Collections.emptyList()).stream()
-        .filter(pa -> Objects.isNull(pa.getExternalServiceAgreementId()))
-        .forEach(
-            pa ->
-                pa.setExternalServiceAgreementId(policyAssignment.getExternalServiceAgreementId()));
-  }
+    @AfterMapping
+    default void afterPolicyAssignmentsMapping(
+        PolicyAssignment policyAssignment,
+        @MappingTarget PresentationPostPolicyAssignmentBulkRequest bulkRequest) {
+        Optional.ofNullable(bulkRequest.getPolicyAssignments()).orElse(Collections.emptyList()).stream()
+            .filter(pa -> Objects.isNull(pa.getExternalServiceAgreementId()))
+            .forEach(
+                pa ->
+                    pa.setExternalServiceAgreementId(policyAssignment.getExternalServiceAgreementId()));
+    }
 }

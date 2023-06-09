@@ -1,7 +1,66 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <artifactId>legal-entity-events</artifactId>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <artifactId>jsonschema-events-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
+                            <outputFile>${project.basedir}/target/generated-sources</outputFile>
+                            <packageName>stream.compositions.events.ingress</packageName>
+                            <packageVersion>1</packageVersion>
+                            <!-- The packageName should not contain com.backbase as that is already the default value of the basePackageName -->
+                            <useJavaTime>true</useJavaTime>
+                        </configuration>
+                        <goals>
+                            <goal>events-generation</goal>
+                        </goals>
+                        <id>generate-ingress-events</id>
+                        <phase>generate-sources</phase>
+                    </execution>
+                    <execution>
+                        <configuration>
+                            <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
+                            <outputFile>${project.basedir}/target/generated-sources</outputFile>
+                            <packageName>stream.compositions.events.egress</packageName>
+                            <packageVersion>1</packageVersion>
+                            <!-- The packageName should not contain com.backbase as that is already the default value of the basePackageName -->
+                            <useJavaTime>true</useJavaTime>
+                        </configuration>
+                        <goals>
+                            <goal>events-generation</goal>
+                        </goals>
+                        <id>generate-egress-events</id>
+                        <phase>generate-sources</phase>
+                    </execution>
+                </executions>
+                <groupId>com.backbase.codegen</groupId>
+                <version>${ssdk.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <artifactId>events</artifactId>
+            <groupId>com.backbase.buildingblocks</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>commons-lang</artifactId>
+            <groupId>commons-lang</groupId>
+        </dependency>
+    </dependencies>
+    <groupId>com.backbase.stream.compositions.events</groupId>
+
     <modelVersion>4.0.0</modelVersion>
+
+    <name>Stream :: Compositions :: Events :: Legal Entity</name>
 
     <parent>
         <artifactId>events</artifactId>
@@ -9,68 +68,9 @@
         <version>3.37.1</version>
     </parent>
 
-    <groupId>com.backbase.stream.compositions.events</groupId>
-    <artifactId>legal-entity-events</artifactId>
-
-    <name>Stream :: Compositions :: Events :: Legal Entity</name>
-
     <properties>
         <findMainClass.skip>true</findMainClass.skip>
-        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <sonar.skip>true</sonar.skip>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>events</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <plugins>
-            <plugin>
-                <groupId>com.backbase.codegen</groupId>
-                <artifactId>jsonschema-events-maven-plugin</artifactId>
-                <version>${ssdk.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-ingress-events</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>events-generation</goal>
-                        </goals>
-                        <configuration>
-                            <packageVersion>1</packageVersion>
-                            <useJavaTime>true</useJavaTime>
-                            <outputFile>${project.basedir}/target/generated-sources</outputFile>
-                            <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
-                            <!-- The packageName should not contain com.backbase as that is already the default value of the basePackageName -->
-                            <packageName>stream.compositions.events.ingress</packageName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-egress-events</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>events-generation</goal>
-                        </goals>
-                        <configuration>
-                            <packageVersion>1</packageVersion>
-                            <useJavaTime>true</useJavaTime>
-                            <outputFile>${project.basedir}/target/generated-sources</outputFile>
-                            <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
-                            <!-- The packageName should not contain com.backbase as that is already the default value of the basePackageName -->
-                            <packageName>stream.compositions.events.egress</packageName>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

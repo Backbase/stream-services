@@ -12,11 +12,11 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ExternalContactMapper {
 
-  ExternalContactMapper INSTANCE = Mappers.getMapper(ExternalContactMapper.class);
+    ExternalContactMapper INSTANCE = Mappers.getMapper(ExternalContactMapper.class);
 
-  @IterableMapping(nullValueMappingStrategy = RETURN_NULL)
-  List<ExternalContact> toMapList(
-      List<com.backbase.stream.legalentity.model.ExternalContact> externalContacts);
+    @IterableMapping(nullValueMappingStrategy = RETURN_NULL)
+    List<ExternalContact> toMapList(
+        List<com.backbase.stream.legalentity.model.ExternalContact> externalContacts);
 
-  ExternalContact map(com.backbase.stream.legalentity.model.ExternalContact externalContact);
+    ExternalContact map(com.backbase.stream.legalentity.model.ExternalContact externalContact);
 }

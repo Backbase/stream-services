@@ -22,45 +22,49 @@ import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class ProductCatalogIngestionServiceImplTest {
-  @Mock ReactiveProductCatalogService reactiveProductCatalogService;
-  @Mock ProductCatalogMapper mapper;
-  private ProductCatalogIngestionService productCatalogIngestionService;
-  @Mock private ProductCatalogIntegrationService productCatalogIntegrationService;
 
-  @BeforeEach
-  void setUp() {
-    productCatalogIngestionService =
-        new ProductCatalogIngestionServiceImpl(
-            mapper, reactiveProductCatalogService, productCatalogIntegrationService);
-  }
+    @Mock
+    ReactiveProductCatalogService reactiveProductCatalogService;
+    @Mock
+    ProductCatalogMapper mapper;
+    private ProductCatalogIngestionService productCatalogIngestionService;
+    @Mock
+    private ProductCatalogIntegrationService productCatalogIntegrationService;
 
-  @Test
-  void ingestionInPullMode_Success() {
-    when(mapper.mapIntegrationToStream(any()))
-        .thenReturn(new com.backbase.stream.productcatalog.model.ProductCatalog());
+    @BeforeEach
+    void setUp() {
+        productCatalogIngestionService =
+            new ProductCatalogIngestionServiceImpl(
+                mapper, reactiveProductCatalogService, productCatalogIntegrationService);
+    }
 
-    when(productCatalogIntegrationService.pullProductCatalog(any()))
-        .thenReturn(Mono.just(new ProductCatalog()));
+    @Test
+    void ingestionInPullMode_Success() {
+        when(mapper.mapIntegrationToStream(any()))
+            .thenReturn(new com.backbase.stream.productcatalog.model.ProductCatalog());
 
-    // when(reactiveProductCatalogService.setupProductCatalog(any())).thenReturn(Mono.just(new
-    // com.backbase.stream.productcatalog.model.ProductCatalog()));
-    when(reactiveProductCatalogService.upsertProductCatalog(any()))
-        .thenReturn(Mono.just(new com.backbase.stream.productcatalog.model.ProductCatalog()));
+        when(productCatalogIntegrationService.pullProductCatalog(any()))
+            .thenReturn(Mono.just(new ProductCatalog()));
 
-    ProductCatalogIngestPullRequest request = ProductCatalogIngestPullRequest.builder().build();
-    ProductCatalogIngestResponse productCatalogIngestResponse =
-        productCatalogIngestionService.ingestPull(Mono.just(request)).block();
-    assertNotNull(productCatalogIngestResponse.getProductCatalog());
-  }
+        // when(reactiveProductCatalogService.setupProductCatalog(any())).thenReturn(Mono.just(new
+        // com.backbase.stream.productcatalog.model.ProductCatalog()));
+        when(reactiveProductCatalogService.upsertProductCatalog(any()))
+            .thenReturn(Mono.just(new com.backbase.stream.productcatalog.model.ProductCatalog()));
 
-  @Test
-  void ingestionInPushMode_Unsupported() {
-    Mono<ProductCatalogIngestPushRequest> request =
-        Mono.just(ProductCatalogIngestPushRequest.builder().build());
-    assertThrows(
-        UnsupportedOperationException.class,
-        () -> {
-          productCatalogIngestionService.ingestPush(request);
-        });
-  }
+        ProductCatalogIngestPullRequest request = ProductCatalogIngestPullRequest.builder().build();
+        ProductCatalogIngestResponse productCatalogIngestResponse =
+            productCatalogIngestionService.ingestPull(Mono.just(request)).block();
+        assertNotNull(productCatalogIngestResponse.getProductCatalog());
+    }
+
+    @Test
+    void ingestionInPushMode_Unsupported() {
+        Mono<ProductCatalogIngestPushRequest> request =
+            Mono.just(ProductCatalogIngestPushRequest.builder().build());
+        assertThrows(
+            UnsupportedOperationException.class,
+            () -> {
+                productCatalogIngestionService.ingestPush(request);
+            });
+    }
 }

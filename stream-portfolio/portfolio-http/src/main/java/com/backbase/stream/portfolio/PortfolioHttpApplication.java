@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class PortfolioHttpApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(PortfolioHttpApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(PortfolioHttpApplication.class, args);
+    }
 }

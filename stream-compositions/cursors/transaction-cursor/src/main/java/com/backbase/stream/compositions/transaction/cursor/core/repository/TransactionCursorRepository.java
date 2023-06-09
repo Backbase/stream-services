@@ -11,19 +11,19 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TransactionCursorRepository
     extends CrudRepository<TransactionCursorEntity, String>, TransactionCursorCustomRepository {
 
-  /**
-   * Query the cursor based on arrangement_id criteria
-   *
-   * @param arrangementId ArrangementId of the cursor
-   * @return TransactionCursorEntity
-   */
-  Optional<TransactionCursorEntity> findByArrangementId(String arrangementId);
+    /**
+     * Query the cursor based on arrangement_id criteria
+     *
+     * @param arrangementId ArrangementId of the cursor
+     * @return TransactionCursorEntity
+     */
+    Optional<TransactionCursorEntity> findByArrangementId(String arrangementId);
 
-  /**
-   * Delete the cursor based on arrangement_id
-   *
-   * @param arrangementId ArrangementId of the cursor
-   */
-  @Transactional(rollbackFor = SQLException.class)
-  void deleteByArrangementId(String arrangementId);
+    /**
+     * Delete the cursor based on arrangement_id
+     *
+     * @param arrangementId ArrangementId of the cursor
+     */
+    @Transactional(rollbackFor = SQLException.class)
+    void deleteByArrangementId(String arrangementId);
 }

@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <artifactId>api</artifactId>
-        <groupId>com.backbase.stream.compositions</groupId>
-        <version>3.37.1</version>
-    </parent>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <artifactId>service-api</artifactId>
-    <packaging>pom</packaging>
 
-    <name>Stream :: Compositions :: API :: Service</name>
+    <modelVersion>4.0.0</modelVersion>
 
     <modules>
         <module>legal-entity-composition-api</module>
@@ -22,4 +13,13 @@
         <module>transaction-composition-api</module>
         <module>payment-order-composition-api</module>
     </modules>
+    <name>Stream :: Compositions :: API :: Service</name>
+
+    <packaging>pom</packaging>
+
+    <parent>
+        <artifactId>api</artifactId>
+        <groupId>com.backbase.stream.compositions</groupId>
+        <version>3.37.1</version>
+    </parent>
 </project>

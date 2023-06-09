@@ -22,55 +22,57 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class LimitsSagaTest {
 
-  @InjectMocks private LimitsSaga limitsSaga;
+    @InjectMocks
+    private LimitsSaga limitsSaga;
 
-  @Mock private LimitsServiceApi limitsApi;
+    @Mock
+    private LimitsServiceApi limitsApi;
 
-  @Test
-  void createLimits() {
+    @Test
+    void createLimits() {
 
-    // Given
-    LimitsTask limitsTask = createTask();
-    when(limitsApi.postLimitsRetrieval(any())).thenReturn(Flux.empty());
-    when(limitsApi.postLimits(any())).thenReturn(Mono.just(new LimitsPostResponseBody()));
+        // Given
+        LimitsTask limitsTask = createTask();
+        when(limitsApi.postLimitsRetrieval(any())).thenReturn(Flux.empty());
+        when(limitsApi.postLimits(any())).thenReturn(Mono.just(new LimitsPostResponseBody()));
 
-    // When
-    Mono<LimitsTask> result = limitsSaga.executeTask(limitsTask);
-    result.block();
+        // When
+        Mono<LimitsTask> result = limitsSaga.executeTask(limitsTask);
+        result.block();
 
-    // Then
-    verify(limitsApi).postLimits(any());
-    verify(limitsApi).postLimitsRetrieval(any());
-  }
+        // Then
+        verify(limitsApi).postLimits(any());
+        verify(limitsApi).postLimitsRetrieval(any());
+    }
 
-  @Test
-  void updateLimits() {
+    @Test
+    void updateLimits() {
 
-    // Given
-    LimitsTask limitsTask = createTask();
-    var retrieval = new LimitsRetrievalPostResponseBody();
-    retrieval.uuid("uuid");
-    when(limitsApi.postLimitsRetrieval(any())).thenReturn(Flux.just(retrieval));
-    when(limitsApi.putLimitByUuid(any(), any()))
-        .thenReturn(Mono.just(new LimitByUuidPutResponseBody()));
+        // Given
+        LimitsTask limitsTask = createTask();
+        var retrieval = new LimitsRetrievalPostResponseBody();
+        retrieval.uuid("uuid");
+        when(limitsApi.postLimitsRetrieval(any())).thenReturn(Flux.just(retrieval));
+        when(limitsApi.putLimitByUuid(any(), any()))
+            .thenReturn(Mono.just(new LimitByUuidPutResponseBody()));
 
-    // When
-    Mono<LimitsTask> result = limitsSaga.executeTask(limitsTask);
-    result.block();
+        // When
+        Mono<LimitsTask> result = limitsSaga.executeTask(limitsTask);
+        result.block();
 
-    // Then
-    verify(limitsApi).postLimitsRetrieval(any());
-    verify(limitsApi).putLimitByUuid(any(), any());
-  }
+        // Then
+        verify(limitsApi).postLimitsRetrieval(any());
+        verify(limitsApi).putLimitByUuid(any(), any());
+    }
 
-  private LimitsTask createTask() {
-    var saEntity = new Entity().etype("SA").eref("internalSaId");
-    var fagEntity = new Entity().etype("FAG").eref("internalFagId");
-    var funEntity = new Entity().etype("FUN").eref("1018");
-    var prvEntity = new Entity().etype("PRV").eref("approve");
-    var request = new CreateLimitRequestBody();
-    request.entities(List.of(saEntity, fagEntity, funEntity, prvEntity));
-    request.setUserBBID("internalUserId");
-    return new LimitsTask("1", request);
-  }
+    private LimitsTask createTask() {
+        var saEntity = new Entity().etype("SA").eref("internalSaId");
+        var fagEntity = new Entity().etype("FAG").eref("internalFagId");
+        var funEntity = new Entity().etype("FUN").eref("1018");
+        var prvEntity = new Entity().etype("PRV").eref("approve");
+        var request = new CreateLimitRequestBody();
+        request.entities(List.of(saEntity, fagEntity, funEntity, prvEntity));
+        request.setUserBBID("internalUserId");
+        return new LimitsTask("1", request);
+    }
 }

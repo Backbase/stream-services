@@ -5,21 +5,21 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 public class AccessGroupException extends RuntimeException {
 
-  private final ServiceAgreement serviceAgreement;
-  private String httpResponse;
+    private final ServiceAgreement serviceAgreement;
+    private String httpResponse;
 
-  public AccessGroupException(
-      WebClientResponseException throwable, ServiceAgreement serviceAgreement, String s) {
-    super(s, throwable);
-    this.serviceAgreement = serviceAgreement;
-    this.httpResponse = throwable.getResponseBodyAsString();
-  }
+    public AccessGroupException(
+        WebClientResponseException throwable, ServiceAgreement serviceAgreement, String s) {
+        super(s, throwable);
+        this.serviceAgreement = serviceAgreement;
+        this.httpResponse = throwable.getResponseBodyAsString();
+    }
 
-  public ServiceAgreement getServiceAgreement() {
-    return serviceAgreement;
-  }
+    public ServiceAgreement getServiceAgreement() {
+        return serviceAgreement;
+    }
 
-  public String getHttpResponse() {
-    return httpResponse;
-  }
+    public String getHttpResponse() {
+        return httpResponse;
+    }
 }

@@ -13,18 +13,18 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 class AccessControlConfigurationTest {
 
-  ApplicationContextRunner contextRunner = new ApplicationContextRunner();
+    ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 
-  @Test
-  void configurationTest() {
-    contextRunner
-        .withBean(WebClientAutoConfiguration.class)
-        .withBean(DbsApiClientsAutoConfiguration.class)
-        .withBean(InterServiceWebClientConfiguration.class)
-        .withUserConfiguration(AccessControlConfiguration.class)
-        .run(
-            context -> {
-              assertThat(context).hasSingleBean(AccessGroupService.class);
-            });
-  }
+    @Test
+    void configurationTest() {
+        contextRunner
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(DbsApiClientsAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(AccessControlConfiguration.class)
+            .run(
+                context -> {
+                    assertThat(context).hasSingleBean(AccessGroupService.class);
+                });
+    }
 }

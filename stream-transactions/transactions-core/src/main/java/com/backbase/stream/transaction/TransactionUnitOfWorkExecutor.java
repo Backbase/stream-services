@@ -14,51 +14,51 @@ import reactor.core.publisher.Flux;
 
 public class TransactionUnitOfWorkExecutor extends UnitOfWorkExecutor<TransactionTask> {
 
-  public TransactionUnitOfWorkExecutor(
-      UnitOfWorkRepository<TransactionTask, String> repository,
-      StreamTaskExecutor<TransactionTask> streamTaskExecutor,
-      TransactionWorkerConfigurationProperties properties) {
+    public TransactionUnitOfWorkExecutor(
+        UnitOfWorkRepository<TransactionTask, String> repository,
+        StreamTaskExecutor<TransactionTask> streamTaskExecutor,
+        TransactionWorkerConfigurationProperties properties) {
 
-    super(repository, streamTaskExecutor, properties);
-  }
-
-  public Flux<UnitOfWork<TransactionTask>> prepareUnitOfWork(
-      List<TransactionsPostRequestBody> items) {
-    Stream<UnitOfWork<TransactionTask>> unitOfWorkStream;
-    if (((TransactionWorkerConfigurationProperties) streamWorkerConfiguration)
-        .isGroupPerArrangementId()) {
-      Map<String, List<TransactionsPostRequestBody>> transactionsGroupedByArrangement =
-          items.stream()
-              .collect(
-                  Collectors.groupingBy(TransactionsPostRequestBody::getExternalArrangementId));
-
-      unitOfWorkStream =
-          transactionsGroupedByArrangement.entrySet().stream()
-              .map(
-                  entry -> {
-                    String unitOfOWorkId =
-                        "transactions-grouped-" + entry.getKey() + "-" + System.currentTimeMillis();
-                    return UnitOfWork.from(
-                        unitOfOWorkId, new TransactionTask(unitOfOWorkId, entry.getValue()));
-                  });
-    } else {
-      String unitOfOWorkId = "transactions-mixed-" + System.currentTimeMillis();
-      TransactionTask task = new TransactionTask(unitOfOWorkId, items);
-      unitOfWorkStream = Stream.of(UnitOfWork.from(unitOfOWorkId, task));
+        super(repository, streamTaskExecutor, properties);
     }
-    return Flux.fromStream(unitOfWorkStream);
-  }
 
-  public Flux<UnitOfWork<TransactionTask>> prepareUnitOfWork(
-      Flux<TransactionsPostRequestBody> items) {
+    public Flux<UnitOfWork<TransactionTask>> prepareUnitOfWork(
+        List<TransactionsPostRequestBody> items) {
+        Stream<UnitOfWork<TransactionTask>> unitOfWorkStream;
+        if (((TransactionWorkerConfigurationProperties) streamWorkerConfiguration)
+            .isGroupPerArrangementId()) {
+            Map<String, List<TransactionsPostRequestBody>> transactionsGroupedByArrangement =
+                items.stream()
+                    .collect(
+                        Collectors.groupingBy(TransactionsPostRequestBody::getExternalArrangementId));
 
-    return items
-        .bufferTimeout(
-            streamWorkerConfiguration.getBufferSize(), streamWorkerConfiguration.getBufferMaxTime())
-        .flatMap(this::prepareUnitOfWork);
-  }
+            unitOfWorkStream =
+                transactionsGroupedByArrangement.entrySet().stream()
+                    .map(
+                        entry -> {
+                            String unitOfOWorkId =
+                                "transactions-grouped-" + entry.getKey() + "-" + System.currentTimeMillis();
+                            return UnitOfWork.from(
+                                unitOfOWorkId, new TransactionTask(unitOfOWorkId, entry.getValue()));
+                        });
+        } else {
+            String unitOfOWorkId = "transactions-mixed-" + System.currentTimeMillis();
+            TransactionTask task = new TransactionTask(unitOfOWorkId, items);
+            unitOfWorkStream = Stream.of(UnitOfWork.from(unitOfOWorkId, task));
+        }
+        return Flux.fromStream(unitOfWorkStream);
+    }
 
-  public TransactionWorkerConfigurationProperties getTransactionWorkerConfigurationProperties() {
-    return (TransactionWorkerConfigurationProperties) super.getStreamWorkerConfiguration();
-  }
+    public Flux<UnitOfWork<TransactionTask>> prepareUnitOfWork(
+        Flux<TransactionsPostRequestBody> items) {
+
+        return items
+            .bufferTimeout(
+                streamWorkerConfiguration.getBufferSize(), streamWorkerConfiguration.getBufferMaxTime())
+            .flatMap(this::prepareUnitOfWork);
+    }
+
+    public TransactionWorkerConfigurationProperties getTransactionWorkerConfigurationProperties() {
+        return (TransactionWorkerConfigurationProperties) super.getStreamWorkerConfiguration();
+    }
 }

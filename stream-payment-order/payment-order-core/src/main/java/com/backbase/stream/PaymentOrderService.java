@@ -7,6 +7,6 @@ import reactor.core.publisher.Flux;
 
 public interface PaymentOrderService {
 
-  Flux<UnitOfWork<PaymentOrderTask>> processPaymentOrder(
-      Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux);
+    Flux<UnitOfWork<PaymentOrderTask>> processPaymentOrder(
+        Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux);
 }

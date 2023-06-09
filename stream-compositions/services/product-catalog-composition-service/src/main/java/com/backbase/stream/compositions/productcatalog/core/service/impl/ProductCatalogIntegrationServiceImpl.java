@@ -14,14 +14,17 @@ import reactor.core.publisher.Mono;
 @Service
 @AllArgsConstructor
 public class ProductCatalogIntegrationServiceImpl implements ProductCatalogIntegrationService {
-  private final ProductCatalogIntegrationApi productCatalogIntegrationApi;
 
-  /** {@inheritDoc} */
-  @Override
-  public Mono<ProductCatalog> pullProductCatalog(
-      ProductCatalogIngestPullRequest ingestPullRequest) {
-    return productCatalogIntegrationApi
-        .pullProductCatalog(ingestPullRequest.getAdditionalParameters())
-        .map(PullProductCatalogResponse::getProductCatalog);
-  }
+    private final ProductCatalogIntegrationApi productCatalogIntegrationApi;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Mono<ProductCatalog> pullProductCatalog(
+        ProductCatalogIngestPullRequest ingestPullRequest) {
+        return productCatalogIntegrationApi
+            .pullProductCatalog(ingestPullRequest.getAdditionalParameters())
+            .map(PullProductCatalogResponse::getProductCatalog);
+    }
 }

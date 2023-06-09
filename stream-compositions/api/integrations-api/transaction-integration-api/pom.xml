@@ -1,36 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <artifactId>integrations-api</artifactId>
-        <groupId>com.backbase.stream.compositions</groupId>
-        <version>3.37.1</version>
-    </parent>
-
-    <groupId>com.backbase.stream.compositions.api</groupId>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <artifactId>transaction-integration-api</artifactId>
-
-    <name>Stream :: Compositions :: API :: Transaction Integration</name>
-
-    <properties>
-        <findMainClass.skip>true</findMainClass.skip>
-        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
-        <sonar.skip>true</sonar.skip>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.backbase</groupId>
-                <artifactId>backbase-bom</artifactId>
-                <version>${backbase-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>
@@ -38,76 +9,105 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>assemble-api-zip</id>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <phase>package</phase>
                         <configuration>
                             <descriptors>
                                 <descriptor>assembly/api.xml</descriptor>
                             </descriptors>
                         </configuration>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <id>assemble-api-zip</id>
+                        <phase>package</phase>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>unpack</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.transaction</groupId>
                                     <artifactId>transaction-manager</artifactId>
-                                    <type>zip</type>
                                     <classifier>api</classifier>
+                                    <groupId>com.backbase.dbs.transaction</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                             </artifactItems>
                             <includes>**/*service-api*.yaml, **/*.json</includes>
                         </configuration>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <id>unpack</id>
+                        <phase>generate-sources</phase>
                     </execution>
                 </executions>
+                <groupId>org.apache.maven.plugins</groupId>
             </plugin>
             <plugin>
-                <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>${boat-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>boat-validation</id>
-                        <phase>generate-sources</phase>
+                        <configuration>
+                            <failOnWarning>true</failOnWarning>
+                            <input>src/main/resources/service-api-v2.yaml</input>
+                        </configuration>
                         <goals>
                             <goal>validate</goal>
                         </goals>
-                        <configuration>
-                            <input>src/main/resources/service-api-v2.yaml</input>
-                            <failOnWarning>true</failOnWarning>
-                        </configuration>
+                        <id>boat-validation</id>
+                        <phase>generate-sources</phase>
                     </execution>
                     <execution>
-                        <id>boat-bundle</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>bundle</goal>
-                        </goals>
                         <configuration>
+                            <includes>*api*.yaml</includes>
                             <input>${project.basedir}/src/main/resources</input>
                             <output>${project.build.directory}</output>
                             <versionFileName>true</versionFileName>
-                            <includes>*api*.yaml</includes>
                         </configuration>
+                        <goals>
+                            <goal>bundle</goal>
+                        </goals>
+                        <id>boat-bundle</id>
+                        <phase>generate-sources</phase>
                     </execution>
                 </executions>
+                <groupId>com.backbase.oss</groupId>
+                <version>${boat-maven-plugin.version}</version>
             </plugin>
         </plugins>
     </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <artifactId>backbase-bom</artifactId>
+                <groupId>com.backbase</groupId>
+                <scope>import</scope>
+                <type>pom</type>
+                <version>${backbase-bom.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <groupId>com.backbase.stream.compositions.api</groupId>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>Stream :: Compositions :: API :: Transaction Integration</name>
+
+    <parent>
+        <artifactId>integrations-api</artifactId>
+        <groupId>com.backbase.stream.compositions</groupId>
+        <version>3.37.1</version>
+    </parent>
+
+    <properties>
+        <findMainClass.skip>true</findMainClass.skip>
+        <sonar.skip>true</sonar.skip>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+    </properties>
 </project>

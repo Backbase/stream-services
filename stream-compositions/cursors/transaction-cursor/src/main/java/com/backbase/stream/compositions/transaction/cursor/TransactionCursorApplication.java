@@ -14,7 +14,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories({"com.backbase.stream.compositions.transaction.cursor.core.repository"})
 public class TransactionCursorApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(TransactionCursorApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(TransactionCursorApplication.class, args);
+    }
 }

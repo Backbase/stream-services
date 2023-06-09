@@ -21,48 +21,48 @@ import org.springframework.web.reactive.function.client.WebClient;
 @EnableConfigurationProperties({LegalEntityConfigurationProperties.class})
 public class LegalEntityConfiguration {
 
-  private final LegalEntityConfigurationProperties legalEntityConfigurationProperties;
+    private final LegalEntityConfigurationProperties legalEntityConfigurationProperties;
 
-  @Bean
-  @Primary
-  public LegalEntityIntegrationApi legalEntityIntegrationApi(
-      com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient) {
-    return new LegalEntityIntegrationApi(legalEntityClient);
-  }
+    @Bean
+    @Primary
+    public LegalEntityIntegrationApi legalEntityIntegrationApi(
+        com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient) {
+        return new LegalEntityIntegrationApi(legalEntityClient);
+    }
 
-  @Bean
-  @Primary
-  public ProductCompositionApi productCompositionApi(ApiClient productClient) {
-    return new ProductCompositionApi(productClient);
-  }
+    @Bean
+    @Primary
+    public ProductCompositionApi productCompositionApi(ApiClient productClient) {
+        return new ProductCompositionApi(productClient);
+    }
 
-  @Bean
-  public ApiClient productClient(
-      @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
-      ObjectMapper objectMapper,
-      DateFormat dateFormat) {
-    ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-    apiClient.setBasePath(
-        legalEntityConfigurationProperties.getChains().getProductComposition().getBaseUrl());
+    @Bean
+    public ApiClient productClient(
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+        ObjectMapper objectMapper,
+        DateFormat dateFormat) {
+        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(
+            legalEntityConfigurationProperties.getChains().getProductComposition().getBaseUrl());
 
-    return apiClient;
-  }
+        return apiClient;
+    }
 
-  @Bean
-  public com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient(
-      @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
-      ObjectMapper objectMapper,
-      DateFormat dateFormat) {
-    com.backbase.stream.compositions.legalentity.integration.ApiClient apiClient =
-        new com.backbase.stream.compositions.legalentity.integration.ApiClient(
-            dbsWebClient, objectMapper, dateFormat);
-    apiClient.setBasePath(legalEntityConfigurationProperties.getIntegrationBaseUrl());
+    @Bean
+    public com.backbase.stream.compositions.legalentity.integration.ApiClient legalEntityClient(
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+        ObjectMapper objectMapper,
+        DateFormat dateFormat) {
+        com.backbase.stream.compositions.legalentity.integration.ApiClient apiClient =
+            new com.backbase.stream.compositions.legalentity.integration.ApiClient(
+                dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(legalEntityConfigurationProperties.getIntegrationBaseUrl());
 
-    return apiClient;
-  }
+        return apiClient;
+    }
 
-  @Bean
-  public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-    return http.csrf().disable().build();
-  }
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        return http.csrf().disable().build();
+    }
 }

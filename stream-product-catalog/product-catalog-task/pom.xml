@@ -16,7 +16,7 @@
     <name>Stream :: Product Catalog Task</name>
 
     <properties>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+
         <wiremock-jre8.version>2.33.2</wiremock-jre8.version>
     </properties>
 

@@ -10,5 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @ConfigurationProperties("backbase.stream.compositions.paymentorder")
 public class PaymentOrderConfigurationProperties {
-  private String integrationBaseUrl = "http://payment-orders-ingestion-integration:8080";
+
+    private String integrationBaseUrl = "http://payment-orders-ingestion-integration:8080";
 }

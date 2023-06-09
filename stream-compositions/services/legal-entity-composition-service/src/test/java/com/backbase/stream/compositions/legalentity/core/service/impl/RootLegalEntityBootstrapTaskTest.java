@@ -23,50 +23,52 @@ import reactor.core.publisher.Mono;
 @Import(LegalEntityCompositionApplication.class)
 class RootLegalEntityBootstrapTaskTest {
 
-  @Mock LegalEntitySaga legalEntitySaga;
+    @Mock
+    LegalEntitySaga legalEntitySaga;
 
-  @Mock LegalEntityTask legalEntityTask;
+    @Mock
+    LegalEntityTask legalEntityTask;
 
-  @Test
-  void testRootIngestion_Success() {
-    LegalEntity legalEntity =
-        new LegalEntity()
-            .name("Test Legal Entity")
-            .externalId("externalId")
-            .internalId("internalId");
+    @Test
+    void testRootIngestion_Success() {
+        LegalEntity legalEntity =
+            new LegalEntity()
+                .name("Test Legal Entity")
+                .externalId("externalId")
+                .internalId("internalId");
 
-    lenient().when(legalEntityTask.getLegalEntity()).thenReturn(legalEntity);
-    lenient().when(legalEntityTask.getData()).thenReturn(legalEntity);
+        lenient().when(legalEntityTask.getLegalEntity()).thenReturn(legalEntity);
+        lenient().when(legalEntityTask.getData()).thenReturn(legalEntity);
 
-    lenient().when(legalEntitySaga.executeTask(any())).thenReturn(Mono.just(legalEntityTask));
+        lenient().when(legalEntitySaga.executeTask(any())).thenReturn(Mono.just(legalEntityTask));
 
-    BootstrapConfigurationProperties bootstrapConfigurationProperties =
-        new BootstrapConfigurationProperties();
-    bootstrapConfigurationProperties.setLegalEntity(
-        new LegalEntity().name("Test Legal Entity").externalId("externalId"));
-    bootstrapConfigurationProperties.setEnabled(Boolean.TRUE);
+        BootstrapConfigurationProperties bootstrapConfigurationProperties =
+            new BootstrapConfigurationProperties();
+        bootstrapConfigurationProperties.setLegalEntity(
+            new LegalEntity().name("Test Legal Entity").externalId("externalId"));
+        bootstrapConfigurationProperties.setEnabled(Boolean.TRUE);
 
-    RootLegalEntityBootstrapTask bootstrapTask =
-        new RootLegalEntityBootstrapTask(legalEntitySaga, bootstrapConfigurationProperties);
+        RootLegalEntityBootstrapTask bootstrapTask =
+            new RootLegalEntityBootstrapTask(legalEntitySaga, bootstrapConfigurationProperties);
 
-    bootstrapTask.run(null);
-    verify(legalEntitySaga, times(1)).executeTask(any());
-    assertNotNull(legalEntitySaga.executeTask(any()).block().getData().getInternalId());
-    assertTrue(bootstrapConfigurationProperties.getEnabled());
-  }
+        bootstrapTask.run(null);
+        verify(legalEntitySaga, times(1)).executeTask(any());
+        assertNotNull(legalEntitySaga.executeTask(any()).block().getData().getInternalId());
+        assertTrue(bootstrapConfigurationProperties.getEnabled());
+    }
 
-  @Test
-  void testRootIngestion_Fail() {
+    @Test
+    void testRootIngestion_Fail() {
 
-    BootstrapConfigurationProperties bootstrapConfigurationProperties =
-        new BootstrapConfigurationProperties();
-    bootstrapConfigurationProperties.setLegalEntity(null);
-    bootstrapConfigurationProperties.setEnabled(Boolean.TRUE);
+        BootstrapConfigurationProperties bootstrapConfigurationProperties =
+            new BootstrapConfigurationProperties();
+        bootstrapConfigurationProperties.setLegalEntity(null);
+        bootstrapConfigurationProperties.setEnabled(Boolean.TRUE);
 
-    RootLegalEntityBootstrapTask bootstrapTask =
-        new RootLegalEntityBootstrapTask(legalEntitySaga, bootstrapConfigurationProperties);
+        RootLegalEntityBootstrapTask bootstrapTask =
+            new RootLegalEntityBootstrapTask(legalEntitySaga, bootstrapConfigurationProperties);
 
-    bootstrapTask.run(null);
-    verify(legalEntitySaga, times(0)).executeTask(any());
-  }
+        bootstrapTask.run(null);
+        verify(legalEntitySaga, times(0)).executeTask(any());
+    }
 }

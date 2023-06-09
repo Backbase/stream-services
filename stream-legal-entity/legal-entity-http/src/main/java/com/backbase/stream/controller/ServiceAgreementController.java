@@ -17,21 +17,21 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class ServiceAgreementController implements ServiceAgreementApi {
 
-  private final UpdatedServiceAgreementSaga updatedServiceAgreementService;
+    private final UpdatedServiceAgreementSaga updatedServiceAgreementService;
 
-  @Override
-  public Mono<ResponseEntity<Flux<UpdatedServiceAgreement>>> updateServiceAgreement(
-      Flux<UpdatedServiceAgreement> updatedServiceAgreement, ServerWebExchange exchange) {
-    Flux<UpdatedServiceAgreement> flux =
-        updatedServiceAgreement
-            .map(UpdatedServiceAgreementTask::new)
-            .flatMap(updatedServiceAgreementService::executeTask)
-            .map(UpdatedServiceAgreementTask::getData)
-            .doOnNext(
-                actual ->
-                    log.info(
-                        "Finished Ingestion of Service Agreement: {}", actual.getExternalId()));
+    @Override
+    public Mono<ResponseEntity<Flux<UpdatedServiceAgreement>>> updateServiceAgreement(
+        Flux<UpdatedServiceAgreement> updatedServiceAgreement, ServerWebExchange exchange) {
+        Flux<UpdatedServiceAgreement> flux =
+            updatedServiceAgreement
+                .map(UpdatedServiceAgreementTask::new)
+                .flatMap(updatedServiceAgreementService::executeTask)
+                .map(UpdatedServiceAgreementTask::getData)
+                .doOnNext(
+                    actual ->
+                        log.info(
+                            "Finished Ingestion of Service Agreement: {}", actual.getExternalId()));
 
-    return Mono.just(ResponseEntity.ok(flux));
-  }
+        return Mono.just(ResponseEntity.ok(flux));
+    }
 }

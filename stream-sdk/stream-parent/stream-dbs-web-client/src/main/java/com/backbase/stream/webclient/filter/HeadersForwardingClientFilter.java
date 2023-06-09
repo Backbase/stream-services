@@ -17,57 +17,57 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class HeadersForwardingClientFilter implements ExchangeFilterFunction {
 
-  private final DbsWebClientConfigurationProperties properties;
+    private final DbsWebClientConfigurationProperties properties;
 
-  @Override
-  public Mono<ClientResponse> filter(ClientRequest originalRequest, ExchangeFunction next) {
-    ClientRequest additionalHeadersRequest = enrichRequestWithAdditionalHeaders(originalRequest);
+    @Override
+    public Mono<ClientResponse> filter(ClientRequest originalRequest, ExchangeFunction next) {
+        ClientRequest additionalHeadersRequest = enrichRequestWithAdditionalHeaders(originalRequest);
 
-    return Mono.deferContextual(
-        context -> {
-          Optional<MultiValueMap<String, String>> forwardHeaders =
-              context.getOrEmpty(CONTEXT_KEY_FORWARDED_HEADERS);
-          log.trace("Context contains headers? {}", forwardHeaders.isPresent());
-          log.trace(
-              "Forwarded headers: {}", forwardHeaders.map(MultiValueMap::toString).orElse("none"));
+        return Mono.deferContextual(
+            context -> {
+                Optional<MultiValueMap<String, String>> forwardHeaders =
+                    context.getOrEmpty(CONTEXT_KEY_FORWARDED_HEADERS);
+                log.trace("Context contains headers? {}", forwardHeaders.isPresent());
+                log.trace(
+                    "Forwarded headers: {}", forwardHeaders.map(MultiValueMap::toString).orElse("none"));
 
-          ClientRequest forwardHeadersRequest =
-              enrichRequestWithForwardedHeaders(additionalHeadersRequest, forwardHeaders);
+                ClientRequest forwardHeadersRequest =
+                    enrichRequestWithForwardedHeaders(additionalHeadersRequest, forwardHeaders);
 
-          return next.exchange(forwardHeadersRequest);
-        });
-  }
+                return next.exchange(forwardHeadersRequest);
+            });
+    }
 
-  private ClientRequest enrichRequestWithAdditionalHeaders(ClientRequest originalRequest) {
-    return Optional.ofNullable(properties.getAdditionalHeaders())
-        .map(
-            additionalHeaders -> {
-              log.debug(
-                  "Adding additional headers: {} from configuration to Request:" + " {}",
-                  additionalHeaders,
-                  originalRequest.url());
-              return ClientRequest.from(originalRequest)
-                  .headers(httpHeaders -> httpHeaders.addAll(additionalHeaders))
-                  .build();
-            })
-        .orElse(originalRequest);
-  }
+    private ClientRequest enrichRequestWithAdditionalHeaders(ClientRequest originalRequest) {
+        return Optional.ofNullable(properties.getAdditionalHeaders())
+            .map(
+                additionalHeaders -> {
+                    log.debug(
+                        "Adding additional headers: {} from configuration to Request:" + " {}",
+                        additionalHeaders,
+                        originalRequest.url());
+                    return ClientRequest.from(originalRequest)
+                        .headers(httpHeaders -> httpHeaders.addAll(additionalHeaders))
+                        .build();
+                })
+            .orElse(originalRequest);
+    }
 
-  private ClientRequest enrichRequestWithForwardedHeaders(
-      ClientRequest additionalHeadersRequest,
-      Optional<MultiValueMap<String, String>> forwardHeaders) {
-    return forwardHeaders
-        .map(
-            headers -> {
-              log.debug(
-                  "Adding additional headers: {} from Reactive subscriber context"
-                      + " to Request: {}",
-                  headers,
-                  additionalHeadersRequest.url());
-              return ClientRequest.from(additionalHeadersRequest)
-                  .headers(httpHeaders -> httpHeaders.putAll(headers))
-                  .build();
-            })
-        .orElse(additionalHeadersRequest);
-  }
+    private ClientRequest enrichRequestWithForwardedHeaders(
+        ClientRequest additionalHeadersRequest,
+        Optional<MultiValueMap<String, String>> forwardHeaders) {
+        return forwardHeaders
+            .map(
+                headers -> {
+                    log.debug(
+                        "Adding additional headers: {} from Reactive subscriber context"
+                            + " to Request: {}",
+                        headers,
+                        additionalHeadersRequest.url());
+                    return ClientRequest.from(additionalHeadersRequest)
+                        .headers(httpHeaders -> httpHeaders.putAll(headers))
+                        .build();
+                })
+            .orElse(additionalHeadersRequest);
+    }
 }

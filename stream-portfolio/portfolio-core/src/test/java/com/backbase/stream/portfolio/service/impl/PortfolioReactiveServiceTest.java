@@ -26,24 +26,27 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class PortfolioReactiveServiceTest {
 
-  @Mock private PortfolioSagaProperties portfolioSagaProperties;
+    @Mock
+    private PortfolioSagaProperties portfolioSagaProperties;
 
-  @Mock private PortfolioSaga portfolioSaga;
+    @Mock
+    private PortfolioSaga portfolioSaga;
 
-  @InjectMocks private PortfolioReactiveService portfolioReactiveService;
+    @InjectMocks
+    private PortfolioReactiveService portfolioReactiveService;
 
-  @Test
-  void shouldIngestWealthBundles() {
-    WealthBundle wealthBundle = new WealthBundle();
+    @Test
+    void shouldIngestWealthBundles() {
+        WealthBundle wealthBundle = new WealthBundle();
 
-    Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
-    Mockito.when(portfolioSaga.executeTask(any())).thenAnswer(i -> Mono.just(i.getArgument(0)));
+        Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
+        Mockito.when(portfolioSaga.executeTask(any())).thenAnswer(i -> Mono.just(i.getArgument(0)));
 
-    Flux<WealthBundle> wealthBundles =
-        portfolioReactiveService.ingestWealthBundles(Flux.fromIterable(List.of(wealthBundle)));
+        Flux<WealthBundle> wealthBundles =
+            portfolioReactiveService.ingestWealthBundles(Flux.fromIterable(List.of(wealthBundle)));
 
-    Assertions.assertNotNull(wealthBundles);
+        Assertions.assertNotNull(wealthBundles);
 
-    StepVerifier.create(wealthBundles).assertNext(assertEqualsTo(wealthBundle)).verifyComplete();
-  }
+        StepVerifier.create(wealthBundles).assertNext(assertEqualsTo(wealthBundle)).verifyComplete();
+    }
 }

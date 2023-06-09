@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface CursorMapper {
 
-  CursorItem toCursorItem(IngestionCursor ingestionCursor);
+    CursorItem toCursorItem(IngestionCursor ingestionCursor);
 
-  IngestionCursor toIngestionCursor(CursorItem cursorItem);
+    IngestionCursor toIngestionCursor(CursorItem cursorItem);
 }

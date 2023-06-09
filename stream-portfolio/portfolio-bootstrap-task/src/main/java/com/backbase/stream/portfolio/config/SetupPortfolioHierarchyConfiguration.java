@@ -21,23 +21,23 @@ import reactor.core.publisher.Flux;
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
 public class SetupPortfolioHierarchyConfiguration {
 
-  private final PortfolioSaga portfolioSaga;
-  private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
+    private final PortfolioSaga portfolioSaga;
+    private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
 
-  @Bean
-  public CommandLineRunner commandLineRunner() {
-    return args -> execute();
-  }
+    @Bean
+    public CommandLineRunner commandLineRunner() {
+        return args -> execute();
+    }
 
-  void execute() {
-    List<WealthBundle> wealthBundles = bootstrapConfigurationProperties.getWealthBundles();
-    log.debug("Wealth bundles: {}", wealthBundles);
-    log.info("Bootstrapping Root Wealth Bundles Structure");
-    Flux.fromIterable(Objects.requireNonNullElse(wealthBundles, List.of()))
-        .map(PortfolioTask::new)
-        .flatMap(portfolioSaga::executeTask)
-        .collectList()
-        .block();
-    log.info("Finished bootstrapping Wealth Bundles Structure");
-  }
+    void execute() {
+        List<WealthBundle> wealthBundles = bootstrapConfigurationProperties.getWealthBundles();
+        log.debug("Wealth bundles: {}", wealthBundles);
+        log.info("Bootstrapping Root Wealth Bundles Structure");
+        Flux.fromIterable(Objects.requireNonNullElse(wealthBundles, List.of()))
+            .map(PortfolioTask::new)
+            .flatMap(portfolioSaga::executeTask)
+            .collectList()
+            .block();
+        log.info("Finished bootstrapping Wealth Bundles Structure");
+    }
 }

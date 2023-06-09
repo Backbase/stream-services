@@ -5,10 +5,11 @@ import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalog
 import reactor.core.publisher.Mono;
 
 public interface ProductCatalogIntegrationService {
-  /**
-   * Retrieve product catalog from integration service.
-   *
-   * @return Product catalog
-   */
-  Mono<ProductCatalog> pullProductCatalog(ProductCatalogIngestPullRequest ingestPullRequest);
+
+    /**
+     * Retrieve product catalog from integration service.
+     *
+     * @return Product catalog
+     */
+    Mono<ProductCatalog> pullProductCatalog(ProductCatalogIngestPullRequest ingestPullRequest);
 }

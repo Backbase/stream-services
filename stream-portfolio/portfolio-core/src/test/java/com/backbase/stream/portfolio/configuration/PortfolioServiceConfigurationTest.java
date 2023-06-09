@@ -13,25 +13,27 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
  */
 class PortfolioServiceConfigurationTest {
 
-  @Test
-  void shouldCreatePortfolioSagas() {
-    ApplicationContextRunner contextRunner =
-        new ApplicationContextRunner()
-            .withConfiguration(
-                UserConfigurations.of(
-                    PortfolioServiceConfiguration.class, LimitedAutoConfiguration.class));
+    @Test
+    void shouldCreatePortfolioSagas() {
+        ApplicationContextRunner contextRunner =
+            new ApplicationContextRunner()
+                .withConfiguration(
+                    UserConfigurations.of(
+                        PortfolioServiceConfiguration.class, LimitedAutoConfiguration.class));
 
-    contextRunner.run(
-        (context) -> {
-          Throwable startupFailure = context.getStartupFailure();
+        contextRunner.run(
+            (context) -> {
+                Throwable startupFailure = context.getStartupFailure();
 
-          Assertions.assertNull(startupFailure);
-          Assertions.assertTrue(context.containsBean("portfolioReactiveService"));
-          Assertions.assertTrue(context.containsBean("portfolioIngestionReactiveService"));
-          Assertions.assertTrue(context.containsBean("instrumentIngestionReactiveService"));
-        });
-  }
+                Assertions.assertNull(startupFailure);
+                Assertions.assertTrue(context.containsBean("portfolioReactiveService"));
+                Assertions.assertTrue(context.containsBean("portfolioIngestionReactiveService"));
+                Assertions.assertTrue(context.containsBean("instrumentIngestionReactiveService"));
+            });
+    }
 
-  @SpringBootApplication(scanBasePackages = {"com.backbase.stream.portfolio"})
-  public static class LimitedAutoConfiguration {}
+    @SpringBootApplication(scanBasePackages = {"com.backbase.stream.portfolio"})
+    public static class LimitedAutoConfiguration {
+
+    }
 }

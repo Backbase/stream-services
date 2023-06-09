@@ -23,72 +23,73 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @EnableConfigurationProperties(ProductConfigurationProperties.class)
 public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
-  private final ProductConfigurationProperties configProperties;
-  private final ProductIngestionService productIngestionService;
-  private final ProductGroupMapper mapper;
-  private final EventBus eventBus;
 
-  /**
-   * Handles ProductsPullEvent.
-   *
-   * @param envelopedEvent EnvelopedEvent<ProductsPullEvent>
-   */
-  @Override
-  public void handle(EnvelopedEvent<ProductPullEvent> envelopedEvent) {
-    buildRequest(envelopedEvent.getEvent())
-        .flatMap(productIngestionService::ingestPull)
-        .doOnError(this::handleError)
-        .subscribe(this::handleResponse);
-  }
+    private final ProductConfigurationProperties configProperties;
+    private final ProductIngestionService productIngestionService;
+    private final ProductGroupMapper mapper;
+    private final EventBus eventBus;
 
-  /**
-   * Builds ingestion request for downstream service.
-   *
-   * @param event ProductsPullEvent
-   * @return ProductPullRequest
-   */
-  private Mono<ProductIngestPullRequest> buildRequest(ProductPullEvent event) {
-    return Mono.just(
-        ProductIngestPullRequest.builder()
-            .legalEntityExternalId(event.getLegalEntityExternalId())
-            .build());
-  }
-
-  /**
-   * Handles reponse from ingestion service.
-   *
-   * @param response ProductIngestResponse
-   */
-  private void handleResponse(ProductIngestResponse response) {
-    if (Boolean.FALSE.equals(configProperties.getEvents().getEnableCompleted())) {
-      return;
+    /**
+     * Handles ProductsPullEvent.
+     *
+     * @param envelopedEvent EnvelopedEvent<ProductsPullEvent>
+     */
+    @Override
+    public void handle(EnvelopedEvent<ProductPullEvent> envelopedEvent) {
+        buildRequest(envelopedEvent.getEvent())
+            .flatMap(productIngestionService::ingestPull)
+            .doOnError(this::handleError)
+            .subscribe(this::handleResponse);
     }
-    ProductCompletedEvent event =
-        new ProductCompletedEvent()
-            .withProductGroups(
-                response.getProductGroups().stream()
-                    .map(productGroup -> mapper.mapStreamToEvent(productGroup))
-                    .collect(Collectors.toList()));
 
-    EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
-    envelopedEvent.setEvent(event);
-    eventBus.emitEvent(envelopedEvent);
-  }
-
-  /**
-   * Handles error from ingestion service.
-   *
-   * @param ex Throwable
-   */
-  private void handleError(Throwable ex) {
-    log.error("Error ingesting legal entity using the Pull event: {}", ex.getMessage());
-
-    if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
-      ProductFailedEvent event = new ProductFailedEvent().withMessage(ex.getMessage());
-
-      EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
-      envelopedEvent.setEvent(event);
-      eventBus.emitEvent(envelopedEvent);
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param event ProductsPullEvent
+     * @return ProductPullRequest
+     */
+    private Mono<ProductIngestPullRequest> buildRequest(ProductPullEvent event) {
+        return Mono.just(
+            ProductIngestPullRequest.builder()
+                .legalEntityExternalId(event.getLegalEntityExternalId())
+                .build());
     }
-  }
+
+    /**
+     * Handles reponse from ingestion service.
+     *
+     * @param response ProductIngestResponse
+     */
+    private void handleResponse(ProductIngestResponse response) {
+        if (Boolean.FALSE.equals(configProperties.getEvents().getEnableCompleted())) {
+            return;
+        }
+        ProductCompletedEvent event =
+            new ProductCompletedEvent()
+                .withProductGroups(
+                    response.getProductGroups().stream()
+                        .map(productGroup -> mapper.mapStreamToEvent(productGroup))
+                        .collect(Collectors.toList()));
+
+        EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(event);
+        eventBus.emitEvent(envelopedEvent);
+    }
+
+    /**
+     * Handles error from ingestion service.
+     *
+     * @param ex Throwable
+     */
+    private void handleError(Throwable ex) {
+        log.error("Error ingesting legal entity using the Pull event: {}", ex.getMessage());
+
+        if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
+            ProductFailedEvent event = new ProductFailedEvent().withMessage(ex.getMessage());
+
+            EnvelopedEvent<ProductFailedEvent> envelopedEvent = new EnvelopedEvent<>();
+            envelopedEvent.setEvent(event);
+            eventBus.emitEvent(envelopedEvent);
+        }
+    }
 }

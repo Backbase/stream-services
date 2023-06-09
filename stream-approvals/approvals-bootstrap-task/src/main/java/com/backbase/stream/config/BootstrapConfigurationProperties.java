@@ -14,5 +14,6 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "bootstrap", ignoreInvalidFields = true)
 public class BootstrapConfigurationProperties {
 
-  @NotNull private List<Approval> approvals;
+    @NotNull
+    private List<Approval> approvals;
 }

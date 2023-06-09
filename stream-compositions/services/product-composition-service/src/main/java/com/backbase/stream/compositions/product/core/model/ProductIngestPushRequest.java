@@ -9,7 +9,8 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class ProductIngestPushRequest {
-  private String eventId;
-  private ProductGroup productGroup;
-  private String source;
+
+    private String eventId;
+    private ProductGroup productGroup;
+    private String source;
 }

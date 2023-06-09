@@ -16,39 +16,39 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("backbase.communication.services.approval")
 public class ApprovalClientConfig extends CompositeApiClientConfig {
 
-  public static final String APPROVAL_SERVICE_ID = "approval-service";
+    public static final String APPROVAL_SERVICE_ID = "approval-service";
 
-  public ApprovalClientConfig() {
-    super(APPROVAL_SERVICE_ID);
-  }
+    public ApprovalClientConfig() {
+        super(APPROVAL_SERVICE_ID);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public ApiClient approvalsApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-    return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public ApiClient approvalsApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public ApprovalTypesApi approvalTypesApi(ApiClient approvalsApiClient) {
-    return new ApprovalTypesApi(approvalsApiClient);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public ApprovalTypesApi approvalTypesApi(ApiClient approvalsApiClient) {
+        return new ApprovalTypesApi(approvalsApiClient);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi(ApiClient approvalsApiClient) {
-    return new ApprovalTypeAssignmentsApi(approvalsApiClient);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi(ApiClient approvalsApiClient) {
+        return new ApprovalTypeAssignmentsApi(approvalsApiClient);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public PoliciesApi policiesApi(ApiClient approvalsApiClient) {
-    return new PoliciesApi(approvalsApiClient);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public PoliciesApi policiesApi(ApiClient approvalsApiClient) {
+        return new PoliciesApi(approvalsApiClient);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public PolicyAssignmentsApi policyAssignmentsApi(ApiClient approvalsApiClient) {
-    return new PolicyAssignmentsApi(approvalsApiClient);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public PolicyAssignmentsApi policyAssignmentsApi(ApiClient approvalsApiClient) {
+        return new PolicyAssignmentsApi(approvalsApiClient);
+    }
 }

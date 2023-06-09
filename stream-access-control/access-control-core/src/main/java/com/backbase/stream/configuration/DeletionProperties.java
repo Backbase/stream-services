@@ -9,11 +9,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("backbase.stream.dbs.deletion")
 public class DeletionProperties {
 
-  /** The function group item type to delete. */
-  private FunctionGroupItemType functionGroupItemType = FunctionGroupItemType.NONE;
+    /**
+     * The function group item type to delete.
+     */
+    private FunctionGroupItemType functionGroupItemType = FunctionGroupItemType.NONE;
 
-  public enum FunctionGroupItemType {
-    NONE,
-    TEMPLATE
-  }
+    public enum FunctionGroupItemType {
+        NONE,
+        TEMPLATE
+    }
 }

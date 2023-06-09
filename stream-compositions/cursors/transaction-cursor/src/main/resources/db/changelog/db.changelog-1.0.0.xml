@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="initial_001" context="initial" author="backbase">
+    <changeSet author="backbase" context="initial" id="initial_001">
         <comment>create the txn_cursor table</comment>
-        <createTable tableName="txn_cursor" remarks="Table to store the transaction cursor">
+        <createTable remarks="Table to store the transaction cursor" tableName="txn_cursor">
             <column name="id" type="varchar(36)">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_txn_cursor"/>
             </column>
-            <column name="arrangement_id" type="varchar(36)" remarks="Arrangement ID">
+            <column name="arrangement_id" remarks="Arrangement ID" type="varchar(36)">
                 <constraints nullable="false" unique="true" uniqueConstraintName="arrangement_id_UNIQUE"/>
             </column>
-            <column name="ext_arrangement_id" type="varchar(50)" remarks="External Arrangement ID">
+            <column name="ext_arrangement_id" remarks="External Arrangement ID" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
-            <column name="last_txn_date" type="datetime" remarks="Last Transaction Date"/>
-            <column name="last_txn_ids" type="varchar(4000)" remarks="Last Transaction IDs"/>
-            <column name="legal_entity_id" type="varchar(36)" remarks="Legal Entity ID">
+            <column name="last_txn_date" remarks="Last Transaction Date" type="datetime"/>
+            <column name="last_txn_ids" remarks="Last Transaction IDs" type="varchar(4000)"/>
+            <column name="legal_entity_id" remarks="Legal Entity ID" type="varchar(36)">
                 <constraints nullable="false"/>
             </column>
-            <column name="additions" type="clob" remarks="Additions"/>
-            <column name="status" type="varchar(45)" remarks="Status"/>
+            <column name="additions" remarks="Additions" type="clob"/>
+            <column name="status" remarks="Status" type="varchar(45)"/>
         </createTable>
     </changeSet>
 

@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <artifactId>cursors-api</artifactId>
+
     <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>transaction-cursor-api</module>
+    </modules>
+    <name>Stream :: Compositions :: API :: Cursor</name>
+
+    <packaging>pom</packaging>
 
     <parent>
         <artifactId>api</artifactId>
         <groupId>com.backbase.stream.compositions</groupId>
         <version>3.37.1</version>
     </parent>
-
-    <artifactId>cursors-api</artifactId>
-    <packaging>pom</packaging>
-
-    <name>Stream :: Compositions :: API :: Cursor</name>
-
-    <modules>
-        <module>transaction-cursor-api</module>
-    </modules>
 </project>

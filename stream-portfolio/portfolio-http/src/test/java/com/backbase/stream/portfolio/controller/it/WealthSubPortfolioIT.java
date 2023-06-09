@@ -27,90 +27,92 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({"it"})
 class WealthSubPortfolioIT {
-  @Autowired private WebTestClient webTestClient;
 
-  @Test
-  void shouldIngestRegionBundles() throws Exception {
-    // Given
-    setupWireMock();
+    @Autowired
+    private WebTestClient webTestClient;
 
-    List<SubPortfolioBundle> subPortfolioBundles = PortfolioHttpTestUtil.getSubPortfolios();
+    @Test
+    void shouldIngestRegionBundles() throws Exception {
+        // Given
+        setupWireMock();
 
-    // When
-    webTestClient
-        .post()
-        .uri("/portfolios/sub-portfolios/batch")
-        .header("Content-Type", "application/json")
-        .header(X_TID_HEADER_NAME, X_TID_HEADER_VALUE)
-        .bodyValue(subPortfolioBundles)
-        .exchange()
-        .expectStatus()
-        .isEqualTo(200);
+        List<SubPortfolioBundle> subPortfolioBundles = PortfolioHttpTestUtil.getSubPortfolios();
 
-    // Then
-    WireMock.verify(
-        WireMock.getRequestedFor(
-                WireMock.urlEqualTo(
-                    "/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804"))
-            .withHeader(X_TID_HEADER_NAME, WireMock.equalTo(X_TID_HEADER_VALUE)));
+        // When
+        webTestClient
+            .post()
+            .uri("/portfolios/sub-portfolios/batch")
+            .header("Content-Type", "application/json")
+            .header(X_TID_HEADER_NAME, X_TID_HEADER_VALUE)
+            .bodyValue(subPortfolioBundles)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(200);
 
-    Assertions.assertTrue(WireMock.findUnmatchedRequests().isEmpty());
-  }
+        // Then
+        WireMock.verify(
+            WireMock.getRequestedFor(
+                    WireMock.urlEqualTo(
+                        "/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804"))
+                .withHeader(X_TID_HEADER_NAME, WireMock.equalTo(X_TID_HEADER_VALUE)));
 
-  private void setupWireMock() {
-    WireMock.stubFor(
-        WireMock.post("/oauth/token")
-            .willReturn(
-                WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                    .withBody(
-                        "{\"access_token\":"
-                            + " \"access-token\",\"expires_in\":"
-                            + " 600,\"refresh_expires_in\":"
-                            + " 1800,\"refresh_token\":"
-                            + " \"refresh-token\",\"token_type\":"
-                            + " \"bearer\",\"id_token\":"
-                            + " \"id-token\",\"not-before-policy\":"
-                            + " 1633622545,\"session_state\":"
-                            + " \"72a28739-3d20-4965-bd86-64410df53d04\",\"scope\":"
-                            + " \"openid\"}")));
+        Assertions.assertTrue(WireMock.findUnmatchedRequests().isEmpty());
+    }
 
-    WireMock.stubFor(
-        WireMock.get("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804")
-            .willReturn(
-                WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                    .withBody(
-                        "{\"code\":\"1234\", \"name\": \"testName\","
-                            + " \"valuation\": {\"amount\": 34.5,"
-                            + " \"currencyCode\": \"EUR\"},"
-                            + " \"performance\": 54.6, \"percentOfParent\":"
-                            + " 32.5}")));
+    private void setupWireMock() {
+        WireMock.stubFor(
+            WireMock.post("/oauth/token")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(
+                            "{\"access_token\":"
+                                + " \"access-token\",\"expires_in\":"
+                                + " 600,\"refresh_expires_in\":"
+                                + " 1800,\"refresh_token\":"
+                                + " \"refresh-token\",\"token_type\":"
+                                + " \"bearer\",\"id_token\":"
+                                + " \"id-token\",\"not-before-policy\":"
+                                + " 1633622545,\"session_state\":"
+                                + " \"72a28739-3d20-4965-bd86-64410df53d04\",\"scope\":"
+                                + " \"openid\"}")));
 
-    WireMock.stubFor(
-        WireMock.get("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427805")
-            .willReturn(
-                WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                    .withBody(
-                        "{\"code\":\"1234\", \"name\": \"testName\","
-                            + " \"valuation\": {\"amount\": 34.5,"
-                            + " \"currencyCode\": \"EUR\"},"
-                            + " \"performance\": 54.6, \"percentOfParent\":"
-                            + " 32.5}")));
+        WireMock.stubFor(
+            WireMock.get("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(
+                            "{\"code\":\"1234\", \"name\": \"testName\","
+                                + " \"valuation\": {\"amount\": 34.5,"
+                                + " \"currencyCode\": \"EUR\"},"
+                                + " \"performance\": 54.6, \"percentOfParent\":"
+                                + " 32.5}")));
 
-    WireMock.stubFor(
-        WireMock.put("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804")
-            .willReturn(
-                WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                    .withBody("")));
+        WireMock.stubFor(
+            WireMock.get("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427805")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(
+                            "{\"code\":\"1234\", \"name\": \"testName\","
+                                + " \"valuation\": {\"amount\": 34.5,"
+                                + " \"currencyCode\": \"EUR\"},"
+                                + " \"performance\": 54.6, \"percentOfParent\":"
+                                + " 32.5}")));
 
-    WireMock.stubFor(
-        WireMock.put("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427805")
-            .willReturn(
-                WireMock.aResponse()
-                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                    .withBody("")));
-  }
+        WireMock.stubFor(
+            WireMock.put("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427804")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("")));
+
+        WireMock.stubFor(
+            WireMock.put("/portfolio/integration-api/v1/portfolios/1234/sub-portfolios/1427805")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("")));
+    }
 }

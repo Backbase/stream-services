@@ -22,46 +22,50 @@ import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class ArrangementSubControllerTest {
-  @InjectMocks ArrangementSubController arrangementSubController;
 
-  @Mock ArrangementIngestionService arrangementIngestionService;
+    @InjectMocks
+    ArrangementSubController arrangementSubController;
 
-  @Mock ArrangementRestMapper arrangementRestMapper;
+    @Mock
+    ArrangementIngestionService arrangementIngestionService;
 
-  @Test
-  void pullIngestArrangement_Success() {
-    ArrangementPullIngestionRequest request = new ArrangementPullIngestionRequest();
-    ArrangementIngestPullRequest pullRequest = ArrangementIngestPullRequest.builder().build();
+    @Mock
+    ArrangementRestMapper arrangementRestMapper;
 
-    when(arrangementRestMapper.mapPullRequest(request)).thenReturn(pullRequest);
+    @Test
+    void pullIngestArrangement_Success() {
+        ArrangementPullIngestionRequest request = new ArrangementPullIngestionRequest();
+        ArrangementIngestPullRequest pullRequest = ArrangementIngestPullRequest.builder().build();
 
-    ArrangementIngestResponse ingestResponse = ArrangementIngestResponse.builder().build();
-    when(arrangementIngestionService.ingestPull(pullRequest)).thenReturn(Mono.just(ingestResponse));
+        when(arrangementRestMapper.mapPullRequest(request)).thenReturn(pullRequest);
 
-    ResponseEntity<ArrangementIngestionResponse> responseEntity = mock(ResponseEntity.class);
-    when(arrangementRestMapper.mapResponse(ingestResponse)).thenReturn(responseEntity);
+        ArrangementIngestResponse ingestResponse = ArrangementIngestResponse.builder().build();
+        when(arrangementIngestionService.ingestPull(pullRequest)).thenReturn(Mono.just(ingestResponse));
 
-    Mono<ResponseEntity<ArrangementIngestionResponse>> responseEntityMono =
-        arrangementSubController.pullIngestArrangement(Mono.just(request), null);
+        ResponseEntity<ArrangementIngestionResponse> responseEntity = mock(ResponseEntity.class);
+        when(arrangementRestMapper.mapResponse(ingestResponse)).thenReturn(responseEntity);
 
-    StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
-  }
+        Mono<ResponseEntity<ArrangementIngestionResponse>> responseEntityMono =
+            arrangementSubController.pullIngestArrangement(Mono.just(request), null);
 
-  @Test
-  void pushIngestArrangements_Success() {
-    ArrangementPushIngestionRequest request = new ArrangementPushIngestionRequest();
-    ArrangementIngestPushRequest pushRequest = ArrangementIngestPushRequest.builder().build();
-    when(arrangementRestMapper.mapPushRequest(request)).thenReturn(pushRequest);
+        StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
+    }
 
-    ArrangementIngestResponse ingestResponse = ArrangementIngestResponse.builder().build();
-    when(arrangementIngestionService.ingestPush(pushRequest)).thenReturn(Mono.just(ingestResponse));
+    @Test
+    void pushIngestArrangements_Success() {
+        ArrangementPushIngestionRequest request = new ArrangementPushIngestionRequest();
+        ArrangementIngestPushRequest pushRequest = ArrangementIngestPushRequest.builder().build();
+        when(arrangementRestMapper.mapPushRequest(request)).thenReturn(pushRequest);
 
-    ResponseEntity<ArrangementIngestionResponse> responseEntity = mock(ResponseEntity.class);
-    when(arrangementRestMapper.mapResponse(ingestResponse)).thenReturn(responseEntity);
+        ArrangementIngestResponse ingestResponse = ArrangementIngestResponse.builder().build();
+        when(arrangementIngestionService.ingestPush(pushRequest)).thenReturn(Mono.just(ingestResponse));
 
-    Mono<ResponseEntity<ArrangementIngestionResponse>> responseEntityMono =
-        arrangementSubController.pushIngestArrangement(Mono.just(request), null);
+        ResponseEntity<ArrangementIngestionResponse> responseEntity = mock(ResponseEntity.class);
+        when(arrangementRestMapper.mapResponse(ingestResponse)).thenReturn(responseEntity);
 
-    StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
-  }
+        Mono<ResponseEntity<ArrangementIngestionResponse>> responseEntityMono =
+            arrangementSubController.pushIngestArrangement(Mono.just(request), null);
+
+        StepVerifier.create(responseEntityMono).expectNext(responseEntity).verifyComplete();
+    }
 }

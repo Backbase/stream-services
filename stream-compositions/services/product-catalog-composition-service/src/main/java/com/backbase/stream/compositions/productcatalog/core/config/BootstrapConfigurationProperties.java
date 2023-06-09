@@ -11,5 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "bootstrap", ignoreInvalidFields = true)
 public class BootstrapConfigurationProperties {
-  private ProductCatalog productCatalog;
+
+    private ProductCatalog productCatalog;
 }

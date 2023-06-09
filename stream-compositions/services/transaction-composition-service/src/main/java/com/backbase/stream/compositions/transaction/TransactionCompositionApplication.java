@@ -9,7 +9,8 @@ import org.springframework.context.annotation.ComponentScan;
 @SpringBootApplication
 @ComponentScan("com.backbase.stream")
 public class TransactionCompositionApplication {
-  public static void main(String[] args) {
-    SpringApplication.run(TransactionCompositionApplication.class, args);
-  }
+
+    public static void main(String[] args) {
+        SpringApplication.run(TransactionCompositionApplication.class, args);
+    }
 }

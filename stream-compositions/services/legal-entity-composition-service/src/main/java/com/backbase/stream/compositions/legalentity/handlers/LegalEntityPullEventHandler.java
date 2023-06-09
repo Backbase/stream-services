@@ -22,73 +22,73 @@ import reactor.core.publisher.Mono;
 @EnableConfigurationProperties(LegalEntityConfigurationProperties.class)
 public class LegalEntityPullEventHandler implements EventHandler<LegalEntityPullEvent> {
 
-  private final LegalEntityConfigurationProperties configProperties;
-  private final LegalEntityIngestionService legalEntityIngestionService;
-  private final LegalEntityMapper mapper;
-  private final EventBus eventBus;
+    private final LegalEntityConfigurationProperties configProperties;
+    private final LegalEntityIngestionService legalEntityIngestionService;
+    private final LegalEntityMapper mapper;
+    private final EventBus eventBus;
 
-  /**
-   * Handles LegalEntityIngestPullEvent.
-   *
-   * @param envelopedEvent EnvelopedEvent<LegalEntityPullEvent>
-   */
-  @Override
-  public void handle(EnvelopedEvent<LegalEntityPullEvent> envelopedEvent) {
-    legalEntityIngestionService
-        .ingestPull(buildRequest(envelopedEvent.getEvent()))
-        .doOnSuccess(this::handleResponse)
-        .onErrorResume(this::handleError)
-        .subscribe();
-  }
-
-  /**
-   * Builds ingestion request for downstream service.
-   *
-   * @param event LegalEntityIngestPullEvent
-   * @return LegalEntityIngestPullRequest
-   */
-  private LegalEntityPullRequest buildRequest(LegalEntityPullEvent event) {
-    return mapper.mapPullRequestEventToStream(event);
-  }
-
-  /**
-   * Handles response from ingestion service.
-   *
-   * @param response LegalEntityIngestResponse
-   */
-  private void handleResponse(LegalEntityResponse response) {
-    if (Boolean.TRUE.equals(configProperties.getEvents().getEnableCompleted())) {
-      sendCompletedEvent(response);
-    }
-  }
-
-  private void sendCompletedEvent(LegalEntityResponse response) {
-    LegalEntityCompletedEvent event =
-        new LegalEntityCompletedEvent()
-            .withLegalEntity(mapper.mapStreamToEvent(response.getLegalEntity()));
-
-    EnvelopedEvent<LegalEntityCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
-    envelopedEvent.setEvent(event);
-    eventBus.emitEvent(envelopedEvent);
-  }
-
-  /**
-   * Handles error from ingestion service.
-   *
-   * @param ex Throwable
-   */
-  private Mono<LegalEntityResponse> handleError(Throwable ex) {
-    if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
-      LegalEntityFailedEvent event =
-          new LegalEntityFailedEvent()
-              .withEventId(UUID.randomUUID().toString())
-              .withMessage(ex.getMessage());
-
-      EnvelopedEvent<LegalEntityFailedEvent> envelopedEvent = new EnvelopedEvent<>();
-      envelopedEvent.setEvent(event);
-      eventBus.emitEvent(envelopedEvent);
+    /**
+     * Handles LegalEntityIngestPullEvent.
+     *
+     * @param envelopedEvent EnvelopedEvent<LegalEntityPullEvent>
+     */
+    @Override
+    public void handle(EnvelopedEvent<LegalEntityPullEvent> envelopedEvent) {
+        legalEntityIngestionService
+            .ingestPull(buildRequest(envelopedEvent.getEvent()))
+            .doOnSuccess(this::handleResponse)
+            .onErrorResume(this::handleError)
+            .subscribe();
     }
 
-    return Mono.empty();
-  }
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param event LegalEntityIngestPullEvent
+     * @return LegalEntityIngestPullRequest
+     */
+    private LegalEntityPullRequest buildRequest(LegalEntityPullEvent event) {
+        return mapper.mapPullRequestEventToStream(event);
+    }
+
+    /**
+     * Handles response from ingestion service.
+     *
+     * @param response LegalEntityIngestResponse
+     */
+    private void handleResponse(LegalEntityResponse response) {
+        if (Boolean.TRUE.equals(configProperties.getEvents().getEnableCompleted())) {
+            sendCompletedEvent(response);
+        }
+    }
+
+    private void sendCompletedEvent(LegalEntityResponse response) {
+        LegalEntityCompletedEvent event =
+            new LegalEntityCompletedEvent()
+                .withLegalEntity(mapper.mapStreamToEvent(response.getLegalEntity()));
+
+        EnvelopedEvent<LegalEntityCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(event);
+        eventBus.emitEvent(envelopedEvent);
+    }
+
+    /**
+     * Handles error from ingestion service.
+     *
+     * @param ex Throwable
+     */
+    private Mono<LegalEntityResponse> handleError(Throwable ex) {
+        if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
+            LegalEntityFailedEvent event =
+                new LegalEntityFailedEvent()
+                    .withEventId(UUID.randomUUID().toString())
+                    .withMessage(ex.getMessage());
+
+            EnvelopedEvent<LegalEntityFailedEvent> envelopedEvent = new EnvelopedEvent<>();
+            envelopedEvent.setEvent(event);
+            eventBus.emitEvent(envelopedEvent);
+        }
+
+        return Mono.empty();
+    }
 }

@@ -8,16 +8,16 @@ import lombok.Data;
 @Data
 public class ContactsTask extends StreamTask {
 
-  private ContactsBulkPostRequestBody data;
-  private ContactsBulkPostResponseBody response;
+    private ContactsBulkPostRequestBody data;
+    private ContactsBulkPostResponseBody response;
 
-  public ContactsTask(String unitOfWorkId, ContactsBulkPostRequestBody data) {
-    super(unitOfWorkId);
-    this.data = data;
-  }
+    public ContactsTask(String unitOfWorkId, ContactsBulkPostRequestBody data) {
+        super(unitOfWorkId);
+        this.data = data;
+    }
 
-  @Override
-  public String getName() {
-    return "contact";
-  }
+    @Override
+    public String getName() {
+        return "contact";
+    }
 }

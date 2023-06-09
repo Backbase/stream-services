@@ -1,18 +1,18 @@
 <assembly xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
-          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
-    <id>api</id>
-    <formats>
-        <format>zip</format>
-    </formats>
-    <includeBaseDirectory>false</includeBaseDirectory>
+    xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+    xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}</directory>
-            <outputDirectory>${artifactId}</outputDirectory>
             <includes>
                 <include>*.yaml</include>
             </includes>
+            <outputDirectory>${artifactId}</outputDirectory>
         </fileSet>
     </fileSets>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <id>api</id>
+    <includeBaseDirectory>false</includeBaseDirectory>
 </assembly>

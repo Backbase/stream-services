@@ -8,12 +8,12 @@ import lombok.Getter;
 @Getter
 public class UserUpsertException extends RuntimeException {
 
-  private final List<User> users;
-  private final List<BatchResponseItem> batchResponseItem;
+    private final List<User> users;
+    private final List<BatchResponseItem> batchResponseItem;
 
-  public UserUpsertException(
-      String s, List<User> current, List<BatchResponseItem> batchResponseItem) {
-    this.users = current;
-    this.batchResponseItem = batchResponseItem;
-  }
+    public UserUpsertException(
+        String s, List<User> current, List<BatchResponseItem> batchResponseItem) {
+        this.users = current;
+        this.batchResponseItem = batchResponseItem;
+    }
 }

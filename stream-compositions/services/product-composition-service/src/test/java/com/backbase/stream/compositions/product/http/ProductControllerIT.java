@@ -58,248 +58,254 @@ import reactor.core.publisher.Mono;
 @Slf4j
 class ProductControllerIT extends IntegrationTest {
 
-  private static final int INTEGRATION_SERVICE_PORT = 18000;
-  private static final int TRANSACTION_SERVICE_PORT = 12000;
-  private static final int PAYMENT_ORDER_SERVICE_PORT = 13000;
-  private static BrokerService broker;
+    private static final int INTEGRATION_SERVICE_PORT = 18000;
+    private static final int TRANSACTION_SERVICE_PORT = 12000;
+    private static final int PAYMENT_ORDER_SERVICE_PORT = 13000;
+    private static BrokerService broker;
 
-  @MockBean
-  @Qualifier("batchProductIngestionSaga")
-  BatchProductIngestionSaga batchProductIngestionSaga;
+    @MockBean
+    @Qualifier("batchProductIngestionSaga")
+    BatchProductIngestionSaga batchProductIngestionSaga;
 
-  @MockBean ArrangementService arrangementService;
-  @Autowired ProductController productController;
-  @Autowired ObjectMapper objectMapper;
-  private ClientAndServer integrationServer;
-  private ClientAndServer transactionServer;
-  private ClientAndServer paymentOrderServer;
-  private MockServerClient integrationServerClient;
-  private MockServerClient transactionServerClient;
-  private MockServerClient paymentOrderServerClient;
+    @MockBean
+    ArrangementService arrangementService;
+    @Autowired
+    ProductController productController;
+    @Autowired
+    ObjectMapper objectMapper;
+    private ClientAndServer integrationServer;
+    private ClientAndServer transactionServer;
+    private ClientAndServer paymentOrderServer;
+    private MockServerClient integrationServerClient;
+    private MockServerClient transactionServerClient;
+    private MockServerClient paymentOrderServerClient;
 
-  @BeforeAll
-  static void initActiveMqBroker() throws Exception {
-    broker = new BrokerService();
-    broker.setBrokerName("activemq");
-    broker.setPersistent(false);
-    broker.start();
-    broker.waitUntilStarted();
-  }
+    @BeforeAll
+    static void initActiveMqBroker() throws Exception {
+        broker = new BrokerService();
+        broker.setBrokerName("activemq");
+        broker.setPersistent(false);
+        broker.start();
+        broker.waitUntilStarted();
+    }
 
-  @BeforeEach
-  void initializeIntegrationServer() throws IOException {
-    integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
-    integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
-    integrationServerClient
-        .when(request().withMethod("POST").withPath("/service-api/v2/product-group"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(readContentFromClasspath("integration-data/response.json")));
+    @BeforeEach
+    void initializeIntegrationServer() throws IOException {
+        integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
+        integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
+        integrationServerClient
+            .when(request().withMethod("POST").withPath("/service-api/v2/product-group"))
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withContentType(MediaType.APPLICATION_JSON)
+                    .withBody(readContentFromClasspath("integration-data/response.json")));
 
-    integrationServerClient
-        .when(request().withMethod("PUT").withPath("/service-api/v2/arrangement"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(readContentFromClasspath("integration-data/arrangement-response.json")));
-  }
+        integrationServerClient
+            .when(request().withMethod("PUT").withPath("/service-api/v2/arrangement"))
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withContentType(MediaType.APPLICATION_JSON)
+                    .withBody(readContentFromClasspath("integration-data/arrangement-response.json")));
+    }
 
-  @BeforeEach
-  void initializeTransactionServer() throws JsonProcessingException {
-    transactionServer = startClientAndServer(TRANSACTION_SERVICE_PORT);
-    transactionServerClient = new MockServerClient("localhost", TRANSACTION_SERVICE_PORT);
-    transactionServerClient
-        .when(request().withMethod("POST").withPath("/service-api/v2/ingest/pull"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(
-                    objectMapper.writeValueAsString(
-                        new TransactionIngestionResponse()
-                            .withTransactions(
-                                List.of(
-                                    new TransactionsPostResponseBody()
-                                        .withId("id")
-                                        .withExternalId("externalId"))))));
-  }
+    @BeforeEach
+    void initializeTransactionServer() throws JsonProcessingException {
+        transactionServer = startClientAndServer(TRANSACTION_SERVICE_PORT);
+        transactionServerClient = new MockServerClient("localhost", TRANSACTION_SERVICE_PORT);
+        transactionServerClient
+            .when(request().withMethod("POST").withPath("/service-api/v2/ingest/pull"))
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withContentType(MediaType.APPLICATION_JSON)
+                    .withBody(
+                        objectMapper.writeValueAsString(
+                            new TransactionIngestionResponse()
+                                .withTransactions(
+                                    List.of(
+                                        new TransactionsPostResponseBody()
+                                            .withId("id")
+                                            .withExternalId("externalId"))))));
+    }
 
-  @BeforeEach
-  void initializePaymentOrderServer() throws JsonProcessingException {
-    paymentOrderServer = startClientAndServer(PAYMENT_ORDER_SERVICE_PORT);
-    paymentOrderServerClient = new MockServerClient("localhost", PAYMENT_ORDER_SERVICE_PORT);
-    paymentOrderServerClient
-        .when(request().withMethod("POST").withPath("/service-api/v2/ingest/pull"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(
-                    objectMapper.writeValueAsString(
-                        new PaymentOrderIngestionResponse()
-                            .withNewPaymentOrder(
-                                List.of(new PaymentOrderPostResponse().withId("id"))))));
-  }
+    @BeforeEach
+    void initializePaymentOrderServer() throws JsonProcessingException {
+        paymentOrderServer = startClientAndServer(PAYMENT_ORDER_SERVICE_PORT);
+        paymentOrderServerClient = new MockServerClient("localhost", PAYMENT_ORDER_SERVICE_PORT);
+        paymentOrderServerClient
+            .when(request().withMethod("POST").withPath("/service-api/v2/ingest/pull"))
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withContentType(MediaType.APPLICATION_JSON)
+                    .withBody(
+                        objectMapper.writeValueAsString(
+                            new PaymentOrderIngestionResponse()
+                                .withNewPaymentOrder(
+                                    List.of(new PaymentOrderPostResponse().withId("id"))))));
+    }
 
-  @AfterEach
-  void stopMockServer() {
-    integrationServer.stop();
-    while (!integrationServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {}
-    transactionServer.stop();
-    while (!transactionServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {}
-    paymentOrderServer.stop();
-    while (!paymentOrderServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {}
-  }
+    @AfterEach
+    void stopMockServer() {
+        integrationServer.stop();
+        while (!integrationServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
+        }
+        transactionServer.stop();
+        while (!transactionServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
+        }
+        paymentOrderServer.stop();
+        while (!paymentOrderServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
+        }
+    }
 
-  @Test
-  void pullIngestProduct_Success() throws Exception {
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode node =
-        mapper
-            .readTree(readContentFromClasspath("integration-data/response.json"))
-            .get("productGroups")
-            .get(0);
-    ProductGroup productGroup = mapper.treeToValue(node, ProductGroup.class);
-    productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
+    @Test
+    void pullIngestProduct_Success() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node =
+            mapper
+                .readTree(readContentFromClasspath("integration-data/response.json"))
+                .get("productGroups")
+                .get(0);
+        ProductGroup productGroup = mapper.treeToValue(node, ProductGroup.class);
+        productGroup.setServiceAgreement(new ServiceAgreement().internalId("sa_internalId"));
 
-    ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
-    Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
+        ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
+        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-    when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
-        .thenReturn(productGroupTaskMono);
+        when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+            .thenReturn(productGroupTaskMono);
 
-    when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
-        .thenReturn(
-            Mono.just(
-                new BatchProductGroupTask()
-                    .data(
-                        new BatchProductGroup()
-                            .productGroups(List.of(productGroup))
-                            .serviceAgreement(productGroup.getServiceAgreement()))));
+        when(batchProductIngestionSaga.process(any(BatchProductGroupTask.class)))
+            .thenReturn(
+                Mono.just(
+                    new BatchProductGroupTask()
+                        .data(
+                            new BatchProductGroup()
+                                .productGroups(List.of(productGroup))
+                                .serviceAgreement(productGroup.getServiceAgreement()))));
 
-    ProductPullIngestionRequest pullIngestionRequest =
-        new ProductPullIngestionRequest()
-            .withLegalEntityExternalId("leId")
-            .withServiceAgreementExternalId("saExId")
-            .withServiceAgreementInternalId("saId")
-            .withUserExternalId("userId")
-            .withReferenceJobRoleNames(List.of("Admin Role"))
-            .withMembershipAccounts(null)
-            .withAdditions(Map.of());
+        ProductPullIngestionRequest pullIngestionRequest =
+            new ProductPullIngestionRequest()
+                .withLegalEntityExternalId("leId")
+                .withServiceAgreementExternalId("saExId")
+                .withServiceAgreementInternalId("saId")
+                .withUserExternalId("userId")
+                .withReferenceJobRoleNames(List.of("Admin Role"))
+                .withMembershipAccounts(null)
+                .withAdditions(Map.of());
 
-    URI uri = URI.create("/service-api/v2/ingest/pull");
-    WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+        URI uri = URI.create("/service-api/v2/ingest/pull");
+        WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
-    webTestClient
-        .post()
-        .uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class)
-        .exchange()
-        .expectStatus()
-        .isCreated();
-  }
+        webTestClient
+            .post()
+            .uri(uri)
+            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+            .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class)
+            .exchange()
+            .expectStatus()
+            .isCreated();
+    }
 
-  @Test
-  void pushIngestProduct_Success() throws Exception {
-    ProductPushIngestionRequest pushIngestionRequest =
-        new ProductPushIngestionRequest()
-            .withProductGroup(
-                new com.backbase.stream.compositions.product.api.model.ProductGroup());
-    URI uri = URI.create("/service-api/v2/ingest/push");
-    WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+    @Test
+    void pushIngestProduct_Success() throws Exception {
+        ProductPushIngestionRequest pushIngestionRequest =
+            new ProductPushIngestionRequest()
+                .withProductGroup(
+                    new com.backbase.stream.compositions.product.api.model.ProductGroup());
+        URI uri = URI.create("/service-api/v2/ingest/push");
+        WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
-    webTestClient
-        .post()
-        .uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pushIngestionRequest), ProductPushIngestionRequest.class)
-        .exchange()
-        .expectStatus()
-        .is5xxServerError();
-  }
+        webTestClient
+            .post()
+            .uri(uri)
+            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+            .body(Mono.just(pushIngestionRequest), ProductPushIngestionRequest.class)
+            .exchange()
+            .expectStatus()
+            .is5xxServerError();
+    }
 
-  @Test
-  void pullIngestArrangement_Success() throws Exception {
-    when(arrangementService.updateArrangement(any()))
-        .thenReturn(Mono.just(new AccountArrangementItemPut()));
+    @Test
+    void pullIngestArrangement_Success() throws Exception {
+        when(arrangementService.updateArrangement(any()))
+            .thenReturn(Mono.just(new AccountArrangementItemPut()));
 
-    ArrangementPullIngestionRequest pullIngestionRequest =
-        new ArrangementPullIngestionRequest()
-            .withInternalArrangementId("arrangementId")
-            .withExternalArrangementId("externalArrangementId")
-            .withAdditions(Map.of());
+        ArrangementPullIngestionRequest pullIngestionRequest =
+            new ArrangementPullIngestionRequest()
+                .withInternalArrangementId("arrangementId")
+                .withExternalArrangementId("externalArrangementId")
+                .withAdditions(Map.of());
 
-    URI uri = URI.create("/service-api/v2/ingest/arrangement/pull");
-    WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+        URI uri = URI.create("/service-api/v2/ingest/arrangement/pull");
+        WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
-    webTestClient
-        .put()
-        .uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class)
-        .exchange()
-        .expectStatus()
-        .isOk();
-  }
+        webTestClient
+            .put()
+            .uri(uri)
+            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+            .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class)
+            .exchange()
+            .expectStatus()
+            .isOk();
+    }
 
-  @Test
-  void pullIngestArrangement_Fail() throws Exception {
-    when(arrangementService.updateArrangement(any())).thenThrow(new RuntimeException());
+    @Test
+    void pullIngestArrangement_Fail() throws Exception {
+        when(arrangementService.updateArrangement(any())).thenThrow(new RuntimeException());
 
-    ArrangementPullIngestionRequest pullIngestionRequest =
-        new ArrangementPullIngestionRequest()
-            .withInternalArrangementId("arrangementId")
-            .withExternalArrangementId("externalArrangementId")
-            .withAdditions(Map.of());
+        ArrangementPullIngestionRequest pullIngestionRequest =
+            new ArrangementPullIngestionRequest()
+                .withInternalArrangementId("arrangementId")
+                .withExternalArrangementId("externalArrangementId")
+                .withAdditions(Map.of());
 
-    URI uri = URI.create("/service-api/v2/ingest/arrangement/pull");
-    WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+        URI uri = URI.create("/service-api/v2/ingest/arrangement/pull");
+        WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
-    webTestClient
-        .put()
-        .uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class)
-        .exchange()
-        .expectStatus()
-        .is5xxServerError();
-  }
+        webTestClient
+            .put()
+            .uri(uri)
+            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+            .body(Mono.just(pullIngestionRequest), ProductPullIngestionRequest.class)
+            .exchange()
+            .expectStatus()
+            .is5xxServerError();
+    }
 
-  @Test
-  void pushIngestArrangement_Success() throws IOException {
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode node =
-        mapper
-            .readTree(readContentFromClasspath("integration-data/arrangement-response.json"))
-            .get("arrangement");
-    com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut
-        arrangementItemPut =
+    @Test
+    void pushIngestArrangement_Success() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode node =
+            mapper
+                .readTree(readContentFromClasspath("integration-data/arrangement-response.json"))
+                .get("arrangement");
+        com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut
+            arrangementItemPut =
             mapper.treeToValue(
                 node,
                 com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut.class);
 
-    when(arrangementService.updateArrangement(any()))
-        .thenReturn(Mono.just(new AccountArrangementItemPut()));
+        when(arrangementService.updateArrangement(any()))
+            .thenReturn(Mono.just(new AccountArrangementItemPut()));
 
-    ArrangementPushIngestionRequest pushIngestionRequest =
-        new ArrangementPushIngestionRequest()
-            .withInternalArrangementId("arrangementId")
-            .withArrangement(arrangementItemPut);
+        ArrangementPushIngestionRequest pushIngestionRequest =
+            new ArrangementPushIngestionRequest()
+                .withInternalArrangementId("arrangementId")
+                .withArrangement(arrangementItemPut);
 
-    URI uri = URI.create("/service-api/v2/ingest/arrangement/push");
-    WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
+        URI uri = URI.create("/service-api/v2/ingest/arrangement/push");
+        WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
-    webTestClient
-        .put()
-        .uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pushIngestionRequest), ArrangementPushIngestionRequest.class)
-        .exchange()
-        .expectStatus()
-        .isOk();
-  }
+        webTestClient
+            .put()
+            .uri(uri)
+            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+            .body(Mono.just(pushIngestionRequest), ArrangementPushIngestionRequest.class)
+            .exchange()
+            .expectStatus()
+            .isOk();
+    }
 }

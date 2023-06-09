@@ -24,65 +24,67 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class LegalEntityServiceTest {
 
-  private LegalEntityService subject;
+    private LegalEntityService subject;
 
-  @Mock private LegalEntitiesApi legalEntitiesApi;
-  @Mock private LegalEntityApi legalEntityApi;
+    @Mock
+    private LegalEntitiesApi legalEntitiesApi;
+    @Mock
+    private LegalEntityApi legalEntityApi;
 
-  private LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
+    private LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
 
-  @BeforeEach
-  void setup() {
-    subject = new LegalEntityService(legalEntitiesApi, legalEntityApi, new BatchResponseUtils());
-  }
+    @BeforeEach
+    void setup() {
+        subject = new LegalEntityService(legalEntitiesApi, legalEntityApi, new BatchResponseUtils());
+    }
 
-  @Test
-  void updateLegalEntity_success() {
-    final String externalId = "someExternalId";
-    final String internalId = "someInternalId";
-    final String oldName = "oldName";
-    final String newName = "newName";
-    LegalEntity legalEntity =
-        new LegalEntity().externalId(externalId).internalId(internalId).name(oldName);
-    LegalEntity legalEntityUpdated =
-        new LegalEntity().externalId(externalId).internalId(internalId).name(newName);
+    @Test
+    void updateLegalEntity_success() {
+        final String externalId = "someExternalId";
+        final String internalId = "someInternalId";
+        final String oldName = "oldName";
+        final String newName = "newName";
+        LegalEntity legalEntity =
+            new LegalEntity().externalId(externalId).internalId(internalId).name(oldName);
+        LegalEntity legalEntityUpdated =
+            new LegalEntity().externalId(externalId).internalId(internalId).name(newName);
 
-    LegalEntityItemBase leItemBase =
-        new LegalEntityItemBase().id(internalId).externalId(externalId).name(newName);
+        LegalEntityItemBase leItemBase =
+            new LegalEntityItemBase().id(internalId).externalId(externalId).name(newName);
 
-    BatchResponseItem batchResponseItem =
-        new BatchResponseItem().status(BatchResponseItem.StatusEnum.HTTP_STATUS_OK);
+        BatchResponseItem batchResponseItem =
+            new BatchResponseItem().status(BatchResponseItem.StatusEnum.HTTP_STATUS_OK);
 
-    when(legalEntitiesApi.putLegalEntities(anyList())).thenReturn(Flux.just(batchResponseItem));
-    when(legalEntitiesApi.getLegalEntityByExternalId(externalId)).thenReturn(Mono.just(leItemBase));
+        when(legalEntitiesApi.putLegalEntities(anyList())).thenReturn(Flux.just(batchResponseItem));
+        when(legalEntitiesApi.getLegalEntityByExternalId(externalId)).thenReturn(Mono.just(leItemBase));
 
-    Mono<LegalEntity> result = subject.putLegalEntity(legalEntity);
+        Mono<LegalEntity> result = subject.putLegalEntity(legalEntity);
 
-    StepVerifier.create(result).assertNext(assertEqualsTo(legalEntityUpdated)).verifyComplete();
-  }
+        StepVerifier.create(result).assertNext(assertEqualsTo(legalEntityUpdated)).verifyComplete();
+    }
 
-  @Test
-  void updateLegalEntity_fail() {
-    final String externalId = "someExternalId";
-    final String internalId = "someInternalId";
-    final String oldName = "oldName";
-    final String newName = "newName";
-    LegalEntity legalEntity =
-        new LegalEntity().externalId(externalId).internalId(internalId).name(oldName);
-    LegalEntity legalEntityUpdated =
-        new LegalEntity().externalId(externalId).internalId(internalId).name(newName);
+    @Test
+    void updateLegalEntity_fail() {
+        final String externalId = "someExternalId";
+        final String internalId = "someInternalId";
+        final String oldName = "oldName";
+        final String newName = "newName";
+        LegalEntity legalEntity =
+            new LegalEntity().externalId(externalId).internalId(internalId).name(oldName);
+        LegalEntity legalEntityUpdated =
+            new LegalEntity().externalId(externalId).internalId(internalId).name(newName);
 
-    LegalEntityItemBase leItemBase =
-        new LegalEntityItemBase().id(internalId).externalId(externalId).name(newName);
+        LegalEntityItemBase leItemBase =
+            new LegalEntityItemBase().id(internalId).externalId(externalId).name(newName);
 
-    BatchResponseItem batchResponseItem =
-        new BatchResponseItem().status(BatchResponseItem.StatusEnum.HTTP_STATUS_OK);
+        BatchResponseItem batchResponseItem =
+            new BatchResponseItem().status(BatchResponseItem.StatusEnum.HTTP_STATUS_OK);
 
-    when(legalEntitiesApi.putLegalEntities(anyList())).thenReturn(Flux.just(batchResponseItem));
-    when(legalEntitiesApi.getLegalEntityByExternalId(externalId)).thenReturn(Mono.just(leItemBase));
+        when(legalEntitiesApi.putLegalEntities(anyList())).thenReturn(Flux.just(batchResponseItem));
+        when(legalEntitiesApi.getLegalEntityByExternalId(externalId)).thenReturn(Mono.just(leItemBase));
 
-    Mono<LegalEntity> result = subject.putLegalEntity(legalEntity);
+        Mono<LegalEntity> result = subject.putLegalEntity(legalEntity);
 
-    StepVerifier.create(result).assertNext(assertEqualsTo(legalEntityUpdated)).verifyComplete();
-  }
+        StepVerifier.create(result).assertNext(assertEqualsTo(legalEntityUpdated)).verifyComplete();
+    }
 }

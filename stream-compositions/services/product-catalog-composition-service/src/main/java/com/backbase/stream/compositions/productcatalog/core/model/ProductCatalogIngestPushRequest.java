@@ -9,5 +9,6 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class ProductCatalogIngestPushRequest {
-  private ProductCatalog productCatalog;
+
+    private ProductCatalog productCatalog;
 }

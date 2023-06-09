@@ -13,21 +13,21 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("backbase.communication.services.limit")
 public class LimitsClientConfig extends CompositeApiClientConfig {
 
-  public static final String LIMITS_SERVICE_ID = "limit";
+    public static final String LIMITS_SERVICE_ID = "limit";
 
-  public LimitsClientConfig() {
-    super(LIMITS_SERVICE_ID);
-  }
+    public LimitsClientConfig() {
+        super(LIMITS_SERVICE_ID);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public ApiClient limitApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-    return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public ApiClient limitApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public LimitsServiceApi limitsServiceApi(ApiClient limitApiClient) {
-    return new LimitsServiceApi(limitApiClient);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public LimitsServiceApi limitsServiceApi(ApiClient limitApiClient) {
+        return new LimitsServiceApi(limitApiClient);
+    }
 }

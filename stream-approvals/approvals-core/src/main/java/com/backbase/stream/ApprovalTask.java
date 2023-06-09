@@ -11,29 +11,29 @@ import lombok.NoArgsConstructor;
 @Data
 public class ApprovalTask extends StreamTask {
 
-  private Approval approval;
+    private Approval approval;
 
-  public ApprovalTask(Approval data) {
-    super(data.getName());
-    this.approval = data;
-  }
+    public ApprovalTask(Approval data) {
+        super(data.getName());
+        this.approval = data;
+    }
 
-  public ApprovalTask(String taskId, Approval data) {
-    super(taskId);
-    this.approval = data;
-  }
+    public ApprovalTask(String taskId, Approval data) {
+        super(taskId);
+        this.approval = data;
+    }
 
-  public Approval getData() {
-    return approval;
-  }
+    public Approval getData() {
+        return approval;
+    }
 
-  public ApprovalTask data(Approval approval) {
-    this.approval = approval;
-    return this;
-  }
+    public ApprovalTask data(Approval approval) {
+        this.approval = approval;
+        return this;
+    }
 
-  @Override
-  public String getName() {
-    return getId();
-  }
+    @Override
+    public String getName() {
+        return getId();
+    }
 }

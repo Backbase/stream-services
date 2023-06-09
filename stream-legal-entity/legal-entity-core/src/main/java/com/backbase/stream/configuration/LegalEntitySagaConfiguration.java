@@ -24,59 +24,61 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import({
-  ProductConfiguration.class,
-  AccessControlConfiguration.class,
-  ProductIngestionSagaConfiguration.class,
-  LimitsServiceConfiguration.class,
-  ContactsServiceConfiguration.class
+    ProductConfiguration.class,
+    AccessControlConfiguration.class,
+    ProductIngestionSagaConfiguration.class,
+    LimitsServiceConfiguration.class,
+    ContactsServiceConfiguration.class
 })
 @EnableConfigurationProperties({LegalEntitySagaConfigurationProperties.class})
 public class LegalEntitySagaConfiguration {
 
-  @Bean
-  public LegalEntitySaga reactiveLegalEntitySaga(
-      LegalEntityService legalEntityService,
-      UserService userService,
-      UserProfileService userProfileService,
-      AccessGroupService accessGroupService,
-      ProductIngestionSaga productIngestionSaga,
-      BatchProductIngestionSaga batchProductIngestionSaga,
-      LimitsSaga limitsSaga,
-      ContactsSaga contactsSaga,
-      LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
-      ObjectMapper objectMapper) {
-    return new LegalEntitySaga(
-        legalEntityService,
-        userService,
-        userProfileService,
-        accessGroupService,
-        productIngestionSaga,
-        batchProductIngestionSaga,
-        limitsSaga,
-        contactsSaga,
-        sinkConfigurationProperties);
-  }
+    @Bean
+    public LegalEntitySaga reactiveLegalEntitySaga(
+        LegalEntityService legalEntityService,
+        UserService userService,
+        UserProfileService userProfileService,
+        AccessGroupService accessGroupService,
+        ProductIngestionSaga productIngestionSaga,
+        BatchProductIngestionSaga batchProductIngestionSaga,
+        LimitsSaga limitsSaga,
+        ContactsSaga contactsSaga,
+        LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
+        ObjectMapper objectMapper) {
+        return new LegalEntitySaga(
+            legalEntityService,
+            userService,
+            userProfileService,
+            accessGroupService,
+            productIngestionSaga,
+            batchProductIngestionSaga,
+            limitsSaga,
+            contactsSaga,
+            sinkConfigurationProperties);
+    }
 
-  @Bean
-  @ConditionalOnProperty(
-      name = "backbase.stream.persistence",
-      havingValue = "memory",
-      matchIfMissing = true)
-  public LegalEntityUnitOfWorkRepository legalEntityInMemoryUnitOfWorkRepository() {
-    return new LegalEntityInMemoryUnitOfWorkRepository();
-  }
+    @Bean
+    @ConditionalOnProperty(
+        name = "backbase.stream.persistence",
+        havingValue = "memory",
+        matchIfMissing = true)
+    public LegalEntityUnitOfWorkRepository legalEntityInMemoryUnitOfWorkRepository() {
+        return new LegalEntityInMemoryUnitOfWorkRepository();
+    }
 
-  @Bean
-  public LegalEntityUnitOfWorkExecutor legalEntityUnitOfWorkExecutor(
-      LegalEntityUnitOfWorkRepository legalEntityUnitOfWorkRepository,
-      LegalEntitySaga legalEntitySaga,
-      LegalEntitySagaConfigurationProperties configProperties) {
+    @Bean
+    public LegalEntityUnitOfWorkExecutor legalEntityUnitOfWorkExecutor(
+        LegalEntityUnitOfWorkRepository legalEntityUnitOfWorkRepository,
+        LegalEntitySaga legalEntitySaga,
+        LegalEntitySagaConfigurationProperties configProperties) {
 
-    return new LegalEntityUnitOfWorkExecutor(
-        legalEntityUnitOfWorkRepository, legalEntitySaga, configProperties);
-  }
+        return new LegalEntityUnitOfWorkExecutor(
+            legalEntityUnitOfWorkRepository, legalEntitySaga, configProperties);
+    }
 
-  public static class LegalEntityInMemoryUnitOfWorkRepository
-      extends InMemoryReactiveUnitOfWorkRepository<LegalEntityTask>
-      implements LegalEntityUnitOfWorkRepository {}
+    public static class LegalEntityInMemoryUnitOfWorkRepository
+        extends InMemoryReactiveUnitOfWorkRepository<LegalEntityTask>
+        implements LegalEntityUnitOfWorkRepository {
+
+    }
 }

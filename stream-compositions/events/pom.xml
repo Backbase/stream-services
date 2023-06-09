@@ -1,27 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <artifactId>stream-compositions</artifactId>
-        <groupId>com.backbase.stream</groupId>
-        <version>3.37.1</version>
-    </parent>
-
-    <groupId>com.backbase.stream.compositions</groupId>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <artifactId>events</artifactId>
 
-    <packaging>pom</packaging>
+    <groupId>com.backbase.stream.compositions</groupId>
 
-    <name>Stream :: Compositions :: Events</name>
-
-    <properties>
-        <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
-        <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
-        <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
-    </properties>
-
+    <modelVersion>4.0.0</modelVersion>
     <modules>
         <module>legal-entity-events</module>
         <module>product-events</module>
@@ -29,5 +13,21 @@
         <module>transaction-events</module>
         <!--        <module>payment-order-events</module>-->
     </modules>
+
+    <name>Stream :: Compositions :: Events</name>
+
+    <packaging>pom</packaging>
+
+    <parent>
+        <artifactId>stream-compositions</artifactId>
+        <groupId>com.backbase.stream</groupId>
+        <version>3.37.1</version>
+    </parent>
+
+    <properties>
+        <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
+        <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
+        <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
+    </properties>
 
 </project>

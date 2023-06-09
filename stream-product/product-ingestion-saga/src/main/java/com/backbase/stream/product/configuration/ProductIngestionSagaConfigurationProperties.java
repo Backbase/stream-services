@@ -7,12 +7,18 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("backbase.stream.product.sink")
 public class ProductIngestionSagaConfigurationProperties {
 
-  /** Enable identity integration */
-  private boolean identityEnabled = false;
+    /**
+     * Enable identity integration
+     */
+    private boolean identityEnabled = false;
 
-  /** Number of Worker Threads to Unit Of Work Executors */
-  private int unitOfWorkExecutors = 1;
+    /**
+     * Number of Worker Threads to Unit Of Work Executors
+     */
+    private int unitOfWorkExecutors = 1;
 
-  /** Number of Worker Threads for Tasks */
-  private int taskExecutors = 3;
+    /**
+     * Number of Worker Threads for Tasks
+     */
+    private int taskExecutors = 3;
 }

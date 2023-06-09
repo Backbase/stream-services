@@ -14,19 +14,20 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @AllArgsConstructor
 public class PaymentOrderPostIngestionServiceImpl implements PaymentOrderPostIngestionService {
-  private final EventBus eventBus;
 
-  private final PaymentOrderConfigurationProperties paymentOrderConfigurationProperties;
+    private final EventBus eventBus;
 
-  @Override
-  public void handleSuccess(List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses) {
-    log.info("Payment Order ingestion completed successfully.");
-    // events can be handled here as part of a different ticket.
-  }
+    private final PaymentOrderConfigurationProperties paymentOrderConfigurationProperties;
 
-  @Override
-  public Mono<List<PaymentOrderIngestDbsResponse>> handleFailure(Throwable error) {
-    // events can be handled here as part of a different ticket.
-    return Mono.empty();
-  }
+    @Override
+    public void handleSuccess(List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses) {
+        log.info("Payment Order ingestion completed successfully.");
+        // events can be handled here as part of a different ticket.
+    }
+
+    @Override
+    public Mono<List<PaymentOrderIngestDbsResponse>> handleFailure(Throwable error) {
+        // events can be handled here as part of a different ticket.
+        return Mono.empty();
+    }
 }

@@ -5,11 +5,12 @@ import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIng
 import reactor.core.publisher.Flux;
 
 public interface PaymentOrderIntegrationService {
-  /**
-   * Pulls payment order from external integration service.
-   *
-   * @param ingestPullRequest PaymentOrderIngestPullRequest
-   * @return Mono<PaymentOrderPostRequestBody>
-   */
-  Flux<PaymentOrderPostRequest> pullPaymentOrder(PaymentOrderIngestPullRequest ingestPullRequest);
+
+    /**
+     * Pulls payment order from external integration service.
+     *
+     * @param ingestPullRequest PaymentOrderIngestPullRequest
+     * @return Mono<PaymentOrderPostRequestBody>
+     */
+    Flux<PaymentOrderPostRequest> pullPaymentOrder(PaymentOrderIngestPullRequest ingestPullRequest);
 }

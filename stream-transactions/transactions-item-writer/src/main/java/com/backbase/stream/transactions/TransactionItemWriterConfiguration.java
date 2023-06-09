@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Import;
 @Import(TransactionServiceConfiguration.class)
 public class TransactionItemWriterConfiguration {
 
-  @Bean
-  public TransactionsItemWriter transactionsItemWriter(
-      TransactionUnitOfWorkExecutor transactionUnitOfWorkExecutor) {
-    return new TransactionsItemWriter(transactionUnitOfWorkExecutor);
-  }
+    @Bean
+    public TransactionsItemWriter transactionsItemWriter(
+        TransactionUnitOfWorkExecutor transactionUnitOfWorkExecutor) {
+        return new TransactionsItemWriter(transactionUnitOfWorkExecutor);
+    }
 }

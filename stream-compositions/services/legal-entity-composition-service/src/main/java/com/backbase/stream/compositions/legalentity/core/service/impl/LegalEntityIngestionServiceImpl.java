@@ -27,80 +27,84 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionService {
 
-  private final LegalEntitySaga legalEntitySaga;
-  private final LegalEntityIntegrationService legalEntityIntegrationService;
-  private final Validator validator;
-  private final LegalEntityPostIngestionService legalEntityPostIngestionService;
+    private final LegalEntitySaga legalEntitySaga;
+    private final LegalEntityIntegrationService legalEntityIntegrationService;
+    private final Validator validator;
+    private final LegalEntityPostIngestionService legalEntityPostIngestionService;
 
-  /** {@inheritDoc} */
-  public Mono<LegalEntityResponse> ingestPull(LegalEntityPullRequest ingestPullRequest) {
-    return pullLegalEntity(ingestPullRequest)
-        .flatMap(this::validate)
-        .flatMap(this::sendToDbs)
-        .flatMap(legalEntityPostIngestionService::handleSuccess)
-        .doOnError(legalEntityPostIngestionService::handleFailure);
-  }
-
-  /** {@inheritDoc} */
-  public Mono<LegalEntityResponse> ingestPush(LegalEntityPushRequest ingestPushRequest) {
-    return pushLegalEntity(ingestPushRequest)
-        .flatMap(this::validate)
-        .flatMap(this::sendToDbs)
-        .doOnSuccess(legalEntityPostIngestionService::handleSuccess);
-  }
-
-  /**
-   * Pulls and remaps legal entity from integration service.
-   *
-   * @param request LegalEntityIngestPullRequest
-   * @return LegalEntity
-   */
-  private Mono<LegalEntityResponse> pullLegalEntity(LegalEntityPullRequest request) {
-    return legalEntityIntegrationService.pullLegalEntity(request);
-  }
-
-  /**
-   * Sends Legal Entity Task to DBS for persistence.
-   *
-   * @param res LegalEntityResponse
-   * @return LegalEntity
-   */
-  private Mono<LegalEntityResponse> sendToDbs(LegalEntityResponse res) {
-    return legalEntitySaga
-        .executeTask(new LegalEntityTask(res.getLegalEntity()))
-        .map(LegalEntityTask::getData)
-        .map(
-            le ->
-                LegalEntityResponse.builder()
-                    .legalEntity(le)
-                    .membershipAccounts(res.getMembershipAccounts())
-                    .productChainEnabledFromRequest(res.getProductChainEnabledFromRequest())
-                    .build());
-  }
-
-  /**
-   * Perform any pre-processing on the data received from the downstream system
-   *
-   * @param res
-   * @return A Mono publisher for LegalEntity
-   */
-  private Mono<LegalEntityResponse> validate(LegalEntityResponse res) {
-    Set<ConstraintViolation<LegalEntity>> violations = validator.validate(res.getLegalEntity());
-
-    if (!CollectionUtils.isEmpty(violations)) {
-      List<Error> errors =
-          violations.stream()
-              .map(
-                  c -> new Error().withMessage(c.getMessage()).withKey(Error.INVALID_INPUT_MESSAGE))
-              .collect(Collectors.toList());
-      return Mono.error(new BadRequestException().withErrors(errors));
+    /**
+     * {@inheritDoc}
+     */
+    public Mono<LegalEntityResponse> ingestPull(LegalEntityPullRequest ingestPullRequest) {
+        return pullLegalEntity(ingestPullRequest)
+            .flatMap(this::validate)
+            .flatMap(this::sendToDbs)
+            .flatMap(legalEntityPostIngestionService::handleSuccess)
+            .doOnError(legalEntityPostIngestionService::handleFailure);
     }
 
-    return Mono.just(res);
-  }
+    /**
+     * {@inheritDoc}
+     */
+    public Mono<LegalEntityResponse> ingestPush(LegalEntityPushRequest ingestPushRequest) {
+        return pushLegalEntity(ingestPushRequest)
+            .flatMap(this::validate)
+            .flatMap(this::sendToDbs)
+            .doOnSuccess(legalEntityPostIngestionService::handleSuccess);
+    }
 
-  private Mono<LegalEntityResponse> pushLegalEntity(LegalEntityPushRequest legalEntityPushRequest) {
-    return Mono.just(
-        LegalEntityResponse.builder().legalEntity(legalEntityPushRequest.getLegalEntity()).build());
-  }
+    /**
+     * Pulls and remaps legal entity from integration service.
+     *
+     * @param request LegalEntityIngestPullRequest
+     * @return LegalEntity
+     */
+    private Mono<LegalEntityResponse> pullLegalEntity(LegalEntityPullRequest request) {
+        return legalEntityIntegrationService.pullLegalEntity(request);
+    }
+
+    /**
+     * Sends Legal Entity Task to DBS for persistence.
+     *
+     * @param res LegalEntityResponse
+     * @return LegalEntity
+     */
+    private Mono<LegalEntityResponse> sendToDbs(LegalEntityResponse res) {
+        return legalEntitySaga
+            .executeTask(new LegalEntityTask(res.getLegalEntity()))
+            .map(LegalEntityTask::getData)
+            .map(
+                le ->
+                    LegalEntityResponse.builder()
+                        .legalEntity(le)
+                        .membershipAccounts(res.getMembershipAccounts())
+                        .productChainEnabledFromRequest(res.getProductChainEnabledFromRequest())
+                        .build());
+    }
+
+    /**
+     * Perform any pre-processing on the data received from the downstream system
+     *
+     * @param res
+     * @return A Mono publisher for LegalEntity
+     */
+    private Mono<LegalEntityResponse> validate(LegalEntityResponse res) {
+        Set<ConstraintViolation<LegalEntity>> violations = validator.validate(res.getLegalEntity());
+
+        if (!CollectionUtils.isEmpty(violations)) {
+            List<Error> errors =
+                violations.stream()
+                    .map(
+                        c -> new Error().withMessage(c.getMessage()).withKey(Error.INVALID_INPUT_MESSAGE))
+                    .collect(Collectors.toList());
+            return Mono.error(new BadRequestException().withErrors(errors));
+        }
+
+        return Mono.just(res);
+    }
+
+    private Mono<LegalEntityResponse> pushLegalEntity(LegalEntityPushRequest legalEntityPushRequest) {
+        return Mono.just(
+            LegalEntityResponse.builder().legalEntity(legalEntityPushRequest.getLegalEntity()).build());
+    }
 }

@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>com.backbase.stream</groupId>
-        <artifactId>stream-task-starter-parent</artifactId>
-        <version>3.37.1</version>
-        <relativePath>../../stream-sdk/stream-starter-parents/stream-task-starter-parent</relativePath>
-    </parent>
-
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <artifactId>approvals-bootstrap-task</artifactId>
-
-    <packaging>jar</packaging>
-    <name>Stream :: Approvals Bootstrap Task</name>
-
-    <properties>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
-    </properties>
 
     <dependencies>
 
         <dependency>
-            <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <groupId>com.h2database</groupId>
         </dependency>
 
         <dependency>
-            <groupId>com.backbase.stream</groupId>
             <artifactId>approvals-core</artifactId>
+            <groupId>com.backbase.stream</groupId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
             <scope>test</scope>
         </dependency>
 
     </dependencies>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>Stream :: Approvals Bootstrap Task</name>
+    <packaging>jar</packaging>
+
+    <parent>
+        <artifactId>stream-task-starter-parent</artifactId>
+        <groupId>com.backbase.stream</groupId>
+        <relativePath>../../stream-sdk/stream-starter-parents/stream-task-starter-parent</relativePath>
+        <version>3.37.1</version>
+    </parent>
+
+    <properties>
+
+    </properties>
 
 
 </project>

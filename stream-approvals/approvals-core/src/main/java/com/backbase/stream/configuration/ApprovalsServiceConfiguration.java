@@ -17,14 +17,14 @@ import org.springframework.context.annotation.Import;
 @Slf4j
 public class ApprovalsServiceConfiguration {
 
-  @Bean
-  public ApprovalsIntegrationService approvalIntegrationService(
-      ApprovalTypesApi approvalTypesApi,
-      ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi,
-      PoliciesApi policiesApi,
-      PolicyAssignmentsApi policyAssignmentsApi) {
+    @Bean
+    public ApprovalsIntegrationService approvalIntegrationService(
+        ApprovalTypesApi approvalTypesApi,
+        ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi,
+        PoliciesApi policiesApi,
+        PolicyAssignmentsApi policyAssignmentsApi) {
 
-    return new ApprovalsIntegrationService(
-        approvalTypesApi, approvalTypeAssignmentsApi, policiesApi, policyAssignmentsApi);
-  }
+        return new ApprovalsIntegrationService(
+            approvalTypesApi, approvalTypeAssignmentsApi, policiesApi, policyAssignmentsApi);
+    }
 }

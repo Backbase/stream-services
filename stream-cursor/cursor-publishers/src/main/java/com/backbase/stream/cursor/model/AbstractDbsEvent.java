@@ -6,12 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** Abstract DBS Event. */
+/**
+ * Abstract DBS Event.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class AbstractDbsEvent implements Serializable {
 
-  private Map<String, Object> additions;
-  private String version;
+    private Map<String, Object> additions;
+    private String version;
 }

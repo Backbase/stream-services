@@ -1,19 +1,19 @@
 <assembly xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
-          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
-    <id>specs</id>
-    <formats>
-        <format>zip</format>
-    </formats>
-    <includeBaseDirectory>false</includeBaseDirectory>
+    xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
+    xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
     <fileSets>
         <fileSet>
             <directory>${project.basedir}/../api/</directory>
-            <outputDirectory>/</outputDirectory>
             <includes>
                 <include>**/*.yaml</include>
                 <include>**/*.yml</include>
             </includes>
+            <outputDirectory>/</outputDirectory>
         </fileSet>
     </fileSets>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <id>specs</id>
+    <includeBaseDirectory>false</includeBaseDirectory>
 </assembly>

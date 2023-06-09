@@ -18,25 +18,28 @@ import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class ProductCatalogIngestPushEventHandlerTest {
-  @Mock ProductCatalogMapper mapper;
-  @Mock private ProductCatalogIngestionService productCatalogIngestionService;
 
-  @Test
-  void testHandleEvent_Completed() {
-    ProductCatalog productCatalog = new ProductCatalog();
+    @Mock
+    ProductCatalogMapper mapper;
+    @Mock
+    private ProductCatalogIngestionService productCatalogIngestionService;
 
-    Mono<ProductCatalogIngestResponse> responseMono =
-        Mono.just(ProductCatalogIngestResponse.builder().productCatalog(productCatalog).build());
+    @Test
+    void testHandleEvent_Completed() {
+        ProductCatalog productCatalog = new ProductCatalog();
 
-    lenient().when(productCatalogIngestionService.ingestPush(any())).thenReturn(responseMono);
+        Mono<ProductCatalogIngestResponse> responseMono =
+            Mono.just(ProductCatalogIngestResponse.builder().productCatalog(productCatalog).build());
 
-    ProductCatalogIngestPushEventHandler handler =
-        new ProductCatalogIngestPushEventHandler(productCatalogIngestionService, mapper);
+        lenient().when(productCatalogIngestionService.ingestPush(any())).thenReturn(responseMono);
 
-    EnvelopedEvent<ProductCatalogIngestPushEvent> envelopedEvent = new EnvelopedEvent<>();
-    envelopedEvent.setEvent(new ProductCatalogIngestPushEvent());
+        ProductCatalogIngestPushEventHandler handler =
+            new ProductCatalogIngestPushEventHandler(productCatalogIngestionService, mapper);
 
-    handler.handle(envelopedEvent);
-    verify(productCatalogIngestionService).ingestPush(any());
-  }
+        EnvelopedEvent<ProductCatalogIngestPushEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(new ProductCatalogIngestPushEvent());
+
+        handler.handle(envelopedEvent);
+        verify(productCatalogIngestionService).ingestPush(any());
+    }
 }

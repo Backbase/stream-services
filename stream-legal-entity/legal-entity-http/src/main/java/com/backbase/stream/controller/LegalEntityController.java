@@ -18,21 +18,21 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class LegalEntityController implements LegalEntityApi {
 
-  private final LegalEntitySaga legalEntitySaga;
-  private final LegalEntitySagaConfigurationProperties legalEntitySagaConfiguration;
+    private final LegalEntitySaga legalEntitySaga;
+    private final LegalEntitySagaConfigurationProperties legalEntitySagaConfiguration;
 
-  @Override
-  public Mono<ResponseEntity<Flux<LegalEntity>>> createLegalEntity(
-      Flux<LegalEntity> legalEntity, ServerWebExchange exchange) {
-    Flux<LegalEntity> flux =
-        legalEntity
-            .map(LegalEntityTask::new)
-            .flatMap(legalEntitySaga::executeTask, legalEntitySagaConfiguration.getTaskExecutors())
-            .map(LegalEntityTask::getData)
-            .doOnNext(
-                actual ->
-                    log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
+    @Override
+    public Mono<ResponseEntity<Flux<LegalEntity>>> createLegalEntity(
+        Flux<LegalEntity> legalEntity, ServerWebExchange exchange) {
+        Flux<LegalEntity> flux =
+            legalEntity
+                .map(LegalEntityTask::new)
+                .flatMap(legalEntitySaga::executeTask, legalEntitySagaConfiguration.getTaskExecutors())
+                .map(LegalEntityTask::getData)
+                .doOnNext(
+                    actual ->
+                        log.info("Finished Ingestion of Legal Entity: {}", actual.getExternalId()));
 
-    return Mono.just(ResponseEntity.ok(flux));
-  }
+        return Mono.just(ResponseEntity.ok(flux));
+    }
 }

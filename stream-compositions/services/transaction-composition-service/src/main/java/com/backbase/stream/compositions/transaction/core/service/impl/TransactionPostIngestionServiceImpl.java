@@ -18,37 +18,38 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @AllArgsConstructor
 public class TransactionPostIngestionServiceImpl implements TransactionPostIngestionService {
-  private final EventBus eventBus;
 
-  private final TransactionConfigurationProperties transactionConfigurationProperties;
+    private final EventBus eventBus;
 
-  @Override
-  public void handleSuccess(List<TransactionsPostResponseBody> res) {
-    log.info("Transaction ingestion completed successfully.");
-    if (Boolean.TRUE.equals(transactionConfigurationProperties.getEvents().getEnableCompleted())) {
-      TransactionsCompletedEvent event =
-          new TransactionsCompletedEvent()
-              .withTransactionIds(
-                  res.stream()
-                      .map(TransactionsPostResponseBody::getId)
-                      .collect(Collectors.toList()));
-      EnvelopedEvent<TransactionsCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
-      envelopedEvent.setEvent(event);
-      eventBus.emitEvent(envelopedEvent);
+    private final TransactionConfigurationProperties transactionConfigurationProperties;
+
+    @Override
+    public void handleSuccess(List<TransactionsPostResponseBody> res) {
+        log.info("Transaction ingestion completed successfully.");
+        if (Boolean.TRUE.equals(transactionConfigurationProperties.getEvents().getEnableCompleted())) {
+            TransactionsCompletedEvent event =
+                new TransactionsCompletedEvent()
+                    .withTransactionIds(
+                        res.stream()
+                            .map(TransactionsPostResponseBody::getId)
+                            .collect(Collectors.toList()));
+            EnvelopedEvent<TransactionsCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
+            envelopedEvent.setEvent(event);
+            eventBus.emitEvent(envelopedEvent);
+        }
+
+        log.debug("Ingested Transactions: {}", res);
     }
 
-    log.debug("Ingested Transactions: {}", res);
-  }
-
-  @Override
-  public Mono<List<TransactionsPostResponseBody>> handleFailure(Throwable error) {
-    log.error("Transaction ingestion failed. {}", error.getMessage());
-    if (Boolean.TRUE.equals(transactionConfigurationProperties.getEvents().getEnableFailed())) {
-      TransactionsFailedEvent event = new TransactionsFailedEvent().withMessage(error.getMessage());
-      EnvelopedEvent<TransactionsFailedEvent> envelopedEvent = new EnvelopedEvent<>();
-      envelopedEvent.setEvent(event);
-      eventBus.emitEvent(envelopedEvent);
+    @Override
+    public Mono<List<TransactionsPostResponseBody>> handleFailure(Throwable error) {
+        log.error("Transaction ingestion failed. {}", error.getMessage());
+        if (Boolean.TRUE.equals(transactionConfigurationProperties.getEvents().getEnableFailed())) {
+            TransactionsFailedEvent event = new TransactionsFailedEvent().withMessage(error.getMessage());
+            EnvelopedEvent<TransactionsFailedEvent> envelopedEvent = new EnvelopedEvent<>();
+            envelopedEvent.setEvent(event);
+            eventBus.emitEvent(envelopedEvent);
+        }
+        return Mono.empty();
     }
-    return Mono.empty();
-  }
 }

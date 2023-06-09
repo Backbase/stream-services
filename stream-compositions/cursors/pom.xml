@@ -1,87 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <artifactId>cursors</artifactId>
+    <groupId>com.backbase.stream.compositions</groupId>
+
+    <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>transaction-cursor</module>
+    </modules>
+
+    <name>Stream :: Compositions :: Cursors</name>
+
+    <packaging>pom</packaging>
     <parent>
         <artifactId>stream-compositions</artifactId>
         <groupId>com.backbase.stream</groupId>
         <version>3.37.1</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
-
-    <groupId>com.backbase.stream.compositions</groupId>
-    <artifactId>cursors</artifactId>
-
-    <packaging>pom</packaging>
-
-    <name>Stream :: Compositions :: Cursors</name>
-    <modules>
-        <module>transaction-cursor</module>
-    </modules>
 
     <profiles>
         <profile>
-            <id>clean-database</id>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
                         <artifactId>sql-maven-plugin</artifactId>
-                        <inherited>false</inherited>
-                        <version>1.5</version>
                         <configuration>
                             <printResultSet>true</printResultSet>
                         </configuration>
+                        <dependencies>
+                            <dependency>
+                                <artifactId>mysql-connector-java</artifactId>
+                                <groupId>mysql</groupId>
+                                <version>5.1.41</version>
+                            </dependency>
+                        </dependencies>
                         <executions>
                             <execution>
-                                <id>drop-db</id>
-                                <phase>clean</phase>
-                                <goals>
-                                    <goal>execute</goal>
-                                </goals>
                                 <configuration>
                                     <driver>com.mysql.jdbc.Driver</driver>
-                                    <url>jdbc:mysql://localhost:3306?useSSL=false</url>
-                                    <username>root</username>
-                                    <password>root</password>
                                     <forceMojoExecution>true</forceMojoExecution>
+                                    <password>root</password>
                                     <sqlCommand>
                                         DROP
                                         DATABASE IF EXISTS transaction_cursor;
                                     </sqlCommand>
+                                    <url>jdbc:mysql://localhost:3306?useSSL=false</url>
+                                    <username>root</username>
                                 </configuration>
-                            </execution>
-                            <execution>
-                                <id>create-db-transaction_cursor</id>
-                                <phase>clean</phase>
                                 <goals>
                                     <goal>execute</goal>
                                 </goals>
+                                <id>drop-db</id>
+                                <phase>clean</phase>
+                            </execution>
+                            <execution>
                                 <configuration>
                                     <driver>com.mysql.jdbc.Driver</driver>
-                                    <url>jdbc:mysql://localhost:3306/transaction_cursor?useSSL=false&amp;createDatabaseIfNotExist=true</url>
-                                    <username>root</username>
-                                    <password>root</password>
-                                    <forceMojoExecution>true</forceMojoExecution>
                                     <fileset>
                                         <basedir>${project.basedir}/files/sql/transaction_cursor/mysql</basedir>
                                         <includes>
                                             <include>create/*.sql</include>
                                         </includes>
                                     </fileset>
+                                    <forceMojoExecution>true</forceMojoExecution>
+                                    <password>root</password>
+                                    <url>jdbc:mysql://localhost:3306/transaction_cursor?useSSL=false&amp;createDatabaseIfNotExist=true</url>
+                                    <username>root</username>
                                 </configuration>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <id>create-db-transaction_cursor</id>
+                                <phase>clean</phase>
                             </execution>
                         </executions>
-                        <dependencies>
-                            <dependency>
-                                <groupId>mysql</groupId>
-                                <artifactId>mysql-connector-java</artifactId>
-                                <version>5.1.41</version>
-                            </dependency>
-                        </dependencies>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <inherited>false</inherited>
+                        <version>1.5</version>
                     </plugin>
                 </plugins>
             </build>
+            <id>clean-database</id>
         </profile>
     </profiles>
 </project>

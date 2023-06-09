@@ -13,33 +13,32 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Reactive Cursor Stream Controller which allow subscribers to subscribe to a Ingestion Cursor
- * Stream.
+ * Reactive Cursor Stream Controller which allow subscribers to subscribe to a Ingestion Cursor Stream.
  */
 @RestController
 @AllArgsConstructor
 @Slf4j
 public class CursorStreamController implements CursorStreamApi {
 
-  private final CursorStreamService cursorStreamService;
+    private final CursorStreamService cursorStreamService;
 
-  /**
-   * Reactive HTTP Stream of ingestion cursor as they happen.
-   *
-   * @param source Source Filter
-   * @param state State filter
-   * @param exchange Current HTTP Request
-   * @return Stream of Ingestion Cursors
-   */
-  @Override
-  public Mono<ResponseEntity<Flux<IngestionCursor>>> getIngestionCursorStream(
-      @Valid String source, @Valid String state, ServerWebExchange exchange) {
-    IngestionCursor.CursorSourceEnum ingestionCursorSource =
-        source != null ? IngestionCursor.CursorSourceEnum.fromValue(source) : null;
-    IngestionCursor.CursorStateEnum ingestionCursorState =
-        state != null ? IngestionCursor.CursorStateEnum.fromValue(state) : null;
-    Flux<IngestionCursor> allCursors =
-        cursorStreamService.findAllCursors(ingestionCursorSource, ingestionCursorState);
-    return Mono.just(ResponseEntity.ok(allCursors));
-  }
+    /**
+     * Reactive HTTP Stream of ingestion cursor as they happen.
+     *
+     * @param source   Source Filter
+     * @param state    State filter
+     * @param exchange Current HTTP Request
+     * @return Stream of Ingestion Cursors
+     */
+    @Override
+    public Mono<ResponseEntity<Flux<IngestionCursor>>> getIngestionCursorStream(
+        @Valid String source, @Valid String state, ServerWebExchange exchange) {
+        IngestionCursor.CursorSourceEnum ingestionCursorSource =
+            source != null ? IngestionCursor.CursorSourceEnum.fromValue(source) : null;
+        IngestionCursor.CursorStateEnum ingestionCursorState =
+            state != null ? IngestionCursor.CursorStateEnum.fromValue(state) : null;
+        Flux<IngestionCursor> allCursors =
+            cursorStreamService.findAllCursors(ingestionCursorSource, ingestionCursorState);
+        return Mono.just(ResponseEntity.ok(allCursors));
+    }
 }

@@ -20,48 +20,49 @@ import org.springframework.web.reactive.function.client.WebClient;
 @AllArgsConstructor
 @EnableConfigurationProperties(TransactionConfigurationProperties.class)
 public class TransactionCompositionConfiguration {
-  private final TransactionConfigurationProperties transactionConfigurationProperties;
 
-  @Bean
-  public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-    return http.csrf().disable().build();
-  }
+    private final TransactionConfigurationProperties transactionConfigurationProperties;
 
-  @Bean
-  @Primary
-  public TransactionIntegrationApi transactionIntegrationApi(
-      ApiClient transactionIntegrationClient) {
-    return new TransactionIntegrationApi(transactionIntegrationClient);
-  }
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        return http.csrf().disable().build();
+    }
 
-  @Bean
-  @Primary
-  public TransactionCursorApi transactionCursorApi(
-      com.backbase.stream.compositions.transaction.cursor.ApiClient transactionCursorClient) {
-    return new TransactionCursorApi(transactionCursorClient);
-  }
+    @Bean
+    @Primary
+    public TransactionIntegrationApi transactionIntegrationApi(
+        ApiClient transactionIntegrationClient) {
+        return new TransactionIntegrationApi(transactionIntegrationClient);
+    }
 
-  @Bean
-  public ApiClient transactionIntegrationClient(
-      @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
-      ObjectMapper objectMapper,
-      DateFormat dateFormat) {
-    ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-    apiClient.setBasePath(transactionConfigurationProperties.getIntegrationBaseUrl());
+    @Bean
+    @Primary
+    public TransactionCursorApi transactionCursorApi(
+        com.backbase.stream.compositions.transaction.cursor.ApiClient transactionCursorClient) {
+        return new TransactionCursorApi(transactionCursorClient);
+    }
 
-    return apiClient;
-  }
+    @Bean
+    public ApiClient transactionIntegrationClient(
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+        ObjectMapper objectMapper,
+        DateFormat dateFormat) {
+        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(transactionConfigurationProperties.getIntegrationBaseUrl());
 
-  @Bean
-  public com.backbase.stream.compositions.transaction.cursor.ApiClient transactionCursorClient(
-      @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
-      ObjectMapper objectMapper,
-      DateFormat dateFormat) {
-    com.backbase.stream.compositions.transaction.cursor.ApiClient apiClient =
-        new com.backbase.stream.compositions.transaction.cursor.ApiClient(
-            dbsWebClient, objectMapper, dateFormat);
-    apiClient.setBasePath(transactionConfigurationProperties.getCursor().getBaseUrl());
+        return apiClient;
+    }
 
-    return apiClient;
-  }
+    @Bean
+    public com.backbase.stream.compositions.transaction.cursor.ApiClient transactionCursorClient(
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+        ObjectMapper objectMapper,
+        DateFormat dateFormat) {
+        com.backbase.stream.compositions.transaction.cursor.ApiClient apiClient =
+            new com.backbase.stream.compositions.transaction.cursor.ApiClient(
+                dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(transactionConfigurationProperties.getCursor().getBaseUrl());
+
+        return apiClient;
+    }
 }

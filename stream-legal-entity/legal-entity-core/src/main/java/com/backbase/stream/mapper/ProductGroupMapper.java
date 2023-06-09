@@ -7,5 +7,5 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface ProductGroupMapper {
 
-  ProductGroup map(BaseProductGroup baseProductGroup);
+    ProductGroup map(BaseProductGroup baseProductGroup);
 }

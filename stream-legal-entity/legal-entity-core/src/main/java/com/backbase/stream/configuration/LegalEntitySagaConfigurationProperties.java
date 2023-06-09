@@ -10,9 +10,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 public class LegalEntitySagaConfigurationProperties extends StreamWorkerConfiguration {
 
-  /** Enable identity integration */
-  private boolean useIdentityIntegration = true;
+    /**
+     * Enable identity integration
+     */
+    private boolean useIdentityIntegration = true;
 
-  /** Enable User Profile */
-  private boolean userProfileEnabled = false;
+    /**
+     * Enable User Profile
+     */
+    private boolean userProfileEnabled = false;
 }

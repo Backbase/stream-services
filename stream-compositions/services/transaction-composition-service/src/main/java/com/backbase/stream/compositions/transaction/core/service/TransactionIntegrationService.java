@@ -5,12 +5,13 @@ import com.backbase.stream.compositions.transaction.integration.client.model.Tra
 import reactor.core.publisher.Flux;
 
 public interface TransactionIntegrationService {
-  /**
-   * Pulls transactions from external integration service.
-   *
-   * @param ingestPullRequest TransactionIngestPullRequest
-   * @return Mono<TransactionsPostRequestBody>
-   */
-  Flux<TransactionsPostRequestBody> pullTransactions(
-      TransactionIngestPullRequest ingestPullRequest);
+
+    /**
+     * Pulls transactions from external integration service.
+     *
+     * @param ingestPullRequest TransactionIngestPullRequest
+     * @return Mono<TransactionsPostRequestBody>
+     */
+    Flux<TransactionsPostRequestBody> pullTransactions(
+        TransactionIngestPullRequest ingestPullRequest);
 }

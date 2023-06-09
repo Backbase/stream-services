@@ -1,89 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-        <groupId>com.backbase.stream</groupId>
-        <artifactId>stream-http-starter-parent</artifactId>
-        <version>3.37.1</version>
-        <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
-    </parent>
-
-
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <artifactId>cursor-http</artifactId>
 
-    <packaging>jar</packaging>
-    <name>Stream :: Cursor HTTP</name>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>boat-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <configOptions>
+                                <apiPackage>com.backbase.stream.cursor.api</apiPackage>
+                                <apis/>
+                                <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <java8>true</java8>
+                                <library>spring-boot</library>
+                                <modelPackage>com.backbase.stream.cursor.model</modelPackage>
+                                <models/>
+                                <openapiDocketConfig>true</openapiDocketConfig>
+                                <performBeanValidation>true</performBeanValidation>
+                                <reactive>true</reactive>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                            </configOptions>
+                            <generateApiTests>false</generateApiTests>
+                            <generateApis>true</generateApis>
+                            <generateModels>false</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
+                            <output>${openapi-generator-maven-plugin.output}</output>
+                        </configuration>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <id>cursor</id>
+                        <phase>generate-sources</phase>
+                    </execution>
 
-    <properties>
-        <raml2openapi-maven-plugin.input>${project.basedir}/../api/openapi.yaml</raml2openapi-maven-plugin.input>
-        <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
-    </properties>
+                </executions>
+                <groupId>com.backbase.oss</groupId>
+            </plugin>
+
+            <plugin>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+            </plugin>
+        </plugins>
+    </build>
+
 
     <dependencies>
 
         <dependency>
-            <groupId>com.backbase.stream</groupId>
             <artifactId>cursor-publishers</artifactId>
+            <groupId>com.backbase.stream</groupId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.backbase.stream</groupId>
             <artifactId>cursor-store</artifactId>
+            <groupId>com.backbase.stream</groupId>
             <version>${project.version}</version>
         </dependency>
 
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.backbase.oss</groupId>
-                <artifactId>boat-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>cursor</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
-                            <generateApiTests>false</generateApiTests>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                            <generateModels>false</generateModels>
-                            <generateApis>true</generateApis>
-                            <output>${openapi-generator-maven-plugin.output}</output>
-                            <configOptions>
-                                <library>spring-boot</library>
-                                <reactive>true</reactive>
-                                <java8>true</java8>
-                                <dateLibrary>java8</dateLibrary>
-                                <openapiDocketConfig>true</openapiDocketConfig>
-                                <interfaceOnly>true</interfaceOnly>
-                                <modelPackage>com.backbase.stream.cursor.model</modelPackage>
-                                <apiPackage>com.backbase.stream.cursor.api</apiPackage>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                                <performBeanValidation>true</performBeanValidation>
-                                <apis/>
-                                <models/>
-                            </configOptions>
-                        </configuration>
-                    </execution>
+    <modelVersion>4.0.0</modelVersion>
+    <name>Stream :: Cursor HTTP</name>
 
-                </executions>
-            </plugin>
+    <packaging>jar</packaging>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+    <parent>
+        <artifactId>stream-http-starter-parent</artifactId>
+        <groupId>com.backbase.stream</groupId>
+        <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
+        <version>3.37.1</version>
+    </parent>
+
+    <properties>
+        <raml2openapi-maven-plugin.input>${project.basedir}/../api/openapi.yaml</raml2openapi-maven-plugin.input>
+        <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
+
+    </properties>
 
 
 </project>

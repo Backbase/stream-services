@@ -19,26 +19,28 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class LegalEntityIngestPushEventHandlerTest {
 
-  @Mock LegalEntityMapperImpl mapper;
-  @Mock private LegalEntityIngestionService legalEntityIngestionService;
+    @Mock
+    LegalEntityMapperImpl mapper;
+    @Mock
+    private LegalEntityIngestionService legalEntityIngestionService;
 
-  @Test
-  void testHandleEvent_Completed() {
-    Mono<LegalEntityResponse> responseMono =
-        Mono.just(
-            LegalEntityResponse.builder()
-                .legalEntity(new LegalEntity().name("Legal Entity"))
-                .build());
+    @Test
+    void testHandleEvent_Completed() {
+        Mono<LegalEntityResponse> responseMono =
+            Mono.just(
+                LegalEntityResponse.builder()
+                    .legalEntity(new LegalEntity().name("Legal Entity"))
+                    .build());
 
-    lenient().when(legalEntityIngestionService.ingestPush(any())).thenReturn(responseMono);
+        lenient().when(legalEntityIngestionService.ingestPush(any())).thenReturn(responseMono);
 
-    LegalEntityPushEventHandler handler =
-        new LegalEntityPushEventHandler(legalEntityIngestionService, mapper);
+        LegalEntityPushEventHandler handler =
+            new LegalEntityPushEventHandler(legalEntityIngestionService, mapper);
 
-    EnvelopedEvent<LegalEntityPushEvent> envelopedEvent = new EnvelopedEvent<>();
-    envelopedEvent.setEvent(new LegalEntityPushEvent());
+        EnvelopedEvent<LegalEntityPushEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(new LegalEntityPushEvent());
 
-    handler.handle(envelopedEvent);
-    verify(legalEntityIngestionService).ingestPush(any());
-  }
+        handler.handle(envelopedEvent);
+        verify(legalEntityIngestionService).ingestPush(any());
+    }
 }

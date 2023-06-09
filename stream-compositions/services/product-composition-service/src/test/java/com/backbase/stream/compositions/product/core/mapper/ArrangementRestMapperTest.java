@@ -5,7 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.compositions.product.api.model.*;
+import com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut;
+import com.backbase.stream.compositions.product.api.model.ArrangementIngestionConfig;
+import com.backbase.stream.compositions.product.api.model.ArrangementIngestionResponse;
+import com.backbase.stream.compositions.product.api.model.ArrangementPullIngestionRequest;
+import com.backbase.stream.compositions.product.api.model.ArrangementPushIngestionRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
@@ -19,80 +23,84 @@ import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
 class ArrangementRestMapperTest {
-  private static final String ARRANGEMENT_ID = "arrangementId";
-  private static final String EXTERNAL_ARRANGEMENT_ID = "externalArrangementId";
-  private static final String SOURCE = "source";
 
-  @InjectMocks ArrangementRestMapper arrangementRestMapper;
+    private static final String ARRANGEMENT_ID = "arrangementId";
+    private static final String EXTERNAL_ARRANGEMENT_ID = "externalArrangementId";
+    private static final String SOURCE = "source";
 
-  @Mock ArrangementMapper arrangementMapper;
+    @InjectMocks
+    ArrangementRestMapper arrangementRestMapper;
 
-  @Mock ConfigMapper chainsMapper;
+    @Mock
+    ArrangementMapper arrangementMapper;
 
-  @Test
-  void mapPushRequest() {
-    AccountArrangementItemPut arrangementItemPut = new AccountArrangementItemPut();
+    @Mock
+    ConfigMapper chainsMapper;
 
-    when(arrangementMapper.mapCompositionToStream(arrangementItemPut))
-        .thenReturn(
-            new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut());
+    @Test
+    void mapPushRequest() {
+        AccountArrangementItemPut arrangementItemPut = new AccountArrangementItemPut();
 
-    when(chainsMapper.map(any())).thenReturn(RequestConfig.builder().build());
+        when(arrangementMapper.mapCompositionToStream(arrangementItemPut))
+            .thenReturn(
+                new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut());
 
-    ArrangementIngestionConfig requestConfig = new ArrangementIngestionConfig();
+        when(chainsMapper.map(any())).thenReturn(RequestConfig.builder().build());
 
-    ArrangementPushIngestionRequest request =
-        new ArrangementPushIngestionRequest()
-            .withInternalArrangementId(ARRANGEMENT_ID)
-            .withSource(SOURCE)
-            .withArrangement(arrangementItemPut)
-            .withConfig(requestConfig);
+        ArrangementIngestionConfig requestConfig = new ArrangementIngestionConfig();
 
-    ArrangementIngestPushRequest mappedRequest = arrangementRestMapper.mapPushRequest(request);
-    assertEquals(SOURCE, mappedRequest.getSource());
-    assertEquals(ARRANGEMENT_ID, mappedRequest.getArrangementInternalId());
-    assertNotNull(mappedRequest.getConfig());
-  }
+        ArrangementPushIngestionRequest request =
+            new ArrangementPushIngestionRequest()
+                .withInternalArrangementId(ARRANGEMENT_ID)
+                .withSource(SOURCE)
+                .withArrangement(arrangementItemPut)
+                .withConfig(requestConfig);
 
-  @Test
-  void mapPullRequest() {
-    when(chainsMapper.map(any())).thenReturn(RequestConfig.builder().build());
+        ArrangementIngestPushRequest mappedRequest = arrangementRestMapper.mapPushRequest(request);
+        assertEquals(SOURCE, mappedRequest.getSource());
+        assertEquals(ARRANGEMENT_ID, mappedRequest.getArrangementInternalId());
+        assertNotNull(mappedRequest.getConfig());
+    }
 
-    ArrangementIngestionConfig requestConfig = new ArrangementIngestionConfig();
+    @Test
+    void mapPullRequest() {
+        when(chainsMapper.map(any())).thenReturn(RequestConfig.builder().build());
 
-    ArrangementPullIngestionRequest request =
-        new ArrangementPullIngestionRequest()
-            .withInternalArrangementId(ARRANGEMENT_ID)
-            .withExternalArrangementId(EXTERNAL_ARRANGEMENT_ID)
-            .withSource(SOURCE)
-            .withConfig(requestConfig);
+        ArrangementIngestionConfig requestConfig = new ArrangementIngestionConfig();
 
-    ArrangementIngestPullRequest mappedRequest = arrangementRestMapper.mapPullRequest(request);
-    assertEquals(SOURCE, mappedRequest.getSource());
-    assertEquals(ARRANGEMENT_ID, mappedRequest.getArrangementId());
-    assertNotNull(mappedRequest.getConfig());
-  }
+        ArrangementPullIngestionRequest request =
+            new ArrangementPullIngestionRequest()
+                .withInternalArrangementId(ARRANGEMENT_ID)
+                .withExternalArrangementId(EXTERNAL_ARRANGEMENT_ID)
+                .withSource(SOURCE)
+                .withConfig(requestConfig);
 
-  @Test
-  void mapResponse() {
-    com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut streamArrangement =
-        new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut();
+        ArrangementIngestPullRequest mappedRequest = arrangementRestMapper.mapPullRequest(request);
+        assertEquals(SOURCE, mappedRequest.getSource());
+        assertEquals(ARRANGEMENT_ID, mappedRequest.getArrangementId());
+        assertNotNull(mappedRequest.getConfig());
+    }
 
-    AccountArrangementItemPut compositionArrangement = new AccountArrangementItemPut();
+    @Test
+    void mapResponse() {
+        com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut streamArrangement =
+            new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut();
 
-    when(arrangementMapper.mapStreamToComposition(streamArrangement))
-        .thenReturn(compositionArrangement);
+        AccountArrangementItemPut compositionArrangement = new AccountArrangementItemPut();
 
-    ArrangementIngestResponse response =
-        ArrangementIngestResponse.builder()
-            .arrangement(
-                new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut())
-            .build();
+        when(arrangementMapper.mapStreamToComposition(streamArrangement))
+            .thenReturn(compositionArrangement);
 
-    ResponseEntity<ArrangementIngestionResponse> responseEntity =
-        arrangementRestMapper.mapResponse(response);
+        ArrangementIngestResponse response =
+            ArrangementIngestResponse.builder()
+                .arrangement(
+                    new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut())
+                .build();
 
-    assertNotNull(responseEntity);
-    assertEquals(compositionArrangement, responseEntity.getBody().getArrangement());
-  }
+        ResponseEntity<ArrangementIngestionResponse> responseEntity =
+            arrangementRestMapper.mapResponse(response);
+
+        assertNotNull(responseEntity);
+        assertEquals(compositionArrangement, responseEntity.getBody().getArrangement());
+    }
 }

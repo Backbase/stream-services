@@ -23,75 +23,78 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 @Slf4j
 public class TransactionController implements TransactionCompositionApi {
-  private final TransactionIngestionService transactionIngestionService;
-  private final TransactionMapper mapper;
 
-  @Override
-  public Mono<ResponseEntity<TransactionIngestionResponse>> pullTransactions(
-      Mono<TransactionPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
-    return pullIngestionRequest
-        .map(this::buildPullRequest)
-        .flatMap(transactionIngestionService::ingestPull)
-        .map(this::mapIngestionToResponse);
-  }
+    private final TransactionIngestionService transactionIngestionService;
+    private final TransactionMapper mapper;
 
-  /** {@inheritDoc} */
-  @Override
-  public Mono<ResponseEntity<TransactionIngestionResponse>> pushIngestTransactions(
-      @Valid Mono<TransactionPushIngestionRequest> pushIngestionRequest,
-      ServerWebExchange exchange) {
-    return pushIngestionRequest
-        .map(this::buildPushRequest)
-        .flatMap(transactionIngestionService::ingestPush)
-        .map(this::mapIngestionToResponse);
-  }
+    @Override
+    public Mono<ResponseEntity<TransactionIngestionResponse>> pullTransactions(
+        Mono<TransactionPullIngestionRequest> pullIngestionRequest, ServerWebExchange exchange) {
+        return pullIngestionRequest
+            .map(this::buildPullRequest)
+            .flatMap(transactionIngestionService::ingestPull)
+            .map(this::mapIngestionToResponse);
+    }
 
-  /**
-   * Builds ingestion request for downstream service.
-   *
-   * @param request PullIngestionRequest
-   * @return ProductIngestPullRequest
-   */
-  private TransactionIngestPullRequest buildPullRequest(TransactionPullIngestionRequest request) {
-    return TransactionIngestPullRequest.builder()
-        .arrangementId(request.getArrangementId())
-        .legalEntityInternalId(request.getLegalEntityInternalId())
-        .externalArrangementId(request.getExternalArrangementId())
-        .dateRangeStart(request.getDateRangeStart())
-        .dateRangeEnd(request.getDateRangeEnd())
-        .additions(request.getAdditions())
-        .build();
-  }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Mono<ResponseEntity<TransactionIngestionResponse>> pushIngestTransactions(
+        @Valid Mono<TransactionPushIngestionRequest> pushIngestionRequest,
+        ServerWebExchange exchange) {
+        return pushIngestionRequest
+            .map(this::buildPushRequest)
+            .flatMap(transactionIngestionService::ingestPush)
+            .map(this::mapIngestionToResponse);
+    }
 
-  /**
-   * Builds ingestion request for downstream service.
-   *
-   * @param request PushIngestionRequest
-   * @return ProductIngestPushRequest
-   */
-  private TransactionIngestPushRequest buildPushRequest(TransactionPushIngestionRequest request) {
-    return TransactionIngestPushRequest.builder()
-        .transactions(
-            request.getTransactions().stream()
-                .map(mapper::mapCompositionToStream)
-                .collect(Collectors.toList()))
-        .build();
-  }
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param request PullIngestionRequest
+     * @return ProductIngestPullRequest
+     */
+    private TransactionIngestPullRequest buildPullRequest(TransactionPullIngestionRequest request) {
+        return TransactionIngestPullRequest.builder()
+            .arrangementId(request.getArrangementId())
+            .legalEntityInternalId(request.getLegalEntityInternalId())
+            .externalArrangementId(request.getExternalArrangementId())
+            .dateRangeStart(request.getDateRangeStart())
+            .dateRangeEnd(request.getDateRangeEnd())
+            .additions(request.getAdditions())
+            .build();
+    }
 
-  /**
-   * Builds ingestion response for API endpoint.
-   *
-   * @param response ProductCatalogIngestResponse
-   * @return IngestionResponse
-   */
-  private ResponseEntity<TransactionIngestionResponse> mapIngestionToResponse(
-      TransactionIngestResponse response) {
-    return new ResponseEntity<>(
-        new TransactionIngestionResponse()
-            .withTransactions(
-                response.getTransactions().stream()
-                    .map(mapper::mapStreamToComposition)
-                    .collect(Collectors.toList())),
-        HttpStatus.CREATED);
-  }
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param request PushIngestionRequest
+     * @return ProductIngestPushRequest
+     */
+    private TransactionIngestPushRequest buildPushRequest(TransactionPushIngestionRequest request) {
+        return TransactionIngestPushRequest.builder()
+            .transactions(
+                request.getTransactions().stream()
+                    .map(mapper::mapCompositionToStream)
+                    .collect(Collectors.toList()))
+            .build();
+    }
+
+    /**
+     * Builds ingestion response for API endpoint.
+     *
+     * @param response ProductCatalogIngestResponse
+     * @return IngestionResponse
+     */
+    private ResponseEntity<TransactionIngestionResponse> mapIngestionToResponse(
+        TransactionIngestResponse response) {
+        return new ResponseEntity<>(
+            new TransactionIngestionResponse()
+                .withTransactions(
+                    response.getTransactions().stream()
+                        .map(mapper::mapStreamToComposition)
+                        .collect(Collectors.toList())),
+            HttpStatus.CREATED);
+    }
 }

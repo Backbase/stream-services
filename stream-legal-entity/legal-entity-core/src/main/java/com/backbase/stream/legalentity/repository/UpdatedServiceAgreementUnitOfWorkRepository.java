@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UpdatedServiceAgreementUnitOfWorkRepository
-    extends UnitOfWorkRepository<UpdatedServiceAgreementTask, String> {}
+    extends UnitOfWorkRepository<UpdatedServiceAgreementTask, String> {
+
+}

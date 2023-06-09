@@ -24,71 +24,72 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @EnableConfigurationProperties(TransactionConfigurationProperties.class)
 public class TransactionIngestPullEventHandler implements EventHandler<TransactionsPullEvent> {
-  private final TransactionConfigurationProperties configProperties;
-  private final TransactionIngestionService transactionIngestionService;
-  private final TransactionMapper mapper;
-  private final EventBus eventBus;
 
-  /**
-   * Handles ProductsIngestPullEvent.
-   *
-   * @param envelopedEvent EnvelopedEvent<ProductsIngestPullEvent>
-   */
-  @Override
-  public void handle(EnvelopedEvent<TransactionsPullEvent> envelopedEvent) {
-    transactionIngestionService
-        .ingestPull(buildRequest(envelopedEvent.getEvent()))
-        .onErrorResume(this::handleError)
-        .subscribe(this::handleResponse);
-  }
+    private final TransactionConfigurationProperties configProperties;
+    private final TransactionIngestionService transactionIngestionService;
+    private final TransactionMapper mapper;
+    private final EventBus eventBus;
 
-  /**
-   * Handles reponse from ingestion service.
-   *
-   * @param response ProductIngestResponse
-   */
-  private void handleResponse(TransactionIngestResponse response) {
-    if (Boolean.FALSE.equals(configProperties.getEvents().getEnableCompleted())) {
-      return;
+    /**
+     * Handles ProductsIngestPullEvent.
+     *
+     * @param envelopedEvent EnvelopedEvent<ProductsIngestPullEvent>
+     */
+    @Override
+    public void handle(EnvelopedEvent<TransactionsPullEvent> envelopedEvent) {
+        transactionIngestionService
+            .ingestPull(buildRequest(envelopedEvent.getEvent()))
+            .onErrorResume(this::handleError)
+            .subscribe(this::handleResponse);
     }
-    TransactionsCompletedEvent event =
-        new TransactionsCompletedEvent()
-            .withTransactionIds(
-                response.getTransactions().stream()
-                    .map(TransactionsPostResponseBody::getId)
-                    .collect(Collectors.toList()))
-            .withInternalArrangementId(response.getArrangementId());
 
-    EnvelopedEvent<TransactionsCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
-    envelopedEvent.setEvent(event);
-    eventBus.emitEvent(envelopedEvent);
-  }
+    /**
+     * Handles reponse from ingestion service.
+     *
+     * @param response ProductIngestResponse
+     */
+    private void handleResponse(TransactionIngestResponse response) {
+        if (Boolean.FALSE.equals(configProperties.getEvents().getEnableCompleted())) {
+            return;
+        }
+        TransactionsCompletedEvent event =
+            new TransactionsCompletedEvent()
+                .withTransactionIds(
+                    response.getTransactions().stream()
+                        .map(TransactionsPostResponseBody::getId)
+                        .collect(Collectors.toList()))
+                .withInternalArrangementId(response.getArrangementId());
 
-  /**
-   * Handles error from ingestion service.
-   *
-   * @param ex Throwable
-   */
-  private Mono<TransactionIngestResponse> handleError(Throwable ex) {
-    log.error("Error ingesting legal entity using the Pull event: {}", ex.getMessage());
-
-    if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
-      TransactionsFailedEvent event = new TransactionsFailedEvent().withMessage(ex.getMessage());
-
-      EnvelopedEvent<TransactionsFailedEvent> envelopedEvent = new EnvelopedEvent<>();
-      envelopedEvent.setEvent(event);
-      eventBus.emitEvent(envelopedEvent);
+        EnvelopedEvent<TransactionsCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
+        envelopedEvent.setEvent(event);
+        eventBus.emitEvent(envelopedEvent);
     }
-    return Mono.empty();
-  }
 
-  /**
-   * Builds ingestion request for downstream service.
-   *
-   * @param event ProductsIngestPullEvent
-   * @return ProductIngestPullRequest
-   */
-  private TransactionIngestPullRequest buildRequest(TransactionsPullEvent event) {
-    return mapper.mapPullEventToStream(event);
-  }
+    /**
+     * Handles error from ingestion service.
+     *
+     * @param ex Throwable
+     */
+    private Mono<TransactionIngestResponse> handleError(Throwable ex) {
+        log.error("Error ingesting legal entity using the Pull event: {}", ex.getMessage());
+
+        if (Boolean.TRUE.equals(configProperties.getEvents().getEnableFailed())) {
+            TransactionsFailedEvent event = new TransactionsFailedEvent().withMessage(ex.getMessage());
+
+            EnvelopedEvent<TransactionsFailedEvent> envelopedEvent = new EnvelopedEvent<>();
+            envelopedEvent.setEvent(event);
+            eventBus.emitEvent(envelopedEvent);
+        }
+        return Mono.empty();
+    }
+
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param event ProductsIngestPullEvent
+     * @return ProductIngestPullRequest
+     */
+    private TransactionIngestPullRequest buildRequest(TransactionsPullEvent event) {
+        return mapper.mapPullEventToStream(event);
+    }
 }

@@ -10,10 +10,10 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PaymentOrderTypeMapper {
 
-  @Mapping(source = "schedule.nextExecutionDate", target = "nextExecutionDate")
-  PaymentOrderPutRequest mapPaymentOrderPostRequest(
-      PaymentOrderPostRequest paymentOrderPostRequest);
+    @Mapping(source = "schedule.nextExecutionDate", target = "nextExecutionDate")
+    PaymentOrderPutRequest mapPaymentOrderPostRequest(
+        PaymentOrderPostRequest paymentOrderPostRequest);
 
-  List<PaymentOrderPostRequest> mapPaymentOrderPostRequest(
-      List<GetPaymentOrderResponse> paymentOrderPostRequest);
+    List<PaymentOrderPostRequest> mapPaymentOrderPostRequest(
+        List<GetPaymentOrderResponse> paymentOrderPostRequest);
 }

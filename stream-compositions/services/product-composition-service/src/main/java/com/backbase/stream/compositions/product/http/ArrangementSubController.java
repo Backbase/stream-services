@@ -16,24 +16,25 @@ import reactor.core.publisher.Mono;
 @Service
 @AllArgsConstructor
 class ArrangementSubController {
-  private final ArrangementIngestionService arrangementIngestionService;
-  private final ArrangementRestMapper arrangementRestMapper;
 
-  Mono<ResponseEntity<ArrangementIngestionResponse>> pullIngestArrangement(
-      Mono<ArrangementPullIngestionRequest> arrangementPullIngestionRequest,
-      ServerWebExchange exchange) {
-    return arrangementPullIngestionRequest
-        .map(arrangementRestMapper::mapPullRequest)
-        .flatMap(arrangementIngestionService::ingestPull)
-        .map(arrangementRestMapper::mapResponse);
-  }
+    private final ArrangementIngestionService arrangementIngestionService;
+    private final ArrangementRestMapper arrangementRestMapper;
 
-  Mono<ResponseEntity<ArrangementIngestionResponse>> pushIngestArrangement(
-      Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest,
-      ServerWebExchange exchange) {
-    return arrangementPushIngestionRequest
-        .map(arrangementRestMapper::mapPushRequest)
-        .flatMap(arrangementIngestionService::ingestPush)
-        .map(arrangementRestMapper::mapResponse);
-  }
+    Mono<ResponseEntity<ArrangementIngestionResponse>> pullIngestArrangement(
+        Mono<ArrangementPullIngestionRequest> arrangementPullIngestionRequest,
+        ServerWebExchange exchange) {
+        return arrangementPullIngestionRequest
+            .map(arrangementRestMapper::mapPullRequest)
+            .flatMap(arrangementIngestionService::ingestPull)
+            .map(arrangementRestMapper::mapResponse);
+    }
+
+    Mono<ResponseEntity<ArrangementIngestionResponse>> pushIngestArrangement(
+        Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest,
+        ServerWebExchange exchange) {
+        return arrangementPushIngestionRequest
+            .map(arrangementRestMapper::mapPushRequest)
+            .flatMap(arrangementIngestionService::ingestPush)
+            .map(arrangementRestMapper::mapResponse);
+    }
 }

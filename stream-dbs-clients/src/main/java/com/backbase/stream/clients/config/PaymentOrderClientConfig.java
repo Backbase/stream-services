@@ -13,21 +13,21 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("backbase.communication.services.payment.order")
 public class PaymentOrderClientConfig extends CompositeApiClientConfig {
 
-  public static final String PAYMENT_ORDER_SERVICE_ID = "payment-order-service";
+    public static final String PAYMENT_ORDER_SERVICE_ID = "payment-order-service";
 
-  public PaymentOrderClientConfig() {
-    super(PAYMENT_ORDER_SERVICE_ID);
-  }
+    public PaymentOrderClientConfig() {
+        super(PAYMENT_ORDER_SERVICE_ID);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public ApiClient paymentOrderClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-    return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public ApiClient paymentOrderClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public PaymentOrdersApi paymentOrdersApi(ApiClient paymentOrderClient) {
-    return new PaymentOrdersApi(paymentOrderClient);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public PaymentOrdersApi paymentOrdersApi(ApiClient paymentOrderClient) {
+        return new PaymentOrdersApi(paymentOrderClient);
+    }
 }

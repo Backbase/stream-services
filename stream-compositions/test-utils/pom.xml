@@ -1,7 +1,67 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <artifactId>test-utils</artifactId>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <SIG_SECRET_KEY>JWTSecretKeyDontUseInProduction!</SIG_SECRET_KEY>
+                    </systemPropertyVariables>
+                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <artifactId>activemq-broker</artifactId>
+            <groupId>org.apache.activemq</groupId>
+            <version>${activemq.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>auth-security</artifactId>
+            <groupId>com.backbase.buildingblocks</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>communication</artifactId>
+            <groupId>com.backbase.buildingblocks</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>service-sdk-starter-test</artifactId>
+            <groupId>com.backbase.buildingblocks</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <groupId>org.springframework.boot</groupId>
+        </dependency>
+        <dependency>
+            <artifactId>mockserver-netty</artifactId>
+            <groupId>org.mock-server</groupId>
+            <version>${mock.server.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>mockserver-client-java</artifactId>
+            <groupId>org.mock-server</groupId>
+            <version>${mock.server.version}</version>
+        </dependency>
+        <dependency>
+            <artifactId>mockito-inline</artifactId>
+            <groupId>org.mockito</groupId>
+            <version>${mockito.version}</version>
+        </dependency>
+    </dependencies>
+    <groupId>com.backbase.stream.compositions</groupId>
+
     <modelVersion>4.0.0</modelVersion>
+
+    <name>Stream :: Compositions :: Test Utils</name>
+
+    <packaging>jar</packaging>
 
     <parent>
         <artifactId>stream-compositions</artifactId>
@@ -9,72 +69,12 @@
         <version>3.37.1</version>
     </parent>
 
-    <groupId>com.backbase.stream.compositions</groupId>
-    <artifactId>test-utils</artifactId>
-
-    <packaging>jar</packaging>
-
-    <name>Stream :: Compositions :: Test Utils</name>
-
     <properties>
+        <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
+        <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
+        <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
         <findMainClass.skip>true</findMainClass.skip>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
-        <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
-        <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
-        <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-broker</artifactId>
-            <version>${activemq.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>auth-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>communication</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>service-sdk-starter-test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-netty</artifactId>
-            <version>${mock.server.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-client-java</artifactId>
-            <version>${mock.server.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>${mockito.version}</version>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                        <SIG_SECRET_KEY>JWTSecretKeyDontUseInProduction!</SIG_SECRET_KEY>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

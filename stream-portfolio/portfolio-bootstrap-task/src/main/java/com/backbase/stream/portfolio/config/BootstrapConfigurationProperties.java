@@ -11,5 +11,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 public class BootstrapConfigurationProperties {
 
-  private List<WealthBundle> wealthBundles;
+    private List<WealthBundle> wealthBundles;
 }

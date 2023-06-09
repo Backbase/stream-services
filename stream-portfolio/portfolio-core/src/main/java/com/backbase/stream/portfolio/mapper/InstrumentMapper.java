@@ -22,24 +22,24 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface InstrumentMapper {
 
-  RegionsPostRequest mapRegion(Region region);
+    RegionsPostRequest mapRegion(Region region);
 
-  @Mapping(target = ".", source = "country")
-  @Mapping(target = "region", source = "regionCode")
-  CountriesPostRequest mapCountry(String regionCode, Country country);
+    @Mapping(target = ".", source = "country")
+    @Mapping(target = "region", source = "regionCode")
+    CountriesPostRequest mapCountry(String regionCode, Country country);
 
-  InstrumentsPostRequest mapInstrument(Instrument instrument);
+    InstrumentsPostRequest mapInstrument(Instrument instrument);
 
-  InstrumentPutRequest mapPutInstrument(Instrument instrument);
+    InstrumentPutRequest mapPutInstrument(Instrument instrument);
 
-  AssetClassesPostRequest mapAssetClass(AssetClass assetClass);
+    AssetClassesPostRequest mapAssetClass(AssetClass assetClass);
 
-  AssetClassesPutRequest mapPutAssetClass(AssetClass assetClass);
+    AssetClassesPutRequest mapPutAssetClass(AssetClass assetClass);
 
-  SubAssetClassesPostRequest mapSubAssetClass(SubAssetClass assetClass);
+    SubAssetClassesPostRequest mapSubAssetClass(SubAssetClass assetClass);
 
-  SubAssetClassPutRequest mapPutSubAssetClass(SubAssetClass assetClass);
+    SubAssetClassPutRequest mapPutSubAssetClass(SubAssetClass assetClass);
 
-  List<InstrumentHistoryPricesRequestItem> mapHistoryPrices(
-      List<InstrumentHistoryPrice> historyPrices);
+    List<InstrumentHistoryPricesRequestItem> mapHistoryPrices(
+        List<InstrumentHistoryPrice> historyPrices);
 }

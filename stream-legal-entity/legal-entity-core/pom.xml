@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -8,17 +8,15 @@
         <artifactId>stream-legal-entity</artifactId>
         <version>3.37.1</version>
     </parent>
-
     <artifactId>legal-entity-core</artifactId>
 
     <packaging>jar</packaging>
     <name>Stream :: Legal Entity Core</name>
 
     <properties>
-        <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml
-        </raml2openapi-maven-plugin.input>
+        <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+
     </properties>
 
     <dependencies>
@@ -104,26 +102,26 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
+                            <configOptions>
+                                <apiPackage>com.backbase.stream.legalentity.api</apiPackage>
+                                <apis />
+                                <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <java8>true</java8>
+                                <library>spring-boot</library>
+                                <modelPackage>com.backbase.stream.legalentity.model</modelPackage>
+                                <models />
+                                <openapiDocketConfig>true</openapiDocketConfig>
+                                <reactive>true</reactive>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                            </configOptions>
                             <generateApiTests>false</generateApiTests>
-                            <output>${openapi-generator-maven-plugin.output}</output>
-                            <generateSupportingFiles>false</generateSupportingFiles>
                             <generateApis>true</generateApis>
                             <generateModels>false</generateModels>
-                            <configOptions>
-                                <library>spring-boot</library>
-                                <reactive>true</reactive>
-                                <java8>true</java8>
-                                <dateLibrary>java8</dateLibrary>
-                                <openapiDocketConfig>true</openapiDocketConfig>
-                                <interfaceOnly>true</interfaceOnly>
-                                <modelPackage>com.backbase.stream.legalentity.model</modelPackage>
-                                <apiPackage>com.backbase.stream.legalentity.api</apiPackage>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                                <apis/>
-                                <models/>
-                            </configOptions>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
+                            <output>${openapi-generator-maven-plugin.output}</output>
                             <typeMappings>
                                 <typeMapping>Double=java.math.BigDecimal</typeMapping>
                             </typeMappings>

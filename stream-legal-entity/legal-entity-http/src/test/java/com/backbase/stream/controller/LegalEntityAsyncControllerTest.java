@@ -56,127 +56,144 @@ import reactor.core.publisher.Mono;
 @AutoConfigureWebTestClient
 @TestPropertySource(properties = "spring.cloud.kubernetes.enabled=false")
 @Import({
-  LegalEntityHttpConfiguration.class,
-  LegalEntitySagaConfiguration.class,
-  UpdatedServiceAgreementSagaConfiguration.class
+    LegalEntityHttpConfiguration.class,
+    LegalEntitySagaConfiguration.class,
+    UpdatedServiceAgreementSagaConfiguration.class
 })
 class LegalEntityAsyncControllerTest {
 
-  @MockBean private ReactiveClientRegistrationRepository reactiveClientRegistrationRepository;
+    @MockBean
+    private ReactiveClientRegistrationRepository reactiveClientRegistrationRepository;
 
-  @MockBean private WebClient webClient;
+    @MockBean
+    private WebClient webClient;
 
-  @MockBean private com.backbase.dbs.accesscontrol.api.service.ApiClient accessControlApiClient;
+    @MockBean
+    private com.backbase.dbs.accesscontrol.api.service.ApiClient accessControlApiClient;
 
-  @MockBean private com.backbase.dbs.user.api.service.ApiClient userApiClient;
+    @MockBean
+    private com.backbase.dbs.user.api.service.ApiClient userApiClient;
 
-  @MockBean private com.backbase.dbs.user.profile.api.service.ApiClient userProfileApiClient;
+    @MockBean
+    private com.backbase.dbs.user.profile.api.service.ApiClient userProfileApiClient;
 
-  @MockBean private com.backbase.dbs.arrangement.api.service.ApiClient accountsApiClient;
+    @MockBean
+    private com.backbase.dbs.arrangement.api.service.ApiClient accountsApiClient;
 
-  @MockBean private com.backbase.identity.integration.api.service.ApiClient identityApiClient;
+    @MockBean
+    private com.backbase.identity.integration.api.service.ApiClient identityApiClient;
 
-  @MockBean private LimitsServiceApi limitsApi;
+    @MockBean
+    private LimitsServiceApi limitsApi;
 
-  @MockBean private ContactsApi contactsApi;
+    @MockBean
+    private ContactsApi contactsApi;
 
-  @MockBean private UserManagementApi userManagementApi;
+    @MockBean
+    private UserManagementApi userManagementApi;
 
-  @MockBean private AccessGroupService accessGroupService;
+    @MockBean
+    private AccessGroupService accessGroupService;
 
-  @MockBean private LegalEntitiesApi legalEntitiesApi;
+    @MockBean
+    private LegalEntitiesApi legalEntitiesApi;
 
-  @MockBean private LegalEntityApi legalEntityApi;
+    @MockBean
+    private LegalEntityApi legalEntityApi;
 
-  @MockBean private IdentityManagementApi identityManagementApi;
+    @MockBean
+    private IdentityManagementApi identityManagementApi;
 
-  @MockBean private UserProfileManagementApi userProfileManagementApi;
+    @MockBean
+    private UserProfileManagementApi userProfileManagementApi;
 
-  @MockBean
-  private com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi
-      userProfileManagement;
+    @MockBean
+    private com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi
+        userProfileManagement;
 
-  @MockBean private ArrangementsApi arrangementsApi;
+    @MockBean
+    private ArrangementsApi arrangementsApi;
 
-  @Autowired private WebTestClient webTestClient;
+    @Autowired
+    private WebTestClient webTestClient;
 
-  @Test
-  void updateServiceAgreementAsyncTest() throws Exception {
-    final String saExternalId = "someSaExternalId";
-    final String saInternalId = "someSaInternalId";
-    URI uri = URI.create("/async/service-agreement");
-    User user1 = new User().externalId("someUserExId1");
-    User user2 = new User().externalId("someUserExId2");
-    LegalEntityParticipant participant =
-        new LegalEntityParticipant()
-            .externalId("someLeExId")
-            .sharingAccounts(true)
-            .sharingUsers(true);
-    BaseProductGroup baseProductGroup =
-        new BaseProductGroup().addLoansItem(new Loan().productNumber("1"));
-    JobProfileUser jobProfileUser1 =
-        new JobProfileUser().user(user1).addReferenceJobRoleNamesItem("someJobRole1");
-    JobProfileUser jobProfileUser2 =
-        new JobProfileUser().user(user2).addReferenceJobRoleNamesItem("someJobRole2");
-    UpdatedServiceAgreement serviceAgreement =
-        new UpdatedServiceAgreement()
-            .addProductGroupsItem(baseProductGroup)
-            .addSaUsersItem(
-                new ServiceAgreementUserAction()
-                    .userProfile(jobProfileUser1)
-                    .action(ServiceAgreementUserAction.ActionEnum.ADD))
-            .addSaUsersItem(
-                new ServiceAgreementUserAction()
-                    .userProfile(jobProfileUser2)
-                    .action(ServiceAgreementUserAction.ActionEnum.ADD));
-    serviceAgreement
-        .externalId(saExternalId)
-        .internalId(saInternalId)
-        .name("someSa")
-        .addParticipantsItem(participant);
-    ServiceAgreement internalSA =
-        new ServiceAgreement().externalId(saExternalId).internalId(saInternalId);
-    List<FunctionGroupItem> serviceAgreementFunctionGroups =
-        asList(
-            new FunctionGroupItem().name("someJobRole1").type(FunctionGroupItem.TypeEnum.DEFAULT),
-            new FunctionGroupItem().name("someJobRole2").type(FunctionGroupItem.TypeEnum.DEFAULT),
-            new FunctionGroupItem().name("someJobRole3").type(FunctionGroupItem.TypeEnum.DEFAULT));
-    ProductGroup productGroup = new ProductGroup().serviceAgreement(serviceAgreement);
-    productGroup.loans(baseProductGroup.getLoans());
+    @Test
+    void updateServiceAgreementAsyncTest() throws Exception {
+        final String saExternalId = "someSaExternalId";
+        final String saInternalId = "someSaInternalId";
+        URI uri = URI.create("/async/service-agreement");
+        User user1 = new User().externalId("someUserExId1");
+        User user2 = new User().externalId("someUserExId2");
+        LegalEntityParticipant participant =
+            new LegalEntityParticipant()
+                .externalId("someLeExId")
+                .sharingAccounts(true)
+                .sharingUsers(true);
+        BaseProductGroup baseProductGroup =
+            new BaseProductGroup().addLoansItem(new Loan().productNumber("1"));
+        JobProfileUser jobProfileUser1 =
+            new JobProfileUser().user(user1).addReferenceJobRoleNamesItem("someJobRole1");
+        JobProfileUser jobProfileUser2 =
+            new JobProfileUser().user(user2).addReferenceJobRoleNamesItem("someJobRole2");
+        UpdatedServiceAgreement serviceAgreement =
+            new UpdatedServiceAgreement()
+                .addProductGroupsItem(baseProductGroup)
+                .addSaUsersItem(
+                    new ServiceAgreementUserAction()
+                        .userProfile(jobProfileUser1)
+                        .action(ServiceAgreementUserAction.ActionEnum.ADD))
+                .addSaUsersItem(
+                    new ServiceAgreementUserAction()
+                        .userProfile(jobProfileUser2)
+                        .action(ServiceAgreementUserAction.ActionEnum.ADD));
+        serviceAgreement
+            .externalId(saExternalId)
+            .internalId(saInternalId)
+            .name("someSa")
+            .addParticipantsItem(participant);
+        ServiceAgreement internalSA =
+            new ServiceAgreement().externalId(saExternalId).internalId(saInternalId);
+        List<FunctionGroupItem> serviceAgreementFunctionGroups =
+            asList(
+                new FunctionGroupItem().name("someJobRole1").type(FunctionGroupItem.TypeEnum.DEFAULT),
+                new FunctionGroupItem().name("someJobRole2").type(FunctionGroupItem.TypeEnum.DEFAULT),
+                new FunctionGroupItem().name("someJobRole3").type(FunctionGroupItem.TypeEnum.DEFAULT));
+        ProductGroup productGroup = new ProductGroup().serviceAgreement(serviceAgreement);
+        productGroup.loans(baseProductGroup.getLoans());
 
-    when(accessGroupService.updateServiceAgreementAssociations(any(), eq(serviceAgreement), any()))
-        .thenReturn(Mono.just(serviceAgreement));
+        when(accessGroupService.updateServiceAgreementAssociations(any(), eq(serviceAgreement), any()))
+            .thenReturn(Mono.just(serviceAgreement));
 
-    Mono<ProductGroupTask> productGroupTaskMono = Mono.just(new ProductGroupTask(productGroup));
-    when(accessGroupService.setupProductGroups(any())).thenReturn(productGroupTaskMono);
+        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(new ProductGroupTask(productGroup));
+        when(accessGroupService.setupProductGroups(any())).thenReturn(productGroupTaskMono);
 
-    when(accessGroupService.getUserByExternalId(eq("someUserExId1"), eq(true)))
-        .thenReturn(Mono.just(new GetUser().id("someUserInId1").externalId("someUserExId1")));
-    when(accessGroupService.getUserByExternalId(eq("someUserExId2"), eq(true)))
-        .thenReturn(Mono.just(new GetUser().id("someUserInId2").externalId("someUserExId2")));
+        when(accessGroupService.getUserByExternalId(eq("someUserExId1"), eq(true)))
+            .thenReturn(Mono.just(new GetUser().id("someUserInId1").externalId("someUserExId1")));
+        when(accessGroupService.getUserByExternalId(eq("someUserExId2"), eq(true)))
+            .thenReturn(Mono.just(new GetUser().id("someUserInId2").externalId("someUserExId2")));
 
-    when(accessGroupService.getFunctionGroupsForServiceAgreement(eq("someSaInternalId")))
-        .thenReturn(Mono.just(serviceAgreementFunctionGroups));
+        when(accessGroupService.getFunctionGroupsForServiceAgreement(eq("someSaInternalId")))
+            .thenReturn(Mono.just(serviceAgreementFunctionGroups));
 
-    BatchProductGroupTask bpgTask =
-        new BatchProductGroupTask()
-            .data(new BatchProductGroup().serviceAgreement(serviceAgreement));
-    Mono<BatchProductGroupTask> bpgTaskMono = Mono.just(bpgTask);
-    when(accessGroupService.assignPermissionsBatch(any(), any())).thenReturn(bpgTaskMono);
+        BatchProductGroupTask bpgTask =
+            new BatchProductGroupTask()
+                .data(new BatchProductGroup().serviceAgreement(serviceAgreement));
+        Mono<BatchProductGroupTask> bpgTaskMono = Mono.just(bpgTask);
+        when(accessGroupService.assignPermissionsBatch(any(), any())).thenReturn(bpgTaskMono);
 
-    when(accessGroupService.getServiceAgreementByExternalId(eq(saExternalId)))
-        .thenReturn(Mono.just(internalSA));
+        when(accessGroupService.getServiceAgreementByExternalId(eq(saExternalId)))
+            .thenReturn(Mono.just(internalSA));
 
-    WebTestClient.ResponseSpec result =
-        webTestClient
-            .put()
-            .uri(uri)
-            .body(Mono.just(serviceAgreement), UpdatedServiceAgreement.class)
-            .exchange();
-    FluxExchangeResult<UpdatedServiceAgreementResponse> responseFlux =
-        result.returnResult(UpdatedServiceAgreementResponse.class);
-    UpdatedServiceAgreementResponse response = responseFlux.getResponseBody().blockLast();
+        WebTestClient.ResponseSpec result =
+            webTestClient
+                .put()
+                .uri(uri)
+                .body(Mono.just(serviceAgreement), UpdatedServiceAgreement.class)
+                .exchange();
+        FluxExchangeResult<UpdatedServiceAgreementResponse> responseFlux =
+            result.returnResult(UpdatedServiceAgreementResponse.class);
+        UpdatedServiceAgreementResponse response = responseFlux.getResponseBody().blockLast();
 
-    assertEquals(ACCEPTED, response.getState());
-  }
+        assertEquals(ACCEPTED, response.getState());
+    }
 }

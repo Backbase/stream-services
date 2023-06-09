@@ -7,19 +7,19 @@ import reactor.core.publisher.Mono;
 
 public interface ProductIngestionService {
 
-  /**
-   * Ingests legal Entities in pull mode.
-   *
-   * @param ingestPullRequest Ingest pull request
-   * @return LegalEntityIngestResponse
-   */
-  Mono<ProductIngestResponse> ingestPull(ProductIngestPullRequest ingestPullRequest);
+    /**
+     * Ingests legal Entities in pull mode.
+     *
+     * @param ingestPullRequest Ingest pull request
+     * @return LegalEntityIngestResponse
+     */
+    Mono<ProductIngestResponse> ingestPull(ProductIngestPullRequest ingestPullRequest);
 
-  /**
-   * Ingests product group in push mode.
-   *
-   * @param ingestPushRequest Ingest push request
-   * @return ProductIngestResponse
-   */
-  Mono<ProductIngestResponse> ingestPush(ProductIngestPushRequest ingestPushRequest);
+    /**
+     * Ingests product group in push mode.
+     *
+     * @param ingestPushRequest Ingest push request
+     * @return ProductIngestResponse
+     */
+    Mono<ProductIngestResponse> ingestPush(ProductIngestPushRequest ingestPushRequest);
 }

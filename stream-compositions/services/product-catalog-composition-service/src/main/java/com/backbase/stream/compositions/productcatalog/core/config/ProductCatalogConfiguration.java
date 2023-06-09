@@ -21,27 +21,28 @@ import org.springframework.web.reactive.function.client.WebClient;
 @EnableWebFluxSecurity
 @EnableConfigurationProperties(ProductCatalogConfigurationProperties.class)
 public class ProductCatalogConfiguration {
-  private final ProductCatalogConfigurationProperties properties;
 
-  @Bean
-  public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-    return http.csrf().disable().build();
-  }
+    private final ProductCatalogConfigurationProperties properties;
 
-  @Bean
-  @Primary
-  public ProductCatalogIntegrationApi productCatalogIntegrationApi(ApiClient legalEntityClient) {
-    return new ProductCatalogIntegrationApi(legalEntityClient);
-  }
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        return http.csrf().disable().build();
+    }
 
-  @Bean
-  public ApiClient productCatalogClient(
-      @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
-      ObjectMapper objectMapper,
-      DateFormat dateFormat) {
-    ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-    apiClient.setBasePath(properties.getProductCatalogIntegrationUrl());
+    @Bean
+    @Primary
+    public ProductCatalogIntegrationApi productCatalogIntegrationApi(ApiClient legalEntityClient) {
+        return new ProductCatalogIntegrationApi(legalEntityClient);
+    }
 
-    return apiClient;
-  }
+    @Bean
+    public ApiClient productCatalogClient(
+        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+        ObjectMapper objectMapper,
+        DateFormat dateFormat) {
+        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
+        apiClient.setBasePath(properties.getProductCatalogIntegrationUrl());
+
+        return apiClient;
+    }
 }

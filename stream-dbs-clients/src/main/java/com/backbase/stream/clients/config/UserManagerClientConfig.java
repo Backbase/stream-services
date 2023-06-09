@@ -14,27 +14,27 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("backbase.communication.services.usermanager")
 public class UserManagerClientConfig extends CompositeApiClientConfig {
 
-  public static final String USER_MANAGER_SERVICE_ID = "user-manager";
+    public static final String USER_MANAGER_SERVICE_ID = "user-manager";
 
-  public UserManagerClientConfig() {
-    super(USER_MANAGER_SERVICE_ID);
-  }
+    public UserManagerClientConfig() {
+        super(USER_MANAGER_SERVICE_ID);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public ApiClient userManagerClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-    return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public ApiClient userManagerClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public UserManagementApi usersApi(ApiClient userManagerClient) {
-    return new UserManagementApi(userManagerClient);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public UserManagementApi usersApi(ApiClient userManagerClient) {
+        return new UserManagementApi(userManagerClient);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public IdentityManagementApi identityManagementApi(ApiClient userManagerClient) {
-    return new IdentityManagementApi(userManagerClient);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public IdentityManagementApi identityManagementApi(ApiClient userManagerClient) {
+        return new IdentityManagementApi(userManagerClient);
+    }
 }

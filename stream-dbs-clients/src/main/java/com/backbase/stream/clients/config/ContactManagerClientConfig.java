@@ -13,21 +13,21 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("backbase.communication.services.contactmanager")
 public class ContactManagerClientConfig extends CompositeApiClientConfig {
 
-  public static final String CONTACT_MANAGER_SERVICE_ID = "contact-manager";
+    public static final String CONTACT_MANAGER_SERVICE_ID = "contact-manager";
 
-  public ContactManagerClientConfig() {
-    super(CONTACT_MANAGER_SERVICE_ID);
-  }
+    public ContactManagerClientConfig() {
+        super(CONTACT_MANAGER_SERVICE_ID);
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public ApiClient contactManagerApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-    return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public ApiClient contactManagerApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
+    }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public ContactsApi contactsApi(ApiClient contactManagerApiClient) {
-    return new ContactsApi(contactManagerApiClient);
-  }
+    @Bean
+    @ConditionalOnMissingBean
+    public ContactsApi contactsApi(ApiClient contactManagerApiClient) {
+        return new ContactsApi(contactManagerApiClient);
+    }
 }

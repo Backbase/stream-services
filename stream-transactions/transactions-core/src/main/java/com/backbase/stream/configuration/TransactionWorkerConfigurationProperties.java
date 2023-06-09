@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 public class TransactionWorkerConfigurationProperties extends StreamWorkerConfiguration {
 
-  private boolean groupPerArrangementId;
+    private boolean groupPerArrangementId;
 
-  private boolean continueOnError;
+    private boolean continueOnError;
 }

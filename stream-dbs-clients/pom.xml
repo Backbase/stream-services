@@ -7,15 +7,15 @@
         <artifactId>stream-services</artifactId>
         <version>3.37.1</version>
     </parent>
-
     <artifactId>stream-dbs-clients</artifactId>
+
     <packaging>jar</packaging>
+
     <name>Stream :: DBS Clients</name>
 
     <properties>
         <sonar.skip>true</sonar.skip>
     </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -102,100 +102,100 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.accesscontrol</groupId>
                                     <artifactId>access-control-openapi-spec</artifactId>
                                     <classifier>api</classifier>
-                                    <type>zip</type>
+                                    <groupId>com.backbase.dbs.accesscontrol</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.products</groupId>
                                     <artifactId>arrangement-manager</artifactId>
                                     <classifier>api</classifier>
-                                    <type>zip</type>
+                                    <groupId>com.backbase.products</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.audit</groupId>
                                     <artifactId>audit-spec</artifactId>
                                     <classifier>api</classifier>
-                                    <type>zip</type>
+                                    <groupId>com.backbase.dbs.audit</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.transaction</groupId>
                                     <artifactId>transaction-manager</artifactId>
-                                    <type>zip</type>
                                     <classifier>api</classifier>
+                                    <groupId>com.backbase.dbs.transaction</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.paymentorder</groupId>
                                     <artifactId>payment-order-service</artifactId>
-                                    <type>zip</type>
                                     <classifier>api</classifier>
+                                    <groupId>com.backbase.dbs.paymentorder</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.user</groupId>
                                     <artifactId>user-manager</artifactId>
                                     <classifier>api</classifier>
-                                    <type>zip</type>
+                                    <groupId>com.backbase.dbs.user</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.user</groupId>
                                     <artifactId>user-profile-manager</artifactId>
                                     <classifier>api</classifier>
-                                    <type>zip</type>
+                                    <groupId>com.backbase.dbs.user</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.limit</groupId>
                                     <artifactId>limit</artifactId>
                                     <classifier>api</classifier>
-                                    <type>zip</type>
+                                    <groupId>com.backbase.dbs.limit</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.identity</groupId>
                                     <artifactId>identity-integration-service</artifactId>
                                     <classifier>api</classifier>
-                                    <type>zip</type>
+                                    <groupId>com.backbase.identity</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.approval</groupId>
                                     <artifactId>approval-service</artifactId>
                                     <classifier>api</classifier>
-                                    <type>zip</type>
+                                    <groupId>com.backbase.dbs.approval</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase</groupId>
                                     <artifactId>portfolio</artifactId>
                                     <classifier>api</classifier>
-                                    <type>zip</type>
+                                    <groupId>com.backbase</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.dbs.contact</groupId>
                                     <artifactId>contact-manager</artifactId>
                                     <classifier>api</classifier>
-                                    <type>zip</type>
+                                    <groupId>com.backbase.dbs.contact</groupId>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
+                                    <type>zip</type>
                                 </artifactItem>
                             </artifactItems>
                             <includes>**/*.yaml, **/*.json</includes>
@@ -217,8 +217,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.service.v2</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
@@ -229,8 +229,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v2</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.integration.v2.model</modelPackage>
                         </configuration>
                     </execution>
@@ -241,8 +241,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.arrangement.api.service.v2</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v*.yaml</inputSpec>
                             <modelPackage>com.backbase.dbs.arrangement.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
@@ -253,8 +253,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.api.service.v2</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml</inputSpec>
                             <modelPackage>com.backbase.dbs.user.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
@@ -265,8 +265,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.profile.api.service.v2</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml</inputSpec>
                             <modelPackage>com.backbase.dbs.user.profile.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
@@ -277,8 +277,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v*.yaml</inputSpec>
                             <modelPackage>com.backbase.dbs.transaction.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
@@ -289,15 +289,15 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <typeMappings>
-                                <typeMapping>OffsetDateTime=java.lang.String</typeMapping>
-                            </typeMappings>
+                            <apiPackage>com.backbase.dbs.paymentorder.api.service.v2</apiPackage>
                             <importMappings>
                                 <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
                             </importMappings>
                             <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.paymentorder.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.paymentorder.api.service.v2.model</modelPackage>
+                            <typeMappings>
+                                <typeMapping>OffsetDateTime=java.lang.String</typeMapping>
+                            </typeMappings>
                         </configuration>
                     </execution>
                     <execution>
@@ -307,8 +307,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/audit/audit-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.audit.api.service.v2</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/audit/audit-service-api-v*.yaml</inputSpec>
                             <modelPackage>com.backbase.dbs.audit.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
@@ -319,8 +319,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/limit/limit-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.limit.api.service.v2</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/limit/limit-service-api-v2*.yaml</inputSpec>
                             <modelPackage>com.backbase.dbs.limit.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
@@ -331,8 +331,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.approval.api.service.v2</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml</inputSpec>
                             <modelPackage>com.backbase.dbs.approval.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
@@ -343,8 +343,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/identity/identity-integration-outbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.identity.integration.api.service.v1</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/identity/identity-integration-outbound-api-v*.yaml</inputSpec>
                             <modelPackage>com.backbase.identity.integration.api.service.v1.model</modelPackage>
                         </configuration>
                     </execution>
@@ -355,8 +355,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-instrument-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.portfolio.instrument.integration.api.service.v1</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-instrument-integration-inbound-api-v*.yaml</inputSpec>
                             <modelPackage>com.backbase.portfolio.instrument.integration.api.service.v1.model</modelPackage>
                         </configuration>
                     </execution>
@@ -367,8 +367,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.portfolio.integration.api.service.v1</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-integration-inbound-api-v*.yaml</inputSpec>
                             <modelPackage>com.backbase.portfolio.api.service.integration.v1.model</modelPackage>
                         </configuration>
                     </execution>
@@ -379,8 +379,8 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/contact-manager/contact-manager-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.contact.api.service.v2</apiPackage>
+                            <inputSpec>${project.build.directory}/yaml/contact-manager/contact-manager-service-api-v2*.yaml</inputSpec>
                             <modelPackage>com.backbase.dbs.contact.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>

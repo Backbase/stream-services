@@ -18,33 +18,35 @@ import org.springframework.context.annotation.Import;
 @EnableConfigurationProperties({UpdatedServiceAgreementSagaConfigurationProperties.class})
 public class UpdatedServiceAgreementSagaConfiguration {
 
-  @Bean
-  public UpdatedServiceAgreementSaga reactiveUpdatedServiceAgreementSaga(
-      AccessGroupService accessGroupService, ArrangementService arrangementService) {
-    return new UpdatedServiceAgreementSaga(accessGroupService, arrangementService);
-  }
+    @Bean
+    public UpdatedServiceAgreementSaga reactiveUpdatedServiceAgreementSaga(
+        AccessGroupService accessGroupService, ArrangementService arrangementService) {
+        return new UpdatedServiceAgreementSaga(accessGroupService, arrangementService);
+    }
 
-  @Bean
-  @ConditionalOnProperty(
-      name = "backbase.stream.persistence",
-      havingValue = "memory",
-      matchIfMissing = true)
-  public UpdatedServiceAgreementUnitOfWorkRepository
-      updatedServiceAgreementInMemoryUnitOfWorkRepository() {
-    return new UpdatedServiceAgreementInMemoryUnitOfWorkRepository();
-  }
+    @Bean
+    @ConditionalOnProperty(
+        name = "backbase.stream.persistence",
+        havingValue = "memory",
+        matchIfMissing = true)
+    public UpdatedServiceAgreementUnitOfWorkRepository
+    updatedServiceAgreementInMemoryUnitOfWorkRepository() {
+        return new UpdatedServiceAgreementInMemoryUnitOfWorkRepository();
+    }
 
-  @Bean
-  public UpdatedServiceAgreementUnitOfWorkExecutor updatedServiceAgreementUnitOfWorkExecutor(
-      UpdatedServiceAgreementUnitOfWorkRepository updatedServiceAgreementUnitOfWorkRepository,
-      UpdatedServiceAgreementSaga updatedServiceAgreementSaga,
-      UpdatedServiceAgreementSagaConfigurationProperties configProperties) {
+    @Bean
+    public UpdatedServiceAgreementUnitOfWorkExecutor updatedServiceAgreementUnitOfWorkExecutor(
+        UpdatedServiceAgreementUnitOfWorkRepository updatedServiceAgreementUnitOfWorkRepository,
+        UpdatedServiceAgreementSaga updatedServiceAgreementSaga,
+        UpdatedServiceAgreementSagaConfigurationProperties configProperties) {
 
-    return new UpdatedServiceAgreementUnitOfWorkExecutor(
-        updatedServiceAgreementUnitOfWorkRepository, updatedServiceAgreementSaga, configProperties);
-  }
+        return new UpdatedServiceAgreementUnitOfWorkExecutor(
+            updatedServiceAgreementUnitOfWorkRepository, updatedServiceAgreementSaga, configProperties);
+    }
 
-  public static class UpdatedServiceAgreementInMemoryUnitOfWorkRepository
-      extends InMemoryReactiveUnitOfWorkRepository<UpdatedServiceAgreementTask>
-      implements UpdatedServiceAgreementUnitOfWorkRepository {}
+    public static class UpdatedServiceAgreementInMemoryUnitOfWorkRepository
+        extends InMemoryReactiveUnitOfWorkRepository<UpdatedServiceAgreementTask>
+        implements UpdatedServiceAgreementUnitOfWorkRepository {
+
+    }
 }

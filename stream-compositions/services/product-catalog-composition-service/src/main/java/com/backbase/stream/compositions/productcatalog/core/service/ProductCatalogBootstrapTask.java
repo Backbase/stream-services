@@ -19,22 +19,23 @@ import reactor.core.publisher.Mono;
 @ConditionalOnProperty(name = "bootstrap.enabled", matchIfMissing = false)
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
 public class ProductCatalogBootstrapTask implements ApplicationRunner {
-  private final ReactiveProductCatalogService productCatalogService;
-  private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
 
-  @Override
-  public void run(ApplicationArguments args) {
-    ProductCatalog productCatalog = bootstrapConfigurationProperties.getProductCatalog();
-    bootstrapProductCatalog(productCatalog).subscribe();
-  }
+    private final ReactiveProductCatalogService productCatalogService;
+    private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
 
-  private Mono<ProductCatalog> bootstrapProductCatalog(ProductCatalog productCatalog) {
-    if (Objects.isNull(productCatalog)) {
-      log.warn("Failed to load product catalog.");
-      return Mono.empty();
-    } else {
-      log.info("Bootstrapping product catalog.");
-      return productCatalogService.setupProductCatalog(productCatalog);
+    @Override
+    public void run(ApplicationArguments args) {
+        ProductCatalog productCatalog = bootstrapConfigurationProperties.getProductCatalog();
+        bootstrapProductCatalog(productCatalog).subscribe();
     }
-  }
+
+    private Mono<ProductCatalog> bootstrapProductCatalog(ProductCatalog productCatalog) {
+        if (Objects.isNull(productCatalog)) {
+            log.warn("Failed to load product catalog.");
+            return Mono.empty();
+        } else {
+            log.info("Bootstrapping product catalog.");
+            return productCatalogService.setupProductCatalog(productCatalog);
+        }
+    }
 }

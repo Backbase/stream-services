@@ -1,5 +1,5 @@
 <configuration>
-    <appender name="COLOR" class="ch.qos.logback.core.ConsoleAppender">
+    <appender class="ch.qos.logback.core.ConsoleAppender" name="COLOR">
         <encoder>
             <pattern>[%date{HH:mm:ss.SSS}] %magenta(%20([%thread])) %highlight([%level]) %cyan([%logger]) %msg%n
             </pattern>
