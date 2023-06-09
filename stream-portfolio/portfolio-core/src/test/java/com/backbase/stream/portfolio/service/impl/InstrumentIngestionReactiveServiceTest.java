@@ -32,83 +32,80 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class InstrumentIngestionReactiveServiceTest {
 
-    @Mock
-    private PortfolioSagaProperties portfolioSagaProperties;
+  @Mock private PortfolioSagaProperties portfolioSagaProperties;
 
-    @Mock
-    private InstrumentIntegrationService instrumentIntegrationService;
+  @Mock private InstrumentIntegrationService instrumentIntegrationService;
 
-    @InjectMocks
-    private InstrumentIngestionReactiveService instrumentIngestionReactiveService;
+  @InjectMocks private InstrumentIngestionReactiveService instrumentIngestionReactiveService;
 
-    @Test
-    void shouldIngestWealthAssets() throws Exception {
-        WealthAssetBundle wealthAssetBundle = PortfolioTestUtil.getWealthAssetBundle();
-        List<AssetClassBundle> assetClasses = wealthAssetBundle.getAssetClasses();
+  @Test
+  void shouldIngestWealthAssets() throws Exception {
+    WealthAssetBundle wealthAssetBundle = PortfolioTestUtil.getWealthAssetBundle();
+    List<AssetClassBundle> assetClasses = wealthAssetBundle.getAssetClasses();
 
-        AssetClassBundle assetClassBundle0 = assetClasses.get(0);
-        AssetClassBundle assetClassBundle1 = assetClasses.get(1);
-        AssetClassBundle assetClassBundle2 = assetClasses.get(2);
-        AssetClassBundle assetClassBundle3 = assetClasses.get(3);
+    AssetClassBundle assetClassBundle0 = assetClasses.get(0);
+    AssetClassBundle assetClassBundle1 = assetClasses.get(1);
+    AssetClassBundle assetClassBundle2 = assetClasses.get(2);
+    AssetClassBundle assetClassBundle3 = assetClasses.get(3);
 
-        Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
-        Mockito.when(instrumentIntegrationService.upsertAssetClass(any()))
-            .thenAnswer(i -> Mono.just(i.getArgument(0)));
+    Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
+    Mockito.when(instrumentIntegrationService.upsertAssetClass(any()))
+        .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
-        Flux<AssetClassBundle> ingestedWealthAssets =
-            instrumentIngestionReactiveService.ingestWealthAssets(Flux.fromIterable(assetClasses));
+    Flux<AssetClassBundle> ingestedWealthAssets =
+        instrumentIngestionReactiveService.ingestWealthAssets(Flux.fromIterable(assetClasses));
 
-        Assertions.assertNotNull(ingestedWealthAssets);
+    Assertions.assertNotNull(ingestedWealthAssets);
 
-        StepVerifier.create(ingestedWealthAssets)
-            .assertNext(assertEqualsTo(assetClassBundle0))
-            .assertNext(assertEqualsTo(assetClassBundle1))
-            .assertNext(assertEqualsTo(assetClassBundle2))
-            .assertNext(assertEqualsTo(assetClassBundle3))
-            .verifyComplete();
-    }
+    StepVerifier.create(ingestedWealthAssets)
+        .assertNext(assertEqualsTo(assetClassBundle0))
+        .assertNext(assertEqualsTo(assetClassBundle1))
+        .assertNext(assertEqualsTo(assetClassBundle2))
+        .assertNext(assertEqualsTo(assetClassBundle3))
+        .verifyComplete();
+  }
 
-    @Test
-    void shouldIngestealthInstrumentBundles() throws Exception {
-        WealthInstrumentBundle wealthInstrumentBundle = PortfolioTestUtil.getWealthInstrumentBundle();
-        List<InstrumentBundle> instruments = wealthInstrumentBundle.getInstruments();
+  @Test
+  void shouldIngestealthInstrumentBundles() throws Exception {
+    WealthInstrumentBundle wealthInstrumentBundle = PortfolioTestUtil.getWealthInstrumentBundle();
+    List<InstrumentBundle> instruments = wealthInstrumentBundle.getInstruments();
 
-        InstrumentBundle instrumentBundle0 = instruments.get(0);
+    InstrumentBundle instrumentBundle0 = instruments.get(0);
 
-        Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
-        Mockito.when(instrumentIntegrationService.upsertInstrument(any()))
-            .thenAnswer(i -> Mono.just(i.getArgument(0)));
+    Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
+    Mockito.when(instrumentIntegrationService.upsertInstrument(any()))
+        .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
-        Flux<InstrumentBundle> ingestedInstruments =
-            instrumentIngestionReactiveService.ingestInstruments(Flux.fromIterable(instruments));
+    Flux<InstrumentBundle> ingestedInstruments =
+        instrumentIngestionReactiveService.ingestInstruments(Flux.fromIterable(instruments));
 
-        Assertions.assertNotNull(ingestedInstruments);
+    Assertions.assertNotNull(ingestedInstruments);
 
-        StepVerifier.create(ingestedInstruments)
-            .assertNext(assertEqualsTo(instrumentBundle0))
-            .verifyComplete();
-    }
+    StepVerifier.create(ingestedInstruments)
+        .assertNext(assertEqualsTo(instrumentBundle0))
+        .verifyComplete();
+  }
 
-    @Test
-    void shouldIngestRegionBundles() throws Exception {
-        WealthRegionsBundle wealthRegionsBundle = PortfolioTestUtil.getWealthRegionsBundle();
-        List<RegionBundle> regionBundles = wealthRegionsBundle.getRegions();
+  @Test
+  void shouldIngestRegionBundles() throws Exception {
+    WealthRegionsBundle wealthRegionsBundle = PortfolioTestUtil.getWealthRegionsBundle();
+    List<RegionBundle> regionBundles = wealthRegionsBundle.getRegions();
 
-        RegionBundle regionBundle0 = regionBundles.get(0);
-        RegionBundle regionBundle1 = regionBundles.get(1);
+    RegionBundle regionBundle0 = regionBundles.get(0);
+    RegionBundle regionBundle1 = regionBundles.get(1);
 
-        Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
-        Mockito.when(instrumentIntegrationService.upsertRegions(any()))
-            .thenAnswer(i -> Mono.just(i.getArgument(0)));
+    Mockito.when(portfolioSagaProperties.getTaskExecutors()).thenReturn(1);
+    Mockito.when(instrumentIntegrationService.upsertRegions(any()))
+        .thenAnswer(i -> Mono.just(i.getArgument(0)));
 
-        Flux<RegionBundle> ingestedRegionBundles =
-            instrumentIngestionReactiveService.ingestRegionBundles(Flux.fromIterable(regionBundles));
+    Flux<RegionBundle> ingestedRegionBundles =
+        instrumentIngestionReactiveService.ingestRegionBundles(Flux.fromIterable(regionBundles));
 
-        Assertions.assertNotNull(ingestedRegionBundles);
+    Assertions.assertNotNull(ingestedRegionBundles);
 
-        StepVerifier.create(ingestedRegionBundles)
-            .assertNext(assertEqualsTo(regionBundle0))
-            .assertNext(assertEqualsTo(regionBundle1))
-            .verifyComplete();
-    }
+    StepVerifier.create(ingestedRegionBundles)
+        .assertNext(assertEqualsTo(regionBundle0))
+        .assertNext(assertEqualsTo(regionBundle1))
+        .verifyComplete();
+  }
 }

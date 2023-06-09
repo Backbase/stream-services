@@ -19,34 +19,34 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class ProductController implements ProductCompositionApi {
 
-    private ProductSubController productSubController;
-    private ArrangementSubController arrangementSubController;
+  private ProductSubController productSubController;
+  private ArrangementSubController arrangementSubController;
 
-    @Override
-    public Mono<ResponseEntity<ArrangementIngestionResponse>> pullIngestArrangement(
-        Mono<ArrangementPullIngestionRequest> arrangementPullIngestionRequest,
-        ServerWebExchange exchange) {
-        return arrangementSubController.pullIngestArrangement(
-            arrangementPullIngestionRequest, exchange);
-    }
+  @Override
+  public Mono<ResponseEntity<ArrangementIngestionResponse>> pullIngestArrangement(
+      Mono<ArrangementPullIngestionRequest> arrangementPullIngestionRequest,
+      ServerWebExchange exchange) {
+    return arrangementSubController.pullIngestArrangement(
+        arrangementPullIngestionRequest, exchange);
+  }
 
-    @Override
-    public Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProduct(
-        Mono<ProductPullIngestionRequest> productPullIngestionRequest, ServerWebExchange exchange) {
-        return productSubController.pullIngestProduct(productPullIngestionRequest, exchange);
-    }
+  @Override
+  public Mono<ResponseEntity<ProductIngestionResponse>> pullIngestProduct(
+      Mono<ProductPullIngestionRequest> productPullIngestionRequest, ServerWebExchange exchange) {
+    return productSubController.pullIngestProduct(productPullIngestionRequest, exchange);
+  }
 
-    @Override
-    public Mono<ResponseEntity<ArrangementIngestionResponse>> pushIngestArrangement(
-        Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest,
-        ServerWebExchange exchange) {
-        return arrangementSubController.pushIngestArrangement(
-            arrangementPushIngestionRequest, exchange);
-    }
+  @Override
+  public Mono<ResponseEntity<ArrangementIngestionResponse>> pushIngestArrangement(
+      Mono<ArrangementPushIngestionRequest> arrangementPushIngestionRequest,
+      ServerWebExchange exchange) {
+    return arrangementSubController.pushIngestArrangement(
+        arrangementPushIngestionRequest, exchange);
+  }
 
-    @Override
-    public Mono<ResponseEntity<ProductIngestionResponse>> pushIngestProduct(
-        Mono<ProductPushIngestionRequest> productPushIngestionRequest, ServerWebExchange exchange) {
-        return productSubController.pushIngestProduct(productPushIngestionRequest, exchange);
-    }
+  @Override
+  public Mono<ResponseEntity<ProductIngestionResponse>> pushIngestProduct(
+      Mono<ProductPushIngestionRequest> productPushIngestionRequest, ServerWebExchange exchange) {
+    return productSubController.pushIngestProduct(productPushIngestionRequest, exchange);
+  }
 }

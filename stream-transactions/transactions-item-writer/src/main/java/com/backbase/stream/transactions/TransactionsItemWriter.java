@@ -26,37 +26,37 @@ import reactor.core.publisher.Flux;
 @Slf4j
 public class TransactionsItemWriter implements ItemWriter<TransactionsPostRequestBody> {
 
-    private final TransactionUnitOfWorkExecutor transactionTaskUnitOfWorkExecutor;
+  private final TransactionUnitOfWorkExecutor transactionTaskUnitOfWorkExecutor;
 
-    /**
-     * Process thousands of transactions by grouping them on arrangement id and register a Unit Of Work per
-     * arrangementExecutes jobs directly Synchronously, as Item Writers are used synchronously.
-     */
-    @Override
-    public void write(@NonNull List<? extends TransactionsPostRequestBody> items) throws Exception {
+  /**
+   * Process thousands of transactions by grouping them on arrangement id and register a Unit Of
+   * Work per arrangementExecutes jobs directly Synchronously, as Item Writers are used
+   * synchronously.
+   */
+  @Override
+  public void write(@NonNull List<? extends TransactionsPostRequestBody> items) throws Exception {
 
-        Flux<UnitOfWork<TransactionTask>> unitOfWorkFlux =
-            transactionTaskUnitOfWorkExecutor.prepareUnitOfWork(Collections.unmodifiableList(items));
+    Flux<UnitOfWork<TransactionTask>> unitOfWorkFlux =
+        transactionTaskUnitOfWorkExecutor.prepareUnitOfWork(Collections.unmodifiableList(items));
 
-        try {
-            unitOfWorkFlux
-                .flatMap(transactionTaskUnitOfWorkExecutor::executeTasks)
-                .doOnNext(UnitOfWork::logSummary)
-                .doOnError(
-                    throwable ->
-                        log.error(
-                            "Unexpected Exception while processing UnitOfWork: {}",
-                            throwable.getMessage()))
-                .blockLast();
-        } catch (StreamTaskException e) {
-
-            if (!transactionTaskUnitOfWorkExecutor
-                .getTransactionWorkerConfigurationProperties()
-                .isContinueOnError()) {
-                throw new RuntimeException("Failed to write transactions", e.getCause());
-            } else {
-                log.error("Failed to write transactions: {}", e.getMessage());
-            }
-        }
+    try {
+      unitOfWorkFlux
+          .flatMap(transactionTaskUnitOfWorkExecutor::executeTasks)
+          .doOnNext(UnitOfWork::logSummary)
+          .doOnError(
+              throwable ->
+                  log.error(
+                      "Unexpected Exception while processing UnitOfWork: {}",
+                      throwable.getMessage()))
+          .blockLast();
+    } catch (StreamTaskException e) {
+      if (!transactionTaskUnitOfWorkExecutor
+          .getTransactionWorkerConfigurationProperties()
+          .isContinueOnError()) {
+        throw new RuntimeException("Failed to write transactions", e.getCause());
+      } else {
+        log.error("Failed to write transactions: {}", e.getMessage());
+      }
     }
+  }
 }

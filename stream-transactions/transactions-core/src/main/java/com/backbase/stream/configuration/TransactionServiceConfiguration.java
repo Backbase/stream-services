@@ -19,43 +19,41 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class TransactionServiceConfiguration {
 
-    @Bean
-    public TransactionTaskExecutor transactionTaskExecutor(
-        TransactionPresentationServiceApi transactionsApi) {
-        return new TransactionTaskExecutor(transactionsApi);
-    }
+  @Bean
+  public TransactionTaskExecutor transactionTaskExecutor(
+      TransactionPresentationServiceApi transactionsApi) {
+    return new TransactionTaskExecutor(transactionsApi);
+  }
 
-    @Bean
-    public TransactionUnitOfWorkExecutor transactionUnitOfWorkExecutor(
-        TransactionTaskExecutor transactionTaskExecutor,
-        TransactionUnitOfWorkRepository transactionUnitOfWorkRepository,
-        TransactionWorkerConfigurationProperties transactionWorkerConfigurationProperties) {
+  @Bean
+  public TransactionUnitOfWorkExecutor transactionUnitOfWorkExecutor(
+      TransactionTaskExecutor transactionTaskExecutor,
+      TransactionUnitOfWorkRepository transactionUnitOfWorkRepository,
+      TransactionWorkerConfigurationProperties transactionWorkerConfigurationProperties) {
 
-        return new TransactionUnitOfWorkExecutor(
-            transactionUnitOfWorkRepository,
-            transactionTaskExecutor,
-            transactionWorkerConfigurationProperties);
-    }
+    return new TransactionUnitOfWorkExecutor(
+        transactionUnitOfWorkRepository,
+        transactionTaskExecutor,
+        transactionWorkerConfigurationProperties);
+  }
 
-    @Bean
-    @ConditionalOnProperty(
-        name = "backbase.stream.persistence",
-        havingValue = "memory",
-        matchIfMissing = true)
-    public TransactionUnitOfWorkRepository transactionUnitOfWorkRepository() {
-        return new InMemoryTransactionUnitOfWorkRepository();
-    }
+  @Bean
+  @ConditionalOnProperty(
+      name = "backbase.stream.persistence",
+      havingValue = "memory",
+      matchIfMissing = true)
+  public TransactionUnitOfWorkRepository transactionUnitOfWorkRepository() {
+    return new InMemoryTransactionUnitOfWorkRepository();
+  }
 
-    @Bean
-    public TransactionService transactionService(
-        TransactionUnitOfWorkExecutor transactionTaskExecutor,
-        TransactionPresentationServiceApi transactionsApi) {
-        return new TransactionServiceImpl(transactionsApi, transactionTaskExecutor);
-    }
+  @Bean
+  public TransactionService transactionService(
+      TransactionUnitOfWorkExecutor transactionTaskExecutor,
+      TransactionPresentationServiceApi transactionsApi) {
+    return new TransactionServiceImpl(transactionsApi, transactionTaskExecutor);
+  }
 
-    public static class InMemoryTransactionUnitOfWorkRepository
-        extends InMemoryReactiveUnitOfWorkRepository<TransactionTask>
-        implements TransactionUnitOfWorkRepository {
-
-    }
+  public static class InMemoryTransactionUnitOfWorkRepository
+      extends InMemoryReactiveUnitOfWorkRepository<TransactionTask>
+      implements TransactionUnitOfWorkRepository {}
 }

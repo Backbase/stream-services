@@ -10,12 +10,12 @@ import lombok.Data;
 @AllArgsConstructor
 public class PaymentOrderIngestPullRequest {
 
-    private String memberNumber;
-    private String internalUserId;
-    private String legalEntityInternalId;
-    private String legalEntityExternalId;
-    private String serviceAgreementInternalId;
-    private Map<String, String> additions;
-    private String dateRangeStart;
-    private String dateRangeEnd;
+  private String memberNumber;
+  private String internalUserId;
+  private String legalEntityInternalId;
+  private String legalEntityExternalId;
+  private String serviceAgreementInternalId;
+  private Map<String, String> additions;
+  private String dateRangeStart;
+  private String dateRangeEnd;
 }

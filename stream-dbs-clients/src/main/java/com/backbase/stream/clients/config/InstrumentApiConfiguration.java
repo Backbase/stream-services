@@ -17,48 +17,48 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("backbase.communication.services.instrument")
 public class InstrumentApiConfiguration extends CompositeApiClientConfig {
 
-    public static final String PORTFOLIO_SERVICE_ID = "portfolio";
+  public static final String PORTFOLIO_SERVICE_ID = "portfolio";
 
-    public InstrumentApiConfiguration() {
-        super(PORTFOLIO_SERVICE_ID);
-    }
+  public InstrumentApiConfiguration() {
+    super(PORTFOLIO_SERVICE_ID);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ApiClient instrumentApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public ApiClient instrumentApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public InstrumentManagementApi instrumentManagementApi(ApiClient instrumentApiClient) {
-        return new InstrumentManagementApi(instrumentApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public InstrumentManagementApi instrumentManagementApi(ApiClient instrumentApiClient) {
+    return new InstrumentManagementApi(instrumentApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public InstrumentPriceManagementApi instrumentPriceManagementApi(ApiClient instrumentApiClient) {
-        return new InstrumentPriceManagementApi(instrumentApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public InstrumentPriceManagementApi instrumentPriceManagementApi(ApiClient instrumentApiClient) {
+    return new InstrumentPriceManagementApi(instrumentApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public InstrumentRegionManagementApi instrumentRegionManagementApi(
-        ApiClient instrumentApiClient) {
-        return new InstrumentRegionManagementApi(instrumentApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public InstrumentRegionManagementApi instrumentRegionManagementApi(
+      ApiClient instrumentApiClient) {
+    return new InstrumentRegionManagementApi(instrumentApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public InstrumentCountryManagementApi instrumentCountryManagementApi(
-        ApiClient instrumentApiClient) {
-        return new InstrumentCountryManagementApi(instrumentApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public InstrumentCountryManagementApi instrumentCountryManagementApi(
+      ApiClient instrumentApiClient) {
+    return new InstrumentCountryManagementApi(instrumentApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public InstrumentAssetClassManagementApi instrumentAssetClassManagementApi(
-        ApiClient instrumentApiClient) {
-        return new InstrumentAssetClassManagementApi(instrumentApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public InstrumentAssetClassManagementApi instrumentAssetClassManagementApi(
+      ApiClient instrumentApiClient) {
+    return new InstrumentAssetClassManagementApi(instrumentApiClient);
+  }
 }

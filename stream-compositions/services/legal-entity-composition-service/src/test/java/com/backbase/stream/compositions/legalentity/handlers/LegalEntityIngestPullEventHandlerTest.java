@@ -24,66 +24,63 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class LegalEntityIngestPullEventHandlerTest {
 
-    @Mock
-    LegalEntityIngestionService legalEntityIngestionService;
+  @Mock LegalEntityIngestionService legalEntityIngestionService;
 
-    @Mock
-    LegalEntityMapper mapper;
+  @Mock LegalEntityMapper mapper;
 
-    @Mock
-    EventBus eventBus;
+  @Mock EventBus eventBus;
 
-    LegalEntityConfigurationProperties configProperties = new LegalEntityConfigurationProperties();
+  LegalEntityConfigurationProperties configProperties = new LegalEntityConfigurationProperties();
 
-    LegalEntityPullEventHandler handler;
+  LegalEntityPullEventHandler handler;
 
-    @BeforeEach
-    void setUp() {
-        handler =
-            new LegalEntityPullEventHandler(
-                configProperties, legalEntityIngestionService, mapper, eventBus);
+  @BeforeEach
+  void setUp() {
+    handler =
+        new LegalEntityPullEventHandler(
+            configProperties, legalEntityIngestionService, mapper, eventBus);
 
-        configProperties.setEvents(new LegalEntityConfigurationProperties.Events());
-    }
+    configProperties.setEvents(new LegalEntityConfigurationProperties.Events());
+  }
 
-    @Test
-    void testHandleEvent_Completed() {
-        LegalEntityResponse res =
-            LegalEntityResponse.builder().legalEntity(new LegalEntity().name("Legal Entity")).build();
-        Mono<LegalEntityResponse> responseMono = Mono.just(res);
+  @Test
+  void testHandleEvent_Completed() {
+    LegalEntityResponse res =
+        LegalEntityResponse.builder().legalEntity(new LegalEntity().name("Legal Entity")).build();
+    Mono<LegalEntityResponse> responseMono = Mono.just(res);
 
-        when(legalEntityIngestionService.ingestPull(any())).thenReturn(responseMono);
+    when(legalEntityIngestionService.ingestPull(any())).thenReturn(responseMono);
 
-        LegalEntityPullRequest legalEntityPullRequest = new LegalEntityPullRequest();
-        legalEntityPullRequest.setLegalEntityExternalId("externalLegalId");
+    LegalEntityPullRequest legalEntityPullRequest = new LegalEntityPullRequest();
+    legalEntityPullRequest.setLegalEntityExternalId("externalLegalId");
 
-        when(mapper.mapPullRequestEventToStream(any())).thenReturn(new LegalEntityPullRequest());
+    when(mapper.mapPullRequestEventToStream(any())).thenReturn(new LegalEntityPullRequest());
 
-        configProperties.getEvents().setEnableCompleted(Boolean.TRUE);
+    configProperties.getEvents().setEnableCompleted(Boolean.TRUE);
 
-        EnvelopedEvent<LegalEntityPullEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(
-            new LegalEntityPullEvent().withLegalEntityExternalId("externalLegalId"));
+    EnvelopedEvent<LegalEntityPullEvent> envelopedEvent = new EnvelopedEvent<>();
+    envelopedEvent.setEvent(
+        new LegalEntityPullEvent().withLegalEntityExternalId("externalLegalId"));
 
-        handler.handle(envelopedEvent);
-        Mockito.verify(legalEntityIngestionService, Mockito.times(1)).ingestPull(any());
-    }
+    handler.handle(envelopedEvent);
+    Mockito.verify(legalEntityIngestionService, Mockito.times(1)).ingestPull(any());
+  }
 
-    @Test
-    void testHandleEvent_Failed() {
-        LegalEntityPullRequest legalEntityPullRequest = new LegalEntityPullRequest();
-        legalEntityPullRequest.setLegalEntityExternalId("externalLegalId");
-        when(mapper.mapPullRequestEventToStream(any())).thenReturn(legalEntityPullRequest);
+  @Test
+  void testHandleEvent_Failed() {
+    LegalEntityPullRequest legalEntityPullRequest = new LegalEntityPullRequest();
+    legalEntityPullRequest.setLegalEntityExternalId("externalLegalId");
+    when(mapper.mapPullRequestEventToStream(any())).thenReturn(legalEntityPullRequest);
 
-        when(legalEntityIngestionService.ingestPull(any()))
-            .thenReturn(Mono.error(new RuntimeException("test error")));
-        configProperties.getEvents().setEnableFailed(Boolean.TRUE);
+    when(legalEntityIngestionService.ingestPull(any()))
+        .thenReturn(Mono.error(new RuntimeException("test error")));
+    configProperties.getEvents().setEnableFailed(Boolean.TRUE);
 
-        EnvelopedEvent<LegalEntityPullEvent> envelopedEvent = new EnvelopedEvent<>();
-        envelopedEvent.setEvent(
-            new LegalEntityPullEvent().withLegalEntityExternalId("externalLegalId"));
+    EnvelopedEvent<LegalEntityPullEvent> envelopedEvent = new EnvelopedEvent<>();
+    envelopedEvent.setEvent(
+        new LegalEntityPullEvent().withLegalEntityExternalId("externalLegalId"));
 
-        handler.handle(envelopedEvent);
-        StepVerifier.create(legalEntityIngestionService.ingestPull(any())).expectError().verify();
-    }
+    handler.handle(envelopedEvent);
+    StepVerifier.create(legalEntityIngestionService.ingestPull(any())).expectError().verify();
+  }
 }

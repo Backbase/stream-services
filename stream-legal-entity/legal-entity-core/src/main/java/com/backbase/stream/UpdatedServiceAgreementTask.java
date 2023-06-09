@@ -11,23 +11,23 @@ import lombok.NoArgsConstructor;
 @Data
 public class UpdatedServiceAgreementTask extends StreamTask {
 
-    private UpdatedServiceAgreement serviceAgreement;
+  private UpdatedServiceAgreement serviceAgreement;
 
-    public UpdatedServiceAgreementTask(UpdatedServiceAgreement serviceAgreement) {
-        super(serviceAgreement.getExternalId());
-        this.serviceAgreement = serviceAgreement;
-    }
+  public UpdatedServiceAgreementTask(UpdatedServiceAgreement serviceAgreement) {
+    super(serviceAgreement.getExternalId());
+    this.serviceAgreement = serviceAgreement;
+  }
 
-    @Override
-    public String getName() {
-        return serviceAgreement.getExternalId();
-    }
+  @Override
+  public String getName() {
+    return serviceAgreement.getExternalId();
+  }
 
-    public UpdatedServiceAgreement getData() {
-        return serviceAgreement;
-    }
+  public UpdatedServiceAgreement getData() {
+    return serviceAgreement;
+  }
 
-    public void setData(UpdatedServiceAgreement serviceAgreement) {
-        this.serviceAgreement = serviceAgreement;
-    }
+  public void setData(UpdatedServiceAgreement serviceAgreement) {
+    this.serviceAgreement = serviceAgreement;
+  }
 }

@@ -16,16 +16,14 @@ import reactor.core.publisher.Flux;
 @AllArgsConstructor
 public class TransactionIntegrationServiceImpl implements TransactionIntegrationService {
 
-    private final TransactionIntegrationApi transactionIntegrationApi;
-    private final TransactionMapper transactionMapper;
+  private final TransactionIntegrationApi transactionIntegrationApi;
+  private final TransactionMapper transactionMapper;
 
-    /**
-     * {@inheritDoc}
-     */
-    public Flux<TransactionsPostRequestBody> pullTransactions(
-        TransactionIngestPullRequest ingestPullRequest) {
-        return transactionIntegrationApi
-            .pullTransactions(transactionMapper.mapStreamToIntegration(ingestPullRequest))
-            .flatMapIterable(PullTransactionsResponse::getTransactions);
-    }
+  /** {@inheritDoc} */
+  public Flux<TransactionsPostRequestBody> pullTransactions(
+      TransactionIngestPullRequest ingestPullRequest) {
+    return transactionIntegrationApi
+        .pullTransactions(transactionMapper.mapStreamToIntegration(ingestPullRequest))
+        .flatMapIterable(PullTransactionsResponse::getTransactions);
+  }
 }

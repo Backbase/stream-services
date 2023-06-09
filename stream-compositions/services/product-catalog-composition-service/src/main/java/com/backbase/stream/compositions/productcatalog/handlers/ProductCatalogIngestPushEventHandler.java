@@ -15,25 +15,25 @@ import reactor.core.publisher.Mono;
 public class ProductCatalogIngestPushEventHandler
     implements EventHandler<ProductCatalogIngestPushEvent> {
 
-    private final ProductCatalogIngestionService productCatalogIngestionService;
-    private final ProductCatalogMapper mapper;
+  private final ProductCatalogIngestionService productCatalogIngestionService;
+  private final ProductCatalogMapper mapper;
 
-    @Override
-    public void handle(EnvelopedEvent<ProductCatalogIngestPushEvent> envelopedEvent) {
-        productCatalogIngestionService.ingestPush(buildRequest(envelopedEvent));
-    }
+  @Override
+  public void handle(EnvelopedEvent<ProductCatalogIngestPushEvent> envelopedEvent) {
+    productCatalogIngestionService.ingestPush(buildRequest(envelopedEvent));
+  }
 
-    /**
-     * Builds ingestion request for downstream service.
-     *
-     * @param envelopedEvent EnvelopedEvent<LegalEntityIngestPushEvent>
-     * @return LegalEntityIngestPullRequest
-     */
-    private Mono<ProductCatalogIngestPushRequest> buildRequest(
-        EnvelopedEvent<ProductCatalogIngestPushEvent> envelopedEvent) {
-        return Mono.just(
-            ProductCatalogIngestPushRequest.builder()
-                .productCatalog(mapper.mapEventToStream(envelopedEvent.getEvent().getProductCatalog()))
-                .build());
-    }
+  /**
+   * Builds ingestion request for downstream service.
+   *
+   * @param envelopedEvent EnvelopedEvent<LegalEntityIngestPushEvent>
+   * @return LegalEntityIngestPullRequest
+   */
+  private Mono<ProductCatalogIngestPushRequest> buildRequest(
+      EnvelopedEvent<ProductCatalogIngestPushEvent> envelopedEvent) {
+    return Mono.just(
+        ProductCatalogIngestPushRequest.builder()
+            .productCatalog(mapper.mapEventToStream(envelopedEvent.getEvent().getProductCatalog()))
+            .build());
+  }
 }

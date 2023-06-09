@@ -12,5 +12,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Setter
 public class ContactsWorkerConfigurationProperties extends StreamWorkerConfiguration {
 
-    private boolean continueOnError;
+  private boolean continueOnError;
 }

@@ -19,50 +19,50 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class RequestConfig {
 
-    private Chains chains;
+  private Chains chains;
 
-    public Optional<Boolean> isTransactionChainEnabled() {
-        return chains == null
+  public Optional<Boolean> isTransactionChainEnabled() {
+    return chains == null
             || chains.getTransactionComposition() == null
             || chains.getTransactionComposition().getEnabled() == null
-            ? Optional.empty()
-            : Optional.of(Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled()));
-    }
+        ? Optional.empty()
+        : Optional.of(Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled()));
+  }
 
-    public Optional<Boolean> isTransactionChainAsync() {
-        return chains == null
+  public Optional<Boolean> isTransactionChainAsync() {
+    return chains == null
             || chains.getTransactionComposition() == null
             || chains.getTransactionComposition().getAsync() == null
-            ? Optional.empty()
-            : Optional.of(Boolean.TRUE.equals(chains.getTransactionComposition().getAsync()));
-    }
+        ? Optional.empty()
+        : Optional.of(Boolean.TRUE.equals(chains.getTransactionComposition().getAsync()));
+  }
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Chains {
+  @Data
+  @Builder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public static class Chains {
 
-        private ProductConfigurationProperties.TransactionComposition transactionComposition;
-    }
+    private ProductConfigurationProperties.TransactionComposition transactionComposition;
+  }
 
-    @Data
-    @SuperBuilder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public abstract static class BaseComposition {
+  @Data
+  @SuperBuilder
+  @NoArgsConstructor
+  @AllArgsConstructor
+  public abstract static class BaseComposition {
 
-        private Boolean enabled = Boolean.FALSE;
-        private Boolean async = Boolean.FALSE;
-    }
+    private Boolean enabled = Boolean.FALSE;
+    private Boolean async = Boolean.FALSE;
+  }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @SuperBuilder
-    public static class TransactionComposition
-        extends ProductConfigurationProperties.BaseComposition {
+  @Data
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @SuperBuilder
+  public static class TransactionComposition
+      extends ProductConfigurationProperties.BaseComposition {
 
-        private List<String> excludeProductTypeExternalIds = new ArrayList<>();
-    }
+    private List<String> excludeProductTypeExternalIds = new ArrayList<>();
+  }
 }

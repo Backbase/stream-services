@@ -10,9 +10,9 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface ApprovalMapper {
 
-    PostApprovalTypeRequest mapApprovalType(ApprovalType approvalType);
+  PostApprovalTypeRequest mapApprovalType(ApprovalType approvalType);
 
-    @Mapping(source = "approvalTypeAssignments", target = "approvalTypeAssignments")
-    PresentationPostBulkApprovalTypeAssignmentRequest mapApprovalTypeAssignment(
-        PolicyAssignment policyAssignment);
+  @Mapping(source = "approvalTypeAssignments", target = "approvalTypeAssignments")
+  PresentationPostBulkApprovalTypeAssignmentRequest mapApprovalTypeAssignment(
+      PolicyAssignment policyAssignment);
 }

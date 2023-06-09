@@ -17,45 +17,44 @@ import org.springframework.util.Assert;
 @ActiveProfiles({"it", "moustache-bank", "moustache-bank-subsidiaries"})
 public class SetupLegalEntityHierarchyTaskApplicationIT {
 
-    @RegisterExtension
-    static WireMockExtension wiremock =
-        WireMockExtension.newInstance().options(wireMockConfig().dynamicPort()).build();
+  @RegisterExtension
+  static WireMockExtension wiremock =
+      WireMockExtension.newInstance().options(wireMockConfig().dynamicPort()).build();
 
-    @Autowired
-    BootstrapConfigurationProperties configuration;
+  @Autowired BootstrapConfigurationProperties configuration;
 
-    @DynamicPropertySource
-    static void registerDynamicProperties(DynamicPropertyRegistry registry) {
-        String wiremockUrl = String.format("http://localhost:%d", wiremock.getPort());
-        registry.add("spring.zipkin.base-url", () -> wiremockUrl);
-        registry.add(
-            "spring.cloud.discovery.client.simple.instances.token-converter[0].uri", () -> wiremockUrl);
-        registry.add(
-            "spring.cloud.discovery.client.simple.instances.user-manager[0].uri", () -> wiremockUrl);
-        registry.add(
-            "spring.cloud.discovery.client.simple.instances.user-manager[0].metadata.contextPath",
-            () -> "/user-manager");
-        registry.add(
-            "spring.cloud.discovery.client.simple.instances.access-control[0].uri", () -> wiremockUrl);
-        registry.add(
-            "spring.cloud.discovery.client.simple.instances.access-control[0].metadata.contextPath",
-            () -> "/access-control");
-        registry.add(
-            "spring.cloud.discovery.client.simple.instances.arrangement-manager[0].uri",
-            () -> wiremockUrl);
-        registry.add(
-            "spring.cloud.discovery.client.simple.instances.arrangement-manager[0].metadata.contextPath",
-            () -> "/arrangement-manager");
-    }
+  @DynamicPropertySource
+  static void registerDynamicProperties(DynamicPropertyRegistry registry) {
+    String wiremockUrl = String.format("http://localhost:%d", wiremock.getPort());
+    registry.add("spring.zipkin.base-url", () -> wiremockUrl);
+    registry.add(
+        "spring.cloud.discovery.client.simple.instances.token-converter[0].uri", () -> wiremockUrl);
+    registry.add(
+        "spring.cloud.discovery.client.simple.instances.user-manager[0].uri", () -> wiremockUrl);
+    registry.add(
+        "spring.cloud.discovery.client.simple.instances.user-manager[0].metadata.contextPath",
+        () -> "/user-manager");
+    registry.add(
+        "spring.cloud.discovery.client.simple.instances.access-control[0].uri", () -> wiremockUrl);
+    registry.add(
+        "spring.cloud.discovery.client.simple.instances.access-control[0].metadata.contextPath",
+        () -> "/access-control");
+    registry.add(
+        "spring.cloud.discovery.client.simple.instances.arrangement-manager[0].uri",
+        () -> wiremockUrl);
+    registry.add(
+        "spring.cloud.discovery.client.simple.instances.arrangement-manager[0].metadata.contextPath",
+        () -> "/arrangement-manager");
+  }
 
-    @Test
-    void contextLoads() {
-        // Triggers the CommandLineRunner which will run the boostrap task to be validated by the
-        // WireMock assertions.
-        Assert.notEmpty(
-            configuration.getLegalEntity().getSubsidiaries(),
-            "At least one subsidiary should be present.");
-        Assert.notNull(
-            configuration.getLegalEntity().getName(), "Legal entity name should be present.");
-    }
+  @Test
+  void contextLoads() {
+    // Triggers the CommandLineRunner which will run the boostrap task to be validated by the
+    // WireMock assertions.
+    Assert.notEmpty(
+        configuration.getLegalEntity().getSubsidiaries(),
+        "At least one subsidiary should be present.");
+    Assert.notNull(
+        configuration.getLegalEntity().getName(), "Legal entity name should be present.");
+  }
 }

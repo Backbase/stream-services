@@ -39,70 +39,68 @@ import reactor.core.publisher.Mono;
 @ExtendWith({SpringExtension.class})
 class ProductCatalogControllerIT extends IntegrationTest {
 
-    private static final int INTEGRATION_SERVICE_PORT = 18000;
-    private static BrokerService broker;
-    @MockBean
-    ReactiveProductCatalogService reactiveProductCatalogService;
-    @Autowired
-    ProductCatalogController productCatalogController;
-    private ClientAndServer integrationServer;
-    private MockServerClient integrationServerClient;
+  private static final int INTEGRATION_SERVICE_PORT = 18000;
+  private static BrokerService broker;
+  @MockBean ReactiveProductCatalogService reactiveProductCatalogService;
+  @Autowired ProductCatalogController productCatalogController;
+  private ClientAndServer integrationServer;
+  private MockServerClient integrationServerClient;
 
-    @BeforeAll
-    static void initActiveMqBroker() throws Exception {
-        broker = new BrokerService();
-        broker.setBrokerName("activemq");
-        broker.setPersistent(false);
-        broker.start();
-        broker.waitUntilStarted();
-    }
+  @BeforeAll
+  static void initActiveMqBroker() throws Exception {
+    broker = new BrokerService();
+    broker.setBrokerName("activemq");
+    broker.setPersistent(false);
+    broker.start();
+    broker.waitUntilStarted();
+  }
 
-    @BeforeEach
-    void initializeIntegrationServer() throws IOException {
-        integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
-        integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
-        integrationServerClient
-            .when(request().withMethod("GET").withPath("/service-api/v2/product-catalog"))
-            .respond(
-                response()
-                    .withStatusCode(200)
-                    .withContentType(MediaType.APPLICATION_JSON)
-                    .withBody(readContentFromClasspath("integration-data/response.json")));
-    }
+  @BeforeEach
+  void initializeIntegrationServer() throws IOException {
+    integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
+    integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
+    integrationServerClient
+        .when(request().withMethod("GET").withPath("/service-api/v2/product-catalog"))
+        .respond(
+            response()
+                .withStatusCode(200)
+                .withContentType(MediaType.APPLICATION_JSON)
+                .withBody(readContentFromClasspath("integration-data/response.json")));
+  }
 
-    @AfterEach
-    void stopMockServer() {
-        integrationServer.stop();
-    }
+  @AfterEach
+  void stopMockServer() {
+    integrationServer.stop();
+  }
 
-    @Test
-    void pullIngestLegalEntity_Success() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode node =
-            mapper
-                .readTree(readContentFromClasspath("integration-data/response.json"))
-                .get("productCatalog");
-        ProductCatalog productCatalog = mapper.treeToValue(node, ProductCatalog.class);
+  @Test
+  void pullIngestLegalEntity_Success() throws Exception {
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode node =
+        mapper
+            .readTree(readContentFromClasspath("integration-data/response.json"))
+            .get("productCatalog");
+    ProductCatalog productCatalog = mapper.treeToValue(node, ProductCatalog.class);
 
-        when(reactiveProductCatalogService.setupProductCatalog(any()))
-            .thenReturn(Mono.just(productCatalog));
+    when(reactiveProductCatalogService.setupProductCatalog(any()))
+        .thenReturn(Mono.just(productCatalog));
 
-        when(reactiveProductCatalogService.updateExistingProductCatalog(any()))
-            .thenReturn(Mono.just(productCatalog));
+    when(reactiveProductCatalogService.updateExistingProductCatalog(any()))
+        .thenReturn(Mono.just(productCatalog));
 
-        when(reactiveProductCatalogService.upsertProductCatalog(any()))
-            .thenReturn(Mono.just(productCatalog));
+    when(reactiveProductCatalogService.upsertProductCatalog(any()))
+        .thenReturn(Mono.just(productCatalog));
 
-        ProductCatalogPushIngestionRequest request = new ProductCatalogPushIngestionRequest();
-        URI uri = URI.create("/service-api/v2/pull-ingestion");
-        WebTestClient webTestClient = WebTestClient.bindToController(productCatalogController).build();
+    ProductCatalogPushIngestionRequest request = new ProductCatalogPushIngestionRequest();
+    URI uri = URI.create("/service-api/v2/pull-ingestion");
+    WebTestClient webTestClient = WebTestClient.bindToController(productCatalogController).build();
 
-        webTestClient
-            .post()
-            .uri(uri)
-            .body(Mono.just(request), ProductCatalogPushIngestionRequest.class)
-            .exchange()
-            .expectStatus()
-            .isCreated();
-    }
+    webTestClient
+        .post()
+        .uri(uri)
+        .body(Mono.just(request), ProductCatalogPushIngestionRequest.class)
+        .exchange()
+        .expectStatus()
+        .isCreated();
+  }
 }

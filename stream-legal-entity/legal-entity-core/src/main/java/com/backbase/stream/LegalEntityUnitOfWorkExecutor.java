@@ -7,10 +7,10 @@ import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 
 public class LegalEntityUnitOfWorkExecutor extends UnitOfWorkExecutor<LegalEntityTask> {
 
-    public LegalEntityUnitOfWorkExecutor(
-        UnitOfWorkRepository<LegalEntityTask, String> repository,
-        StreamTaskExecutor<LegalEntityTask> streamTaskExecutor,
-        StreamWorkerConfiguration properties) {
-        super(repository, streamTaskExecutor, properties);
-    }
+  public LegalEntityUnitOfWorkExecutor(
+      UnitOfWorkRepository<LegalEntityTask, String> repository,
+      StreamTaskExecutor<LegalEntityTask> streamTaskExecutor,
+      StreamWorkerConfiguration properties) {
+    super(repository, streamTaskExecutor, properties);
+  }
 }

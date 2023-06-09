@@ -24,87 +24,87 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("backbase.communication.services.access-control")
 public class AccessControlClientConfig extends CompositeApiClientConfig {
 
-    public static final String ACCESS_CONTROL_SERVICE_ID = "access-control";
+  public static final String ACCESS_CONTROL_SERVICE_ID = "access-control";
 
-    public AccessControlClientConfig() {
-        super(ACCESS_CONTROL_SERVICE_ID);
-    }
+  public AccessControlClientConfig() {
+    super(ACCESS_CONTROL_SERVICE_ID);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ApiClient accessControlApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public ApiClient accessControlApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public UserQueryApi userQueryApi(ApiClient accessControlApiClient) {
-        return new UserQueryApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public UserQueryApi userQueryApi(ApiClient accessControlApiClient) {
+    return new UserQueryApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public UsersApi accessControlUsersApi(ApiClient accessControlApiClient) {
-        return new UsersApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public UsersApi accessControlUsersApi(ApiClient accessControlApiClient) {
+    return new UsersApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public DataGroupApi dataGroupApi(ApiClient accessControlApiClient) {
-        return new DataGroupApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public DataGroupApi dataGroupApi(ApiClient accessControlApiClient) {
+    return new DataGroupApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public DataGroupsApi dataGroupsApi(ApiClient accessControlApiClient) {
-        return new DataGroupsApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public DataGroupsApi dataGroupsApi(ApiClient accessControlApiClient) {
+    return new DataGroupsApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public FunctionGroupApi functionGroupApi(ApiClient accessControlApiClient) {
-        return new FunctionGroupApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public FunctionGroupApi functionGroupApi(ApiClient accessControlApiClient) {
+    return new FunctionGroupApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public FunctionGroupsApi functionGroupsApi(ApiClient accessControlApiClient) {
-        return new FunctionGroupsApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public FunctionGroupsApi functionGroupsApi(ApiClient accessControlApiClient) {
+    return new FunctionGroupsApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ServiceAgreementQueryApi serviceAgreementQueryApi(ApiClient accessControlApiClient) {
-        return new ServiceAgreementQueryApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public ServiceAgreementQueryApi serviceAgreementQueryApi(ApiClient accessControlApiClient) {
+    return new ServiceAgreementQueryApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ServiceAgreementApi serviceAgreementApi(ApiClient accessControlApiClient) {
-        return new ServiceAgreementApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public ServiceAgreementApi serviceAgreementApi(ApiClient accessControlApiClient) {
+    return new ServiceAgreementApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ServiceAgreementsApi serviceAgreementsApi(ApiClient accessControlApiClient) {
-        return new ServiceAgreementsApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public ServiceAgreementsApi serviceAgreementsApi(ApiClient accessControlApiClient) {
+    return new ServiceAgreementsApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public LegalEntitiesApi legalEntitiesApi(ApiClient accessControlApiClient) {
-        return new LegalEntitiesApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public LegalEntitiesApi legalEntitiesApi(ApiClient accessControlApiClient) {
+    return new LegalEntitiesApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public LegalEntityApi legalEntityApi(ApiClient accessControlApiClient) {
-        return new LegalEntityApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public LegalEntityApi legalEntityApi(ApiClient accessControlApiClient) {
+    return new LegalEntityApi(accessControlApiClient);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public UserContextApi userContextApi(ApiClient accessControlApiClient) {
-        return new UserContextApi(accessControlApiClient);
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public UserContextApi userContextApi(ApiClient accessControlApiClient) {
+    return new UserContextApi(accessControlApiClient);
+  }
 }

@@ -5,7 +5,7 @@ import reactor.core.publisher.Mono;
 
 public interface StreamTaskExecutor<T extends StreamTask> {
 
-    Mono<T> executeTask(T streamTask);
+  Mono<T> executeTask(T streamTask);
 
-    Mono<T> rollBack(T streamTask);
+  Mono<T> rollBack(T streamTask);
 }

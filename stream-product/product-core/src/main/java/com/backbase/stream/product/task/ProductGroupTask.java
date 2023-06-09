@@ -11,29 +11,29 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProductGroupTask extends StreamTask {
 
-    private ProductGroup productGroup;
+  private ProductGroup productGroup;
 
-    public ProductGroupTask(String id, ProductGroup productGroup) {
-        super(id);
-        this.productGroup = productGroup;
-    }
+  public ProductGroupTask(String id, ProductGroup productGroup) {
+    super(id);
+    this.productGroup = productGroup;
+  }
 
-    public ProductGroupTask(ProductGroup productGroup) {
-        super(productGroup.getName());
-        this.productGroup = productGroup;
-    }
+  public ProductGroupTask(ProductGroup productGroup) {
+    super(productGroup.getName());
+    this.productGroup = productGroup;
+  }
 
-    public ProductGroup getData() {
-        return productGroup;
-    }
+  public ProductGroup getData() {
+    return productGroup;
+  }
 
-    public ProductGroupTask data(ProductGroup productGroup) {
-        this.productGroup = productGroup;
-        return this;
-    }
+  public ProductGroupTask data(ProductGroup productGroup) {
+    this.productGroup = productGroup;
+    return this;
+  }
 
-    @Override
-    public String getName() {
-        return getId();
-    }
+  @Override
+  public String getName() {
+    return getId();
+  }
 }

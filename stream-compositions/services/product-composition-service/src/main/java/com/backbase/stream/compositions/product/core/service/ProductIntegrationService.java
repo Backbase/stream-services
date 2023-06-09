@@ -6,11 +6,11 @@ import reactor.core.publisher.Mono;
 
 public interface ProductIntegrationService {
 
-    /**
-     * Pulls product group from external integration service.
-     *
-     * @param ingestPullRequest ProductIngestPullRequest
-     * @return Mono<ProductGroup>
-     */
-    Mono<ProductIngestResponse> pullProductGroup(ProductIngestPullRequest ingestPullRequest);
+  /**
+   * Pulls product group from external integration service.
+   *
+   * @param ingestPullRequest ProductIngestPullRequest
+   * @return Mono<ProductGroup>
+   */
+  Mono<ProductIngestResponse> pullProductGroup(ProductIngestPullRequest ingestPullRequest);
 }

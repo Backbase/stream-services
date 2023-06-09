@@ -21,30 +21,30 @@ import reactor.core.publisher.Mono;
 @ConditionalOnProperty(name = "bootstrap.enabled")
 public class RootLegalEntityBootstrapTask implements ApplicationRunner {
 
-    private final LegalEntitySaga legalEntitySaga;
-    private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
+  private final LegalEntitySaga legalEntitySaga;
+  private final BootstrapConfigurationProperties bootstrapConfigurationProperties;
 
-    @Override
-    public void run(ApplicationArguments args) {
-        LegalEntity rootLegalEntity = bootstrapConfigurationProperties.getLegalEntity();
-        bootstrapRootLegalEntity(rootLegalEntity).subscribe();
+  @Override
+  public void run(ApplicationArguments args) {
+    LegalEntity rootLegalEntity = bootstrapConfigurationProperties.getLegalEntity();
+    bootstrapRootLegalEntity(rootLegalEntity).subscribe();
+  }
+
+  private Mono<String> bootstrapRootLegalEntity(LegalEntity rootLegalEntity) {
+    if (Objects.isNull(rootLegalEntity)) {
+      log.warn("Failed to load root legal entity.");
+      return Mono.empty();
+    } else {
+      log.debug("Bootstrapping root legal entity: {}.", rootLegalEntity.getName());
+
+      return legalEntitySaga
+          .executeTask(new LegalEntityTask(rootLegalEntity))
+          .map(task -> task.getData().getInternalId())
+          .doOnError(Exception.class, e -> log.error("Failed to bootstrap root legal entity.", e))
+          .doOnSuccess(
+              result ->
+                  log.info(
+                      "Root legal entity bootstrapping complete. Internal ID:" + " {}.", result));
     }
-
-    private Mono<String> bootstrapRootLegalEntity(LegalEntity rootLegalEntity) {
-        if (Objects.isNull(rootLegalEntity)) {
-            log.warn("Failed to load root legal entity.");
-            return Mono.empty();
-        } else {
-            log.debug("Bootstrapping root legal entity: {}.", rootLegalEntity.getName());
-
-            return legalEntitySaga
-                .executeTask(new LegalEntityTask(rootLegalEntity))
-                .map(task -> task.getData().getInternalId())
-                .doOnError(Exception.class, e -> log.error("Failed to bootstrap root legal entity.", e))
-                .doOnSuccess(
-                    result ->
-                        log.info(
-                            "Root legal entity bootstrapping complete. Internal ID:" + " {}.", result));
-        }
-    }
+  }
 }

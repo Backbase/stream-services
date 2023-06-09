@@ -16,17 +16,15 @@ import reactor.core.publisher.Flux;
 @AllArgsConstructor
 public class PaymentOrderIntegrationServiceImpl implements PaymentOrderIntegrationService {
 
-    private final PaymentOrderIntegrationApi paymentOrderIntegrationApi;
-    private final PaymentOrderMapper paymentOrderMapper;
+  private final PaymentOrderIntegrationApi paymentOrderIntegrationApi;
+  private final PaymentOrderMapper paymentOrderMapper;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Flux<PaymentOrderPostRequest> pullPaymentOrder(
-        PaymentOrderIngestPullRequest ingestPullRequest) {
-        return paymentOrderIntegrationApi
-            .pullPaymentOrders(paymentOrderMapper.mapStreamToIntegration(ingestPullRequest))
-            .flatMapIterable(PullPaymentOrderResponse::getPaymentOrder);
-    }
+  /** {@inheritDoc} */
+  @Override
+  public Flux<PaymentOrderPostRequest> pullPaymentOrder(
+      PaymentOrderIngestPullRequest ingestPullRequest) {
+    return paymentOrderIntegrationApi
+        .pullPaymentOrders(paymentOrderMapper.mapStreamToIntegration(ingestPullRequest))
+        .flatMapIterable(PullPaymentOrderResponse::getPaymentOrder);
+  }
 }

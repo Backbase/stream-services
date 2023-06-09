@@ -20,36 +20,36 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class HeadersForwardingServerFilter implements WebFilter {
 
-    private final DbsWebClientConfigurationProperties properties;
+  private final DbsWebClientConfigurationProperties properties;
 
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        log.trace(
-            "Forwarding request headers for: {}",
-            Optional.ofNullable(exchange.getRequest())
-                .map(ServerHttpRequest::getPath)
-                .map(RequestPath::toString)
-                .orElse("null"));
-        LinkedMultiValueMap<String, String> headers =
-            assemblyHeadersToForward(
-                properties.getHeadersToForward(), exchange.getRequest().getHeaders());
-        return chain
-            .filter(exchange)
-            .contextWrite(
-                ctx -> headers.isEmpty() ? ctx : ctx.put(CONTEXT_KEY_FORWARDED_HEADERS, headers));
-    }
+  @Override
+  public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+    log.trace(
+        "Forwarding request headers for: {}",
+        Optional.ofNullable(exchange.getRequest())
+            .map(ServerHttpRequest::getPath)
+            .map(RequestPath::toString)
+            .orElse("null"));
+    LinkedMultiValueMap<String, String> headers =
+        assemblyHeadersToForward(
+            properties.getHeadersToForward(), exchange.getRequest().getHeaders());
+    return chain
+        .filter(exchange)
+        .contextWrite(
+            ctx -> headers.isEmpty() ? ctx : ctx.put(CONTEXT_KEY_FORWARDED_HEADERS, headers));
+  }
 
-    private LinkedMultiValueMap<String, String> assemblyHeadersToForward(
-        List<String> headersToForward, HttpHeaders requestHeaders) {
-        LinkedMultiValueMap<String, String> forwardedHeaders = new LinkedMultiValueMap<>();
-        headersToForward.forEach(
-            headerKey -> {
-                List<String> headerValues = requestHeaders.get(headerKey);
-                if (headerValues != null && !headerValues.isEmpty()) {
-                    log.debug("Forwarding header: {}={}", headerKey, headerValues);
-                    forwardedHeaders.addAll(headerKey, headerValues);
-                }
-            });
-        return forwardedHeaders;
-    }
+  private LinkedMultiValueMap<String, String> assemblyHeadersToForward(
+      List<String> headersToForward, HttpHeaders requestHeaders) {
+    LinkedMultiValueMap<String, String> forwardedHeaders = new LinkedMultiValueMap<>();
+    headersToForward.forEach(
+        headerKey -> {
+          List<String> headerValues = requestHeaders.get(headerKey);
+          if (headerValues != null && !headerValues.isEmpty()) {
+            log.debug("Forwarding header: {}={}", headerKey, headerValues);
+            forwardedHeaders.addAll(headerKey, headerValues);
+          }
+        });
+    return forwardedHeaders;
+  }
 }

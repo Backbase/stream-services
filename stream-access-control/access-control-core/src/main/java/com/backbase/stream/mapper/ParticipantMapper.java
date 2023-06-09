@@ -12,21 +12,21 @@ import org.mapstruct.MappingTarget;
 @Mapper
 public interface ParticipantMapper {
 
-    PresentationParticipantBatchUpdate toPresentation(ServiceAgreement serviceAgreement);
+  PresentationParticipantBatchUpdate toPresentation(ServiceAgreement serviceAgreement);
 
-    @Mapping(source = "externalId", target = "externalParticipantId")
-    PresentationParticipantPutBody toPresentation(LegalEntityParticipant participant);
+  @Mapping(source = "externalId", target = "externalParticipantId")
+  PresentationParticipantPutBody toPresentation(LegalEntityParticipant participant);
 
-    @AfterMapping
-    default void afterMapping(
-        ServiceAgreement serviceAgreement,
-        @MappingTarget PresentationParticipantBatchUpdate participants) {
-        if (participants.getParticipants() != null) {
-            participants
-                .getParticipants()
-                .forEach(
-                    participant ->
-                        participant.setExternalServiceAgreementId(serviceAgreement.getExternalId()));
-        }
+  @AfterMapping
+  default void afterMapping(
+      ServiceAgreement serviceAgreement,
+      @MappingTarget PresentationParticipantBatchUpdate participants) {
+    if (participants.getParticipants() != null) {
+      participants
+          .getParticipants()
+          .forEach(
+              participant ->
+                  participant.setExternalServiceAgreementId(serviceAgreement.getExternalId()));
     }
+  }
 }

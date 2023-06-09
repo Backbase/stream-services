@@ -10,5 +10,5 @@ import lombok.ToString;
 @ToString
 public class UpdatePaymentOrderIngestDbsResponse implements PaymentOrderIngestDbsResponse {
 
-    private final PaymentOrderPutResponse paymentOrderPutResponse;
+  private final PaymentOrderPutResponse paymentOrderPutResponse;
 }

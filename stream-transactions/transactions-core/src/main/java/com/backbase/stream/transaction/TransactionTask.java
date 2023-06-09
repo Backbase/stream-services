@@ -11,16 +11,16 @@ import lombok.EqualsAndHashCode;
 @Data
 public class TransactionTask extends StreamTask {
 
-    private List<TransactionsPostRequestBody> data;
-    private List<TransactionsPostResponseBody> response;
+  private List<TransactionsPostRequestBody> data;
+  private List<TransactionsPostResponseBody> response;
 
-    public TransactionTask(String unitOfWorkId, List<TransactionsPostRequestBody> data) {
-        super(unitOfWorkId);
-        this.data = data;
-    }
+  public TransactionTask(String unitOfWorkId, List<TransactionsPostRequestBody> data) {
+    super(unitOfWorkId);
+    this.data = data;
+  }
 
-    @Override
-    public String getName() {
-        return "transaction";
-    }
+  @Override
+  public String getName() {
+    return "transaction";
+  }
 }

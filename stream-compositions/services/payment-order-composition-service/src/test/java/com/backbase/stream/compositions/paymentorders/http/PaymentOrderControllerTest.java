@@ -30,54 +30,52 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class PaymentOrderControllerTest {
 
-    PaymentOrderController paymentOrderController;
+  PaymentOrderController paymentOrderController;
 
-    @Mock
-    PaymentOrderIngestionService paymentOrderIngestionService;
+  @Mock PaymentOrderIngestionService paymentOrderIngestionService;
 
-    @Mock
-    PaymentOrderService paymentOrderService;
+  @Mock PaymentOrderService paymentOrderService;
 
-    PaymentOrderMapper paymentOrderMapper = Mappers.getMapper(PaymentOrderMapper.class);
+  PaymentOrderMapper paymentOrderMapper = Mappers.getMapper(PaymentOrderMapper.class);
 
-    @BeforeEach
-    void setUp() {
-        paymentOrderController =
-            new PaymentOrderController(
-                paymentOrderIngestionService, paymentOrderService, paymentOrderMapper);
-    }
+  @BeforeEach
+  void setUp() {
+    paymentOrderController =
+        new PaymentOrderController(
+            paymentOrderIngestionService, paymentOrderService, paymentOrderMapper);
+  }
 
-    @Test
-    void testPullIngestion_Success() {
+  @Test
+  void testPullIngestion_Success() {
 
-        Mono<PaymentOrderPullIngestionRequest> requestMono =
-            Mono.just(new PaymentOrderPullIngestionRequest().withInternalUserId("internalUserId"));
+    Mono<PaymentOrderPullIngestionRequest> requestMono =
+        Mono.just(new PaymentOrderPullIngestionRequest().withInternalUserId("internalUserId"));
 
-        List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses = new ArrayList<>();
-        paymentOrderIngestDbsResponses.add(
-            new NewPaymentOrderIngestDbsResponse(new PaymentOrderPostResponse()));
-        paymentOrderIngestDbsResponses.add(
-            new UpdatePaymentOrderIngestDbsResponse(new PaymentOrderPutResponse()));
-        paymentOrderIngestDbsResponses.add(new DeletePaymentOrderIngestDbsResponse("paymentOrderId"));
+    List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses = new ArrayList<>();
+    paymentOrderIngestDbsResponses.add(
+        new NewPaymentOrderIngestDbsResponse(new PaymentOrderPostResponse()));
+    paymentOrderIngestDbsResponses.add(
+        new UpdatePaymentOrderIngestDbsResponse(new PaymentOrderPutResponse()));
+    paymentOrderIngestDbsResponses.add(new DeletePaymentOrderIngestDbsResponse("paymentOrderId"));
 
-        doAnswer(
+    doAnswer(
             invocation -> {
-                return Mono.just(
-                    PaymentOrderIngestResponse.builder()
-                        .memberNumber("memberNumber")
-                        .paymentOrderIngestDbsResponses(paymentOrderIngestDbsResponses)
-                        .build());
+              return Mono.just(
+                  PaymentOrderIngestResponse.builder()
+                      .memberNumber("memberNumber")
+                      .paymentOrderIngestDbsResponses(paymentOrderIngestDbsResponses)
+                      .build());
             })
-            .when(paymentOrderIngestionService)
-            .ingestPull(any());
+        .when(paymentOrderIngestionService)
+        .ingestPull(any());
 
-        ResponseEntity<PaymentOrderIngestionResponse> responseEntity =
-            paymentOrderController.pullPaymentOrder(requestMono, null).block();
+    ResponseEntity<PaymentOrderIngestionResponse> responseEntity =
+        paymentOrderController.pullPaymentOrder(requestMono, null).block();
 
-        PaymentOrderIngestionResponse ingestionResponse = responseEntity.getBody();
-        assertNotNull(ingestionResponse);
-        assertNotNull(ingestionResponse.getNewPaymentOrder());
-        assertNotNull(ingestionResponse.getUpdatedPaymentOrder());
-        assertNotNull(ingestionResponse.getDeletedPaymentOrder());
-    }
+    PaymentOrderIngestionResponse ingestionResponse = responseEntity.getBody();
+    assertNotNull(ingestionResponse);
+    assertNotNull(ingestionResponse.getNewPaymentOrder());
+    assertNotNull(ingestionResponse.getUpdatedPaymentOrder());
+    assertNotNull(ingestionResponse.getDeletedPaymentOrder());
+  }
 }

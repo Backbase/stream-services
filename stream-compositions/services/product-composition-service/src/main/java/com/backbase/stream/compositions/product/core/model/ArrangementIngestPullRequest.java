@@ -7,8 +7,8 @@ import lombok.Getter;
 @Builder
 public class ArrangementIngestPullRequest {
 
-    private String arrangementId;
-    private String externalArrangementId;
-    private String source;
-    private RequestConfig config;
+  private String arrangementId;
+  private String externalArrangementId;
+  private String source;
+  private RequestConfig config;
 }

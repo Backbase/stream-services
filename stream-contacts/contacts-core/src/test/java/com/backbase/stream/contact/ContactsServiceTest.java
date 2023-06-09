@@ -25,54 +25,52 @@ import reactor.core.publisher.Flux;
 @ExtendWith(MockitoExtension.class)
 class ContactsServiceTest {
 
-    @InjectMocks
-    private ContactsService contactsService;
+  @InjectMocks private ContactsService contactsService;
 
-    @Mock
-    private ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor;
+  @Mock private ContactsUnitOfWorkExecutor contactsUnitOfWorkExecutor;
 
-    @Test
-    void test_createBulkContacts() {
-        List<ContactsTask> streamTasks = new ArrayList<ContactsTask>();
-        ContactsTask task = new ContactsTask("1", getMockContactsBulkRequest());
-        task.setResponse(getMockResponse());
-        streamTasks.add(task);
-        UnitOfWork<ContactsTask> unitOfWork = new UnitOfWork<>();
-        unitOfWork.setStreamTasks(streamTasks);
+  @Test
+  void test_createBulkContacts() {
+    List<ContactsTask> streamTasks = new ArrayList<ContactsTask>();
+    ContactsTask task = new ContactsTask("1", getMockContactsBulkRequest());
+    task.setResponse(getMockResponse());
+    streamTasks.add(task);
+    UnitOfWork<ContactsTask> unitOfWork = new UnitOfWork<>();
+    unitOfWork.setStreamTasks(streamTasks);
 
-        when(contactsUnitOfWorkExecutor.prepareUnitOfWork(any(Flux.class)))
-            .thenReturn(Flux.just(unitOfWork));
+    when(contactsUnitOfWorkExecutor.prepareUnitOfWork(any(Flux.class)))
+        .thenReturn(Flux.just(unitOfWork));
 
-        Flux<ContactsBulkPostResponseBody> response =
-            contactsService.createBulkContacts(Flux.just(getMockContactsBulkRequest()));
-        verify(contactsUnitOfWorkExecutor).prepareUnitOfWork(any(Flux.class));
-    }
+    Flux<ContactsBulkPostResponseBody> response =
+        contactsService.createBulkContacts(Flux.just(getMockContactsBulkRequest()));
+    verify(contactsUnitOfWorkExecutor).prepareUnitOfWork(any(Flux.class));
+  }
 
-    private ContactsBulkPostRequestBody getMockContactsBulkRequest() {
-        var request = new ContactsBulkPostRequestBody();
-        request.setIngestMode(IngestMode.UPSERT);
+  private ContactsBulkPostRequestBody getMockContactsBulkRequest() {
+    var request = new ContactsBulkPostRequestBody();
+    request.setIngestMode(IngestMode.UPSERT);
 
-        ExternalAccessContext accessContext = new ExternalAccessContext();
-        accessContext.setScope(AccessContextScope.LE);
-        accessContext.setExternalUserId("USER1");
-        request.setAccessContext(accessContext);
+    ExternalAccessContext accessContext = new ExternalAccessContext();
+    accessContext.setScope(AccessContextScope.LE);
+    accessContext.setExternalUserId("USER1");
+    request.setAccessContext(accessContext);
 
-        ExternalContact contact = new ExternalContact();
-        contact.setName("TEST1");
-        contact.setExternalId("TEST101");
+    ExternalContact contact = new ExternalContact();
+    contact.setName("TEST1");
+    contact.setExternalId("TEST101");
 
-        ExternalAccountInformation account = new ExternalAccountInformation();
-        account.setName("TESTACC1");
-        account.setExternalId("TESTACC101");
-        contact.setAccounts(Collections.singletonList(account));
-        request.setContacts(Collections.singletonList(contact));
+    ExternalAccountInformation account = new ExternalAccountInformation();
+    account.setName("TESTACC1");
+    account.setExternalId("TESTACC101");
+    contact.setAccounts(Collections.singletonList(account));
+    request.setContacts(Collections.singletonList(contact));
 
-        return request;
-    }
+    return request;
+  }
 
-    private ContactsBulkPostResponseBody getMockResponse() {
-        ContactsBulkPostResponseBody responseBody = new ContactsBulkPostResponseBody();
-        responseBody.setSuccessCount(2);
-        return responseBody;
-    }
+  private ContactsBulkPostResponseBody getMockResponse() {
+    ContactsBulkPostResponseBody responseBody = new ContactsBulkPostResponseBody();
+    responseBody.setSuccessCount(2);
+    return responseBody;
+  }
 }

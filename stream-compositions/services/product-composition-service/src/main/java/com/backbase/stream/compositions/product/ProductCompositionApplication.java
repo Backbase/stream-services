@@ -10,7 +10,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ComponentScan("com.backbase.stream")
 public class ProductCompositionApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(ProductCompositionApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(ProductCompositionApplication.class, args);
+  }
 }

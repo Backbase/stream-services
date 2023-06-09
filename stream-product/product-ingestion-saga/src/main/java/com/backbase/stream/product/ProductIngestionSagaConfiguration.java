@@ -15,23 +15,23 @@ import org.springframework.context.annotation.Import;
 @EnableConfigurationProperties(ProductIngestionSagaConfigurationProperties.class)
 public class ProductIngestionSagaConfiguration {
 
-    @Bean
-    public ProductIngestionSaga productIngestionSaga(
-        ArrangementService arrangementService,
-        AccessGroupService accessGroupService,
-        UserService userService,
-        ProductIngestionSagaConfigurationProperties configurationProperties) {
-        return new ProductIngestionSaga(
-            arrangementService, accessGroupService, userService, configurationProperties);
-    }
+  @Bean
+  public ProductIngestionSaga productIngestionSaga(
+      ArrangementService arrangementService,
+      AccessGroupService accessGroupService,
+      UserService userService,
+      ProductIngestionSagaConfigurationProperties configurationProperties) {
+    return new ProductIngestionSaga(
+        arrangementService, accessGroupService, userService, configurationProperties);
+  }
 
-    @Bean
-    public BatchProductIngestionSaga batchProductIngestionSaga(
-        ArrangementService arrangementService,
-        AccessGroupService accessGroupService,
-        UserService userService,
-        ProductIngestionSagaConfigurationProperties configurationProperties) {
-        return new BatchProductIngestionSaga(
-            arrangementService, accessGroupService, userService, configurationProperties);
-    }
+  @Bean
+  public BatchProductIngestionSaga batchProductIngestionSaga(
+      ArrangementService arrangementService,
+      AccessGroupService accessGroupService,
+      UserService userService,
+      ProductIngestionSagaConfigurationProperties configurationProperties) {
+    return new BatchProductIngestionSaga(
+        arrangementService, accessGroupService, userService, configurationProperties);
+  }
 }

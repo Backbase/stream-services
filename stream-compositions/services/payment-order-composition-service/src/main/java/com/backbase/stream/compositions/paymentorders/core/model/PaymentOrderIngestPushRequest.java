@@ -11,10 +11,10 @@ import lombok.Data;
 @AllArgsConstructor
 public class PaymentOrderIngestPushRequest {
 
-    private String memberNumber;
-    private String internalUserId;
-    private String legalEntityInternalId;
-    private String legalEntityExternalId;
-    private String serviceAgreementInternalId;
-    private List<PaymentOrderPostRequest> paymentOrders;
+  private String memberNumber;
+  private String internalUserId;
+  private String legalEntityInternalId;
+  private String legalEntityExternalId;
+  private String serviceAgreementInternalId;
+  private List<PaymentOrderPostRequest> paymentOrders;
 }

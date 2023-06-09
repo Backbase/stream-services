@@ -12,8 +12,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ArrangementIngestPushRequest {
 
-    private AccountArrangementItemPut arrangement;
-    private String arrangementInternalId;
-    private String source;
-    private RequestConfig config;
+  private AccountArrangementItemPut arrangement;
+  private String arrangementInternalId;
+  private String source;
+  private RequestConfig config;
 }

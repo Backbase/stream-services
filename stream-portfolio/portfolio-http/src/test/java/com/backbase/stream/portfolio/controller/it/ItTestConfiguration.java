@@ -12,8 +12,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @TestConfiguration
 class ItTestConfiguration {
 
-    @Bean
-    public WebClient.Builder webClientBuilder() {
-        return WebClient.builder();
-    }
+  @Bean
+  public WebClient.Builder webClientBuilder() {
+    return WebClient.builder();
+  }
 }

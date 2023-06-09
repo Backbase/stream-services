@@ -5,17 +5,17 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 public class LegalEntityException extends RuntimeException {
 
-    LegalEntityCreateItem legalEntityCreateItem;
-    String httpResponse;
+  LegalEntityCreateItem legalEntityCreateItem;
+  String httpResponse;
 
-    public LegalEntityException(
-        LegalEntityCreateItem legalEntity, String message, WebClientResponseException exception) {
-        super(exception);
-        httpResponse = exception.getResponseBodyAsString();
-        this.legalEntityCreateItem = legalEntity;
-    }
+  public LegalEntityException(
+      LegalEntityCreateItem legalEntity, String message, WebClientResponseException exception) {
+    super(exception);
+    httpResponse = exception.getResponseBodyAsString();
+    this.legalEntityCreateItem = legalEntity;
+  }
 
-    public String getHttpResponse() {
-        return httpResponse;
-    }
+  public String getHttpResponse() {
+    return httpResponse;
+  }
 }

@@ -8,10 +8,10 @@ import lombok.Getter;
 @Getter
 public class UpdatePaymentOrderIngestRequest implements PaymentOrderIngestRequest {
 
-    private final PaymentOrderPutRequest paymentOrderPutRequest;
+  private final PaymentOrderPutRequest paymentOrderPutRequest;
 
-    @Override
-    public String getBankReferenceId() {
-        return paymentOrderPutRequest.getBankReferenceId();
-    }
+  @Override
+  public String getBankReferenceId() {
+    return paymentOrderPutRequest.getBankReferenceId();
+  }
 }

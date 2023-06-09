@@ -17,31 +17,29 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class LimitsServiceConfiguration {
 
-    @Bean
-    public LimitsSaga limitsSaga(LimitsServiceApi limitsServiceApi) {
-        return new LimitsSaga(limitsServiceApi);
-    }
+  @Bean
+  public LimitsSaga limitsSaga(LimitsServiceApi limitsServiceApi) {
+    return new LimitsSaga(limitsServiceApi);
+  }
 
-    @Bean
-    @ConditionalOnProperty(
-        name = "backbase.stream.persistence",
-        havingValue = "memory",
-        matchIfMissing = true)
-    public LimitsUnitOfWorkRepository limitsUnitOfWorkRepository() {
-        return new InMemoryLimitsUnitOfWorkRepository();
-    }
+  @Bean
+  @ConditionalOnProperty(
+      name = "backbase.stream.persistence",
+      havingValue = "memory",
+      matchIfMissing = true)
+  public LimitsUnitOfWorkRepository limitsUnitOfWorkRepository() {
+    return new InMemoryLimitsUnitOfWorkRepository();
+  }
 
-    @Bean
-    public LimitsUnitOfWorkExecutor limitsUnitOfWorkExecutor(
-        LimitsUnitOfWorkRepository repository,
-        LimitsSaga saga,
-        LimitsWorkerConfigurationProperties configurationProperties) {
-        return new LimitsUnitOfWorkExecutor(repository, saga, configurationProperties);
-    }
+  @Bean
+  public LimitsUnitOfWorkExecutor limitsUnitOfWorkExecutor(
+      LimitsUnitOfWorkRepository repository,
+      LimitsSaga saga,
+      LimitsWorkerConfigurationProperties configurationProperties) {
+    return new LimitsUnitOfWorkExecutor(repository, saga, configurationProperties);
+  }
 
-    public static class InMemoryLimitsUnitOfWorkRepository
-        extends InMemoryReactiveUnitOfWorkRepository<LimitsTask>
-        implements LimitsUnitOfWorkRepository {
-
-    }
+  public static class InMemoryLimitsUnitOfWorkRepository
+      extends InMemoryReactiveUnitOfWorkRepository<LimitsTask>
+      implements LimitsUnitOfWorkRepository {}
 }

@@ -10,5 +10,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ProductCatalogIngestPullRequest {
 
-    private Map<String, String> additionalParameters;
+  private Map<String, String> additionalParameters;
 }

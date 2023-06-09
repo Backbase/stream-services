@@ -28,127 +28,126 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @ActiveProfiles({"it"})
 class WealthAssetsIT {
 
-    @Autowired
-    private WebTestClient webTestClient;
+  @Autowired private WebTestClient webTestClient;
 
-    @Test
-    void shouldIngestRegionBundles() throws Exception {
-        // Given
-        setupWireMock();
+  @Test
+  void shouldIngestRegionBundles() throws Exception {
+    // Given
+    setupWireMock();
 
-        List<AssetClassBundle> assetClassBundles = PortfolioHttpTestUtil.getAssetClasseBundles();
+    List<AssetClassBundle> assetClassBundles = PortfolioHttpTestUtil.getAssetClasseBundles();
 
-        // When
-        webTestClient
-            .post()
-            .uri("/portfolios/asset-classes/batch")
-            .header("Content-Type", "application/json")
-            .header(X_TID_HEADER_NAME, X_TID_HEADER_VALUE)
-            .bodyValue(assetClassBundles)
-            .exchange()
-            .expectStatus()
-            .isEqualTo(200);
+    // When
+    webTestClient
+        .post()
+        .uri("/portfolios/asset-classes/batch")
+        .header("Content-Type", "application/json")
+        .header(X_TID_HEADER_NAME, X_TID_HEADER_VALUE)
+        .bodyValue(assetClassBundles)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(200);
 
-        // Then
-        WireMock.verify(
-            WireMock.getRequestedFor(
-                    WireMock.urlEqualTo(
-                        "/portfolio/integration-api/v1/asset-classes?from=0&size=2147483647"))
-                .withHeader(X_TID_HEADER_NAME, WireMock.equalTo(X_TID_HEADER_VALUE)));
+    // Then
+    WireMock.verify(
+        WireMock.getRequestedFor(
+                WireMock.urlEqualTo(
+                    "/portfolio/integration-api/v1/asset-classes?from=0&size=2147483647"))
+            .withHeader(X_TID_HEADER_NAME, WireMock.equalTo(X_TID_HEADER_VALUE)));
 
-        Assertions.assertTrue(WireMock.findUnmatchedRequests().isEmpty());
-    }
+    Assertions.assertTrue(WireMock.findUnmatchedRequests().isEmpty());
+  }
 
-    private void setupWireMock() {
-        WireMock.stubFor(
-            WireMock.post("/oauth/token")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(
-                            "{\"access_token\":"
-                                + " \"access-token\",\"expires_in\":"
-                                + " 600,\"refresh_expires_in\":"
-                                + " 1800,\"refresh_token\":"
-                                + " \"refresh-token\",\"token_type\":"
-                                + " \"bearer\",\"id_token\":"
-                                + " \"id-token\",\"not-before-policy\":"
-                                + " 1633622545,\"session_state\":"
-                                + " \"72a28739-3d20-4965-bd86-64410df53d04\",\"scope\":"
-                                + " \"openid\"}")));
+  private void setupWireMock() {
+    WireMock.stubFor(
+        WireMock.post("/oauth/token")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(
+                        "{\"access_token\":"
+                            + " \"access-token\",\"expires_in\":"
+                            + " 600,\"refresh_expires_in\":"
+                            + " 1800,\"refresh_token\":"
+                            + " \"refresh-token\",\"token_type\":"
+                            + " \"bearer\",\"id_token\":"
+                            + " \"id-token\",\"not-before-policy\":"
+                            + " 1633622545,\"session_state\":"
+                            + " \"72a28739-3d20-4965-bd86-64410df53d04\",\"scope\":"
+                            + " \"openid\"}")));
 
-        WireMock.stubFor(
-            WireMock.get("/portfolio/integration-api/v1/asset-classes?from=0&size=2147483647")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"assetClasses\":[]}")));
+    WireMock.stubFor(
+        WireMock.get("/portfolio/integration-api/v1/asset-classes?from=0&size=2147483647")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"assetClasses\":[]}")));
 
-        WireMock.stubFor(
-            WireMock.get(
-                    "/portfolio/integration-api/v1/asset-classes/OvBckZySky/sub-asset-classes?from=0&size=2147483647")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"subAssetClasses\":[]}")));
+    WireMock.stubFor(
+        WireMock.get(
+                "/portfolio/integration-api/v1/asset-classes/OvBckZySky/sub-asset-classes?from=0&size=2147483647")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"subAssetClasses\":[]}")));
 
-        WireMock.stubFor(
-            WireMock.get(
-                    "/portfolio/integration-api/v1/asset-classes/iWDEjAewOq/sub-asset-classes?from=0&size=2147483647")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"subAssetClasses\":[]}")));
+    WireMock.stubFor(
+        WireMock.get(
+                "/portfolio/integration-api/v1/asset-classes/iWDEjAewOq/sub-asset-classes?from=0&size=2147483647")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"subAssetClasses\":[]}")));
 
-        WireMock.stubFor(
-            WireMock.get(
-                    "/portfolio/integration-api/v1/asset-classes/KAmfp8dZWo/sub-asset-classes?from=0&size=2147483647")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"subAssetClasses\":[]}")));
+    WireMock.stubFor(
+        WireMock.get(
+                "/portfolio/integration-api/v1/asset-classes/KAmfp8dZWo/sub-asset-classes?from=0&size=2147483647")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"subAssetClasses\":[]}")));
 
-        WireMock.stubFor(
-            WireMock.get(
-                    "/portfolio/integration-api/v1/asset-classes/L1mC78IIVj/sub-asset-classes?from=0&size=2147483647")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"subAssetClasses\":[]}")));
+    WireMock.stubFor(
+        WireMock.get(
+                "/portfolio/integration-api/v1/asset-classes/L1mC78IIVj/sub-asset-classes?from=0&size=2147483647")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"subAssetClasses\":[]}")));
 
-        WireMock.stubFor(
-            WireMock.post("/portfolio/integration-api/v1/asset-classes")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")));
+    WireMock.stubFor(
+        WireMock.post("/portfolio/integration-api/v1/asset-classes")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("")));
 
-        WireMock.stubFor(
-            WireMock.post("/portfolio/integration-api/v1/asset-classes/OvBckZySky/sub-asset-classes")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")));
+    WireMock.stubFor(
+        WireMock.post("/portfolio/integration-api/v1/asset-classes/OvBckZySky/sub-asset-classes")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("")));
 
-        WireMock.stubFor(
-            WireMock.post("/portfolio/integration-api/v1/asset-classes/iWDEjAewOq/sub-asset-classes")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")));
+    WireMock.stubFor(
+        WireMock.post("/portfolio/integration-api/v1/asset-classes/iWDEjAewOq/sub-asset-classes")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("")));
 
-        WireMock.stubFor(
-            WireMock.post("/portfolio/integration-api/v1/asset-classes/KAmfp8dZWo/sub-asset-classes")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")));
+    WireMock.stubFor(
+        WireMock.post("/portfolio/integration-api/v1/asset-classes/KAmfp8dZWo/sub-asset-classes")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("")));
 
-        WireMock.stubFor(
-            WireMock.post("/portfolio/integration-api/v1/asset-classes/L1mC78IIVj/sub-asset-classes")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")));
-    }
+    WireMock.stubFor(
+        WireMock.post("/portfolio/integration-api/v1/asset-classes/L1mC78IIVj/sub-asset-classes")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("")));
+  }
 }

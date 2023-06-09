@@ -18,51 +18,47 @@ import org.springframework.web.reactive.function.client.WebClient;
 @ExtendWith(MockitoExtension.class)
 class PaymentOrderCompositionConfigurationTest {
 
-    @Mock
-    private WebClient webClient;
+  @Mock private WebClient webClient;
 
-    @Mock
-    private ObjectMapper objectMapper;
+  @Mock private ObjectMapper objectMapper;
 
-    @Mock
-    private DateFormat dateFormat;
+  @Mock private DateFormat dateFormat;
 
-    @Mock
-    private PaymentOrderConfigurationProperties properties;
+  @Mock private PaymentOrderConfigurationProperties properties;
 
-    private ApiClient paymentOrderIntegrationClient;
+  private ApiClient paymentOrderIntegrationClient;
 
-    private PaymentOrderIntegrationApi paymentOrderIntegrationApi;
+  private PaymentOrderIntegrationApi paymentOrderIntegrationApi;
 
-    @BeforeEach
-    void init() {
+  @BeforeEach
+  void init() {
 
-        Mockito.when(properties.getIntegrationBaseUrl())
-            .thenReturn("https://payment-order-integration");
+    Mockito.when(properties.getIntegrationBaseUrl())
+        .thenReturn("https://payment-order-integration");
 
-        paymentOrderIntegrationClient = new ApiClient(webClient, objectMapper, dateFormat);
-        paymentOrderIntegrationClient.setBasePath(properties.getIntegrationBaseUrl());
+    paymentOrderIntegrationClient = new ApiClient(webClient, objectMapper, dateFormat);
+    paymentOrderIntegrationClient.setBasePath(properties.getIntegrationBaseUrl());
 
-        paymentOrderIntegrationApi = new PaymentOrderIntegrationApi(paymentOrderIntegrationClient);
-    }
+    paymentOrderIntegrationApi = new PaymentOrderIntegrationApi(paymentOrderIntegrationClient);
+  }
 
-    @Test
-    void testCompositionConfig() {
-        PaymentOrderCompositionConfiguration config =
-            new PaymentOrderCompositionConfiguration(properties);
+  @Test
+  void testCompositionConfig() {
+    PaymentOrderCompositionConfiguration config =
+        new PaymentOrderCompositionConfiguration(properties);
 
-        assertNotNull(config.paymentOrderIntegrationApi(paymentOrderIntegrationClient));
-        assertNotNull(config.paymentOrderIntegrationApi(paymentOrderIntegrationClient).getApiClient());
-        assertNotNull(
-            config
-                .paymentOrderIntegrationApi(paymentOrderIntegrationClient)
-                .getApiClient()
-                .getBasePath());
-        assertEquals(
-            "https://payment-order-integration",
-            config
-                .paymentOrderIntegrationApi(paymentOrderIntegrationClient)
-                .getApiClient()
-                .getBasePath());
-    }
+    assertNotNull(config.paymentOrderIntegrationApi(paymentOrderIntegrationClient));
+    assertNotNull(config.paymentOrderIntegrationApi(paymentOrderIntegrationClient).getApiClient());
+    assertNotNull(
+        config
+            .paymentOrderIntegrationApi(paymentOrderIntegrationClient)
+            .getApiClient()
+            .getBasePath());
+    assertEquals(
+        "https://payment-order-integration",
+        config
+            .paymentOrderIntegrationApi(paymentOrderIntegrationClient)
+            .getApiClient()
+            .getBasePath());
+  }
 }

@@ -40,112 +40,107 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class PaymentOrderIngestionServiceImplTest {
 
-    PaymentOrderMapper mapper = Mappers.getMapper(PaymentOrderMapper.class);
-    @Mock
-    PaymentOrderService paymentOrderService;
-    PaymentOrderPostIngestionService paymentOrderPostIngestionService;
-    @Mock
-    PaymentOrderMapper paymentOrderMapper;
-    @Mock
-    EventBus eventBus;
-    @Mock
-    PaymentOrderConfigurationProperties config;
-    private PaymentOrderIngestionService paymentOrderIngestionService;
-    @Mock
-    private PaymentOrderIntegrationService paymentOrderIntegrationService;
+  PaymentOrderMapper mapper = Mappers.getMapper(PaymentOrderMapper.class);
+  @Mock PaymentOrderService paymentOrderService;
+  PaymentOrderPostIngestionService paymentOrderPostIngestionService;
+  @Mock PaymentOrderMapper paymentOrderMapper;
+  @Mock EventBus eventBus;
+  @Mock PaymentOrderConfigurationProperties config;
+  private PaymentOrderIngestionService paymentOrderIngestionService;
+  @Mock private PaymentOrderIntegrationService paymentOrderIntegrationService;
 
-    @BeforeEach
-    void setUp() {
-        paymentOrderPostIngestionService = new PaymentOrderPostIngestionServiceImpl(eventBus, config);
+  @BeforeEach
+  void setUp() {
+    paymentOrderPostIngestionService = new PaymentOrderPostIngestionServiceImpl(eventBus, config);
 
-        paymentOrderIngestionService =
-            new PaymentOrderIngestionServiceImpl(
-                paymentOrderIntegrationService,
-                paymentOrderService,
-                paymentOrderPostIngestionService,
-                mapper);
-    }
+    paymentOrderIngestionService =
+        new PaymentOrderIngestionServiceImpl(
+            paymentOrderIntegrationService,
+            paymentOrderService,
+            paymentOrderPostIngestionService,
+            mapper);
+  }
 
-    void mockPaymentOrderService() {
-        List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
+  void mockPaymentOrderService() {
+    List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
 
-        PaymentOrderTask dbsResTask = new PaymentOrderTask("id", null);
-        dbsResTask.setResponses(responses);
+    PaymentOrderTask dbsResTask = new PaymentOrderTask("id", null);
+    dbsResTask.setResponses(responses);
 
-        when(paymentOrderService.processPaymentOrder(any()))
-            .thenReturn(Flux.just(UnitOfWork.from("id", dbsResTask)));
-    }
+    when(paymentOrderService.processPaymentOrder(any()))
+        .thenReturn(Flux.just(UnitOfWork.from("id", dbsResTask)));
+  }
 
-    @Test
-    void ingestionInPull() {
+  @Test
+  void ingestionInPull() {
 
-        PaymentOrderIngestPullRequest paymentOrderIngestPullRequest =
-            PaymentOrderIngestPullRequest.builder()
-                .memberNumber("123")
-                .internalUserId("456")
-                .legalEntityInternalId("789")
-                .legalEntityExternalId("012")
-                .dateRangeStart("2019-08-31T23:49:05.629+08:00")
-                .dateRangeEnd("2022-01-01T23:49:05.629+08:00")
-                .build();
+    PaymentOrderIngestPullRequest paymentOrderIngestPullRequest =
+        PaymentOrderIngestPullRequest.builder()
+            .memberNumber("123")
+            .internalUserId("456")
+            .legalEntityInternalId("789")
+            .legalEntityExternalId("012")
+            .dateRangeStart("2019-08-31T23:49:05.629+08:00")
+            .dateRangeEnd("2022-01-01T23:49:05.629+08:00")
+            .build();
 
-        com.backbase.stream.compositions.paymentorder.integration.client.model.PaymentOrderPostRequest
-            paymentOrderPostRequest =
+    com.backbase.stream.compositions.paymentorder.integration.client.model.PaymentOrderPostRequest
+        paymentOrderPostRequest =
             new com.backbase.stream.compositions.paymentorder.integration.client.model
                 .PaymentOrderPostRequest();
-        Flux<
+    Flux<
             com.backbase.stream.compositions.paymentorder.integration.client.model
                 .PaymentOrderPostRequest>
-            paymentOrderPostRequestFlux = Flux.just(paymentOrderPostRequest);
+        paymentOrderPostRequestFlux = Flux.just(paymentOrderPostRequest);
 
-        when(paymentOrderIntegrationService.pullPaymentOrder(paymentOrderIngestPullRequest))
-            .thenReturn(paymentOrderPostRequestFlux);
+    when(paymentOrderIntegrationService.pullPaymentOrder(paymentOrderIngestPullRequest))
+        .thenReturn(paymentOrderPostRequestFlux);
 
-        String unitOfOWorkId = "payment-orders-mixed-" + System.currentTimeMillis();
-        List<PaymentOrderIngestRequest> data = new ArrayList<>();
-        data.add(new NewPaymentOrderIngestRequest(new PaymentOrderPostRequest()));
-        data.add(new UpdatePaymentOrderIngestRequest(new PaymentOrderPutRequest()));
-        data.add(new DeletePaymentOrderIngestRequest("paymentOrderId", "bankReferenceId"));
+    String unitOfOWorkId = "payment-orders-mixed-" + System.currentTimeMillis();
+    List<PaymentOrderIngestRequest> data = new ArrayList<>();
+    data.add(new NewPaymentOrderIngestRequest(new PaymentOrderPostRequest()));
+    data.add(new UpdatePaymentOrderIngestRequest(new PaymentOrderPutRequest()));
+    data.add(new DeletePaymentOrderIngestRequest("paymentOrderId", "bankReferenceId"));
 
-        List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
+    List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
 
-        PaymentOrderTask paymentOrderTask = new PaymentOrderTask(unitOfOWorkId, data);
-        paymentOrderTask.setResponses(responses);
+    PaymentOrderTask paymentOrderTask = new PaymentOrderTask(unitOfOWorkId, data);
+    paymentOrderTask.setResponses(responses);
 
-        Stream<UnitOfWork<PaymentOrderTask>> unitOfWorkStream =
-            Stream.of(UnitOfWork.from(unitOfOWorkId, paymentOrderTask));
-        Flux<UnitOfWork<PaymentOrderTask>> unitOfWorkFlux = Flux.fromStream(unitOfWorkStream);
+    Stream<UnitOfWork<PaymentOrderTask>> unitOfWorkStream =
+        Stream.of(UnitOfWork.from(unitOfOWorkId, paymentOrderTask));
+    Flux<UnitOfWork<PaymentOrderTask>> unitOfWorkFlux = Flux.fromStream(unitOfWorkStream);
 
-        when(paymentOrderService.processPaymentOrder(any())).thenReturn(unitOfWorkFlux);
+    when(paymentOrderService.processPaymentOrder(any())).thenReturn(unitOfWorkFlux);
 
-        Mono<PaymentOrderIngestResponse> paymentOrderIngestResponseMono =
-            paymentOrderIngestionService.ingestPull(paymentOrderIngestPullRequest);
+    Mono<PaymentOrderIngestResponse> paymentOrderIngestResponseMono =
+        paymentOrderIngestionService.ingestPull(paymentOrderIngestPullRequest);
 
-        StepVerifier.create(paymentOrderIngestResponseMono)
-            .assertNext(Assertions::assertNotNull)
-            .verifyComplete();
-    }
+    StepVerifier.create(paymentOrderIngestResponseMono)
+        .assertNext(Assertions::assertNotNull)
+        .verifyComplete();
+  }
 
-    @Test
-    void ingestionInPush() {
-        mockPaymentOrderService();
-        PaymentOrderIngestPushRequest request =
-            PaymentOrderIngestPushRequest.builder()
-                .internalUserId("userId")
-                .paymentOrders(
-                    Collections.singletonList(
-                        new PaymentOrderPostRequest()
-                            .internalUserId("userId")
-                            .bankReferenceId("bankRefId")
-                            .serviceAgreementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
-                            .paymentSetupId("paymentSetupId")
-                            .paymentSubmissionId("paymentSubmissionId")))
-                .build();
+  @Test
+  void ingestionInPush() {
+    mockPaymentOrderService();
+    PaymentOrderIngestPushRequest request =
+        PaymentOrderIngestPushRequest.builder()
+            .internalUserId("userId")
+            .paymentOrders(
+                Collections.singletonList(
+                    new PaymentOrderPostRequest()
+                        .internalUserId("userId")
+                        .bankReferenceId("bankRefId")
+                        .serviceAgreementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
+                        .paymentSetupId("paymentSetupId")
+                        .paymentSubmissionId("paymentSubmissionId")))
+            .build();
 
-        Mono<PaymentOrderIngestResponse> productIngestResponse =
-            paymentOrderIngestionService.ingestPush(request);
-        StepVerifier.create(productIngestResponse)
-            .assertNext(Assertions::assertNotNull)
-            .verifyComplete();
-    }
+    Mono<PaymentOrderIngestResponse> productIngestResponse =
+        paymentOrderIngestionService.ingestPush(request);
+    StepVerifier.create(productIngestResponse)
+        .assertNext(Assertions::assertNotNull)
+        .verifyComplete();
+  }
 }

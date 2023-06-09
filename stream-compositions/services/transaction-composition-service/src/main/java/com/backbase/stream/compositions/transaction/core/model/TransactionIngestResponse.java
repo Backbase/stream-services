@@ -11,6 +11,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class TransactionIngestResponse {
 
-    private final String arrangementId;
-    private final List<TransactionsPostResponseBody> transactions;
+  private final String arrangementId;
+  private final List<TransactionsPostResponseBody> transactions;
 }

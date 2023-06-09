@@ -26,72 +26,72 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class ArrangementIngestionServiceImpl implements ArrangementIngestionService {
 
-    private final ArrangementService arrangementService;
-    private final ArrangementIntegrationService arrangementIntegrationService;
-    private final ArrangementPostIngestionService arrangementPostIngestionService;
-    private final Validator validator;
+  private final ArrangementService arrangementService;
+  private final ArrangementIntegrationService arrangementIntegrationService;
+  private final ArrangementPostIngestionService arrangementPostIngestionService;
+  private final Validator validator;
 
-    @Override
-    public Mono<ArrangementIngestResponse> ingestPull(ArrangementIngestPullRequest ingestionRequest) {
-        return pullArrangement(ingestionRequest)
-            .flatMap(this::validate)
-            .flatMap(this::sendToDbs)
-            .flatMap(arrangementPostIngestionService::handleSuccess)
-            .doOnError(arrangementPostIngestionService::handleFailure);
+  @Override
+  public Mono<ArrangementIngestResponse> ingestPull(ArrangementIngestPullRequest ingestionRequest) {
+    return pullArrangement(ingestionRequest)
+        .flatMap(this::validate)
+        .flatMap(this::sendToDbs)
+        .flatMap(arrangementPostIngestionService::handleSuccess)
+        .doOnError(arrangementPostIngestionService::handleFailure);
+  }
+
+  @Override
+  public Mono<ArrangementIngestResponse> ingestPush(ArrangementIngestPushRequest request) {
+    return pushArrangement(request)
+        .flatMap(this::sendToDbs)
+        .flatMap(arrangementPostIngestionService::handleSuccess)
+        .doOnError(arrangementPostIngestionService::handleFailure);
+  }
+
+  /**
+   * Pulls arrangement from integration service.
+   *
+   * @param request ArrangementPullIngestionRequest
+   * @return ProductGroup
+   */
+  private Mono<ArrangementIngestResponse> pullArrangement(ArrangementIngestPullRequest request) {
+    return arrangementIntegrationService.pullArrangement(request);
+  }
+
+  public Mono<ArrangementIngestResponse> pushArrangement(ArrangementIngestPushRequest request) {
+    return Mono.just(
+        ArrangementIngestResponse.builder()
+            .arrangement(request.getArrangement())
+            .arrangementInternalId(request.getArrangementInternalId())
+            .config(request.getConfig())
+            .source(request.getSource())
+            .build());
+  }
+
+  private Mono<ArrangementIngestResponse> validate(ArrangementIngestResponse res) {
+    Set<ConstraintViolation<AccountArrangementItemPut>> violations =
+        validator.validate(res.getArrangement());
+
+    if (!CollectionUtils.isEmpty(violations)) {
+      List<Error> errors =
+          violations.stream()
+              .map(
+                  c -> new Error().withMessage(c.getMessage()).withKey(Error.INVALID_INPUT_MESSAGE))
+              .collect(Collectors.toList());
+      return Mono.error(new BadRequestException().withErrors(errors));
     }
 
-    @Override
-    public Mono<ArrangementIngestResponse> ingestPush(ArrangementIngestPushRequest request) {
-        return pushArrangement(request)
-            .flatMap(this::sendToDbs)
-            .flatMap(arrangementPostIngestionService::handleSuccess)
-            .doOnError(arrangementPostIngestionService::handleFailure);
-    }
+    return Mono.just(res);
+  }
 
-    /**
-     * Pulls arrangement from integration service.
-     *
-     * @param request ArrangementPullIngestionRequest
-     * @return ProductGroup
-     */
-    private Mono<ArrangementIngestResponse> pullArrangement(ArrangementIngestPullRequest request) {
-        return arrangementIntegrationService.pullArrangement(request);
-    }
-
-    public Mono<ArrangementIngestResponse> pushArrangement(ArrangementIngestPushRequest request) {
-        return Mono.just(
-            ArrangementIngestResponse.builder()
-                .arrangement(request.getArrangement())
-                .arrangementInternalId(request.getArrangementInternalId())
-                .config(request.getConfig())
-                .source(request.getSource())
-                .build());
-    }
-
-    private Mono<ArrangementIngestResponse> validate(ArrangementIngestResponse res) {
-        Set<ConstraintViolation<AccountArrangementItemPut>> violations =
-            validator.validate(res.getArrangement());
-
-        if (!CollectionUtils.isEmpty(violations)) {
-            List<Error> errors =
-                violations.stream()
-                    .map(
-                        c -> new Error().withMessage(c.getMessage()).withKey(Error.INVALID_INPUT_MESSAGE))
-                    .collect(Collectors.toList());
-            return Mono.error(new BadRequestException().withErrors(errors));
-        }
-
-        return Mono.just(res);
-    }
-
-    private Mono<ArrangementIngestResponse> sendToDbs(ArrangementIngestResponse res) {
-        return arrangementService
-            .updateArrangement(res.getArrangement())
-            .map(
-                item ->
-                    ArrangementIngestResponse.builder()
-                        .arrangement(res.getArrangement())
-                        .config(res.getConfig())
-                        .build());
-    }
+  private Mono<ArrangementIngestResponse> sendToDbs(ArrangementIngestResponse res) {
+    return arrangementService
+        .updateArrangement(res.getArrangement())
+        .map(
+            item ->
+                ArrangementIngestResponse.builder()
+                    .arrangement(res.getArrangement())
+                    .config(res.getConfig())
+                    .build());
+  }
 }

@@ -8,6 +8,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("backbase.stream.legalentity.serviceagreement.sink")
 @Data
 @NoArgsConstructor
-public class UpdatedServiceAgreementSagaConfigurationProperties extends StreamWorkerConfiguration {
-
-}
+public class UpdatedServiceAgreementSagaConfigurationProperties extends StreamWorkerConfiguration {}

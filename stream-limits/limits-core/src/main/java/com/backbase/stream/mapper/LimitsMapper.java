@@ -11,16 +11,16 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface LimitsMapper {
 
-    default LimitsRetrievalPostRequestBody map(CreateLimitRequestBody req) {
-        return (LimitsRetrievalPostRequestBody)
-            new LimitsRetrievalPostRequestBody()
-                .limitsRetrievalOptions(
-                    singletonList(
-                        new LimitKey()
-                            .lookupKeys(req.getEntities())
-                            .userBBID(req.getUserBBID())
-                            .shadow(req.getShadow())));
-    }
+  default LimitsRetrievalPostRequestBody map(CreateLimitRequestBody req) {
+    return (LimitsRetrievalPostRequestBody)
+        new LimitsRetrievalPostRequestBody()
+            .limitsRetrievalOptions(
+                singletonList(
+                    new LimitKey()
+                        .lookupKeys(req.getEntities())
+                        .userBBID(req.getUserBBID())
+                        .shadow(req.getShadow())));
+  }
 
-    UpdateLimitRequestBody mapUpdateLimits(CreateLimitRequestBody item);
+  UpdateLimitRequestBody mapUpdateLimits(CreateLimitRequestBody item);
 }

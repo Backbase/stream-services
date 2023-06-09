@@ -10,8 +10,8 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface UnitOfWorkMapper {
 
-    LegalEntityResponse convertToLegalEntityResponse(UnitOfWork<LegalEntityTask> unitOfWork);
+  LegalEntityResponse convertToLegalEntityResponse(UnitOfWork<LegalEntityTask> unitOfWork);
 
-    UpdatedServiceAgreementResponse convertToUpdatedServiceAgreementResponse(
-        UnitOfWork<UpdatedServiceAgreementTask> unitOfWork);
+  UpdatedServiceAgreementResponse convertToUpdatedServiceAgreementResponse(
+      UnitOfWork<UpdatedServiceAgreementTask> unitOfWork);
 }

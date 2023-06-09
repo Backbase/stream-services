@@ -20,57 +20,54 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class ArrangementIntegrationServiceImplTest {
 
-    @InjectMocks
-    ArrangementIntegrationServiceImpl arrangementIntegrationService;
+  @InjectMocks ArrangementIntegrationServiceImpl arrangementIntegrationService;
 
-    @Mock
-    ArrangementIntegrationApi arrangementIntegrationApi;
+  @Mock ArrangementIntegrationApi arrangementIntegrationApi;
 
-    @Mock
-    ArrangementMapper arrangementMapper;
+  @Mock ArrangementMapper arrangementMapper;
 
-    @Test
-    void pullArrangement_Success() {
-        ArrangementIngestPullRequest request =
-            ArrangementIngestPullRequest.builder()
-                .arrangementId("arrangementId")
-                .externalArrangementId("externalArrangementID")
-                .build();
+  @Test
+  void pullArrangement_Success() {
+    ArrangementIngestPullRequest request =
+        ArrangementIngestPullRequest.builder()
+            .arrangementId("arrangementId")
+            .externalArrangementId("externalArrangementID")
+            .build();
 
-        when(arrangementIntegrationApi.pullArrangement(any()))
-            .thenReturn(
-                Mono.just(
-                    new PullArrangementResponse()
-                        .arrangement(
-                            new AccountArrangementItemPut().productId("productId").name("name"))));
-        when(arrangementMapper.mapIntegrationToStream(any()))
-            .thenReturn(
-                new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut());
+    when(arrangementIntegrationApi.pullArrangement(any()))
+        .thenReturn(
+            Mono.just(
+                new PullArrangementResponse()
+                    .arrangement(
+                        new AccountArrangementItemPut().productId("productId").name("name"))));
+    when(arrangementMapper.mapIntegrationToStream(any()))
+        .thenReturn(
+            new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut());
 
-        Mono<ArrangementIngestResponse> responseMono =
-            arrangementIntegrationService.pullArrangement(request);
+    Mono<ArrangementIngestResponse> responseMono =
+        arrangementIntegrationService.pullArrangement(request);
 
-        StepVerifier.create(responseMono)
-            .expectNextMatches(
-                item -> {
-                    return item != null;
-                })
-            .verifyComplete();
-    }
+    StepVerifier.create(responseMono)
+        .expectNextMatches(
+            item -> {
+              return item != null;
+            })
+        .verifyComplete();
+  }
 
-    @Test
-    void pullArrangement_Error() {
-        ArrangementIngestPullRequest request =
-            ArrangementIngestPullRequest.builder()
-                .arrangementId("arrangementId")
-                .externalArrangementId("externalArrangementID")
-                .build();
+  @Test
+  void pullArrangement_Error() {
+    ArrangementIngestPullRequest request =
+        ArrangementIngestPullRequest.builder()
+            .arrangementId("arrangementId")
+            .externalArrangementId("externalArrangementID")
+            .build();
 
-        when(arrangementIntegrationApi.pullArrangement(any()))
-            .thenReturn(Mono.error(new RuntimeException()));
-        Mono<ArrangementIngestResponse> responseMono =
-            arrangementIntegrationService.pullArrangement(request);
+    when(arrangementIntegrationApi.pullArrangement(any()))
+        .thenReturn(Mono.error(new RuntimeException()));
+    Mono<ArrangementIngestResponse> responseMono =
+        arrangementIntegrationService.pullArrangement(request);
 
-        StepVerifier.create(responseMono).verifyError();
-    }
+    StepVerifier.create(responseMono).verifyError();
+  }
 }

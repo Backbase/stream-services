@@ -10,9 +10,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 public class PaymentOrderWorkerConfigurationProperties extends StreamWorkerConfiguration {
 
-    private boolean groupPerArrangementId;
+  private boolean groupPerArrangementId;
 
-    private boolean continueOnError;
+  private boolean continueOnError;
 
-    private boolean deletePaymentOrder = false;
+  private boolean deletePaymentOrder = false;
 }

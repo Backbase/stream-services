@@ -16,26 +16,26 @@ import reactor.core.publisher.Mono;
 
 public interface TransactionService {
 
-    Flux<UnitOfWork<TransactionTask>> processTransactions(
-        Flux<TransactionsPostRequestBody> transactions);
+  Flux<UnitOfWork<TransactionTask>> processTransactions(
+      Flux<TransactionsPostRequestBody> transactions);
 
-    default Flux<TransactionsPostResponseBody> getTransactionIdsFlux(
-        UnitOfWork<TransactionTask> unitOfWork) {
-        Stream<TransactionsPostResponseBody> transactionIdsStream =
-            unitOfWork.getStreamTasks().stream()
-                .map(TransactionTask::getResponse)
-                .flatMap(Collection::stream);
-        return Flux.fromStream(transactionIdsStream);
-    }
+  default Flux<TransactionsPostResponseBody> getTransactionIdsFlux(
+      UnitOfWork<TransactionTask> unitOfWork) {
+    Stream<TransactionsPostResponseBody> transactionIdsStream =
+        unitOfWork.getStreamTasks().stream()
+            .map(TransactionTask::getResponse)
+            .flatMap(Collection::stream);
+    return Flux.fromStream(transactionIdsStream);
+  }
 
-    Flux<TransactionItem> getLatestTransactions(String arrangementId, int size);
+  Flux<TransactionItem> getLatestTransactions(String arrangementId, int size);
 
-    @SuppressWarnings("WeakerAccess")
-    Mono<Void> deleteTransactions(Flux<TransactionsDeleteRequestBody> transactionItemDelete);
+  @SuppressWarnings("WeakerAccess")
+  Mono<Void> deleteTransactions(Flux<TransactionsDeleteRequestBody> transactionItemDelete);
 
-    Flux<TransactionItem> getTransactions(TransactionsQuery transactionsQuery);
+  Flux<TransactionItem> getTransactions(TransactionsQuery transactionsQuery);
 
-    Mono<Void> patchTransactions(Flux<TransactionsPatchRequestBody> transactionItems);
+  Mono<Void> patchTransactions(Flux<TransactionsPatchRequestBody> transactionItems);
 
-    Mono<Void> postRefresh(Flux<ArrangementItem> arrangementItems);
+  Mono<Void> postRefresh(Flux<ArrangementItem> arrangementItems);
 }

@@ -9,21 +9,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface TransactionCursorCustomRepository {
 
-    /**
-     * Patch the Cursor based on arrangement_id
-     *
-     * @param arrangementId                 ArrangementId of the Cursor
-     * @param transactionCursorPatchRequest Request Payload to Patch the Cursor
-     */
-    @Transactional(rollbackFor = SQLException.class)
-    Integer patchByArrangementId(
-        String arrangementId, TransactionCursorPatchRequest transactionCursorPatchRequest);
+  /**
+   * Patch the Cursor based on arrangement_id
+   *
+   * @param arrangementId ArrangementId of the Cursor
+   * @param transactionCursorPatchRequest Request Payload to Patch the Cursor
+   */
+  @Transactional(rollbackFor = SQLException.class)
+  Integer patchByArrangementId(
+      String arrangementId, TransactionCursorPatchRequest transactionCursorPatchRequest);
 
-    /**
-     * Filter the Cursor based on last_txn_date and status
-     *
-     * @param transactionCursorFilterRequest Request Payload to filter the Cursor
-     */
-    List<TransactionCursorEntity> filterCursor(
-        TransactionCursorFilterRequest transactionCursorFilterRequest);
+  /**
+   * Filter the Cursor based on last_txn_date and status
+   *
+   * @param transactionCursorFilterRequest Request Payload to filter the Cursor
+   */
+  List<TransactionCursorEntity> filterCursor(
+      TransactionCursorFilterRequest transactionCursorFilterRequest);
 }

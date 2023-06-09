@@ -11,8 +11,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class TransactionIngestPushRequest {
 
-    private String externalArrangementId;
-    private String legalEntityInternalId;
-    private String arrangementId;
-    private List<TransactionsPostRequestBody> transactions;
+  private String externalArrangementId;
+  private String legalEntityInternalId;
+  private String arrangementId;
+  private List<TransactionsPostRequestBody> transactions;
 }

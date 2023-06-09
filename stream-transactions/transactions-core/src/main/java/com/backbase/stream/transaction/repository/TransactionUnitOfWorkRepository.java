@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TransactionUnitOfWorkRepository
-    extends UnitOfWorkRepository<TransactionTask, String> {
-
-}
+    extends UnitOfWorkRepository<TransactionTask, String> {}

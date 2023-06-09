@@ -7,5 +7,5 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface RealmMapper {
 
-    Realm toStream(AddRealmResponse realmsPostPostResponseBody);
+  Realm toStream(AddRealmResponse realmsPostPostResponseBody);
 }

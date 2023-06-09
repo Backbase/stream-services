@@ -20,28 +20,28 @@ import org.springframework.web.reactive.function.client.WebClient;
 @EnableConfigurationProperties(PaymentOrderConfigurationProperties.class)
 public class PaymentOrderCompositionConfiguration {
 
-    private final PaymentOrderConfigurationProperties paymentOrderConfigurationProperties;
+  private final PaymentOrderConfigurationProperties paymentOrderConfigurationProperties;
 
-    @Bean
-    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
-        return http.csrf().disable().build();
-    }
+  @Bean
+  public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+    return http.csrf().disable().build();
+  }
 
-    @Bean
-    @Primary
-    public PaymentOrderIntegrationApi paymentOrderIntegrationApi(
-        ApiClient paymentOrderIntegrationClient) {
-        return new PaymentOrderIntegrationApi(paymentOrderIntegrationClient);
-    }
+  @Bean
+  @Primary
+  public PaymentOrderIntegrationApi paymentOrderIntegrationApi(
+      ApiClient paymentOrderIntegrationClient) {
+    return new PaymentOrderIntegrationApi(paymentOrderIntegrationClient);
+  }
 
-    @Bean
-    public ApiClient paymentOrderIntegrationClient(
-        @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
-        ObjectMapper objectMapper,
-        DateFormat dateFormat) {
-        ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
-        apiClient.setBasePath(paymentOrderConfigurationProperties.getIntegrationBaseUrl());
+  @Bean
+  public ApiClient paymentOrderIntegrationClient(
+      @Qualifier(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME) WebClient dbsWebClient,
+      ObjectMapper objectMapper,
+      DateFormat dateFormat) {
+    ApiClient apiClient = new ApiClient(dbsWebClient, objectMapper, dateFormat);
+    apiClient.setBasePath(paymentOrderConfigurationProperties.getIntegrationBaseUrl());
 
-        return apiClient;
-    }
+    return apiClient;
+  }
 }

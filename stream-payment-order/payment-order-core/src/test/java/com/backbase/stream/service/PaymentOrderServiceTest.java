@@ -23,40 +23,38 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 public class PaymentOrderServiceTest extends PaymentOrderBaseTest {
 
-    private final Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux =
-        Flux.fromIterable(paymentOrderPostRequest);
-    @InjectMocks
-    private PaymentOrderServiceImpl paymentOrderService;
-    @Mock
-    private PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor;
+  private final Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux =
+      Flux.fromIterable(paymentOrderPostRequest);
+  @InjectMocks private PaymentOrderServiceImpl paymentOrderService;
+  @Mock private PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor;
 
-    @Test
-    public void test_processPaymentOrder() {
+  @Test
+  public void test_processPaymentOrder() {
 
-        List<PaymentOrderIngestRequest> paymentOrderIngestRequestList =
-            List.of(
-                new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(0)),
-                new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(1)));
+    List<PaymentOrderIngestRequest> paymentOrderIngestRequestList =
+        List.of(
+            new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(0)),
+            new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(1)));
 
-        PaymentOrderTask paymentOrderTask =
-            new PaymentOrderTask("po_task_id", paymentOrderIngestRequestList);
-        UnitOfWork<PaymentOrderTask> unitOfWork = UnitOfWork.from("uow_id", paymentOrderTask);
-        Flux<UnitOfWork<PaymentOrderTask>> unitOfWorkFlux = Flux.just(unitOfWork);
+    PaymentOrderTask paymentOrderTask =
+        new PaymentOrderTask("po_task_id", paymentOrderIngestRequestList);
+    UnitOfWork<PaymentOrderTask> unitOfWork = UnitOfWork.from("uow_id", paymentOrderTask);
+    Flux<UnitOfWork<PaymentOrderTask>> unitOfWorkFlux = Flux.just(unitOfWork);
 
-        Mockito.lenient()
-            .when(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
-            .thenReturn(unitOfWorkFlux);
+    Mockito.lenient()
+        .when(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
+        .thenReturn(unitOfWorkFlux);
 
-        Mockito.lenient()
-            .when(paymentOrderUnitOfWorkExecutor.executeUnitOfWork(unitOfWork))
-            .thenReturn(Mono.just(unitOfWork));
+    Mockito.lenient()
+        .when(paymentOrderUnitOfWorkExecutor.executeUnitOfWork(unitOfWork))
+        .thenReturn(Mono.just(unitOfWork));
 
-        StepVerifier.create(paymentOrderService.processPaymentOrder(paymentOrderPostRequestFlux))
-            .assertNext(
-                uow -> {
-                    Assertions.assertEquals(UnitOfWork.State.NEW, uow.getState());
-                    Assertions.assertEquals(1, uow.getStreamTasks().size());
-                })
-            .verifyComplete();
-    }
+    StepVerifier.create(paymentOrderService.processPaymentOrder(paymentOrderPostRequestFlux))
+        .assertNext(
+            uow -> {
+              Assertions.assertEquals(UnitOfWork.State.NEW, uow.getState());
+              Assertions.assertEquals(1, uow.getStreamTasks().size());
+            })
+        .verifyComplete();
+  }
 }

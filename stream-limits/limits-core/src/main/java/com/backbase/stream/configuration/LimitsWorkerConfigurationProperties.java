@@ -10,5 +10,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 public class LimitsWorkerConfigurationProperties extends StreamWorkerConfiguration {
 
-    private boolean continueOnError;
+  private boolean continueOnError;
 }

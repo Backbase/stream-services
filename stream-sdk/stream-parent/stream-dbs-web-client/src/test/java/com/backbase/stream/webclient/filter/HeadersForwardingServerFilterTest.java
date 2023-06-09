@@ -23,65 +23,58 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class HeadersForwardingServerFilterTest {
 
-    @InjectMocks
-    private HeadersForwardingServerFilter subject;
+  @InjectMocks private HeadersForwardingServerFilter subject;
 
-    @Mock
-    private DbsWebClientConfigurationProperties dbsWebClientConfigurationProperties;
+  @Mock private DbsWebClientConfigurationProperties dbsWebClientConfigurationProperties;
 
-    @Mock
-    private ServerWebExchange serverWebExchange;
+  @Mock private ServerWebExchange serverWebExchange;
 
-    @Mock
-    private WebFilterChain webFilterChain;
+  @Mock private WebFilterChain webFilterChain;
 
-    @Mock
-    private ServerHttpRequest serverHttpRequest;
+  @Mock private ServerHttpRequest serverHttpRequest;
 
-    @Mock
-    private RequestPath requestPath;
+  @Mock private RequestPath requestPath;
 
-    @Mock
-    private HttpHeaders httpHeaders;
+  @Mock private HttpHeaders httpHeaders;
 
-    @Test
-    void filterShouldForwardRequestHeaders() {
-        String headerKeyToForward = "X-TID";
-        List<String> headerValueToForward = asList("tenant1");
-        LinkedMultiValueMap<String, String> expectedForwardedHeaders = new LinkedMultiValueMap<>();
-        expectedForwardedHeaders.put(headerKeyToForward, headerValueToForward);
+  @Test
+  void filterShouldForwardRequestHeaders() {
+    String headerKeyToForward = "X-TID";
+    List<String> headerValueToForward = asList("tenant1");
+    LinkedMultiValueMap<String, String> expectedForwardedHeaders = new LinkedMultiValueMap<>();
+    expectedForwardedHeaders.put(headerKeyToForward, headerValueToForward);
 
-        when(dbsWebClientConfigurationProperties.getHeadersToForward())
-            .thenReturn(asList(headerKeyToForward));
-        when(serverWebExchange.getRequest()).thenReturn(serverHttpRequest);
-        when(serverHttpRequest.getPath()).thenReturn(requestPath);
-        when(serverHttpRequest.getHeaders()).thenReturn(httpHeaders);
-        when(webFilterChain.filter(eq(serverWebExchange))).thenReturn(Mono.empty());
+    when(dbsWebClientConfigurationProperties.getHeadersToForward())
+        .thenReturn(asList(headerKeyToForward));
+    when(serverWebExchange.getRequest()).thenReturn(serverHttpRequest);
+    when(serverHttpRequest.getPath()).thenReturn(requestPath);
+    when(serverHttpRequest.getHeaders()).thenReturn(httpHeaders);
+    when(webFilterChain.filter(eq(serverWebExchange))).thenReturn(Mono.empty());
 
-        when(httpHeaders.get(headerKeyToForward)).thenReturn(headerValueToForward);
+    when(httpHeaders.get(headerKeyToForward)).thenReturn(headerValueToForward);
 
-        StepVerifier.create(subject.filter(serverWebExchange, webFilterChain))
-            .expectAccessibleContext()
-            .contains("headers", expectedForwardedHeaders)
-            .then()
-            .verifyComplete();
-    }
+    StepVerifier.create(subject.filter(serverWebExchange, webFilterChain))
+        .expectAccessibleContext()
+        .contains("headers", expectedForwardedHeaders)
+        .then()
+        .verifyComplete();
+  }
 
-    @Test
-    void filterShouldNotForwardRequestHeaders() {
-        String headerKeyToForward = "X-TID";
+  @Test
+  void filterShouldNotForwardRequestHeaders() {
+    String headerKeyToForward = "X-TID";
 
-        when(dbsWebClientConfigurationProperties.getHeadersToForward())
-            .thenReturn(asList(headerKeyToForward));
-        when(serverWebExchange.getRequest()).thenReturn(serverHttpRequest);
-        when(serverHttpRequest.getPath()).thenReturn(requestPath);
-        when(serverHttpRequest.getHeaders()).thenReturn(httpHeaders);
-        when(webFilterChain.filter(eq(serverWebExchange))).thenReturn(Mono.empty());
+    when(dbsWebClientConfigurationProperties.getHeadersToForward())
+        .thenReturn(asList(headerKeyToForward));
+    when(serverWebExchange.getRequest()).thenReturn(serverHttpRequest);
+    when(serverHttpRequest.getPath()).thenReturn(requestPath);
+    when(serverHttpRequest.getHeaders()).thenReturn(httpHeaders);
+    when(webFilterChain.filter(eq(serverWebExchange))).thenReturn(Mono.empty());
 
-        StepVerifier.create(subject.filter(serverWebExchange, webFilterChain))
-            .expectAccessibleContext()
-            .matches(c -> c.getOrEmpty("headers").isEmpty())
-            .then()
-            .verifyComplete();
-    }
+    StepVerifier.create(subject.filter(serverWebExchange, webFilterChain))
+        .expectAccessibleContext()
+        .matches(c -> c.getOrEmpty("headers").isEmpty())
+        .then()
+        .verifyComplete();
+  }
 }

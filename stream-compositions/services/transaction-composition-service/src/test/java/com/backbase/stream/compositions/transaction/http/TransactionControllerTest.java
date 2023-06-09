@@ -24,70 +24,69 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class TransactionControllerTest {
 
-    TransactionMapper mapper = Mappers.getMapper(TransactionMapper.class);
+  TransactionMapper mapper = Mappers.getMapper(TransactionMapper.class);
 
-    @Mock
-    TransactionIngestionService transactionIngestionService;
+  @Mock TransactionIngestionService transactionIngestionService;
 
-    TransactionController transactionController;
+  TransactionController transactionController;
 
-    @BeforeEach
-    void setUp() {
-        transactionController = new TransactionController(transactionIngestionService, mapper);
-    }
+  @BeforeEach
+  void setUp() {
+    transactionController = new TransactionController(transactionIngestionService, mapper);
+  }
 
-    @Test
-    void testPullIngestion_Success() {
+  @Test
+  void testPullIngestion_Success() {
 
-        Mono<TransactionPullIngestionRequest> requestMono =
+    Mono<TransactionPullIngestionRequest> requestMono =
+        Mono.just(
+            new TransactionPullIngestionRequest()
+                .withArrangementId("arrangementId")
+                .withBillingCycles(3)
+                .withExternalArrangementId("extArrangementId")
+                .withLegalEntityInternalId("legalEntityId"));
+
+    when(transactionIngestionService.ingestPull(any()))
+        .thenReturn(
             Mono.just(
-                new TransactionPullIngestionRequest()
-                    .withArrangementId("arrangementId")
-                    .withBillingCycles(3)
-                    .withExternalArrangementId("extArrangementId")
-                    .withLegalEntityInternalId("legalEntityId"));
-
-        when(transactionIngestionService.ingestPull(any()))
-            .thenReturn(
-                Mono.just(
-                    TransactionIngestResponse.builder()
-                        .transactions(
-                            List.of(
-                                new TransactionsPostResponseBody()
-                                    .id("1")
-                                    .externalId("externalId")
-                                    .additions(Map.of())))
-                        .build()));
-
-        transactionController.pullTransactions(requestMono, null).block();
-        verify(transactionIngestionService).ingestPull(any());
-    }
-
-    @Test
-    void testPushIngestion_Success() {
-        Mono<TransactionPushIngestionRequest> requestMono =
-            Mono.just(
-                new TransactionPushIngestionRequest()
-                    .withTransactions(
+                TransactionIngestResponse.builder()
+                    .transactions(
                         List.of(
-                            new TransactionsPostRequestBody()
-                                .withReference("ref")
-                                .withType("type")
-                                .withArrangementId("arrangementId"))));
+                            new TransactionsPostResponseBody()
+                                .id("1")
+                                .externalId("externalId")
+                                .additions(Map.of())))
+                    .build()));
 
-        when(transactionIngestionService.ingestPush(any()))
-            .thenReturn(
-                Mono.just(
-                    TransactionIngestResponse.builder()
-                        .transactions(
-                            List.of(
-                                new TransactionsPostResponseBody()
-                                    .id("1")
-                                    .externalId("externalId")
-                                    .additions(Map.of())))
-                        .build()));
+    transactionController.pullTransactions(requestMono, null).block();
+    verify(transactionIngestionService).ingestPull(any());
+  }
 
-        transactionController.pushIngestTransactions(requestMono, null).block();
-        verify(transactionIngestionService).ingestPush(any());
-    }
+  @Test
+  void testPushIngestion_Success() {
+    Mono<TransactionPushIngestionRequest> requestMono =
+        Mono.just(
+            new TransactionPushIngestionRequest()
+                .withTransactions(
+                    List.of(
+                        new TransactionsPostRequestBody()
+                            .withReference("ref")
+                            .withType("type")
+                            .withArrangementId("arrangementId"))));
+
+    when(transactionIngestionService.ingestPush(any()))
+        .thenReturn(
+            Mono.just(
+                TransactionIngestResponse.builder()
+                    .transactions(
+                        List.of(
+                            new TransactionsPostResponseBody()
+                                .id("1")
+                                .externalId("externalId")
+                                .additions(Map.of())))
+                    .build()));
+
+    transactionController.pushIngestTransactions(requestMono, null).block();
+    verify(transactionIngestionService).ingestPush(any());
+  }
 }

@@ -10,5 +10,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ProductCatalogIngestPushRequest {
 
-    private ProductCatalog productCatalog;
+  private ProductCatalog productCatalog;
 }

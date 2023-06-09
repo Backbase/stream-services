@@ -27,37 +27,37 @@ import org.springframework.web.reactive.function.client.WebClient.Builder;
 @Slf4j
 public class LocalRunConfig {
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ObjectMapper objectMapper(DateFormat dateFormat) {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setDateFormat(dateFormat);
-        mapper.registerModule(new JavaTimeModule());
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper;
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public ObjectMapper objectMapper(DateFormat dateFormat) {
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.setDateFormat(dateFormat);
+    mapper.registerModule(new JavaTimeModule());
+    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    return mapper;
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public DateFormat dateFormat() {
-        DateFormat dateFormat = new StdDateFormat();
-        dateFormat.setTimeZone(TimeZone.getDefault());
-        return dateFormat;
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public DateFormat dateFormat() {
+    DateFormat dateFormat = new StdDateFormat();
+    dateFormat.setTimeZone(TimeZone.getDefault());
+    return dateFormat;
+  }
 
-    @Bean({"interServiceWebClient"})
-    @ConditionalOnMissingBean(name = {"interServiceWebClient"})
-    public WebClient interServiceWebClient(
-        ObjectProvider<InterServiceWebClientCustomizer> interServiceWebClientCustomizers,
-        Builder builder) {
-        builder.defaultHeader("Content-Type", new String[]{MediaType.APPLICATION_JSON.toString()});
-        builder.defaultHeader("Accept", new String[]{MediaType.APPLICATION_JSON.toString()});
-        interServiceWebClientCustomizers
-            .orderedStream()
-            .forEach(
-                (customizer) -> {
-                    customizer.customize(builder);
-                });
-        return builder.build();
-    }
+  @Bean({"interServiceWebClient"})
+  @ConditionalOnMissingBean(name = {"interServiceWebClient"})
+  public WebClient interServiceWebClient(
+      ObjectProvider<InterServiceWebClientCustomizer> interServiceWebClientCustomizers,
+      Builder builder) {
+    builder.defaultHeader("Content-Type", new String[] {MediaType.APPLICATION_JSON.toString()});
+    builder.defaultHeader("Accept", new String[] {MediaType.APPLICATION_JSON.toString()});
+    interServiceWebClientCustomizers
+        .orderedStream()
+        .forEach(
+            (customizer) -> {
+              customizer.customize(builder);
+            });
+    return builder.build();
+  }
 }

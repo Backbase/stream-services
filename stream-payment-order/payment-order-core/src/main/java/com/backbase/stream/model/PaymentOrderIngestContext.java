@@ -11,7 +11,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 public class PaymentOrderIngestContext {
 
-    private String internalUserId;
-    private List<PaymentOrderPostRequest> corePaymentOrder = new ArrayList<>();
-    private List<GetPaymentOrderResponse> existingPaymentOrder = new ArrayList<>();
+  private String internalUserId;
+  private List<PaymentOrderPostRequest> corePaymentOrder = new ArrayList<>();
+  private List<GetPaymentOrderResponse> existingPaymentOrder = new ArrayList<>();
 }

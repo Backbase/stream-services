@@ -18,47 +18,46 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public final class ReactiveStreamHandler {
 
-    private static final String FAILED = "failed";
+  private static final String FAILED = "failed";
 
-    private ReactiveStreamHandler() {
-    }
+  private ReactiveStreamHandler() {}
 
-    public static <T> Flux<T> getFluxStream(List<T> task) {
-        return Flux.fromStream(Optional.ofNullable(task).orElseGet(List::of).stream());
-    }
+  public static <T> Flux<T> getFluxStream(List<T> task) {
+    return Flux.fromStream(Optional.ofNullable(task).orElseGet(List::of).stream());
+  }
 
-    @NotNull
-    public static <T> Function<PortfolioBundleException, Publisher<? extends T>> error(
-        PortfolioTask task, String entity, String operation) {
-        return exception -> {
-            task.error(
-                entity,
-                operation,
-                FAILED,
-                null,
-                null,
-                exception,
-                exception.getHttpResponse(),
-                exception.getMessage());
-            return Mono.error(new StreamTaskException(task, exception));
-        };
-    }
+  @NotNull
+  public static <T> Function<PortfolioBundleException, Publisher<? extends T>> error(
+      PortfolioTask task, String entity, String operation) {
+    return exception -> {
+      task.error(
+          entity,
+          operation,
+          FAILED,
+          null,
+          null,
+          exception,
+          exception.getHttpResponse(),
+          exception.getMessage());
+      return Mono.error(new StreamTaskException(task, exception));
+    };
+  }
 
-    @NotNull
-    static <T> Function<WebClientResponseException, Mono<? extends T>> error(
-        Object entity, String errorMessage) {
-        return exception -> Mono.error(new PortfolioBundleException(entity, errorMessage, exception));
-    }
+  @NotNull
+  static <T> Function<WebClientResponseException, Mono<? extends T>> error(
+      Object entity, String errorMessage) {
+    return exception -> Mono.error(new PortfolioBundleException(entity, errorMessage, exception));
+  }
 
-    static void handleWebClientResponseException(
-        WebClientResponseException webclientResponseException) {
-        Objects.requireNonNull(webclientResponseException);
-        Optional<HttpRequest> responseExceptionRequest =
-            Optional.ofNullable(webclientResponseException.getRequest());
-        log.error(
-            "Bad Request: \n[{}]: {}\nResponse: {}",
-            responseExceptionRequest.map(HttpRequest::getMethod).orElse(null),
-            responseExceptionRequest.map(HttpRequest::getURI).orElse(null),
-            webclientResponseException.getResponseBodyAsString());
-    }
+  static void handleWebClientResponseException(
+      WebClientResponseException webclientResponseException) {
+    Objects.requireNonNull(webclientResponseException);
+    Optional<HttpRequest> responseExceptionRequest =
+        Optional.ofNullable(webclientResponseException.getRequest());
+    log.error(
+        "Bad Request: \n[{}]: {}\nResponse: {}",
+        responseExceptionRequest.map(HttpRequest::getMethod).orElse(null),
+        responseExceptionRequest.map(HttpRequest::getURI).orElse(null),
+        webclientResponseException.getResponseBodyAsString());
+  }
 }

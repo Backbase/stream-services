@@ -10,16 +10,16 @@ import lombok.EqualsAndHashCode;
 @Data
 public class LimitsTask extends StreamTask {
 
-    private CreateLimitRequestBody data;
-    private LimitsPostResponseBody response;
+  private CreateLimitRequestBody data;
+  private LimitsPostResponseBody response;
 
-    public LimitsTask(String unitOfWorkId, CreateLimitRequestBody data) {
-        super(unitOfWorkId);
-        this.data = data;
-    }
+  public LimitsTask(String unitOfWorkId, CreateLimitRequestBody data) {
+    super(unitOfWorkId);
+    this.data = data;
+  }
 
-    @Override
-    public String getName() {
-        return "limit";
-    }
+  @Override
+  public String getName() {
+    return "limit";
+  }
 }

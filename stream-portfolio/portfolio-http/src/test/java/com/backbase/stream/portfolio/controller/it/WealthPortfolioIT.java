@@ -33,94 +33,93 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @ActiveProfiles({"it"})
 class WealthPortfolioIT {
 
-    @Autowired
-    private WebTestClient webTestClient;
+  @Autowired private WebTestClient webTestClient;
 
-    @Test
-    void shouldIngestRegionBundles() throws Exception {
-        // Given
-        setupWireMock();
+  @Test
+  void shouldIngestRegionBundles() throws Exception {
+    // Given
+    setupWireMock();
 
-        List<Portfolio> portfolios = PortfolioHttpTestUtil.getPortfolios();
+    List<Portfolio> portfolios = PortfolioHttpTestUtil.getPortfolios();
 
-        // When
-        webTestClient
-            .post()
-            .uri("/portfolios/batch")
-            .header("Content-Type", "application/json")
-            .header("X-TID", "tenant-id")
-            .bodyValue(portfolios)
-            .exchange()
-            .expectStatus()
-            .isEqualTo(200);
+    // When
+    webTestClient
+        .post()
+        .uri("/portfolios/batch")
+        .header("Content-Type", "application/json")
+        .header("X-TID", "tenant-id")
+        .bodyValue(portfolios)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(200);
 
-        // Then
-        verify(
-            WireMock.getRequestedFor(
-                    WireMock.urlEqualTo("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA"))
-                .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-                .withHeader("X-B3-TraceId", notEmpty())
-                .withHeader("X-B3-SpanId", notEmpty()));
+    // Then
+    verify(
+        WireMock.getRequestedFor(
+                WireMock.urlEqualTo("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA"))
+            .withHeader("X-TID", WireMock.equalTo("tenant-id"))
+            .withHeader("X-B3-TraceId", notEmpty())
+            .withHeader("X-B3-SpanId", notEmpty()));
 
-        Assertions.assertTrue(WireMock.findUnmatchedRequests().isEmpty());
+    Assertions.assertTrue(WireMock.findUnmatchedRequests().isEmpty());
+  }
+
+  private void setupWireMock() {
+    stubFor(
+        WireMock.post("/oauth/token")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(
+                        "{\"access_token\":"
+                            + " \"access-token\",\"expires_in\":"
+                            + " 600,\"refresh_expires_in\":"
+                            + " 1800,\"refresh_token\":"
+                            + " \"refresh-token\",\"token_type\":"
+                            + " \"bearer\",\"id_token\":"
+                            + " \"id-token\",\"not-before-policy\":"
+                            + " 1633622545,\"session_state\":"
+                            + " \"72a28739-3d20-4965-bd86-64410df53d04\",\"scope\":"
+                            + " \"openid\"}")));
+
+    stubFor(
+        WireMock.get("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(
+                        "{\"code\": \"testCode\", \"arrangementId\":"
+                            + " \"testArrangementId\", \"name\":"
+                            + " \"testName\"}")));
+
+    stubFor(
+        WireMock.post("/portfolio/integration-api/v1/portfolios")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"regions\":[]}")));
+
+    stubFor(
+        WireMock.put("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA")
+            .willReturn(
+                WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"regions\":[]}")));
+  }
+
+  static class NotEmptyPattern extends StringValuePattern {
+
+    public NotEmptyPattern(@JsonProperty("something") String expectedValue) {
+      super(expectedValue);
     }
 
-    private void setupWireMock() {
-        stubFor(
-            WireMock.post("/oauth/token")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(
-                            "{\"access_token\":"
-                                + " \"access-token\",\"expires_in\":"
-                                + " 600,\"refresh_expires_in\":"
-                                + " 1800,\"refresh_token\":"
-                                + " \"refresh-token\",\"token_type\":"
-                                + " \"bearer\",\"id_token\":"
-                                + " \"id-token\",\"not-before-policy\":"
-                                + " 1633622545,\"session_state\":"
-                                + " \"72a28739-3d20-4965-bd86-64410df53d04\",\"scope\":"
-                                + " \"openid\"}")));
-
-        stubFor(
-            WireMock.get("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(
-                            "{\"code\": \"testCode\", \"arrangementId\":"
-                                + " \"testArrangementId\", \"name\":"
-                                + " \"testName\"}")));
-
-        stubFor(
-            WireMock.post("/portfolio/integration-api/v1/portfolios")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"regions\":[]}")));
-
-        stubFor(
-            WireMock.put("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA")
-                .willReturn(
-                    WireMock.aResponse()
-                        .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("{\"regions\":[]}")));
+    public static NotEmptyPattern notEmpty() {
+      return new NotEmptyPattern("(always)");
     }
 
-    static class NotEmptyPattern extends StringValuePattern {
-
-        public NotEmptyPattern(@JsonProperty("something") String expectedValue) {
-            super(expectedValue);
-        }
-
-        public static NotEmptyPattern notEmpty() {
-            return new NotEmptyPattern("(always)");
-        }
-
-        @Override
-        public MatchResult match(String value) {
-            return MatchResult.of(StringUtils.isNotBlank(value));
-        }
+    @Override
+    public MatchResult match(String value) {
+      return MatchResult.of(StringUtils.isNotBlank(value));
     }
+  }
 }

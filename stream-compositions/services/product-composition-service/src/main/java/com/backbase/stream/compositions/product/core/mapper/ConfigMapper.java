@@ -10,27 +10,27 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConfigMapper {
 
-    public RequestConfig map(ArrangementIngestionConfig config) {
-        return config != null
-            ? RequestConfig.builder().chains(this.map(config.getChains())).build()
-            : null;
-    }
+  public RequestConfig map(ArrangementIngestionConfig config) {
+    return config != null
+        ? RequestConfig.builder().chains(this.map(config.getChains())).build()
+        : null;
+  }
 
-    private RequestConfig.Chains map(ArrangementsChainsConfig chainsConfig) {
-        return chainsConfig != null
-            ? RequestConfig.Chains.builder()
+  private RequestConfig.Chains map(ArrangementsChainsConfig chainsConfig) {
+    return chainsConfig != null
+        ? RequestConfig.Chains.builder()
             .transactionComposition(this.map(chainsConfig.getTransactionComposition()))
             .build()
-            : null;
-    }
+        : null;
+  }
 
-    private ProductConfigurationProperties.TransactionComposition map(
-        TransactionCompositionChainConfig config) {
-        return config != null
-            ? ProductConfigurationProperties.TransactionComposition.builder()
+  private ProductConfigurationProperties.TransactionComposition map(
+      TransactionCompositionChainConfig config) {
+    return config != null
+        ? ProductConfigurationProperties.TransactionComposition.builder()
             .enabled(config.getEnabled())
             .async(config.getAsync())
             .build()
-            : null;
-    }
+        : null;
+  }
 }

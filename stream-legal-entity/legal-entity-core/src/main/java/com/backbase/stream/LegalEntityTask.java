@@ -11,24 +11,24 @@ import lombok.NoArgsConstructor;
 @Data
 public class LegalEntityTask extends StreamTask {
 
-    private LegalEntity legalEntity;
+  private LegalEntity legalEntity;
 
-    public LegalEntityTask(LegalEntity data) {
-        super(data.getExternalId());
-        this.legalEntity = data;
-    }
+  public LegalEntityTask(LegalEntity data) {
+    super(data.getExternalId());
+    this.legalEntity = data;
+  }
 
-    public LegalEntity getData() {
-        return legalEntity;
-    }
+  public LegalEntity getData() {
+    return legalEntity;
+  }
 
-    public LegalEntityTask data(LegalEntity legalEntity) {
-        this.legalEntity = legalEntity;
-        return this;
-    }
+  public LegalEntityTask data(LegalEntity legalEntity) {
+    this.legalEntity = legalEntity;
+    return this;
+  }
 
-    @Override
-    public String getName() {
-        return legalEntity.getExternalId();
-    }
+  @Override
+  public String getName() {
+    return legalEntity.getExternalId();
+  }
 }

@@ -15,20 +15,19 @@ import org.springframework.web.reactive.function.client.WebClient;
 @ExtendWith(MockitoExtension.class)
 class ProductCatalogConfigurationTest {
 
-    @Mock
-    ApiClient apiClient;
+  @Mock ApiClient apiClient;
 
-    @Test
-    void test() {
-        ProductCatalogConfigurationProperties properties = new ProductCatalogConfigurationProperties();
-        properties.setProductCatalogIntegrationUrl("http://product-catalog");
+  @Test
+  void test() {
+    ProductCatalogConfigurationProperties properties = new ProductCatalogConfigurationProperties();
+    properties.setProductCatalogIntegrationUrl("http://product-catalog");
 
-        ProductCatalogConfiguration configuration = new ProductCatalogConfiguration(properties);
-        assertNotNull(configuration.productCatalogIntegrationApi(apiClient));
+    ProductCatalogConfiguration configuration = new ProductCatalogConfiguration(properties);
+    assertNotNull(configuration.productCatalogIntegrationApi(apiClient));
 
-        ApiClient apiClient =
-            configuration.productCatalogClient(
-                WebClient.builder().build(), new ObjectMapper(), DateFormat.getDateInstance());
-        assertEquals("http://product-catalog", apiClient.getBasePath());
-    }
+    ApiClient apiClient =
+        configuration.productCatalogClient(
+            WebClient.builder().build(), new ObjectMapper(), DateFormat.getDateInstance());
+    assertEquals("http://product-catalog", apiClient.getBasePath());
+  }
 }

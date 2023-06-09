@@ -12,16 +12,16 @@ import lombok.EqualsAndHashCode;
 @Data
 public class PaymentOrderTask extends StreamTask {
 
-    private List<PaymentOrderIngestRequest> data;
-    private List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
+  private List<PaymentOrderIngestRequest> data;
+  private List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
 
-    public PaymentOrderTask(String unitOfWorkId, List<PaymentOrderIngestRequest> data) {
-        super(unitOfWorkId);
-        this.data = data;
-    }
+  public PaymentOrderTask(String unitOfWorkId, List<PaymentOrderIngestRequest> data) {
+    super(unitOfWorkId);
+    this.data = data;
+  }
 
-    @Override
-    public String getName() {
-        return "paymentorder";
-    }
+  @Override
+  public String getName() {
+    return "paymentorder";
+  }
 }

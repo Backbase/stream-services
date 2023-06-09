@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Forces calling `ZipkinAutoConfiguration.cleanup` method to stop its executor service from preventing the application
- * to shut down when finishing the execution of spring cloud tasks.
+ * Forces calling `ZipkinAutoConfiguration.cleanup` method to stop its executor service from
+ * preventing the application to shut down when finishing the execution of spring cloud tasks.
  */
 @Slf4j
 @Configuration
@@ -21,24 +21,25 @@ import org.springframework.context.annotation.Configuration;
     matchIfMissing = true)
 public class TaskZipkinLifecycleAutoConfiguration {
 
-    static final String ZIPKIN_CONFIGURATION_BEAN =
-        "org.springframework.cloud.sleuth.autoconfig.zipkin2.ZipkinAutoConfiguration";
+  static final String ZIPKIN_CONFIGURATION_BEAN =
+      "org.springframework.cloud.sleuth.autoconfig.zipkin2.ZipkinAutoConfiguration";
 
-    /**
-     * Listener to the ApplicationReadyEvent once it is published at the end of the spring cloud task execution.
-     *
-     * @param postProcessor .
-     * @return .
-     */
-    @Bean
-    public ApplicationListener<ApplicationReadyEvent> applicationReadyListener(
-        InitDestroyAnnotationBeanPostProcessor postProcessor) {
-        return event -> {
-            var applicationContext = event.getApplicationContext();
-            if (applicationContext.containsBeanDefinition(ZIPKIN_CONFIGURATION_BEAN)) {
-                var zipkinConfig = applicationContext.getBean(ZIPKIN_CONFIGURATION_BEAN);
-                postProcessor.postProcessBeforeDestruction(zipkinConfig, ZIPKIN_CONFIGURATION_BEAN);
-            }
-        };
-    }
+  /**
+   * Listener to the ApplicationReadyEvent once it is published at the end of the spring cloud task
+   * execution.
+   *
+   * @param postProcessor .
+   * @return .
+   */
+  @Bean
+  public ApplicationListener<ApplicationReadyEvent> applicationReadyListener(
+      InitDestroyAnnotationBeanPostProcessor postProcessor) {
+    return event -> {
+      var applicationContext = event.getApplicationContext();
+      if (applicationContext.containsBeanDefinition(ZIPKIN_CONFIGURATION_BEAN)) {
+        var zipkinConfig = applicationContext.getBean(ZIPKIN_CONFIGURATION_BEAN);
+        postProcessor.postProcessBeforeDestruction(zipkinConfig, ZIPKIN_CONFIGURATION_BEAN);
+      }
+    };
+  }
 }
