@@ -2,21 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>backbase-parent</artifactId>
         <version>15.2.0</version>
         <relativePath />
     </parent>
+
     <groupId>com.backbase.stream</groupId>
+
     <artifactId>stream-services</artifactId>
 
     <version>3.37.1</version>
 
     <packaging>pom</packaging>
-
     <name>Stream :: Services</name>
+
     <modules>
         <module>stream-dbs-clients</module>
         <module>stream-sdk</module>
@@ -69,7 +70,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -119,14 +119,10 @@
                             </goals>
                             <configuration>
                                 <configLocation>google_checks.xml</configLocation>
-                                <!--                                <suppressionsLocation>suppressions.xml</suppressionsLocation>-->
+                                <consoleOutput>true</consoleOutput>
                                 <encoding>UTF-8</encoding>
                                 <failsOnError>true</failsOnError>
-                                <consoleOutput>true</consoleOutput>
                                 <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                                <consoleOutput>true</consoleOutput>
-                                <encoding>UTF-8</encoding>
-                                <failsOnError>true</failsOnError>
                             </configuration>
                         </execution>
                     </executions>
@@ -137,30 +133,6 @@
                             <version>1.0.28</version>
                         </dependency>
                     </dependencies>
-                </plugin>
-                <plugin>
-                    <groupId>com.theoryinpractise</groupId>
-                    <artifactId>googleformatter-maven-plugin</artifactId>
-                    <version>1.7.3</version>
-                    <executions>
-                        <execution>
-                            <id>reformat-sources</id>
-                            <phase>process-sources</phase>
-                            <goals>
-                                <goal>format</goal>
-                            </goals>
-                            <configuration>
-                                <includeStale>false</includeStale>
-                                <style>GOOGLE</style>
-                                <formatMain>true</formatMain>
-                                <formatTest>true</formatTest>
-                                <filterModified>false</filterModified>
-                                <skip>false</skip>
-                                <fixImports>false</fixImports>
-                                <maxLineLength>100</maxLineLength>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -193,6 +165,30 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>com.spotify.fmt</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>2.20</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sourceDirectory>src/main/java/</sourceDirectory>
+                    <testSourceDirectory>src/test/java/</testSourceDirectory>
+                    <skip>false</skip>
+                    <skipSourceDirectory>false</skipSourceDirectory>
+                    <skipTestSourceDirectory>false</skipTestSourceDirectory>
+                    <skipSortingImports>false</skipSortingImports>
+                    <style>google</style>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 

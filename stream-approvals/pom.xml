@@ -8,11 +8,11 @@
         <artifactId>stream-services</artifactId>
         <version>3.37.1</version>
     </parent>
+
     <artifactId>stream-approvals</artifactId>
+
     <packaging>pom</packaging>
-
     <name>Stream :: Approvals</name>
-
     <modules>
         <module>approvals-core</module>
         <module>approvals-bootstrap-task</module>

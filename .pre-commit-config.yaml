@@ -10,12 +10,6 @@ repos:
       - id: destroyed-symlinks
       - id: check-xml
 
-#  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-#    rev: v2.8.0
-#    hooks:
-#      - id: pretty-format-java
-#        args: [ --autofix, --google-java-formatter-version=1.17.0 ]
-
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.30.0
     hooks:

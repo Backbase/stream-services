@@ -8,11 +8,11 @@
         <artifactId>stream-services</artifactId>
         <version>3.37.1</version>
     </parent>
+
     <artifactId>stream-portfolio</artifactId>
+
     <packaging>pom</packaging>
-
     <name>Stream :: Portfolio</name>
-
     <modules>
         <module>portfolio-core</module>
         <module>portfolio-bootstrap-task</module>

@@ -8,11 +8,11 @@
         <artifactId>stream-services</artifactId>
         <version>3.37.1</version>
     </parent>
+
     <artifactId>stream-cursor</artifactId>
+
     <packaging>pom</packaging>
-
     <name>Stream :: Cursor</name>
-
     <modules>
         <module>cursor-core</module>
         <module>cursor-store</module>

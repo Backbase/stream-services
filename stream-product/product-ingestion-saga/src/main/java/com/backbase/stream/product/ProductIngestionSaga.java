@@ -234,9 +234,7 @@ public class ProductIngestionSaga {
     return Mono.justOrEmpty(businessFunctionGroups);
   }
 
-  /***********
-   * FIX ME
-   */
+  /** ******** FIX ME */
   //    private Mono<JobProfileUser> setupPermissions(ProductGroupTask streamTask, JobProfileUser
   // jobProfileUser) {
   //        return processUser(streamTask, jobProfileUser)

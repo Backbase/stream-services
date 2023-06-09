@@ -8,6 +8,7 @@
         <artifactId>stream-models</artifactId>
         <version>3.37.1</version>
     </parent>
+
     <artifactId>approval-model</artifactId>
 
     <packaging>jar</packaging>
@@ -18,7 +19,6 @@
         <openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</openapi-maven-plugin.output>
         <sonar.skip>true</sonar.skip>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.jetbrains</groupId>

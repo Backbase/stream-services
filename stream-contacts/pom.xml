@@ -8,11 +8,11 @@
         <artifactId>stream-services</artifactId>
         <version>3.37.1</version>
     </parent>
+
     <artifactId>stream-contacts</artifactId>
+
     <packaging>pom</packaging>
-
     <name>Stream :: Contacts</name>
-
     <modules>
         <module>contacts-core</module>
     </modules>

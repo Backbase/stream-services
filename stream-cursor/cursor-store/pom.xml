@@ -8,13 +8,13 @@
         <artifactId>stream-cursor</artifactId>
         <version>3.37.1</version>
     </parent>
+
     <artifactId>cursor-store</artifactId>
 
     <packaging>jar</packaging>
     <name>Stream :: Cursor Store</name>
 
     <properties />
-
     <dependencies>
         <dependency>
             <groupId>com.backbase.stream</groupId>
