@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>backbase-parent</artifactId>
         <version>15.2.0</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
@@ -37,7 +38,8 @@
     </modules>
 
     <properties>
-        <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
+        <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations
+        </annotations.generated-sources-dir>
         <backbase-bom.version>2023.02-LTS</backbase-bom.version>
         <boat-maven-plugin.version>0.16.6</boat-maven-plugin.version>
         <checkstyle.config.location>backbase_checks.xml</checkstyle.config.location>
@@ -46,7 +48,8 @@
         <java.version>17</java.version>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
         <openapi-generator-maven-plugin.library>spring-boot</openapi-generator-maven-plugin.library>
-        <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
+        <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi
+        </openapi-generator-maven-plugin.output>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.organization>backbase-technology-prototyping</sonar.organization>
 
@@ -179,8 +182,6 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <sourceDirectory>src/main/java/</sourceDirectory>
-                    <testSourceDirectory>src/test/java/</testSourceDirectory>
                     <skip>false</skip>
                     <skipSourceDirectory>false</skipSourceDirectory>
                     <skipTestSourceDirectory>false</skipTestSourceDirectory>
