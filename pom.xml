@@ -175,9 +175,9 @@
                 <version>2.20</version>
                 <executions>
                     <execution>
-                        <phase>verify</phase>
+                        <phase>process-sources</phase>
                         <goals>
-                            <goal>check</goal>
+                            <goal>format</goal>
                         </goals>
                     </execution>
                 </executions>
