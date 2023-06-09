@@ -126,9 +126,9 @@ public interface ProductMapper {
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(DebitCard debitCard);
 
-  /**
-   * @param creditCard
-   * @return
+  /** toPresentation.
+   * @param creditCard creditCard
+   * @return AccountArrangementItemPost
    */
   @Mapping(
       source = ProductMapperConstants.EXTERNAL_ID,

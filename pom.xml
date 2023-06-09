@@ -51,6 +51,7 @@
         <japicmp.skip>true</japicmp.skip>
 
         <checkstyle.config.location>backbase_checks.xml</checkstyle.config.location>
+<!--        <checkstyle.config.location>google_checks_javadocs.xml</checkstyle.config.location>-->
     </properties>
 
     <dependencyManagement>
