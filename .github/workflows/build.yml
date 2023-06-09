@@ -8,11 +8,26 @@ on:
   pull_request:
     types: [ opened, synchronize, reopened ]
 jobs:
+  checkstyle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: reviewdog/action-setup@v1
+      - run: reviewdog -version
+      - uses: dbelyaev/action-checkstyle@v0.7.4
+        with:
+          github_token: ${{ secrets.github_token }}
+          checkstyle_config: backbase_checks.xml
+          #          checkstyle_version: 10.12.0
+          reporter: github-pr-review
+          level: warning
+          workdir: ./
+          filter_mode: diff_context
   main:
     if: "!contains(github.event.head_commit.message, '[skip bump]') && !contains(github.event.head_commit.message, 'nobump/')"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           persist-credentials: false   # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
           fetch-depth: 0    # Shallow clones should be disabled for a better relevancy of sonar analysis
