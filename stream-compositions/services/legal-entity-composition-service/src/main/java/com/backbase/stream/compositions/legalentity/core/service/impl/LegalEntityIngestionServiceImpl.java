@@ -73,6 +73,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
             le ->
                 LegalEntityResponse.builder()
                     .legalEntity(le)
+                    .additions(res.getAdditions())
                     .membershipAccounts(res.getMembershipAccounts())
                     .productChainEnabledFromRequest(res.getProductChainEnabledFromRequest())
                     .build());

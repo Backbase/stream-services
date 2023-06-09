@@ -4,10 +4,9 @@ import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntitiesApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntityApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityItemBase;
+import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItemBase;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.mapper.LegalEntityMapper;
 import com.backbase.stream.utils.BatchResponseUtils;
@@ -27,13 +26,12 @@ class LegalEntityServiceTest {
   private LegalEntityService subject;
 
   @Mock private LegalEntitiesApi legalEntitiesApi;
-  @Mock private LegalEntityApi legalEntityApi;
 
   private LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
 
   @BeforeEach
   void setup() {
-    subject = new LegalEntityService(legalEntitiesApi, legalEntityApi, new BatchResponseUtils());
+    subject = new LegalEntityService(legalEntitiesApi, new BatchResponseUtils());
   }
 
   @Test

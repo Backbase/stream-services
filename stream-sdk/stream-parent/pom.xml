@@ -11,12 +11,11 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-parent</artifactId>
-
-    <version>3.37.1</version>
-
+    <version>3.43.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Parent</name>
     <description>Parent for all Stream SDK modules</description>
+
     <organization>
         <name>Backbase B.V.</name>
         <url>http://www.backbase.com</url>
@@ -25,10 +24,10 @@
     <licenses>
         <license />
     </licenses>
-
     <developers>
         <developer />
     </developers>
+
     <modules>
         <module>stream-dbs-web-client</module>
         <module>stream-test-support</module>
@@ -37,9 +36,10 @@
     </modules>
 
     <properties>
-        <japicmp.skip>true</japicmp.skip>
         <ssdk.version>15.2.0</ssdk.version>
+        <japicmp.skip>true</japicmp.skip>
     </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

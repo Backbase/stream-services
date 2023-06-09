@@ -1,9 +1,9 @@
 package com.backbase.stream.service;
 
-import static com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_INTERNAL_SERVER_ERROR;
-import static com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_OK;
-import static com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction.ADD;
-import static com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction.REMOVE;
+import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_INTERNAL_SERVER_ERROR;
+import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_OK;
+import static com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction.ADD;
+import static com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction.REMOVE;
 import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
 import static com.backbase.stream.WebClientTestUtils.buildWebResponseExceptionMono;
 import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
@@ -17,32 +17,27 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem.TypeEnum;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPermissions;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PersistenceApprovalPermissionsGetResponseBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAction;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationAssignUserPermissions;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationDataGroupIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupDataGroup;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationParticipantPutBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUserPair;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUsersBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
+import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem.TypeEnum;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissionsGetResponseBody;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAssignUserPermissions;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationFunctionGroupDataGroup;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationParticipantBatchUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationParticipantPutBody;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationServiceAgreementUserPair;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationServiceAgreementUsersBatchUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -90,21 +85,11 @@ class AccessGroupServiceTest {
 
   @Mock private UserManagementApi usersApi;
 
-  @Mock private UserQueryApi userQueryApi;
-
   @Mock private UsersApi accessControlUsersApi;
-
-  @Mock private DataGroupApi dataGroupApi;
 
   @Mock private DataGroupsApi dataGroupsApi;
 
-  @Mock private FunctionGroupApi functionGroupApi;
-
   @Mock private FunctionGroupsApi functionGroupsApi;
-
-  @Mock private ServiceAgreementQueryApi serviceAgreementQueryApi;
-
-  @Mock private ServiceAgreementApi serviceAgreementApi;
 
   @Mock private ServiceAgreementsApi serviceAgreementsApi;
 
@@ -118,7 +103,7 @@ class AccessGroupServiceTest {
     final Mono<ServiceAgreementItem> dbsSa =
         Mono.just(new ServiceAgreementItem().externalId(externalId));
 
-    when(serviceAgreementApi.getServiceAgreementExternalId(eq(externalId))).thenReturn(dbsSa);
+    when(serviceAgreementsApi.getServiceAgreementExternalId(eq(externalId))).thenReturn(dbsSa);
 
     Mono<ServiceAgreement> result = subject.getServiceAgreementByExternalId(externalId);
 
@@ -135,7 +120,7 @@ class AccessGroupServiceTest {
 
     Mono<ServiceAgreementItem> response =
         buildWebResponseExceptionMono(WebClientResponseException.NotFound.class, HttpMethod.GET);
-    when(serviceAgreementApi.getServiceAgreementExternalId(eq(externalId))).thenReturn(response);
+    when(serviceAgreementsApi.getServiceAgreementExternalId(eq(externalId))).thenReturn(response);
 
     Mono<ServiceAgreement> actual = subject.getServiceAgreementByExternalId(externalId);
 
@@ -190,7 +175,7 @@ class AccessGroupServiceTest {
                 .sharingUsers(false)
                 .action(LegalEntityParticipant.ActionEnum.ADD));
 
-    when(serviceAgreementApi.putPresentationIngestServiceAgreementParticipants(any()))
+    when(serviceAgreementsApi.putPresentationIngestServiceAgreementParticipants(any()))
         .thenReturn(
             Flux.concat(
                 Mono.just(
@@ -213,7 +198,7 @@ class AccessGroupServiceTest {
                             .status(HTTP_STATUS_OK)
                             .resourceId(u.getUserProfile().getUser().getExternalId()))
                 .collect(Collectors.toList()));
-    when(serviceAgreementApi.putPresentationServiceAgreementUsersBatchUpdate(any()))
+    when(serviceAgreementsApi.putPresentationServiceAgreementUsersBatchUpdate(any()))
         .thenReturn(usersResponse);
 
     when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
@@ -221,14 +206,14 @@ class AccessGroupServiceTest {
 
     Mono<ServiceAgreementUsersQuery> emptyExistingUsersList =
         Mono.just(new ServiceAgreementUsersQuery());
-    when(serviceAgreementQueryApi.getServiceAgreementUsers(eq(saInternalId)))
+    when(serviceAgreementsApi.getServiceAgreementUsers(eq(saInternalId)))
         .thenReturn(emptyExistingUsersList);
 
     Mono<ServiceAgreement> result =
         subject.updateServiceAgreementAssociations(streamTask, serviceAgreement, regularUsers);
     result.block();
 
-    InOrder inOrderValidator = inOrder(serviceAgreementApi);
+    InOrder inOrderValidator = inOrder(serviceAgreementsApi);
     thenUpdateParticipantsCall(
         inOrderValidator,
         saExternalId,
@@ -307,7 +292,7 @@ class AccessGroupServiceTest {
                 .sharingUsers(false)
                 .action(LegalEntityParticipant.ActionEnum.ADD));
 
-    when(serviceAgreementApi.putPresentationIngestServiceAgreementParticipants(any()))
+    when(serviceAgreementsApi.putPresentationIngestServiceAgreementParticipants(any()))
         .thenReturn(Flux.concat(Mono.just(new BatchResponseItemExtended().status(HTTP_STATUS_OK))));
 
     ServiceAgreementParticipantsGetResponseBody existingPar1 =
@@ -327,7 +312,7 @@ class AccessGroupServiceTest {
                             .status(HTTP_STATUS_OK)
                             .resourceId(u.getUserProfile().getUser().getExternalId()))
                 .collect(Collectors.toList()));
-    when(serviceAgreementApi.putPresentationServiceAgreementUsersBatchUpdate(any()))
+    when(serviceAgreementsApi.putPresentationServiceAgreementUsersBatchUpdate(any()))
         .thenReturn(usersResponse);
 
     Mono<ServiceAgreementUsersQuery> existingUsersList =
@@ -335,14 +320,14 @@ class AccessGroupServiceTest {
             new ServiceAgreementUsersQuery()
                 .addUserIdsItem("in_userId1")
                 .addUserIdsItem("in_userId3"));
-    when(serviceAgreementQueryApi.getServiceAgreementUsers(eq(saInternalId)))
+    when(serviceAgreementsApi.getServiceAgreementUsers(eq(saInternalId)))
         .thenReturn(existingUsersList);
 
     Mono<ServiceAgreement> result =
         subject.updateServiceAgreementAssociations(streamTask, serviceAgreement, regularUsers);
     result.block();
 
-    InOrder inOrderValidator = inOrder(serviceAgreementApi);
+    InOrder inOrderValidator = inOrder(serviceAgreementsApi);
     thenUpdateParticipantsCall(
         inOrderValidator, saExternalId, ADD, new ExpectedParticipantUpdate("p3", false, false));
     thenUpdateParticipantsCall(
@@ -388,7 +373,7 @@ class AccessGroupServiceTest {
                 .sharingUsers(false)
                 .action(LegalEntityParticipant.ActionEnum.ADD));
 
-    when(serviceAgreementApi.putPresentationIngestServiceAgreementParticipants(any()))
+    when(serviceAgreementsApi.putPresentationIngestServiceAgreementParticipants(any()))
         .thenReturn(
             Flux.concat(
                 Mono.just(
@@ -466,7 +451,8 @@ class AccessGroupServiceTest {
 
     Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
     baseProductGroupMap.put(
-        new BusinessFunctionGroup().id("business-function-group-id-1"), Collections.emptyList());
+        new BusinessFunctionGroup().id("business-function-group-id-1"),
+        List.of(new BaseProductGroup().internalId("data-group-id")));
 
     Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions =
         new HashMap<>();
@@ -492,9 +478,12 @@ class AccessGroupServiceTest {
                             .functionGroupIdentifier(
                                 new PresentationIdentifier()
                                     .idIdentifier("business-function-group-id-1"))
-                            .dataGroupIdentifiers(Collections.emptyList()))));
+                            .dataGroupIdentifiers(
+                                List.of(
+                                    new PresentationDataGroupIdentifier()
+                                        .idIdentifier("data-group-id"))))));
 
-    when(functionGroupApi.getFunctionGroups("sa-internal-id"))
+    when(functionGroupsApi.getFunctionGroups("sa-internal-id"))
         .thenReturn(
             Flux.just(
                 new FunctionGroupItem()
@@ -506,7 +495,8 @@ class AccessGroupServiceTest {
                     .name("Full access")
                     .type(FunctionGroupItem.TypeEnum.TEMPLATE)));
 
-    when(userQueryApi.getPersistenceApprovalPermissions("user-internal-id", "sa-internal-id"))
+    when(accessControlUsersApi.getPersistenceApprovalPermissions(
+            "user-internal-id", "sa-internal-id"))
         .thenReturn(
             Mono.just(
                 new PersistenceApprovalPermissions()
@@ -520,7 +510,10 @@ class AccessGroupServiceTest {
                                 .dataGroupIds(Collections.emptyList()),
                             new PersistenceApprovalPermissionsGetResponseBody()
                                 .functionGroupId("system-group-id-3")
-                                .dataGroupIds(Collections.emptyList())))));
+                                .dataGroupIds(Collections.emptyList()),
+                            new PersistenceApprovalPermissionsGetResponseBody()
+                                .functionGroupId("business-function-group-id-1")
+                                .dataGroupIds(List.of("data-group-id"))))));
 
     when(accessControlUsersApi.putAssignUserPermissions(expectedPermissions))
         .thenReturn(
@@ -601,7 +594,7 @@ class AccessGroupServiceTest {
                                     new PresentationDataGroupIdentifier()
                                         .idIdentifier("data-group-2"))))));
 
-    when(functionGroupApi.getFunctionGroups("sa-internal-id"))
+    when(functionGroupsApi.getFunctionGroups("sa-internal-id"))
         .thenReturn(
             Flux.just(
                 new FunctionGroupItem()
@@ -613,7 +606,8 @@ class AccessGroupServiceTest {
                     .name("Full access")
                     .type(FunctionGroupItem.TypeEnum.TEMPLATE)));
 
-    when(userQueryApi.getPersistenceApprovalPermissions("user-internal-id", "sa-internal-id"))
+    when(accessControlUsersApi.getPersistenceApprovalPermissions(
+            "user-internal-id", "sa-internal-id"))
         .thenReturn(
             Mono.just(
                 new PersistenceApprovalPermissions()
@@ -737,7 +731,7 @@ class AccessGroupServiceTest {
                                     .idIdentifier("business-function-group-id-1"))
                             .dataGroupIdentifiers(Collections.emptyList()))));
 
-    when(functionGroupApi.getFunctionGroups("sa-internal-id"))
+    when(functionGroupsApi.getFunctionGroups("sa-internal-id"))
         .thenReturn(
             Flux.just(
                 new FunctionGroupItem()
@@ -749,7 +743,8 @@ class AccessGroupServiceTest {
                     .name("Full access")
                     .type(FunctionGroupItem.TypeEnum.TEMPLATE)));
 
-    when(userQueryApi.getPersistenceApprovalPermissions("user-internal-id", "sa-internal-id"))
+    when(accessControlUsersApi.getPersistenceApprovalPermissions(
+            "user-internal-id", "sa-internal-id"))
         .thenReturn(Mono.just(new PersistenceApprovalPermissions().items(Collections.emptyList())));
 
     when(accessControlUsersApi.putAssignUserPermissions(expectedPermissions))
@@ -814,7 +809,7 @@ class AccessGroupServiceTest {
                                     new PresentationDataGroupIdentifier()
                                         .idIdentifier("data-group-0"))))));
 
-    when(functionGroupApi.getFunctionGroups("sa-internal-id"))
+    when(functionGroupsApi.getFunctionGroups("sa-internal-id"))
         .thenReturn(
             Flux.just(
                 new FunctionGroupItem()
@@ -822,7 +817,8 @@ class AccessGroupServiceTest {
                     .name("SYSTEM_FUNCTION_GROUP")
                     .type(FunctionGroupItem.TypeEnum.SYSTEM)));
 
-    when(userQueryApi.getPersistenceApprovalPermissions("user-internal-id", "sa-internal-id"))
+    when(accessControlUsersApi.getPersistenceApprovalPermissions(
+            "user-internal-id", "sa-internal-id"))
         .thenReturn(
             Mono.just(
                 new PersistenceApprovalPermissions()
@@ -880,7 +876,7 @@ class AccessGroupServiceTest {
             .name("Full access")
             .type(TypeEnum.TEMPLATE);
 
-    when(functionGroupApi.getFunctionGroups(internalSaId))
+    when(functionGroupsApi.getFunctionGroups(internalSaId))
         .thenReturn(Flux.just(systemFunctionGroup, templateFunctionGroup));
 
     when(functionGroupsApi.postFunctionGroupsDelete(any())).thenReturn(Flux.empty());
@@ -910,7 +906,7 @@ class AccessGroupServiceTest {
                                 .externalUserId(userId)
                                 .externalServiceAgreementId(expectedSaExId))
                     .collect(Collectors.toList()));
-    verify(serviceAgreementApi, times(1))
+    verify(serviceAgreementsApi, times(1))
         .putPresentationServiceAgreementUsersBatchUpdate(eq(expectedRegularUserAddUpdate));
   }
 
@@ -933,7 +929,7 @@ class AccessGroupServiceTest {
                                 .action(expectedAction))
                     .collect(Collectors.toList()));
     validator
-        .verify(serviceAgreementApi)
+        .verify(serviceAgreementsApi)
         .putPresentationIngestServiceAgreementParticipants(eq(expectedRequest));
   }
 
@@ -960,7 +956,6 @@ class AccessGroupServiceTest {
 
   @AllArgsConstructor
   private static class ExpectedParticipantUpdate {
-
     String exId;
     boolean sharingAccounts;
     boolean sharingUsers;

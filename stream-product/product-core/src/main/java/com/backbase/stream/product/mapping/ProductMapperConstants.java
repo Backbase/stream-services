@@ -6,6 +6,9 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 class ProductMapperConstants {
 
+  private static final String YYYY_MM_DD_T_HH_MM_SS_SSSXX = "yyyy-MM-dd'T'HH:mm:ss.SSSXX";
+  static final DateTimeFormatter formatter =
+      DateTimeFormatter.ofPattern(ProductMapperConstants.YYYY_MM_DD_T_HH_MM_SS_SSSXX);
   static final String DAILY = "DAILY";
   static final String WEEKLY = "WEEKLY";
   static final String MONTHLY = "MONTHLY";
@@ -28,7 +31,6 @@ class ProductMapperConstants {
   static final String INTERNAL_ID = "internalId";
   static final String DEBIT_CARDS_ITEMS = "debitCardsItems";
   static final String DEBIT_CARDS = "debitCards";
-  private static final String YYYY_MM_DD_T_HH_MM_SS_SSSXX = "yyyy-MM-dd'T'HH:mm:ss.SSSXX";
-  static final DateTimeFormatter formatter =
-      DateTimeFormatter.ofPattern(ProductMapperConstants.YYYY_MM_DD_T_HH_MM_SS_SSSXX);
+  static final String NUMBER = "number";
+  static final String PAN_SUFFIX = "panSuffix";
 }

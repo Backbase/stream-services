@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>integrations-api</artifactId>
+        <groupId>com.backbase.stream.compositions</groupId>
+        <version>3.43.0</version>
+    </parent>
+
+    <groupId>com.backbase.stream.compositions.api</groupId>
     <artifactId>product-integration-api</artifactId>
+
+    <name>Stream :: Compositions :: API :: Product Integration</name>
+
+    <properties>
+        <findMainClass.skip>true</findMainClass.skip>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+        <sonar.skip>true</sonar.skip>
+    </properties>
 
     <build>
         <plugins>
@@ -9,95 +26,78 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>assemble-api-zip</id>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
                         <configuration>
                             <descriptors>
                                 <descriptor>assembly/api.xml</descriptor>
                             </descriptors>
                         </configuration>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <id>assemble-api-zip</id>
-                        <phase>package</phase>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
+                <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
+                <version>${boat-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <configuration>
-                            <failOnWarning>true</failOnWarning>
-                            <input>src/main/resources/service-api-v2.yaml</input>
-                        </configuration>
+                        <id>boat-validation</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>
-                        <id>boat-validation</id>
-                        <phase>generate-sources</phase>
+                        <configuration>
+                            <input>src/main/resources/service-api-v2.yaml</input>
+                            <failOnWarning>true</failOnWarning>
+                        </configuration>
                     </execution>
                     <execution>
-                        <configuration>
-                            <includes>*api*.yaml</includes>
-                            <input>${project.basedir}/src/main/resources</input>
-                            <output>${project.build.directory}</output>
-                            <versionFileName>true</versionFileName>
-                        </configuration>
+                        <id>boat-bundle</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>bundle</goal>
                         </goals>
-                        <id>boat-bundle</id>
-                        <phase>generate-sources</phase>
+                        <configuration>
+                            <input>${project.basedir}/src/main/resources</input>
+                            <output>${project.build.directory}</output>
+                            <versionFileName>true</versionFileName>
+                            <includes>*api*.yaml</includes>
+                        </configuration>
                     </execution>
                 </executions>
-                <groupId>com.backbase.oss</groupId>
-                <version>${boat-maven-plugin.version}</version>
             </plugin>
             <plugin>
+                <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
+                <!-- RELEASE_VERSION -->
+                <version>5.3.0</version>
+                <!-- /RELEASE_VERSION -->
                 <executions>
                     <execution>
-                        <configuration>
-                            <apiPackage>com.backbase.stream.compositions.integration.product.api</apiPackage>
-                            <configOptions>
-                                <dateLibrary>java8</dateLibrary>
-                                <library>webclient</library>
-                                <sourceFolder>src/gen/java/main</sourceFolder>
-                            </configOptions>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelTests>false</generateModelTests>
-                            <generatorName>java</generatorName>
-                            <inputSpec>${project.basedir}/src/main/resources/service-api-v2.yaml</inputSpec>
-                            <modelPackage>com.backbase.stream.compositions.integration.product.model</modelPackage>
-                        </configuration>
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/service-api-v2.yaml</inputSpec>
+                            <apiPackage>com.backbase.stream.compositions.integration.product.api</apiPackage>
+                            <modelPackage>com.backbase.stream.compositions.integration.product.model</modelPackage>
+                            <generatorName>java</generatorName>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <configOptions>
+                                <library>webclient</library>
+                                <dateLibrary>java8</dateLibrary>
+                                <sourceFolder>src/gen/java/main</sourceFolder>
+                            </configOptions>
+                        </configuration>
                     </execution>
 
                 </executions>
-                <!-- RELEASE_VERSION -->
-                <groupId>org.openapitools</groupId>
-                <!-- /RELEASE_VERSION -->
-                <version>5.3.0</version>
             </plugin>
         </plugins>
     </build>
-
-    <groupId>com.backbase.stream.compositions.api</groupId>
-    <modelVersion>4.0.0</modelVersion>
-
-    <name>Stream :: Compositions :: API :: Product Integration</name>
-
-    <parent>
-        <artifactId>integrations-api</artifactId>
-        <groupId>com.backbase.stream.compositions</groupId>
-        <version>3.37.1</version>
-    </parent>
-
-    <properties>
-        <findMainClass.skip>true</findMainClass.skip>
-        <sonar.skip>true</sonar.skip>
-        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
-    </properties>
 </project>

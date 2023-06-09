@@ -1,63 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <artifactId>services</artifactId>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-    <dependencies>
-        <!-- Spring dependencies -->
-        <dependency>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-            <groupId>org.springframework.boot</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>spring-boot-starter-security</artifactId>
-            <groupId>org.springframework.boot</groupId>
-        </dependency>
-
-        <!-- Service SDK dependencies -->
-        <dependency>
-            <artifactId>events</artifactId>
-            <groupId>com.backbase.buildingblocks</groupId>
-        </dependency>
-
-        <!-- Test dependencies -->
-        <dependency>
-            <artifactId>test-utils</artifactId>
-            <groupId>com.backbase.stream.compositions</groupId>
-            <scope>test</scope>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>activemq-broker</artifactId>
-            <groupId>org.apache.activemq</groupId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <artifactId>activemq-junit</artifactId>
-            <groupId>org.apache.activemq.tooling</groupId>
-            <scope>test</scope>
-            <version>${activemq.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>activemq-kahadb-store</artifactId>
-            <groupId>org.apache.activemq</groupId>
-            <scope>test</scope>
-            <version>${activemq.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>reactor-test</artifactId>
-            <groupId>io.projectreactor</groupId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <artifactId>service-sdk-starter-mapping</artifactId>
-            <groupId>com.backbase.buildingblocks</groupId>
-        </dependency>
-    </dependencies>
+    <parent>
+        <artifactId>stream-compositions</artifactId>
+        <groupId>com.backbase.stream</groupId>
+        <version>3.43.0</version>
+    </parent>
 
     <groupId>com.backbase.stream.compositions</groupId>
-    <modelVersion>4.0.0</modelVersion>
+    <artifactId>services</artifactId>
+
+    <packaging>pom</packaging>
+
+    <name>Stream :: Compositions :: Services</name>
 
     <modules>
         <module>legal-entity-composition-service</module>
@@ -67,14 +23,57 @@
         <module>payment-order-composition-service</module>
     </modules>
 
-    <name>Stream :: Compositions :: Services</name>
+    <dependencies>
+        <!-- Spring dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
 
-    <packaging>pom</packaging>
+        <!-- Service SDK dependencies -->
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>events</artifactId>
+        </dependency>
 
-    <parent>
-        <artifactId>stream-compositions</artifactId>
-        <groupId>com.backbase.stream</groupId>
-        <version>3.37.1</version>
-    </parent>
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>com.backbase.stream.compositions</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-broker</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq.tooling</groupId>
+            <artifactId>activemq-junit</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-kahadb-store</artifactId>
+            <version>${activemq.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>service-sdk-starter-mapping</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>

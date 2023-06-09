@@ -1,93 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <artifactId>stream-task-starter-parent</artifactId>
-
-    <dependencies>
-        <dependency>
-            <artifactId>lombok</artifactId>
-            <groupId>org.projectlombok</groupId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <artifactId>spring-security-config</artifactId>
-            <groupId>org.springframework.security</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>spring-cloud-starter-task</artifactId>
-            <groupId>org.springframework.cloud</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-            <groupId>org.springframework.boot</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>service-sdk-starter-eureka-client</artifactId>
-            <groupId>com.backbase.buildingblocks</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>spring-cloud-starter-kubernetes-fabric8</artifactId>
-            <groupId>org.springframework.cloud</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>spring-cloud-starter-kubernetes-fabric8-loadbalancer</artifactId>
-            <groupId>org.springframework.cloud</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>h2</artifactId>
-            <groupId>com.h2database</groupId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <artifactId>spring-cloud-kubernetes-dependencies</artifactId>
-                <groupId>org.springframework.cloud</groupId>
-                <scope>import</scope>
-                <type>pom</type>
-                <version>${spring-cloud-kubernetes.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-    <description>Parent for Stream Executable Tasks</description>
-    <groupId>com.backbase.stream</groupId>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <name>Stream :: SDK :: Task Starter</name>
-    <packaging>pom</packaging>
 
     <parent>
-        <artifactId>service-sdk-starter-reactive</artifactId>
         <groupId>com.backbase.buildingblocks</groupId>
-        <relativePath/>
+        <artifactId>service-sdk-starter-reactive</artifactId>
         <version>15.2.0</version>
+        <relativePath/>
     </parent>
 
-    <profiles>
-        <profile>
-            <activation>
-                <os>
-                    <arch>aarch64</arch>
-                    <family>mac</family>
-                </os>
-            </activation>
-            <dependencies>
-                <dependency>
-                    <artifactId>netty-resolver-dns-native-macos</artifactId>
-                    <classifier>osx-aarch_64</classifier>
-                    <groupId>io.netty</groupId>
-                </dependency>
-            </dependencies>
-            <id>mac-m1</id>
-        </profile>
-    </profiles>
+    <groupId>com.backbase.stream</groupId>
+    <artifactId>stream-task-starter-parent</artifactId>
+    <version>3.43.0</version>
+    <packaging>pom</packaging>
+    <name>Stream :: SDK :: Task Starter</name>
+    <description>Parent for Stream Executable Tasks</description>
 
     <properties>
         <jib.container.volumes>/tmp</jib.container.volumes>
         <spring-cloud-kubernetes.version>2.1.3</spring-cloud-kubernetes.version>
     </properties>
 
-    <version>3.37.1</version>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-kubernetes-dependencies</artifactId>
+                <version>${spring-cloud-kubernetes.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-task</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>service-sdk-starter-eureka-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-kubernetes-fabric8</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-kubernetes-fabric8-loadbalancer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>mac-m1</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-resolver-dns-native-macos</artifactId>
+                    <classifier>osx-aarch_64</classifier>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
 </project>

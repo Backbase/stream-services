@@ -1,126 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.backbase.stream</groupId>
+        <artifactId>stream-http-starter-parent</artifactId>
+        <version>3.43.0</version>
+        <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
+    </parent>
+
     <artifactId>portfolio-http</artifactId>
+
+    <packaging>jar</packaging>
+    <name>Stream :: Portfolio HTTP</name>
+
+    <properties>
+        <openapi-maven-plugin.input>${project.basedir}/../../api/stream-portfolio/openapi.yaml</openapi-maven-plugin.input>
+        <openapi-maven-plugin.output>${project.build.directory}/api/openapi.yaml</openapi-maven-plugin.output>
+        <openapi-maven-plugin.base-package>com.backbase.stream.portfolio</openapi-maven-plugin.base-package>
+
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+
+        <wiremock-jre8.version>2.33.2</wiremock-jre8.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>portfolio-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.oai</groupId>
+            <artifactId>swagger-request-validator-core</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8</artifactId>
+            <version>${wiremock-jre8.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
                 <executions>
                     <execution>
+                        <id>default-site</id>
                         <configuration>
                             <skip>true</skip>
                         </configuration>
-                        <id>default-site</id>
                     </execution>
                 </executions>
-                <groupId>org.apache.maven.plugins</groupId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
             <plugin>
+                <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>generate</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
                         <configuration>
-                            <configOptions>
-                                <apiPackage>${openapi-maven-plugin.base-package}.api</apiPackage>
-                                <dateLibrary>java8</dateLibrary>
-                                <interfaceOnly>true</interfaceOnly>
-                                <java8>true</java8>
-                                <library>spring-boot</library>
-                                <modelPackage>${openapi-maven-plugin.base-package}.model</modelPackage>
-                                <reactive>true</reactive>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                                <useBeanValidation>false</useBeanValidation>
-                            </configOptions>
+                            <generatorName>spring</generatorName>
+                            <inputSpec>${openapi-maven-plugin.input}</inputSpec>
                             <generateApiTests>false</generateApiTests>
                             <generateApis>true</generateApis>
                             <generateModels>false</generateModels>
                             <generateSupportingFiles>false</generateSupportingFiles>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${openapi-maven-plugin.input}</inputSpec>
                             <output>${openapi-generator-maven-plugin.output}</output>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <reactive>true</reactive>
+                                <java8>true</java8>
+                                <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <modelPackage>${openapi-maven-plugin.base-package}.model</modelPackage>
+                                <apiPackage>${openapi-maven-plugin.base-package}.api</apiPackage>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                             <typeMappings>
                                 <typeMapping>Double=java.math.BigDecimal</typeMapping>
                             </typeMappings>
                         </configuration>
+                    </execution>
+                    <execution>
+                        <id>docs</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <id>generate</id>
-                        <phase>generate-sources</phase>
-                    </execution>
-                    <execution>
+                        <phase>site</phase>
                         <configuration>
                             <generatorName>html2</generatorName>
                             <inputSpec>${openapi-maven-plugin.output}</inputSpec>
                             <output>${project.build.directory}/site</output>
                         </configuration>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <id>docs</id>
-                        <phase>site</phase>
                     </execution>
                 </executions>
-                <groupId>com.backbase.oss</groupId>
             </plugin>
 
             <plugin>
-                <artifactId>build-helper-maven-plugin</artifactId>
                 <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <artifactId>portfolio-core</artifactId>
-            <groupId>com.backbase.stream</groupId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>swagger-request-validator-core</artifactId>
-            <groupId>com.atlassian.oai</groupId>
-            <version>2.9.0</version>
-        </dependency>
-
-        <dependency>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <groupId>org.springframework.boot</groupId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <artifactId>wiremock-jre8</artifactId>
-            <groupId>com.github.tomakehurst</groupId>
-            <scope>test</scope>
-            <version>${wiremock-jre8.version}</version>
-        </dependency>
-    </dependencies>
-
-    <modelVersion>4.0.0</modelVersion>
-    <name>Stream :: Portfolio HTTP</name>
-
-    <packaging>jar</packaging>
-
-    <parent>
-        <artifactId>stream-http-starter-parent</artifactId>
-        <groupId>com.backbase.stream</groupId>
-        <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
-        <version>3.37.1</version>
-    </parent>
-
-    <properties>
-        <openapi-maven-plugin.base-package>com.backbase.stream.portfolio</openapi-maven-plugin.base-package>
-        <openapi-maven-plugin.input>${project.basedir}/../../api/stream-portfolio/openapi.yaml
-        </openapi-maven-plugin.input>
-        <openapi-maven-plugin.output>${project.build.directory}/api/openapi.yaml</openapi-maven-plugin.output>
-
-
-        <wiremock-jre8.version>2.33.2</wiremock-jre8.version>
-    </properties>
 
 </project>

@@ -12,11 +12,7 @@ import com.backbase.stream.compositions.transaction.core.service.TransactionInge
 import com.backbase.stream.compositions.transaction.core.service.TransactionIntegrationService;
 import com.backbase.stream.compositions.transaction.core.service.TransactionPostIngestionService;
 import com.backbase.stream.compositions.transaction.cursor.client.TransactionCursorApi;
-import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursor;
-import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorPatchRequest;
-import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorResponse;
-import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorUpsertRequest;
-import com.backbase.stream.compositions.transaction.cursor.client.model.TransactionCursorUpsertResponse;
+import com.backbase.stream.compositions.transaction.cursor.client.model.*;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.worker.model.UnitOfWork;
 import java.time.OffsetDateTime;
@@ -34,7 +30,6 @@ import reactor.core.publisher.Mono;
 @Service
 @AllArgsConstructor
 public class TransactionIngestionServiceImpl implements TransactionIngestionService {
-
   public static final String DELIMITER = ",";
   public static final String dateFormat = "yyyy-MM-dd hh:mm:ss";
   private final TransactionMapper mapper;
@@ -231,6 +226,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
     return TransactionIngestResponse.builder()
         .transactions(transactions)
         .arrangementId(ingestRequest.getArrangementId())
+        .additions(ingestRequest.getAdditions())
         .build();
   }
 

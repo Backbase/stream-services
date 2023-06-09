@@ -9,7 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostResponseBody;
@@ -76,6 +76,22 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class LegalEntitySagaTest {
 
+  @InjectMocks private LegalEntitySaga legalEntitySaga;
+
+  @Mock private LegalEntityService legalEntityService;
+
+  @Mock private UserService userService;
+
+  @Mock private UserProfileService userProfileService;
+
+  @Mock private AccessGroupService accessGroupService;
+
+  @Mock private BatchProductIngestionSaga batchProductIngestionSaga;
+
+  @Mock private LimitsSaga limitsSaga;
+
+  @Mock private ContactsSaga contactsSaga;
+
   @Spy
   private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
       getLegalEntitySagaConfigurationProperties();
@@ -89,14 +105,6 @@ class LegalEntitySagaTest {
   LegalEntity legalEntity;
   ServiceAgreement customSa;
   JobProfileUser regularUser;
-  @InjectMocks private LegalEntitySaga legalEntitySaga;
-  @Mock private LegalEntityService legalEntityService;
-  @Mock private UserService userService;
-  @Mock private UserProfileService userProfileService;
-  @Mock private AccessGroupService accessGroupService;
-  @Mock private BatchProductIngestionSaga batchProductIngestionSaga;
-  @Mock private LimitsSaga limitsSaga;
-  @Mock private ContactsSaga contactsSaga;
 
   @Test
   void customServiceAgreementCreation() {
@@ -405,7 +413,7 @@ class LegalEntitySagaTest {
                                         .addFunctionsItem(
                                             new BusinessFunction()
                                                 .functionId("1071")
-                                                .name("US Domestic" + " Wire")
+                                                .name("US Domestic Wire")
                                                 .addPrivilegesItem(
                                                     new Privilege()
                                                         .privilege("create")
@@ -428,8 +436,7 @@ class LegalEntitySagaTest {
                                                     IdentityUserLinkStrategy.IDENTITY_AGNOSTIC))
                                         .referenceJobRoleNames(
                                             List.of(
-                                                "Private" + " - Read" + " only",
-                                                "Job Role" + " with" + " Limits"))))
+                                                "Private - Read only", "Job Role with Limits"))))
                             .currentAccounts(
                                 singletonList(
                                     (CurrentAccount)
@@ -437,7 +444,7 @@ class LegalEntitySagaTest {
                                             .BBAN("01318000")
                                             .externalId("7155000")
                                             .productTypeExternalId("privateCurrentAccount")
-                                            .name("Account" + " 1")
+                                            .name("Account 1")
                                             .currency("GBP"))),
                     (ProductGroup)
                         new ProductGroup()
@@ -453,7 +460,7 @@ class LegalEntitySagaTest {
                                                 .identityLinkStrategy(
                                                     IdentityUserLinkStrategy.IDENTITY_AGNOSTIC))
                                         .referenceJobRoleNames(
-                                            singletonList("Private" + " - Full" + " access"))))
+                                            singletonList("Private - Full access"))))
                             .currentAccounts(
                                 singletonList(
                                     (CurrentAccount)
@@ -461,7 +468,7 @@ class LegalEntitySagaTest {
                                             .BBAN("01318001")
                                             .externalId("7155001")
                                             .productTypeExternalId("privateCurrentAccount")
-                                            .name("Account" + " 2")
+                                            .name("Account 2")
                                             .currency("GBP")))))
             .users(
                 singletonList(
@@ -526,8 +533,8 @@ class LegalEntitySagaTest {
         .thenReturn(Mono.just(new GetUser().externalId("john.doe").id("internalId")));
     when(limitsSaga.executeTask(any()))
         .thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
-    //       when(contactsSaga.executeTask(any())).thenReturn(Mono.just(new ContactsTask("1",
-    // new ContactsBulkPostRequestBody())));
+    //       when(contactsSaga.executeTask(any())).thenReturn(Mono.just(new ContactsTask("1", new
+    // ContactsBulkPostRequestBody())));
     when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
         .thenAnswer(
             (Answer<Mono<ProductGroupTask>>)
@@ -535,8 +542,8 @@ class LegalEntitySagaTest {
                   ProductGroupTask productGroupTask = invocationOnMock.getArgument(0);
                   Duration delay =
                       productGroupTask.getName().contains("100000-Default PG")
-                          ? Duration.ofMillis(500) // First product group will be
-                          // processed with delay
+                          ? Duration.ofMillis(
+                              500) // First product group will be processed with delay
                           : Duration.ofMillis(1);
 
                   return Mono.delay(delay)

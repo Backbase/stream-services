@@ -1,18 +1,13 @@
 package com.backbase.stream.clients.config;
 
 import com.backbase.dbs.accesscontrol.api.service.ApiClient;
-import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntitiesApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntityApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.UserContextApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.PermissionSetApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -38,20 +33,8 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
 
   @Bean
   @ConditionalOnMissingBean
-  public UserQueryApi userQueryApi(ApiClient accessControlApiClient) {
-    return new UserQueryApi(accessControlApiClient);
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
   public UsersApi accessControlUsersApi(ApiClient accessControlApiClient) {
     return new UsersApi(accessControlApiClient);
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
-  public DataGroupApi dataGroupApi(ApiClient accessControlApiClient) {
-    return new DataGroupApi(accessControlApiClient);
   }
 
   @Bean
@@ -62,26 +45,8 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
 
   @Bean
   @ConditionalOnMissingBean
-  public FunctionGroupApi functionGroupApi(ApiClient accessControlApiClient) {
-    return new FunctionGroupApi(accessControlApiClient);
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
   public FunctionGroupsApi functionGroupsApi(ApiClient accessControlApiClient) {
     return new FunctionGroupsApi(accessControlApiClient);
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
-  public ServiceAgreementQueryApi serviceAgreementQueryApi(ApiClient accessControlApiClient) {
-    return new ServiceAgreementQueryApi(accessControlApiClient);
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
-  public ServiceAgreementApi serviceAgreementApi(ApiClient accessControlApiClient) {
-    return new ServiceAgreementApi(accessControlApiClient);
   }
 
   @Bean
@@ -98,13 +63,13 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
 
   @Bean
   @ConditionalOnMissingBean
-  public LegalEntityApi legalEntityApi(ApiClient accessControlApiClient) {
-    return new LegalEntityApi(accessControlApiClient);
+  public UserContextApi userContextApi(ApiClient accessControlApiClient) {
+    return new UserContextApi(accessControlApiClient);
   }
 
   @Bean
   @ConditionalOnMissingBean
-  public UserContextApi userContextApi(ApiClient accessControlApiClient) {
-    return new UserContextApi(accessControlApiClient);
+  public PermissionSetApi permissionSetApi(ApiClient accessControlApiClient) {
+    return new PermissionSetApi(accessControlApiClient);
   }
 }

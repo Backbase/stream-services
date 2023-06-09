@@ -15,6 +15,6 @@
     <parent>
         <artifactId>api</artifactId>
         <groupId>com.backbase.stream.compositions</groupId>
-        <version>3.37.1</version>
+        <version>3.43.0</version>
     </parent>
 </project>

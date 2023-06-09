@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.43.0](https://github.com/Backbase/stream-services/compare/3.42.0...3.43.0)
+### Changed
+- Upgraded Access-Control service-api from v2 to v3
+
+## [3.42.0](https://github.com/Backbase/stream-services/compare/3.41.0...3.42.0)
+### Added
+- Added Pull Request template for Stream contributors.
+
+## [3.41.0](https://github.com/Backbase/stream-services/compare/3.40.0...3.41.0)
+### Added
+- Added additions to `DebitCardItem` openapi schema.
+
+## [3.40.0](https://github.com/Backbase/stream-services/compare/3.39.2...3.40.0)
+### Added
+- Add support for propagating additions from the legal entity ingestion request.
+
+## [3.39.2](https://github.com/Backbase/stream-services/compare/3.39.0...3.40.1)
+### Changed
+- Propagate additions returned by the Product and Transaction integration Response to the Product and Transaction composition Response.
+
+## [3.39.1](https://github.com/Backbase/stream-services/compare/3.39.0...3.40.1)
+### Changed
+- Bugfix for putAssignUserPermissions error `Data groups cannot be duplicated in scope of a single function group during assigning permissions`
+
+## [3.39.0](https://github.com/Backbase/stream-services/compare/3.38.0...3.39.0)
+### Added
+- Add PermissionSetApi to stream-dbs-clients for APS ingestion scenarios
+
+## [3.38.0](https://github.com/Backbase/stream-services/compare/3.37.0...3.38.0)
+### Added
+- Updated Product Mapper to map panSuffix to all product types `panSuffix` to `number`
+
 ## [3.37.0](https://github.com/Backbase/stream-services/compare/3.36.0...3.37.0)
 
 ### Added

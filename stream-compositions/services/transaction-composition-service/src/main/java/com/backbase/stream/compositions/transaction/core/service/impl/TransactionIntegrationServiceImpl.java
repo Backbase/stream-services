@@ -6,6 +6,8 @@ import com.backbase.stream.compositions.transaction.core.service.TransactionInte
 import com.backbase.stream.compositions.transaction.integration.client.TransactionIntegrationApi;
 import com.backbase.stream.compositions.transaction.integration.client.model.PullTransactionsResponse;
 import com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,6 @@ import reactor.core.publisher.Flux;
 @Service
 @AllArgsConstructor
 public class TransactionIntegrationServiceImpl implements TransactionIntegrationService {
-
   private final TransactionIntegrationApi transactionIntegrationApi;
   private final TransactionMapper transactionMapper;
 
@@ -24,6 +25,26 @@ public class TransactionIntegrationServiceImpl implements TransactionIntegration
       TransactionIngestPullRequest ingestPullRequest) {
     return transactionIntegrationApi
         .pullTransactions(transactionMapper.mapStreamToIntegration(ingestPullRequest))
+        .doOnNext(response -> processSuccess(response, ingestPullRequest))
         .flatMapIterable(PullTransactionsResponse::getTransactions);
+  }
+
+  private void processSuccess(
+      PullTransactionsResponse pullTransactionsResponse,
+      TransactionIngestPullRequest ingestPullRequest) {
+    propagateAdditions(pullTransactionsResponse, ingestPullRequest);
+  }
+
+  private void propagateAdditions(
+      PullTransactionsResponse pullTransactionsResponse,
+      TransactionIngestPullRequest ingestPullRequest) {
+    if (pullTransactionsResponse.getAdditions() != null) {
+      Map<String, String> additions = ingestPullRequest.getAdditions();
+      if (additions == null) {
+        additions = new HashMap<>();
+      }
+      additions.putAll(pullTransactionsResponse.getAdditions());
+      ingestPullRequest.setAdditions(additions);
+    }
   }
 }

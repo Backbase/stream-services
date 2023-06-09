@@ -2,13 +2,13 @@ package com.backbase.stream.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.model.CreateStatus;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ParticipantIngest;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationUserApsIdentifiers;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementPut;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServicesAgreementIngest;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.Status;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.CreateStatus;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationUserApsIdentifiers;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.Status;
 import com.backbase.stream.legalentity.model.ApsIdentifiers;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;

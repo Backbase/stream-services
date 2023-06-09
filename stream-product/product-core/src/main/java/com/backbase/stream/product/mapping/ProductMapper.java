@@ -34,6 +34,7 @@ import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.ValueMapping;
 import org.mapstruct.ValueMappings;
@@ -84,6 +85,7 @@ public interface ProductMapper {
   @Mapping(
       source = ProductMapperConstants.ACCOUNT_HOLDER_NAME,
       target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+  @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
   AccountArrangementItemPost toPresentation(CurrentAccount currentAccount);
 
   @Mapping(
@@ -101,6 +103,7 @@ public interface ProductMapper {
   @Mapping(
       source = ProductMapperConstants.ACCOUNT_HOLDER_NAME,
       target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+  @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(SavingsAccount savingsAccount);
 
@@ -116,6 +119,10 @@ public interface ProductMapper {
   @Mapping(
       source = ProductMapperConstants.ACCOUNT_HOLDER_NAME,
       target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+  @Mapping(
+      source = "debitCard",
+      qualifiedByName = "mapDebitCardNumber",
+      target = ProductMapperConstants.NUMBER)
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(DebitCard debitCard);
 
@@ -131,6 +138,10 @@ public interface ProductMapper {
   @Mapping(
       source = ProductMapperConstants.ACCOUNT_HOLDER_NAME,
       target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+  @Mapping(
+      source = "creditCard",
+      qualifiedByName = "mapCreditCardNumber",
+      target = ProductMapperConstants.NUMBER)
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(CreditCard creditCard);
 
@@ -146,6 +157,7 @@ public interface ProductMapper {
   @Mapping(
       source = ProductMapperConstants.ACCOUNT_HOLDER_NAME,
       target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+  @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(TermDeposit termDeposit);
 
@@ -159,6 +171,7 @@ public interface ProductMapper {
       source = ProductMapperConstants.LEGAL_ENTITIES,
       target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITY_IDS)
   @Mapping(source = "currentInvestment.amount", target = "currentInvestmentValue")
+  @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(InvestmentAccount investmentAccount);
 
@@ -174,6 +187,7 @@ public interface ProductMapper {
   @Mapping(
       source = ProductMapperConstants.ACCOUNT_HOLDER_NAME,
       target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+  @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(Loan loan);
 
@@ -299,30 +313,22 @@ public interface ProductMapper {
   InvestmentAccount mapInvestmentAccount(AccountArrangementItem product);
 
   default BookedBalance mapBookedBalance(BigDecimal bigDecimal) {
-    if (bigDecimal == null) {
-      return null;
-    }
+    if (bigDecimal == null) return null;
     return new BookedBalance().amount(bigDecimal);
   }
 
   default AvailableBalance mapAvailable(BigDecimal bigDecimal) {
-    if (bigDecimal == null) {
-      return null;
-    }
+    if (bigDecimal == null) return null;
     return new AvailableBalance().amount(bigDecimal);
   }
 
   default PrincipalAmount mapPrincipal(BigDecimal bigDecimal) {
-    if (bigDecimal == null) {
-      return null;
-    }
+    if (bigDecimal == null) return null;
     return new PrincipalAmount().amount(bigDecimal);
   }
 
   default CreditLimit mapCreditLimit(BigDecimal bigDecimal) {
-    if (bigDecimal == null) {
-      return null;
-    }
+    if (bigDecimal == null) return null;
     return new CreditLimit().amount(bigDecimal);
   }
 
@@ -474,4 +480,20 @@ public interface ProductMapper {
 
   @Mapping(source = "userExternalId", target = "userId")
   AccountUserPreferencesItemPut mapUserPreference(UserPreferences userPreferences);
+
+  @Named("mapDebitCardNumber")
+  default String mapDebitCardNumber(DebitCard debitCard) {
+    if (StringUtils.hasText(debitCard.getNumber())) {
+      return debitCard.getNumber();
+    }
+    return debitCard.getPanSuffix();
+  }
+
+  @Named("mapCreditCardNumber")
+  default String mapCreditCardNumber(CreditCard creditCard) {
+    if (StringUtils.hasText(creditCard.getNumber())) {
+      return creditCard.getNumber();
+    }
+    return creditCard.getPanSuffix();
+  }
 }

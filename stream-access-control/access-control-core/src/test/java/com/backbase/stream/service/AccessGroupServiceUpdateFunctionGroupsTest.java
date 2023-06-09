@@ -3,26 +3,21 @@ package com.backbase.stream.service;
 import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
 import static org.mockito.ArgumentMatchers.any;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.BatchResponseItemExtended;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.Functiongroupupdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.IdItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.Permission;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationFunctionGroupPutRequestBody;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationIngestFunctionGroup;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermission;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationPermissionFunctionGroupUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.Privilege;
+import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.Permission;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationFunctionGroupPutRequestBody;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIngestFunctionGroup;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermission;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermissionFunctionGroupUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.Privilege;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BusinessFunction;
@@ -33,7 +28,6 @@ import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,21 +51,11 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
   @Mock private UserManagementApi usersApi;
 
-  @Mock private UserQueryApi userQueryApi;
-
   @Mock private UsersApi accessControlUsersApi;
-
-  @Mock private DataGroupApi dataGroupApi;
 
   @Mock private DataGroupsApi dataGroupsApi;
 
-  @Mock private FunctionGroupApi functionGroupApi;
-
   @Mock private FunctionGroupsApi functionGroupsApi;
-
-  @Mock private ServiceAgreementQueryApi serviceAgreementQueryApi;
-
-  @Mock private ServiceAgreementApi serviceAgreementApi;
 
   @Mock private ServiceAgreementsApi serviceAgreementsApi;
 
@@ -124,7 +108,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .sharingUsers(false)
                 .action(LegalEntityParticipant.ActionEnum.ADD));
 
-    Mockito.when(functionGroupApi.getFunctionGroups(saInternalId))
+    Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
         .thenReturn(
             Flux.fromIterable(
                 Collections.singletonList(
@@ -177,7 +161,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         .postPresentationIngestFunctionGroup(
             new PresentationIngestFunctionGroup()
                 .externalServiceAgreementId(saExternalId)
-                .apsId(BigDecimal.ONE)
+                .apsId(1L)
                 .name("jobRoleNew")
                 .description("jobRoleNew")
                 .type(PresentationIngestFunctionGroup.TypeEnum.REGULAR)
@@ -236,7 +220,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .sharingUsers(false)
                 .action(LegalEntityParticipant.ActionEnum.ADD));
 
-    Mockito.when(functionGroupApi.getFunctionGroups(saInternalId))
+    Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
         .thenReturn(
             Flux.fromIterable(
                 Collections.singletonList(
@@ -291,7 +275,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 new PresentationFunctionGroupPutRequestBody()
                     .identifier(new PresentationIdentifier().idIdentifier("1"))
                     .functionGroup(
-                        new Functiongroupupdate()
+                        new FunctionGroupUpdate()
                             .name("jobRole")
                             .description("jobRole")
                             .metadata(Map.of("key1", "value1"))
@@ -351,7 +335,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .sharingUsers(false)
                 .action(LegalEntityParticipant.ActionEnum.ADD));
 
-    Mockito.when(functionGroupApi.getFunctionGroups(saInternalId))
+    Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
         .thenReturn(
             Flux.fromIterable(
                 Collections.singletonList(
@@ -398,9 +382,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                     .resourceId("4028db307522bfbb017523171c9d0007")
                     .status(BatchResponseItemExtended.StatusEnum.HTTP_STATUS_BAD_REQUEST)
                     .addErrorsItem(
-                        "You cannot manage this entity, while the"
-                            + " referenced service agreement has a pending"
-                            + " change.")));
+                        "You cannot manage this entity, while the referenced service agreement has a pending change.")));
 
     Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
 
@@ -412,7 +394,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 new PresentationFunctionGroupPutRequestBody()
                     .identifier(new PresentationIdentifier().idIdentifier("1"))
                     .functionGroup(
-                        new Functiongroupupdate()
+                        new FunctionGroupUpdate()
                             .name("jobRole")
                             .description("jobRole")
                             .addPermissionsItem(
@@ -471,7 +453,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .sharingUsers(false)
                 .action(LegalEntityParticipant.ActionEnum.ADD));
 
-    Mockito.when(functionGroupApi.getFunctionGroups(saInternalId))
+    Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
         .thenReturn(
             Flux.fromIterable(
                 Collections.singletonList(
@@ -526,7 +508,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 new PresentationFunctionGroupPutRequestBody()
                     .identifier(new PresentationIdentifier().idIdentifier("1"))
                     .functionGroup(
-                        new Functiongroupupdate()
+                        new FunctionGroupUpdate()
                             .name("fg1")
                             .description("fg1")
                             .addPermissionsItem(

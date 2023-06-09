@@ -1,139 +1,133 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.backbase.stream.compositions</groupId>
+        <artifactId>services</artifactId>
+        <version>3.43.0</version>
+    </parent>
+
     <artifactId>payment-order-composition-service</artifactId>
+    <version>3.43.0</version>
+
+    <packaging>jar</packaging>
+
+    <name>Stream :: Compositions :: Services :: Payment Order</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>payment-order-composition-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>payment-order-integration-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>payment-order-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
+                <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
+                <version>${boat-maven-plugin.version}</version>
                 <configuration>
+                    <output>${project.build.directory}/generated-sources/api</output>
+                    <generateSupportingFiles>true</generateSupportingFiles>
+                    <strictSpec>true</strictSpec>
+                    <generateApiTests>false</generateApiTests>
+                    <generateModelTests>false</generateModelTests>
                     <configOptions>
                         <dateLibrary>java8</dateLibrary>
                         <interfaceOnly>true</interfaceOnly>
-                        <java8>true</java8>
                         <skipDefaultInterface>true</skipDefaultInterface>
                         <useBeanValidation>true</useBeanValidation>
                         <useClassLevelBeanValidation>false</useClassLevelBeanValidation>
-                        <useOptional>false</useOptional>
                         <useTags>true</useTags>
+                        <java8>true</java8>
+                        <useOptional>false</useOptional>
                     </configOptions>
-                    <generateApiTests>false</generateApiTests>
-                    <generateModelTests>false</generateModelTests>
-                    <generateSupportingFiles>true</generateSupportingFiles>
-                    <input/>
-                    <model/>
-                    <output>${project.build.directory}/generated-sources/api</output>
-                    <strictSpec>true</strictSpec>
+                    <input />
+                    <model />
                 </configuration>
                 <executions>
                     <execution>
-                        <configuration>
-                            <additionalProperties>useWithModifiers=true</additionalProperties>
-                            <configOptions>
-                                <apiPackage>com.backbase.stream.compositions.paymentorder.api</apiPackage>
-                                <library>spring-boot</library>
-                                <modelPackage>com.backbase.stream.compositions.paymentorder.api.model</modelPackage>
-                                <performBeanValidation>true</performBeanValidation>
-                                <reactive>true</reactive>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                            </configOptions>
-                            <generatorName>spring</generatorName>
-                            <importMappings>
-                                <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
-                            </importMappings>
-                            <inputSpec>
-                                ${project.basedir}/../../api/service-api/payment-order-composition-api/src/main/resources/service-api-v2.yaml
-                            </inputSpec>
-                            <typeMappings>
-                                <typeMapping>OffsetDateTime=java.lang.String</typeMapping>
-                            </typeMappings>
-                        </configuration>
+                        <id>generate-payment-order-composition-api-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <id>generate-payment-order-composition-api-code</id>
-                        <phase>generate-sources</phase>
-                    </execution>
-                    <execution>
                         <configuration>
+                            <inputSpec>${project.basedir}/../../api/service-api/payment-order-composition-api/src/main/resources/service-api-v2.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
                             <additionalProperties>useWithModifiers=true</additionalProperties>
-                            <apiPackage>com.backbase.stream.compositions.paymentorder.integration.client</apiPackage>
-                            <configOptions>
-                                <library>spring-boot</library>
-                                <performBeanValidation>true</performBeanValidation>
-                                <reactive>true</reactive>
-                            </configOptions>
-                            <importMappings>
-                                <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
-                            </importMappings>
-                            <inputSpec>
-                                ${project.basedir}/../../api/integrations-api/payment-order-integration-api/src/main/resources/service-api-v2.yaml
-                            </inputSpec>
-                            <modelPackage>com.backbase.stream.compositions.paymentorder.integration.client.model
-                            </modelPackage>
                             <typeMappings>
                                 <typeMapping>OffsetDateTime=java.lang.String</typeMapping>
                             </typeMappings>
+                            <importMappings>
+                                <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
+                            </importMappings>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <apiPackage>com.backbase.stream.compositions.paymentorder.api</apiPackage>
+                                <modelPackage>com.backbase.stream.compositions.paymentorder.api.model</modelPackage>
+                                <reactive>true</reactive>
+                                <performBeanValidation>true</performBeanValidation>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                            </configOptions>
                         </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-payment-order-integration-client-code</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
-                        <id>generate-payment-order-integration-client-code</id>
-                        <phase>generate-sources</phase>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../../api/integrations-api/payment-order-integration-api/src/main/resources/service-api-v2.yaml</inputSpec>
+                            <apiPackage>com.backbase.stream.compositions.paymentorder.integration.client</apiPackage>
+                            <modelPackage>com.backbase.stream.compositions.paymentorder.integration.client.model</modelPackage>
+                            <additionalProperties>useWithModifiers=true</additionalProperties>
+                            <typeMappings>
+                                <typeMapping>OffsetDateTime=java.lang.String</typeMapping>
+                            </typeMappings>
+                            <importMappings>
+                                <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
+                            </importMappings>
+                            <configOptions>
+                                <library>spring-boot</library>
+                                <reactive>true</reactive>
+                                <performBeanValidation>true</performBeanValidation>
+                            </configOptions>
+                        </configuration>
                     </execution>
                 </executions>
-                <groupId>com.backbase.oss</groupId>
-                <version>${boat-maven-plugin.version}</version>
             </plugin>
 
             <plugin>
+                <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <fork>false</fork>
                 </configuration>
-                <groupId>org.springframework.boot</groupId>
             </plugin>
 
         </plugins>
     </build>
-
-    <dependencies>
-        <dependency>
-            <artifactId>lombok</artifactId>
-            <groupId>org.projectlombok</groupId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <artifactId>payment-order-composition-api</artifactId>
-            <groupId>com.backbase.stream.compositions.api</groupId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>payment-order-integration-api</artifactId>
-            <groupId>com.backbase.stream.compositions.api</groupId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <artifactId>payment-order-core</artifactId>
-            <groupId>com.backbase.stream</groupId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
-    <modelVersion>4.0.0</modelVersion>
-
-    <name>Stream :: Compositions :: Services :: Payment Order</name>
-
-    <packaging>jar</packaging>
-
-    <parent>
-        <artifactId>services</artifactId>
-        <groupId>com.backbase.stream.compositions</groupId>
-        <version>3.37.1</version>
-    </parent>
-
-    <version>3.37.1</version>
 
 </project>

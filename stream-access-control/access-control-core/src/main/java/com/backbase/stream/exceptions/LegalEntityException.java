@@ -1,6 +1,6 @@
 package com.backbase.stream.exceptions;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityCreateItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityCreateItem;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class LegalEntityException extends RuntimeException {

@@ -1,56 +1,55 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>stream-compositions</artifactId>
+        <groupId>com.backbase.stream</groupId>
+        <version>3.43.0</version>
+    </parent>
+
+    <groupId>com.backbase.stream.compositions</groupId>
     <artifactId>api</artifactId>
+
+    <packaging>pom</packaging>
+
+    <name>Stream :: Compositions :: API</name>
+
+    <properties>
+        <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
+        <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
+        <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
+    </properties>
 
     <dependencies>
         <dependency>
-            <artifactId>spring-boot-starter-webflux</artifactId>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
-            <artifactId>jackson-databind-nullable</artifactId>
             <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
         </dependency>
         <dependency>
-            <artifactId>jsr305</artifactId>
             <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
         </dependency>
         <!-- Swagger codegen dependencies -->
         <dependency>
-            <artifactId>swagger-annotations</artifactId>
             <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
         <dependency>
-            <artifactId>swagger-annotations</artifactId>
             <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
         </dependency>
     </dependencies>
-
-    <groupId>com.backbase.stream.compositions</groupId>
-    <modelVersion>4.0.0</modelVersion>
 
     <modules>
         <module>service-api</module>
         <module>cursors-api</module>
         <module>integrations-api</module>
     </modules>
-
-    <name>Stream :: Compositions :: API</name>
-
-    <packaging>pom</packaging>
-
-    <parent>
-        <artifactId>stream-compositions</artifactId>
-        <groupId>com.backbase.stream</groupId>
-        <version>3.37.1</version>
-    </parent>
-
-    <properties>
-        <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
-        <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
-        <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
-    </properties>
 
 </project>

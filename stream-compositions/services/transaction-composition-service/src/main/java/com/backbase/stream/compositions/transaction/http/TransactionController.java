@@ -23,7 +23,6 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 @Slf4j
 public class TransactionController implements TransactionCompositionApi {
-
   private final TransactionIngestionService transactionIngestionService;
   private final TransactionMapper mapper;
 
@@ -92,7 +91,8 @@ public class TransactionController implements TransactionCompositionApi {
             .withTransactions(
                 response.getTransactions().stream()
                     .map(mapper::mapStreamToComposition)
-                    .collect(Collectors.toList())),
+                    .collect(Collectors.toList()))
+            .withAdditions(response.getAdditions()),
         HttpStatus.CREATED);
   }
 }

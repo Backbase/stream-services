@@ -7,6 +7,8 @@ import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequ
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
 import com.backbase.stream.legalentity.model.ProductGroup;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,6 @@ import reactor.core.publisher.Mono;
 @Service
 @AllArgsConstructor
 public class ProductIntegrationServiceImpl implements ProductIntegrationService {
-
   private final ProductIntegrationApi productIntegrationApi;
 
   private final ProductGroupMapper mapper;
@@ -47,9 +48,9 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
     response.setUserExternalId(request.getUserExternalId());
     response.setUserInternalId(request.getUserInternalId());
     response.setSource(request.getSource());
-    response.setAdditions(request.getAdditions());
     response.setTransactionChainEnabledFromRequest(request.getTransactionChainEnabled());
     response.setPaymentOrderChainEnabledFromRequest(request.getPaymentOrderChainEnabled());
+    putAllAbsent(response, request);
     return response;
   }
 
@@ -78,5 +79,23 @@ public class ProductIntegrationServiceImpl implements ProductIntegrationService 
   private Mono<ProductIngestResponse> handleIntegrationError(Throwable e) {
     log.error("Error while pulling products: {}", e.getMessage());
     return Mono.error(new InternalServerErrorException().withMessage(e.getMessage()));
+  }
+
+  private void putAllAbsent(
+      ProductIngestResponse productIngestResponse,
+      ProductIngestPullRequest productIngestPullRequest) {
+    Map<String, String> sourceAdditions = productIngestPullRequest.getAdditions();
+    Map<String, String> additions = productIngestResponse.getAdditions();
+    if (additions == null) {
+      additions = new HashMap<>();
+    }
+    if (sourceAdditions != null) {
+      for (String key : sourceAdditions.keySet()) {
+        if (!additions.containsKey(key)) {
+          additions.put(key, sourceAdditions.get(key));
+        }
+      }
+      productIngestResponse.setAdditions(additions);
+    }
   }
 }
