@@ -18,12 +18,11 @@ jobs:
         with:
           github_token: ${{ secrets.github_token }}
           checkstyle_config: backbase_checks.xml
-          #          checkstyle_version: 10.12.0
           reporter: github-pr-review
           level: warning
-          workdir: ./
           filter_mode: diff_context
   main:
+    needs: [ checkstyle ]
     if: "!contains(github.event.head_commit.message, '[skip bump]') && !contains(github.event.head_commit.message, 'nobump/')"
     runs-on: ubuntu-latest
     steps:
