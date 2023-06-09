@@ -126,6 +126,10 @@ public interface ProductMapper {
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(DebitCard debitCard);
 
+  /**
+   * @param creditCard
+   * @return
+   */
   @Mapping(
       source = ProductMapperConstants.EXTERNAL_ID,
       target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
@@ -161,6 +165,10 @@ public interface ProductMapper {
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(TermDeposit termDeposit);
 
+  /**
+   * @param investmentAccount
+   * @return
+   */
   @Mapping(
       source = ProductMapperConstants.EXTERNAL_ID,
       target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
@@ -175,6 +183,10 @@ public interface ProductMapper {
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(InvestmentAccount investmentAccount);
 
+  /**
+   * @param loan
+   * @return
+   */
   @Mapping(
       source = ProductMapperConstants.EXTERNAL_ID,
       target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
@@ -191,14 +203,30 @@ public interface ProductMapper {
   @InheritConfiguration
   AccountArrangementItemPost toPresentation(Loan loan);
 
+  /**
+   * @param arrangementItemPost
+   * @return
+   */
   AccountArrangementItem toArrangementItem(AccountArrangementItemPost arrangementItemPost);
 
+  /**
+   * @param arrangementItemPost
+   * @return
+   */
   AccountArrangementItemPut toArrangementItemPut(AccountArrangementItemPost arrangementItemPost);
 
   AccountArrangementItemBase toArrangementItemBase(AccountArrangementItemPost arrangementItemPost);
 
+  /**
+   * @param arrangementItemPost
+   * @return
+   */
   AccountArrangementItem toArrangementItem(AccountArrangementItemBase arrangementItemPost);
 
+  /**
+   * @param product
+   * @return
+   */
   //
   @Mapping(
       source = ProductMapperConstants.EXTERNAL_ID,
@@ -214,6 +242,10 @@ public interface ProductMapper {
   //    @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
   //    BaseProduct toBaseProduct(ArrangementItem arrangementItem);
 
+  /**
+   * @param arrangementItem
+   * @return
+   */
   @Mapping(
       source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID,
       target = ProductMapperConstants.EXTERNAL_ID)
@@ -227,6 +259,10 @@ public interface ProductMapper {
   @InheritConfiguration
   Product mapCustomProduct(AccountArrangementItem arrangementItem);
 
+  /**
+   * @param product
+   * @return
+   */
   @Mapping(
       source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID,
       target = ProductMapperConstants.EXTERNAL_ID)
@@ -239,6 +275,10 @@ public interface ProductMapper {
   @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
   CurrentAccount mapCurrentAccount(AccountArrangementItem product);
 
+  /**
+   * @param product
+   * @return
+   */
   @Mapping(
       source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID,
       target = ProductMapperConstants.EXTERNAL_ID)
@@ -263,6 +303,10 @@ public interface ProductMapper {
   @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
   DebitCard mapDebitCard(AccountArrangementItem product);
 
+  /**
+   * @param product
+   * @return
+   */
   @Mapping(
       source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID,
       target = ProductMapperConstants.EXTERNAL_ID)
@@ -312,26 +356,54 @@ public interface ProductMapper {
   @Mapping(source = "currentInvestmentValue", target = "currentInvestment")
   InvestmentAccount mapInvestmentAccount(AccountArrangementItem product);
 
+  /**
+   * @param bigDecimal
+   * @return
+   */
   default BookedBalance mapBookedBalance(BigDecimal bigDecimal) {
-    if (bigDecimal == null) return null;
+    if (bigDecimal == null) {
+      return null;
+    }
     return new BookedBalance().amount(bigDecimal);
   }
 
+  /**
+   * @param bigDecimal
+   * @return
+   */
   default AvailableBalance mapAvailable(BigDecimal bigDecimal) {
-    if (bigDecimal == null) return null;
+    if (bigDecimal == null) {
+      return null;
+    }
     return new AvailableBalance().amount(bigDecimal);
   }
 
+  /**
+   * @param bigDecimal
+   * @return
+   */
   default PrincipalAmount mapPrincipal(BigDecimal bigDecimal) {
-    if (bigDecimal == null) return null;
+    if (bigDecimal == null) {
+      return null;
+    }
     return new PrincipalAmount().amount(bigDecimal);
   }
 
+  /**
+   * @param bigDecimal
+   * @return
+   */
   default CreditLimit mapCreditLimit(BigDecimal bigDecimal) {
-    if (bigDecimal == null) return null;
+    if (bigDecimal == null) {
+      return null;
+    }
     return new CreditLimit().amount(bigDecimal);
   }
 
+  /**
+   * @param bigDecimal
+   * @return
+   */
   default CurrentInvestment mapCurrentInvestment(BigDecimal bigDecimal) {
     if (bigDecimal == null) {
       return null;
@@ -339,10 +411,18 @@ public interface ProductMapper {
     return new CurrentInvestment().amount(bigDecimal);
   }
 
+  /**
+   * @param legalEntityId
+   * @return
+   */
   default LegalEntity mapLegalEntity(String legalEntityId) {
     return new LegalEntity().externalId(legalEntityId);
   }
 
+  /**
+   * @param s
+   * @return
+   */
   default OffsetDateTime map(String s) {
     if (StringUtils.isEmpty(s)) {
       return null;
@@ -451,6 +531,10 @@ public interface ProductMapper {
   })
   TermUnit map(TimeUnit unit);
 
+  /**
+   * @param value
+   * @return
+   */
   default java.util.List<java.lang.String> mapLegalEntityId(
       java.util.List<com.backbase.stream.legalentity.model.LegalEntityReference> value) {
     if (value != null) {
@@ -460,6 +544,10 @@ public interface ProductMapper {
     }
   }
 
+  /**
+   * @param value
+   * @return
+   */
   default List<LegalEntityReference> mapLegalEntityReference(List<String> value) {
     if (value != null) {
       return value.stream()

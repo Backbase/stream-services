@@ -63,7 +63,7 @@ public class BatchProductIngestionMode {
 
   /**
    * @return True, if arrangements should be replaced (arrangements not existing in batch will be
-   *     REMOVED from DBS). Otherwise, they should be just updated.
+   *     REMOVED from DBS). Otherwise, they should be just updated
    */
   public boolean isArrangementsReplaceEnabled() {
     return arrangementsMode == ArrangementsMode.REPLACE;

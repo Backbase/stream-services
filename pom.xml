@@ -49,6 +49,8 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <japicmp.skip>true</japicmp.skip>
+
+        <checkstyle.config.location>backbase_checks.xml</checkstyle.config.location>
     </properties>
 
     <dependencyManagement>
@@ -103,6 +105,34 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>2.17</version>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <configuration>
+                                <configLocation>${checkstyle.config.location}</configLocation>
+                                <consoleOutput>true</consoleOutput>
+                                <encoding>UTF-8</encoding>
+                                <failsOnError>true</failsOnError>
+                                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.backbase.buildingblocks</groupId>
+                            <artifactId>ssdk-checkstyle-config</artifactId>
+                            <version>1.0.28</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -133,6 +163,26 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify.fmt</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>2.20</version>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <skip>false</skip>
+                    <skipSourceDirectory>false</skipSourceDirectory>
+                    <skipTestSourceDirectory>false</skipTestSourceDirectory>
+                    <skipSortingImports>false</skipSortingImports>
+                    <style>google</style>
+                </configuration>
             </plugin>
         </plugins>
     </build>
