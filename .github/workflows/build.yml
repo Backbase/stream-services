@@ -10,17 +10,16 @@ on:
 jobs:
   checkstyle:
     runs-on: ubuntu-latest
+    name: Checkstyle job
     steps:
-      - uses: actions/checkout@v3
-      - uses: reviewdog/action-setup@v1
-      - run: reviewdog -version
-      - uses: dbelyaev/action-checkstyle@v0.7.4
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run check style
+        uses: nikitasavinov/checkstyle-action@master
         with:
-          github_token: ${{ secrets.github_token }}
-          checkstyle_config: backbase_checks.xml
-          reporter: github-pr-review
-          level: warning
-          filter_mode: diff_context
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: 'github-pr-check'
+          tool_name: 'testtool'
   main:
     needs: [ checkstyle ]
     if: "!contains(github.event.head_commit.message, '[skip bump]') && !contains(github.event.head_commit.message, 'nobump/')"
