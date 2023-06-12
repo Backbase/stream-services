@@ -1,0 +1,27 @@
+name: Pull Request Body Validation
+
+#
+#   IMPORTANT TO KNOW
+#
+# - This workflow runs whenever new changes is Opened, reopened, edited or changes pushed to an existing Pull Request
+# - It validates if all task lists in the pull request are completed
+# - It validates if description in the pull request is updated by PR owner
+#
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+jobs:
+  pull-request-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR
+        uses: JJ/github-pr-contains-action@releases/v10
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          bodyDoesNotContain: "A few sentences describing the overall goals of the pull request's commits"
+
+      - name: Check for incomplete task list items
+        uses: Shopify/task-list-checker@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
