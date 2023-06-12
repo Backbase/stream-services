@@ -15,7 +15,7 @@ jobs:
   pull-request-validation:
     runs-on: ubuntu-latest
     steps:
-      - name: Check PR
+      - name: Check PR description
         uses: JJ/github-pr-contains-action@releases/v10
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
