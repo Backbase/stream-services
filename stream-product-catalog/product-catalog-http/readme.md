@@ -1,6 +1,6 @@
 # Product Catalog REST Service
 
-The Product Catalog REST Service is used to load and review Products Type in DBS using a 
+The Product Catalog REST Service is used to load and review Products Type in DBS using a
 
 ## Required environment variables
 

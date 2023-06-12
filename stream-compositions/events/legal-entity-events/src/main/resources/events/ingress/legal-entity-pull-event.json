@@ -28,7 +28,11 @@
     },
     "identityUserLinkStrategy": {
       "type": "string",
-      "enum": ["IMPORT_FROM_IDENTIY","CREATE_IN_IDENTITY","IDENTITY_AGNOSTIC"]
+      "enum": [
+        "IMPORT_FROM_IDENTIY",
+        "CREATE_IN_IDENTITY",
+        "IDENTITY_AGNOSTIC"
+      ]
     }
   }
 }

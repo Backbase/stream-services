@@ -25,20 +25,20 @@ paths:
               type: string
 
       responses:
-        "201":
+        '201':
           description: Product catalog successfully returned.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PullProductCatalogResponse'
 
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -59,7 +59,7 @@ components:
       type: object
       properties:
         productCatalog:
-          $ref: '../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog'
+          $ref: ../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog
 
     InternalServerError:
       required:
@@ -68,4 +68,3 @@ components:
       properties:
         message:
           type: string
-

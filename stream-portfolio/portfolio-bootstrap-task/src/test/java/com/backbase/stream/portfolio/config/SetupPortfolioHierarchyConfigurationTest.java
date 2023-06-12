@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import com.backbase.stream.portfolio.PortfolioSaga;
 import com.backbase.stream.portfolio.PortfolioTask;
 import com.backbase.stream.portfolio.model.WealthBundle;
@@ -20,32 +21,29 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class SetupPortfolioHierarchyConfigurationTest {
 
-    @Mock
-    private PortfolioSaga portfolioSaga;
-    @Spy
-    private BootstrapConfigurationProperties bootstrapConfigurationProperties;
-    @InjectMocks
-    SetupPortfolioHierarchyConfiguration configuration;
+  @InjectMocks SetupPortfolioHierarchyConfiguration configuration;
+  @Mock private PortfolioSaga portfolioSaga;
+  @Spy private BootstrapConfigurationProperties bootstrapConfigurationProperties;
 
-    @Test
-    void commandLineRunner() {
-        WealthBundle wealthBundle = new WealthBundle();
+  @Test
+  void commandLineRunner() {
+    WealthBundle wealthBundle = new WealthBundle();
 
-        when(bootstrapConfigurationProperties.getWealthBundles()).thenReturn(List.of(wealthBundle));
-        when(portfolioSaga.executeTask(any(PortfolioTask.class))).thenReturn(Mono.empty());
+    when(bootstrapConfigurationProperties.getWealthBundles()).thenReturn(List.of(wealthBundle));
+    when(portfolioSaga.executeTask(any(PortfolioTask.class))).thenReturn(Mono.empty());
 
-        configuration.execute();
+    configuration.execute();
 
-        verify(portfolioSaga).executeTask(
+    verify(portfolioSaga)
+        .executeTask(
             Mockito.argThat(portfolioTask -> portfolioTask.getData().equals(wealthBundle)));
-    }
+  }
 
-    @Test
-    void commandLineRunnerNoData() {
+  @Test
+  void commandLineRunnerNoData() {
 
-        configuration.execute();
+    configuration.execute();
 
-        verify(portfolioSaga, never()).executeTask(any());
-    }
-
+    verify(portfolioSaga, never()).executeTask(any());
+  }
 }

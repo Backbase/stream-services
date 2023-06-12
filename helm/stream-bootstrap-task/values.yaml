@@ -6,12 +6,12 @@ image:
   pullPolicy: Always
   restartPolicy: OnFailure
 backoffLimit: 1
-dependencies: []
+dependencies: [ ]
 #  - serviceName: identity-integration-service
 #  - serviceName: backbase-identity
 #    path: "/auth/realms/backbase/.well-known/openid-configuration"
 #    healthIndicator: "backbase"
-initContainers: []
+initContainers: [ ]
 #  - name: init-product-catalog
 #    image: repo.backbase.com/backbase-stream-images/product-catalog-task:3.8.0
 #    env:
@@ -25,4 +25,4 @@ resources:
     cpu: 125m
     memory: 256Mi
 env:
-  JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70.0 -Dspring.cloud.config.enabled=false"
+  JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=70.0 -Dspring.cloud.config.enabled=false

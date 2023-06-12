@@ -13,7 +13,7 @@
     <name>Stream :: Limits Core</name>
 
     <properties>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+
     </properties>
 
     <dependencies>

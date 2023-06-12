@@ -11,6 +11,5 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "bootstrap")
 public class ProductCatalogConfigurationProperties {
 
-    @NotNull
-    private ProductCatalog productCatalog;
+  @NotNull private ProductCatalog productCatalog;
 }

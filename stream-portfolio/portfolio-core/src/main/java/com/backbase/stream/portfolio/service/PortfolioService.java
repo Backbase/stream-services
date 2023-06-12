@@ -5,17 +5,16 @@ import reactor.core.publisher.Flux;
 
 /**
  * Portfolio Service.
- * 
- * @author Vladimir Kirchev
  *
+ * @author Vladimir Kirchev
  */
 public interface PortfolioService {
 
-    /**
-     * Ingest Wealth Bundles.
-     * 
-     * @param wealthBundles The {@code WealthBundle} to be ingested.
-     * @return The ingested {@code WealthBundle}.
-     */
-    Flux<WealthBundle> ingestWealthBundles(Flux<WealthBundle> wealthBundles);
+  /**
+   * Ingest Wealth Bundles.
+   *
+   * @param wealthBundles The {@code WealthBundle} to be ingested.
+   * @return The ingested {@code WealthBundle}.
+   */
+  Flux<WealthBundle> ingestWealthBundles(Flux<WealthBundle> wealthBundles);
 }

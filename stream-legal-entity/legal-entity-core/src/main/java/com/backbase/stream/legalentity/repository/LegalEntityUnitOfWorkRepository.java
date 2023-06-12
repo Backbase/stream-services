@@ -5,5 +5,5 @@ import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LegalEntityUnitOfWorkRepository extends UnitOfWorkRepository<LegalEntityTask, String> {
-}
+public interface LegalEntityUnitOfWorkRepository
+    extends UnitOfWorkRepository<LegalEntityTask, String> {}

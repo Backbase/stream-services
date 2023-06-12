@@ -22,19 +22,19 @@ paths:
             schema:
               $ref: '#/components/schemas/ProductCatalogPullIngestionRequest'
       responses:
-        "201":
+        '201':
           description: Product group ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductCatalogIngestionResponse'
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -55,19 +55,19 @@ paths:
             schema:
               $ref: '#/components/schemas/ProductCatalogPushIngestionRequest'
       responses:
-        "201":
+        '201':
           description: Product catalog ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductCatalogIngestionResponse'
-        "400":
+        '400':
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        "500":
+        '500':
           description: InternalServerError
           content:
             application/json:
@@ -96,13 +96,13 @@ components:
       type: object
       properties:
         productCatalog:
-          $ref: '../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog'
+          $ref: ../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog
 
     ProductCatalogIngestionResponse:
       type: object
       properties:
         productCatalog:
-          $ref: '../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog'
+          $ref: ../../../../../../../api/stream-product-catalog/openapi.yaml#/components/schemas/ProductCatalog
 
     InternalServerError:
       required:
@@ -111,4 +111,3 @@ components:
       properties:
         message:
           type: string
-

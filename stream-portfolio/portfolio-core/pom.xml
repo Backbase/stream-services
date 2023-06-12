@@ -14,7 +14,7 @@
     <name>Stream :: Portfolio Core</name>
 
     <properties>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+
     </properties>
 
     <dependencies>

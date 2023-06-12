@@ -14,7 +14,7 @@
     <name>Stream :: Approval Core</name>
 
     <properties>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+
         <sonar.tests />
     </properties>
 

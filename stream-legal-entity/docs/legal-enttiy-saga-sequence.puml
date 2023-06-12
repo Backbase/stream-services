@@ -38,7 +38,7 @@ loop Legal Entity
 
     SAGA -> SAGA: Process Service Agreement
     activate SAGA
-      SAGA -> DBS: Get Existing Service Agreement 
+      SAGA -> DBS: Get Existing Service Agreement
       DBS -> SAGA: Service Agreement
       alt Service Agreement Does not exist
         SAGA -> DBS: Create Master Service Agreement with Administrators

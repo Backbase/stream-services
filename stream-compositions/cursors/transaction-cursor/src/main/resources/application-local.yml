@@ -59,4 +59,3 @@ sso:
         key:
           type: ENV
           value: SIG_SECRET_KEY
-
