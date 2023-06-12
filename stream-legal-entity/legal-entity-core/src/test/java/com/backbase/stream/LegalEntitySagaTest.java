@@ -37,6 +37,7 @@ import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.Limit;
+import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -378,6 +379,7 @@ class LegalEntitySagaTest {
                             .name("Account 2")
                             .currency("GBP")
                     ))
+                    .loans(singletonList(new Loan().IBAN("IBAN123321")))
             ))
             .users(singletonList(
                 new JobProfileUser()
@@ -461,6 +463,7 @@ class LegalEntitySagaTest {
                         return productGroup;
                     });
             });
+
 
         // When
         legalEntitySaga.executeTask(legalEntityTask)

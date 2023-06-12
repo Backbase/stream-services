@@ -28,7 +28,8 @@ import org.springframework.context.annotation.Import;
     AccessControlConfiguration.class,
     ProductIngestionSagaConfiguration.class,
     LimitsServiceConfiguration.class,
-        ContactsServiceConfiguration.class
+    ContactsServiceConfiguration.class,
+    LoansServiceConfiguration.class
 })
 @EnableConfigurationProperties(
     {LegalEntitySagaConfigurationProperties.class}
@@ -52,9 +53,10 @@ public class LegalEntitySagaConfiguration {
             userProfileService,
             accessGroupService,
             productIngestionSaga,
-            batchProductIngestionSaga, limitsSaga,
-                contactsSaga,
-                sinkConfigurationProperties
+            batchProductIngestionSaga,
+            limitsSaga,
+            contactsSaga,
+            sinkConfigurationProperties
         );
     }
 

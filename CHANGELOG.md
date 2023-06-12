@@ -1,5 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.45.0](https://github.com/Backbase/stream-services/compare/3.44.0...3.45.0)
+### Added
+- Added support for loans ingestion into DBS.
+- Included the ingestion of loans to BatchProductIngestionSage where productGroups are being processed.
+- After related arrangements were created in Products capability the loans part is ingested to Loans.
 
 ## [3.44.0](https://github.com/Backbase/stream-services/compare/3.43.0...3.44.0)
 ### Added

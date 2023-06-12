@@ -1,5 +1,6 @@
 package com.backbase.stream.product;
 
+import com.backbase.stream.loan.LoansSaga;
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.product.configuration.ProductIngestionSagaConfigurationProperties;
 import com.backbase.stream.product.service.ArrangementService;
@@ -19,12 +20,14 @@ public class ProductIngestionSagaConfiguration {
     public ProductIngestionSaga productIngestionSaga(ArrangementService arrangementService,
                                                      AccessGroupService accessGroupService,
                                                      UserService userService,
-                                                     ProductIngestionSagaConfigurationProperties configurationProperties) {
+                                                     ProductIngestionSagaConfigurationProperties configurationProperties,
+                                                     LoansSaga loansSaga) {
         return new ProductIngestionSaga(
             arrangementService,
             accessGroupService,
             userService,
-            configurationProperties
+            configurationProperties,
+            loansSaga
         );
     }
 
@@ -32,12 +35,14 @@ public class ProductIngestionSagaConfiguration {
     public BatchProductIngestionSaga batchProductIngestionSaga(ArrangementService arrangementService,
                                                      AccessGroupService accessGroupService,
                                                      UserService userService,
-                                                     ProductIngestionSagaConfigurationProperties configurationProperties) {
+                                                     ProductIngestionSagaConfigurationProperties configurationProperties,
+                                                     LoansSaga loansSaga) {
         return new BatchProductIngestionSaga(
             arrangementService,
             accessGroupService,
             userService,
-            configurationProperties
+            configurationProperties,
+            loansSaga
         );
     }
 }
