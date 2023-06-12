@@ -7,6 +7,9 @@ A few sentences describing the overall goals of the pull request's commits.
 <!--
   Please review the requirements for each checkbox, and check them
   off (change "[ ]" to "[x]") as you verify that they are complete.
+  
+  Add N/A to the task if they are not relevant to the current PR(validation will be skipped). 
+  e.g. [ ] My changes are adequately tested ~ N/A
 -->
 
  - [ ] I made sure, I read [CONTRIBUTING.md](CONTRIBUTING.md) to put right branch prefix as per my need.

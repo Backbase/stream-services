@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.44.0](https://github.com/Backbase/stream-services/compare/3.43.0...3.44.0)
+### Added
+- Added Pull request body(description and checklist) validation workflow
+
 ## [3.43.0](https://github.com/Backbase/stream-services/compare/3.42.0...3.43.0)
 ### Changed
 - Upgraded Access-Control service-api from v2 to v3
