@@ -1,0 +1,41 @@
+name: Build Stream Services
+on:
+  push:
+    branches:
+      - 'feature/**'
+jobs:
+  main:
+    if: "!contains(github.event.head_commit.message, '[skip bump]') && !contains(github.event.head_commit.message, 'nobump/')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of sonar analysis
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: adopt
+          cache: maven
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Configure Maven
+        uses: whelk-io/maven-settings-xml-action@v4
+        with:
+          repositories: '[{ "id": "backbase", "url": "https://repo.backbase.com/repo" }]'
+          plugin_repositories: '[{ "id": "backbase-plugins", "url": "https://repo.backbase.com/repo" }]'
+          servers: '[{ "id": "backbase", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" },{ "id": "backbase-plugins", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" }]'
+
+      - name: Run Sonar Checks
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
