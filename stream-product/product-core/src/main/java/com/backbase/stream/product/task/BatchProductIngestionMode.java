@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BatchProductIngestionMode {
 
-    private FunctionGroupsMode functionGroupsMode = FunctionGroupsMode.UPSERT;
-    private DataGroupsMode dataGroupIngestionMode = DataGroupsMode.UPSERT;
-    private ArrangementsMode arrangementsMode = ArrangementsMode.UPSERT;
+    private FunctionGroupsMode functionGroupsMode;
+    private DataGroupsMode dataGroupIngestionMode;
+    private ArrangementsMode arrangementsMode;
 
     public static final BatchProductIngestionMode UPSERT = upsert();
     public static final BatchProductIngestionMode REPLACE = replace();
