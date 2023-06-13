@@ -1,5 +1,24 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.46.0](https://github.com/Backbase/stream-services/compare/3.45.0...3.46.0)
+### Added
+- Ingestion mode configuration for legal-entity and product compositions
+
+    New properties for `legal-entity-composition`:
+    ```properties
+    backbase.stream.compositions.legal-entity.ingestion-mode.function-groups=UPSERT|REPLACE
+    backbase.stream.compositions.legal-entity.ingestion-mode.data-groups=UPSERT|REPLACE
+    backbase.stream.compositions.legal-entity.ingestion-mode.arrangements=UPSERT|REPLACE
+    ```
+
+    New properties for `product-composition`:
+    ```properties
+    backbase.stream.compositions.product.ingestion-mode.function-groups=UPSERT|REPLACE
+    backbase.stream.compositions.product.ingestion-mode.data-groups=UPSERT|REPLACE
+    backbase.stream.compositions.product.ingestion-mode.arrangements=UPSERT|REPLACE
+    ```
+    Defaults stay the same as before (`UPSERT` for all)
+
 ## [3.45.0](https://github.com/Backbase/stream-services/compare/3.44.0...3.45.0)
 ### Added
 - Added support for loans ingestion into DBS.
