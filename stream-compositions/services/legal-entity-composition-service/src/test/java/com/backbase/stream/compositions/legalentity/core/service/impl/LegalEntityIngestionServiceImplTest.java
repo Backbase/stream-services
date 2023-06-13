@@ -67,6 +67,9 @@ class LegalEntityIngestionServiceImplTest {
     @Mock
     ProductCompositionApi productCompositionApi;
 
+    @Mock
+    LegalEntityConfigurationProperties legalEntityConfigurationProperties;
+
     @BeforeEach
     void setUp() {
         legalEntityPostIngestionService = new LegalEntityPostIngestionServiceImpl(eventBus, config,
@@ -76,7 +79,8 @@ class LegalEntityIngestionServiceImplTest {
                 legalEntitySaga,
                 legalEntityIntegrationService,
                 validator,
-                legalEntityPostIngestionService);
+                legalEntityPostIngestionService,
+                legalEntityConfigurationProperties);
     }
 
 

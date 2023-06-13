@@ -112,4 +112,12 @@ public class ProductConfigurationProperties {
     public static class PaymentOrderComposition extends BaseComposition {
         private List<String> excludeProductTypeExternalIds = new ArrayList<>();
     }
+
+    public BatchProductIngestionMode ingestionMode() {
+        return BatchProductIngestionMode.builder()
+                .functionGroupsMode(ingestionMode.getFunctionGroups())
+                .dataGroupIngestionMode(ingestionMode.getDataGroups())
+                .arrangementsMode(ingestionMode.getArrangements())
+                .build();
+    }
 }
