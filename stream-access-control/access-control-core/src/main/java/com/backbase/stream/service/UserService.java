@@ -276,6 +276,7 @@ public class UserService {
         CreateIdentityRequest createIdentityRequest = new CreateIdentityRequest();
         createIdentityRequest.setLegalEntityInternalId(legalEntityInternalId);
         createIdentityRequest.setExternalId(user.getExternalId());
+        createIdentityRequest.setAdditions(user.getAdditions());
 
         if (IdentityUserLinkStrategy.CREATE_IN_IDENTITY.equals(user.getIdentityLinkStrategy())) {
             Objects.requireNonNull(user.getFullName(), "User Full Name is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
@@ -286,7 +287,6 @@ public class UserService {
             createIdentityRequest.setEmailAddress(user.getEmailAddress().getAddress());
             createIdentityRequest.setMobileNumber(user.getMobileNumber().getNumber());
             ofNullable(user.getAttributes()).ifPresent(createIdentityRequest::setAttributes);
-            ofNullable(user.getAdditions()).ifPresent(createIdentityRequest::setAdditions);
         }
 
         return identityManagementApi.createIdentity(createIdentityRequest)
