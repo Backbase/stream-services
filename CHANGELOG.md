@@ -1,6 +1,6 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-## [3.47.0](https://github.com/Backbase/stream-services/compare/3.42.0...3.43.0)
+## [3.47.0](https://github.com/Backbase/stream-services/compare/3.46.0...3.47.0)
 ### Changed
 - Removed unused parameter from Payment Orders filter request. 
 The `from` parameter was set to Integer.MAX_VALUE and that was causing errors on newer Backbase versions. 
