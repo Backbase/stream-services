@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.backbase.stream.product.task.ProductGroupTask;
+import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -221,6 +222,47 @@ class UserServiceTest {
                 .legalEntityInternalId(legalEntityId);
         verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
         verifyNoMoreInteractions(identityManagementApi);
+    }
+
+    @Test
+    void createOrImportIdentityUserUpdateAdditionsWhenIFIStrategy() {
+        final String internalId = "someInternalId";
+        final String externalId = "someExternalId";
+        final String legalEntityId = "someLegalEntityId";
+        final Map<String, String> additionsMap = Collections.singletonMap("someKey", "someValue");
+
+        CreateIdentityResponse response = new CreateIdentityResponse().externalId(externalId).internalId(internalId);
+        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.just(response));
+        when(identityManagementApi.updateIdentity(eq(internalId), any())).thenReturn(Mono.empty().then());
+
+        User user = new User().externalId(externalId).additions(additionsMap).identityLinkStrategy(IMPORT_FROM_IDENTIY);
+        Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask());
+
+        result.subscribe(assertEqualsTo(user));
+        CreateIdentityRequest expectedCreateIdentityRequest =
+                new CreateIdentityRequest()
+                        .externalId(externalId)
+                        .additions(additionsMap)
+                        .legalEntityInternalId(legalEntityId);
+
+        verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
+        verify(identityManagementApi).updateIdentity(internalId, new UpdateIdentityRequest().additions(additionsMap));
+    }
+
+    @Test
+    void createOrImportIdentityUserUpdateAdditionsWithError() {
+        final String internalId = "someInternalId";
+        final String externalId = "someExternalId";
+        final String legalEntityId = "someLegalEntityId";
+        final Map<String, String> additionsMap = Collections.singletonMap("someKey", "someValue");
+
+        CreateIdentityResponse response = new CreateIdentityResponse().externalId(externalId).internalId(internalId);
+        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.just(response));
+
+        User user = new User().externalId(externalId).additions(additionsMap).identityLinkStrategy(IMPORT_FROM_IDENTIY);
+
+        StepVerifier.create(subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask()))
+                .expectError(StreamTaskException.class);
     }
 
     @Test
