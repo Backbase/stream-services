@@ -233,7 +233,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 );
                 return task;
             })
-            .map(userKindSegmentationSaga::executeTask)
+            .flatMap(userKindSegmentationSaga::executeTask)
             .then(Mono.just(streamTask));
     }
 
