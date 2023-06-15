@@ -1,5 +1,14 @@
 package com.backbase.stream.service;
 
+import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.CREATE_IN_IDENTITY;
+import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY;
+import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.*;
@@ -10,6 +19,13 @@ import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.User;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -24,19 +40,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-
-import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
-import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.CREATE_IN_IDENTITY;
-import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -152,21 +155,21 @@ class UserServiceTest {
         String email = "some@email.com";
 
         EnhancedUserRepresentation enhancedUserRepresentation = new EnhancedUserRepresentation().id(internalId)
-                .email(email).addGroupsItem("group1").addGroupsItem("group2");
+            .email(email).addGroupsItem("group1").addGroupsItem("group2");
         when(identityIntegrationApi.getUserById(realm, internalId))
-                .thenReturn(Mono.just(enhancedUserRepresentation));
+            .thenReturn(Mono.just(enhancedUserRepresentation));
         when(identityIntegrationApi.updateUserById(eq(realm), eq(internalId), any(UserRequestBody.class)))
-                .thenReturn(Mono.empty());
+            .thenReturn(Mono.empty());
 
         User user = new User().internalId(internalId)
-                .additionalGroups(Arrays.asList("group2", "group3"));
+            .additionalGroups(Arrays.asList("group2", "group3"));
         Mono<User> result = subject.updateUserState(user, realm);
 
 
         result.subscribe(assertEqualsTo(user));
         verify(identityIntegrationApi).getUserById(realm, internalId);
         UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email)
-                .credentials(Collections.emptyList()).groups(Arrays.asList("group1", "group2", "group3"));
+            .credentials(Collections.emptyList()).groups(Arrays.asList("group1", "group2", "group3"));
         verify(identityIntegrationApi).updateUserById(realm, internalId, expectedUser);
     }
 
@@ -304,7 +307,7 @@ class UserServiceTest {
         final String mobileNumber = "123456";
         final String fullName = "someName";
 
-        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.error(WebClientResponseException.create(500, "", new HttpHeaders(), "Error response".getBytes(StandardCharsets.UTF_8), null)));
+        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.error(WebClientResponseException.create(500,"", new HttpHeaders(), "Error response".getBytes(StandardCharsets.UTF_8), null)));
 
         User user = new User().externalId(externalId).attributes(attributesMap)
                 .identityLinkStrategy(strategy).fullName(fullName)
@@ -359,10 +362,10 @@ class UserServiceTest {
         final String fullName = "someName";
         UserExternal userExternal = new UserExternal()
                 .externalId(externalId)
-                .fullName(fullName);
+                        .fullName(fullName);
 
 
-        when(usersApi.createUser(any())).thenReturn(Mono.just(new UserCreated().id(internalId)));
+        when(usersApi.createUser(any())).thenReturn(Mono.just(new UserCreated().id(internalId) ));
 
         User user = new User().externalId(externalId).attributes(attributesMap)
                 .identityLinkStrategy(strategy).fullName(fullName)
@@ -410,7 +413,7 @@ class UserServiceTest {
         GetUser getUser = new GetUser().externalId(externalId)
                 .fullName(fullName);
 
-        when(usersApi.updateUserInBatch(any())).thenReturn(Flux.error(WebClientResponseException.create(500, "", new HttpHeaders(), "Error response".getBytes(StandardCharsets.UTF_8), null)));
+        when(usersApi.updateUserInBatch(any())).thenReturn(Flux.error(WebClientResponseException.create(500,"", new HttpHeaders(), "Error response".getBytes(StandardCharsets.UTF_8), null)));
         when(usersApi.getUserByExternalId(externalId, true)).thenReturn(Mono.just(getUser));
 
         User user = new User().externalId(externalId).fullName("oldName");
