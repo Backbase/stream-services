@@ -1,0 +1,13 @@
+
+name: APPROVE
+
+on: pull_request
+permissions:
+  pull-requests: write
+jobs:
+  approve:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: |
+          echo "hello"
