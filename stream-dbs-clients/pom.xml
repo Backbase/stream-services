@@ -427,6 +427,29 @@
                             <modelPackage>com.backbase.dbs.contact.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>boat-validation</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                        <configuration>
+                            <input>${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml</input>
+                            <failOnWarning>true</failOnWarning>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-user-segments-collector-service-api-code</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.audiences.collector.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.audiences.collector.api.service.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 

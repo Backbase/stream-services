@@ -5,6 +5,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +20,8 @@ import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.api.service.v2.model.Realm;
+import com.backbase.stream.audiences.UserKindSegmentationSaga;
+import com.backbase.stream.audiences.UserKindSegmentationTask;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
@@ -26,6 +29,7 @@ import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CurrentAccount;
+import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.ExternalAccountInformation;
 import com.backbase.stream.legalentity.model.ExternalContact;
@@ -54,6 +58,7 @@ import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
+import com.backbase.stream.worker.exception.StreamTaskException;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -100,6 +105,9 @@ class LegalEntitySagaTest {
 
     @Mock
     private ContactsSaga contactsSaga;
+
+    @Mock
+    private UserKindSegmentationSaga userKindSegmentationSaga;
 
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
@@ -839,6 +847,65 @@ class LegalEntitySagaTest {
         result = legalEntitySaga.executeTask(task).block();
         Assertions.assertNotNull(result);
         Assertions.assertEquals(leExternalId, result.getData().getUsers().get(0).getContacts().get(0).getExternalId());
+    }
+
+    @Test
+    void userKindSegmentationIsDisabled() {
+        getMockLegalEntity();
+
+        when(userKindSegmentationSaga.isEnabled()).thenReturn(false);
+
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+
+        verify(userKindSegmentationSaga, never()).executeTask(Mockito.any());
+    }
+
+    @Test
+    void userKindSegmentationUsesLegalEntityCustomerCategory() {
+        getMockLegalEntity();
+        legalEntity.setCustomerCategory(CustomerCategory.RETAIL);
+
+        when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
+
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+
+        verify(userKindSegmentationSaga, times(0)).getDefaultCustomerCategory();
+    }
+
+    @Test
+    void userKindSegmentationUsesDefaultCustomerCategory() {
+        getMockLegalEntity();
+        legalEntity.legalEntityType(LegalEntityType.CUSTOMER);
+
+        when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
+        when(userKindSegmentationSaga.getDefaultCustomerCategory()).thenReturn(CustomerCategory.RETAIL.getValue());
+        when(userKindSegmentationSaga.executeTask(any())).thenReturn(
+            Mono.just(Mockito.mock(UserKindSegmentationTask.class)));
+
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+
+        verify(userKindSegmentationSaga, times(1)).getDefaultCustomerCategory();
+    }
+
+    @Test
+    void whenUserKindSegmentationIsEnabledAndNoCustomerCategoryCanBeDeterminedReturnsError() {
+        getMockLegalEntity();
+        legalEntity.legalEntityType(LegalEntityType.CUSTOMER);
+
+        when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
+        when(userKindSegmentationSaga.getDefaultCustomerCategory()).thenReturn(null);
+
+        var task = mockLegalEntityTask(legalEntity);
+
+        Assertions.assertThrows(
+            StreamTaskException.class,
+            () -> executeLegalEntityTaskAndBlock(task),
+            "Failed to determine LE customerCategory for UserKindSegmentationSage."
+        );
+    }
+
+    private LegalEntityTask executeLegalEntityTaskAndBlock(LegalEntityTask task) {
+        return legalEntitySaga.executeTask(task).block();
     }
 
     private List<GetUser> getUsers(int amount) {
