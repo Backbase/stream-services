@@ -3,6 +3,7 @@ package com.backbase.stream.configuration;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.LegalEntityUnitOfWorkExecutor;
+import com.backbase.stream.audiences.UserKindSegmentationSaga;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.legalentity.repository.LegalEntityUnitOfWorkRepository;
 import com.backbase.stream.limit.LimitsSaga;
@@ -46,7 +47,9 @@ public class LegalEntitySagaConfiguration {
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
-        ObjectMapper objectMapper) {
+        ObjectMapper objectMapper,
+        UserKindSegmentationSaga userKindSegmentationSaga
+    ) {
         return new LegalEntitySaga(
             legalEntityService,
             userService,
@@ -56,7 +59,8 @@ public class LegalEntitySagaConfiguration {
             batchProductIngestionSaga,
             limitsSaga,
             contactsSaga,
-            sinkConfigurationProperties
+            sinkConfigurationProperties,
+            userKindSegmentationSaga
         );
     }
 

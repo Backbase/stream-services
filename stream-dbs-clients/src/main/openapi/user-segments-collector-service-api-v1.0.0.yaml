@@ -1,0 +1,188 @@
+openapi: 3.0.3
+info:
+  title: User Segments Collector service
+  description: Perform user segmentation.
+  version: 1.0.0
+  x-icon: category
+  x-api-dashboard-tags:
+  - name: Engage
+servers:
+- url: http://localhost:4010
+  description: Prism mock server
+tags:
+- name: handlers-service
+paths:
+  /service-api/v1/handlers/customer-onboarded:
+    post:
+      tags:
+      - handlers-service
+      description: Handles customer onboarded request by adding user to a corresponding
+        Segment.
+      operationId: customerOnboarded
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/customer-onboarded-request'
+            examples:
+              customer-onboarded-request-business:
+                $ref: '#/components/examples/customer-onboarded-request-business'
+              customer-onboarded-request-retail:
+                $ref: '#/components/examples/customer-onboarded-request-retail'
+        required: true
+      responses:
+        "202":
+          description: The customer onboarding request was processed successfully.
+        "400":
+          description: If one or more request parameters don't comply with the specification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                $ref: '#/components/examples/lib-bad-request-validation-error'
+        "401":
+          description: If the authentication credentials provided are invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                $ref: '#/components/examples/lib-unauthorized-error'
+        "403":
+          description: If the current user doesn't have sufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+              example:
+                $ref: '#/components/examples/lib-forbidden-error'
+        "500":
+          description: If a runtime error occurs while processing the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/simple-error'
+              example:
+                $ref: '#/components/examples/lib-internal-server-error'
+      x-BbAccessControl: false
+components:
+  schemas:
+    customer-onboarded-request:
+      title: CustomerOnboardedRequest
+      required:
+      - internalUserId
+      - userKind
+      type: object
+      properties:
+        internalUserId:
+          type: string
+          description: internal user id
+        userKind:
+          type: string
+          description: user kind
+          example: RetailCustomer
+          enum:
+          - RetailCustomer
+          - SME
+    error:
+      title: Error
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/error-item'
+    simple-error:
+      title: SimpleError
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information
+        key:
+          minLength: 1
+          type: string
+          description: Error summary
+    error-item:
+      title: ErrorItem
+      required:
+      - key
+      - message
+      type: object
+      properties:
+        message:
+          minLength: 1
+          type: string
+          description: Any further information.
+        key:
+          minLength: 1
+          type: string
+          description: "{capability-name}.api.{api-key-name}. For generated validation\
+            \ errors this is the path in the document the error resolves to. e.g.\
+            \ object name + '.' + field"
+        context:
+          title: Context
+          type: object
+          additionalProperties:
+            type: string
+          description: Context can be anything used to construct localised messages.
+  examples:
+    customer-onboarded-request-business:
+      summary: customer-onboarded-request-business
+      value:
+        internalUserId: 00000000-0000-0000-a000-000000000001
+        userKind: SME
+    customer-onboarded-request-retail:
+      summary: customer-onboarded-request-retail
+      value:
+        internalUserId: 00000000-0000-0000-a000-000000000002
+        userKind: RetailCustomer
+    lib-bad-request-validation-error:
+      summary: lib-bad-request-validation-error
+      value:
+        message: Bad Request
+        key: GENERAL_ERROR
+        errors:
+        - message: "Value Exceeded. Must be between {min} and {max}."
+          key: common.api.shoesize
+          context:
+            max: "50"
+            min: "1"
+    lib-unauthorized-error:
+      summary: lib-unauthorized-error
+      value:
+        message: Access to requested resource denied.
+        key: GENERAL_ERROR
+        errors:
+        - message: Resource access denied due to invalid credentials.
+          key: common.api.token
+          context:
+            accessToken: expired
+    lib-forbidden-error:
+      summary: lib-forbidden-error
+      value:
+        message: Access to requested resource denied.
+        key: GENERAL_ERROR
+        errors:
+        - message: "Resource access denied due to an insufficient user quota of {quota}."
+          key: common.api.quota
+          context:
+            quota: someQuota
+    lib-internal-server-error:
+      summary: lib-internal-server-error
+      value:
+        message: Description of error

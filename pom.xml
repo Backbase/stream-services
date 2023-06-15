@@ -33,6 +33,7 @@
         <module>stream-contacts</module>
         <module>stream-compositions</module>
         <module>stream-loans</module>
+        <module>stream-audiences</module>
     </modules>
 
     <properties>

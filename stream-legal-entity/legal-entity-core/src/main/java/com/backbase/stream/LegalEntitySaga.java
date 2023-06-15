@@ -8,6 +8,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest;
+import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest.UserKindEnum;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
@@ -21,6 +23,8 @@ import com.backbase.dbs.limit.api.service.v2.model.TransactionalLimitsBound;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
+import com.backbase.stream.audiences.UserKindSegmentationSaga;
+import com.backbase.stream.audiences.UserKindSegmentationTask;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
@@ -31,6 +35,7 @@ import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
+import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.JobProfileUser;
@@ -39,8 +44,8 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityReference;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
+import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.Limit;
-import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
@@ -49,8 +54,6 @@ import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.legalentity.model.UserProfile;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
-import com.backbase.stream.loan.LoansSaga;
-import com.backbase.stream.loan.LoansTask;
 import com.backbase.stream.mapper.ExternalContactMapper;
 import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.BatchProductIngestionSaga;
@@ -144,6 +147,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private final LimitsSaga limitsSaga;
     private final ContactsSaga contactsSaga;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
+    private final UserKindSegmentationSaga userKindSegmentationSaga;
+
     private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
 
     public LegalEntitySaga(LegalEntityService legalEntityService,
@@ -154,7 +159,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         BatchProductIngestionSaga batchProductIngestionSaga,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
-        LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
+        LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties,
+        UserKindSegmentationSaga userKindSegmentationSaga) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
         this.userProfileService = userProfileService;
@@ -163,6 +169,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         this.limitsSaga = limitsSaga;
         this.contactsSaga = contactsSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
+        this.userKindSegmentationSaga = userKindSegmentationSaga;
     }
 
     @Override
@@ -178,9 +185,71 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::setupLimits)
             .flatMap(this::processProducts)
             .flatMap(this::postContacts)
+            .flatMap(this::processAudiencesSegmentation)
             .flatMap(this::processSubsidiaries);
     }
 
+    private Mono<LegalEntityTask> processAudiencesSegmentation(LegalEntityTask streamTask) {
+        if (!userKindSegmentationSaga.isEnabled()) {
+            log.info("Skipping audiences UserKind segmentation - feature is disabled.");
+            return Mono.just(streamTask);
+        }
+
+        var le = streamTask.getData();
+
+        if (le.getLegalEntityType() != LegalEntityType.CUSTOMER) {
+            return Mono.just(streamTask);
+        }
+
+        var customerCategory = le.getCustomerCategory();
+        if (customerCategory == null) {
+            var defaultCategory = userKindSegmentationSaga.getDefaultCustomerCategory();
+            if (defaultCategory == null) {
+                return Mono.error(new StreamTaskException(streamTask,
+                    "Failed to determine LE customerCategory for UserKindSegmentationSage."));
+            }
+            customerCategory = CustomerCategory.fromValue(defaultCategory);
+        }
+
+        var userKind = customerCategoryToUserKind(customerCategory);
+
+        if (userKind == null) {
+            log.info("Skipping audiences UserKind segmentation - customerCategory " + customerCategory
+                + " is not supported");
+            return Mono.just(streamTask);
+        }
+
+        if (!le.getUsers().isEmpty()) {
+            log.info("Ingesting customers of LE into UserKind segment customerCategory: " + customerCategory);
+        }
+
+        return Flux.fromIterable(le.getUsers())
+            .map(user -> {
+                var task = new UserKindSegmentationTask();
+                task.setCustomerOnboardedRequest(
+                    new CustomerOnboardedRequest()
+                        .internalUserId(user.getUser().getInternalId())
+                        .userKind(userKind)
+                );
+                return task;
+            })
+            .flatMap(userKindSegmentationSaga::executeTask)
+            .then(Mono.just(streamTask));
+    }
+
+    private UserKindEnum customerCategoryToUserKind(CustomerCategory customerCategory) {
+        switch (customerCategory) {
+            case RETAIL -> {
+                return UserKindEnum.RETAILCUSTOMER;
+            }
+            case BUSINESS -> {
+                return UserKindEnum.SME;
+            }
+            default -> {
+                return null;
+            }
+        }
+    }
 
     private Mono<LegalEntityTask> postContacts(LegalEntityTask streamTask) {
         return Mono.just(streamTask)

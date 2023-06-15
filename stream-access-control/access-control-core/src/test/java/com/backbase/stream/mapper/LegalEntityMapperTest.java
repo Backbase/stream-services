@@ -190,6 +190,10 @@ class LegalEntityMapperTest {
                 com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityType.BANK,
                 presentation.getNewValues().getType()
             ),
+            () -> assertEquals(
+                com.backbase.dbs.accesscontrol.api.service.v3.model.CustomerCategory.RETAIL,
+                presentation.getNewValues().getCustomerCategory()
+            ),
             () -> assertEquals("parentExternalId", presentation.getNewValues().getParentExternalId()),
             () -> assertEquals(Boolean.TRUE, presentation.getNewValues().getActivateSingleServiceAgreement())
         );
