@@ -143,9 +143,9 @@ class LoansSagaTest {
         assertEquals(InboundIntegrationFrequency.MONTHLY, paymentAttributes.getPaymentFrequency());
         assertEquals(42, paymentAttributes.getNumberOfPaymentsMade());
         assertEquals(142, paymentAttributes.getTotalNumberOfPayments());
-        assertEquals("WEEK", paymentAttributes.getTotalDirectAmortizationUnit());
+        assertEquals(InboundIntegrationTermUnit.WEEK, paymentAttributes.getTotalDirectAmortizationUnit());
         assertEquals(new BigDecimal("19000.019"), paymentAttributes.getTotalDirectAmortization());
-        assertEquals("MONTH", paymentAttributes.getTotalIndirectAmortizationUnit());
+        assertEquals(InboundIntegrationTermUnit.MONTH, paymentAttributes.getTotalIndirectAmortizationUnit());
         assertEquals(new BigDecimal("20000.02"), paymentAttributes.getTotalIndirectAmortization());
 
         InboundIntegrationDefaultSettlementAccount defaultSettlementAccount = loan.getDefaultSettlementAccount();
