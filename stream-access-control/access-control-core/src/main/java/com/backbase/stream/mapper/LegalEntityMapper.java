@@ -39,6 +39,7 @@ public interface LegalEntityMapper {
     @Mapping(source = "externalId", target = "newValues.externalId")
     @Mapping(source = "name", target = "newValues.name")
     @Mapping(source = "legalEntityType", target = "newValues.type")
+    @Mapping(source = "customerCategory", target = "newValues.customerCategory")
     @Mapping(source = "parentExternalId", target = "newValues.parentExternalId")
     @Mapping(source = "activateSingleServiceAgreement", target = "newValues.activateSingleServiceAgreement")
     @Mapping(source = "externalId", target = "currentExternalId")
