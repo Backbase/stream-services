@@ -1,5 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.48.0](https://github.com/Backbase/stream-services/compare/3.47.0...3.48.0)
+### Changed
+- Updated UserService.createOrImportIdentityUser to populate user's additions to DBS with IMPORT_FROM_IDENTITY linking strategy
+
 ## [3.47.0](https://github.com/Backbase/stream-services/compare/3.46.0...3.47.0)
 ### Changed
 - Removed unused parameter from Payment Orders filter request. 

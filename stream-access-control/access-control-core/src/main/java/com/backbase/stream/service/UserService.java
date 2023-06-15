@@ -302,19 +302,20 @@ public class UserService {
                 user.setExternalId(identityCreatedItem.getExternalId());
                 return user;
             })
-            .flatMap(newUser -> this.updateIdentityUserAttributes(user, streamTask));
+            .flatMap(newUser -> this.updateIdentityUser(user, streamTask));
     }
 
-    private Mono<User> updateIdentityUserAttributes(User user, StreamTask streamTask) {
+    private Mono<User> updateIdentityUser(User user, StreamTask streamTask) {
         if (IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())
-            && user.getAttributes() != null) {
+            && (user.getAttributes() != null || user.getAdditions() != null)) {
             UpdateIdentityRequest replaceIdentity = new UpdateIdentityRequest();
             replaceIdentity.attributes(user.getAttributes());
+            replaceIdentity.additions(user.getAdditions());
             return identityManagementApi.updateIdentity(user.getInternalId(), replaceIdentity)
                 .onErrorResume(WebClientResponseException.class, e -> {
                     log.error("Error updating identity: {} Response: {}", user.getExternalId(), e.getResponseBodyAsString());
                     String message = "Failed to update identity: " + user.getExternalId();
-                    streamTask.error("user", "update-identity-attributes", "failed",
+                    streamTask.error("user", "update-identity-attributes-and-additions", "failed",
                         user.getExternalId(), user.getInternalId(), e, e.getMessage(), message);
 
                     return Mono.error(new StreamTaskException(streamTask, message));
