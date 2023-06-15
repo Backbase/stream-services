@@ -1,5 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+
+## [3.49.0](https://github.com/Backbase/stream-services/compare/3.48.0...3.49.0)
+### Changed
+- Upgrading Stream from `2023.02-LTS` to `2023.06`
+- Updated Portfolio's position stream contract to include new fields
+
 ## [3.48.0](https://github.com/Backbase/stream-services/compare/3.47.0...3.48.0)
 ### Changed
 - Updated UserService.createOrImportIdentityUser to populate user's additions to DBS with IMPORT_FROM_IDENTITY linking strategy
