@@ -25,6 +25,7 @@
         <module>stream-transactions</module>
         <module>stream-cursor</module>
         <module>stream-product-catalog</module>
+        <module>stream-loans</module>
         <module>stream-limits</module>
         <module>stream-legal-entity</module>
         <module>stream-approvals</module>

@@ -709,9 +709,9 @@ components:
         totalIndirectAmortization:
           $ref: '#/components/schemas/TotalIndirectAmortization'
         totalDirectAmortizationUnit:
-          $ref: '#/components/schemas/FrequencyUnit'
+          $ref: '#/components/schemas/TermUnit'
         totalIndirectAmortizationUnit:
-          $ref: '#/components/schemas/FrequencyUnit'
+          $ref: '#/components/schemas/TermUnit'
         remainingTermUnit:
           $ref: '#/components/schemas/TermUnit'
         remainingTermCount:
