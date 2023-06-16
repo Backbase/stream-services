@@ -95,7 +95,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>unpack</id>
@@ -126,7 +126,7 @@
                                     <artifactId>audit-spec</artifactId>
                                     <classifier>api</classifier>
                                     <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/yaml/audit</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
@@ -338,7 +338,7 @@
                             <importMappings>
                                 <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
                             </importMappings>
-                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v*.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.paymentorder.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.paymentorder.api.service.v2.model</modelPackage>
                         </configuration>

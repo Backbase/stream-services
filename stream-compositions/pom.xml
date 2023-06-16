@@ -16,7 +16,7 @@
     <version>3.49.0</version>
 
     <properties>
-        <backbase-bom.version>2023.02-LTS</backbase-bom.version>
+        <backbase-bom.version>2023.06</backbase-bom.version>
         <boat-maven-plugin.version>0.16.6</boat-maven-plugin.version>
         <testcontainers.version>1.12.5</testcontainers.version>
         <mock.server.version>5.11.2</mock.server.version>

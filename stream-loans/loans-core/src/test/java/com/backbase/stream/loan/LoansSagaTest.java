@@ -118,7 +118,7 @@ class LoansSagaTest {
 
         InboundIntegrationInterestAttributes interestAttributes = loan.getInterestAttributes();
         assertNotNull(interestAttributes);
-        assertEquals(new BigDecimal("8008.008"), interestAttributes.getInterestRate());
+        assertEquals("8008.008", interestAttributes.getInterestRate());
         assertEquals(InboundIntegrationFrequency.ANNUALLY, interestAttributes.getInterestPaymentFrequency());
         assertEquals(new BigDecimal("10.20"), interestAttributes.getTotalAnnualCostPercentage());
 
@@ -143,9 +143,9 @@ class LoansSagaTest {
         assertEquals(InboundIntegrationFrequency.MONTHLY, paymentAttributes.getPaymentFrequency());
         assertEquals(42, paymentAttributes.getNumberOfPaymentsMade());
         assertEquals(142, paymentAttributes.getTotalNumberOfPayments());
-        assertEquals("WEEKLY", paymentAttributes.getTotalDirectAmortizationUnit());
+        assertEquals(InboundIntegrationTermUnit.WEEK, paymentAttributes.getTotalDirectAmortizationUnit());
         assertEquals(new BigDecimal("19000.019"), paymentAttributes.getTotalDirectAmortization());
-        assertEquals("BIWEEKLY", paymentAttributes.getTotalIndirectAmortizationUnit());
+        assertEquals(InboundIntegrationTermUnit.MONTH, paymentAttributes.getTotalIndirectAmortizationUnit());
         assertEquals(new BigDecimal("20000.02"), paymentAttributes.getTotalIndirectAmortization());
 
         InboundIntegrationDefaultSettlementAccount defaultSettlementAccount = loan.getDefaultSettlementAccount();
@@ -209,9 +209,9 @@ class LoansSagaTest {
         loan.setPaymentFrequency(FrequencyUnit.MONTHLY);
         loan.setNumberOfPaymentsMade(42);
         loan.setTotalNumberOfPayments(142);
-        loan.setTotalDirectAmortizationUnit(FrequencyUnit.WEEKLY);
+        loan.setTotalDirectAmortizationUnit(TermUnit.WEEKLY);
         loan.setTotalDirectAmortization(new BigDecimal("19000.019"));
-        loan.setTotalIndirectAmortizationUnit(FrequencyUnit.BIWEEKLY);
+        loan.setTotalIndirectAmortizationUnit(TermUnit.MONTHLY);
         loan.setTotalIndirectAmortization(new BigDecimal("20000.02"));
         loan.setAccountOpeningDate(OffsetDateTime.parse("1991-08-24T16:22:00+00:00"));
         loan.setMaturityDate(OffsetDateTime.parse("1991-08-24T16:23:00+00:00"));

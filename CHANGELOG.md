@@ -1,5 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+
+## [3.50.0](https://github.com/Backbase/stream-services/compare/3.49.0...3.50.0)
+### Changed
+- Upgrading Stream from `2023.02-LTS` to `2023.06`
+- Updated Portfolio's position stream contract to include new fields
+
 ## [3.49.0](https://github.com/Backbase/stream-services/compare/3.48.0...3.49.0)
 ### Added
 - Added Support for ingesting LE customers into audiences user-kind segments (for both Retail and Business banking)
