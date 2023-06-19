@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.51.0](https://github.com/Backbase/stream-services/compare/3.50.0...3.51.0)
+### Changed
+- Upgrading Stream from `2023.06` to `2023.06.2`
+- 
 ## [3.50.0](https://github.com/Backbase/stream-services/compare/3.49.0...3.50.0)
 ### Changed
 - Upgrading Stream from `2023.02-LTS` to `2023.06`
