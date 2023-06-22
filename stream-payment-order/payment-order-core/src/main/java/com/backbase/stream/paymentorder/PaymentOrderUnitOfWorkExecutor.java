@@ -111,7 +111,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
         return paymentOrdersApi.postFilterPaymentOrders(
                 null, null, null, null, null, null, null, null, null, null, null,
-                internalUserId, null, null, null, null,
+                internalUserId, null, null, null, Integer.MAX_VALUE,
                 null, null, paymentOrderPostFilterRequest);
     }
 
