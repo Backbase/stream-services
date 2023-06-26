@@ -1,5 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.49.1](https://github.com/Backbase/stream-services/compare/3.49.0...3.49.1)
+### Changed
+- Pull all Payments belonging to the user instead of the detault, 10.
+  
 ## [3.49.0](https://github.com/Backbase/stream-services/compare/3.48.0...3.49.0)
 ### Added
 - Added Support for ingesting LE customers into audiences user-kind segments (for both Retail and Business banking)
