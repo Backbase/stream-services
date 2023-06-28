@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.paymentorders.core.service.impl;
 
+import com.backbase.stream.service.ArrangementService;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,7 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
     private final PaymentOrderIntegrationService paymentOrderIntegrationService;
     private final PaymentOrderService paymentOrderService;
     private final PaymentOrderPostIngestionService paymentOrderPostIngestionService;
+    private final ArrangementService arrangementService;
 
     private final PaymentOrderMapper paymentOrderMapper;
 
@@ -38,6 +40,7 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
 
         return buildIntegrationRequest(ingestPullRequest)
                 .map(this::pullPaymentOrder)
+                .map(this::addArrangmentId)
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(this::handleSuccess)
                 .onErrorResume(this::handleError)
@@ -66,6 +69,20 @@ public class PaymentOrderIngestionServiceImpl implements PaymentOrderIngestionSe
     private Flux<PaymentOrderPostRequest> pullPaymentOrder(PaymentOrderIngestPullRequest request) {
        return paymentOrderIntegrationService.pullPaymentOrder(request)
                 .map(paymentOrderMapper::mapIntegrationToStream);
+    }
+
+    private Flux<PaymentOrderPostRequest> addArrangmentId(Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux) {
+
+        return paymentOrderPostRequestFlux
+            .map(paymentOrderPostRequest -> {
+                if(paymentOrderPostRequest.getOriginatorAccount().getArrangementId().isEmpty()) {
+                    paymentOrderPostRequest.getOriginatorAccount()
+                        .setArrangementId(arrangementService
+                            .getArrangementInternalId(paymentOrderPostRequest.getOriginatorAccount()
+                                .getExternalArrangementId()));
+                }
+                return paymentOrderPostRequest;
+            });
     }
 
     private Mono<List<PaymentOrderIngestDbsResponse>> sendToDbs(Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux) {

@@ -127,6 +127,7 @@ public class PaymentOrderTaskExecutor implements StreamTaskExecutor<PaymentOrder
      */
     private Mono<PaymentOrderPostResponse> persistNewPaymentOrder(PaymentOrderPostRequest newPaymentOrderRequest) {
         newPaymentOrderRequest.setId(generateTransferUniqueId());
+        System.out.println("posting new pmt: " + newPaymentOrderRequest.getOriginatorAccount().getArrangementId());
         return paymentOrdersApi.postPaymentOrder(
                     newPaymentOrderRequest);
 
