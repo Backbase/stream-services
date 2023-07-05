@@ -959,9 +959,11 @@ public class AccessGroupService {
         }
 
         return dataGroupsApi.postDataGroups(dataGroupItemSystemBase)
-            .onErrorResume(WebClientResponseException.class, badRequest -> {
-                streamTask.error(ACCESS_GROUP, CREATE_ACCESS_GROUP, REJECTED, productGroup.getName(), null, "Data group items cannot have null items");
-                return Mono.error(new StreamTaskException(streamTask, badRequest, "Data Group Items cannot have null items"));
+            .onErrorResume(WebClientResponseException.class, webClientResponseEx -> {
+                String message = webClientResponseEx.getResponseBodyAsString();
+                streamTask.error(ACCESS_GROUP, CREATE_ACCESS_GROUP, REJECTED, productGroup.getName(), null,
+                    webClientResponseEx, message, "Unable to add data access group items");
+                return Mono.error(new StreamTaskException(streamTask, webClientResponseEx, message));
             })
             .map(idItem -> {
                     streamTask.info(ACCESS_GROUP, CREATE_ACCESS_GROUP, CREATED, productGroup.getName(), idItem.getId(), "Create new Data Group");

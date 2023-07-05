@@ -29,15 +29,15 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>contacts-core</artifactId>
+            <artifactId>audiences-core</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>audiences-core</artifactId>
+            <artifactId>contacts-core</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>

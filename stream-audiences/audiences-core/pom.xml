@@ -19,12 +19,12 @@
     <dependencies>
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-worker</artifactId>
+            <artifactId>stream-dbs-clients</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-dbs-clients</artifactId>
+            <artifactId>stream-worker</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

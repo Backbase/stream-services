@@ -305,7 +305,8 @@ public class ProductIngestionSaga {
                 return arrangementService.updateArrangement(arrangemenItemBase)
                     .onErrorResume(ArrangementUpdateException.class, e -> {
                         streamTask.error(ARRANGEMENT, UPDATE_ARRANGEMENT, FAILED, arrangementItemPost.getExternalArrangementId(), internalId, e, e.getHttpResponse(), "Failed to update arrangement: %s", arrangementItemPost.getExternalArrangementId());
-                        return Mono.error(new StreamTaskException(streamTask, e, "Failed to update arrangement"));
+                        return Mono.error(new StreamTaskException(streamTask, e.getCause(),
+                            e.getMessage() + " " + e.getCause().getMessage()));
                     })
                     .map(actual -> {
                         log.info("Updated arrangement: {}", actual.getExternalArrangementId());
