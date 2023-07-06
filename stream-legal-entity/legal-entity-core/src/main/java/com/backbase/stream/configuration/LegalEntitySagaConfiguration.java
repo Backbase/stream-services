@@ -30,7 +30,8 @@ import org.springframework.context.annotation.Import;
     ProductIngestionSagaConfiguration.class,
     LimitsServiceConfiguration.class,
     ContactsServiceConfiguration.class,
-    LoansServiceConfiguration.class
+    LoansServiceConfiguration.class,
+    AudiencesSegmentationConfiguration.class
 })
 @EnableConfigurationProperties(
     {LegalEntitySagaConfigurationProperties.class}
