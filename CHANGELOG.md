@@ -1,5 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.52.0](https://github.com/Backbase/stream-services/compare/3.51.0...3.52.0)
+### Changed
+- Fixed two small bugs caused by introduction of UserKindSegmentationSage
+  add check for LE not having users before processing. (should fix error when LE is empty)
+  add AudiencesSegmentationConfiguration to LegalEntitySagaConfiguration
 
 ## [3.51.0](https://github.com/Backbase/stream-services/compare/3.50.0...3.51.0)
 ### Changed

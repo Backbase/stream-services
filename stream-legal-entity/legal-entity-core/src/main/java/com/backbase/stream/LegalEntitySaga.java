@@ -219,11 +219,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             return Mono.just(streamTask);
         }
 
-        if (!le.getUsers().isEmpty()) {
-            log.info("Ingesting customers of LE into UserKind segment customerCategory: " + customerCategory);
-        }
+        log.info("Ingesting customers of LE into UserKind segment customerCategory: " + customerCategory);
 
-        return Flux.fromIterable(le.getUsers())
+        return Flux.fromStream(StreamUtils.nullableCollectionToStream(le.getUsers()))
             .map(user -> {
                 var task = new UserKindSegmentationTask();
                 task.setCustomerOnboardedRequest(
