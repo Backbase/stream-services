@@ -1,5 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.53.0](https://github.com/Backbase/stream-services/compare/3.52.0...3.53.0)
+### Changed
+- Fixed a bug that was causing the Product Composition integration with Transaction Composition to fail due to a missing required request parameter (`arrangementId`)
+
 ## [3.52.0](https://github.com/Backbase/stream-services/compare/3.51.0...3.52.0)
 ### Changed
 - Fixed two small bugs caused by introduction of UserKindSegmentationSage
