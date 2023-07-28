@@ -1,5 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.55.0](https://github.com/Backbase/stream-services/compare/3.54.0...3.55.0)
+### Changed
+- Removed the no-scs tag used during the docker image build. The latest baas use service bus and these libraries will be required.
 ## [3.53.0](https://github.com/Backbase/stream-services/compare/3.52.0...3.53.0)
 ### Changed
 - Fixed a bug that was causing the Product Composition integration with Transaction Composition to fail due to a missing required request parameter (`arrangementId`)
