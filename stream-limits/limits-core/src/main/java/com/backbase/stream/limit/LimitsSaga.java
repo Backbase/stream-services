@@ -1,10 +1,12 @@
 package com.backbase.stream.limit;
 
+import static org.springframework.util.CollectionUtils.contains;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
 import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.limit.api.service.v2.model.LimitsRetrievalPostResponseBody;
+import com.backbase.stream.configuration.LimitsWorkerConfigurationProperties;
 import com.backbase.stream.mapper.LimitsMapper;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
@@ -31,26 +33,33 @@ public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
     public static final String UPDATED_SUCCESSFULLY = "Limit updated successfully";
     public static final String FAILED_TO_INGEST_LIMITS = "Failed to ingest limits";
     private final LimitsServiceApi limitsApi;
+
+    private final LimitsWorkerConfigurationProperties limitsWorkerConfigurationProperties;
     private final LimitsMapper mapper = Mappers.getMapper(LimitsMapper.class);
 
     @Override
     public Mono<LimitsTask> executeTask(LimitsTask limitsTask) {
         CreateLimitRequestBody item = limitsTask.getData();
 
+        if (!limitsWorkerConfigurationProperties.isEnabled()) {
+            log.info("backbase.stream.limits.worker.limitsEnabled is false, Skipping limits ingestion");
+            return Mono.just(limitsTask);
+        }
+
         log.info("Started ingestion of limits {} for user {}",
-            item.getEntities().stream().map(entity -> entity.getEtype() + COLON + SPACE + entity.getEref())
-                .collect(Collectors.joining(COMMA + SPACE)), item.getUserBBID());
+                item.getEntities().stream().map(entity -> entity.getEtype() + COLON + SPACE + entity.getEref())
+                        .collect(Collectors.joining(COMMA + SPACE)), item.getUserBBID());
         return limitsApi.postLimitsRetrieval(mapper.map(item))
-            .collectList()
-            .flatMap(limitsRetrievalPostResponseBody -> {
-                if (isEmpty(limitsRetrievalPostResponseBody)) {
-                    log.info("Creating Limits");
-                    return createLimits(limitsTask, item);
-                } else {
-                    log.info("Updating Limits");
-                    return updateLimits(limitsTask, item, limitsRetrievalPostResponseBody);
-                }
-            });
+                .collectList()
+                .flatMap(limitsRetrievalPostResponseBody -> {
+                    if (isEmpty(limitsRetrievalPostResponseBody)) {
+                        log.info("Creating Limits");
+                        return createLimits(limitsTask, item);
+                    } else {
+                        log.info("Updating Limits");
+                        return updateLimits(limitsTask, item, limitsRetrievalPostResponseBody);
+                    }
+                });
     }
 
     private Mono<? extends LimitsTask> updateLimits(LimitsTask limitsTask, CreateLimitRequestBody item,

@@ -1,16 +1,9 @@
 package com.backbase.stream.limit;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
-import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
-import com.backbase.dbs.limit.api.service.v2.model.Entity;
-import com.backbase.dbs.limit.api.service.v2.model.LimitByUuidPutResponseBody;
-import com.backbase.dbs.limit.api.service.v2.model.LimitsPostResponseBody;
-import com.backbase.dbs.limit.api.service.v2.model.LimitsRetrievalPostResponseBody;
-import java.util.List;
+import com.backbase.dbs.limit.api.service.v2.model.*;
+import com.backbase.stream.configuration.LimitsWorkerConfigurationProperties;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +11,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LimitsSagaTest {
@@ -27,6 +26,14 @@ class LimitsSagaTest {
 
     @Mock
     private LimitsServiceApi limitsApi;
+
+    @Mock
+    private LimitsWorkerConfigurationProperties limitsWorkerConfigurationProperties;
+
+    @BeforeEach
+    public void init() {
+        when(limitsWorkerConfigurationProperties.isEnabled()).thenReturn(Boolean.TRUE);
+    }
 
     @Test
     void createLimits() {
