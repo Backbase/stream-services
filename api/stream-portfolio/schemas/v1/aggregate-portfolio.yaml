@@ -4,7 +4,10 @@ type: object
 properties:
   id:
     type: string
-    description: Unique identificator for an aggregate portfolio, used to identify aggregate portfolio at a bank or an investment firm.
+    description: Unique identification for an aggregate portfolio, used to identify aggregate portfolio at a bank or an investment firm.
+  externalId:
+    type: string
+    description: Unique identification for an aggregate portfolio externalId.
   name:
     type: string
     description: Name of an aggregate portfolio, characterising total wealth of the end-user.
