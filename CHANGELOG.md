@@ -1,5 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.56.0](https://github.com/Backbase/stream-services/compare/3.54.0...3.55.0)
+### Changed
+- Fix missing portfolio aggregation model attribute `externalId`
 ## [3.55.0](https://github.com/Backbase/stream-services/compare/3.54.0...3.55.0)
 ### Changed
 - Removed the no-scs tag used during the docker image build. The latest baas use service bus and these libraries will be required.
