@@ -42,7 +42,7 @@ public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
         CreateLimitRequestBody item = limitsTask.getData();
 
         if (!limitsWorkerConfigurationProperties.isEnabled()) {
-            log.info("backbase.stream.limits.worker.limitsEnabled is false, Skipping limits ingestion");
+            log.info("backbase.stream.limits.worker.enabled is false, Skipping limits ingestion");
             return Mono.just(limitsTask);
         }
 
