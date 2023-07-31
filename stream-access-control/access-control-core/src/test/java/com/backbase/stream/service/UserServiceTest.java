@@ -3,6 +3,7 @@ package com.backbase.stream.service;
 import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.CREATE_IN_IDENTITY;
 import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY;
 import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -344,6 +345,24 @@ class UserServiceTest {
 
         StepVerifier.create(result)
             .expectError().verify();
+    }
+
+    @Test
+    void createOrImportIdentityErrorOnCreateWhenMissingEmail() {
+        final String externalId = "someExternalId";
+        final String legalEntityId = "someLegalEntityId";
+        final Map<String, String> attributesMap = Collections.singletonMap("someKey", "someValue");
+        final IdentityUserLinkStrategy strategy = CREATE_IN_IDENTITY;
+        final String emailAddress = null;
+        final String mobileNumber = "123456";
+        final String fullName = "someName";
+
+        User user = new User().externalId(externalId).attributes(attributesMap)
+            .identityLinkStrategy(strategy).fullName(fullName)
+            .emailAddress(new EmailAddress().address(emailAddress))
+            .mobileNumber(new PhoneNumber().number(mobileNumber));
+
+        assertThrows(NullPointerException.class, () -> subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask()));
     }
 
     @Test

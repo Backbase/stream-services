@@ -22,8 +22,10 @@ import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServi
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
 import com.backbase.stream.exceptions.UserUpsertException;
+import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.mapper.RealmMapper;
 import com.backbase.stream.mapper.UserMapper;
@@ -279,9 +281,16 @@ public class UserService {
         Mono<CreateIdentityResponse> upsertCall;
 
         if (IdentityUserLinkStrategy.CREATE_IN_IDENTITY.equals(user.getIdentityLinkStrategy())) {
-            Objects.requireNonNull(user.getFullName(), "User Full Name is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
-            Objects.requireNonNull(user.getEmailAddress(), "User Email Address is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
-            Objects.requireNonNull(user.getMobileNumber(), "User Mobile Number is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
+            Objects.requireNonNull(user.getFullName(),
+                "User Full Name is required for user: " + user.getExternalId() + " in legal entity: "
+                    + legalEntityInternalId);
+            Objects.requireNonNull(
+                Optional.ofNullable(user.getEmailAddress()).map(EmailAddress::getAddress).orElse(null),
+                "User Email Address is required for user: " + user.getExternalId() + " in legal entity: "
+                    + legalEntityInternalId);
+            Objects.requireNonNull(Optional.ofNullable(user.getMobileNumber()).map(PhoneNumber::getNumber).orElse(null),
+                "User Mobile Number is required for user: " + user.getExternalId() + " in legal entity: "
+                    + legalEntityInternalId);
 
             CreateIdentityRequest createIdentityRequest = new CreateIdentityRequest();
             createIdentityRequest.setLegalEntityInternalId(legalEntityInternalId);
