@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.38.0](https://github.com/Backbase/stream-services/compare/3.37.0...3.38.0)
+### Changed
+- For the IMPORT_FROM_IDENTIY strategy use the user manager importIdentity API call
+
 ## [3.37.0](https://github.com/Backbase/stream-services/compare/3.36.0...3.37.0)
 ### Added
 - Adds `bankBranchCode` field to `TermDeposit` openapi schema

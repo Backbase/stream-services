@@ -181,7 +181,7 @@ class UserServiceTest {
         final IdentityUserLinkStrategy strategy = IMPORT_FROM_IDENTIY;
 
         CreateIdentityResponse response = new CreateIdentityResponse().externalId(externalId).internalId(internalId);
-        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.just(response));
+        when(identityManagementApi.importIdentity(any())).thenReturn(Mono.just(response));
 
         when(identityManagementApi.updateIdentity(eq(internalId), any())).thenReturn(Mono.empty().then());
 
@@ -193,9 +193,9 @@ class UserServiceTest {
 
 
         result.subscribe(assertEqualsTo(user));
-        CreateIdentityRequest expectedCreateIdentityRequest = new CreateIdentityRequest().externalId(externalId)
+        ImportIdentity expectedImportIdentityRequest = new ImportIdentity().externalId(externalId)
                 .legalEntityInternalId(legalEntityId);
-        verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
+        verify(identityManagementApi).importIdentity(expectedImportIdentityRequest);
         UpdateIdentityRequest expectedUpdateIdentityRequest = new UpdateIdentityRequest().attributes(attributesMap);
         verify(identityManagementApi).updateIdentity(internalId, expectedUpdateIdentityRequest);
     }
@@ -208,7 +208,7 @@ class UserServiceTest {
         final IdentityUserLinkStrategy strategy = IMPORT_FROM_IDENTIY;
 
         CreateIdentityResponse response = new CreateIdentityResponse().externalId(externalId).internalId(internalId);
-        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.just(response));
+        when(identityManagementApi.importIdentity(any())).thenReturn(Mono.just(response));
 
         User user = new User().externalId(externalId).identityLinkStrategy(strategy);
 
@@ -217,9 +217,9 @@ class UserServiceTest {
 
 
         result.subscribe(assertEqualsTo(user));
-        CreateIdentityRequest expectedCreateIdentityRequest = new CreateIdentityRequest().externalId(externalId)
-                .legalEntityInternalId(legalEntityId);
-        verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
+        ImportIdentity expectedImportIdentityRequest = new ImportIdentity().externalId(externalId)
+            .legalEntityInternalId(legalEntityId);
+        verify(identityManagementApi).importIdentity(expectedImportIdentityRequest);
         verifyNoMoreInteractions(identityManagementApi);
     }
 
