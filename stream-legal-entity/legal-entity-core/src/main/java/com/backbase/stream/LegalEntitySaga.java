@@ -430,17 +430,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         LegalEntity legalEntity = task.getData();
         // Pipeline for Existing Legal Entity
         Mono<LegalEntityTask> existingLegalEntity = legalEntityService.getLegalEntityByExternalId(legalEntity.getExternalId())
-            .onErrorResume(throwable -> {
-                if (throwable instanceof WebClientResponseException webClientResponseException) {
-                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), null,
-                        webClientResponseException,
-                        webClientResponseException.getResponseBodyAsString(), "Unexpected Web Client Exception");
-                } else {
-                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), null, throwable,
-                        throwable.getMessage(), "Unexpected Error");
-                }
-                return Mono.error(new StreamTaskException(task, throwable, "Failed to get Legal Entity: " + throwable.getMessage()));
-            })
             .flatMap(actual -> {
                 task.getData().setInternalId(actual.getInternalId());
                 return legalEntityService.getLegalEntityByInternalId(actual.getInternalId())
@@ -453,22 +442,37 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                             return Mono.just(task);
                         });
                     });
+            })
+            .onErrorResume(throwable -> {
+                if (throwable instanceof WebClientResponseException webClientResponseException) {
+                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), null,
+                        webClientResponseException,
+                        webClientResponseException.getResponseBodyAsString(), "Unexpected Web Client Exception");
+                } else {
+                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), null, throwable,
+                        throwable.getMessage(), "Unexpected Error");
+                }
+                return Mono.error(
+                    new StreamTaskException(task, throwable, "Failed to get Legal Entity: " + throwable.getMessage()));
             });
         // Pipeline for Creating New Legal Entity
-        Mono<LegalEntityTask> createNewLegalEntity = legalEntityService.createLegalEntity(legalEntity)
+        Mono<LegalEntityTask> createNewLegalEntity = Mono.defer(() -> legalEntityService.createLegalEntity(legalEntity)
             .flatMap(actual -> {
                 task.getData().setInternalId(legalEntity.getInternalId());
                 return legalEntityService.getLegalEntityByInternalId(actual.getInternalId())
                     .flatMap(result -> {
                         task.getData().setParentInternalId(result.getParentInternalId());
-                        task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, CREATED, legalEntity.getExternalId(), legalEntity.getInternalId(), "Created new Legal Entity");
+                        task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, CREATED, legalEntity.getExternalId(),
+                            legalEntity.getInternalId(), "Created new Legal Entity");
                         return Mono.just(task);
                     });
             })
             .onErrorResume(LegalEntityException.class, legalEntityException -> {
-                task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), legalEntity.getInternalId(), legalEntityException, legalEntityException.getHttpResponse(), legalEntityException.getMessage());
+                task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(),
+                    legalEntity.getInternalId(), legalEntityException, legalEntityException.getHttpResponse(),
+                    legalEntityException.getMessage());
                 return Mono.error(new StreamTaskException(task, legalEntityException));
-            });
+            }));
         return existingLegalEntity.switchIfEmpty(createNewLegalEntity);
     }
 

@@ -60,6 +60,7 @@ import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,15 +68,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -429,8 +435,6 @@ class LegalEntitySagaTest {
             .thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
         when(legalEntityService.getLegalEntityByInternalId("100001"))
             .thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
-        when(legalEntityService.createLegalEntity(legalEntityTask.getLegalEntity()))
-            .thenReturn(Mono.empty());
         when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
         when(legalEntitySagaConfigurationProperties.isUseIdentityIntegration())
             .thenReturn(true);
@@ -597,7 +601,6 @@ class LegalEntitySagaTest {
 
         when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
         when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.empty());
         when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(newLE));
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
@@ -903,6 +906,39 @@ class LegalEntitySagaTest {
             "Failed to determine LE customerCategory for UserKindSegmentationSage."
         );
     }
+
+    @ParameterizedTest
+    @MethodSource("parameters_upster_error")
+    void upster_error(Exception ex, String error) {
+
+        // Given
+        LegalEntityTask leTask = new LegalEntityTask(new LegalEntity().externalId(leExternalId));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.error(ex));
+
+        // When
+        Mono<LegalEntityTask> result = legalEntitySaga.executeTask(leTask);
+        StreamTaskException stEx = null;
+        try {
+            result.block();
+        } catch (StreamTaskException e) {
+            stEx = e;
+        }
+
+        // Then
+        verify(legalEntityService).getLegalEntityByExternalId(any());
+        org.assertj.core.api.Assertions.assertThat(stEx)
+            .isNotNull()
+            .extracting(e -> e.getTask().getHistory().get(1).getErrorMessage())
+            .isEqualTo(error);
+    }
+
+    private static Stream<Arguments> parameters_upster_error() {
+        return Stream.of(
+            Arguments.of(new RuntimeException("Fake error"), "Fake error"),
+            Arguments.of(new WebClientResponseException(400, "Bad request", null,
+                "Fake validation error".getBytes(), Charset.defaultCharset()), "Fake validation error"));
+    }
+
 
     private LegalEntityTask executeLegalEntityTaskAndBlock(LegalEntityTask task) {
         return legalEntitySaga.executeTask(task).block();
