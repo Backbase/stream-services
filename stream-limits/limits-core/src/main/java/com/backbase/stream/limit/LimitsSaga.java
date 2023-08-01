@@ -1,6 +1,5 @@
 package com.backbase.stream.limit;
 
-import static org.springframework.util.CollectionUtils.contains;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
@@ -16,6 +15,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
 
     public static final String LIMIT = "limit";
+    public static final String RETRIEVE = "retrieve";
     public static final String CREATE = "create";
     public static final String SUCCESS = "success";
     public static final String ERROR = "error";
@@ -50,16 +51,26 @@ public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
                 item.getEntities().stream().map(entity -> entity.getEtype() + COLON + SPACE + entity.getEref())
                         .collect(Collectors.joining(COMMA + SPACE)), item.getUserBBID());
         return limitsApi.postLimitsRetrieval(mapper.map(item))
-                .collectList()
-                .flatMap(limitsRetrievalPostResponseBody -> {
-                    if (isEmpty(limitsRetrievalPostResponseBody)) {
-                        log.info("Creating Limits");
-                        return createLimits(limitsTask, item);
-                    } else {
-                        log.info("Updating Limits");
-                        return updateLimits(limitsTask, item, limitsRetrievalPostResponseBody);
-                    }
-                });
+            .onErrorResume(throwable -> {
+                if (throwable instanceof WebClientResponseException webClientResponseException) {
+                    limitsTask.error(LIMIT, RETRIEVE, ERROR, item.getUserBBID(), null, webClientResponseException,
+                        webClientResponseException.getResponseBodyAsString(), FAILED_TO_INGEST_LIMITS);
+                } else {
+                    limitsTask.error(LIMIT, RETRIEVE, ERROR, item.getUserBBID(), null, throwable,
+                        throwable.getMessage(), FAILED_TO_INGEST_LIMITS);
+                }
+                return Mono.error(new StreamTaskException(limitsTask, throwable, FAILED_TO_INGEST_LIMITS));
+            })
+            .collectList()
+            .flatMap(limitsRetrievalPostResponseBody -> {
+                if (isEmpty(limitsRetrievalPostResponseBody)) {
+                    log.info("Creating Limits");
+                    return createLimits(limitsTask, item);
+                } else {
+                    log.info("Updating Limits");
+                    return updateLimits(limitsTask, item, limitsRetrievalPostResponseBody);
+                }
+            });
     }
 
     private Mono<? extends LimitsTask> updateLimits(LimitsTask limitsTask, CreateLimitRequestBody item,
