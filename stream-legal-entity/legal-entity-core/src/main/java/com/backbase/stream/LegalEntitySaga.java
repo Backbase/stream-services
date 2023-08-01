@@ -431,11 +431,14 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         // Pipeline for Existing Legal Entity
         Mono<LegalEntityTask> existingLegalEntity = legalEntityService.getLegalEntityByExternalId(legalEntity.getExternalId())
             .onErrorResume(throwable -> {
-                task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), null, throwable, throwable.getMessage(), "Unexpected Error");
-                return Mono.error(new StreamTaskException(task, throwable, "Failed to get Legal Entity: " + throwable.getMessage()));
-            })
-            .onErrorResume(WebClientResponseException.class, throwable -> {
-                task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), null, throwable, throwable.getResponseBodyAsString(), "Unexpected Web Client Exception");
+                if (throwable instanceof WebClientResponseException webClientResponseException) {
+                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), null,
+                        webClientResponseException,
+                        webClientResponseException.getResponseBodyAsString(), "Unexpected Web Client Exception");
+                } else {
+                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), null, throwable,
+                        throwable.getMessage(), "Unexpected Error");
+                }
                 return Mono.error(new StreamTaskException(task, throwable, "Failed to get Legal Entity: " + throwable.getMessage()));
             })
             .flatMap(actual -> {
