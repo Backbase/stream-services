@@ -19,9 +19,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class LimitsServiceConfiguration {
 
+    private final LimitsWorkerConfigurationProperties limitsWorkerConfigurationProperties;
+
     @Bean
     public LimitsSaga limitsSaga(LimitsServiceApi limitsServiceApi) {
-        return new LimitsSaga(limitsServiceApi);
+        return new LimitsSaga(limitsServiceApi,limitsWorkerConfigurationProperties);
     }
 
     public static class InMemoryLimitsUnitOfWorkRepository extends

@@ -1,11 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [3.57.0](https://github.com/Backbase/stream-services/compare/3.56.0...3.57.0)
+## [3.58.0](https://github.com/Backbase/stream-services/compare/3.57.0...3.58.0)
 ### Changed
 - For the IMPORT_FROM_IDENTIY strategy use the user manager importIdentity API call
 
-## [3.56.0](https://github.com/Backbase/stream-services/compare/3.54.0...3.55.0)
+## [3.57.0](https://github.com/Backbase/stream-services/compare/3.56.0...3.57.0)
+### Added
+- Add feature flag for limits ingestion default is true, `backbase.stream.limits.worker.enabled`
+## [3.56.0](https://github.com/Backbase/stream-services/compare/3.55.0...3.56.0)
+
 ### Changed
 - Fix missing portfolio aggregation model attribute `externalId`
 ## [3.55.0](https://github.com/Backbase/stream-services/compare/3.54.0...3.55.0)
