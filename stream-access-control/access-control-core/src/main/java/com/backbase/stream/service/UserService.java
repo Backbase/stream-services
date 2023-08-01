@@ -9,9 +9,11 @@ import com.backbase.dbs.user.api.service.v2.model.AssignRealm;
 import com.backbase.dbs.user.api.service.v2.model.BatchResponseItem;
 import com.backbase.dbs.user.api.service.v2.model.BatchUser;
 import com.backbase.dbs.user.api.service.v2.model.CreateIdentityRequest;
+import com.backbase.dbs.user.api.service.v2.model.CreateIdentityResponse;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.api.service.v2.model.GetUsersByLegalEntityIdsRequest;
 import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
+import com.backbase.dbs.user.api.service.v2.model.ImportIdentity;
 import com.backbase.dbs.user.api.service.v2.model.Realm;
 import com.backbase.dbs.user.api.service.v2.model.UpdateIdentityRequest;
 import com.backbase.dbs.user.api.service.v2.model.UserCreated;
@@ -20,8 +22,10 @@ import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServi
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
 import com.backbase.stream.exceptions.UserUpsertException;
+import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.mapper.RealmMapper;
 import com.backbase.stream.mapper.UserMapper;
@@ -273,30 +277,55 @@ public class UserService {
      * @return the same User with updated internal and external id on success
      */
     public Mono<User> createOrImportIdentityUser(User user, String legalEntityInternalId, StreamTask streamTask) {
-        CreateIdentityRequest createIdentityRequest = new CreateIdentityRequest();
-        createIdentityRequest.setLegalEntityInternalId(legalEntityInternalId);
-        createIdentityRequest.setExternalId(user.getExternalId());
-        createIdentityRequest.setAdditions(user.getAdditions());
+
+        Mono<CreateIdentityResponse> upsertCall;
 
         if (IdentityUserLinkStrategy.CREATE_IN_IDENTITY.equals(user.getIdentityLinkStrategy())) {
-            Objects.requireNonNull(user.getFullName(), "User Full Name is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
-            Objects.requireNonNull(user.getEmailAddress(), "User Email Address is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
-            Objects.requireNonNull(user.getMobileNumber(), "User Mobile Number is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
+            Objects.requireNonNull(user.getFullName(),
+                "User Full Name is required for user: " + user.getExternalId() + " in legal entity: "
+                    + legalEntityInternalId);
+            Objects.requireNonNull(
+                Optional.ofNullable(user.getEmailAddress()).map(EmailAddress::getAddress).orElse(null),
+                "User Email Address is required for user: " + user.getExternalId() + " in legal entity: "
+                    + legalEntityInternalId);
+            Objects.requireNonNull(Optional.ofNullable(user.getMobileNumber()).map(PhoneNumber::getNumber).orElse(null),
+                "User Mobile Number is required for user: " + user.getExternalId() + " in legal entity: "
+                    + legalEntityInternalId);
 
+            CreateIdentityRequest createIdentityRequest = new CreateIdentityRequest();
+            createIdentityRequest.setLegalEntityInternalId(legalEntityInternalId);
+            createIdentityRequest.setExternalId(user.getExternalId());
+            createIdentityRequest.setAdditions(user.getAdditions());
             createIdentityRequest.setFullName(user.getFullName());
             createIdentityRequest.setEmailAddress(user.getEmailAddress().getAddress());
             createIdentityRequest.setMobileNumber(user.getMobileNumber().getNumber());
             ofNullable(user.getAttributes()).ifPresent(createIdentityRequest::setAttributes);
+
+            upsertCall = identityManagementApi.createIdentity(createIdentityRequest)
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    log.error("Error creating identity: {} Response: {}", createIdentityRequest,
+                        e.getResponseBodyAsString());
+                    String message = "Failed to create user: " + user.getExternalId();
+                    streamTask.error("user", "create-identity", "failed",
+                        user.getExternalId(), legalEntityInternalId, e, e.getMessage(), message);
+                    return Mono.error(new StreamTaskException(streamTask, message));
+                });
+        } else {
+            ImportIdentity importIdentity = new ImportIdentity();
+            importIdentity.setLegalEntityInternalId(legalEntityInternalId);
+            importIdentity.setExternalId(user.getExternalId());
+            importIdentity.additions(user.getAdditions());
+            upsertCall = identityManagementApi.importIdentity(importIdentity)
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    log.error("Error importing identity: {} Response: {}", importIdentity, e.getResponseBodyAsString());
+                    String message = "Failed to import user: " + user.getExternalId();
+                    streamTask.error("user", "import-identity", "failed",
+                        user.getExternalId(), legalEntityInternalId, e, e.getMessage(), message);
+                    return Mono.error(new StreamTaskException(streamTask, message));
+                });
         }
 
-        return identityManagementApi.createIdentity(createIdentityRequest)
-            .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error creating identity: {} Response: {}", createIdentityRequest, e.getResponseBodyAsString());
-                String message = "Failed to create user: " + user.getExternalId();
-                streamTask.error("user", "create-identity", "failed",
-                    user.getExternalId(), legalEntityInternalId, e, e.getMessage(), message);
-                return Mono.error(new StreamTaskException(streamTask, message));
-            })
+        return upsertCall
             .map(identityCreatedItem -> {
                 user.setInternalId(identityCreatedItem.getInternalId());
                 user.setExternalId(identityCreatedItem.getExternalId());

@@ -3,6 +3,7 @@ package com.backbase.stream.service;
 import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.CREATE_IN_IDENTITY;
 import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY;
 import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -182,7 +183,7 @@ class UserServiceTest {
         final IdentityUserLinkStrategy strategy = IMPORT_FROM_IDENTIY;
 
         CreateIdentityResponse response = new CreateIdentityResponse().externalId(externalId).internalId(internalId);
-        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.just(response));
+        when(identityManagementApi.importIdentity(any())).thenReturn(Mono.just(response));
 
         when(identityManagementApi.updateIdentity(eq(internalId), any())).thenReturn(Mono.empty().then());
 
@@ -194,9 +195,9 @@ class UserServiceTest {
 
 
         result.subscribe(assertEqualsTo(user));
-        CreateIdentityRequest expectedCreateIdentityRequest = new CreateIdentityRequest().externalId(externalId)
-                .legalEntityInternalId(legalEntityId);
-        verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
+        ImportIdentity expectedImportIdentityRequest = new ImportIdentity().externalId(externalId)
+            .legalEntityInternalId(legalEntityId);
+        verify(identityManagementApi).importIdentity(expectedImportIdentityRequest);
         UpdateIdentityRequest expectedUpdateIdentityRequest = new UpdateIdentityRequest().attributes(attributesMap);
         verify(identityManagementApi).updateIdentity(internalId, expectedUpdateIdentityRequest);
     }
@@ -209,7 +210,7 @@ class UserServiceTest {
         final IdentityUserLinkStrategy strategy = IMPORT_FROM_IDENTIY;
 
         CreateIdentityResponse response = new CreateIdentityResponse().externalId(externalId).internalId(internalId);
-        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.just(response));
+        when(identityManagementApi.importIdentity(any())).thenReturn(Mono.just(response));
 
         User user = new User().externalId(externalId).identityLinkStrategy(strategy);
 
@@ -218,9 +219,9 @@ class UserServiceTest {
 
 
         result.subscribe(assertEqualsTo(user));
-        CreateIdentityRequest expectedCreateIdentityRequest = new CreateIdentityRequest().externalId(externalId)
-                .legalEntityInternalId(legalEntityId);
-        verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
+        ImportIdentity expectedImportIdentityRequest = new ImportIdentity().externalId(externalId)
+            .legalEntityInternalId(legalEntityId);
+        verify(identityManagementApi).importIdentity(expectedImportIdentityRequest);
         verifyNoMoreInteractions(identityManagementApi);
     }
 
@@ -232,20 +233,20 @@ class UserServiceTest {
         final Map<String, String> additionsMap = Collections.singletonMap("someKey", "someValue");
 
         CreateIdentityResponse response = new CreateIdentityResponse().externalId(externalId).internalId(internalId);
-        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.just(response));
+        when(identityManagementApi.importIdentity(any())).thenReturn(Mono.just(response));
         when(identityManagementApi.updateIdentity(eq(internalId), any())).thenReturn(Mono.empty().then());
 
         User user = new User().externalId(externalId).additions(additionsMap).identityLinkStrategy(IMPORT_FROM_IDENTIY);
         Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask());
 
         result.subscribe(assertEqualsTo(user));
-        CreateIdentityRequest expectedCreateIdentityRequest =
-                new CreateIdentityRequest()
+        ImportIdentity expectedImportIdentityRequest =
+                new ImportIdentity()
                         .externalId(externalId)
                         .additions(additionsMap)
                         .legalEntityInternalId(legalEntityId);
 
-        verify(identityManagementApi).createIdentity(expectedCreateIdentityRequest);
+        verify(identityManagementApi).importIdentity(expectedImportIdentityRequest);
         verify(identityManagementApi).updateIdentity(internalId, new UpdateIdentityRequest().additions(additionsMap));
     }
 
@@ -257,7 +258,7 @@ class UserServiceTest {
         final Map<String, String> additionsMap = Collections.singletonMap("someKey", "someValue");
 
         CreateIdentityResponse response = new CreateIdentityResponse().externalId(externalId).internalId(internalId);
-        when(identityManagementApi.createIdentity(any())).thenReturn(Mono.just(response));
+        when(identityManagementApi.importIdentity(any())).thenReturn(Mono.just(response));
 
         User user = new User().externalId(externalId).additions(additionsMap).identityLinkStrategy(IMPORT_FROM_IDENTIY);
 
@@ -320,6 +321,48 @@ class UserServiceTest {
         StepVerifier.create(result)
                 .expectError().verify();
 
+    }
+
+    @Test
+    void createOrImportIdentityErrorOnImport() {
+        final String externalId = "someExternalId";
+        final String legalEntityId = "someLegalEntityId";
+        final Map<String, String> attributesMap = Collections.singletonMap("someKey", "someValue");
+        final IdentityUserLinkStrategy strategy = IMPORT_FROM_IDENTIY;
+        final String emailAddress = "some@email.com";
+        final String mobileNumber = "123456";
+        final String fullName = "someName";
+
+        when(identityManagementApi.importIdentity(any())).thenReturn(Mono.error(WebClientResponseException.create(500,"", new HttpHeaders(), "Error response".getBytes(StandardCharsets.UTF_8), null)));
+
+        User user = new User().externalId(externalId).attributes(attributesMap)
+            .identityLinkStrategy(strategy).fullName(fullName)
+            .emailAddress(new EmailAddress().address(emailAddress))
+            .mobileNumber(new PhoneNumber().number(mobileNumber));
+
+
+        Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask());
+
+        StepVerifier.create(result)
+            .expectError().verify();
+    }
+
+    @Test
+    void createOrImportIdentityErrorOnCreateWhenMissingEmail() {
+        final String externalId = "someExternalId";
+        final String legalEntityId = "someLegalEntityId";
+        final Map<String, String> attributesMap = Collections.singletonMap("someKey", "someValue");
+        final IdentityUserLinkStrategy strategy = CREATE_IN_IDENTITY;
+        final String emailAddress = null;
+        final String mobileNumber = "123456";
+        final String fullName = "someName";
+
+        User user = new User().externalId(externalId).attributes(attributesMap)
+            .identityLinkStrategy(strategy).fullName(fullName)
+            .emailAddress(new EmailAddress().address(emailAddress))
+            .mobileNumber(new PhoneNumber().number(mobileNumber));
+
+        assertThrows(NullPointerException.class, () -> subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask()));
     }
 
     @Test
