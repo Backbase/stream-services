@@ -18,7 +18,6 @@
 
   <properties>
     <enforce-banned-dependencies.skip>true</enforce-banned-dependencies.skip>
-    <mysql-connector.version>5.1.41</mysql-connector.version>
   </properties>
 
   <dependencies>
@@ -34,9 +33,8 @@
     </dependency>
 
     <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>${mysql-connector.version}</version>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
     </dependency>
 
     <!-- Spring dependencies -->

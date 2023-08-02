@@ -8,7 +8,7 @@ spring:
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:root}
     url: jdbc:mysql://localhost:3306/transaction_cursor?createDatabaseIfNotExist=true&useSSL=false
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
   zipkin:
     enabled: false
   main:
