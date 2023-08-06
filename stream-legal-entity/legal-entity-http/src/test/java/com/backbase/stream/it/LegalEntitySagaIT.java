@@ -258,6 +258,11 @@ class LegalEntitySagaIT {
             WireMock.put("/access-control/service-api/v2/accessgroups/data-groups/batch/update/data-items")
                 .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
         );
+
+        stubFor(
+            WireMock.put("/access-control/service-api/v2/accessgroups/serviceagreements/500001")
+                .willReturn(WireMock.aResponse().withStatus(HttpStatus.OK.value()))
+        );
     }
 
     /**
