@@ -1,5 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.30.7](https://github.com/Backbase/stream-services/compare/3.33.6...3.33.7)
+### Changed
+- Added Secondary Service Agreement update functionality.
+
 ## [3.33.4](https://github.com/Backbase/stream-services/compare/3.33.3...3.34.4)
 ### Changed
 - Updated Product Mapper to map panSuffix to all product types `panSuffix` to `number`
