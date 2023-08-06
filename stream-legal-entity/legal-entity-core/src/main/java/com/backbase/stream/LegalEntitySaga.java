@@ -833,7 +833,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS, sa.getExternalId(), sa.getInternalId(),
                     "Existing Service Agreement: %s found for Legal Entity: %s", sa.getExternalId(),
                     legalEntity.getExternalId());
-                return accessGroupService.updateServiceAgreementAssociations(streamTask, newSa, userActions)
+                return accessGroupService.updateServiceAgreementItem(streamTask, newSa)
+                    .then(accessGroupService.updateServiceAgreementAssociations(streamTask, newSa, userActions))
                     .thenReturn(streamTask);
             });
         // As creatorLegalEntity doesnt accept external ID

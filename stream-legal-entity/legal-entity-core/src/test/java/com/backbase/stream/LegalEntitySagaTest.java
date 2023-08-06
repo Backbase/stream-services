@@ -435,6 +435,8 @@ class LegalEntitySagaTest {
             .thenReturn(Mono.empty());
         when(accessGroupService.getServiceAgreementByExternalId("Service_Agreement_Id"))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
+        when(accessGroupService.updateServiceAgreementItem(any(), any()))
+            .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
         when(accessGroupService.updateServiceAgreementAssociations(any(), any(), any()))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
         when(accessGroupService.createServiceAgreement(any(), any()))

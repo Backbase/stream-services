@@ -16,6 +16,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
 import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
@@ -42,6 +43,7 @@ import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAg
 import com.backbase.dbs.accesscontrol.api.service.v2.model.PresentationServiceAgreementUsersBatchUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
+import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementPut;
 import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.DeletionProperties;
@@ -53,6 +55,7 @@ import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.mapper.AccessGroupMapper;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.utils.BatchResponseUtils;
@@ -78,6 +81,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -727,5 +731,45 @@ class AccessGroupServiceTest {
         boolean sharingAccounts;
         boolean sharingUsers;
     }
+    @Test
+    void testUpdateServiceAgreementItem() {
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
 
+        ServiceAgreement serviceAgreement = new ServiceAgreement();
+        serviceAgreement.setExternalId("external-id");
+        serviceAgreement.setInternalId("internal-id");
+        serviceAgreement.setName("name");
+
+        when(serviceAgreementApi.putServiceAgreementItem(any(), any())).thenReturn(Mono.empty());
+
+        Mono<ServiceAgreement> resultMono = subject.updateServiceAgreementItem(streamTask, serviceAgreement);
+
+        StepVerifier.create(resultMono)
+            .expectNext(serviceAgreement)
+            .verifyComplete();
+
+        verify(serviceAgreementApi, times(1))
+            .putServiceAgreementItem(eq("internal-id"), any());
+
+    }
+
+    @Test
+    void testUpdateServiceAgreementItemFailed() {
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+
+        ServiceAgreement serviceAgreement = new ServiceAgreement();
+        serviceAgreement.setExternalId("external-id");
+        serviceAgreement.setInternalId("internal-id");
+
+        when(serviceAgreementApi.putServiceAgreementItem(any(), any()))
+            .thenReturn(Mono.error(new HttpClientErrorException(BAD_REQUEST, "Bad request", null, null, null)));
+
+        Mono<ServiceAgreement> resultMono = subject.updateServiceAgreementItem(streamTask, serviceAgreement);
+
+        StepVerifier.create(resultMono)
+            .verifyError(StreamTaskException.class);
+
+        verify(serviceAgreementApi, times(1))
+            .putServiceAgreementItem(eq("internal-id"), any());
+    }
 }
