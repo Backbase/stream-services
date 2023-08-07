@@ -426,6 +426,8 @@ class LegalEntitySagaTest {
         when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
         when(legalEntitySagaConfigurationProperties.isUseIdentityIntegration())
             .thenReturn(true);
+        when(legalEntitySagaConfigurationProperties.isServiceAgreementUpdateEnabled())
+            .thenReturn(true);
         when(userService.setupRealm(legalEntityTask.getLegalEntity()))
             .thenReturn(Mono.empty());
         when(userService.linkLegalEntityToRealm(legalEntityTask.getLegalEntity()))
