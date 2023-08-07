@@ -70,6 +70,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -425,6 +426,8 @@ class LegalEntitySagaTest {
         when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
         when(legalEntitySagaConfigurationProperties.isUseIdentityIntegration())
             .thenReturn(true);
+        when(legalEntitySagaConfigurationProperties.isServiceAgreementUpdateEnabled())
+            .thenReturn(true);
         when(userService.setupRealm(legalEntityTask.getLegalEntity()))
             .thenReturn(Mono.empty());
         when(userService.linkLegalEntityToRealm(legalEntityTask.getLegalEntity()))
@@ -434,6 +437,8 @@ class LegalEntitySagaTest {
         when(userService.createOrImportIdentityUser(any(), any(), any()))
             .thenReturn(Mono.empty());
         when(accessGroupService.getServiceAgreementByExternalId("Service_Agreement_Id"))
+            .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
+        lenient().when(accessGroupService.updateServiceAgreementItem(any(), any()))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
         when(accessGroupService.updateServiceAgreementAssociations(any(), any(), any()))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));

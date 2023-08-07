@@ -20,4 +20,9 @@ public class LegalEntitySagaConfigurationProperties extends StreamWorkerConfigur
      */
     private boolean userProfileEnabled = false;
 
+    /**
+     * Enable service agreement update
+     */
+    private boolean serviceAgreementUpdateEnabled = false;
+
 }
