@@ -70,6 +70,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -435,7 +436,7 @@ class LegalEntitySagaTest {
             .thenReturn(Mono.empty());
         when(accessGroupService.getServiceAgreementByExternalId("Service_Agreement_Id"))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
-        when(accessGroupService.updateServiceAgreementItem(any(), any()))
+        lenient().when(accessGroupService.updateServiceAgreementItem(any(), any()))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
         when(accessGroupService.updateServiceAgreementAssociations(any(), any(), any()))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
