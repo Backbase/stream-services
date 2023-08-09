@@ -801,7 +801,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 user.setInternalId(existingUser.getInternalId());
                 streamTask.info(IDENTITY_USER, UPSERT, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId());
                 return user;
-            });
+            })
+            .doOnNext(userService::updateIdentity);
+
         Mono<User> createNewIdentityUser =
             userService.createOrImportIdentityUser(user, legalEntity.getInternalId(), streamTask)
                 .flatMap(currentUser -> userService.updateUserState(currentUser, legalEntity.getRealmName()))

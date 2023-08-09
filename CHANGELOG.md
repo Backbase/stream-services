@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.59.0](https://github.com/Backbase/stream-services/compare/3.58.2...3.59.0)
+### Added
+- Add update identity user attributes in case it's previously created.
 ## [3.58.2](https://github.com/Backbase/stream-services/compare/3.58.1...3.58.2)
 ### Changed
 - Avoiding race condition when assigning a realm to a legal entity when ingesting multiple subsidiaries at the same time.

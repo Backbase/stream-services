@@ -424,6 +424,25 @@ public class UserService {
         return updateRequired ? Optional.of(userRequestBody) : Optional.empty();
     }
 
+
+    /**
+     * Update Identity User, ex: emailAddress, mobileNumber, attributes, and additions
+     *
+     * @param user
+     * @return Mono<User>
+     */
+    public Mono<Void> updateIdentity(User user) {
+
+        Objects.requireNonNull(user.getInternalId(), "user internalId is required");
+        UpdateIdentityRequest updateIdentityRequest = mapper.mapUpdateIdentity(user);
+
+        return identityManagementApi.updateIdentity(user.getInternalId(), updateIdentityRequest)
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    log.error("Failed to update identity: {}", e.getResponseBodyAsString(), e);
+                    return Mono.error(e);
+                });
+    }
+
     /**
      * Update user
      *
