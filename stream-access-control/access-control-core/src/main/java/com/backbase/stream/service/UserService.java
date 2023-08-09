@@ -1,44 +1,19 @@
 package com.backbase.stream.service;
 
-import static java.util.Optional.ofNullable;
-
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
-import com.backbase.dbs.user.api.service.v2.model.AddRealmRequest;
-import com.backbase.dbs.user.api.service.v2.model.AssignRealm;
-import com.backbase.dbs.user.api.service.v2.model.BatchResponseItem;
-import com.backbase.dbs.user.api.service.v2.model.BatchUser;
-import com.backbase.dbs.user.api.service.v2.model.CreateIdentityRequest;
-import com.backbase.dbs.user.api.service.v2.model.CreateIdentityResponse;
-import com.backbase.dbs.user.api.service.v2.model.GetUser;
-import com.backbase.dbs.user.api.service.v2.model.GetUsersByLegalEntityIdsRequest;
-import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
-import com.backbase.dbs.user.api.service.v2.model.ImportIdentity;
-import com.backbase.dbs.user.api.service.v2.model.Realm;
-import com.backbase.dbs.user.api.service.v2.model.UpdateIdentityRequest;
-import com.backbase.dbs.user.api.service.v2.model.UserCreated;
-import com.backbase.dbs.user.api.service.v2.model.UserExternal;
+import com.backbase.dbs.user.api.service.v2.model.*;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
 import com.backbase.stream.exceptions.UserUpsertException;
-import com.backbase.stream.legalentity.model.EmailAddress;
-import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.legalentity.model.*;
 import com.backbase.stream.mapper.RealmMapper;
 import com.backbase.stream.mapper.UserMapper;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
@@ -48,6 +23,13 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+
+import javax.validation.constraints.NotNull;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * Stream User Management. Still needs to be adapted to use Identity correctly
@@ -222,9 +204,8 @@ public class UserService {
                 log.error("Error getting realm: {} Response: {}", realmName, e.getResponseBodyAsString());
                 return Mono.error(e);
             })
-            .collectList()
-            .map(realms -> realms.stream().filter(realm -> realmName.equals(realm.getRealmName())).findFirst())
-            .flatMap(Mono::justOrEmpty);
+            .filter(realm -> realmName.equals(realm.getRealmName()))
+            .next();
     }
 
     /**
@@ -237,11 +218,8 @@ public class UserService {
         if (StringUtils.isEmpty(legalEntity.getRealmName())) {
             return Mono.empty();
         }
-        Mono<Realm> existingRealm = existingRealm(legalEntity.getRealmName());
-        Mono<Realm> createNewRealm = createRealm(legalEntity.getRealmName());
-        return existingRealm.switchIfEmpty(createNewRealm)
-            .map(actual -> actual);
-
+        return existingRealm(legalEntity.getRealmName())
+                .switchIfEmpty(createRealm(legalEntity.getRealmName()));
     }
 
     /**
