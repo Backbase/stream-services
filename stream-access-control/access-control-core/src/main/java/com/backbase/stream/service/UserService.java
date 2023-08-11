@@ -29,6 +29,7 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNullElse;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -429,18 +430,32 @@ public class UserService {
      * Update Identity User, ex: emailAddress, mobileNumber, attributes, and additions
      *
      * @param user
-     * @return Mono<Void>
+     * @return Mono<User>
      */
-    public Mono<Void> updateIdentity(User user) {
+    public Mono<User> updateIdentity(User user) {
 
         Objects.requireNonNull(user.getInternalId(), "user internalId is required");
-        UpdateIdentityRequest updateIdentityRequest = mapper.mapUpdateIdentity(user);
 
-        return identityManagementApi.updateIdentity(user.getInternalId(), updateIdentityRequest)
-                .onErrorResume(WebClientResponseException.class, e -> {
-                    log.error("Failed to update identity: {}", e.getResponseBodyAsString(), e);
-                    return Mono.error(e);
-                });
+        return identityManagementApi.getIdentity(user.getInternalId())
+                .map(mapper::mapUpdateIdentity)
+                .flatMap(updateIdentityRequest -> {
+                    log.debug("Trying to update identity attributes and additions, externalId [{}]", user.getExternalId());
+                        if (updateIdentityRequest.getAttributes() == null) {
+                            updateIdentityRequest.attributes(new HashMap<>());
+                        }
+                        if (updateIdentityRequest.getAdditions() == null) {
+                            updateIdentityRequest.additions(new HashMap<>());
+                        }
+                        updateIdentityRequest.getAttributes().putAll(requireNonNullElse(user.getAttributes(), Map.of()));
+                        updateIdentityRequest.getAdditions().putAll(requireNonNullElse(user.getAdditions(), Map.of()));
+
+                        return identityManagementApi.updateIdentity(user.getInternalId(), updateIdentityRequest)
+                                .onErrorResume(WebClientResponseException.class, e -> {
+                                    log.error("Failed to update identity: {}", e.getResponseBodyAsString(), e);
+                                    return Mono.error(e);
+                                });
+                        }
+                ).thenReturn(user);
     }
 
     /**
