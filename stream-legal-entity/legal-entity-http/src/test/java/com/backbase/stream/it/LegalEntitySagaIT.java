@@ -279,6 +279,18 @@ class LegalEntitySagaIT {
                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                     .withBody("[{\"arrangementId\":\"arrId1\",\"resourceId\":\"resId1\"}]"))
         );
+        stubFor(
+                WireMock.get("/user-manager/service-api/v2/users/identities/9ac44fca")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.MULTI_STATUS.value())
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody("{\"internalId\":\"9ac44fca\",\"externalId\":\"externalId\"}"))
+        );
+        stubFor(
+                WireMock.put("/user-manager/service-api/v2/users/identities/9ac44fca")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.MULTI_STATUS.value())
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody(""))
+        );
     }
 
     /**
