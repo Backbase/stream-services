@@ -1,8 +1,6 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.dbs.user.api.service.v2.model.GetUser;
-import com.backbase.dbs.user.api.service.v2.model.User;
-import com.backbase.dbs.user.api.service.v2.model.UserExternal;
+import com.backbase.dbs.user.api.service.v2.model.*;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
 import org.mapstruct.Mapper;
@@ -27,4 +25,6 @@ public interface UserMapper {
     @Mapping(source = "userProfile.preferredLanguage", target = "preferredLanguage")
     @Mapping(source = "additions", target = "additions")
     User toServiceUser(com.backbase.stream.legalentity.model.User user);
+
+    UpdateIdentityRequest mapUpdateIdentity(GetIdentity user);
 }

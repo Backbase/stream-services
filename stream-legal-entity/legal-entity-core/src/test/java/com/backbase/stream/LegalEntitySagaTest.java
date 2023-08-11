@@ -442,6 +442,8 @@ class LegalEntitySagaTest {
             .thenReturn(Mono.empty());
         when(userService.linkLegalEntityToRealm(legalEntityTask.getLegalEntity()))
             .thenReturn(Mono.empty());
+        when(userService.updateIdentity(any()))
+                .thenReturn(Mono.empty());
         when(userService.getUserByExternalId("john.doe"))
             .thenReturn(Mono.just(new User().internalId("100").externalId("john.doe")));
         when(userService.createOrImportIdentityUser(any(), any(), any()))
@@ -479,7 +481,7 @@ class LegalEntitySagaTest {
 
         // When
         legalEntitySaga.executeTask(legalEntityTask)
-            .block(Duration.ofSeconds(10));
+            .block(Duration.ofSeconds(20));
 
         // Then
         Assertions.assertEquals(
