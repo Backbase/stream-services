@@ -16,7 +16,7 @@ import org.springframework.util.Assert;
 
 @SpringBootTest
 @ActiveProfiles({"it", "moustache-bank", "moustache-bank-subsidiaries"})
-public class SetupLegalEntityHierarchyTaskApplicationIT {
+class SetupLegalEntityHierarchyTaskApplicationIT {
 
     @Autowired
     BootstrapConfigurationProperties configuration;
