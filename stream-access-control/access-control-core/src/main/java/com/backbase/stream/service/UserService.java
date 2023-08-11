@@ -429,7 +429,7 @@ public class UserService {
      * Update Identity User, ex: emailAddress, mobileNumber, attributes, and additions
      *
      * @param user
-     * @return Mono<User>
+     * @return Mono<Void>
      */
     public Mono<Void> updateIdentity(User user) {
 
