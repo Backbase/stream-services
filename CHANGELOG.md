@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.60.0](https://github.com/Backbase/stream-services/compare/3.59.0...3.60.0)
+### Changed
+- updated application-local configurations to be aligned with the new Backbase Local env.
+
 ## [3.59.0](https://github.com/Backbase/stream-services/compare/3.58.2...3.59.0)
 ### Added
 - Add update identity user attributes in case it's previously created.
