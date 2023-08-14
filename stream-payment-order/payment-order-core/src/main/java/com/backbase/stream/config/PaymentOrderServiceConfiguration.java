@@ -34,10 +34,11 @@ public class PaymentOrderServiceConfiguration {
         PaymentOrderTaskExecutor paymentOrderTaskExecutor,
         PaymentOrderUnitOfWorkRepository paymentOrderUnitOfWorkRepository,
         PaymentOrderWorkerConfigurationProperties paymentOrderWorkerConfigurationProperties,
-        PaymentOrdersApi paymentOrdersApi) {
+        PaymentOrdersApi paymentOrdersApi,
+            ArrangementsApi arrangementsApi) {
 
         return new PaymentOrderUnitOfWorkExecutor(paymentOrderUnitOfWorkRepository, paymentOrderTaskExecutor,
-                paymentOrderWorkerConfigurationProperties, paymentOrdersApi, paymentOrderTypeMapper);
+                paymentOrderWorkerConfigurationProperties, paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper);
     }
 
     @Bean

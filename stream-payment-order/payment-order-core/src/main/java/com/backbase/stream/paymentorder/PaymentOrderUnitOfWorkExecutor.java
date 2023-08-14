@@ -7,8 +7,20 @@ import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.PROCESSE
 import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.READY;
 import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.REJECTED;
 
+import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementsFilter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import javax.validation.Valid;
@@ -40,15 +52,18 @@ import reactor.core.publisher.Mono;
 public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOrderTask> {
 
     private final PaymentOrdersApi paymentOrdersApi;
+    private final ArrangementsApi arrangementsApi;
     private final PaymentOrderTypeMapper paymentOrderTypeMapper;
 
     public PaymentOrderUnitOfWorkExecutor(UnitOfWorkRepository<PaymentOrderTask, String> repository,
-                                          StreamTaskExecutor<PaymentOrderTask> streamTaskExecutor,
-                                          StreamWorkerConfiguration streamWorkerConfiguration,
-                                          PaymentOrdersApi paymentOrdersApi,
-                                          PaymentOrderTypeMapper paymentOrderTypeMapper) {
+            StreamTaskExecutor<PaymentOrderTask> streamTaskExecutor,
+            StreamWorkerConfiguration streamWorkerConfiguration,
+            PaymentOrdersApi paymentOrdersApi,
+            ArrangementsApi arrangementsApi,
+            PaymentOrderTypeMapper paymentOrderTypeMapper) {
         super(repository, streamTaskExecutor, streamWorkerConfiguration);
         this.paymentOrdersApi = paymentOrdersApi;
+        this.arrangementsApi = arrangementsApi;
         this.paymentOrderTypeMapper = paymentOrderTypeMapper;
     }
 
@@ -63,11 +78,12 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
     public Flux<UnitOfWork<PaymentOrderTask>> prepareUnitOfWork(Flux<PaymentOrderPostRequest> items) {
         return items.collectList()
-            .map(paymentOrderPostRequests -> this.createPaymentOrderIngestContext(paymentOrderPostRequests))
-            .flatMap(this::getPersistedScheduledTransfers)
-            .flatMapMany(this::getPaymentOrderIngestRequest)
-            .bufferTimeout(streamWorkerConfiguration.getBufferSize(), streamWorkerConfiguration.getBufferMaxTime())
-            .flatMap(this::prepareUnitOfWork);
+                .map(paymentOrderPostRequests -> this.createPaymentOrderIngestContext(paymentOrderPostRequests))
+                .flatMap(this::addArrangementIdMap)
+                .flatMap(this::getPersistedScheduledTransfers)
+                .flatMapMany(this::getPaymentOrderIngestRequest)
+                .bufferTimeout(streamWorkerConfiguration.getBufferSize(), streamWorkerConfiguration.getBufferMaxTime())
+                .flatMap(this::prepareUnitOfWork);
     }
 
     private PaymentOrderIngestContext createPaymentOrderIngestContext(List<PaymentOrderPostRequest> paymentOrderPostRequests) {
@@ -90,12 +106,27 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
         return getPayments(paymentOrderIngestContext2.internalUserId())
                 .map(response -> {
-                        listOfPayments.addAll(response.getPaymentOrders());
+                    listOfPayments.addAll(response.getPaymentOrders());
                     return listOfPayments;
                 })
                 .map(getPaymentOrderResponses -> paymentOrderIngestContext2.existingPaymentOrder(getPaymentOrderResponses))
                 .doOnSuccess(result ->
                         log.debug("Successfully fetched dbs scheduled payment orders"));
+    }
+
+    private @NotNull @Valid Mono<PaymentOrderIngestContext> addArrangementIdMap(PaymentOrderIngestContext paymentOrderIngestContext) {
+
+        return Flux.fromIterable(paymentOrderIngestContext.corePaymentOrder())
+                .flatMap(this::getArrangement)
+                .distinct()
+                .collectList()
+                .map(accountInternalIdGetResponseBody -> paymentOrderIngestContext.arrangementIds(accountInternalIdGetResponseBody));
+    }
+
+    private Mono<AccountArrangementItems> getArrangement(PaymentOrderPostRequest paymentOrderPostRequest) {
+        AccountArrangementsFilter accountArrangementsFilter = new AccountArrangementsFilter()
+                .externalArrangementIds(Collections.singletonList(paymentOrderPostRequest.getOriginatorAccount().getExternalArrangementId()));
+        return arrangementsApi.postFilter(accountArrangementsFilter);
     }
 
     /**
@@ -105,13 +136,14 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
      * @return A Mono with the response from the service api.
      */
     private Mono<PaymentOrderPostFilterResponse> getPayments(String internalUserId) {
+
         var paymentOrderPostFilterRequest = new PaymentOrderPostFilterRequest();
         paymentOrderPostFilterRequest.setStatuses(
                 List.of(READY, ACCEPTED, PROCESSED, CANCELLED, REJECTED, CANCELLATION_PENDING));
 
         return paymentOrdersApi.postFilterPaymentOrders(
                 null, null, null, null, null, null, null, null, null, null, null,
-                internalUserId, null, null, null, null,
+                internalUserId, null, null, null, Integer.MAX_VALUE,
                 null, null, paymentOrderPostFilterRequest);
     }
 
@@ -134,6 +166,11 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         // build new payment list (Bank ref is in core, but not in DBS)
         paymentOrderIngestContext.corePaymentOrder().forEach(corePaymentOrder -> {
             if(!existingBankRefIds.contains(corePaymentOrder.getBankReferenceId())) {
+                AccountArrangementItem accountArrangementItem = getInternalArrangementId(paymentOrderIngestContext.arrangementIds(),
+                        corePaymentOrder.getOriginatorAccount().getExternalArrangementId());
+                if (accountArrangementItem != null) {
+                    corePaymentOrder.getOriginatorAccount().setArrangementId(accountArrangementItem.getId());
+                }
                 paymentOrderIngestRequests.add(new NewPaymentOrderIngestRequest(corePaymentOrder));
             }
         });
@@ -156,5 +193,14 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         }
 
         return Flux.fromIterable(paymentOrderIngestRequests);
+    }
+
+    private AccountArrangementItem getInternalArrangementId(List<AccountArrangementItems> accountArrangementItemsList, String externalArrangementId) {
+
+        return accountArrangementItemsList.stream()
+                .flatMap(a -> a.getArrangementElements().stream())
+                .filter(b -> b.getExternalArrangementId().equalsIgnoreCase(externalArrangementId))
+                .findFirst()
+                .orElse(null);
     }
 }

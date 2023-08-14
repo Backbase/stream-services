@@ -1,5 +1,6 @@
 package com.backbase.stream.task;
 
+import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
@@ -32,6 +33,9 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
     private PaymentOrdersApi paymentOrdersApi;
 
     @Mock
+    private ArrangementsApi arrangementsApi;
+
+    @Mock
     private UnitOfWorkRepository<PaymentOrderTask, String> repository;
 
     private final PaymentOrderTaskExecutor streamTaskExecutor = new PaymentOrderTaskExecutor(paymentOrdersApi);
@@ -41,7 +45,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
     @InjectMocks
     private PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
             repository, streamTaskExecutor, streamWorkerConfiguration,
-            paymentOrdersApi, paymentOrderTypeMapper);;
+            paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper);;
 
     @Test
     void test_prepareUnitOfWork_paymentOrderIngestRequestList() {

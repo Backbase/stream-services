@@ -16,5 +16,5 @@ public class PaymentOrderIngestContext {
     private String internalUserId;
     private List<PaymentOrderPostRequest> corePaymentOrder = new ArrayList<>();
     private List<GetPaymentOrderResponse> existingPaymentOrder = new ArrayList<>();
-
+    private List<AccountArrangementItems> arrangementIds = new ArrayList<>();
 }
