@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [3.60.0](https://github.com/Backbase/stream-services/compare/3.59.0...3.60.0)
+### Added
+- Adding the ability to retrieve the arrangement a payment belongs to.
 ### Changed
 - updated application-local configurations to be aligned with the new Backbase Local env.
 
