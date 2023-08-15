@@ -1,5 +1,6 @@
 package com.backbase.stream.model;
 
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
 import java.util.ArrayList;
 import java.util.List;
 

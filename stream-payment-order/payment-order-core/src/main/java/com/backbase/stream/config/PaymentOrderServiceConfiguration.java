@@ -1,5 +1,6 @@
 package com.backbase.stream.config;
 
+import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.PaymentOrderServiceImpl;
