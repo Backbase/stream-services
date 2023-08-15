@@ -17,22 +17,22 @@ backbase:
   communication:
     services:
       usermanager:
-        direct-uri: http://localhost:8086/user-manager
+        direct-uri: http://localhost:8060
       access-control:
-        direct-uri: http://localhost:8086/access-control
+        direct-uri: http://localhost:8040
       arrangement:
         manager:
-          direct-uri: http://localhost:8082/arrangement-manager
+          direct-uri: http://localhost:8050
       payment:
         order:
-          direct-uri: http://localhost:8090/payment-order-service
+          direct-uri: http://localhost:8051
       transaction:
         manager:
-          direct-uri: http://localhost:8083/transaction-manager
+          direct-uri: http://localhost:8083
     http:
       client-secret: bb-secret
       client-id: bb-client
-      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+      access-token-uri: "http://localhost:7779/oauth/token"
   activemq:
     enabled: true
   stream:
@@ -50,7 +50,7 @@ eureka:
       role: live
   client:
     serviceUrl:
-      defaultZone: http://localhost:8080/registry/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 logging:
   level:

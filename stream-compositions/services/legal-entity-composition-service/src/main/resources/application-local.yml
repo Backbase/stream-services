@@ -11,28 +11,28 @@ spring:
 eureka:
   client:
     enabled: true
-    serviceUrl.defaultZone: http://localhost:8080/registry/eureka
+    serviceUrl.defaultZone: http://localhost:8761/eureka/
 
 backbase:
   communication:
     services:
       usermanager:
-        direct-uri: http://localhost:8086/user-manager
+        direct-uri: http://localhost:8060
       access-control:
-        direct-uri: http://localhost:8086/access-control
+        direct-uri: http://localhost:8040
       arrangement:
         manager:
-          direct-uri: http://localhost:8082/arrangement-manager
+          direct-uri: http://localhost:8050
       user:
         profile:
-          direct-uri: http://localhost:8086/user-profile-manager
+          direct-uri: http://localhost:8061
       identity:
         integration:
-          direct-uri: http://localhost:8181/identity-integration-service
+          direct-uri: http://localhost:8070
     http:
       client-secret: bb-secret
       client-id: bb-client
-      access-token-uri: "http://localhost:8181/oidc-token-converter-service/oauth/token"
+      access-token-uri: "http://localhost:7779/oauth/token"
   stream:
     legalentity:
       sink:
@@ -43,7 +43,7 @@ backbase:
         integration-base-url: http://localhost:7001
         chains:
           product-composition:
-            enabled: true
+            enabled: false
             base-url: http://localhost:9003
             async: false
         events:
