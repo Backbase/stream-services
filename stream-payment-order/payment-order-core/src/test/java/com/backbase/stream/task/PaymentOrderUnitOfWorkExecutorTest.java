@@ -1,6 +1,8 @@
 package com.backbase.stream.task;
 
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
@@ -61,6 +63,16 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
         Mockito.lenient().when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));
 
+        AccountArrangementItem accountArrangementItem = new AccountArrangementItem()
+                .id("arrangementId_1")
+                .externalArrangementId("externalArrangementId_1");
+
+        AccountArrangementItems accountArrangementItems = new AccountArrangementItems()
+                .addArrangementElementsItem(accountArrangementItem);
+
+        Mockito.lenient().when(arrangementsApi.postFilter(Mockito.any()))
+                .thenReturn(Mono.just(accountArrangementItems));
+
         StepVerifier.create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderIngestRequestList))
                 .assertNext(unitOfWork -> {
                     Assertions.assertTrue(unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
@@ -80,6 +92,16 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
         Mockito.lenient().when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));
+
+        AccountArrangementItem accountArrangementItem = new AccountArrangementItem()
+                .id("arrangementId_1")
+                .externalArrangementId("externalArrangementId_1");
+
+        AccountArrangementItems accountArrangementItems = new AccountArrangementItems()
+                .addArrangementElementsItem(accountArrangementItem);
+
+        Mockito.lenient().when(arrangementsApi.postFilter(Mockito.any()))
+                .thenReturn(Mono.just(accountArrangementItems));
 
         StepVerifier.create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
                 .assertNext(unitOfWork -> {
