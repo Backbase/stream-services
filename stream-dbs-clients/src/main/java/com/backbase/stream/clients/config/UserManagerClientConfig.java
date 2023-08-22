@@ -3,6 +3,7 @@ package com.backbase.stream.clients.config;
 import com.backbase.dbs.user.api.service.ApiClient;
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
+import com.backbase.dbs.user.api.service.v2.UserProfileManagementApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -37,6 +38,12 @@ public class UserManagerClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public IdentityManagementApi identityManagementApi(ApiClient userManagerClient) {
         return new IdentityManagementApi(userManagerClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public UserProfileManagementApi userManagerProfileApi(ApiClient userManagerClient) {
+        return new UserProfileManagementApi(userManagerClient);
     }
 
 }

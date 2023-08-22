@@ -56,8 +56,9 @@ public class AccessControlConfiguration {
     @Bean
     public UserService userService(Optional<IdentityIntegrationServiceApi> identityApi,
         UserManagementApi usersApi,
-        IdentityManagementApi identityManagementApi) {
-        return new UserService(usersApi, identityManagementApi, identityApi);
+        IdentityManagementApi identityManagementApi,
+        com.backbase.dbs.user.api.service.v2.UserProfileManagementApi userProfileManagementApi) {
+        return new UserService(usersApi, identityManagementApi, identityApi, userProfileManagementApi);
     }
 
     @Bean

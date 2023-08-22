@@ -623,11 +623,14 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                         .findFirst().get().getUser();
                     inputUser.setInternalId(upsertedUser.getInternalId());
                     return upsertUserProfile(inputUser)
-                        .map(userProfile -> {
+                        .flatMap(userProfile -> {
                             log.info("User Profile upserted for: {}", userProfile.getUserName());
                             inputUser.setUserProfile(userProfile);
-                            return userProfile;
-                        });
+                            return userService.getUserProfile(inputUser.getInternalId());
+                        })
+                        .doOnNext(userCacheProfile ->
+                            log.info("User Cache Profile is existed: {}", userCacheProfile.getFullName())
+                        );
                 }))
             .collectList()
             .thenReturn(streamTask);
