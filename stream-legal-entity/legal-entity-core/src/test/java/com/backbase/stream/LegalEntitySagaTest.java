@@ -20,6 +20,7 @@ import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.api.service.v2.model.Realm;
+import com.backbase.dbs.user.profile.api.service.v2.model.GetUserProfile;
 import com.backbase.stream.audiences.UserKindSegmentationSaga;
 import com.backbase.stream.audiences.UserKindSegmentationTask;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
@@ -42,6 +43,7 @@ import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.Loan;
+import com.backbase.stream.legalentity.model.Multivalued;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -49,6 +51,7 @@ import com.backbase.stream.legalentity.model.ReferenceJobRole;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.legalentity.model.UserProfile;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.product.BatchProductIngestionSaga;
@@ -663,7 +666,8 @@ class LegalEntitySagaTest {
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
-        when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(customSa), any())).thenReturn(Mono.just(customSa));
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(customSa), any())).thenReturn(
+            Mono.just(customSa));
         when(userService.getUserByExternalId(eq(regularUserExId))).thenReturn(Mono.just(oldRegularUser.getUser()));
         when(userService.getUserByExternalId(eq(adminExId))).thenReturn(Mono.just(adminUser));
         when(userService.createUser(any(), any(), any())).thenReturn(Mono.just(adminUser));
@@ -934,6 +938,32 @@ class LegalEntitySagaTest {
             .isEqualTo(error);
     }
 
+    @Test
+    void upsertUserWithProfile() {
+        getMockLegalEntity();
+        User user = regularUser.getUser();
+
+        user.fullName("User With Profile")
+            .emailAddress(new EmailAddress().address("userwp@test.com").primary(true))
+            .mobileNumber(new PhoneNumber().number("0123456").primary(true))
+            .userProfile(new UserProfile()
+                .userId(user.getInternalId())
+                .profileUrl("http://backbase.eu")
+                .addAdditionalEmailsItem(new Multivalued().primary(true).value("userwp@test.com"))
+                .addAdditionalPhoneNumbersItem(new Multivalued().primary(true).value("0123456")));
+
+        legalEntity.setUsers(singletonList(new JobProfileUser().user(user)));
+
+        GetUserProfile getUserProfile = new GetUserProfile().userId(user.getInternalId());
+        when(userProfileService.upsertUserProfile(any())).thenReturn(Mono.just(getUserProfile));
+        when(userService.getUserProfile(user.getInternalId())).thenReturn(
+            Mono.just(new com.backbase.dbs.user.api.service.v2.model.UserProfile().fullName("User With Profile")));
+
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+
+        verify(userService).getUserProfile(user.getInternalId());
+    }
+
     private static Stream<Arguments> parameters_upster_error() {
         return Stream.of(
             Arguments.of(new RuntimeException("Fake error"), "Fake error"),
@@ -968,6 +998,7 @@ class LegalEntitySagaTest {
     private LegalEntitySagaConfigurationProperties getLegalEntitySagaConfigurationProperties() {
         LegalEntitySagaConfigurationProperties sagaConfiguration =  new LegalEntitySagaConfigurationProperties();
         sagaConfiguration.setUseIdentityIntegration(true);
+        sagaConfiguration.setUserProfileEnabled(true);
         return sagaConfiguration;
     }
 

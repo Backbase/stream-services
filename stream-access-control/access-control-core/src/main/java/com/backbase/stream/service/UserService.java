@@ -2,7 +2,9 @@ package com.backbase.stream.service;
 
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
+import com.backbase.dbs.user.api.service.v2.UserProfileManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.*;
+import com.backbase.dbs.user.api.service.v2.model.UserProfile;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
@@ -49,6 +51,7 @@ public class UserService {
     private final UserManagementApi usersApi;
     private final IdentityManagementApi identityManagementApi;
     private final Optional<IdentityIntegrationServiceApi> identityIntegrationApi;
+    private final UserProfileManagementApi userManagerProfileApi;
 
     /**
      * Get User by external ID.
@@ -487,4 +490,22 @@ public class UserService {
                 .then(getUserByExternalId(user.getExternalId()));
     }
 
+    /**
+     * Return user profile.
+     *
+     * @param userId user internal id.
+     * @return User profile if exists. Empty if not.
+     */
+    public Mono<UserProfile> getUserProfile(String userId) {
+        if (userId == null) {
+            return Mono.empty();
+        }
+
+        return userManagerProfileApi.getUserProfile(userId)
+            .doOnNext(userProfile -> log.info("Found user profile for internalId {}", userId))
+            .onErrorResume(WebClientResponseException.NotFound.class, notFound -> {
+                log.info("User profile with id: {} does not exist: {}", userId, notFound.getResponseBodyAsString());
+                return Mono.empty();
+            });
+    }
 }

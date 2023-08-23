@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.60.1](https://github.com/Backbase/stream-services/compare/3.60.0...3.60.1)
+### Added
+- Add populating the user manager cache with user profile data.
+
 ## [3.60.0](https://github.com/Backbase/stream-services/compare/3.59.0...3.60.0)
 ### Added
 - Adding the ability to retrieve the arrangement a payment belongs to.

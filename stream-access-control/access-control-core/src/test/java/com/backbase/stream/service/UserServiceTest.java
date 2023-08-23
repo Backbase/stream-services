@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
+import com.backbase.dbs.user.api.service.v2.UserProfileManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.*;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
@@ -30,6 +31,7 @@ import java.util.Optional;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,9 +58,13 @@ class UserServiceTest {
     @Mock
     private IdentityIntegrationServiceApi identityIntegrationApi;
 
+    @Mock
+    private UserProfileManagementApi userManagerProfileApi;
+
     @BeforeEach
     void setup() {
-        subject = new UserService(usersApi, identityManagementApi, Optional.of(identityIntegrationApi));
+        subject = new UserService(usersApi, identityManagementApi, Optional.of(identityIntegrationApi),
+            userManagerProfileApi);
     }
 
     @Test
@@ -483,5 +489,31 @@ class UserServiceTest {
 
         StepVerifier.create(result)
                 .expectError().verify();
+    }
+
+    @Test
+    void getUserProfile() {
+        final String userId = UUID.randomUUID().toString();
+
+        when(userManagerProfileApi.getUserProfile(userId)).thenReturn(Mono.just(new UserProfile()));
+
+        Mono<UserProfile> result = subject.getUserProfile(userId);
+
+        StepVerifier.create(result)
+            .assertNext(Assertions::assertNotNull)
+            .verifyComplete();
+    }
+
+    @Test
+    void getUserProfile_notFound() {
+        final String userId = UUID.randomUUID().toString();
+
+        when(userManagerProfileApi.getUserProfile(userId)).thenReturn(Mono.error(WebClientResponseException.NotFound.create(404, "not found", new HttpHeaders(), new byte[0], null)));
+
+        Mono<UserProfile> result = subject.getUserProfile(userId);
+
+        StepVerifier.create(result)
+            .expectNextCount(0)
+            .verifyComplete();
     }
 }
