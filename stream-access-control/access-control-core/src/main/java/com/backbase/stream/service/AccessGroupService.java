@@ -402,7 +402,7 @@ public class AccessGroupService {
                 resultList.stream().forEach(r -> {
                     if (r.getStatus() != HTTP_STATUS_OK) {
                         streamTask.error("participant", "update-participant", "failed", r.getResourceId(),
-                            null, "Error updating Participant {} for Service Agreement: {}", r.getResourceId(),
+                            null, "Error updating Participant %s for Service Agreement: %s", r.getResourceId(),
                             serviceAgreement.getExternalId());
                         log.error("Error updating Participant {} for Service Agreement: {}", r.getResourceId(),
                             serviceAgreement.getExternalId());
@@ -1279,6 +1279,8 @@ public class AccessGroupService {
         log.info("Setup {} job role for Service Agreement: {}", jobRole.getName(),
             masterServiceAgreement.getExternalId());
 
+        List<BusinessFunctionGroup> jobRoleFunctionGroups = jobRole.getFunctionGroups();
+
         return getFunctionGroups(streamTask, masterServiceAgreement)
             .collectList()
             .flatMap(functionGroups -> {
@@ -1347,7 +1349,7 @@ public class AccessGroupService {
                     if (!item.getStatus().equals(HTTP_STATUS_OK)) {
                         streamTask.error(JOB_ROLE, "ingest-reference-job-role", FAILED,
                                 item.getExternalServiceAgreementId(), item.getResourceId(),
-                                "Failed up setup Job Role - status: {}, errors: {}", item.getStatus(), item.getErrors());
+                                "Failed up setup Job Role - status: %s, errors: %s", item.getStatus(), item.getErrors());
                         return Mono.error(new StreamTaskException(streamTask, "Failed to setup Job Role - status: " + item.getStatus() + ", errors: " + item.getErrors()));
                     }
                     jobRole.setId(idItems.get(0).getResourceId());

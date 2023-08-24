@@ -54,9 +54,10 @@ public abstract class StreamTask {
      */
     public void error(String entity, String operation, String result, String externalId, String internalId,
                       String message, Object... messageArgs) {
-        addHistory(entity, operation, result, externalId, internalId, String.format(message, messageArgs),
+        String formattedMessage = String.format(message, messageArgs);
+        addHistory(entity, operation, result, externalId, internalId, formattedMessage,
             TaskHistory.Severity.ERROR, null, null);
-        error = message;
+        error = formattedMessage;
     }
 
     /**
@@ -72,9 +73,10 @@ public abstract class StreamTask {
      */
     public void error(String entity, String operation, String result, String externalId, String internalId,
                       Throwable throwable, String errorMessage, String message, Object... messageArgs) {
-        addHistory(entity, operation, result, externalId, internalId, String.format(message, messageArgs),
+        String formattedMessage = String.format(message, messageArgs);
+        addHistory(entity, operation, result, externalId, internalId, formattedMessage,
             TaskHistory.Severity.ERROR, throwable, errorMessage);
-        error = message;
+        error = formattedMessage;
     }
 
     /**
