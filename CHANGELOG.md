@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.60.2](https://github.com/Backbase/stream-services/compare/3.60.1...3.60.2)
+### Changed
+- Fix formatting of StreamTask error messages
+- Fix message placeholders of `AccessGroupService`
+
 ## [3.60.1](https://github.com/Backbase/stream-services/compare/3.60.0...3.60.1)
 ### Added
 - Add populating the user manager cache with user profile data.
