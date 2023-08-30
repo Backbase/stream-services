@@ -1003,7 +1003,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private Mono<LegalEntityTask> setupLegalEntityLimits(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
-        if(isNull(legalEntity.getLimit())) {
+        if(isNull(legalEntity.getLimit()) || !validateLimit(legalEntity.getLimit())) {
             streamTask.info(LEGAL_ENTITY, PROCESS_LIMITS, FAILED, legalEntity.getInternalId(), legalEntity.getExternalId(), "Legal Entity: %s does not have any Legal Entity limits defined", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
@@ -1031,11 +1031,10 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             return Mono.just(streamTask);
         }
         return Flux.fromStream(legalEntity.getLimit().getBusinessFunctionLimits()
-                        .stream()
-                        .filter(businessFunctionLimit -> nonNull(businessFunctionLimit)
-                                && nonNull(businessFunctionLimit.getPrivilege())
-                                && validateLimit(businessFunctionLimit.getPrivilege().getLimit())
-                        ).map(businessFunctionLimit -> createLimitsTask(streamTask, legalEntity.getInternalId(), businessFunctionLimit)))
+                .stream()
+                .filter(businessFunctionLimit -> nonNull(businessFunctionLimit)
+                        && !CollectionUtils.isEmpty(businessFunctionLimit.getPrivileges()))
+                .flatMap(businessFunctionLimit -> createLimitsTask(streamTask, legalEntity.getInternalId(), businessFunctionLimit)))
                 .concatMap(limitsSaga::executeTask)
                 .map(limitsTask -> streamTask.addHistory(limitsTask.getHistory()))
                 .collectList()
@@ -1053,34 +1052,41 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private Mono<LegalEntityTask> setupServiceAgreementLimits(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
         ServiceAgreement serviceAgreement = retrieveServiceAgreement(legalEntity);
-        if(isNull(serviceAgreement.getLimit())) {
+        if (isNull(serviceAgreement.getLimit())) {
             streamTask.info(LEGAL_ENTITY, PROCESS_LIMITS, FAILED, legalEntity.getInternalId(), legalEntity.getExternalId(), "Legal Entity: %s does not have any Service Agreement limits defined", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
-        return limitsSaga.executeTask(createLimitsTask(streamTask,  serviceAgreement, null, serviceAgreement.getLimit()))
+        return limitsSaga.executeTask(createLimitsTask(streamTask, serviceAgreement, null, serviceAgreement.getLimit()))
             .flatMap(limitsTask -> requireNonNull(Mono.just(streamTask)))
             .then(Mono.just(streamTask));
     }
 
-    private LimitsTask createLimitsTask(LegalEntityTask streamTask, String legalEntityId, BusinessFunctionLimit businessFunctionLimit) {
+    private Stream<LimitsTask> createLimitsTask(LegalEntityTask streamTask, String legalEntityId, BusinessFunctionLimit businessFunctionLimit) {
 
-        var limitData = new CreateLimitRequestBody();
-        var entities = new ArrayList<Entity>();
-        ofNullable(legalEntityId).ifPresent(le -> entities.add(new Entity().etype(LEGAL_ENTITY_E_TYPE).eref(le)));
-        ofNullable(businessFunctionLimit.getFunctionId())
-                .ifPresent(functionId -> entities.add(new Entity().etype(FUNCTION_E_TYPE).eref(functionId)));
-        ofNullable(businessFunctionLimit.getPrivilege())
-                .map(Privilege::getPrivilege)
-                .ifPresent(privilege -> entities.add(new Entity().etype(PRIVILEGE_E_TYPE).eref(privilege)));
-        limitData.entities(entities);
-        ofNullable(businessFunctionLimit.getPrivilege())
-                .map(Privilege::getLimit).ifPresent(limit -> {
-                    limitData.periodicLimitsBounds(periodicLimits(limit))
-                            .transactionalLimitsBound(transactionalLimits(limit))
-                            .shadow(businessFunctionLimit.getShadow())
-                            .currency(limit.getCurrencyCode());
-                });
-        return new LimitsTask(streamTask.getId() + "-" + LEGAL_ENTITY_LIMITS, limitData);
+        if(isNull(businessFunctionLimit) || CollectionUtils.isEmpty(businessFunctionLimit.getPrivileges())){
+            return Stream.of();
+        }
+        return businessFunctionLimit.getPrivileges()
+            .stream()
+            .filter(privilege -> validateLimit(privilege.getLimit()))
+            .map(privilege -> {
+                var limitData = new CreateLimitRequestBody();
+                var entities = new ArrayList<Entity>();
+                ofNullable(legalEntityId).ifPresent(le -> entities.add(new Entity().etype(LEGAL_ENTITY_E_TYPE).eref(le)));
+                ofNullable(businessFunctionLimit.getFunctionId())
+                        .ifPresent(functionId -> entities.add(new Entity().etype(FUNCTION_E_TYPE).eref(functionId)));
+                ofNullable(privilege.getPrivilege())
+                        .ifPresent(prv -> entities.add(new Entity().etype(PRIVILEGE_E_TYPE).eref(prv)));
+                limitData.entities(entities);
+                Optional.of(privilege)
+                    .map(Privilege::getLimit).ifPresent(limit -> {
+                        limitData.periodicLimitsBounds(periodicLimits(limit))
+                                .transactionalLimitsBound(transactionalLimits(limit))
+                                .shadow(businessFunctionLimit.getShadow())
+                                .currency(limit.getCurrencyCode());
+                    });
+                return new LimitsTask(streamTask.getId() + "-" + LEGAL_ENTITY_LIMITS, limitData);
+            });
     }
 
     private LimitsTask createLimitsTask(LegalEntityTask streamTask, ServiceAgreement serviceAgreement, String legalEntityId, Limit limit) {

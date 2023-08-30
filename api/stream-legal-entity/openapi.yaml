@@ -1360,8 +1360,10 @@ components:
           type: boolean
           default: false
           example: true
-        privilege:
-          $ref: '#/components/schemas/Privilege'
+        privileges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Privilege'
     UserProfile:
       title: UserProfile
       description: |
