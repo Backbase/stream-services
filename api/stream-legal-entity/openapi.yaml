@@ -1345,7 +1345,7 @@ components:
       required:
         - functionId
         - shadow
-        - privileges
+        - privilege
       properties:
         functionId:
           description: |-
