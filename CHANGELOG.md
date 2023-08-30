@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.60.3](https://github.com/Backbase/stream-services/compare/3.60.1...3.60.2)
+### Changed
+- Enhance Legal Entity level Limit Object to set Limit based on Privilege, Business Function and Legal Entity
+
 ## [3.60.2](https://github.com/Backbase/stream-services/compare/3.60.1...3.60.2)
 ### Changed
 - Fix formatting of StreamTask error messages
