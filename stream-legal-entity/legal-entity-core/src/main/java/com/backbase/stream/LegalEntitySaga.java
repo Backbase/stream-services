@@ -1003,7 +1003,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private Mono<LegalEntityTask> setupLegalEntityLimits(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
-        if (isNull(legalEntity.getLimit()) || validateLimit(legalEntity.getLimit())) {
+        if (isNull(legalEntity.getLimit()) || !validateLimit(legalEntity.getLimit())) {
             streamTask.info(LEGAL_ENTITY, PROCESS_LIMITS, FAILED, legalEntity.getInternalId(), legalEntity.getExternalId(), "Legal Entity: %s does not have any Legal Entity limits defined", legalEntity.getExternalId());
             return Mono.just(streamTask);
         }
