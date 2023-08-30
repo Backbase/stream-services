@@ -1335,6 +1335,33 @@ components:
           $ref: '#/components/schemas/QuarterlyLimit'
         yearly:
           $ref: '#/components/schemas/YearlyLimit'
+        businessFunctionLimits:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessFunctionLimit'
+    BusinessFunctionLimit:
+      title: BusinessFunctionLimit
+      type: object
+      required:
+        - functionId
+        - shadow
+        - privileges
+      properties:
+        functionId:
+          description: |-
+            Unique ID in the system
+            Guidelines: <project_prefix>.<1xxx>
+          maxLength: 36
+          minLength: 1
+          type: string
+          example: "bankA.1000"
+        shadow:
+          description: shadow limit or not
+          type: boolean
+          default: false
+          example: true
+        privilege:
+          $ref: '#/components/schemas/Privilege'
     UserProfile:
       title: UserProfile
       description: |
