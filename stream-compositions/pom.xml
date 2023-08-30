@@ -7,23 +7,23 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>15.2.2</version>
+        <version>15.2.0</version>
         <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>3.61.0</version>
+    <version>3.38.0-SNAPSHOT</version>
 
     <properties>
-        <backbase-bom.version>2023.06</backbase-bom.version>
+        <backbase-bom.version>2023.02-LTS</backbase-bom.version>
         <boat-maven-plugin.version>0.16.6</boat-maven-plugin.version>
         <testcontainers.version>1.12.5</testcontainers.version>
         <mock.server.version>5.11.2</mock.server.version>
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
         <spring-cloud-kubernetes.version>2.1.3</spring-cloud-kubernetes.version>
-        <ssdk.version>15.2.2</ssdk.version>
+        <ssdk.version>15.2.0</ssdk.version>
         <jib.container.volumes>/tmp</jib.container.volumes>
     </properties>
 

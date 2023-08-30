@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>15.2.2</version>
+        <version>15.2.0</version>
         <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-task-starter-parent</artifactId>
-    <version>3.61.0</version>
+    <version>3.38.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Task Starter</name>
     <description>Parent for Stream Executable Tasks</description>

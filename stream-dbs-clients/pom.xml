@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>3.61.0</version>
+        <version>3.38.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -29,10 +29,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>com.backbase.buildingblocks</groupId>
-            <artifactId>building-blocks-common</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
@@ -95,7 +91,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>unpack</id>
@@ -126,7 +122,7 @@
                                     <artifactId>audit-spec</artifactId>
                                     <classifier>api</classifier>
                                     <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/yaml/audit</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
@@ -201,14 +197,6 @@
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.backbase.loan</groupId>
-                                    <artifactId>loan</artifactId>
-                                    <classifier>api</classifier>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
                             </artifactItems>
                             <includes>**/*.yaml, **/*.json</includes>
                         </configuration>
@@ -229,9 +217,9 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v3*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.accesscontrol.api.service.v3</apiPackage>
-                            <modelPackage>com.backbase.dbs.accesscontrol.api.service.v3.model</modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.accesscontrol.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.accesscontrol.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
@@ -256,37 +244,6 @@
                             <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.arrangement.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.arrangement.api.service.v2.model</modelPackage>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-loan-integration-inbound-api-code</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.build.directory}/yaml/loan/loan-integration-inbound-api-v*.yaml</inputSpec>
-                            <apiPackage>com.backbase.loan.inbound.api.service.v1</apiPackage>
-                            <modelPackage>com.backbase.loan.inbound.api.service.v1.model</modelPackage>
-                            <generateSupportingFiles>true</generateSupportingFiles>
-                            <generatorName>java</generatorName>
-                            <strictSpec>true</strictSpec>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelTests>false</generateModelTests>
-                            <configOptions>
-                                <library>resttemplate</library>
-                                <restTemplateBeanName>interServiceRestTemplate</restTemplateBeanName>
-                                <dateLibrary>java8</dateLibrary>
-                                <interfaceOnly>true</interfaceOnly>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                                <useBeanValidation>true</useBeanValidation>
-                                <generateAliasAsModel>true</generateAliasAsModel>
-                                <useClassLevelBeanValidation>false</useClassLevelBeanValidation>
-                                <useTags>true</useTags>
-                                <java8>true</java8>
-                                <useOptional>false</useOptional>
-                                <sourceFolder>/</sourceFolder>
-                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -338,7 +295,7 @@
                             <importMappings>
                                 <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
                             </importMappings>
-                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v2*.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.paymentorder.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.paymentorder.api.service.v2.model</modelPackage>
                         </configuration>
@@ -425,29 +382,6 @@
                             <inputSpec>${project.build.directory}/yaml/contact-manager/contact-manager-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.contact.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.contact.api.service.v2.model</modelPackage>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>boat-validation</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>validate</goal>
-                        </goals>
-                        <configuration>
-                            <input>${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml</input>
-                            <failOnWarning>true</failOnWarning>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-user-segments-collector-service-api-code</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml</inputSpec>
-                            <apiPackage>com.backbase.audiences.collector.api.service.v1</apiPackage>
-                            <modelPackage>com.backbase.audiences.collector.api.service.v1.model</modelPackage>
                         </configuration>
                     </execution>
                 </executions>
