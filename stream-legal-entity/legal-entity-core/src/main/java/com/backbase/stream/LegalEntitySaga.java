@@ -1079,12 +1079,11 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                         .ifPresent(prv -> entities.add(new Entity().etype(PRIVILEGE_E_TYPE).eref(prv)));
                 limitData.entities(entities);
                 Optional.of(privilege)
-                    .map(Privilege::getLimit).ifPresent(limit -> {
+                    .map(Privilege::getLimit).ifPresent(limit ->
                         limitData.periodicLimitsBounds(periodicLimits(limit))
                                 .transactionalLimitsBound(transactionalLimits(limit))
                                 .shadow(businessFunctionLimit.getShadow())
-                                .currency(limit.getCurrencyCode());
-                    });
+                                .currency(limit.getCurrencyCode()));
                 return new LimitsTask(streamTask.getId() + "-" + LEGAL_ENTITY_LIMITS, limitData);
             });
     }
