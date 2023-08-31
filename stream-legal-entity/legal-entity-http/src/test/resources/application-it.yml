@@ -24,6 +24,10 @@ spring:
               - uri: http://localhost:10000
                 metadata:
                   contextPath: /loan
+            limit:
+              - uri: http://localhost:10000
+                metadata:
+                  contextPath: /limit
     kubernetes:
       config:
         enabled: false

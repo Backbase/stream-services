@@ -5,7 +5,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
 
-import com.backbase.stream.legalentity.model.Loan;
+import com.backbase.stream.legalentity.model.*;
+
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -18,19 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import com.backbase.stream.LegalEntityTask;
-import com.backbase.stream.legalentity.model.BaseProductGroup;
-import com.backbase.stream.legalentity.model.CurrentAccount;
-import com.backbase.stream.legalentity.model.EmailAddress;
-import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
-import com.backbase.stream.legalentity.model.JobProfileUser;
-import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityParticipant;
-import com.backbase.stream.legalentity.model.LegalEntityStatus;
-import com.backbase.stream.legalentity.model.LegalEntityType;
-import com.backbase.stream.legalentity.model.PhoneNumber;
-import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.ServiceAgreement;
-import com.backbase.stream.legalentity.model.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
@@ -65,6 +54,7 @@ class LegalEntitySagaIT {
                     .parentExternalId("parent-100000")
                     .legalEntityType(LegalEntityType.CUSTOMER)
                     .realmName("customer-bank")
+                    .limit(legalEntityLimit())
                     .productGroups(Arrays.asList(
                         (ProductGroup) new ProductGroup()
                             .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
@@ -141,6 +131,16 @@ class LegalEntitySagaIT {
                             .status(LegalEntityStatus.ENABLED)
                             .isMaster(false)
                     )
+            );
+    }
+
+    private static Limit legalEntityLimit(){
+        return new Limit()
+            .addBusinessFunctionLimitsItem(new BusinessFunctionLimit()
+                .functionId("1001")
+                    .shadow(true)
+                    .addPrivilegesItem(new Privilege().privilege("create").limit(new Limit().daily(BigDecimal.valueOf(2500d))))
+                    .addPrivilegesItem(new Privilege().privilege("execute").limit(new Limit().daily(BigDecimal.valueOf(2500d))))
             );
     }
 
@@ -291,6 +291,18 @@ class LegalEntitySagaIT {
                                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                                 .withBody(""))
         );
+        stubFor(
+                WireMock.post("/limit/service-api/v2/limits/retrieval")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.OK.value())
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody(""))
+        );
+        stubFor(
+                WireMock.post("/limit/service-api/v2/limits")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.CREATED.value())
+                                .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                                .withBody(""))
+        );
     }
 
     /**
@@ -372,6 +384,34 @@ class LegalEntitySagaIT {
             .withHeader("X-TID", WireMock.equalTo("tenant-id"))
             .withHeader("X-B3-TraceId", notEmpty())
             .withHeader("X-B3-SpanId", notEmpty()));
+    }
+
+    @Test
+    void legalEntitySagaSetLimitLegalEntity() {
+        // Given
+        setupWireMock();
+        LegalEntityTask legalEntityTask = defaultLegalEntityTask();
+
+        // When
+        webTestClient.post()
+                .uri("/legal-entity")
+                .header("Content-Type", "application/json")
+                .header("X-TID", "tenant-id")
+                .bodyValue(legalEntityTask.getLegalEntity())
+                .exchange()
+                .expectStatus().isEqualTo(200);
+
+
+        // Then
+        verify(WireMock.postRequestedFor(WireMock.urlEqualTo("/limit/service-api/v2/limits/retrieval"))
+                .withHeader("X-TID", WireMock.equalTo("tenant-id"))
+                .withHeader("X-B3-TraceId", notEmpty())
+                .withHeader("X-B3-SpanId", notEmpty()));
+
+        verify(WireMock.postRequestedFor(WireMock.urlEqualTo("/limit/service-api/v2/limits"))
+                .withHeader("X-TID", WireMock.equalTo("tenant-id"))
+                .withHeader("X-B3-TraceId", notEmpty())
+                .withHeader("X-B3-SpanId", notEmpty()));
     }
 
     static class NotEmptyPattern extends StringValuePattern {
