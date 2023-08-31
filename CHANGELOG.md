@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 ## [3.62.0](https://github.com/Backbase/stream-services/compare/3.61.0...3.62.0)
 ### Added
 - Secondary Service Agreement update
+## [3.60.3](https://github.com/Backbase/stream-services/compare/3.60.1...3.60.2)
+### Changed
+- Enhance Legal Entity level Limit Object to set Limit based on Privilege, Business Function and Legal Entity
 
 ## [3.60.2](https://github.com/Backbase/stream-services/compare/3.60.1...3.60.2)
 ### Changed

@@ -1335,6 +1335,35 @@ components:
           $ref: '#/components/schemas/QuarterlyLimit'
         yearly:
           $ref: '#/components/schemas/YearlyLimit'
+        businessFunctionLimits:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessFunctionLimit'
+    BusinessFunctionLimit:
+      title: BusinessFunctionLimit
+      type: object
+      required:
+        - functionId
+        - shadow
+        - privilege
+      properties:
+        functionId:
+          description: |-
+            Unique ID in the system
+            Guidelines: <project_prefix>.<1xxx>
+          maxLength: 36
+          minLength: 1
+          type: string
+          example: "bankA.1000"
+        shadow:
+          description: shadow limit or not
+          type: boolean
+          default: false
+          example: true
+        privileges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Privilege'
     UserProfile:
       title: UserProfile
       description: |
@@ -2356,8 +2385,8 @@ components:
     DefaultSettlementAccountNumber:
       type: string
       description: |
-          Default settlement account number. If defaultSettlementAccountId is specified and the account is
-          from dbs then account number will be taken from it and this field will be ignored.
+        Default settlement account number. If defaultSettlementAccountId is specified and the account is
+        from dbs then account number will be taken from it and this field will be ignored.
     DefaultSettlementAccountInternalId:
       type: string
     DefaultSettlementAccountExternalId:
