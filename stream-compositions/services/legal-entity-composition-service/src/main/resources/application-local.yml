@@ -38,6 +38,7 @@ backbase:
       sink:
         useIdentityIntegration: true
         userProfileEnabled: true
+        serviceAgreementUpdateEnabled: false
     compositions:
       legal-entity:
         integration-base-url: http://localhost:7001
@@ -444,4 +445,5 @@ bootstrap:
 
 logging:
   level:
+    com.backbase.stream: INFO
     com.backbase.stream.compositions: DEBUG

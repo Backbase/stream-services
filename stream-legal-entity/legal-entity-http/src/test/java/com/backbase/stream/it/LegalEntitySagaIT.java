@@ -274,6 +274,10 @@ class LegalEntitySagaIT {
                 .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
         );
         stubFor(
+                WireMock.put("/access-control/service-api/v3/accesscontrol/service-agreements/500001")
+                        .willReturn(WireMock.aResponse().withStatus(HttpStatus.OK.value()))
+        );
+        stubFor(
             WireMock.post("/loan/service-api/v1/loans/batch")
                 .willReturn(WireMock.aResponse().withStatus(HttpStatus.MULTI_STATUS.value())
                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
