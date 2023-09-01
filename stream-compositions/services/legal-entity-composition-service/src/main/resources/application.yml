@@ -21,6 +21,7 @@ backbase:
       sink:
         useIdentityIntegration: true
         userProfileEnabled: true
+        serviceAgreementUpdateEnabled: false
     compositions:
       legal-entity:
         integration-base-url: http://legal-entity-integration:8080

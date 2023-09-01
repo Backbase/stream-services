@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
@@ -441,6 +442,8 @@ class LegalEntitySagaTest {
         when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
         when(legalEntitySagaConfigurationProperties.isUseIdentityIntegration())
             .thenReturn(true);
+        when(legalEntitySagaConfigurationProperties.isServiceAgreementUpdateEnabled())
+                .thenReturn(true);
         when(userService.setupRealm(legalEntityTask.getLegalEntity()))
             .thenReturn(Mono.empty());
         when(userService.linkLegalEntityToRealm(legalEntityTask.getLegalEntity()))
@@ -453,6 +456,8 @@ class LegalEntitySagaTest {
             .thenReturn(Mono.empty());
         when(accessGroupService.getServiceAgreementByExternalId("Service_Agreement_Id"))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
+        lenient().when(accessGroupService.updateServiceAgreementItem(any(), any()))
+                .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
         when(accessGroupService.updateServiceAgreementAssociations(any(), any(), any()))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
         when(accessGroupService.createServiceAgreement(any(), any()))

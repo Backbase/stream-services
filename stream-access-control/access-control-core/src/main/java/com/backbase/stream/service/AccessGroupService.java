@@ -40,6 +40,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationServiceAg
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.configuration.DeletionProperties;
@@ -93,6 +94,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -172,6 +174,23 @@ public class AccessGroupService {
             .map(accessGroupMapper::toStream);
     }
 
+    /**
+     *
+     * @param streamTask
+     * @param serviceAgreement
+     * @return Service Agreement
+     */
+    public Mono<ServiceAgreement> updateServiceAgreementItem(StreamTask streamTask, ServiceAgreement serviceAgreement) {
+        log.info("Updating Service Agreement with external Id: {}", serviceAgreement.getExternalId());
+        ServiceAgreementPut serviceAgreementPut = accessGroupMapper.toPresentationPut(serviceAgreement);
+        return serviceAgreementsApi.putServiceAgreementItem(serviceAgreement.getInternalId(), serviceAgreementPut)
+                .onErrorResume(HttpClientErrorException.class, throwable -> {
+                    log.error(SERVICE_AGREEMENT, "update", "failed", serviceAgreement.getExternalId(),
+                            "", throwable, throwable.getResponseBodyAsString(), "Failed to update Service Agreement");
+                    return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to update Service Agreement"));
+                })
+                .thenReturn(serviceAgreement);
+    }
     /**
      * Update Service Agreement.
      *

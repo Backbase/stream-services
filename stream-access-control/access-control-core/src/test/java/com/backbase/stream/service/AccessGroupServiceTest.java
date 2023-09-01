@@ -16,6 +16,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
@@ -74,6 +75,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.HttpClientErrorException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -667,7 +669,47 @@ class AccessGroupServiceTest {
         List<PresentationIdentifier> value = captor.getValue();
         assertEquals(templateFunctionGroup.getId(), value.get(0).getIdIdentifier());
     }
+    @Test
+    void testUpdateServiceAgreementItem() {
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
 
+        ServiceAgreement serviceAgreement = new ServiceAgreement();
+        serviceAgreement.setExternalId("external-id");
+        serviceAgreement.setInternalId("internal-id");
+        serviceAgreement.setName("name");
+
+        when(serviceAgreementsApi.putServiceAgreementItem(any(), any())).thenReturn(Mono.empty());
+
+        Mono<ServiceAgreement> resultMono = subject.updateServiceAgreementItem(streamTask, serviceAgreement);
+
+        StepVerifier.create(resultMono)
+                .expectNext(serviceAgreement)
+                .verifyComplete();
+
+        verify(serviceAgreementsApi, times(1))
+                .putServiceAgreementItem(eq("internal-id"), any());
+
+    }
+
+    @Test
+    void testUpdateServiceAgreementItemFailed() {
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+
+        ServiceAgreement serviceAgreement = new ServiceAgreement();
+        serviceAgreement.setExternalId("external-id");
+        serviceAgreement.setInternalId("internal-id");
+
+        when(serviceAgreementsApi.putServiceAgreementItem(any(), any()))
+                .thenReturn(Mono.error(new HttpClientErrorException(BAD_REQUEST, "Bad request", null, null, null)));
+
+        Mono<ServiceAgreement> resultMono = subject.updateServiceAgreementItem(streamTask, serviceAgreement);
+
+        StepVerifier.create(resultMono)
+                .verifyError(StreamTaskException.class);
+
+        verify(serviceAgreementsApi, times(1))
+                .putServiceAgreementItem(eq("internal-id"), any());
+    }
     private void thenRegularUsersUpdateCall(String expectedSaExId, PresentationAction expectedAction,
                                             String... expectedUserIds) {
         PresentationServiceAgreementUsersBatchUpdate expectedRegularUserAddUpdate =
