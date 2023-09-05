@@ -47,7 +47,7 @@
         <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
         <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
         <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
-        <sonar.organization>backbase-technology-prototyping</sonar.organization>
+        <sonar.organization>backbase</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <japicmp.skip>true</japicmp.skip>
