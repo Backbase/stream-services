@@ -21,7 +21,7 @@
 
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
 
-        <wiremock-jre8.version>2.33.2</wiremock-jre8.version>
+        <wiremock-jre8.version>2.35.1</wiremock-jre8.version>
     </properties>
 
     <dependencies>
