@@ -47,6 +47,6 @@ public class TransactionPostIngestionServiceImpl implements TransactionPostInges
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
         }
-        return Mono.empty();
+        return Mono.error(error);
     }
 }

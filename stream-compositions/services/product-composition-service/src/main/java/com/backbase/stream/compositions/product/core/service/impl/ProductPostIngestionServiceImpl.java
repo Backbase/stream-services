@@ -47,6 +47,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .doOnNext(r -> log.info("Product ingestion completed successfully for SA {}",
                         res.getServiceAgreementInternalId()))
                 .flatMap(this::processTransactionChains)
+                .onErrorResume(x -> Mono.just(res))
                 .flatMap(this::processPaymentOrderChains)
                 .doOnNext(this::processSuccessEvent)
                 .doOnNext(r -> {
