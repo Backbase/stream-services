@@ -17,7 +17,7 @@
     <properties>
         <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/api/openapi.yaml</raml2openapi-maven-plugin.output>
-        <wiremock-jre8.version>2.33.2</wiremock-jre8.version>
+        <wiremock-jre8.version>2.35.1</wiremock-jre8.version>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
     </properties>
 
