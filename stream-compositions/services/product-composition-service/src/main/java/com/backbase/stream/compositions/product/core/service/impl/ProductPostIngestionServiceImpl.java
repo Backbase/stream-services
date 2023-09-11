@@ -171,7 +171,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
         log.error("Error while calling Transaction Composition: {}", t.getMessage());
-        return Mono.error(new InternalServerErrorException(t.getMessage()));
+        return Mono.just(new TransactionIngestionResponse());
     }
 
     private Mono<PaymentOrderIngestionResponse> handlePaymentOrderError(Throwable t) {
