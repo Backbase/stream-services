@@ -1,5 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [3.33.7](https://github.com/Backbase/stream-services/compare/3.33.7...3.33.8)
+### Changed
+- Return error when transaction composition failed.
 ## [3.33.7](https://github.com/Backbase/stream-services/compare/3.33.6...3.33.7)
 ### Changed
 - Added Secondary Service Agreement update functionality.
