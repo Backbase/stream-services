@@ -47,7 +47,6 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
                 .doOnNext(r -> log.info("Product ingestion completed successfully for SA {}",
                         res.getServiceAgreementInternalId()))
                 .flatMap(this::processTransactionChains)
-                .onErrorResume(x -> Mono.just(res))
                 .flatMap(this::processPaymentOrderChains)
                 .doOnNext(this::processSuccessEvent)
                 .doOnNext(r -> {
@@ -172,7 +171,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
         log.error("Error while calling Transaction Composition: {}", t.getMessage());
-        return Mono.error(new InternalServerErrorException(t.getMessage()));
+        return Mono.just(new TransactionIngestionResponse());
     }
 
     private Mono<PaymentOrderIngestionResponse> handlePaymentOrderError(Throwable t) {
