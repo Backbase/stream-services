@@ -184,7 +184,7 @@ services:
       identity:
         condition: service_healthy
 
-  legal-entity-composition-service:
+  legal-entity-composition:
     image: repo.backbase.com/backbase-stream-images/legal-entity-composition-service:${STREAM_VERSION}
     ports:
       - "8989:8080"
@@ -196,7 +196,7 @@ services:
       - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "/tmp/HealthCheck.java", "http://localhost:8080/actuator/health" ]
+      test: [ "CMD", "java", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/legal-entity-composition" ]
     depends_on:
       token-converter:
         condition: service_healthy
