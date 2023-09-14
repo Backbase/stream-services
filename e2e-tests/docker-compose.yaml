@@ -1,12 +1,16 @@
-version: "3.9"
 # https://docs.docker.com/compose/compose-file/
 
 x-common-variables: &common-variables
-  JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60.0 -Dlogging.level.com.backbase=DEBUG
+  JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60.0
   SIG_SECRET_KEY: JWTSecretKeyDontUseInProduction!
   USERCTX_KEY: JWTSecretKeyDontUseInProduction!
+  logging.level.com.backbase: DEBUG
+  logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+  server.shutdown: graceful
   eureka.client.serviceUrl.defaultZone: http://registry:8080/eureka
   eureka.client.healthcheck.enabled: true
+  eureka.client.registry-fetch-interval-seconds: 15
+  eureka.client.instance-info-replication-interval-seconds: 15
   eureka.instance.non-secure-port: 8080
   eureka.instance.initialStatus: STARTING
   backbase.activemq.enabled: false
@@ -30,20 +34,19 @@ x-database-variables: &database-variables
 
 x-healthcheck-defaults: &healthcheck-defaults
   start_period: 60s
-  interval: 30s
+  interval: 15s
   timeout: 5s
-  retries: 10
+  retries: 15
+
+name: stream
 
 services:
   mysql:
-    container_name: stream_mysql
     image: mysql:8.0.31
-    ports:
-      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
     volumes:
-      - stream_mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
       - ./mysql:/docker-entrypoint-initdb.d:rw
     healthcheck:
       test: mysqladmin ping --silent
@@ -52,10 +55,7 @@ services:
       retries: 5
 
   registry:
-    container_name: stream_registry
     image: repo.backbase.com/backbase-docker-releases/registry:${BB_VERSION}
-    ports:
-      - "8761:8080"
     volumes:
       - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
@@ -63,10 +63,7 @@ services:
       test: [ "CMD", "java", "/tmp/HealthCheck.java" ]
 
   token-converter:
-    container_name: stream_token_converter
     image: repo.backbase.com/backbase-docker-releases/oidc-token-converter-service:${BB_VERSION}
-    ports:
-      - "7779:8080"
     environment:
       <<: *common-variables
       BACKBASE_OIDCTOKENCONVERTER_WHITELISTEDDOMAINS_0_INTERNALHOSTSCHEME: http
@@ -83,10 +80,7 @@ services:
       - identity
 
   identity:
-    container_name: stream_identity
     image: repo.backbase.com/backbase-docker-releases/backbase-identity:${BB_VERSION}
-    ports:
-      - '8180:8080'
     environment:
       QUARKUS_DATASOURCE_URL: "jdbc:mysql://mysql:3306/backbase_identity?useSSL=false&allowPublicKeyRetrieval=true&cacheServerConfiguration=true&createDatabaseIfNotExist=true"
       QUARKUS_DATASOURCE_USERNAME: "root"
@@ -116,13 +110,9 @@ services:
         condition: service_healthy
 
   access-control:
-    container_name: stream_access_control
     image: repo.backbase.com/backbase-docker-releases/access-control:${BB_VERSION}
-    ports:
-      - "8040:8080"
     environment:
-      <<: *common-variables
-      <<: *database-variables
+      <<: [*common-variables, *database-variables]
       backbase.multi-tenancy.datasource.default-catalog: t1_access_control
       backbase.multi-tenancy.tenants[0].catalog: t1_access_control
       backbase.multi-tenancy.tenants[1].catalog: t2_access_control
@@ -138,13 +128,9 @@ services:
       - registry
 
   user-manager:
-    container_name: stream_user_manager
     image: repo.backbase.com/backbase-docker-releases/user-manager:${BB_VERSION}
-    ports:
-      - "8060:8080"
     environment:
-      <<: *common-variables
-      <<: *database-variables
+      <<: [*common-variables, *database-variables]
       backbase.multi-tenancy.datasource.default-catalog: t1_user_manager
       backbase.multi-tenancy.tenants[0].catalog: t1_user_manager
       backbase.multi-tenancy.tenants[1].catalog: t2_user_manager
@@ -163,10 +149,7 @@ services:
       - registry
 
   identity-integration-service:
-    container_name: stream_identity_integration_service
     image: repo.backbase.com/backbase-docker-releases/identity-integration-service:${BB_VERSION}
-    ports:
-      - "8070:8080"
     environment:
       <<: *common-variables
       IDENTITY_SERVERURL: http://identity:8080/auth
@@ -183,7 +166,6 @@ services:
       - registry
 
   legal-entity-bootstrap-task:
-    container_name: stream_legal_entity_bootstrap_task
     image: repo.backbase.com/backbase-stream-images/legal-entity-bootstrap-task:${STREAM_VERSION}
     environment:
       <<: *common-variables
@@ -203,10 +185,9 @@ services:
         condition: service_healthy
 
   legal-entity-composition-service:
-    container_name: stream_legal_entity_composition
     image: repo.backbase.com/backbase-stream-images/legal-entity-composition-service:${STREAM_VERSION}
     ports:
-      - "8050:8080"
+      - "8989:8080"
     environment:
       <<: *common-variables
       bootstrap.enabled: true
@@ -229,7 +210,7 @@ services:
         condition: service_healthy
 
 volumes:
-  stream_mysql_data:
+  mysql_data:
     driver: local
 
 networks:

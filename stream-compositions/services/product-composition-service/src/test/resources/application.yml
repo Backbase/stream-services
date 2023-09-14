@@ -5,6 +5,9 @@ spring:
     enabled: false
   main:
     allow-bean-definition-overriding: true
+  cloud:
+    loadbalancer:
+      enabled: false
 sso:
   jwt:
     internal:

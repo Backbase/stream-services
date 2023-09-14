@@ -7,7 +7,9 @@ spring:
         enabled: false
       enabled: false
       discovery:
-        enabled: true
+        enabled: false
+    loadbalancer:
+      enabled: false
   activemq:
     broker-url: vm://activemq
   main:
