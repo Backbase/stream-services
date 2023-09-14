@@ -27,16 +27,13 @@ backbase:
   stream:
     compositions:
       product:
-        integration-base-url: http://product-integration:8080
         chains:
           transaction-composition:
             enabled: true
-            base-url: http://transaction-composition:8080
             async: false
             excludeProductTypeExternalIds:
           payment-order-composition:
             enabled: true
-            base-url: http://payment-order-composition:8080
             async: false
             excludeProductTypeExternalIds:
         events:
@@ -44,7 +41,6 @@ backbase:
           enableFailed: true
         cursor:
           enabled: false
-          base-url: http://product-cursor:8080
         ingestion-mode:
           function-groups: UPSERT
           data-groups: UPSERT

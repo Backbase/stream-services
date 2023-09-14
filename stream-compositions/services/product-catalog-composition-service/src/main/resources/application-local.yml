@@ -16,6 +16,10 @@ backbase:
       arrangement:
         manager:
           direct-uri: http://localhost:8050
+      stream:
+        product-catalog:
+          integration:
+            direct-uri: http://localhost:7002
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -25,7 +29,6 @@ backbase:
       product-catalog:
         enable-completed-events: false
         enable-failed-events: false
-        product-catalog-integration-url: http://localhost:7002
 
 backbase.activemq.enabled: true
 spring.activemq.broker-url: tcp://localhost:61616

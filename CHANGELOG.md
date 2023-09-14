@@ -1,6 +1,41 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.63.0](https://github.com/Backbase/stream-services/compare/3.62.0...3.63.0)
+### Changed
+- Enabling service discovery for stream composition components, direct endpoint urls were removed.
+- To use static uri settings, configure it as the following example:
+```yaml
+backbase:
+  communication:
+    services:
+      stream:
+        legal-entity:
+          integration:
+            direct-uri: http://legal-entity-integration:8080
+        product:
+          integration:
+            direct-uri: http://product-integration:8080
+          composition:
+            direct-uri: http://product-composition:8080
+        product-catalog:
+          integration:
+            direct-uri: http://product-catalog-ingestion-integration:8080
+        payment-order:
+          integration:
+            direct-uri: http://payment-order-integration:8080
+          composition:
+            direct-uri: http://payment-order-composition:8080
+        transaction:
+          composition:
+            direct-uri: http://transaction-composition:8080
+          cursor:
+            direct-uri: http://transaction-cursor:8080
+          integration:
+            direct-uri: http://transaction-integration:8080
+```
+> To keep it retro-compatible you also need to set: `spring.cloud.loadbalancer.enabled=false`
+
 ## [3.62.0](https://github.com/Backbase/stream-services/compare/3.61.0...3.62.0)
 ### Added
 - Secondary Service Agreement update

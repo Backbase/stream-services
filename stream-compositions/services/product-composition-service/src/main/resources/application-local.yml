@@ -32,6 +32,16 @@ backbase:
       arrangement:
         manager:
           direct-uri: http://localhost:8050
+      stream:
+        product:
+          integration:
+            direct-uri: http://localhost:7003
+        transaction:
+          composition:
+            direct-uri: http://localhost:9004
+        payment-order:
+          composition:
+            direct-uri: http://localhost:9004
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -39,16 +49,13 @@ backbase:
   stream:
     compositions:
       product:
-        integration-base-url: http://localhost:7003
         chains:
           transaction-composition:
             enabled: false
-            base-url: http://localhost:9004
             async: false
             excludeProductTypeExternalIds:
           payment-order-composition:
             enabled: false
-            base-url: http://localhost:9004
             async: false
             excludeProductTypeExternalIds:
         events:
@@ -56,7 +63,6 @@ backbase:
           enableFailed: true
         cursor:
           enabled: false
-          base-url: http://localhost:9005
 
 logging:
   level:

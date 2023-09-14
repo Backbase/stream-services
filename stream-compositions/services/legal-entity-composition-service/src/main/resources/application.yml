@@ -24,19 +24,16 @@ backbase:
         serviceAgreementUpdateEnabled: false
     compositions:
       legal-entity:
-        integration-base-url: http://legal-entity-integration:8080
         chains:
           include-subsidiaries: false
           product-composition:
             enabled: true
-            base-url: http://product-composition:8080
             async: false
         events:
           enableCompleted: true
           enableFailed: true
         cursor:
           enabled: false
-          base-url: http://legal-entity-cursor:8080
 bootstrap:
   enabled: false
   # This is just an example. Replace it with data corresponding to your bank

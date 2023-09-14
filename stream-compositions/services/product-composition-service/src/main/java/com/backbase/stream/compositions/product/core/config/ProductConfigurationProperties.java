@@ -2,19 +2,22 @@ package com.backbase.stream.compositions.product.core.config;
 
 import com.backbase.stream.compositions.product.core.model.RequestConfig;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @ConfigurationProperties("backbase.stream.compositions.product")
 public class ProductConfigurationProperties {
-    private String integrationBaseUrl = "http://product-ingestion-integration:8080";
     private Chains chains;
     private Events events;
     private Cursor cursor;
@@ -67,7 +70,6 @@ public class ProductConfigurationProperties {
     @NoArgsConstructor
     public static class Cursor {
         private Boolean enabled = Boolean.FALSE;
-        private String baseUrl = "http://product-cursor:9000";
     }
 
     @Data
@@ -93,7 +95,6 @@ public class ProductConfigurationProperties {
     @AllArgsConstructor
     public static abstract class BaseComposition {
         private Boolean enabled = Boolean.FALSE;
-        private String baseUrl = "http://localhost:9003/";
         private Boolean async = Boolean.FALSE;
     }
 

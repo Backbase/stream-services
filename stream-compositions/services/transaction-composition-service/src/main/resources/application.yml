@@ -34,11 +34,9 @@ backbase:
     compositions:
       transaction:
         defaultStartOffsetInDays: 30
-        integration-base-url: http://transaction-integration:8080
         events:
           enableCompleted: true
           enableFailed: true
         cursor:
           enabled: true
           transactionIdsFilterEnabled: false
-          base-url: http://transaction-cursor:8080
