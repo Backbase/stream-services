@@ -29,6 +29,13 @@ backbase:
       identity:
         integration:
           direct-uri: http://localhost:8070
+      stream:
+        legal-entity:
+          integration:
+            direct-uri: http://localhost:7001
+        product:
+          composition:
+            direct-uri: http://localhost:9003
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -41,18 +48,15 @@ backbase:
         serviceAgreementUpdateEnabled: false
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:7001
         chains:
           product-composition:
             enabled: false
-            base-url: http://localhost:9003
             async: false
         events:
           enableCompleted: false
           enableFailed: false
         cursor:
           enabled: false
-          base-url: http://localhost:9005
 
 bootstrap:
   enabled: true

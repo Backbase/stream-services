@@ -34,6 +34,3 @@ backbase:
     paymentorder:
       worker:
         deletePaymentOrder: false
-    compositions:
-      paymentorder:
-        integration-base-url: http://payment-order-integration:8080

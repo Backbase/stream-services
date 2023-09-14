@@ -11,7 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @ConfigurationProperties("backbase.stream.compositions.transaction")
 public class TransactionConfigurationProperties {
-    private String integrationBaseUrl = "http://transaction-ingestion-integration:8080";
     private Events events;
     private Cursor cursor;
     private Integer defaultStartOffsetInDays;
@@ -28,7 +27,6 @@ public class TransactionConfigurationProperties {
     public static class Cursor {
         private Boolean enabled = Boolean.FALSE;
         private Boolean transactionIdsFilterEnabled = Boolean.FALSE;
-        private String baseUrl = "http://product-cursor:9000";
     }
 
     public final boolean isCursorEnabled() {

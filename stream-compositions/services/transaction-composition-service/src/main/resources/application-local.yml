@@ -32,6 +32,12 @@ backbase:
       transaction:
         manager:
           direct-uri: http://localhost:8083
+      stream:
+        transaction:
+          cursor:
+            direct-uri: http://localhost:9005
+          integration:
+            direct-uri: http://localhost:7004
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -42,14 +48,12 @@ backbase:
     compositions:
       transaction:
         defaultStartOffsetInDays: 30
-        integration-base-url: http://localhost:7004
         events:
           enableCompleted: true
           enableFailed: true
         cursor:
           enabled: true
           transactionIdsFilterEnabled: true
-          base-url: http://localhost:9005
 
 eureka:
   instance:

@@ -3,24 +3,10 @@ package com.backbase.stream.compositions.paymentorders.core.service.impl;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutRequest;
 import com.backbase.stream.PaymentOrderService;
-import com.backbase.stream.compositions.paymentorders.core.config.PaymentOrderConfigurationProperties;
 import com.backbase.stream.compositions.paymentorders.core.mapper.PaymentOrderMapper;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPullRequest;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPushRequest;
@@ -35,7 +21,17 @@ import com.backbase.stream.model.request.UpdatePaymentOrderIngestRequest;
 import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
 import com.backbase.stream.paymentorder.PaymentOrderTask;
 import com.backbase.stream.worker.model.UnitOfWork;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -63,12 +59,9 @@ class PaymentOrderIngestionServiceImplTest {
     @Mock
     EventBus eventBus;
 
-    @Mock
-    PaymentOrderConfigurationProperties config;
-
     @BeforeEach
     void setUp() {
-        paymentOrderPostIngestionService = new PaymentOrderPostIngestionServiceImpl(eventBus, config);
+        paymentOrderPostIngestionService = new PaymentOrderPostIngestionServiceImpl(eventBus);
 
         paymentOrderIngestionService = new PaymentOrderIngestionServiceImpl(
             paymentOrderIntegrationService,

@@ -1,6 +1,38 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.63.0](https://github.com/Backbase/stream-services/compare/3.62.0...3.63.0)
+### Changed
+- Enabling service discovery for stream composition components, to keep static configuration please use it as following:
+```yaml
+backbase:
+  communication:
+    services:
+      stream:
+        legal-entity:
+          integration:
+            direct-uri: http://legal-entity-integration
+        product:
+          integration:
+            direct-uri: http://product-integration
+          composition:
+            direct-uri: http://product-composition
+        product-catalog:
+          integration:
+            direct-uri: http://product-catalog-ingestion-integration
+        payment-order:
+          integration:
+            direct-uri: http://payment-order-integration
+          composition:
+            direct-uri: http://payment-order-composition
+        transaction:
+          composition:
+            direct-uri: http://transaction-composition
+          cursor:
+            direct-uri: http://transaction-cursor
+          integration:
+            direct-uri: http://transaction-integration
+```
 ## [3.62.0](https://github.com/Backbase/stream-services/compare/3.61.0...3.62.0)
 ### Added
 - Secondary Service Agreement update

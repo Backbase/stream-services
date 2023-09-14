@@ -16,7 +16,7 @@ import org.springframework.validation.annotation.Validated;
  * false in services with support to client-side load balancing.
  */
 @Validated
-class CompositeApiClientConfig extends ApiClientConfig {
+public class CompositeApiClientConfig extends ApiClientConfig {
 
     /**
      * Direct uri used as base path when load balancing is not available.
