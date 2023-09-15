@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.64.0](https://github.com/Backbase/stream-services/compare/3.63.0...3.64.0)
+### Changed
+- Return error when transaction composition failed.
+
 ## [3.63.0](https://github.com/Backbase/stream-services/compare/3.62.0...3.63.0)
 ### Changed
 - Enabling service discovery for stream composition components, direct endpoint urls were removed.
