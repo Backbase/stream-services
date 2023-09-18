@@ -164,7 +164,7 @@ class TransactionIngestionServiceImplTest {
         Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
                 .ingestPull(mockTransactionIngestPullRequest());
         StepVerifier.create(productIngestResponse)
-                .verifyComplete();
+                .verifyError();
     }
 
     @Test
