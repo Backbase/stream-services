@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.65.0](https://github.com/Backbase/stream-services/compare/3.64.0...3.65.0)
+### Changed
+- Move call to processAudiencesSegmentation after setupUsers 
+
 ## [3.64.0](https://github.com/Backbase/stream-services/compare/3.63.0...3.64.0)
 ### Changed
 - Return error when transaction composition failed.

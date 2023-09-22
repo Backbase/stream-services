@@ -147,6 +147,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::linkLegalEntityToRealm)
             .flatMap(this::setupAdministrators)
             .flatMap(this::setupUsers)
+            .flatMap(this::processAudiencesSegmentation)
             .flatMap(this::setupServiceAgreement)
             .flatMap(this::createJobRoles)
             .flatMap(this::processJobProfiles)
@@ -154,7 +155,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::setupLimits)
             .flatMap(this::processProducts)
             .flatMap(this::postContacts)
-            .flatMap(this::processAudiencesSegmentation)
             .flatMap(this::processSubsidiaries);
     }
 
