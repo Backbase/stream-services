@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 ## [3.33.9](https://github.com/Backbase/stream-services/compare/3.33.9...3.33.9)
 ### Changed
 - Always check cursor and create if it does not exist. 
-- If `DateRangeEnd` is passed in the composition request set that the lastTxnDate instead of system date.  
+- If `DateRangeEnd` is passed in the composition request set that as lastTxnDate instead of system date.  
 ## [3.33.7](https://github.com/Backbase/stream-services/compare/3.33.7...3.33.8)
 ### Changed
 - Return error when transaction composition failed.
