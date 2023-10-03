@@ -57,7 +57,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
                 .map(f -> filterExisting(f, ingestPullRequest.getLastIngestedExternalIds()))
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(list -> handleSuccess(
-                        ingestPullRequest.getArrangementId(), true, list))
+                        ingestPullRequest.getArrangementId(), true, list, ingestPullRequest.getDateRangeEnd()))
                 .onErrorResume(e -> handleError(
                         ingestPullRequest.getArrangementId(), true, e))
                 .map(list -> buildResponse(list, ingestPullRequest));
@@ -88,7 +88,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
         transactionIngestPullRequest.setDateRangeEnd(dateRangeEndFromRequest == null
                 ? currentTime : dateRangeEndFromRequest);
 
-        if (dateRangeStartFromRequest == null && config.isCursorEnabled()) {
+        if (config.isCursorEnabled()) {
             log.info("Transaction Cursor is enabled and Request has no Start Date");
             return getCursor(transactionIngestPullRequest)
                     .switchIfEmpty(createCursor(transactionIngestPullRequest));
@@ -107,7 +107,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
         return Mono.just(Flux.fromIterable(ingestPushRequest.getTransactions()))
                 .flatMap(this::sendToDbs)
                 .doOnSuccess(list -> handleSuccess(
-                        ingestPushRequest.getArrangementId(), false, list))
+                        ingestPushRequest.getArrangementId(), false, list, null))
                 .onErrorResume(e -> handleError(
                         ingestPushRequest.getArrangementId(), false, e))
                 .map(list -> buildResponse(list, ingestPushRequest));
@@ -222,7 +222,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
     }
 
     private void handleSuccess(String arrangementId, boolean pullMode,
-                               List<TransactionsPostResponseBody> transactions) {
+                               List<TransactionsPostResponseBody> transactions, OffsetDateTime dateRangeEnd) {
         if (config.isCursorEnabled() && pullMode) {
             String lastTxnIds = null;
             if (config.isTransactionIdsFilterEnabled()) {
@@ -231,14 +231,21 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
                         .collect(Collectors.joining(DELIMITER));
             }
             patchCursor(arrangementId, buildPatchCursorRequest(
-                    TransactionCursor.StatusEnum.SUCCESS,
-                    OffsetDateTime.now().format(DateTimeFormatter.ofPattern(dateFormat)),
+                    TransactionCursor.StatusEnum.SUCCESS, getLastTxnDate(dateRangeEnd),
                     lastTxnIds));
         }
 
         transactionPostIngestionService.handleSuccess(transactions);
 
         log.debug("Ingested transactions: {}", transactions);
+    }
+
+    private String getLastTxnDate(OffsetDateTime dateRangeEnd) {
+        String lastTxnDate = OffsetDateTime.now().format(DateTimeFormatter.ofPattern(dateFormat));
+        if (dateRangeEnd != null) {
+            lastTxnDate = dateRangeEnd.format(DateTimeFormatter.ofPattern(dateFormat));
+        }
+        return lastTxnDate;
     }
 
     private Mono<List<TransactionsPostResponseBody>> handleError(String arrangementId,
