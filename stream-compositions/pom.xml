@@ -13,7 +13,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>3.33.8</version>
+    <version>3.33.9</version>
 
     <properties>
         <backbase-bom.version>2022.10.3</backbase-bom.version>
