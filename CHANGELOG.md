@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.66.0](https://github.com/Backbase/stream-services/compare/3.65.0...3.66.0)
+### Changed
+- Always check cursor and create if it does not exist.
+- If `DateRangeEnd` is passed in the composition request set that as lastTxnDate instead of system date.
+
 ## [3.65.0](https://github.com/Backbase/stream-services/compare/3.64.0...3.65.0)
 ### Changed
 - Move call to processAudiencesSegmentation after setupUsers 
