@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-http-starter-parent</artifactId>
-        <version>3.65.0</version>
+        <version>3.66.0</version>
         <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
     </parent>
 
