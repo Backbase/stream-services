@@ -37,6 +37,11 @@
       <artifactId>mysql-connector-j</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>com.backbase.buildingblocks</groupId>
+      <artifactId>service-sdk-starter-mapping</artifactId>
+    </dependency>
+
     <!-- Spring dependencies -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
