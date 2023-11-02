@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.67.0](https://github.com/Backbase/stream-services/compare/3.66.0...3.67.0)
+### Changed
+- Fix transaction-cursor k8 deployment failure issue: `org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper' available`
+- Fix transaction-cursor `application-local.yaml` config
+
 ## [3.66.0](https://github.com/Backbase/stream-services/compare/3.65.0...3.66.0)
 ### Changed
 - Always check cursor and create if it does not exist.
