@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-task-starter-parent</artifactId>
-    <version>3.66.0</version>
+    <version>3.67.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Task Starter</name>
     <description>Parent for Stream Executable Tasks</description>
