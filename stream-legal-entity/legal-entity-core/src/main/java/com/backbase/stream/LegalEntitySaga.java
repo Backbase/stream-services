@@ -143,6 +143,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     @Override
     public Mono<LegalEntityTask> executeTask(@SpanTag(value = "streamTask") LegalEntityTask streamTask) {
+        log.info("test");
         return upsertLegalEntity(streamTask)
             .flatMap(this::linkLegalEntityToRealm)
             .flatMap(this::setupAdministrators)
