@@ -1132,6 +1132,69 @@ components:
         - legalEntityType
         - administrators
         - jobProfile
+
+    LegalEntityV2:
+      title: Legal Entity v2
+      description: |
+        (This Legal Entity is the restructured one)
+        A Legal Entity is any personal or non-personal entity that is involved in a transaction or an product with the bank. Both the bank and its customers are legal entities
+        
+        A Legal Entity:
+        * Has one or more users that act on its behalf.
+        * A legal entity hierarchy is a collection of parent-child relationships. For example, within the same deployment, this allows you to:
+        * Set up a holding structure for a corporate customer of the bank.
+        * Set up a structure within the bank to support country and regional offices.
+      type: object
+      properties:
+        name:
+          type: string
+        activateSingleServiceAgreement:
+          type: boolean
+        internalId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        externalId:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        legalEntityType:
+          $ref: '#/components/schemas/LegalEntityType'
+        customerCategory:
+          $ref: '#/components/schemas/CustomerCategory'
+        realmName:
+          type: string
+          description: Realm to which the Legal Entity should be mapped.
+        parentExternalId:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        parentInternalId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        subsidiaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegalEntity'
+        limit:
+          $ref: '#/components/schemas/Limit'
+        administrators:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        masterServiceAgreement:
+          $ref: '#/components/schemas/ServiceAgreementV2'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContact'
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - name
+        - external
+        - legalEntityType
+        - administrators
+
     JobProfileUser:
       type: object
       properties:
@@ -1605,6 +1668,85 @@ components:
           type: object
           additionalProperties:
             type: string
+
+    ServiceAgreementV2:
+      title: Service Agreement
+      description: |
+        The formal vehicle that allows users of one entity to access products of that or other entities
+        A Service agreement is:
+        - A contract that includes one or more legal entities. A legal entity that is participating in a service agreement can allow a subset of its users to act through that service agreement and/or allow a subset of its products to be accessed through the service agreement. Within each service agreement, permissions to perform specific tasks are granted to users, including access to products shared by one or more legal entities (participating in that service agreement). As such, a service agreement is a way to give third party users specific access to your products.
+        - A special kind of service agreement is called the master service agreement. This service agreement has one legal entity participant and once configured, the participant cannot be changed. Important to know is that once the user is granted with administrative permissions (e.g. manage account groups), he or she has the power to execute the task in any service agreement lower in the hierarchy. For example, if the user of the bank is assigned with manage account groups permission in the master service agreement of the bank, the user can manage account groups in any service agreement lower in the hierarchy.
+        - A service agreement may be restricted in time, by setting a time bound. Permissions granted to users in the time-restricted service agreement, are active and may be consumed, only while the time bound is valid.
+      properties:
+        internalId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        externalId:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        name:
+          maxLength: 128
+          minLength: 1
+          pattern: ^\S(.*(\S))?$
+          type: string
+          description: The service agreement name
+        description:
+          maxLength: 255
+          minLength: 1
+          pattern: ^(\S|\n)((.|\n)*(\S|\n))?$
+          type: string
+          description: Description
+        participants:
+          type: array
+          description: Participants of the service agreement
+          items:
+            $ref: '#/components/schemas/LegalEntityParticipantV2'
+        validFromDate:
+          type: string
+          format: date
+          description: Start date of the service agreement.
+        validFromTime:
+          type: string
+          description: Start time of the service agreement.
+        validUntilDate:
+          type: string
+          format: date
+          description: End date of the service agreement.
+        validUntilTime:
+          type: string
+          description: End time of the service agreement.
+        status:
+          $ref: '#/components/schemas/LegalEntityStatus'
+        isMaster:
+          type: boolean
+          description: Master flag
+        regularUserAps:
+          $ref: '#/components/schemas/ApsIdentifiers'
+        adminUserAps:
+          $ref: '#/components/schemas/ApsIdentifiers'
+        jobRoles:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobRole'
+        referenceJobRoles:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferenceJobRole'
+        creatorLegalEntity:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        limit:
+          $ref: '#/components/schemas/Limit'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContact'
+        productGroups:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductGroup"
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+
     ApsIdentifiers:
       type: object
       properties:
@@ -1650,6 +1792,46 @@ components:
             - "REMOVE"
         limit:
           $ref: '#/components/schemas/Limit'
+
+    LegalEntityParticipantV2:
+      required:
+        - externalId
+        - sharingAccounts
+        - sharingUsers
+      type: object
+      properties:
+        internalId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        externalId:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        sharingUsers:
+          type: boolean
+          description: Boolean value if the Participant is sharing users
+        sharingAccounts:
+          type: boolean
+          description: Boolean value if the participant is sharing accounts
+        admins:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalIdentifier'
+        users:
+          type: array
+          description: User external ids
+          items:
+            $ref: '#/components/schemas/ExternalIdentifier'
+        jobProfileUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobProfileUser'
+        action:
+          type: string
+          description: the action to perform for this participant. Required for participant update flow
+          enum:
+            - "ADD"
+            - "REMOVE"
+        limit:
+          $ref: '#/components/schemas/Limit'
+
     LegalEntityStatus:
       type: string
       description: Status of the entity
