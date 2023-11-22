@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.69.0](https://github.com/Backbase/stream-services/compare/3.68.0...3.69.0)
+### Changed
+- Add new models for LE and SA to cover requirements in the new bootstrap
+
 ## [3.68.0](https://github.com/Backbase/stream-services/compare/3.67.0...3.68.0)
 ### Changed
 - Add CardsReference to legal-entity openapi spec
