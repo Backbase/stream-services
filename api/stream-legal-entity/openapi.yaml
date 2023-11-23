@@ -1168,7 +1168,7 @@ components:
         subsidiaries:
           type: array
           items:
-            $ref: '#/components/schemas/LegalEntity'
+            $ref: '#/components/schemas/LegalEntityV2'
         limit:
           $ref: '#/components/schemas/Limit'
         administrators:
