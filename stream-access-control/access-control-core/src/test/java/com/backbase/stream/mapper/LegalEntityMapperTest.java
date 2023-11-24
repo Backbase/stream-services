@@ -38,7 +38,7 @@ class LegalEntityMapperTest {
 
     @Test
     void toPresentationWithNullArg() {
-        assertNull(mapper.toPresentation(null));
+        assertNull(mapper.toPresentation((LegalEntity) null));
     }
 
     @Test
@@ -174,7 +174,7 @@ class LegalEntityMapperTest {
 
     @Test
     void testToLegalEntityPutWithNullArg() {
-        assertNull(mapper.toLegalEntityPut(null));
+        assertNull(mapper.toLegalEntityPut((LegalEntity) null));
     }
 
     @Test

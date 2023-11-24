@@ -60,6 +60,7 @@ import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ReferenceJobRole;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
+import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.mapper.AccessGroupMapper;
 import com.backbase.stream.mapper.ParticipantMapper;
@@ -152,6 +153,17 @@ public class AccessGroupService {
                 return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to create Service Agreement"));
             })
             .zipWith(Mono.just(serviceAgreement), storeIdInServiceAgreement());
+    }
+
+    public Mono<ServiceAgreementV2> createServiceAgreement(StreamTask streamTask, ServiceAgreementV2 serviceAgreement) {
+        ServicesAgreementIngest servicesAgreementIngest = accessGroupMapper.toPresentation(serviceAgreement);
+        return serviceAgreementsApi.postServiceAgreementIngest(servicesAgreementIngest)
+            .onErrorResume(WebClientResponseException.class, throwable -> {
+                streamTask.error(SERVICE_AGREEMENT, "create", "failed", serviceAgreement.getExternalId(),
+                    "", throwable, throwable.getResponseBodyAsString(), "Failed to create Service Agreement");
+                return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to create Service Agreement"));
+            })
+            .zipWith(Mono.just(serviceAgreement), storeIdInServiceAgreementV2());
     }
 
     /**
@@ -448,6 +460,14 @@ public class AccessGroupService {
     }
 
     private BiFunction<IdItem, ServiceAgreement, ServiceAgreement> storeIdInServiceAgreement() {
+        return (idItem, serviceAgreement1) -> {
+            serviceAgreement1.setInternalId(idItem.getId());
+            log.info("Created Service Agreement: {} with id: {}", serviceAgreement1.getName(), idItem.getId());
+            return serviceAgreement1;
+        };
+    }
+
+    private BiFunction<IdItem, ServiceAgreementV2, ServiceAgreementV2> storeIdInServiceAgreementV2() {
         return (idItem, serviceAgreement1) -> {
             serviceAgreement1.setInternalId(idItem.getId());
             log.info("Created Service Agreement: {} with id: {}", serviceAgreement1.getName(), idItem.getId());
