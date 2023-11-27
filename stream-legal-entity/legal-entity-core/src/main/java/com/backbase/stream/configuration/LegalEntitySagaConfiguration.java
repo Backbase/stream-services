@@ -43,12 +43,10 @@ public class LegalEntitySagaConfiguration {
         UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
-        ProductIngestionSaga productIngestionSaga,
         BatchProductIngestionSaga batchProductIngestionSaga,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
-        ObjectMapper objectMapper,
         UserKindSegmentationSaga userKindSegmentationSaga
     ) {
         return new LegalEntitySaga(
@@ -56,7 +54,6 @@ public class LegalEntitySagaConfiguration {
             userService,
             userProfileService,
             accessGroupService,
-            productIngestionSaga,
             batchProductIngestionSaga,
             limitsSaga,
             contactsSaga,
