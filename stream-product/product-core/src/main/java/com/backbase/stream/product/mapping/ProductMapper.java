@@ -132,6 +132,8 @@ public interface ProductMapper {
 
     AccountArrangementItem toArrangementItem(AccountArrangementItemBase arrangementItemPost);
 
+    AccountArrangementItem toArrangementItem(AccountArrangementItemPut arrangementItemPut);
+
     //
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
     AccountArrangementItem toPresentationWithWeirdSpellingError(Product product);
