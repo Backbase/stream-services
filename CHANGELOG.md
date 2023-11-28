@@ -1,5 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+
+## [3.49.2](https://github.com/Backbase/stream-services/compare/3.49.1...3.49.2)
+### Changed
+- Add AccountArrangementItemPut mapping in ProductMapper
+
 ## [3.49.1](https://github.com/Backbase/stream-services/compare/3.49.0...3.49.1)
 ### Changed
 - Pull all Payments belonging to the user instead of the detault, 10.
