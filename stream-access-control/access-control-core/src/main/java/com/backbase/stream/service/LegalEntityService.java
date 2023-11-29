@@ -108,6 +108,16 @@ public class LegalEntityService {
                 .map(mapper::toStream);
     }
 
+    public Mono<ServiceAgreementV2> getMasterServiceAgreementForExternalLegalEntityIdV2(String legalEntityExternalId) {
+        return legalEntitiesApi.getMasterServiceAgreementByExternalLegalEntity(legalEntityExternalId)
+            .doOnNext(serviceAgreementItem -> log.info("Service Agreement: {} found for legal entity: {}", serviceAgreementItem.getExternalId(), legalEntityExternalId))
+            .onErrorResume(WebClientResponseException.NotFound.class, throwable -> {
+                log.info("Master Service Agreement not found for: {}. Request:[{}] {}  Response: {}", legalEntityExternalId,  throwable.getRequest().getMethod(), throwable.getRequest().getURI() , throwable.getResponseBodyAsString());
+                return Mono.empty();
+            })
+            .map(mapper::toStreamV2);
+    }
+
     /**
      * Get Master Service Agreement for Internal Legal Entity ID.
      *
@@ -171,6 +181,17 @@ public class LegalEntityService {
             })
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .map(mapper::toStream);
+    }
+
+    public Mono<LegalEntityV2> getLegalEntityByInternalIdV2(String internalId) {
+        return legalEntitiesApi.getLegalEntityById(internalId)
+            .onErrorResume(WebClientResponseException.NotFound.class, notFound -> {
+                log.info("Legal Entity with internalId: {} does not exist: {}", internalId,
+                    notFound.getResponseBodyAsString());
+                return Mono.empty();
+            })
+            .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
+            .map(mapper::toStreamV2);
     }
 
     /**

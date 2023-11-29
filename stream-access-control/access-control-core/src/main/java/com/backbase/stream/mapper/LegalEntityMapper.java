@@ -9,6 +9,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -47,6 +48,9 @@ public interface LegalEntityMapper {
 
     @Mapping(source = "id", target = "internalId")
     ServiceAgreement toStream(GetServiceAgreement getServiceAgreement);
+
+    @Mapping(source = "id", target = "internalId")
+    ServiceAgreementV2 toStreamV2(GetServiceAgreement getServiceAgreement);
 
     @Mapping(source = "additions", target = "newValues.additions")
     @Mapping(source = "externalId", target = "newValues.externalId")

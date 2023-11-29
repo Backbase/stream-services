@@ -1106,6 +1106,38 @@ public class AccessGroupService {
             });
     }
 
+    public Mono<Void> deleteAdmins(ServiceAgreementV2 serviceAgreement) {
+        log.debug("Removing admins for Service Agreement {}", serviceAgreement.getName());
+        return serviceAgreementsApi.getServiceAgreementAdmins(serviceAgreement.getInternalId())
+            .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins()))
+            // get External  ID for each admin.
+            // We need to  get the user by using the internal id to facilitate the delete for issue #46
+            .flatMap(userId -> usersApi.getUserById(userId, true)).map(GetUser::getExternalId)
+            .collectList()
+            .doOnNext(adminIds -> log.debug("Found  admins: {}", adminIds))
+            .map(adminsExternalIds -> adminsExternalIds.stream()
+                .map(adminId -> new PresentationServiceAgreementUserPair()
+                    .externalServiceAgreementId(serviceAgreement.getExternalId())
+                    .externalUserId(adminId))
+                .collect(Collectors.toList()))
+            .flatMap(admins -> {
+                if (CollectionUtils.isEmpty(admins)) {
+                    return Mono.empty();
+                } else {
+                    return serviceAgreementsApi.putPresentationServiceAgreementAdminsBatchUpdate(
+                            new PresentationServiceAgreementUsersBatchUpdate()
+                                .action(PresentationAction.REMOVE)
+                                .users(admins))
+                        .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Delete Admin", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
+                        .collectList()
+                        .onErrorResume(WebClientResponseException.class, e -> {
+                            log.error("Failed to delete admin: {}", e.getResponseBodyAsString(), e);
+                            return Mono.error(e);
+                        }).then();
+                }
+            });
+    }
+
     /**
      * Get internal identifiers of all arrangements mentioned in all Data Groups for specified Service Agreement.
      *

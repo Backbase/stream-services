@@ -311,7 +311,7 @@ class LegalEntitySagaTest {
         when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(eq(leInternalId))).thenReturn(Mono.empty());
         when(legalEntityService.createLegalEntity((LegalEntity) any())).thenReturn(Mono.just(legalEntity));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
-        when(accessGroupService.createServiceAgreement((StreamTask) any(), (ServiceAgreement) any())).thenReturn(Mono.just(sa));
+        when(accessGroupService.createServiceAgreement(any(), (ServiceAgreement) any())).thenReturn(Mono.just(sa));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
             .thenReturn(productGroupTaskMono);
         when(userService.setupRealm(task.getLegalEntity()))
@@ -527,7 +527,7 @@ class LegalEntitySagaTest {
         when(accessGroupService.removePermissionsForUser(any(), any())).thenReturn(Mono.empty());
 
         when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.empty());
-        when(accessGroupService.deleteAdmins(any())).thenReturn(Mono.empty());
+        when(accessGroupService.deleteAdmins((ServiceAgreement) any())).thenReturn(Mono.empty());
         when(userService.archiveUsers(any(), any())).thenReturn(Mono.empty());
         when(legalEntityService.deleteLegalEntity(any())).thenReturn(Mono.empty());
 
@@ -570,7 +570,7 @@ class LegalEntitySagaTest {
         when(accessGroupService.removePermissionsForUser(any(), any())).thenReturn(Mono.empty());
 
         when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.empty());
-        when(accessGroupService.deleteAdmins(any())).thenReturn(Mono.empty());
+        when(accessGroupService.deleteAdmins((ServiceAgreement) any())).thenReturn(Mono.empty());
         when(userService.archiveUsers(any(), any())).thenReturn(Mono.empty());
         when(legalEntityService.deleteLegalEntity(any())).thenReturn(Mono.empty());
 
