@@ -33,7 +33,7 @@ public interface ServiceAgreementV2ToV1Mapper {
         @Mapping(target = "limit", source = "limit")
         @Mapping(target = "contacts", source = "contacts")
         @Mapping(target = "additions", source = "additions")
-        @Mapping(target = "participants", source = "participantsV2", qualifiedByName = "mapParticipants")
+        @Mapping(target = "participants", source = "participants", qualifiedByName = "mapParticipants")
         ServiceAgreement map(ServiceAgreementV2 serviceAgreementV2);
 
         @Named("mapParticipants")
