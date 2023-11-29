@@ -20,7 +20,6 @@ public interface ServiceAgreementV2ToV1Mapper {
         @Mapping(target = "externalId", source = "externalId")
         @Mapping(target = "name", source = "name")
         @Mapping(target = "description", source = "description")
-        @Mapping(target = "participants", source = "participants")
         @Mapping(target = "validFromDate", source = "validFromDate")
         @Mapping(target = "validFromTime", source = "validFromTime")
         @Mapping(target = "validUntilDate", source = "validUntilDate")
