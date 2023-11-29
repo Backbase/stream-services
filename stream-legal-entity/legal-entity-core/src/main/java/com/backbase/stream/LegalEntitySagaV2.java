@@ -202,17 +202,10 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
     }
 
     private UserKindEnum customerCategoryToUserKind(CustomerCategory customerCategory) {
-        switch (customerCategory) {
-            case RETAIL -> {
-                return UserKindEnum.RETAILCUSTOMER;
-            }
-            case BUSINESS -> {
-                return UserKindEnum.SME;
-            }
-            default -> {
-                return null;
-            }
-        }
+        return switch (customerCategory) {
+            case RETAIL -> UserKindEnum.RETAILCUSTOMER;
+            case BUSINESS -> UserKindEnum.SME;
+        };
     }
 
     private Mono<LegalEntityTaskV2> postLegalEntityContacts(LegalEntityTaskV2 streamTask) {
@@ -244,28 +237,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
             .then(Mono.just(streamTask));
     }
 
-    private String getParticipantUser(ServiceAgreement serviceAgreement) {
-        if (!isEmpty(serviceAgreement.getParticipants())) {
-            Optional<LegalEntityParticipant> participants = serviceAgreement.getParticipants()
-                .stream()
-                .filter(LegalEntityParticipant::getSharingUsers)
-                .findFirst();
-            if (participants.isPresent()) {
-                LegalEntityParticipant participant = participants.get();
-                if (!isEmpty(participant.getAdmins())) {
-                    return getOptionalUserId(participant.getAdmins().stream().findFirst());
-                } else if (!isEmpty(participant.getUsers())) {
-                    return getOptionalUserId(participant.getUsers().stream().findFirst());
-                }
-            }
-        }
-        return null;
-    }
-
-    private String getOptionalUserId(Optional<String> optionalUserId) {
-        return optionalUserId.isPresent() ? optionalUserId.get() : null;
-    }
-
     private ContactsTask createContactsTask(String streamTaskId, String externalLegalEntityId,
         String externalServiceAgreementId, String externalUserId, AccessContextScope scope,
         List<ExternalContact> contacts) {
@@ -285,15 +256,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
         accessContext.setExternalUserId(externalUserId);
         accessContext.setScope(scope);
         return accessContext;
-    }
-
-    private Optional<String> getUserExternalId(List<JobProfileUser> users) {
-        if (CollectionUtils.isEmpty(users)) {
-            return Optional.empty();
-        }
-        Optional<JobProfileUser> optionalUser = users.stream().findFirst();
-        return optionalUser.map(jobProfileUser -> Optional.ofNullable(jobProfileUser.getUser().getExternalId()))
-            .orElse(Optional.empty());
     }
 
     private ServiceAgreementV2 getServiceAgreement(LegalEntityV2 legalEntity) {
@@ -342,7 +304,7 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
                     .collectList()
                     .flatMap(lists -> Mono.just(
                         lists.stream().flatMap(List::stream).filter(getUser -> !getUser.getExternalId().startsWith(
-                            REMOVED_PREFIX)).collect(Collectors.toList())))
+                            REMOVED_PREFIX)).toList()))
                     .map(getUsers -> Tuples.of(data.getT1(), le, getUsers));
             })
             .flatMap(data -> {
@@ -461,22 +423,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
             .thenReturn(streamTask);
     }
 
-    private Mono<LegalEntityTask> postUserContacts(LegalEntityTask streamTask, List<ExternalContact> externalContacts,
-        String externalUserId) {
-        if (isEmpty(externalContacts)) {
-            log.info("Creating Contacts for User {}", externalUserId);
-            streamTask.info(USER, PROCESS_CONTACTS, FAILED, externalUserId, null,
-                "User: %s does not have any Contacts", externalUserId);
-            return Mono.just(streamTask);
-        }
-        LegalEntity legalEntity = streamTask.getData();
-        log.info("Creating Contacts for User {}", externalUserId);
-        return contactsSaga.executeTask(createContactsTask(streamTask.getId(), legalEntity.getExternalId(),
-                null, externalUserId, AccessContextScope.USER, externalContacts))
-            .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
-            .then(Mono.just(streamTask));
-    }
-
     private Mono<UserProfile> upsertUserProfile(User user) {
         if (legalEntitySagaConfigurationProperties.isUserProfileEnabled()) {
             if (user.getUserProfile() != null) {
@@ -513,18 +459,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
             .thenReturn(legalEntityTask);
     }
 
-    private User setupAdminInternalId(LegalEntity legalEntity, JobProfileUser jobProfileUser) {
-        User user = jobProfileUser.getUser();
-        // Ensure internal Id present.
-        if (user.getInternalId() == null) {
-            legalEntity.getAdministrators().stream()
-                .filter(admin -> admin.getExternalId().equals(user.getExternalId()))
-                .findFirst()
-                .ifPresent(admin -> user.setInternalId(admin.getInternalId()));
-        }
-        return user;
-    }
-
     public Mono<User> upsertUser(LegalEntityTaskV2 streamTask, User user) {
         if (legalEntitySagaConfigurationProperties.isUseIdentityIntegration()
             && !IdentityUserLinkStrategy.IDENTITY_AGNOSTIC.equals(user.getIdentityLinkStrategy())) {
@@ -534,30 +468,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
                 "Fallback to Identity Agnostic identityLinkStrategy. Either identity integration is disabled or User identityLinkStrategy is not set to identity.");
             return upsertUser(user, streamTask);
         }
-    }
-
-    private Mono<User> upsertUserBulk(User user, LegalEntityTask streamTask) {
-        LegalEntity legalEntity = streamTask.getData();
-        streamTask.info(USER, UPSERT, "", user.getExternalId(), user.getInternalId(),
-            "Upsert User with External ID: %s", user.getExternalId());
-
-        Mono<User> getExistingUser = Mono.zip(Mono.just(user), userService.getUserByExternalId(user.getExternalId()),
-            (u, existingUser) -> {
-                u.setInternalId(existingUser.getInternalId());
-                streamTask.info(USER, UPSERT, EXISTS, u.getExternalId(), u.getInternalId(), "User %s already exists",
-                    existingUser.getExternalId());
-                return u;
-            });
-
-        Mono<User> createNewUser = Mono.zip(Mono.just(user),
-            userService.createUser(user, legalEntity.getExternalId(), streamTask),
-            (u, newUser) -> {
-                u.setInternalId(newUser.getInternalId());
-                streamTask.info(USER, UPSERT, CREATED, u.getExternalId(), user.getInternalId(), "User %s created",
-                    newUser.getExternalId());
-                return user;
-            });
-        return getExistingUser.switchIfEmpty(createNewUser);
     }
 
     private Mono<User> upsertUser(User user, LegalEntityTaskV2 streamTask) {
@@ -717,10 +627,7 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
             .flatMap(this::executeTask)
             .map(childTask -> streamTask.addHistory(childTask.getHistory()))
             .collectList()
-            .zipWith(Mono.just(streamTask), (legalEntityResults, childStreamTask) -> {
-                // Do Something With The Children
-                return streamTask;
-            });
+            .zipWith(Mono.just(streamTask), (legalEntityResults, childStreamTask) -> streamTask);
     }
 
     private Mono<LegalEntityTaskV2> linkLegalEntityToRealm(LegalEntityTaskV2 streamTask) {
