@@ -374,12 +374,12 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
         Mono<LegalEntityTaskV2> createNewLegalEntity = Mono.defer(
             () -> legalEntityService.createLegalEntity(leV2Mapper.mapLegalEntityV2ToLegalEntity(legalEntityV2))
                 .flatMap(actual -> {
-                    task.getData().setInternalId(legalEntityV2.getInternalId());
+                    task.getData().setInternalId(actual.getInternalId());
                     return legalEntityService.getLegalEntityByInternalId(actual.getInternalId())
                         .flatMap(result -> {
                             task.getData().setParentInternalId(result.getParentInternalId());
                             task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, CREATED, legalEntityV2.getExternalId(),
-                                legalEntityV2.getInternalId(), "Created new Legal Entity");
+                                actual.getInternalId(), "Created new Legal Entity");
                             return Mono.just(task);
                         });
                 })
