@@ -596,11 +596,29 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                         }
                         streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS,
                             serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
-                            "Existing Service Agreement: %s found for Legal Entity: %s",
+                            "Existing Master Service Agreement: %s found for Legal Entity: %s",
                             serviceAgreement.getExternalId(), legalEntityParticipant.get().getExternalId());
                         return Mono.just(streamTask);
                     });
-            return existingServiceAgreement;
+
+            ServiceAgreement newServiceAgreement = createMasterServiceAgreement(serviceAgreementV1);
+            Mono<ServiceAgreementTaskV2> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask, newServiceAgreement)
+                .onErrorMap(AccessGroupException.class, accessGroupException -> {
+                    streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED,
+                        newServiceAgreement.getExternalId(), null, accessGroupException,
+                        accessGroupException.getMessage(), accessGroupException.getHttpResponse());
+                    return new StreamTaskException(streamTask, accessGroupException);
+                })
+                .flatMap(serviceAgreement -> {
+                    streamTask.getData().getParticipants().get(0).setSharingAccounts(true);
+                    streamTask.getData().getParticipants().get(0).setSharingUsers(true);
+                    streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED,
+                        serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
+                        "Created new Service Agreement: %s", serviceAgreement.getExternalId(),
+                        serviceAgreement.getExternalId());
+                    return Mono.just(streamTask);
+                });
+            return existingServiceAgreement.switchIfEmpty(createServiceAgreement);
         }
     }
 
@@ -678,35 +696,10 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         return existingServiceAgreement.switchIfEmpty(createServiceAgreement);
     }
 
-    private ServiceAgreement createMasterServiceAgreement(LegalEntity legalEntity, @Valid List<User> admins) {
+    private ServiceAgreement createMasterServiceAgreement(ServiceAgreement serviceAgreement) {
 
-        List<String> adminExternalIds = admins != null
-            ? admins.stream().map(User::getExternalId).collect(Collectors.toList()) :
-            null;
-
-        LegalEntityParticipant legalEntityParticipant = new LegalEntityParticipant();
-        legalEntityParticipant.setExternalId(legalEntity.getExternalId());
-        legalEntityParticipant.setSharingAccounts(true);
-        legalEntityParticipant.setSharingUsers(true);
-        legalEntityParticipant.setAdmins(adminExternalIds);
-        legalEntityParticipant.setUsers(Collections.emptyList());
-
-        ServiceAgreement serviceAgreement;
-
-        if (legalEntity.getMasterServiceAgreement() == null) {
-            serviceAgreement = new ServiceAgreement();
-            serviceAgreement.setExternalId("sa_" + legalEntity.getExternalId());
-            serviceAgreement.setName(legalEntity.getName());
-            serviceAgreement.setDescription("Master Service Agreement for " + legalEntity.getName());
-            serviceAgreement.setStatus(LegalEntityStatus.ENABLED);
-        } else {
-            serviceAgreement = legalEntity.getMasterServiceAgreement();
-        }
-
-        serviceAgreement.setIsMaster(true);
-        if(isEmpty(serviceAgreement.getParticipants())) {
-            serviceAgreement.addParticipantsItem(legalEntityParticipant);
-        }
+        serviceAgreement.getParticipants().get(0).setSharingAccounts(true);
+        serviceAgreement.getParticipants().get(0).setSharingUsers(true);
 
         return serviceAgreement;
     }
