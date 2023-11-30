@@ -130,7 +130,9 @@ public interface ProductMapper {
 
     AccountArrangementItemBase toArrangementItemBase(AccountArrangementItemPost arrangementItemPost);
 
-    AccountArrangementItem toArrangementItem(AccountArrangementItemBase arrangementItemPost);
+    AccountArrangementItem toArrangementItem(AccountArrangementItemBase arrangementItemBase);
+
+    AccountArrangementItem toArrangementItem(AccountArrangementItemPut arrangementItemPut);
 
     //
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
