@@ -18,31 +18,23 @@ import com.backbase.dbs.contact.api.service.v2.model.IngestMode;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.api.service.v2.model.Realm;
-import com.backbase.dbs.user.profile.api.service.v2.model.GetUserProfile;
 import com.backbase.stream.audiences.UserKindSegmentationSaga;
 import com.backbase.stream.audiences.UserKindSegmentationTask;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
-import com.backbase.stream.legalentity.model.BaseProductGroup;
-import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CustomerCategory;
-import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.ExternalAccountInformation;
 import com.backbase.stream.legalentity.model.ExternalContact;
-import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
-import com.backbase.stream.legalentity.model.Multivalued;
-import com.backbase.stream.legalentity.model.PhoneNumber;
-import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.legalentity.model.User;
-import com.backbase.stream.legalentity.model.UserProfile;
+import com.backbase.stream.mapper.LegalEntityV2toV1Mapper;
+import com.backbase.stream.mapper.ServiceAgreementV2ToV1Mapper;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserService;
@@ -58,6 +50,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -100,22 +93,28 @@ class LegalEntitySagaV2Test {
     String leInternalId = "someLeInternalId";
     String adminExId = "someAdminExId";
     String regularUserExId = "someRegularUserExId";
-    LegalEntityV2 legalEntity;
+    LegalEntityV2 legalEntityV2;
     User regularUser;
+
+    private final static LegalEntityV2toV1Mapper leMapper = Mappers.getMapper(LegalEntityV2toV1Mapper.class);
+    private final static ServiceAgreementV2ToV1Mapper saMapper = Mappers.getMapper(ServiceAgreementV2ToV1Mapper.class);
 
     @Test
     void masterServiceAgreementCreation() {
-        ServiceAgreementV2 sa = new ServiceAgreementV2().creatorLegalEntity(leExternalId);
-        legalEntity = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId).parentExternalId(leExternalId)
-            .activateSingleServiceAgreement(false).masterServiceAgreement(sa);
+        ServiceAgreement sa = new ServiceAgreement().creatorLegalEntity(leExternalId);
+        legalEntityV2 = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId)
+            .parentExternalId(leExternalId)
+            .activateSingleServiceAgreement(false).masterServiceAgreement(saMapper.mapV2(sa));
+        LegalEntity legalEntity = leMapper.mapLegalEntityV2ToLegalEntity(legalEntityV2);
 
-        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntity);
+        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntityV2);
 
-        when(task.getLegalEntity()).thenReturn(legalEntity);
-        when(legalEntityService.getLegalEntityByExternalIdV2(eq(leExternalId))).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalIdV2(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityIdV2(eq(leInternalId))).thenReturn(Mono.just(sa));
-        when(legalEntityService.createLegalEntity((LegalEntityV2) any())).thenReturn(Mono.just(legalEntity));
+        when(task.getLegalEntity()).thenReturn(legalEntityV2);
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(leInternalId)).thenReturn(
+            Mono.just(sa));
+        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(userService.setupRealm(task.getLegalEntity()))
             .thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(task.getLegalEntity()))
@@ -127,8 +126,8 @@ class LegalEntitySagaV2Test {
         verify(userService).setupRealm(task.getLegalEntity());
         verify(userService).linkLegalEntityToRealm(task.getLegalEntity());
 
-        when(legalEntityService.getLegalEntityByExternalIdV2(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.putLegalEntity((LegalEntityV2) any())).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         result = legalEntitySaga.executeTask(task);
         result.block();
 
@@ -140,17 +139,19 @@ class LegalEntitySagaV2Test {
     void masterServiceAgreementCreation_activateSingleServiceAgreement() {
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
-        legalEntity = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId).parentExternalId(leExternalId);
-        ServiceAgreementV2 sa = new ServiceAgreementV2().creatorLegalEntity(leExternalId);
+        legalEntityV2 = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId)
+            .parentExternalId(leExternalId);
+        ServiceAgreement sa = new ServiceAgreement().creatorLegalEntity(leExternalId);
+        LegalEntity legalEntity = leMapper.mapLegalEntityV2ToLegalEntity(legalEntityV2);
+        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntityV2);
 
-        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntity);
-
-        when(task.getLegalEntity()).thenReturn(legalEntity);
-        when(legalEntityService.getLegalEntityByExternalIdV2(eq(leExternalId))).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalIdV2(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityIdV2(eq(leInternalId))).thenReturn(Mono.empty());
-        when(legalEntityService.createLegalEntity((LegalEntityV2) any())).thenReturn(Mono.just(legalEntity));
-        when(accessGroupService.createServiceAgreement(any(), (ServiceAgreementV2) any())).thenReturn(Mono.just(sa));
+        when(task.getLegalEntity()).thenReturn(legalEntityV2);
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(leInternalId)).thenReturn(
+            Mono.empty());
+        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
+        when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
         when(userService.setupRealm(task.getLegalEntity()))
             .thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(task.getLegalEntity()))
@@ -162,8 +163,8 @@ class LegalEntitySagaV2Test {
         verify(userService).setupRealm(task.getLegalEntity());
         verify(userService).linkLegalEntityToRealm(task.getLegalEntity());
 
-        when(legalEntityService.getLegalEntityByExternalIdV2(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.putLegalEntity((LegalEntityV2) any())).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         result = legalEntitySaga.executeTask(task);
         result.block();
 
@@ -173,13 +174,14 @@ class LegalEntitySagaV2Test {
 
     @Test
     void deleteLegalEntity_usersPrefixedWithRemovedNotProcessed() {
-        legalEntity = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId)
+        legalEntityV2 = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId)
             .parentExternalId(leExternalId);
-        ServiceAgreementV2 sa = new ServiceAgreementV2().creatorLegalEntity(leExternalId);
+        ServiceAgreement sa = new ServiceAgreement().creatorLegalEntity(leExternalId);
 
-        when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityIdV2(leExternalId)).thenReturn(
+        when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(leExternalId)).thenReturn(
             Mono.just(sa));
-        when(legalEntityService.getLegalEntityByExternalIdV2(leExternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(
+            Mono.just(leMapper.mapLegalEntityV2ToLegalEntity(legalEntityV2)));
 
         Long totalUsers = 5L;
 
@@ -208,13 +210,14 @@ class LegalEntitySagaV2Test {
 
     @Test
     void deleteLegalEntity_processesPaginatedListOfUsers() {
-        legalEntity = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId)
+        legalEntityV2 = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId)
             .parentExternalId(leExternalId);
-        ServiceAgreementV2 sa = new ServiceAgreementV2().creatorLegalEntity(leExternalId);
+        ServiceAgreement sa = new ServiceAgreement().creatorLegalEntity(leExternalId);
 
-        when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityIdV2(leExternalId)).thenReturn(
+        when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(leExternalId)).thenReturn(
             Mono.just(sa));
-        when(legalEntityService.getLegalEntityByExternalIdV2(leExternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(
+            Mono.just(leMapper.mapLegalEntityV2ToLegalEntity(legalEntityV2)));
 
         Long totalUsers = 22L;
 
@@ -252,68 +255,76 @@ class LegalEntitySagaV2Test {
     @Test
     void updateLegalEntityName() {
         regularUser = new User().internalId("someRegularUserInId")
-                .externalId(regularUserExId);
+            .externalId(regularUserExId);
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
-        ServiceAgreementV2 sa = new ServiceAgreementV2().creatorLegalEntity(leExternalId);
-        legalEntity = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId).name("Model Bank")
-                .addAdministratorsItem(adminUser).parentExternalId(leParentExternalId)
-                .users(singletonList(regularUser))
-                .subsidiaries(singletonList(
-                        new LegalEntityV2().externalId(leExternalId)));
+        ServiceAgreement sa = new ServiceAgreement().creatorLegalEntity(leExternalId);
+        legalEntityV2 = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId)
+            .name("Model Bank")
+            .addAdministratorsItem(adminUser).parentExternalId(leParentExternalId)
+            .users(singletonList(regularUser))
+            .subsidiaries(singletonList(
+                new LegalEntityV2().externalId(leExternalId)));
 
-        LegalEntityV2 newLE = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId).name("New Model Bank")
-                .addAdministratorsItem(adminUser).parentExternalId(leParentExternalId)
-                .users(singletonList(regularUser))
-                .subsidiaries(singletonList(
-                        new LegalEntityV2().externalId(leExternalId)
-                ));
+        LegalEntityV2 newLE = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId)
+            .name("New Model Bank")
+            .addAdministratorsItem(adminUser).parentExternalId(leParentExternalId)
+            .users(singletonList(regularUser))
+            .subsidiaries(singletonList(
+                new LegalEntityV2().externalId(leExternalId)
+            ));
 
         LegalEntityTaskV2 task = mockLegalEntityTask(newLE);
 
-        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityIdV2(leInternalId)).thenReturn(Mono.just(sa));
-        when(accessGroupService.createServiceAgreement(any(), (ServiceAgreementV2) any())).thenReturn(Mono.just(sa));
-        when(legalEntityService.getLegalEntityByExternalIdV2(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.getLegalEntityByInternalIdV2(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.putLegalEntity((LegalEntityV2) any())).thenReturn(Mono.just(newLE));
-        when(userService.getUserByExternalId(eq(regularUserExId))).thenReturn(Mono.just(regularUser));
-        when(userService.getUserByExternalId(eq(adminExId))).thenReturn(Mono.just(adminUser));
+        LegalEntity legalEntity = leMapper.mapLegalEntityV2ToLegalEntity(legalEntityV2);
+
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(leInternalId)).thenReturn(
+            Mono.just(sa));
+        when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(leMapper.mapLegalEntityV2ToLegalEntity(newLE)));
+        when(userService.getUserByExternalId(regularUserExId)).thenReturn(Mono.just(regularUser));
+        when(userService.getUserByExternalId(adminExId)).thenReturn(Mono.just(adminUser));
         when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());
         when(userService.setupRealm((LegalEntityV2) any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm((LegalEntityV2) any())).thenReturn(Mono.just(new LegalEntityV2()));
         when(userService.updateUser(any())).thenReturn(Mono.empty());
 
         LegalEntityTaskV2 result = legalEntitySaga.executeTask(task)
-                .block();
+            .block();
 
         Assertions.assertNotNull(result);
         Assertions.assertEquals(newLE.getName(), result.getData().getName());
-
-        verify(legalEntityService).putLegalEntity(eq(newLE));
     }
 
     @Test
     void updateUserName() {
         User newRegularUser = new User().internalId("someRegularUserInId")
-                .externalId(regularUserExId).fullName("New Name Regular User");
+            .externalId(regularUserExId).fullName("New Name Regular User");
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId).fullName("Admin");
-        ServiceAgreementV2 sa = new ServiceAgreementV2().creatorLegalEntity(leExternalId);
-        legalEntity = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId).name("Model Bank")
+        ServiceAgreement sa = new ServiceAgreement().creatorLegalEntity(leExternalId);
+        LegalEntityV2 legalEntityV2 = new LegalEntityV2().internalId(leInternalId).externalId(leExternalId)
+            .name("Model Bank")
             .addAdministratorsItem(adminUser).parentExternalId(leParentExternalId)
-                .users(singletonList(newRegularUser))
-                .subsidiaries(singletonList(
-                        new LegalEntityV2().externalId(leExternalId).internalId("internalSubsidiary")
-                ));
+            .users(singletonList(newRegularUser))
+            .subsidiaries(singletonList(
+                new LegalEntityV2().externalId(leExternalId).internalId("internalSubsidiary")
+            ));
 
-        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntity);
-        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityIdV2(leInternalId)).thenReturn(Mono.just(sa));
-        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityIdV2("internalSubsidiary")).thenReturn(Mono.just(sa));
-        when(accessGroupService.createServiceAgreement(any(), (ServiceAgreementV2) any())).thenReturn(Mono.just(sa));
-        when(legalEntityService.getLegalEntityByExternalIdV2(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.getLegalEntityByInternalIdV2(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.createLegalEntity((LegalEntityV2) any())).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.putLegalEntity((LegalEntityV2) any())).thenReturn(Mono.empty());
-        when(userService.getUserByExternalId(eq(adminExId))).thenReturn(Mono.just(adminUser));
-        when(userService.getUserByExternalId(eq(regularUserExId))).thenReturn(Mono.just(newRegularUser));
+        LegalEntity legalEntity = leMapper.mapLegalEntityV2ToLegalEntity(legalEntityV2);
+
+        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntityV2);
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(leInternalId)).thenReturn(
+            Mono.just(sa));
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId("internalSubsidiary")).thenReturn(
+            Mono.just(sa));
+        when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.empty());
+        when(userService.getUserByExternalId(adminExId)).thenReturn(Mono.just(adminUser));
+        when(userService.getUserByExternalId(regularUserExId)).thenReturn(Mono.just(newRegularUser));
         when(userService.createUser(any(), any(), any())).thenReturn(Mono.just(adminUser));
         when(userService.updateUser(any())).thenReturn(Mono.empty());
         when(userService.setupRealm((LegalEntityV2) any())).thenReturn(Mono.just(new Realm()));
@@ -321,36 +332,40 @@ class LegalEntitySagaV2Test {
         when(userService.updateUser(any())).thenReturn(Mono.just(newRegularUser));
 
         LegalEntityTaskV2 result = legalEntitySaga.executeTask(task)
-                .block();
+            .block();
 
         Assertions.assertNotNull(result);
         Assertions.assertNotNull(result.getData().getUsers());
         Assertions.assertNotNull(result.getData().getUsers().get(0));
         Assertions.assertEquals(newRegularUser.getFullName(),
-                result.getData().getUsers().get(0).getFullName());
+            result.getData().getUsers().get(0).getFullName());
     }
 
     void getMockLegalEntity() {
         regularUser = new User().internalId("someRegularUserInId")
-                .externalId(regularUserExId);
+            .externalId(regularUserExId);
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
-        ServiceAgreementV2 sa = new ServiceAgreementV2().creatorLegalEntity(leExternalId);
-        legalEntity = new LegalEntityV2()
-                .internalId(leInternalId)
-                .externalId(leExternalId)
-                .addAdministratorsItem(adminUser)
-                .parentExternalId(leParentExternalId)
-                .users(singletonList(regularUser))
-                .subsidiaries(singletonList(
-                        new LegalEntityV2().externalId(leExternalId).internalId("internalSubsidiaries")
-                ));
+        ServiceAgreement sa = new ServiceAgreement().creatorLegalEntity(leExternalId);
+        legalEntityV2 = new LegalEntityV2()
+            .internalId(leInternalId)
+            .externalId(leExternalId)
+            .addAdministratorsItem(adminUser)
+            .parentExternalId(leParentExternalId)
+            .users(singletonList(regularUser))
+            .subsidiaries(singletonList(
+                new LegalEntityV2().externalId(leExternalId).internalId("internalSubsidiaries")
+            ));
 
-        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityIdV2(leInternalId)).thenReturn(Mono.just(sa));
-        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityIdV2("internalSubsidiaries")).thenReturn(Mono.just(sa));
-        when(accessGroupService.createServiceAgreement(any(), (ServiceAgreementV2) any())).thenReturn(Mono.just(sa));
-        when(legalEntityService.getLegalEntityByExternalIdV2(leExternalId)).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalIdV2(leInternalId)).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.createLegalEntity((LegalEntityV2) any())).thenReturn(Mono.just(legalEntity));
+        LegalEntity legalEntity = leMapper.mapLegalEntityV2ToLegalEntity(legalEntityV2);
+
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(leInternalId)).thenReturn(
+            Mono.just(sa));
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId("internalSubsidiaries")).thenReturn(
+            Mono.just(sa));
+        when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(userService.getUserByExternalId(regularUserExId)).thenReturn(Mono.just(regularUser));
         when(userService.getUserByExternalId(adminExId)).thenReturn(Mono.just(adminUser));
         when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());
@@ -362,7 +377,7 @@ class LegalEntitySagaV2Test {
     @Test
     void test_PostLegalContacts() {
         getMockLegalEntity();
-        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntity);
+        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntityV2);
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.LE));
 
         LegalEntityTaskV2 result = legalEntitySaga.executeTask(task).block();
@@ -370,7 +385,7 @@ class LegalEntitySagaV2Test {
         Assertions.assertNotNull(result);
 
         ExternalContact contact = getMockExternalContact();
-        legalEntity.setContacts(Collections.singletonList(contact));
+        legalEntityV2.setContacts(Collections.singletonList(contact));
         result = legalEntitySaga.executeTask(task).block();
         Assertions.assertNotNull(result);
         Assertions.assertEquals(leExternalId, result.getData().getContacts().get(0).getExternalId());
@@ -380,28 +395,32 @@ class LegalEntitySagaV2Test {
     void test_PostLegalContacts_NoUser() {
 
         regularUser = new User().internalId("someRegularUserInId")
-                .externalId(regularUserExId);
+            .externalId(regularUserExId);
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
 
         ExternalContact contact = getMockExternalContact();
-        ServiceAgreementV2 sa = new ServiceAgreementV2().creatorLegalEntity(leExternalId);
-        legalEntity = new LegalEntityV2()
-                .internalId(leInternalId)
-                .externalId(leExternalId)
-                .addAdministratorsItem(adminUser)
-                .parentExternalId(leParentExternalId)
-                .contacts(Collections.singletonList(contact))
-                .subsidiaries(singletonList(
-                        new LegalEntityV2().externalId(leExternalId).internalId("internalSubsidiary")
-                ));
+        ServiceAgreement sa = new ServiceAgreement().creatorLegalEntity(leExternalId);
+        legalEntityV2 = new LegalEntityV2()
+            .internalId(leInternalId)
+            .externalId(leExternalId)
+            .addAdministratorsItem(adminUser)
+            .parentExternalId(leParentExternalId)
+            .contacts(Collections.singletonList(contact))
+            .subsidiaries(singletonList(
+                new LegalEntityV2().externalId(leExternalId).internalId("internalSubsidiary")
+            ));
 
-        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntity);
-        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityIdV2("internalSubsidiary")).thenReturn(Mono.just(sa));
-        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityIdV2(leInternalId)).thenReturn(Mono.just(sa));
-        when(accessGroupService.createServiceAgreement(any(), (ServiceAgreementV2) any())).thenReturn(Mono.just(sa));
-        when(legalEntityService.getLegalEntityByExternalIdV2(leExternalId)).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalIdV2(leInternalId)).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.createLegalEntity((LegalEntityV2) any())).thenReturn(Mono.just(legalEntity));
+        LegalEntity legalEntity = leMapper.mapLegalEntityV2ToLegalEntity(legalEntityV2);
+
+        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntityV2);
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId("internalSubsidiary")).thenReturn(
+            Mono.just(sa));
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(leInternalId)).thenReturn(
+            Mono.just(sa));
+        when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
         when(userService.getUserByExternalId(adminExId)).thenReturn(Mono.just(adminUser));
         when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());
         when(userService.setupRealm((LegalEntityV2) any())).thenReturn(Mono.just(new Realm()));
@@ -416,7 +435,7 @@ class LegalEntitySagaV2Test {
     @Test
     void test_PostUserContacts() {
         getMockLegalEntity();
-        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntity);
+        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntityV2);
 
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
 
@@ -434,7 +453,7 @@ class LegalEntitySagaV2Test {
 
         when(userKindSegmentationSaga.isEnabled()).thenReturn(false);
 
-        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntityV2)).block();
 
         verify(userKindSegmentationSaga, never()).executeTask(Mockito.any());
     }
@@ -442,11 +461,11 @@ class LegalEntitySagaV2Test {
     @Test
     void userKindSegmentationUsesLegalEntityCustomerCategory() {
         getMockLegalEntity();
-        legalEntity.setCustomerCategory(CustomerCategory.RETAIL);
+        legalEntityV2.setCustomerCategory(CustomerCategory.RETAIL);
 
         when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
 
-        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntityV2)).block();
 
         verify(userKindSegmentationSaga, times(0)).getDefaultCustomerCategory();
     }
@@ -454,14 +473,14 @@ class LegalEntitySagaV2Test {
     @Test
     void userKindSegmentationUsesDefaultCustomerCategory() {
         getMockLegalEntity();
-        legalEntity.legalEntityType(LegalEntityType.CUSTOMER);
+        legalEntityV2.legalEntityType(LegalEntityType.CUSTOMER);
 
         when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
         when(userKindSegmentationSaga.getDefaultCustomerCategory()).thenReturn(CustomerCategory.RETAIL.getValue());
         when(userKindSegmentationSaga.executeTask(any())).thenReturn(
             Mono.just(Mockito.mock(UserKindSegmentationTask.class)));
 
-        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntityV2)).block();
 
         verify(userKindSegmentationSaga, times(1)).getDefaultCustomerCategory();
     }
@@ -469,12 +488,12 @@ class LegalEntitySagaV2Test {
     @Test
     void whenUserKindSegmentationIsEnabledAndNoCustomerCategoryCanBeDeterminedReturnsError() {
         getMockLegalEntity();
-        legalEntity.legalEntityType(LegalEntityType.CUSTOMER);
+        legalEntityV2.legalEntityType(LegalEntityType.CUSTOMER);
 
         when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
         when(userKindSegmentationSaga.getDefaultCustomerCategory()).thenReturn(null);
 
-        var task = mockLegalEntityTask(legalEntity);
+        var task = mockLegalEntityTask(legalEntityV2);
 
         Assertions.assertThrows(
             StreamTaskException.class,
@@ -489,7 +508,7 @@ class LegalEntitySagaV2Test {
 
         // Given
         LegalEntityTaskV2 leTask = new LegalEntityTaskV2(new LegalEntityV2().externalId(leExternalId));
-        when(legalEntityService.getLegalEntityByExternalIdV2(leExternalId)).thenReturn(Mono.error(ex));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.error(ex));
 
         // When
         Mono<LegalEntityTaskV2> result = legalEntitySaga.executeTask(leTask);
@@ -501,7 +520,7 @@ class LegalEntitySagaV2Test {
         }
 
         // Then
-        verify(legalEntityService).getLegalEntityByExternalIdV2(any());
+        verify(legalEntityService).getLegalEntityByExternalId(any());
         org.assertj.core.api.Assertions.assertThat(stEx)
             .isNotNull()
             .extracting(e -> e.getTask().getHistory().get(1).getErrorMessage())
@@ -540,7 +559,7 @@ class LegalEntitySagaV2Test {
     }
 
     private LegalEntitySagaConfigurationProperties getLegalEntitySagaConfigurationProperties() {
-        LegalEntitySagaConfigurationProperties sagaConfiguration =  new LegalEntitySagaConfigurationProperties();
+        LegalEntitySagaConfigurationProperties sagaConfiguration = new LegalEntitySagaConfigurationProperties();
         sagaConfiguration.setUseIdentityIntegration(true);
         sagaConfiguration.setUserProfileEnabled(true);
         return sagaConfiguration;
@@ -549,13 +568,13 @@ class LegalEntitySagaV2Test {
 
     private ExternalContact getMockExternalContact() {
         ExternalAccountInformation externalAccount = new ExternalAccountInformation()
-                .name("ACC1")
-                .externalId("ACCEXT1")
-                .accountNumber("12345");
+            .name("ACC1")
+            .externalId("ACCEXT1")
+            .accountNumber("12345");
         return new ExternalContact()
-                .name("Sam")
-                .externalId(leExternalId)
-                .accounts(Collections.singletonList(externalAccount));
+            .name("Sam")
+            .externalId(leExternalId)
+            .accounts(Collections.singletonList(externalAccount));
     }
 
     private ContactsBulkPostRequestBody getMockContactsBulkRequest(AccessContextScope accessContextScope) {

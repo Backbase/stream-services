@@ -155,17 +155,6 @@ public class AccessGroupService {
             .zipWith(Mono.just(serviceAgreement), storeIdInServiceAgreement());
     }
 
-    public Mono<ServiceAgreementV2> createServiceAgreement(StreamTask streamTask, ServiceAgreementV2 serviceAgreement) {
-        ServicesAgreementIngest servicesAgreementIngest = accessGroupMapper.toPresentation(serviceAgreement);
-        return serviceAgreementsApi.postServiceAgreementIngest(servicesAgreementIngest)
-            .onErrorResume(WebClientResponseException.class, throwable -> {
-                streamTask.error(SERVICE_AGREEMENT, "create", "failed", serviceAgreement.getExternalId(),
-                    "", throwable, throwable.getResponseBodyAsString(), "Failed to create Service Agreement");
-                return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to create Service Agreement"));
-            })
-            .zipWith(Mono.just(serviceAgreement), storeIdInServiceAgreementV2());
-    }
-
     /**
      * Get Service Agreement by external ID.
      *
