@@ -4,6 +4,7 @@ import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntitySagaV2;
 import com.backbase.stream.LegalEntityTask;
 import com.backbase.stream.LegalEntityUnitOfWorkExecutor;
+import com.backbase.stream.ServiceAgreementSagaV2;
 import com.backbase.stream.audiences.UserKindSegmentationSaga;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.legalentity.repository.LegalEntityUnitOfWorkRepository;
@@ -82,6 +83,28 @@ public class LegalEntitySagaConfiguration {
             contactsSaga,
             sinkConfigurationProperties,
             userKindSegmentationSaga
+        );
+    }
+
+    @Bean
+    public ServiceAgreementSagaV2 reactiveServiceAgreementV2Saga(LegalEntityService legalEntityService,
+        UserService userService,
+        UserProfileService userProfileService,
+        AccessGroupService accessGroupService,
+        BatchProductIngestionSaga batchProductIngestionSaga,
+        LimitsSaga limitsSaga,
+        ContactsSaga contactsSaga,
+        LegalEntitySagaConfigurationProperties sinkConfigurationProperties
+    ) {
+        return new ServiceAgreementSagaV2(
+            legalEntityService,
+            userService,
+            userProfileService,
+            accessGroupService,
+            batchProductIngestionSaga,
+            limitsSaga,
+            contactsSaga,
+            sinkConfigurationProperties
         );
     }
 
