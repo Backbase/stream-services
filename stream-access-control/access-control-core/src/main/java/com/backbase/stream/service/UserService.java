@@ -226,14 +226,6 @@ public class UserService {
                 .switchIfEmpty(createRealm(legalEntity.getRealmName()));
     }
 
-    public Mono<Realm> setupRealm(LegalEntityV2 legalEntity) {
-        if (StringUtils.isEmpty(legalEntity.getRealmName())) {
-            return Mono.empty();
-        }
-        return existingRealm(legalEntity.getRealmName())
-            .switchIfEmpty(createRealm(legalEntity.getRealmName()));
-    }
-
     /**
      * Link LegalEntity to that Realm. (Realm should already be in DBS)
      *
@@ -241,25 +233,6 @@ public class UserService {
      * @return the same object on success
      */
     public Mono<LegalEntity> linkLegalEntityToRealm(LegalEntity legalEntity) {
-        if (ObjectUtils.isEmpty(legalEntity.getRealmName())){
-            log.warn("Skipping assigning legal entity to Identity, realm name not informed.");
-            return Mono.empty();
-        }
-        log.info("Linking Legal Entity with internal Id '{}' to Realm: '{}'", legalEntity.getInternalId(), legalEntity.getRealmName());
-        AssignRealm assignRealm = new AssignRealm().legalEntityId(legalEntity.getInternalId());
-        return identityManagementApi.assignRealm(legalEntity.getRealmName(), assignRealm)
-            .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error Linking: {}", e.getResponseBodyAsString());
-                return Mono.error(e);
-            })
-            .then(Mono.just(legalEntity))
-            .map(actual -> {
-                log.info("Legal Entity: {} linked to Realm: {}", actual.getInternalId(), legalEntity.getRealmName());
-                return actual;
-            });
-    }
-
-    public Mono<LegalEntityV2> linkLegalEntityToRealm(LegalEntityV2 legalEntity) {
         if (ObjectUtils.isEmpty(legalEntity.getRealmName())){
             log.warn("Skipping assigning legal entity to Identity, realm name not informed.");
             return Mono.empty();

@@ -7,9 +7,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityCreateItem
 import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityPut;
 import com.backbase.stream.exceptions.LegalEntityException;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
-import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.mapper.AccessGroupMapper;
 import com.backbase.stream.mapper.LegalEntityMapper;
 import com.backbase.stream.utils.BatchResponseUtils;
@@ -48,16 +46,6 @@ public class LegalEntityService {
      * @return The Created Legal Entity including Internal ID
      */
     public Mono<LegalEntity> createLegalEntity(LegalEntity legalEntity) {
-        LegalEntityCreateItem legalEntityCreateItem = mapper.toPresentation(legalEntity);
-        return createLegalEntity(legalEntityCreateItem)
-            .map(createdLegalEntityId -> {
-                log.info("Created Legal Entity: {} with ID: {}", legalEntity.getName(), createdLegalEntityId.getId());
-                legalEntity.setInternalId(createdLegalEntityId.getId());
-                return legalEntity;
-            });
-    }
-
-    public Mono<LegalEntityV2> createLegalEntity(LegalEntityV2 legalEntity) {
         LegalEntityCreateItem legalEntityCreateItem = mapper.toPresentation(legalEntity);
         return createLegalEntity(legalEntityCreateItem)
             .map(createdLegalEntityId -> {
@@ -108,16 +96,6 @@ public class LegalEntityService {
                 .map(mapper::toStream);
     }
 
-    public Mono<ServiceAgreementV2> getMasterServiceAgreementForExternalLegalEntityIdV2(String legalEntityExternalId) {
-        return legalEntitiesApi.getMasterServiceAgreementByExternalLegalEntity(legalEntityExternalId)
-            .doOnNext(serviceAgreementItem -> log.info("Service Agreement: {} found for legal entity: {}", serviceAgreementItem.getExternalId(), legalEntityExternalId))
-            .onErrorResume(WebClientResponseException.NotFound.class, throwable -> {
-                log.info("Master Service Agreement not found for: {}. Request:[{}] {}  Response: {}", legalEntityExternalId,  throwable.getRequest().getMethod(), throwable.getRequest().getURI() , throwable.getResponseBodyAsString());
-                return Mono.empty();
-            })
-            .map(mapper::toStreamV2);
-    }
-
     /**
      * Get Master Service Agreement for Internal Legal Entity ID.
      *
@@ -135,17 +113,6 @@ public class LegalEntityService {
             .map(serviceAgreementMapper::toStream);
     }
 
-    public Mono<ServiceAgreementV2> getMasterServiceAgreementForInternalLegalEntityIdV2(String legalEntityInternalId) {
-        log.info("Getting Service Agreement for: {}", legalEntityInternalId);
-        return legalEntitiesApi.getMasterServiceAgreement(legalEntityInternalId)
-            .doOnNext(serviceAgreementItem -> log.info("Service Agreement: {} found for legal entity: {}", serviceAgreementItem.getExternalId(), legalEntityInternalId))
-            .onErrorResume(WebClientResponseException.NotFound.class, throwable -> {
-                log.info("Master Service Agreement not found for: {}. Request:[{}] {}  Response: {}", legalEntityInternalId,  throwable.getRequest().getMethod(), throwable.getRequest().getURI() , throwable.getResponseBodyAsString());
-                return Mono.empty();
-            })
-            .map(serviceAgreementMapper::toStreamV2);
-    }
-
     public Mono<LegalEntity> getLegalEntityByExternalId(String externalId) {
         try {
             return legalEntitiesApi.getLegalEntityByExternalId(externalId)
@@ -154,19 +121,6 @@ public class LegalEntityService {
                         return Mono.empty();
                     })
                     .map(mapper::toStream);
-        } catch (RestClientException e) {
-            return Mono.error(e);
-        }
-    }
-
-    public Mono<LegalEntityV2> getLegalEntityByExternalIdV2(String externalId) {
-        try {
-            return legalEntitiesApi.getLegalEntityByExternalId(externalId)
-                .onErrorResume(WebClientResponseException.NotFound.class, notFound -> {
-                    log.info("Legal Entity with externalId: {} does not exist: {}", externalId, notFound.getResponseBodyAsString());
-                    return Mono.empty();
-                })
-                .map(mapper::toStreamV2);
         } catch (RestClientException e) {
             return Mono.error(e);
         }
@@ -181,17 +135,6 @@ public class LegalEntityService {
             })
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .map(mapper::toStream);
-    }
-
-    public Mono<LegalEntityV2> getLegalEntityByInternalIdV2(String internalId) {
-        return legalEntitiesApi.getLegalEntityById(internalId)
-            .onErrorResume(WebClientResponseException.NotFound.class, notFound -> {
-                log.info("Legal Entity with internalId: {} does not exist: {}", internalId,
-                    notFound.getResponseBodyAsString());
-                return Mono.empty();
-            })
-            .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
-            .map(mapper::toStreamV2);
     }
 
     /**
@@ -234,15 +177,4 @@ public class LegalEntityService {
                 .onErrorStop()
                 .then(getLegalEntityByExternalId(legalEntityPut.getNewValues().getExternalId()));
     }
-
-    public Mono<LegalEntityV2> putLegalEntity(LegalEntityV2 legalEntity) {
-        LegalEntityPut legalEntityPut = mapper.toLegalEntityPut(legalEntity);
-
-        return legalEntitiesApi.putLegalEntities(Collections.singletonList(legalEntityPut))
-            .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
-            .onErrorResume(WebClientResponseException.class, exception -> Mono.error(new RuntimeException("Failed to update Legal Entity",  exception)))
-            .onErrorStop()
-            .then(getLegalEntityByExternalIdV2(legalEntityPut.getNewValues().getExternalId()));
-    }
-
 }

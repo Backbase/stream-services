@@ -12,32 +12,32 @@ import lombok.NoArgsConstructor;
 @Data
 public class LegalEntityTaskV2 extends StreamTask {
 
-    private LegalEntityV2 legalEntity;
+    private LegalEntityV2 legalEntityV2;
     private BatchProductIngestionMode ingestionMode;
 
     public LegalEntityTaskV2(LegalEntityV2 data) {
         super(data.getExternalId());
-        this.legalEntity = data;
+        this.legalEntityV2 = data;
         this.ingestionMode = BatchProductIngestionMode.UPSERT;
     }
 
     public LegalEntityTaskV2(LegalEntityV2 data, BatchProductIngestionMode ingestionMode) {
         super(data.getExternalId());
-        this.legalEntity = data;
+        this.legalEntityV2 = data;
         this.ingestionMode = ingestionMode;
     }
 
     public LegalEntityV2 getData() {
-        return legalEntity;
+        return legalEntityV2;
     }
 
     public LegalEntityTaskV2 data(LegalEntityV2 legalEntity) {
-        this.legalEntity = legalEntity;
+        this.legalEntityV2 = legalEntity;
         return this;
     }
 
     @Override
     public String getName() {
-        return legalEntity.getExternalId();
+        return legalEntityV2.getExternalId();
     }
 }

@@ -37,7 +37,6 @@ import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityParticipantV2;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.LegalEntityType;
@@ -51,6 +50,8 @@ import com.backbase.stream.legalentity.model.UserProfile;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.mapper.ExternalContactMapper;
+import com.backbase.stream.mapper.LegalEntityV2toV1Mapper;
+import com.backbase.stream.mapper.ServiceAgreementV2ToV1Mapper;
 import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
@@ -112,6 +113,9 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
     private static final String LEGAL_ENTITY_LIMITS = "legal-entity-limits";
 
     private final UserProfileMapper userProfileMapper = Mappers.getMapper(UserProfileMapper.class);
+    private final LegalEntityV2toV1Mapper leV2Mapper = Mappers.getMapper(LegalEntityV2toV1Mapper.class);
+    private final ServiceAgreementV2ToV1Mapper saV2Mapper = Mappers.getMapper(ServiceAgreementV2ToV1Mapper.class);
+
 
     private final LegalEntityService legalEntityService;
     private final UserService userService;
@@ -287,8 +291,9 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
     public Mono<Void> deleteLegalEntity(String legalEntityExternalId, int userQuerySize) {
         AtomicInteger from = new AtomicInteger(0);
         return Mono.zip(
-                legalEntityService.getMasterServiceAgreementForExternalLegalEntityIdV2(legalEntityExternalId),
-                legalEntityService.getLegalEntityByExternalIdV2(legalEntityExternalId))
+                legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(legalEntityExternalId).map(saV2Mapper::mapV2),
+                legalEntityService.getLegalEntityByExternalId(legalEntityExternalId).map(
+                    leV2Mapper::mapLegalEntityToLegalEntityV2))
             .flatMap(data -> {
                 LegalEntityV2 le = data.getT2();
                 return userService.getUsersByLegalEntity(le.getInternalId(), userQuerySize, from.get())
@@ -335,31 +340,31 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
     private Mono<LegalEntityTaskV2> upsertLegalEntity(LegalEntityTaskV2 task) {
         task.info(LEGAL_ENTITY, UPSERT, "", task.getData().getExternalId(), null,
             "Upsert Legal Entity with External ID: %s", task.getData().getExternalId());
-        LegalEntityV2 legalEntity = task.getData();
+        LegalEntityV2 legalEntityV2 = task.getData();
         // Pipeline for Existing Legal Entity
-        Mono<LegalEntityTaskV2> existingLegalEntity = legalEntityService.getLegalEntityByExternalIdV2(
-                legalEntity.getExternalId())
+        Mono<LegalEntityTaskV2> existingLegalEntity = legalEntityService.getLegalEntityByExternalId(
+                legalEntityV2.getExternalId())
             .flatMap(actual -> {
                 task.getData().setInternalId(actual.getInternalId());
-                return legalEntityService.getLegalEntityByInternalIdV2(actual.getInternalId())
+                return legalEntityService.getLegalEntityByInternalId(actual.getInternalId())
                     .flatMap(result -> {
                         task.getData().setParentInternalId(result.getParentInternalId());
 
-                        return legalEntityService.putLegalEntity(task.getData()).flatMap(leUpdated -> {
+                        return legalEntityService.putLegalEntity(leV2Mapper.mapLegalEntityV2ToLegalEntity(task.getData())).flatMap(leUpdated -> {
                             log.info("Updated LegalEntity: {}", leUpdated.getName());
-                            task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, UPDATED, legalEntity.getExternalId(),
-                                actual.getInternalId(), "Legal Entity: %s updated", legalEntity.getName());
+                            task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, UPDATED, legalEntityV2.getExternalId(),
+                                actual.getInternalId(), "Legal Entity: %s updated", legalEntityV2.getName());
                             return Mono.just(task);
                         });
                     });
             })
             .onErrorResume(throwable -> {
                 if (throwable instanceof WebClientResponseException webClientResponseException) {
-                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), null,
+                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntityV2.getExternalId(), null,
                         webClientResponseException,
                         webClientResponseException.getResponseBodyAsString(), "Unexpected Web Client Exception");
                 } else {
-                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(), null, throwable,
+                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntityV2.getExternalId(), null, throwable,
                         throwable.getMessage(), "Unexpected Error");
                 }
                 return Mono.error(
@@ -367,20 +372,20 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
             });
         // Pipeline for Creating New Legal Entity
         Mono<LegalEntityTaskV2> createNewLegalEntity = Mono.defer(
-            () -> legalEntityService.createLegalEntity(legalEntity)
+            () -> legalEntityService.createLegalEntity(leV2Mapper.mapLegalEntityV2ToLegalEntity(legalEntityV2))
                 .flatMap(actual -> {
-                    task.getData().setInternalId(legalEntity.getInternalId());
-                    return legalEntityService.getLegalEntityByInternalIdV2(actual.getInternalId())
+                    task.getData().setInternalId(actual.getInternalId());
+                    return legalEntityService.getLegalEntityByInternalId(actual.getInternalId())
                         .flatMap(result -> {
                             task.getData().setParentInternalId(result.getParentInternalId());
-                            task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, CREATED, legalEntity.getExternalId(),
-                                legalEntity.getInternalId(), "Created new Legal Entity");
+                            task.info(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, CREATED, legalEntityV2.getExternalId(),
+                                actual.getInternalId(), "Created new Legal Entity");
                             return Mono.just(task);
                         });
                 })
                 .onErrorResume(LegalEntityException.class, legalEntityException -> {
-                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntity.getExternalId(),
-                        legalEntity.getInternalId(), legalEntityException, legalEntityException.getHttpResponse(),
+                    task.error(LEGAL_ENTITY, UPSERT_LEGAL_ENTITY, FAILED, legalEntityV2.getExternalId(),
+                        legalEntityV2.getInternalId(), legalEntityException, legalEntityException.getHttpResponse(),
                         legalEntityException.getMessage());
                     return Mono.error(new StreamTaskException(task, legalEntityException));
                 }));
@@ -529,8 +534,9 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
         if (legalEntity.getMasterServiceAgreement() == null || StringUtils.hasText(
             legalEntity.getMasterServiceAgreement().getInternalId())) {
 
-            Mono<LegalEntityTaskV2> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityIdV2(
+            Mono<LegalEntityTaskV2> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(
                     legalEntity.getInternalId())
+                .map(saV2Mapper::mapV2)
                 .flatMap(serviceAgreement -> {
                     if (legalEntity.getMasterServiceAgreement() != null) {
                         serviceAgreement.setLimit(legalEntity.getMasterServiceAgreement().getLimit());
@@ -548,19 +554,20 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
                 });
 
             // Master Service Agreement can be created only if activateSingleServiceAgreement property is missing or it has the value: true
-            if (streamTask.getLegalEntity() != null &&
-                (streamTask.getLegalEntity().getActivateSingleServiceAgreement() == null || streamTask.getLegalEntity()
+            if (streamTask.getLegalEntityV2() != null &&
+                (streamTask.getLegalEntityV2().getActivateSingleServiceAgreement() == null || streamTask.getLegalEntityV2()
                     .getActivateSingleServiceAgreement())) {
                 ServiceAgreementV2 newServiceAgreement = createMasterServiceAgreement(legalEntity,
                     legalEntity.getAdministrators());
                 Mono<LegalEntityTaskV2> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask,
-                        newServiceAgreement)
+                        saV2Mapper.map(newServiceAgreement))
                     .onErrorMap(AccessGroupException.class, accessGroupException -> {
                         streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED,
                             newServiceAgreement.getExternalId(), null, accessGroupException,
                             accessGroupException.getMessage(), accessGroupException.getHttpResponse());
                         return new StreamTaskException(streamTask, accessGroupException);
                     })
+                    .map(saV2Mapper::mapV2)
                     .flatMap(serviceAgreement -> {
                         streamTask.getData().setMasterServiceAgreement(serviceAgreement);
                         streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED,
@@ -631,12 +638,13 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
     }
 
     private Mono<LegalEntityTaskV2> linkLegalEntityToRealm(LegalEntityTaskV2 streamTask) {
+        LegalEntity legalEntity = leV2Mapper.mapLegalEntityV2ToLegalEntity(streamTask.getLegalEntityV2());
         return Mono.just(streamTask)
             .filter(task -> legalEntitySagaConfigurationProperties.isUseIdentityIntegration())
             .flatMap(task ->
-                userService.setupRealm(task.getLegalEntity())
-                    .then(userService.linkLegalEntityToRealm(task.getLegalEntity()))
-                    .map(legalEntity -> streamTask)
+                userService.setupRealm(legalEntity)
+                    .then(userService.linkLegalEntityToRealm(legalEntity))
+                    .map(legalEntityV2 -> streamTask)
             ).switchIfEmpty(Mono.just(streamTask));
     }
 
