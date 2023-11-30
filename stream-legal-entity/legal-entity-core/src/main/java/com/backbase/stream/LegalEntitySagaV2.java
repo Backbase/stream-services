@@ -554,8 +554,8 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
                 });
 
             // Master Service Agreement can be created only if activateSingleServiceAgreement property is missing or it has the value: true
-            if (streamTask.getLegalEntity() != null &&
-                (streamTask.getLegalEntity().getActivateSingleServiceAgreement() == null || streamTask.getLegalEntity()
+            if (streamTask.getLegalEntityV2() != null &&
+                (streamTask.getLegalEntityV2().getActivateSingleServiceAgreement() == null || streamTask.getLegalEntityV2()
                     .getActivateSingleServiceAgreement())) {
                 ServiceAgreementV2 newServiceAgreement = createMasterServiceAgreement(legalEntity,
                     legalEntity.getAdministrators());
@@ -638,12 +638,13 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
     }
 
     private Mono<LegalEntityTaskV2> linkLegalEntityToRealm(LegalEntityTaskV2 streamTask) {
+        LegalEntity legalEntity = leV2Mapper.mapLegalEntityV2ToLegalEntity(streamTask.getLegalEntityV2());
         return Mono.just(streamTask)
             .filter(task -> legalEntitySagaConfigurationProperties.isUseIdentityIntegration())
             .flatMap(task ->
-                userService.setupRealm(task.getLegalEntity())
-                    .then(userService.linkLegalEntityToRealm(task.getLegalEntity()))
-                    .map(legalEntity -> streamTask)
+                userService.setupRealm(legalEntity)
+                    .then(userService.linkLegalEntityToRealm(legalEntity))
+                    .map(legalEntityV2 -> streamTask)
             ).switchIfEmpty(Mono.just(streamTask));
     }
 
