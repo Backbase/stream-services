@@ -444,26 +444,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
         }
     }
 
-    public Mono<LegalEntityTask> setupUserPermissions(LegalEntityTask legalEntityTask, JobProfileUser userJobProfile) {
-        LegalEntity legalEntity = legalEntityTask.getData();
-        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = Stream.of(userJobProfile)
-            // Ensure internal Id present.
-            .filter(jobProfileUser -> nonNull(jobProfileUser.getUser().getInternalId()))
-            .collect(Collectors.toMap(
-                JobProfileUser::getUser,
-                jobProfileUser -> userJobProfile.getBusinessFunctionGroups().stream()
-                    .collect(Collectors.toMap(
-                        bfg -> bfg,
-                        bfg -> Collections.emptyList()
-                    ))
-            ));
-        log.trace("Permissions {}", request);
-        return accessGroupService.assignPermissionsBatch(
-                new BatchProductGroupTask(BATCH_PRODUCT_GROUP_ID + System.currentTimeMillis(), new BatchProductGroup()
-                    .serviceAgreement(retrieveServiceAgreement(legalEntity)), legalEntityTask.getIngestionMode()), request)
-            .thenReturn(legalEntityTask);
-    }
-
     public Mono<User> upsertUser(LegalEntityTaskV2 streamTask, User user) {
         if (legalEntitySagaConfigurationProperties.isUseIdentityIntegration()
             && !IdentityUserLinkStrategy.IDENTITY_AGNOSTIC.equals(user.getIdentityLinkStrategy())) {
