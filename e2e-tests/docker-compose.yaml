@@ -19,6 +19,10 @@ x-common-variables: &common-variables
   spring.main.banner-mode: off
   spring.zipkin.enabled: false
   spring.cloud.config.enabled: false
+  spring.cloud.kubernetes.enabled: false
+  backbase.audit.enabled: false
+  backbase.security.public.paths: /integration-api/**
+  backbase.security.mtls.enabled: false
 
 x-database-variables: &database-variables
   spring.liquibase.enabled: true
@@ -49,6 +53,8 @@ volumes:
 services:
   mysql:
     image: mysql:8.0.31
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
     volumes:
@@ -62,6 +68,9 @@ services:
 
   activemq:
     image: apache/activemq-classic:5.17.6
+    ports:
+      - "61616:61616"
+      - "8161:8161"
     healthcheck:
       test: activemq status
       interval: 10s
@@ -70,6 +79,8 @@ services:
 
   registry:
     image: repo.backbase.com/backbase-docker-releases/registry:${BB_VERSION}
+    ports:
+      - "8761:8080"
     volumes:
       - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
@@ -78,6 +89,8 @@ services:
 
   token-converter:
     image: repo.backbase.com/backbase-docker-releases/oidc-token-converter-service:${BB_VERSION}
+    ports:
+      - "7779:8080"
     environment:
       <<: *common-variables
       BACKBASE_OIDCTOKENCONVERTER_WHITELISTEDDOMAINS_0_INTERNALHOSTSCHEME: http
@@ -99,6 +112,8 @@ services:
       context: ./identity
       args:
         IDENTITY_BUILDER: repo.backbase.com/backbase-docker-releases/auth-server-builder:${BB_VERSION}
+    ports:
+      - '8180:8080'
     environment:
       KEYCLOAK_ADMIN: "admin"
       KEYCLOAK_ADMIN_PASSWORD: "admin"
@@ -129,6 +144,8 @@ services:
 
   access-control:
     image: repo.backbase.com/backbase-docker-releases/access-control:${BB_VERSION}
+    ports:
+      - "8040:8080"
     environment:
       <<: [ *common-variables, *database-variables, *message-broker-variables ]
       backbase.multi-tenancy.datasource.default-catalog: t1_access_control
@@ -148,6 +165,8 @@ services:
 
   user-manager:
     image: repo.backbase.com/backbase-docker-releases/user-manager:${BB_VERSION}
+    ports:
+      - "8060:8080"
     environment:
       <<: [ *common-variables, *database-variables, *message-broker-variables ]
       backbase.multi-tenancy.datasource.default-catalog: t1_user_manager
@@ -170,6 +189,8 @@ services:
 
   identity-integration-service:
     image: repo.backbase.com/backbase-docker-releases/identity-integration-service:${BB_VERSION}
+    ports:
+      - "8070:8080"
     environment:
       <<: *common-variables
       IDENTITY_SERVERURL: http://identity:8080/auth
@@ -212,6 +233,8 @@ services:
       <<: [ *common-variables, *message-broker-variables ]
       bootstrap.enabled: true
       backbase.stream.client.additional-headers.x-tid: t1
+      spring.cloud.discovery.client.simple.instances.legal-entity-integration[0].uri: http://wiremock:8080
+      backbase.stream.compositions.legal-entity.chains.product-composition.enabled: false
     volumes:
       - ./utils/HealthCheck.java:/tmp/HealthCheck.java
     healthcheck:
@@ -230,3 +253,13 @@ services:
         condition: service_healthy
     links:
       - activemq
+
+  wiremock:
+    image: wiremock/wiremock:2.32.0
+    ports:
+      - "9000:8080"
+    command:
+      - --verbose
+      - --global-response-templating
+    volumes:
+      - ./stubs:/home/wiremock

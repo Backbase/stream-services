@@ -1,10 +1,9 @@
-package com.backbase.stream.webclient.filter;
+package com.backbase.stream.m10y.web;
 
-import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
+import com.backbase.stream.m10y.config.MultiTenancyConfigurationProperties;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,13 +20,13 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
-class HeadersForwardingServerFilterTest {
+class HeaderForwardingServerFilterTest {
 
     @InjectMocks
-    private HeadersForwardingServerFilter subject;
+    private HeaderForwardingServerFilter subject;
 
     @Mock
-    private DbsWebClientConfigurationProperties dbsWebClientConfigurationProperties;
+    private MultiTenancyConfigurationProperties multiTenancyConfigurationProperties;
 
     @Mock
     private ServerWebExchange serverWebExchange;
@@ -47,11 +46,11 @@ class HeadersForwardingServerFilterTest {
     @Test
     void filterShouldForwardRequestHeaders() {
         String headerKeyToForward = "X-TID";
-        List<String> headerValueToForward = asList("tenant1");
+        List<String> headerValueToForward = List.of("tenant1");
         LinkedMultiValueMap<String, String> expectedForwardedHeaders = new LinkedMultiValueMap<>();
         expectedForwardedHeaders.put(headerKeyToForward, headerValueToForward);
 
-        when(dbsWebClientConfigurationProperties.getHeadersToForward()).thenReturn(asList(headerKeyToForward));
+        when(multiTenancyConfigurationProperties.getHeadersToForward()).thenReturn(List.of(headerKeyToForward));
         when(serverWebExchange.getRequest()).thenReturn(serverHttpRequest);
         when(serverHttpRequest.getPath()).thenReturn(requestPath);
         when(serverHttpRequest.getHeaders()).thenReturn(httpHeaders);
@@ -69,7 +68,7 @@ class HeadersForwardingServerFilterTest {
     void filterShouldNotForwardRequestHeaders() {
         String headerKeyToForward = "X-TID";
 
-        when(dbsWebClientConfigurationProperties.getHeadersToForward()).thenReturn(asList(headerKeyToForward));
+        when(multiTenancyConfigurationProperties.getHeadersToForward()).thenReturn(List.of(headerKeyToForward));
         when(serverWebExchange.getRequest()).thenReturn(serverHttpRequest);
         when(serverHttpRequest.getPath()).thenReturn(requestPath);
         when(serverHttpRequest.getHeaders()).thenReturn(httpHeaders);

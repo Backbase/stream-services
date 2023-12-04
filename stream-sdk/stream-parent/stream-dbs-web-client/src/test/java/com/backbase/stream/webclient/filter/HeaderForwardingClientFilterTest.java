@@ -21,7 +21,7 @@ import reactor.test.StepVerifier;
 import reactor.util.context.Context;
 
 @ExtendWith(MockitoExtension.class)
-public class HeadersForwardingClientFilterTest {
+public class HeaderForwardingClientFilterTest {
 
     @Mock
     ClientRequest clientRequest;
@@ -42,7 +42,7 @@ public class HeadersForwardingClientFilterTest {
 
         DbsWebClientConfigurationProperties properties = new DbsWebClientConfigurationProperties();
         properties.setAdditionalHeaders(headersToBeIncluded);
-        ExchangeFilterFunction underTest = new HeadersForwardingClientFilter(properties);
+        ExchangeFilterFunction underTest = new HeaderForwardingClientFilter(properties);
 
         StepVerifier.create(underTest.filter(clientRequest, exchangeFunction))
             .verifyComplete();
@@ -59,7 +59,7 @@ public class HeadersForwardingClientFilterTest {
         var serverRequestHeaders = new LinkedMultiValueMap<>();
         serverRequestHeaders.add("X-TID", "tenant1");
 
-        ExchangeFilterFunction underTest = new HeadersForwardingClientFilter(new DbsWebClientConfigurationProperties());
+        ExchangeFilterFunction underTest = new HeaderForwardingClientFilter(new DbsWebClientConfigurationProperties());
 
         StepVerifier.create(underTest.filter(clientRequest, exchangeFunction)
                 .contextWrite(Context.of("headers", serverRequestHeaders)))
@@ -79,7 +79,7 @@ public class HeadersForwardingClientFilterTest {
 
         DbsWebClientConfigurationProperties properties = new DbsWebClientConfigurationProperties();
         properties.setAdditionalHeaders(headersToBeIncluded);
-        ExchangeFilterFunction underTest = new HeadersForwardingClientFilter(properties);
+        ExchangeFilterFunction underTest = new HeaderForwardingClientFilter(properties);
 
         var serverRequestHeaders = new LinkedMultiValueMap<>();
         serverRequestHeaders.add("X-TID", "tenant1");

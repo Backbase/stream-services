@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
 import com.backbase.buildingblocks.webclient.WebClientConstants;
-import com.backbase.stream.webclient.filter.HeadersForwardingClientFilter;
+import com.backbase.stream.webclient.filter.HeaderForwardingClientFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ public class DbsWebClientConfigurationTest {
                 assertThat(context).getBean(WebClientConstants.INTER_SERVICE_WEB_CLIENT_NAME)
                     .extracting("builder.filters")
                     .asList()
-                    .anyMatch(HeadersForwardingClientFilter.class::isInstance);
+                    .anyMatch(HeaderForwardingClientFilter.class::isInstance);
             });
     }
 
