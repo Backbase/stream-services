@@ -31,9 +31,11 @@ import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
+import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityParticipantV2;
 import com.backbase.stream.legalentity.model.LegalEntityReference;
+import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -471,7 +473,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private Mono<ServiceAgreementTaskV2> postUserContacts(ServiceAgreementTaskV2 streamTask,
         List<ExternalContact> externalContacts, String externalUserId, String leId) {
         if (isEmpty(externalContacts)) {
-            log.info("Creating Contacts for User {}", externalUserId);
+            log.info("User {} has no contacts", externalUserId);
             streamTask.info(USER, PROCESS_CONTACTS, FAILED, externalUserId, null,
                 "User: %s does not have any Contacts", externalUserId);
             return Mono.just(streamTask);
@@ -483,25 +485,9 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             .then(Mono.just(streamTask));
     }
 
-    private Mono<UserProfile> upsertUserProfile(User user) {
-        if (legalEntitySagaConfigurationProperties.isUserProfileEnabled()) {
-            if (user.getUserProfile() != null) {
-                CreateUserProfile mappedUserProfile = userProfileMapper.toCreate(user);
-                return userProfileService.upsertUserProfile(mappedUserProfile)
-                    .map(userProfileMapper::toUserProfile);
-            } else {
-                log.debug("User Profile for {} is null. Skipping User Profile creation", user.getExternalId());
-                return Mono.empty();
-            }
-        } else {
-            log.debug("Skipping User Profile creation as config property is set to false");
-            return Mono.empty();
-        }
-    }
-
-    public Mono<ServiceAgreementTaskV2> setupUserPermissions(ServiceAgreementTaskV2 ServiceAgreementTaskV2,
+    public Mono<ServiceAgreementTaskV2> setupUserPermissions(ServiceAgreementTaskV2 serviceAgreementTaskV2,
         JobProfileUser userJobProfile) {
-        ServiceAgreementV2 serviceAgreement = ServiceAgreementTaskV2.getData();
+        ServiceAgreementV2 serviceAgreement = serviceAgreementTaskV2.getData();
         log.info("Setup user permissions for user: {}", userJobProfile.getUser().getExternalId());
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = Stream.of(userJobProfile)
             // Ensure internal Id present.
@@ -515,11 +501,17 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     ))
             ));
         log.trace("Permissions {}", request);
+
+        if (request.isEmpty()) {
+            log.info("Skipping setup of permissions since no declarative business functions were found.");
+            return Mono.just(serviceAgreementTaskV2);
+        }
+
         return accessGroupService.assignPermissionsBatch(
                 new BatchProductGroupTask(BATCH_PRODUCT_GROUP_ID + System.currentTimeMillis(), new BatchProductGroup()
                     .serviceAgreement(saMapper.map(serviceAgreement)),
-                    ServiceAgreementTaskV2.getIngestionMode()), request)
-            .thenReturn(ServiceAgreementTaskV2);
+                    serviceAgreementTaskV2.getIngestionMode()), request)
+            .thenReturn(serviceAgreementTaskV2);
     }
 
     public Mono<ServiceAgreementTaskV2> setupAdministratorPermissions(ServiceAgreementTaskV2 streamTask) {
@@ -676,9 +668,12 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             })
             .flatMap(createdSa -> {
                 serviceAgreement.setInternalId(createdSa.getInternalId());
+                String admins = participantSharingUsers.get().getAdmins() != null ?
+                    String.join(", ", participantSharingUsers.get().getAdmins()) : "";
                 streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, createdSa.getExternalId(),
                     createdSa.getInternalId(),
                     "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s",
+                    createdSa.getExternalId(), admins,
                     createdSa.getExternalId(), String.join(", ",
                         participantSharingUsers.get().getAdmins() != null
                             ? participantSharingUsers.get().getAdmins()
