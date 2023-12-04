@@ -88,7 +88,6 @@ public class LegalEntitySagaConfiguration {
 
     @Bean
     public ServiceAgreementSagaV2 reactiveServiceAgreementV2Saga(LegalEntityService legalEntityService,
-        UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
         BatchProductIngestionSaga batchProductIngestionSaga,
@@ -98,7 +97,6 @@ public class LegalEntitySagaConfiguration {
     ) {
         return new ServiceAgreementSagaV2(
             legalEntityService,
-            userService,
             userProfileService,
             accessGroupService,
             batchProductIngestionSaga,

@@ -31,11 +31,9 @@ import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
-import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityParticipantV2;
 import com.backbase.stream.legalentity.model.LegalEntityReference;
-import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -75,7 +73,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -125,7 +122,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private final UserProfileMapper userProfileMapper = Mappers.getMapper(UserProfileMapper.class);
 
     private final LegalEntityService legalEntityService;
-    private final UserService userService;
     private final UserProfileService userProfileService;
     private final AccessGroupService accessGroupService;
     private final BatchProductIngestionSaga batchProductIngestionSaga;
@@ -137,7 +133,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private static final ServiceAgreementV2ToV1Mapper saMapper = ServiceAgreementV2ToV1Mapper.INSTANCE;
 
     public ServiceAgreementSagaV2(LegalEntityService legalEntityService,
-        UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
         BatchProductIngestionSaga batchProductIngestionSaga,
@@ -145,7 +140,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
-        this.userService = userService;
         this.userProfileService = userProfileService;
         this.accessGroupService = accessGroupService;
         this.batchProductIngestionSaga = batchProductIngestionSaga;
@@ -573,7 +567,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private Mono<ServiceAgreementTaskV2> setupServiceAgreement(ServiceAgreementTaskV2 streamTask) {
         ServiceAgreementV2 sa = streamTask.getData();
 
-        if (!sa.getIsMaster()) {
+        if (sa.getIsMaster() == null || !sa.getIsMaster()) {
             return setupCustomServiceAgreement(streamTask);
         } else {
             if (StringUtils.isNotEmpty(sa.getInternalId())) {
@@ -685,7 +679,10 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                 streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, createdSa.getExternalId(),
                     createdSa.getInternalId(),
                     "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s",
-                    createdSa.getExternalId(), String.join(", ", participantSharingUsers.get().getAdmins()),
+                    createdSa.getExternalId(), String.join(", ",
+                        participantSharingUsers.get().getAdmins() != null
+                            ? participantSharingUsers.get().getAdmins()
+                            : List.of("")),
                     participantSharingUsers.get().getExternalId());
                 return Mono.just(streamTask);
             })
