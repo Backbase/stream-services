@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-parent</artifactId>
-        <version>3.68.1</version>
+        <version>3.69.0</version>
     </parent>
 
     <artifactId>stream-multitenancy</artifactId>
@@ -21,7 +21,7 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
+            <artifactId>spring-boot-starter-reactor-netty</artifactId>
         </dependency>
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>

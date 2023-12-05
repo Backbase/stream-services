@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-parent</artifactId>
-    <version>3.68.1</version>
+    <version>3.69.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Parent</name>
     <description>Parent for all Stream SDK modules</description>
@@ -29,6 +29,7 @@
     </developers>
 
     <modules>
+        <module>stream-multitenancy</module>
         <module>stream-dbs-web-client</module>
         <module>stream-test-support</module>
         <module>stream-openapi-support</module>

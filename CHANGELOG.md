@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.69.0](https://github.com/Backbase/stream-services/compare/3.68.0...3.69.0)
+### Added
+- Add customer category to service agreement spec
+
 ## [3.68.1](https://github.com/Backbase/stream-services/compare/3.68.0...3.68.1)
 ### Changed
 - Add AccountArrangementItemPut mapping in ProductMapper

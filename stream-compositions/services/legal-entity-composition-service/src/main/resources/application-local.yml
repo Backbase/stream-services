@@ -36,10 +36,7 @@ backbase:
         product:
           composition:
             direct-uri: http://localhost:9003
-    http:
-      client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: "http://localhost:7779/oauth/token"
+
   stream:
     legalentity:
       sink:
