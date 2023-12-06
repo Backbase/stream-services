@@ -18,12 +18,10 @@ import com.backbase.dbs.limit.api.service.v2.model.Entity;
 import com.backbase.dbs.limit.api.service.v2.model.PeriodicLimitsBounds;
 import com.backbase.dbs.limit.api.service.v2.model.TransactionalLimitsBound;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
-import com.backbase.dbs.user.profile.api.service.v2.model.CreateUserProfile;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
 import com.backbase.stream.exceptions.AccessGroupException;
-import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
@@ -31,11 +29,8 @@ import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
-import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityParticipantV2;
-import com.backbase.stream.legalentity.model.LegalEntityReference;
-import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -43,22 +38,17 @@ import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.legalentity.model.User;
-import com.backbase.stream.legalentity.model.UserProfile;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.mapper.ExternalContactMapper;
 import com.backbase.stream.mapper.ServiceAgreementV2ToV1Mapper;
-import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
-import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
-import com.backbase.stream.service.UserProfileService;
-import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -121,10 +111,8 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private static final String LEGAL_ENTITY_LIMITS = "legal-entity-limits";
 
     private final BusinessFunctionGroupMapper businessFunctionGroupMapper = Mappers.getMapper(BusinessFunctionGroupMapper.class);
-    private final UserProfileMapper userProfileMapper = Mappers.getMapper(UserProfileMapper.class);
 
     private final LegalEntityService legalEntityService;
-    private final UserProfileService userProfileService;
     private final AccessGroupService accessGroupService;
     private final BatchProductIngestionSaga batchProductIngestionSaga;
     private final LimitsSaga limitsSaga;
@@ -135,14 +123,12 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private static final ServiceAgreementV2ToV1Mapper saMapper = ServiceAgreementV2ToV1Mapper.INSTANCE;
 
     public ServiceAgreementSagaV2(LegalEntityService legalEntityService,
-        UserProfileService userProfileService,
         AccessGroupService accessGroupService,
         BatchProductIngestionSaga batchProductIngestionSaga,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
-        this.userProfileService = userProfileService;
         this.accessGroupService = accessGroupService;
         this.batchProductIngestionSaga = batchProductIngestionSaga;
         this.limitsSaga = limitsSaga;
@@ -154,6 +140,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     public Mono<ServiceAgreementTaskV2> executeTask(@SpanTag(value = "streamTask") ServiceAgreementTaskV2 streamTask) {
         return setupServiceAgreement(streamTask)
             .flatMap(this::createJobRoles)
+            .flatMap(this::retrieveUsersInternalIdsForJobProfile)
             .flatMap(this::processJobProfiles)
             .flatMap(this::setupAdministratorPermissions)
             .flatMap(this::setupLimits)
@@ -293,31 +280,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private ProductGroupTask createProductGroupTask(ServiceAgreementTaskV2 streamTask, ProductGroup productGroup) {
         ServiceAgreementV2 serviceAgreement = streamTask.getData();
 
-        Optional<LegalEntityParticipantV2> participantSharingAccounts = streamTask.getData().getParticipants().stream()
-            .filter(LegalEntityParticipantV2::getSharingAccounts)
-            .findFirst();
-
-        if (participantSharingAccounts.isEmpty()) {
-            streamTask.info(SERVICE_AGREEMENT, PROCESS_PRODUCTS, FAILED, serviceAgreement.getExternalId(),
-                serviceAgreement.getInternalId(), "Service Agreement: % does not have participants "
-                    + "with sharing accounts",
-                serviceAgreement.getExternalId());
-            return null;
-        }
-        LegalEntityParticipantV2 participantLE = participantSharingAccounts.get();
-
-        if (productGroup.getUsers() == null) {
-            productGroup.setUsers(participantLE.getJobProfileUsers());
-        }
-        StreamUtils.nullableCollectionToStream(productGroup.getUsers())
-            .forEach(jobProfileUser -> {
-                if (jobProfileUser.getLegalEntityReference() == null) {
-                    jobProfileUser.setLegalEntityReference(new LegalEntityReference()
-                        .externalId(participantLE.getExternalId())
-                        .internalId(participantLE.getInternalId()));
-                }
-            });
-
         log.info("Setting up process data access groups");
         if (productGroup.getName() == null) {
             productGroup.setName(DEFAULT_DATA_GROUP);
@@ -326,16 +288,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             productGroup.setDescription(DEFAULT_DATA_DESCRIPTION);
         }
         productGroup.setServiceAgreement(saMapper.map(serviceAgreement));
-
-        StreamUtils.getAllProducts(productGroup)
-            .forEach((BaseProduct bp) -> {
-                if (CollectionUtils.isEmpty(bp.getLegalEntities())
-                    || bp.getLegalEntities().stream().map(LegalEntityReference::getExternalId).filter(Objects::nonNull)
-                    .noneMatch(le -> le.equals(participantLE.getExternalId()))) {
-                    bp.addLegalEntitiesItem(new LegalEntityReference().externalId(participantLE.getExternalId())
-                        .internalId(participantLE.getInternalId()));
-                }
-            });
 
         return new ProductGroupTask(streamTask.getId() + "-" + productGroup.getName(), productGroup);
     }
@@ -437,7 +389,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                         .map(idByFunctionGroupName::get)
                         .filter(Objects::nonNull)
                         .map(businessFunctionGroupMapper::map)
-                        .collect(Collectors.toList());
+                        .toList();
                 })
                 .map(bf -> {
                     if (!isEmpty(businessFunctionGroups))
@@ -630,7 +582,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             .getJobProfileUsers())
             .map(JobProfileUser::getUser).map(User::getExternalId)
             .map(id -> new ServiceAgreementUserAction().action(ServiceAgreementUserAction.ActionEnum.ADD)
-                .userProfile(new JobProfileUser().user(new User().externalId(id)))).collect(Collectors.toList());
+                .userProfile(new JobProfileUser().user(new User().externalId(id)))).toList();
 
         Mono<ServiceAgreementTaskV2> existingServiceAgreement = accessGroupService
             .getServiceAgreementByExternalId(serviceAgreement.getExternalId())
@@ -862,7 +814,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                         .map(privilege -> getCreateLimitRequestBody(serviceAgreement,
                             businessFunction, privilege, actual.getId(), userId))))
                 .map(limitData -> new LimitsTask(streamTask.getId() + "-" + USER_JOB_ROLE_LIMITS, limitData))
-                .collect(Collectors.toList())));
+                .toList()));
         }
 
         var jobRoleLimits = actual.getFunctionGroups().stream()
@@ -875,10 +827,9 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     .map(privilege -> getCreateLimitRequestBody(serviceAgreement,
                         businessFunction, privilege, actual.getId(), null))))
             .map(limitData -> new LimitsTask(streamTask.getId() + "-" + JOB_ROLE_LIMITS, limitData))
-            .collect(Collectors.toList());
+            .toList();
 
-        return Stream.concat(jobRoleLimits.stream(), userJobRoleLimits.stream())
-            .collect(Collectors.toList());
+        return Stream.concat(jobRoleLimits.stream(), userJobRoleLimits.stream()).toList();
     }
 
     @NotNull
@@ -937,5 +888,32 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             .filter(businessFunction -> nonNull(businessFunction.getPrivileges()))
             .flatMap(businessFunction -> businessFunction.getPrivileges().stream())
             .noneMatch(privilege -> nonNull(privilege.getLimit()));
+    }
+
+    private Mono<ServiceAgreementTaskV2> retrieveUsersInternalIdsForJobProfile(ServiceAgreementTaskV2 streamTask) {
+        var sa = streamTask.getData();
+        if(sa.getParticipants() == null || sa.getParticipants().stream().allMatch(participantV2 -> Objects.isNull(participantV2.getJobProfileUsers()))) {
+            return Mono.just(streamTask);
+        }
+
+        var jobProfileUsers = sa.getParticipants().stream()
+            .filter(participantV2 -> participantV2.getJobProfileUsers() != null)
+            .flatMap(participantV2 -> participantV2.getJobProfileUsers().stream())
+            .collect(Collectors.toSet());
+        return Flux.fromIterable(jobProfileUsers)
+            .flatMap(jpu -> accessGroupService.getUserByExternalId(jpu.getUser().getExternalId(), true))
+            .collectList()
+            .flatMap(internalUsers -> {
+                Map<String, GetUser> usersByExternalId =
+                    internalUsers.stream().collect(Collectors.toMap(GetUser::getExternalId, Function.identity(), (a1, a2) -> a1));
+                jobProfileUsers.forEach(jp -> {
+                    String externalId = jp.getUser().getExternalId();
+                    GetUser internalUser = usersByExternalId.get(externalId);
+                    if (internalUser != null) {
+                        jp.getUser().setInternalId(internalUser.getId());
+                    }
+                });
+                return Mono.just(streamTask);
+            });
     }
 }

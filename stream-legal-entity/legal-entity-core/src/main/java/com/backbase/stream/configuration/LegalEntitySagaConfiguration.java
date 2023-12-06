@@ -97,7 +97,6 @@ public class LegalEntitySagaConfiguration {
     ) {
         return new ServiceAgreementSagaV2(
             legalEntityService,
-            userProfileService,
             accessGroupService,
             batchProductIngestionSaga,
             limitsSaga,

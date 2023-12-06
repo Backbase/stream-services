@@ -546,9 +546,9 @@ public class AccessGroupService {
                             .dataGroupIdentifiers(
                                 usersPermissions.get(user).get(bfg).stream()
                                     .map(pg -> mapDataGroupId(pg.getInternalId()))
-                                    .collect(Collectors.toList())))
-                        .collect(Collectors.toList())))
-            .collect(Collectors.toList());
+                                    .toList()))
+                        .toList()))
+            .toList();
 
         return Mono.just(request)
             .flatMap(userPermissionsRequest -> {
