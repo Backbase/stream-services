@@ -27,9 +27,7 @@ public class TenantMessageInProcessor implements MessageInProcessor {
         if (tenant.isPresent()) {
             TenantContext.setTenant(tenant.get());
         } else {
-            log.debug("Could not identify Tenant using available strategies {}. "
-                    + "Supply a tenant identifier for the available strategies. Configure the available tenants.",
-                this);
+            log.debug("Could not identify Tenant {}. ", this);
         }
     }
 

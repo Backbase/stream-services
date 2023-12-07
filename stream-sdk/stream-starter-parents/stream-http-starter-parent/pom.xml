@@ -20,6 +20,11 @@
     <properties>
         <jib.container.volumes>/tmp</jib.container.volumes>
 
+        <!-- Values from the parent's 'no-scs' profile used by default (Azure Service Bus bug workaround) -->
+        <docker.scs.rabbit>provided</docker.scs.rabbit>
+        <docker.scs.kafka>provided</docker.scs.kafka>
+        <docker.scs.azure>provided</docker.scs.azure>
+
         <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
         <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
         <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>

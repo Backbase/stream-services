@@ -18,7 +18,6 @@ public class TenantEventMessageProcessor implements EventMessageProcessor, Messa
 
     public static final String TID_HEADER_NAME = "bbTenantId";
 
-
     /**
      * Adds the currently-bound tenant ID to the {@link #TID_HEADER_NAME} header of the given {@link MessageBuilder}.
      */
@@ -39,8 +38,7 @@ public class TenantEventMessageProcessor implements EventMessageProcessor, Messa
         if (tenant.isPresent()) {
             messageBuilder.setHeader(TID_HEADER_NAME, tenant.get());
         } else {
-            log.debug("A Tenant is not present in the TenantContext. "
-                + "Perhaps this request was started in a different thread.");
+            log.debug("A Tenant is not present in the context.");
         }
     }
 

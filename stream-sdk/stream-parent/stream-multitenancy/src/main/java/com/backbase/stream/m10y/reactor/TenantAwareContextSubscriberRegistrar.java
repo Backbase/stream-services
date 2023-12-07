@@ -6,7 +6,6 @@ import static com.backbase.stream.m10y.reactor.HeaderForwardingContextSubscriber
 import com.backbase.stream.m10y.TenantContext;
 import java.util.List;
 import java.util.function.Function;
-import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -15,7 +14,6 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Operators;
 
-@Slf4j
 public class TenantAwareContextSubscriberRegistrar implements InitializingBean, DisposableBean {
 
     private static final String TENANT_AWARE_CONTEXT_OPERATOR_KEY = "TENANT_AWARE_CONTEXT_OPERATOR";
@@ -42,7 +40,6 @@ public class TenantAwareContextSubscriberRegistrar implements InitializingBean, 
             // Already enriched. No need to create Subscriber so return original
             return delegate;
         }
-        log.debug("Setting tenant context: {}", TenantContext.getTenant().get());
         HttpHeaders headers = new HttpHeaders();
         headers.put(TENANT_HEADER_NAME, List.of(TenantContext.getTenant().get()));
         return new HeaderForwardingContextSubscriber<>(delegate, headers);
