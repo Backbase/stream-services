@@ -88,7 +88,6 @@ public class LegalEntitySagaConfiguration {
 
     @Bean
     public ServiceAgreementSagaV2 reactiveServiceAgreementV2Saga(LegalEntityService legalEntityService,
-        UserProfileService userProfileService,
         AccessGroupService accessGroupService,
         BatchProductIngestionSaga batchProductIngestionSaga,
         LimitsSaga limitsSaga,

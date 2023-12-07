@@ -2,6 +2,7 @@ package com.backbase.stream;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -84,9 +85,6 @@ class ServiceAgreementV2SagaTest {
     private LegalEntityService legalEntityService;
 
     @Mock
-    private UserService userService;
-
-    @Mock
     private AccessGroupService accessGroupService;
 
     @Mock
@@ -118,7 +116,7 @@ class ServiceAgreementV2SagaTest {
             .externalId(regularUserExId)).legalEntityReference(new LegalEntityReference().externalId(leExternalId));
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP")
-            .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)));
+            .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId).internalId(leExternalId)));
         ProductGroup productGroup = new ProductGroup();
         productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
             .description("somePgDescription").savingAccounts(singletonList(account)).users(List.of(regularUser));
@@ -155,9 +153,9 @@ class ServiceAgreementV2SagaTest {
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
             any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(userService.getUserByExternalId(eq(regularUserExId))).thenReturn(Mono.just(regularUser.getUser()));
-        when(userService.getUserByExternalId(eq(adminExId))).thenReturn(Mono.just(adminUser));
-        when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());
+        when(accessGroupService.getUserByExternalId(any(), anyBoolean())).thenReturn(Mono.just(new GetUser()
+            .externalId(regularUser.getUser().getExternalId())
+            .id(regularUser.getUser().getInternalId())));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
 
         ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task)
@@ -214,12 +212,15 @@ class ServiceAgreementV2SagaTest {
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
         when(accessGroupService.createServiceAgreement(any(), any()))
             .thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.updateServiceAgreementRegularUsers(eq(task), eq(transformServiceAgreement(customSa)), any()))
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
             .thenReturn(Mono.just(transformServiceAgreement(customSa)));
         when(accessGroupService.getServiceAgreementParticipants(any(), any()))
             .thenReturn(Flux.just(new ServiceAgreementParticipantsGetResponseBody().externalId(customSaExId)));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
             .thenReturn(productGroupTaskMono);
+        when(accessGroupService.getUserByExternalId(any(), anyBoolean())).thenReturn(Mono.just(new GetUser()
+            .externalId(regularUser.getUser().getExternalId())
+            .id(regularUser.getUser().getInternalId())));
         when(limitsSaga.executeTask(any(LimitsTask.class)))
             .thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
 
@@ -324,8 +325,6 @@ class ServiceAgreementV2SagaTest {
 
         List<String> productGroupTaskProcessingOrder = new CopyOnWriteArrayList<>();
 
-        when(userService.getUserByExternalId("john.doe"))
-            .thenReturn(Mono.just(new User().internalId("100").externalId("john.doe")));
         when(accessGroupService.getServiceAgreementByExternalId("100000"))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
         lenient().when(accessGroupService.updateServiceAgreementItem(any(), any()))
@@ -450,7 +449,6 @@ class ServiceAgreementV2SagaTest {
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-
         BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
         JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
         customSa = new ServiceAgreementV2()
@@ -465,14 +463,15 @@ class ServiceAgreementV2SagaTest {
         User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
 
         when(accessGroupService.getServiceAgreementByExternalId(customSaExId)).thenReturn(Mono.empty());
-        when(accessGroupService.createServiceAgreement(any(), eq(transformServiceAgreement(customSa))))
+        when(accessGroupService.createServiceAgreement(any(), any()))
             .thenReturn(Mono.just(transformServiceAgreement(customSa)));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(transformServiceAgreement(customSa)),
             any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(userService.getUserByExternalId(regularUserExId)).thenReturn(Mono.just(regularUser.getUser()));
-        when(userService.getUserByExternalId(adminExId)).thenReturn(Mono.just(adminUser));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
+        when(accessGroupService.getUserByExternalId(any(), anyBoolean())).thenReturn(Mono.just(new GetUser()
+            .externalId(regularUser.getUser().getExternalId())
+            .id(regularUser.getUser().getInternalId())));
     }
 
     private ExternalContact getMockExternalContact() {

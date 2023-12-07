@@ -22,6 +22,7 @@ import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
 import com.backbase.stream.exceptions.AccessGroupException;
+import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
@@ -47,6 +48,7 @@ import com.backbase.stream.product.BusinessFunctionGroupMapper;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
+import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.worker.StreamTaskExecutor;
@@ -280,6 +282,11 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private ProductGroupTask createProductGroupTask(ServiceAgreementTaskV2 streamTask, ProductGroup productGroup) {
         ServiceAgreementV2 serviceAgreement = streamTask.getData();
 
+        if (productGroup.getUsers() == null) {
+            log.error("Product group {} does not have users", productGroup.getName());
+            return null;
+        }
+
         log.info("Setting up process data access groups");
         if (productGroup.getName() == null) {
             productGroup.setName(DEFAULT_DATA_GROUP);
@@ -289,7 +296,19 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         }
         productGroup.setServiceAgreement(saMapper.map(serviceAgreement));
 
+        List<String> errors = new ArrayList<>();
+        StreamUtils.getAllProducts(productGroup)
+            .forEach((BaseProduct bp) -> {
+                if (CollectionUtils.isEmpty(bp.getLegalEntities())) {
+                    errors.add("Product: " + bp.getExternalId());
+                }
+            });
+        if (!CollectionUtils.isEmpty(errors)) {
+            throw new IllegalArgumentException("Products does not have legalEntities defined: " + String.join(",", errors));
+        }
+
         return new ProductGroupTask(streamTask.getId() + "-" + productGroup.getName(), productGroup);
+
     }
 
     private Mono<ServiceAgreementTaskV2> createJobRoles(ServiceAgreementTaskV2 streamTask) {
