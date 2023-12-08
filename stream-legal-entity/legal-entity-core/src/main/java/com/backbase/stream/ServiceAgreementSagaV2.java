@@ -32,7 +32,6 @@ import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityParticipantV2;
-import com.backbase.stream.legalentity.model.LegalEntityReference;
 import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -52,8 +51,6 @@ import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
-import com.backbase.stream.service.UserProfileService;
-import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -128,8 +125,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private static final ServiceAgreementV2ToV1Mapper saMapper = ServiceAgreementV2ToV1Mapper.INSTANCE;
 
     public ServiceAgreementSagaV2(LegalEntityService legalEntityService,
-        UserService userService,
-        UserProfileService userProfileService,
         AccessGroupService accessGroupService,
         BatchProductIngestionSaga batchProductIngestionSaga,
         LimitsSaga limitsSaga,
@@ -287,30 +282,10 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private ProductGroupTask createProductGroupTask(ServiceAgreementTaskV2 streamTask, ProductGroup productGroup) {
         ServiceAgreementV2 serviceAgreement = streamTask.getData();
 
-        Optional<LegalEntityParticipantV2> participantSharingAccounts = streamTask.getData().getParticipants().stream()
-            .filter(LegalEntityParticipantV2::getSharingAccounts)
-            .findFirst();
-
-        if (participantSharingAccounts.isEmpty()) {
-            streamTask.info(SERVICE_AGREEMENT, PROCESS_PRODUCTS, FAILED, serviceAgreement.getExternalId(),
-                serviceAgreement.getInternalId(), "Service Agreement: %s does not have participants "
-                    + "with sharing accounts",
-                serviceAgreement.getExternalId());
+        if (productGroup.getUsers() == null) {
+            log.error("Product group {} does not have users", productGroup.getName());
             return null;
         }
-        LegalEntityParticipantV2 participantLE = participantSharingAccounts.get();
-
-        if (productGroup.getUsers() == null) {
-            productGroup.setUsers(participantLE.getJobProfileUsers());
-        }
-        StreamUtils.nullableCollectionToStream(productGroup.getUsers())
-            .forEach(jobProfileUser -> {
-                if (jobProfileUser.getLegalEntityReference() == null) {
-                    jobProfileUser.setLegalEntityReference(new LegalEntityReference()
-                        .externalId(participantLE.getExternalId())
-                        .internalId(participantLE.getInternalId()));
-                }
-            });
 
         log.info("Setting up process data access groups");
         if (productGroup.getName() == null) {
@@ -321,17 +296,19 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         }
         productGroup.setServiceAgreement(saMapper.map(serviceAgreement));
 
+        List<String> errors = new ArrayList<>();
         StreamUtils.getAllProducts(productGroup)
             .forEach((BaseProduct bp) -> {
-                if (CollectionUtils.isEmpty(bp.getLegalEntities())
-                    || bp.getLegalEntities().stream().map(LegalEntityReference::getExternalId).filter(Objects::nonNull)
-                    .noneMatch(le -> le.equals(participantLE.getExternalId()))) {
-                    bp.addLegalEntitiesItem(new LegalEntityReference().externalId(participantLE.getExternalId())
-                        .internalId(participantLE.getInternalId()));
+                if (CollectionUtils.isEmpty(bp.getLegalEntities())) {
+                    errors.add("Product: " + bp.getExternalId());
                 }
             });
+        if (!CollectionUtils.isEmpty(errors)) {
+            throw new IllegalArgumentException("Products does not have legalEntities defined: " + String.join(",", errors));
+        }
 
         return new ProductGroupTask(streamTask.getId() + "-" + productGroup.getName(), productGroup);
+
     }
 
     private Mono<ServiceAgreementTaskV2> createJobRoles(ServiceAgreementTaskV2 streamTask) {
@@ -555,7 +532,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private Mono<ServiceAgreementTaskV2> setupServiceAgreement(ServiceAgreementTaskV2 streamTask) {
         ServiceAgreementV2 sa = streamTask.getData();
 
-        if (!sa.getIsMaster()) {
+        if (sa.getIsMaster() == null || !sa.getIsMaster()) {
             return setupCustomServiceAgreement(streamTask);
         } else {
             if (StringUtils.isNotEmpty(sa.getInternalId())) {
@@ -672,6 +649,10 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     createdSa.getInternalId(),
                     "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s",
                     createdSa.getExternalId(), admins,
+                    createdSa.getExternalId(), String.join(", ",
+                        participantSharingUsers.get().getAdmins() != null
+                            ? participantSharingUsers.get().getAdmins()
+                            : List.of("")),
                     participantSharingUsers.get().getExternalId());
                 return Mono.just(streamTask);
             })
