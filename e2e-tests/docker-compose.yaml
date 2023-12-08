@@ -67,12 +67,12 @@ services:
       retries: 5
 
   activemq:
-    image: apache/activemq-classic:5.17.6
+    image: symptoma/activemq:5.18.3
     ports:
       - "61616:61616"
       - "8161:8161"
     healthcheck:
-      test: activemq status
+      test: /opt/activemq/bin/activemq status
       interval: 10s
       timeout: 5s
       retries: 5
@@ -252,6 +252,63 @@ services:
       identity:
         condition: service_healthy
     links:
+      - activemq
+
+  arrangement-manager:
+    image: repo.backbase.com/backbase-docker-releases/arrangement-manager:${BB_VERSION}
+    profiles:
+      - accounts
+    ports:
+      - "8050:8080"
+    environment:
+      <<: [ *common-variables, *database-variables, *message-broker-variables ]
+      backbase.multi-tenancy.datasource.default-catalog: t1_arrangement_manager
+      backbase.multi-tenancy.tenants[0].catalog: t1_arrangement_manager
+      backbase.multi-tenancy.tenants[1].catalog: t2_arrangement_manager
+    volumes:
+      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/arrangement-manager", "<status>UP</status>" ]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    links:
+      - registry
+      - activemq
+
+  product-catalog-task:
+    image: repo.backbase.com/backbase-stream-images/product-catalog-task:${STREAM_VERSION}
+    profiles:
+      - accounts
+    environment:
+      <<: *common-variables
+      spring.profiles.include: moustache-bank
+      backbase.stream.client.additional-headers.x-tid: t1
+    depends_on:
+      token-converter:
+        condition: service_healthy
+      arrangement-manager:
+        condition: service_healthy
+
+  product-composition:
+    image: repo.backbase.com/backbase-stream-images/product-composition-service:${STREAM_VERSION}
+    profiles:
+      - accounts
+    ports:
+      - "8003:8080"
+    environment:
+      <<: [ *common-variables, *message-broker-variables ]
+      spring.cloud.discovery.client.simple.instances.product-integration[0].uri: http://wiremock:8080
+      backbase.stream.compositions.product.chains.transaction-composition.enabled: false
+      backbase.stream.compositions.product.chains.payment-order-composition.enabled: false
+    volumes:
+      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/product-composition" ]
+    links:
+      - registry
       - activemq
 
   wiremock:

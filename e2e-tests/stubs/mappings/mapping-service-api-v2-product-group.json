@@ -1,0 +1,28 @@
+{
+  "request" : {
+    "urlPathPattern" : "/service-api/v2/product-group",
+    "method" : "POST"
+  },
+  "response" : {
+    "status" : 200,
+    "jsonBody" : {
+      "productGroups": []
+    },
+    "headers" : {
+      "X-Content-Type-Options" : "nosniff",
+      "X-XSS-Protection" : "1; mode=block",
+      "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma" : "no-cache",
+      "Expires" : "0",
+      "X-Frame-Options" : "DENY",
+      "Content-Type" : "application/json",
+      "Date" : "Wed, 26 Oct 2022 12:16:40 GMT",
+      "Keep-Alive" : "timeout=60"
+    },
+    "transformers": ["response-template"]
+  },
+  "persistent" : true,
+  "priority" : 5,
+  "insertionIndex" : 0,
+  "postServeActions" : [ ]
+}
