@@ -6,8 +6,87 @@
   "response" : {
     "status" : 200,
     "jsonBody" : {
-      "productGroups": []
-    },
+      "productGroups": [
+        {
+          "productGroupType": "ARRANGEMENTS",
+          "name": "{{ jsonPath request.body '$.legalEntityExternalId' }}-arrangements",
+          "description": "Permissions to manage details, view balances, transactions and receive internal transfers",
+          "serviceAgreement": {
+            "internalId": "{{ jsonPath request.body '$.serviceAgreementInternalId' }}",
+            "externalId": "{{ jsonPath request.body '$.serviceAgreementExternalId' }}"
+          },
+          "users": [
+            {
+              "user": {
+                "externalId": "{{ jsonPath request.body '$.userExternalId' }}",
+                "identityLinkStrategy": "IDENTITY_AGNOSTIC"
+              },
+              "legalEntityReference": {
+                "externalId": "{{ jsonPath request.body '$.legalEntityExternalId' }}"
+              },
+              "referenceJobRoleNames": [
+                "{{ jsonPath request.body '$.referenceJobRoleNames[0]' }}"
+              ]
+            }
+          ],
+          "currentAccounts": [
+            {
+              "bban": "30023980",
+              "externalId": "OF_30023980",
+              "productTypeExternalId": "current-account",
+              "externalTransferAllowed": true,
+              "state": {
+                "externalStateId": "Active",
+                "state": "Active"
+              },
+              "currency": "USD",
+              "bookedBalance": {
+                "amount": 53784.73,
+                "currencyCode": "USD"
+              },
+              "availableBalance": {
+                "amount": 53784.73,
+                "currencyCode": "USD"
+              },
+              "BBAN": "30023980",
+              "bankBranchCode": "807009",
+              "creditAccount": true,
+              "debitAccount": true
+            }
+          ],
+          "savingAccounts": [
+            {
+              "bban": "30111307",
+              "externalId": "DP_30111307",
+              "productTypeExternalId": "savings-account",
+              "externalTransferAllowed": true,
+              "state": {
+                "externalStateId": "Active",
+                "state": "Active"
+              },
+              "currency": "USD",
+              "availableBalance": {
+                "amount": 805.28,
+                "currencyCode": "USD"
+              },
+              "bookedBalance": {
+                "amount": 805.28,
+                "currencyCode": "USD"
+              },
+              "BBAN": "30111307",
+              "bankBranchCode": "807009",
+              "principalAmount": {
+                "amount": 805.28,
+                "currencyCode": "USD"
+              },
+              "creditAccount": true,
+              "debitAccount": true
+            }
+          ]
+        }
+      ]
+    }
+  ,
     "headers" : {
       "X-Content-Type-Options" : "nosniff",
       "X-XSS-Protection" : "1; mode=block",

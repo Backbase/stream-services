@@ -1,5 +1,4 @@
 {
-  "id" : "89d729b4-dba0-46a6-b1ad-e436ac790de4",
   "request" : {
     "urlPathPattern" : "/service-api/v2/legal-entity",
     "method" : "POST"
@@ -46,7 +45,6 @@
     },
     "transformers": ["response-template"]
   },
-  "uuid" : "89d729b4-dba0-46a6-b1ad-e436ac790de4",
   "persistent" : true,
   "priority" : 5,
   "insertionIndex" : 0,

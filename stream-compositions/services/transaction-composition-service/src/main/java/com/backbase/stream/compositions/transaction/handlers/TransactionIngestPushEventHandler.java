@@ -6,23 +6,23 @@ import com.backbase.stream.compositions.events.ingress.event.spec.v1.Transaction
 import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPushRequest;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
+import java.util.Collections;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
-
 @Component
 @AllArgsConstructor
 public class TransactionIngestPushEventHandler implements EventHandler<TransactionsPushEvent> {
+
     private final TransactionIngestionService transactionIngestionService;
     private final TransactionMapper mapper;
 
     @Override
     public void handle(EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
         buildRequest(envelopedEvent)
-                .flatMap(transactionIngestionService::ingestPush)
-                .subscribe();
+            .flatMap(transactionIngestionService::ingestPush)
+            .block();
     }
 
     /**
