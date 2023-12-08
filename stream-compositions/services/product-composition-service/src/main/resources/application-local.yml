@@ -26,6 +26,9 @@ backbase:
       arrangement:
         manager:
           direct-uri: http://localhost:8050
+      transaction:
+        manager:
+          direct-uri: http://localhost:8087
       stream:
         product:
           integration:
@@ -44,6 +47,9 @@ backbase:
     compositions:
       product:
         chains:
+          transaction-manager:
+            enabled: false
+            async: false
           transaction-composition:
             enabled: false
             async: false

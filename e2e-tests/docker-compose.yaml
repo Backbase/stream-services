@@ -51,6 +51,7 @@ volumes:
     driver: local
 
 services:
+  # External Dependencies
   mysql:
     image: mysql:8.0.31
     ports:
@@ -77,6 +78,17 @@ services:
       timeout: 5s
       retries: 5
 
+  wiremock:
+    image: wiremock/wiremock:2.32.0
+    ports:
+      - "9000:8080"
+    command:
+      - --verbose
+      - --global-response-templating
+    volumes:
+      - ./stubs:/home/wiremock
+
+  # Backbase Services
   registry:
     image: repo.backbase.com/backbase-docker-releases/registry:${BB_VERSION}
     ports:
@@ -207,7 +219,7 @@ services:
       - registry
 
   legal-entity-bootstrap-task:
-    image: repo.backbase.com/backbase-stream-images/legal-entity-bootstrap-task:${STREAM_VERSION}
+    image: ${STREAM_REGISTRY}/legal-entity-bootstrap-task:${STREAM_VERSION}
     environment:
       <<: *common-variables
       spring.profiles.include: moustache-bank
@@ -226,7 +238,7 @@ services:
         condition: service_healthy
 
   legal-entity-composition:
-    image: repo.backbase.com/backbase-stream-images/legal-entity-composition-service:${STREAM_VERSION}
+    image: ${STREAM_REGISTRY}/legal-entity-composition-service:${STREAM_VERSION}
     ports:
       - "8989:8080"
     environment:
@@ -277,8 +289,32 @@ services:
       - registry
       - activemq
 
+  transaction-manager:
+    image: repo.backbase.com/backbase-docker-releases/transaction-manager:${BB_VERSION}
+    ports:
+      - "8087:8080"
+    profiles:
+      - accounts
+    environment:
+      <<: [ *common-variables, *message-broker-variables, *database-variables ]
+      backbase.multi-tenancy.datasource.default-catalog: t1_transaction_manager
+      backbase.multi-tenancy.tenants[0].catalog: t1_transaction_manager
+      backbase.multi-tenancy.tenants[1].catalog: t2_transaction_manager
+      spring.cloud.discovery.client.simple.instances.transaction-integration-mock[0].uri: http://wiremock:8080
+    volumes:
+      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/transaction-manager", "<status>UP</status>" ]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    links:
+      - activemq
+      - registry
+
   product-catalog-task:
-    image: repo.backbase.com/backbase-stream-images/product-catalog-task:${STREAM_VERSION}
+    image: ${STREAM_REGISTRY}/product-catalog-task:${STREAM_VERSION}
     profiles:
       - accounts
     environment:
@@ -292,7 +328,7 @@ services:
         condition: service_healthy
 
   product-composition:
-    image: repo.backbase.com/backbase-stream-images/product-composition-service:${STREAM_VERSION}
+    image: ${STREAM_REGISTRY}/product-composition-service:${STREAM_VERSION}
     profiles:
       - accounts
     ports:
@@ -310,13 +346,3 @@ services:
     links:
       - registry
       - activemq
-
-  wiremock:
-    image: wiremock/wiremock:2.32.0
-    ports:
-      - "9000:8080"
-    command:
-      - --verbose
-      - --global-response-templating
-    volumes:
-      - ./stubs:/home/wiremock

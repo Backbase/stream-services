@@ -12,6 +12,7 @@ import com.backbase.stream.clients.config.PortfolioApiConfiguration;
 import com.backbase.stream.clients.config.TransactionManagerClientConfig;
 import com.backbase.stream.clients.config.UserManagerClientConfig;
 import com.backbase.stream.clients.config.UserProfileManagerClientConfig;
+import com.backbase.stream.m10y.config.MultiTenancyConfiguration;
 import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({
     DbsWebClientConfiguration.class,
+    MultiTenancyConfiguration.class,
     AccessControlClientConfig.class,
     ApprovalClientConfig.class,
     ArrangementManagerClientConfig.class,

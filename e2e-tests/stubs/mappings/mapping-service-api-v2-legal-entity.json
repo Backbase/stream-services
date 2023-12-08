@@ -44,9 +44,5 @@
       "Keep-Alive" : "timeout=60"
     },
     "transformers": ["response-template"]
-  },
-  "persistent" : true,
-  "priority" : 5,
-  "insertionIndex" : 0,
-  "postServeActions" : [ ]
+  }
 }

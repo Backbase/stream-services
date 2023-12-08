@@ -5,17 +5,14 @@ import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
-import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsPullEvent;
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderPullIngestionRequest;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
-import com.backbase.stream.compositions.product.core.mapper.EventRequestsMapper;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductPostIngestionService;
-import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
-import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
+import com.backbase.stream.compositions.product.core.service.TransactionIngestionService;
 import com.backbase.stream.compositions.transaction.client.model.TransactionPullIngestionRequest;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -38,10 +35,9 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private final EventBus eventBus;
     private final ProductConfigurationProperties config;
-    private final TransactionCompositionApi transactionCompositionApi;
     private final PaymentOrderCompositionApi paymentOrderCompositionApi;
     private final ProductGroupMapper mapper;
-    private final EventRequestsMapper eventRequestsMapper;
+    private final TransactionIngestionService transactionIngestionService;
 
     @Override
     public Mono<ProductIngestResponse> handleSuccess(ProductIngestResponse res) {
@@ -108,15 +104,11 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private Mono<ProductIngestResponse> ingestTransactions(ProductIngestResponse res) {
         return extractProducts(res.getProductGroups())
-                .map(product -> buildTransactionPullRequest(product, res))
-                .flatMap(transactionCompositionApi::pullTransactions)
-                .onErrorResume(this::handleTransactionError)
-                .doOnNext(response -> {
-                    log.debug("Response from Transaction Composition: {}",
-                            response.getTransactions());
-                })
-                .collectList()
-                .map(p -> res);
+            .map(product -> buildTransactionPullRequest(product, res))
+            .flatMap(transactionIngestionService::ingestTransactions)
+            .onErrorResume(this::handleTransactionError)
+            .collectList()
+            .map(p -> res);
     }
 
     private Mono<ProductIngestResponse> ingestPaymentOrder(ProductIngestResponse res) {
@@ -133,15 +125,7 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     private Mono<ProductIngestResponse> ingestTransactionsAsync(ProductIngestResponse res) {
         return extractProducts(res.getProductGroups())
             .map(product -> buildTransactionPullRequest(product, res))
-            .map(eventRequestsMapper::map)
-            .map(e -> {
-                var event = new EnvelopedEvent<TransactionsPullEvent>();
-                event.setEvent(e);
-                return event;
-            })
-            .doOnNext(eventBus::emitEvent)
-            .doOnNext(t -> log.info("Async transaction ingestion called for arrangement: {}",
-                t.getEvent().getArrangementId()))
+            .flatMap(transactionIngestionService::ingestTransactionsAsync)
             .collectList()
             .map(p -> res);
     }
@@ -177,9 +161,9 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         }
     }
 
-    private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
-        log.error("Error while calling Transaction Composition: {}", t.getMessage());
-        return Mono.just(new TransactionIngestionResponse());
+    private <T> Mono<T> handleTransactionError(Throwable t) {
+        log.error("Error while calling Transaction Chain: {}", t.getMessage());
+        return Mono.empty();
     }
 
     private Mono<PaymentOrderIngestionResponse> handlePaymentOrderError(Throwable t) {

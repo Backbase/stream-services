@@ -29,13 +29,9 @@ public class MultiTenancyConfiguration {
         return new HeaderForwardingServerFilter(properties);
     }
 
-    @Configuration(proxyBeanMethods = false)
-    static class TenantContextConfiguration {
-
-        @Bean
-        TenantAwareContextSubscriberRegistrar tenantReactorContextSubscriberRegistrar() {
-            return new TenantAwareContextSubscriberRegistrar();
-        }
+    @Bean
+    public TenantAwareContextSubscriberRegistrar tenantReactorContextSubscriberRegistrar() {
+        return new TenantAwareContextSubscriberRegistrar();
     }
 
     @Configuration(proxyBeanMethods = false)

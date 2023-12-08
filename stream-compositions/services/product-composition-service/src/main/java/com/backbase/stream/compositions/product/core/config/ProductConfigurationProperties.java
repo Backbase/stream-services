@@ -11,16 +11,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.beans.InvalidPropertyException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @ConfigurationProperties("backbase.stream.compositions.product")
-public class ProductConfigurationProperties {
-    private Chains chains;
-    private Events events;
-    private Cursor cursor;
+public class ProductConfigurationProperties implements InitializingBean {
+
+    private Chains chains = new Chains();
+    private Events events = new Events();
+    private Cursor cursor = new Cursor();
     private IngestionMode ingestionMode = new IngestionMode();
 
     public boolean isCompletedEventEnabled() {
@@ -32,23 +35,27 @@ public class ProductConfigurationProperties {
     }
 
     public boolean isTransactionChainEnabled() {
-        return Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled());
+        return Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
+            || Boolean.TRUE.equals(chains.getTransactionManager().getEnabled());
     }
 
     public boolean isTransactionChainEnabled(RequestConfig requestConfig) {
         return requestConfig == null || requestConfig.isTransactionChainEnabled().isEmpty()
-                ? Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
-                : requestConfig.isTransactionChainEnabled().orElse(false);
+            ? Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
+            || Boolean.TRUE.equals(chains.getTransactionManager().getEnabled())
+            : requestConfig.isTransactionChainEnabled().orElse(false);
     }
 
     public boolean isTransactionChainAsync(RequestConfig requestConfig) {
         return requestConfig == null || requestConfig.isTransactionChainAsync().isEmpty()
-                ? Boolean.TRUE.equals(chains.getTransactionComposition().getAsync())
-                : requestConfig.isTransactionChainAsync().orElse(false);
+            ? Boolean.TRUE.equals(chains.getTransactionComposition().getAsync())
+            || Boolean.TRUE.equals(chains.getTransactionManager().getAsync())
+            : requestConfig.isTransactionChainAsync().orElse(false);
     }
 
     public boolean isTransactionChainAsync() {
-        return Boolean.TRUE.equals(chains.getTransactionComposition().getAsync());
+        return Boolean.TRUE.equals(chains.getTransactionComposition().getAsync())
+            || Boolean.TRUE.equals(chains.getTransactionManager().getAsync());
     }
 
     public boolean isPaymentOrderChainEnabled() {
@@ -59,9 +66,27 @@ public class ProductConfigurationProperties {
         return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getAsync());
     }
 
+    public BatchProductIngestionMode ingestionMode() {
+        return BatchProductIngestionMode.builder()
+            .functionGroupsMode(ingestionMode.getFunctionGroups())
+            .dataGroupIngestionMode(ingestionMode.getDataGroups())
+            .arrangementsMode(ingestionMode.getArrangements())
+            .build();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
+            && Boolean.TRUE.equals(chains.getTransactionManager().getEnabled())) {
+            throw new InvalidPropertyException(this.getClass(), "backbase.stream.compositions.product.chains",
+                "Either Transaction Composition or Transaction Manager should be enabled, never both");
+        }
+    }
+
     @Data
     @NoArgsConstructor
     public static class Events {
+
         private Boolean enableCompleted = Boolean.FALSE;
         private Boolean enableFailed = Boolean.FALSE;
     }
@@ -69,6 +94,7 @@ public class ProductConfigurationProperties {
     @Data
     @NoArgsConstructor
     public static class Cursor {
+
         private Boolean enabled = Boolean.FALSE;
     }
 
@@ -77,13 +103,16 @@ public class ProductConfigurationProperties {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Chains {
-        private TransactionComposition transactionComposition;
-        private PaymentOrderComposition paymentOrderComposition;
+
+        private TransactionManager transactionManager = new TransactionManager();
+        private TransactionComposition transactionComposition = new TransactionComposition();
+        private PaymentOrderComposition paymentOrderComposition = new PaymentOrderComposition();
     }
 
     @Data
     @NoArgsConstructor
     public static class IngestionMode {
+
         private BatchProductIngestionMode.FunctionGroupsMode functionGroups = BatchProductIngestionMode.FunctionGroupsMode.UPSERT;
         private BatchProductIngestionMode.DataGroupsMode dataGroups = BatchProductIngestionMode.DataGroupsMode.UPSERT;
         private BatchProductIngestionMode.ArrangementsMode arrangements = BatchProductIngestionMode.ArrangementsMode.UPSERT;
@@ -94,8 +123,13 @@ public class ProductConfigurationProperties {
     @NoArgsConstructor
     @AllArgsConstructor
     public static abstract class BaseComposition {
+
         private Boolean enabled = Boolean.FALSE;
         private Boolean async = Boolean.FALSE;
+    }
+
+    public static class TransactionManager extends TransactionComposition {
+
     }
 
     @Data
@@ -103,6 +137,7 @@ public class ProductConfigurationProperties {
     @AllArgsConstructor
     @SuperBuilder
     public static class TransactionComposition extends BaseComposition {
+
         private List<String> excludeProductTypeExternalIds = new ArrayList<>();
     }
 
@@ -111,14 +146,7 @@ public class ProductConfigurationProperties {
     @AllArgsConstructor
     @SuperBuilder
     public static class PaymentOrderComposition extends BaseComposition {
-        private List<String> excludeProductTypeExternalIds = new ArrayList<>();
-    }
 
-    public BatchProductIngestionMode ingestionMode() {
-        return BatchProductIngestionMode.builder()
-                .functionGroupsMode(ingestionMode.getFunctionGroups())
-                .dataGroupIngestionMode(ingestionMode.getDataGroups())
-                .arrangementsMode(ingestionMode.getArrangements())
-                .build();
+        private List<String> excludeProductTypeExternalIds = new ArrayList<>();
     }
 }

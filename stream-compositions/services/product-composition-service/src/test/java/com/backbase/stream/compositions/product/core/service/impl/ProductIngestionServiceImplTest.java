@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
+import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
@@ -92,6 +93,9 @@ class ProductIngestionServiceImplTest {
     TransactionCompositionApi transactionCompositionApi;
 
     @Mock
+    TransactionPresentationServiceApi transactionPresentationServiceApi;
+
+    @Mock
     PaymentOrderCompositionApi paymentOrderCompositionApi;
 
     ProductGroupMapper mapper = Mappers.getMapper(ProductGroupMapper.class);
@@ -102,8 +106,9 @@ class ProductIngestionServiceImplTest {
     @BeforeEach
     void setUp() {
 
-        productPostIngestionService = new ProductPostIngestionServiceImpl(eventBus, config,
-                transactionCompositionApi, paymentOrderCompositionApi, mapper, eventRequestsMapper);
+        productPostIngestionService = new ProductPostIngestionServiceImpl(eventBus, config, paymentOrderCompositionApi,
+            mapper, new TransactionIngestionServiceImpl(eventBus, eventRequestsMapper,
+            transactionCompositionApi, transactionPresentationServiceApi, config));
 
         productIngestionService = new ProductIngestionServiceImpl(
                 batchProductIngestionSaga,
