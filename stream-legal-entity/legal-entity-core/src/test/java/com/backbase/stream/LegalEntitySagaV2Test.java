@@ -84,6 +84,9 @@ class LegalEntitySagaV2Test {
     @Mock
     private UserKindSegmentationSaga userKindSegmentationSaga;
 
+    @Mock
+    private ServiceAgreementSagaV2 serviceAgreementSagaV2;
+
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
         getLegalEntitySagaConfigurationProperties();
@@ -156,13 +159,14 @@ class LegalEntitySagaV2Test {
             .thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(leMapper.mapLegalEntityV2ToLegalEntity(task.getLegalEntityV2())))
             .thenReturn(Mono.just(new LegalEntity()));
+        when(serviceAgreementSagaV2.executeTask(any())).thenReturn(Mono.empty());
 
         Mono<LegalEntityTaskV2> result = legalEntitySaga.executeTask(task);
         result.block();
 
         verify(userService).setupRealm(legalEntity);
         verify(userService).linkLegalEntityToRealm(legalEntity);
-
+        when(serviceAgreementSagaV2.executeTask(any())).thenReturn(Mono.empty());
         when(userService.setupRealm(leMapper.mapLegalEntityV2ToLegalEntity(task.getLegalEntityV2())))
             .thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(leMapper.mapLegalEntityV2ToLegalEntity(task.getLegalEntityV2())))
@@ -172,8 +176,8 @@ class LegalEntitySagaV2Test {
         result = legalEntitySaga.executeTask(task);
         result.block();
 
-        verify(userService).setupRealm(leMapper.mapLegalEntityV2ToLegalEntity(task.getLegalEntityV2()));
-        verify(userService).linkLegalEntityToRealm(leMapper.mapLegalEntityV2ToLegalEntity(task.getLegalEntityV2()));
+        verify(userService, times(2)).setupRealm(leMapper.mapLegalEntityV2ToLegalEntity(task.getLegalEntityV2()));
+        verify(userService, times(2)).linkLegalEntityToRealm(leMapper.mapLegalEntityV2ToLegalEntity(task.getLegalEntityV2()));
     }
 
     @Test
@@ -293,6 +297,7 @@ class LegalEntitySagaV2Test {
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
         when(userService.updateUser(any())).thenReturn(Mono.empty());
+        when(serviceAgreementSagaV2.executeTask(any())).thenReturn(Mono.empty());
 
         LegalEntityTaskV2 result = legalEntitySaga.executeTask(task)
             .block();
@@ -334,6 +339,7 @@ class LegalEntitySagaV2Test {
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
         when(userService.updateUser(any())).thenReturn(Mono.just(newRegularUser));
+        when(serviceAgreementSagaV2.executeTask(any())).thenReturn(Mono.empty());
 
         LegalEntityTaskV2 result = legalEntitySaga.executeTask(task)
             .block();
@@ -376,6 +382,7 @@ class LegalEntitySagaV2Test {
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
         when(userService.updateUser(any())).thenReturn(Mono.just(regularUser));
+        when(serviceAgreementSagaV2.executeTask(any())).thenReturn(Mono.empty());
     }
 
     @Test
@@ -430,6 +437,7 @@ class LegalEntitySagaV2Test {
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
         when(userService.updateUser(any())).thenReturn(Mono.just(regularUser));
+        when(serviceAgreementSagaV2.executeTask(any())).thenReturn(Mono.empty());
 
         LegalEntityTaskV2 result = legalEntitySaga.executeTask(task).block();
 

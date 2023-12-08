@@ -437,7 +437,9 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     if (!isEmpty(businessFunctionGroups))
                         bf.addAll(businessFunctionGroups);
                     return bf;
-                });
+                })
+                .doOnError(throwable -> log.error("error fetching function group for service agreement {} with error {}",
+                    streamTask.getData().getInternalId(), throwable.getMessage()));
         }
         return Mono.justOrEmpty(businessFunctionGroups);
     }
@@ -578,6 +580,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                             serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
                             "Existing Master Service Agreement: %s found for Legal Entity: %s",
                             serviceAgreement.getExternalId(), legalEntityParticipant.get().getExternalId());
+                        streamTask.setServiceAgreement(saMapper.mapV2(serviceAgreement));
                         return Mono.just(streamTask);
                     });
 
@@ -596,6 +599,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                         serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
                         "Created new Service Agreement: %s", serviceAgreement.getExternalId(),
                         serviceAgreement.getExternalId());
+                    streamTask.getServiceAgreement().setInternalId(serviceAgreement.getInternalId());
                     return Mono.just(streamTask);
                 });
             return existingServiceAgreement.switchIfEmpty(createServiceAgreement);
@@ -673,6 +677,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             })
             .then(accessGroupService.updateServiceAgreementRegularUsers(streamTask,
                     saMapper.map(serviceAgreement), userActions)
+                .doOnError(throwable -> log.error("error updating service agreement regular users {}", throwable.getMessage()))
                 .thenReturn(streamTask));
 
         return existingServiceAgreement.switchIfEmpty(createServiceAgreement);

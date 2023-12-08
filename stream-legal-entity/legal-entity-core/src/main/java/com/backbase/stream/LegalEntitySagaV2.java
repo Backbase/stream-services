@@ -28,14 +28,10 @@ import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
 import com.backbase.stream.exceptions.AccessGroupException;
 import com.backbase.stream.exceptions.LegalEntityException;
-import com.backbase.stream.legalentity.model.BaseProductGroup;
-import com.backbase.stream.legalentity.model.BatchProductGroup;
-import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionLimit;
 import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
-import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipantV2;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
@@ -53,7 +49,6 @@ import com.backbase.stream.mapper.ExternalContactMapper;
 import com.backbase.stream.mapper.LegalEntityV2toV1Mapper;
 import com.backbase.stream.mapper.ServiceAgreementV2ToV1Mapper;
 import com.backbase.stream.mapper.UserProfileMapper;
-import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
@@ -65,7 +60,6 @@ import com.backbase.stream.worker.model.StreamTask;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -104,7 +98,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
     public static final String PROCESS_CONTACTS = "process-contacts";
     public static final String UPSERT = "upsert";
     public static final String SETUP_SERVICE_AGREEMENT = "setup-service-agreement";
-    private static final String BATCH_PRODUCT_GROUP_ID = "batch_product_group_task-";
 
     private static final String LEGAL_ENTITY_E_TYPE = "LE";
     private static final String SERVICE_AGREEMENT_E_TYPE = "SA";
@@ -125,6 +118,7 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
     private final ContactsSaga contactsSaga;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
     private final UserKindSegmentationSaga userKindSegmentationSaga;
+    private final ServiceAgreementSagaV2 serviceAgreementSagaV2;
 
     private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
 
@@ -132,6 +126,7 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
         UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
+        ServiceAgreementSagaV2 serviceAgreementSagaV2,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties,
@@ -140,6 +135,7 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
         this.userService = userService;
         this.userProfileService = userProfileService;
         this.accessGroupService = accessGroupService;
+        this.serviceAgreementSagaV2 = serviceAgreementSagaV2;
         this.limitsSaga = limitsSaga;
         this.contactsSaga = contactsSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
@@ -511,7 +507,7 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
     private Mono<LegalEntityTaskV2> setupServiceAgreement(LegalEntityTaskV2 streamTask) {
         LegalEntityV2 legalEntity = streamTask.getData();
 
-        if (legalEntity.getMasterServiceAgreement() == null || StringUtils.hasText(
+        if (legalEntity.getMasterServiceAgreement() == null || !StringUtils.hasText(
             legalEntity.getMasterServiceAgreement().getInternalId())) {
 
             Mono<LegalEntityTaskV2> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(
@@ -539,21 +535,22 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
                     .getActivateSingleServiceAgreement())) {
                 ServiceAgreementV2 newServiceAgreement = createMasterServiceAgreement(legalEntity,
                     legalEntity.getAdministrators());
-                Mono<LegalEntityTaskV2> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask,
-                        saV2Mapper.map(newServiceAgreement))
+
+                Mono<LegalEntityTaskV2> createServiceAgreement = serviceAgreementSagaV2.executeTask(
+                        new ServiceAgreementTaskV2(newServiceAgreement))
                     .onErrorMap(AccessGroupException.class, accessGroupException -> {
                         streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED,
                             newServiceAgreement.getExternalId(), null, accessGroupException,
                             accessGroupException.getMessage(), accessGroupException.getHttpResponse());
                         return new StreamTaskException(streamTask, accessGroupException);
                     })
-                    .map(saV2Mapper::mapV2)
-                    .flatMap(serviceAgreement -> {
-                        streamTask.getData().setMasterServiceAgreement(serviceAgreement);
+                    .flatMap(serviceAgreementTaskV2 -> {
+                        streamTask.getData().setMasterServiceAgreement(serviceAgreementTaskV2.getServiceAgreement());
                         streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED,
-                            serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
+                            serviceAgreementTaskV2.getServiceAgreement().getExternalId(),
+                            serviceAgreementTaskV2.getServiceAgreement().getInternalId(),
                             "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s",
-                            serviceAgreement.getExternalId(),
+                            serviceAgreementTaskV2.getServiceAgreement().getExternalId(),
                             legalEntity.getAdministrators().stream().map(User::getExternalId)
                                 .collect(Collectors.joining(", ")), legalEntity.getExternalId());
                         return Mono.just(streamTask);
@@ -626,13 +623,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
                     .then(userService.linkLegalEntityToRealm(legalEntity))
                     .map(legalEntityV2 -> streamTask)
             ).switchIfEmpty(Mono.just(streamTask));
-    }
-
-    private ServiceAgreement retrieveServiceAgreement(LegalEntity legalEntity) {
-        if (legalEntity.getCustomServiceAgreement() != null) {
-            return legalEntity.getCustomServiceAgreement();
-        }
-        return legalEntity.getMasterServiceAgreement();
     }
 
     private Flux<LegalEntityV2> setSubsidiaryParentLegalEntityId(LegalEntityV2 parentLegalEntity,
