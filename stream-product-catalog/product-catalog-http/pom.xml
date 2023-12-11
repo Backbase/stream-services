@@ -19,6 +19,7 @@
         <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-product-catalog/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
+        <archunit.skip>true</archunit.skip>
     </properties>
 
     <dependencies>

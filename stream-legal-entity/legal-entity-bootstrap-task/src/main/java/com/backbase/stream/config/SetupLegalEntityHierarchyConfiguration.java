@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 import reactor.core.publisher.Flux;
 
 
@@ -19,6 +20,7 @@ import reactor.core.publisher.Flux;
 @Configuration
 @AllArgsConstructor
 @Slf4j
+@Validated
 @EnableConfigurationProperties(BootstrapConfigurationProperties.class)
 public class SetupLegalEntityHierarchyConfiguration {
 

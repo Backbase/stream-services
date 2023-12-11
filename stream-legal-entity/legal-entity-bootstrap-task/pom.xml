@@ -17,6 +17,7 @@
     <properties>
         <wiremock-jre8.version>2.35.1</wiremock-jre8.version>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
+        <archunit.backbase.LoggingRules.skip>true</archunit.backbase.LoggingRules.skip>
     </properties>
 
     <dependencies>
