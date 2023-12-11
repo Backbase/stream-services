@@ -31,7 +31,6 @@ import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
-import com.backbase.stream.legalentity.model.LegalEntityParticipantV2;
 import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -164,47 +163,46 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             return Mono.just(streamTask);
         }
         log.info("Creating Contacts for Service Agreement Id {}", serviceAgreement.getExternalId());
-        if (!isEmpty(serviceAgreement.getParticipants())) {
-            Optional<LegalEntityParticipantV2> participantSharingUsers = serviceAgreement.getParticipants()
-                .stream()
-                .filter(LegalEntityParticipantV2::getSharingUsers)
-                .findFirst();
-            if (participantSharingUsers.isPresent()) {
-                LegalEntityParticipantV2 participant = participantSharingUsers.get();
-                Optional<String> externalUserOptional = getUserExternalId(participant.getJobProfileUsers());
-                String externalUserId;
-                if (externalUserOptional.isEmpty()) {
-                    externalUserId = getParticipantUser(participant);
-                    if (externalUserId == null) {
-                        streamTask.info(LEGAL_ENTITY, PROCESS_CONTACTS, FAILED, participant.getExternalId(),
-                            participant.getInternalId(),
-                            "Legal Entity: % participant of service agreement: %s does not have any Users",
-                            participant.getExternalId(), serviceAgreement.getExternalId());
-                        return Mono.just(streamTask);
-                    }
-                } else {
-                    externalUserId = externalUserOptional.get();
-                }
-                return contactsSaga.executeTask(createContactsTask(streamTask.getId(), participant.getExternalId(),
-                        serviceAgreement.getExternalId(), externalUserId, AccessContextScope.SA,
-                        serviceAgreement.getContacts()))
-                    .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
-                    .then(Mono.just(streamTask));
+
+        Optional<String> externalUserOptional = getUserExternalId(serviceAgreement.getJobProfileUsers());
+        String externalUserId;
+        if (externalUserOptional.isEmpty()) {
+            externalUserId = getParticipantUser(saMapper.map(serviceAgreement));
+            if (externalUserId == null) {
+                streamTask.info(SERVICE_AGREEMENT, PROCESS_CONTACTS, FAILED, serviceAgreement.getExternalId(),
+                    serviceAgreement.getInternalId(),
+                    "SA: %s does not have any participants", serviceAgreement.getExternalId());
+                return Mono.just(streamTask);
             }
+        } else {
+            externalUserId = externalUserOptional.get();
         }
-        streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT_USERS, FAILED, serviceAgreement.getExternalId(),
-            serviceAgreement.getInternalId(), "Service Agreement: % does not have participants",
-            serviceAgreement.getExternalId());
-        return Mono.just(streamTask);
+        return contactsSaga.executeTask(createContactsTask(streamTask.getId(), serviceAgreement.getExternalId(),
+                serviceAgreement.getExternalId(), externalUserId, AccessContextScope.SA, serviceAgreement.getContacts()))
+            .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
+            .then(Mono.just(streamTask));
     }
 
-    private String getParticipantUser(LegalEntityParticipantV2 participant) {
-        if (!isEmpty(participant.getAdmins())) {
-            return participant.getAdmins().get(0);
-        } else if (!isEmpty(participant.getUsers())) {
-            return participant.getUsers().get(0);
+    private String getParticipantUser(ServiceAgreement serviceAgreement) {
+        if (!isEmpty(serviceAgreement.getParticipants())) {
+            Optional<LegalEntityParticipant> participants = serviceAgreement.getParticipants()
+                .stream()
+                .filter(LegalEntityParticipant::getSharingUsers)
+                .findFirst();
+            if (participants.isPresent()) {
+                LegalEntityParticipant participant = participants.get();
+                if (!isEmpty(participant.getAdmins())) {
+                    return getOptionalUserId(participant.getAdmins().stream().findFirst());
+                } else if (!isEmpty(participant.getUsers())) {
+                    return getOptionalUserId(participant.getUsers().stream().findFirst());
+                }
+            }
         }
         return null;
+    }
+
+    private String getOptionalUserId(Optional<String> optionalUserId) {
+        return optionalUserId.isPresent() ? optionalUserId.get() : null;
     }
 
     private ContactsTask createContactsTask(String streamTaskId, String externalLegalEntityId,
@@ -339,32 +337,18 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         log.info("Processing Job Profiles for: {}", streamTask.getName());
         ServiceAgreementV2 serviceAgreement = streamTask.getData();
 
-        Optional<LegalEntityParticipantV2> participantSharingUsers = streamTask.getData().getParticipants().stream()
-            .filter(LegalEntityParticipantV2::getSharingUsers)
-            .findFirst();
-
-        if (participantSharingUsers.isEmpty()) {
-            streamTask.info(SERVICE_AGREEMENT, PROCESS_JOB_PROFILES, FAILED, serviceAgreement.getExternalId(),
-                serviceAgreement.getInternalId(), "Service Agreement: % does not have participants "
-                    + "with sharing users to setup job profiles",
-                serviceAgreement.getExternalId());
-            return Mono.just(streamTask);
-        }
-
-        LegalEntityParticipantV2 participantLE = participantSharingUsers.get();
-
-        if (participantLE.getJobProfileUsers() == null) {
+        if (serviceAgreement.getJobProfileUsers() == null) {
             streamTask.warn(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, REJECTED,
-                participantLE.getExternalId(), participantLE.getInternalId(),
+                serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
                 "No Job Profile Users defined in Service agreement. No Business Function Groups will be assigned.");
             return Mono.just(streamTask);
         }
-        if (participantLE.getJobProfileUsers().stream().allMatch(jobProfileUser -> jobProfileUser.getUser() == null)) {
-            streamTask.warn(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, REJECTED, participantLE.getExternalId(),
-                participantLE.getInternalId(), "No Users defined in Job Profiles");
+        if (serviceAgreement.getJobProfileUsers().stream().allMatch(jobProfileUser -> jobProfileUser.getUser() == null)) {
+            streamTask.warn(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, REJECTED, serviceAgreement.getExternalId(),
+                serviceAgreement.getInternalId(), "No Users defined in Job Profiles");
             return Mono.just(streamTask);
         }
-        return Flux.fromStream(nullableCollectionToStream(participantLE.getJobProfileUsers()))
+        return Flux.fromStream(nullableCollectionToStream(serviceAgreement.getJobProfileUsers()))
             .flatMap(jobProfileUser -> getBusinessFunctionGroupTemplates(streamTask, jobProfileUser)
                 .flatMap(businessFunctionGroups -> accessGroupService.setupFunctionGroups(streamTask,
                     saMapper.map(streamTask.getServiceAgreement()), businessFunctionGroups))
@@ -373,7 +357,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                         jobProfileUser.getUser().getExternalId());
                     jobProfileUser.setBusinessFunctionGroups(list);
                     list.forEach(bfg -> streamTask.info(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, "assigned",
-                        participantLE.getExternalId(), participantLE.getInternalId(),
+                        serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
                         "Assigned Business Function Group: %s with functions: %s to Service Agreement: %s",
                         bfg.getName(),
                         ofNullable(bfg.getFunctions())
@@ -387,7 +371,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             .collectList()
             .map(jobProfileUsers -> {
                 if (!jobProfileUsers.isEmpty())
-                    participantLE.setJobProfileUsers(jobProfileUsers);
+                    serviceAgreement.setJobProfileUsers(jobProfileUsers);
                 return streamTask;
             });
 
@@ -423,24 +407,15 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
 
     private Mono<ServiceAgreementTaskV2> postUserContacts(ServiceAgreementTaskV2 streamTask) {
         ServiceAgreementV2 serviceAgreement = streamTask.getData();
-        Optional<LegalEntityParticipantV2> participantSharingUsers = serviceAgreement.getParticipants()
-            .stream()
-            .filter(LegalEntityParticipantV2::getSharingUsers)
-            .findFirst();
-        if (participantSharingUsers.isPresent()) {
-            Flux<JobProfileUser> jobProfileUsers = Flux.fromStream(nullableCollectionToStream(
-                participantSharingUsers.get().getJobProfileUsers()));
-            return jobProfileUsers
-                .flatMap(jobProfileUser -> postUserContacts(streamTask, jobProfileUser.getContacts(),
-                    jobProfileUser.getUser().getExternalId(), participantSharingUsers.get().getExternalId()))
-                .collectList()
-                .thenReturn(streamTask);
-        }
-        streamTask.info(SERVICE_AGREEMENT, PROCESS_JOB_PROFILES, FAILED, serviceAgreement.getExternalId(),
-            serviceAgreement.getInternalId(), "Service Agreement: % does not have participants "
-                + "with sharing users to post user contacts",
-            serviceAgreement.getExternalId());
-        return Mono.just(streamTask);
+
+        Flux<JobProfileUser> jobProfileUsers = Flux.fromStream(nullableCollectionToStream(
+            serviceAgreement.getJobProfileUsers()));
+        return jobProfileUsers
+            .flatMap(jobProfileUser -> postUserContacts(streamTask, jobProfileUser.getContacts(),
+                jobProfileUser.getUser().getExternalId(), serviceAgreement.getExternalId()))
+            .collectList()
+            .thenReturn(streamTask);
+
     }
 
     private Mono<ServiceAgreementTaskV2> postUserContacts(ServiceAgreementTaskV2 streamTask,
@@ -490,20 +465,9 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     public Mono<ServiceAgreementTaskV2> setupAdministratorPermissions(ServiceAgreementTaskV2 streamTask) {
         // Assign permissions for the user for all business function groups.
         ServiceAgreementV2 serviceAgreement = streamTask.getData();
-        Optional<LegalEntityParticipantV2> participantSharingUsers = serviceAgreement.getParticipants()
-            .stream()
-            .filter(LegalEntityParticipantV2::getSharingUsers)
-            .findFirst();
-        if (participantSharingUsers.isEmpty()) {
-            streamTask.info(SERVICE_AGREEMENT, PROCESS_JOB_PROFILES, FAILED, serviceAgreement.getExternalId(),
-                serviceAgreement.getInternalId(), "Service Agreement: % does not have participants "
-                    + "with sharing users to setup administrator permissions",
-                serviceAgreement.getExternalId());
-            return Mono.just(streamTask);
-        }
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = nullableCollectionToStream(
-            participantSharingUsers.get().getJobProfileUsers())
+            serviceAgreement.getJobProfileUsers())
             .filter(jobProfileUser -> !isEmpty(jobProfileUser.getBusinessFunctionGroups()))
             .collect(Collectors.toMap(
                 JobProfileUser::getUser,
@@ -538,7 +502,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             if (StringUtils.isNotEmpty(sa.getInternalId())) {
                 return Mono.just(streamTask);
             }
-            Optional<LegalEntityParticipantV2> legalEntityParticipant = sa.getParticipants().stream().findFirst();
+            Optional<LegalEntityParticipant> legalEntityParticipant = sa.getParticipants().stream().findFirst();
             if (legalEntityParticipant.isEmpty()) {
                 log.info("Skipping setup of master service agreement which has no participants.");
                 return Mono.just(streamTask);
@@ -589,19 +553,8 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             log.error("Defined service agreement contains no external Id");
             return Mono.error(new StreamTaskException(streamTask, "Defined service agreement contains no external Id"));
         }
-        Optional<LegalEntityParticipantV2> participantSharingUsers = serviceAgreement.getParticipants()
-            .stream()
-            .filter(LegalEntityParticipantV2::getSharingUsers)
-            .findFirst();
-        if (participantSharingUsers.isEmpty()) {
-            streamTask.info(SERVICE_AGREEMENT, PROCESS_JOB_PROFILES, FAILED, serviceAgreement.getExternalId(),
-                serviceAgreement.getInternalId(), "Service Agreement: % does not have participants "
-                    + "with sharing users to setup administrator permissions",
-                serviceAgreement.getExternalId());
-            return Mono.just(streamTask);
-        }
 
-        List<ServiceAgreementUserAction> userActions = nullableCollectionToStream(participantSharingUsers.get()
+        List<ServiceAgreementUserAction> userActions = nullableCollectionToStream(serviceAgreement
             .getJobProfileUsers())
             .map(JobProfileUser::getUser).map(User::getExternalId)
             .map(id -> new ServiceAgreementUserAction().action(ServiceAgreementUserAction.ActionEnum.ADD)
@@ -612,8 +565,10 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             .flatMap(sa -> {
                 serviceAgreement.setInternalId(sa.getInternalId());
                 streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS, sa.getExternalId(), sa.getInternalId(),
-                    "Existing Service Agreement: %s found for Legal Entity: %s", sa.getExternalId(),
-                    participantSharingUsers.get().getExternalId());
+                    "Existing Service Agreement: %s found for Legal Entities: %s", sa.getExternalId(),
+                    serviceAgreement.getParticipants().stream()
+                        .map(LegalEntityParticipant::getExternalId)
+                        .collect(Collectors.joining(", ")));
                 if (legalEntitySagaConfigurationProperties.isServiceAgreementUpdateEnabled()) {
                     return accessGroupService.updateServiceAgreementItem(streamTask, saMapper.map(serviceAgreement))
                         .then(accessGroupService.updateServiceAgreementAssociations(streamTask,
@@ -643,17 +598,14 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             })
             .flatMap(createdSa -> {
                 serviceAgreement.setInternalId(createdSa.getInternalId());
-                String admins = participantSharingUsers.get().getAdmins() != null ?
-                    String.join(", ", participantSharingUsers.get().getAdmins()) : "";
                 streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, createdSa.getExternalId(),
                     createdSa.getInternalId(),
-                    "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s",
-                    createdSa.getExternalId(), admins,
-                    createdSa.getExternalId(), String.join(", ",
-                        participantSharingUsers.get().getAdmins() != null
-                            ? participantSharingUsers.get().getAdmins()
-                            : List.of("")),
-                    participantSharingUsers.get().getExternalId());
+                    "Created new Service Agreement: %s for Legal Entities: %s",
+                    createdSa.getExternalId(),
+                    createdSa.getExternalId(),
+                        serviceAgreement.getParticipants().stream()
+                            .map(LegalEntityParticipant::getExternalId)
+                            .collect(Collectors.joining(", ")));
                 return Mono.just(streamTask);
             })
             .then(accessGroupService.updateServiceAgreementRegularUsers(streamTask,
@@ -916,14 +868,11 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
 
     private Mono<ServiceAgreementTaskV2> retrieveUsersInternalIdsForJobProfile(ServiceAgreementTaskV2 streamTask) {
         var sa = streamTask.getData();
-        if(sa.getParticipants() == null || sa.getParticipants().stream().allMatch(participantV2 -> Objects.isNull(participantV2.getJobProfileUsers()))) {
+        if(sa.getParticipants() == null || CollectionUtils.isEmpty(sa.getJobProfileUsers())) {
             return Mono.just(streamTask);
         }
 
-        var jobProfileUsers = sa.getParticipants().stream()
-            .filter(participantV2 -> participantV2.getJobProfileUsers() != null)
-            .flatMap(participantV2 -> participantV2.getJobProfileUsers().stream())
-            .collect(Collectors.toSet());
+        var jobProfileUsers = new HashSet<>(sa.getJobProfileUsers());
         return Flux.fromIterable(jobProfileUsers)
             .flatMap(jpu -> accessGroupService.getUserByExternalId(jpu.getUser().getExternalId(), true))
             .collectList()

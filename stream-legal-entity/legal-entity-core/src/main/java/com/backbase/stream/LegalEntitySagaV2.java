@@ -33,7 +33,7 @@ import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityParticipantV2;
+import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
@@ -570,7 +570,7 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
             ? admins.stream().map(User::getExternalId).toList() :
             null;
 
-        LegalEntityParticipantV2 legalEntityParticipant = new LegalEntityParticipantV2();
+        LegalEntityParticipant legalEntityParticipant = new LegalEntityParticipant();
         legalEntityParticipant.setExternalId(legalEntity.getExternalId());
         legalEntityParticipant.setSharingAccounts(true);
         legalEntityParticipant.setSharingUsers(true);

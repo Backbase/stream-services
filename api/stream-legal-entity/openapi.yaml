@@ -1694,11 +1694,15 @@ components:
           pattern: ^(\S|\n)((.|\n)*(\S|\n))?$
           type: string
           description: Description
+        jobProfileUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobProfileUser'
         participants:
           type: array
           description: Participants of the service agreement
           items:
-            $ref: '#/components/schemas/LegalEntityParticipantV2'
+            $ref: '#/components/schemas/LegalEntityParticipant'
         validFromDate:
           type: string
           format: date
@@ -1784,45 +1788,6 @@ components:
           description: User external ids
           items:
             $ref: '#/components/schemas/ExternalIdentifier'
-        action:
-          type: string
-          description: the action to perform for this participant. Required for participant update flow
-          enum:
-            - "ADD"
-            - "REMOVE"
-        limit:
-          $ref: '#/components/schemas/Limit'
-
-    LegalEntityParticipantV2:
-      required:
-        - externalId
-        - sharingAccounts
-        - sharingUsers
-      type: object
-      properties:
-        internalId:
-          $ref: '#/components/schemas/InternalIdentifier'
-        externalId:
-          $ref: '#/components/schemas/ExternalIdentifier'
-        sharingUsers:
-          type: boolean
-          description: Boolean value if the Participant is sharing users
-        sharingAccounts:
-          type: boolean
-          description: Boolean value if the participant is sharing accounts
-        admins:
-          type: array
-          items:
-            $ref: '#/components/schemas/ExternalIdentifier'
-        users:
-          type: array
-          description: User external ids
-          items:
-            $ref: '#/components/schemas/ExternalIdentifier'
-        jobProfileUsers:
-          type: array
-          items:
-            $ref: '#/components/schemas/JobProfileUser'
         action:
           type: string
           description: the action to perform for this participant. Required for participant update flow

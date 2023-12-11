@@ -32,7 +32,6 @@ import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
-import com.backbase.stream.legalentity.model.LegalEntityParticipantV2;
 import com.backbase.stream.legalentity.model.LegalEntityReference;
 import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.Loan;
@@ -136,9 +135,9 @@ class ServiceAgreementV2SagaTest {
             .isMaster(false)
             .addJobRolesItem(jobRole)
             .creatorLegalEntity(leExternalId)
-            .participants(singletonList(new LegalEntityParticipantV2()
+            .addJobProfileUsersItem(regularUser)
+            .participants(singletonList(new LegalEntityParticipant()
                 .externalId(leExternalId)
-                .addJobProfileUsersItem(regularUser)
                 .sharingUsers(true)
                 .sharingAccounts(true)))
             .productGroups(singletonList(productGroup));
@@ -196,10 +195,10 @@ class ServiceAgreementV2SagaTest {
             .externalId(customSaExId)
             .addJobRolesItem(jobRole)
             .isMaster(false)
+            .addJobProfileUsersItem(regularUser)
             .creatorLegalEntity(leExternalId)
-            .participants(singletonList(new LegalEntityParticipantV2()
+            .participants(singletonList(new LegalEntityParticipant()
                 .externalId(leExternalId)
-                .addJobProfileUsersItem(regularUser)
                 .sharingUsers(true)
                 .sharingAccounts(true)))
             .productGroups(singletonList(productGroup));
@@ -298,27 +297,29 @@ class ServiceAgreementV2SagaTest {
                             .currency("GBP")
                             .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)))
                     ))
-                    .loans(singletonList(new Loan().IBAN("IBAN123321")))
-            ))
-            .addParticipantsItem(new LegalEntityParticipantV2()
+                    .loans(singletonList((Loan) new Loan()
+                        .IBAN("IBAN123321")
+                        .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)))
+            ))))
+                .addJobProfileUsersItem(new JobProfileUser()
+                .user(
+                    new User()
+                        .externalId("john.doe")
+                        .fullName("John Doe")
+                        .identityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY)
+                        .locked(false)
+                        .emailAddress(new EmailAddress().address("test@example.com"))
+                        .mobileNumber(new PhoneNumber().number("+12345"))
+                )
+                .referenceJobRoleNames(Arrays.asList(
+                    "Private - Read only", "Private - Full access"
+                ))
+                .legalEntityReference(new LegalEntityReference().externalId(leExternalId))
+            )
+            .addParticipantsItem(new LegalEntityParticipant()
                 .externalId(leExternalId)
                 .sharingAccounts(true)
                 .sharingUsers(true)
-                .addJobProfileUsersItem(new JobProfileUser()
-                    .user(
-                        new User()
-                            .externalId("john.doe")
-                            .fullName("John Doe")
-                            .identityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY)
-                            .locked(false)
-                            .emailAddress(new EmailAddress().address("test@example.com"))
-                            .mobileNumber(new PhoneNumber().number("+12345"))
-                    )
-                    .referenceJobRoleNames(Arrays.asList(
-                        "Private - Read only", "Private - Full access"
-                    ))
-                    .legalEntityReference(new LegalEntityReference().externalId(leExternalId))
-                )
             );
 
         ServiceAgreementTaskV2 serviceAgreementTaskV2 = new ServiceAgreementTaskV2(customSa);
@@ -389,7 +390,7 @@ class ServiceAgreementV2SagaTest {
         Assertions.assertNotNull(result);
         Assertions.assertEquals(leExternalId, result.getData().getContacts().get(0).getExternalId());
 
-        LegalEntityParticipantV2 participant = new LegalEntityParticipantV2()
+        LegalEntityParticipant participant = new LegalEntityParticipant()
                 .externalId(leExternalId)
                 .sharingUsers(true)
                 .users(singletonList("USER1"));
@@ -422,7 +423,7 @@ class ServiceAgreementV2SagaTest {
         result = serviceAgreementSaga.executeTask(task).block();
         Assertions.assertNotNull(result);
         Assertions.assertEquals(leExternalId,
-            result.getData().getParticipants().get(0).getJobProfileUsers().get(0).getContacts().get(0).getExternalId());
+            result.getData().getJobProfileUsers().get(0).getContacts().get(0).getExternalId());
     }
 
     private ServiceAgreementTaskV2 mockServiceAgreementTask(ServiceAgreementV2 serviceAgreement) {
@@ -453,10 +454,10 @@ class ServiceAgreementV2SagaTest {
         JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
         customSa = new ServiceAgreementV2()
             .externalId(customSaExId)
+            .addJobProfileUsersItem(regularUser)
             .addJobRolesItem(jobRole)
-            .participants(singletonList(new LegalEntityParticipantV2()
+            .participants(singletonList(new LegalEntityParticipant()
                 .externalId(leExternalId)
-                .addJobProfileUsersItem(regularUser)
                 .sharingUsers(true)
                 .sharingAccounts(true)))
             .creatorLegalEntity(leExternalId);
@@ -526,7 +527,7 @@ class ServiceAgreementV2SagaTest {
         serviceAgreement.setExternalId(serviceAgreementV2.getExternalId());
         serviceAgreement.setName(serviceAgreementV2.getName());
         serviceAgreement.setDescription(serviceAgreementV2.getDescription());
-        serviceAgreement.setParticipants(transformParticipants(serviceAgreementV2));
+        serviceAgreement.setParticipants(serviceAgreementV2.getParticipants());
         serviceAgreement.setValidFromDate(serviceAgreementV2.getValidFromDate());
         serviceAgreement.setValidFromTime(serviceAgreementV2.getValidFromTime());
         serviceAgreement.setValidUntilDate(serviceAgreementV2.getValidUntilDate());
@@ -542,20 +543,6 @@ class ServiceAgreementV2SagaTest {
         serviceAgreement.setAdditions(serviceAgreementV2.getAdditions());
 
         return serviceAgreement;
-    }
-    private List<LegalEntityParticipant> transformParticipants(ServiceAgreementV2 serviceAgreement) {
-        List<LegalEntityParticipant> participants = new ArrayList<>();
-        for (LegalEntityParticipantV2 participantV2 : serviceAgreement.getParticipants()) {
-            LegalEntityParticipant participant = new LegalEntityParticipant();
-            participant.setInternalId(participantV2.getInternalId());
-            participant.setExternalId(participantV2.getExternalId());
-            participant.setSharingUsers(participantV2.getSharingUsers());
-            participant.setSharingAccounts(participantV2.getSharingAccounts());
-            participant.setAdmins(participantV2.getAdmins());
-            participant.setUsers(participantV2.getUsers());
-            participants.add(participant);
-        }
-        return participants;
     }
 
     private LegalEntitySagaConfigurationProperties getLegalEntitySagaConfigurationProperties() {

@@ -1,14 +1,9 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.stream.legalentity.model.LegalEntityParticipant;
-import com.backbase.stream.legalentity.model.LegalEntityParticipantV2;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
-import java.util.List;
-import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -33,7 +28,7 @@ public interface ServiceAgreementV2ToV1Mapper {
         @Mapping(target = "limit", source = "limit")
         @Mapping(target = "contacts", source = "contacts")
         @Mapping(target = "additions", source = "additions")
-        @Mapping(target = "participants", source = "participants", qualifiedByName = "mapParticipants")
+        @Mapping(target = "participants", source = "participants")
         ServiceAgreement map(ServiceAgreementV2 serviceAgreementV2);
 
         @Mapping(target = "internalId", source = "internalId")
@@ -53,21 +48,8 @@ public interface ServiceAgreementV2ToV1Mapper {
         @Mapping(target = "limit", source = "limit")
         @Mapping(target = "contacts", source = "contacts")
         @Mapping(target = "additions", source = "additions")
-        @Mapping(target = "participants", source = "participants", qualifiedByName = "mapParticipants")
+        @Mapping(target = "participants", source = "participants")
         ServiceAgreementV2 mapV2(ServiceAgreement serviceAgreement);
 
-        @Named("mapParticipants")
-        @IterableMapping(qualifiedByName = "mapParticipant")
-        List<LegalEntityParticipant> mapParticipants(List<LegalEntityParticipantV2> participantsV2);
-
-        @Named("mapParticipants")
-        @IterableMapping(qualifiedByName = "mapParticipant")
-        List<LegalEntityParticipantV2> mapParticipantsV2(List<LegalEntityParticipant> participants);
-
-        @Named("mapParticipant")
-        LegalEntityParticipant mapParticipant(LegalEntityParticipantV2 participantV2);
-
-        @Named("mapParticipant")
-        LegalEntityParticipantV2 mapParticipantV2(LegalEntityParticipant participant);
 }
 
