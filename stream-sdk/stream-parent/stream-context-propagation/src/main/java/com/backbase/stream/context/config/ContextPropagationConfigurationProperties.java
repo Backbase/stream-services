@@ -1,4 +1,4 @@
-package com.backbase.stream.m10y.config;
+package com.backbase.stream.context.config;
 
 import java.util.List;
 import lombok.Data;
@@ -7,8 +7,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 @Data
 @EnableConfigurationProperties
-@ConfigurationProperties("backbase.stream.multi-tenancy")
-public class MultiTenancyConfigurationProperties {
+@ConfigurationProperties("backbase.stream.context")
+public class ContextPropagationConfigurationProperties {
 
     public static final String TENANT_HEADER_NAME = "X-TID";
 

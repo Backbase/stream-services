@@ -1,11 +1,11 @@
-package com.backbase.stream.m10y.events;
+package com.backbase.stream.context.events;
 
 import com.backbase.buildingblocks.backend.communication.context.OriginatorContext;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.scs.EventMessageProcessor;
 import com.backbase.buildingblocks.backend.communication.event.scs.MessageFactoryProcessor;
 import com.backbase.buildingblocks.persistence.model.Event;
-import com.backbase.stream.m10y.TenantContext;
+import com.backbase.stream.context.TenantContext;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.support.MessageBuilder;

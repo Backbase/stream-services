@@ -1,11 +1,11 @@
-package com.backbase.stream.m10y.config;
+package com.backbase.stream.context.config;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.scs.MessageInProcessor;
-import com.backbase.stream.m10y.events.TenantEventMessageProcessor;
-import com.backbase.stream.m10y.events.TenantMessageInProcessor;
-import com.backbase.stream.m10y.reactor.TenantAwareContextSubscriberRegistrar;
-import com.backbase.stream.m10y.web.HeaderForwardingServerFilter;
+import com.backbase.stream.context.events.TenantEventMessageProcessor;
+import com.backbase.stream.context.events.TenantMessageInProcessor;
+import com.backbase.stream.context.reactor.TenantAwareContextSubscriberRegistrar;
+import com.backbase.stream.context.web.HeaderForwardingServerFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -15,8 +15,8 @@ import org.springframework.context.annotation.Configuration;
 
 
 @AutoConfiguration
-@EnableConfigurationProperties(MultiTenancyConfigurationProperties.class)
-public class MultiTenancyConfiguration {
+@EnableConfigurationProperties(ContextPropagationConfigurationProperties.class)
+public class ContextPropagationConfiguration {
 
     /**
      * Adds reactive server filter to chain.
@@ -25,7 +25,8 @@ public class MultiTenancyConfiguration {
      * @return .
      */
     @Bean
-    public HeaderForwardingServerFilter headerForwardingServerFilter(MultiTenancyConfigurationProperties properties) {
+    public HeaderForwardingServerFilter headerForwardingServerFilter(
+        ContextPropagationConfigurationProperties properties) {
         return new HeaderForwardingServerFilter(properties);
     }
 

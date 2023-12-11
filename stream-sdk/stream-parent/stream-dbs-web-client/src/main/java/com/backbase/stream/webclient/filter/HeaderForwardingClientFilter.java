@@ -1,6 +1,6 @@
 package com.backbase.stream.webclient.filter;
 
-import static com.backbase.stream.m10y.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
+import static com.backbase.stream.context.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
 
 import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
 import java.util.Optional;

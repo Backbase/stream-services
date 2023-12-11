@@ -1,9 +1,9 @@
-package com.backbase.stream.m10y.reactor;
+package com.backbase.stream.context.reactor;
 
-import static com.backbase.stream.m10y.config.MultiTenancyConfigurationProperties.TENANT_HEADER_NAME;
-import static com.backbase.stream.m10y.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
+import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_HEADER_NAME;
+import static com.backbase.stream.context.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
 
-import com.backbase.stream.m10y.TenantContext;
+import com.backbase.stream.context.TenantContext;
 import java.util.List;
 import java.util.function.Function;
 import org.reactivestreams.Publisher;

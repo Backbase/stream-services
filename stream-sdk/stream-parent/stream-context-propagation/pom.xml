@@ -8,9 +8,10 @@
         <version>3.69.0</version>
     </parent>
 
-    <artifactId>stream-multitenancy</artifactId>
+    <artifactId>stream-context-propagation</artifactId>
 
-    <name>Stream :: SDK :: multitenancy</name>
+    <name>Stream :: SDK :: Context Propagation</name>
+    <description>Used to propagate the request context to any downstream requests.</description>
 
     <properties>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>

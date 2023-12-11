@@ -1,8 +1,8 @@
-package com.backbase.stream.m10y.web;
+package com.backbase.stream.context.web;
 
-import static com.backbase.stream.m10y.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
+import static com.backbase.stream.context.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
 
-import com.backbase.stream.m10y.config.MultiTenancyConfigurationProperties;
+import com.backbase.stream.context.config.ContextPropagationConfigurationProperties;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class HeaderForwardingServerFilter implements WebFilter {
 
-    private final MultiTenancyConfigurationProperties properties;
+    private final ContextPropagationConfigurationProperties properties;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {

@@ -29,7 +29,7 @@
     </developers>
 
     <modules>
-        <module>stream-multitenancy</module>
+        <module>stream-context-propagation</module>
         <module>stream-dbs-web-client</module>
         <module>stream-test-support</module>
         <module>stream-openapi-support</module>

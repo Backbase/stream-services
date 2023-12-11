@@ -1,8 +1,8 @@
-package com.backbase.stream.m10y.reactor;
+package com.backbase.stream.context.reactor;
 
-import static com.backbase.stream.m10y.config.MultiTenancyConfigurationProperties.TENANT_HEADER_NAME;
+import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_HEADER_NAME;
 
-import com.backbase.stream.m10y.TenantContext;
+import com.backbase.stream.context.TenantContext;
 import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Subscription;
 import org.springframework.util.MultiValueMap;

@@ -1,9 +1,9 @@
-package com.backbase.stream.m10y.web;
+package com.backbase.stream.context.web;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.m10y.config.MultiTenancyConfigurationProperties;
+import com.backbase.stream.context.config.ContextPropagationConfigurationProperties;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +26,7 @@ class HeaderForwardingServerFilterTest {
     private HeaderForwardingServerFilter subject;
 
     @Mock
-    private MultiTenancyConfigurationProperties multiTenancyConfigurationProperties;
+    private ContextPropagationConfigurationProperties contextPropagationConfigurationProperties;
 
     @Mock
     private ServerWebExchange serverWebExchange;
@@ -50,7 +50,7 @@ class HeaderForwardingServerFilterTest {
         LinkedMultiValueMap<String, String> expectedForwardedHeaders = new LinkedMultiValueMap<>();
         expectedForwardedHeaders.put(headerKeyToForward, headerValueToForward);
 
-        when(multiTenancyConfigurationProperties.getHeadersToForward()).thenReturn(List.of(headerKeyToForward));
+        when(contextPropagationConfigurationProperties.getHeadersToForward()).thenReturn(List.of(headerKeyToForward));
         when(serverWebExchange.getRequest()).thenReturn(serverHttpRequest);
         when(serverHttpRequest.getPath()).thenReturn(requestPath);
         when(serverHttpRequest.getHeaders()).thenReturn(httpHeaders);
@@ -68,7 +68,7 @@ class HeaderForwardingServerFilterTest {
     void filterShouldNotForwardRequestHeaders() {
         String headerKeyToForward = "X-TID";
 
-        when(multiTenancyConfigurationProperties.getHeadersToForward()).thenReturn(List.of(headerKeyToForward));
+        when(contextPropagationConfigurationProperties.getHeadersToForward()).thenReturn(List.of(headerKeyToForward));
         when(serverWebExchange.getRequest()).thenReturn(serverHttpRequest);
         when(serverHttpRequest.getPath()).thenReturn(requestPath);
         when(serverHttpRequest.getHeaders()).thenReturn(httpHeaders);

@@ -47,7 +47,7 @@
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-multitenancy</artifactId>
+            <artifactId>stream-context-propagation</artifactId>
             <version>${project.version}</version>
         </dependency>
 

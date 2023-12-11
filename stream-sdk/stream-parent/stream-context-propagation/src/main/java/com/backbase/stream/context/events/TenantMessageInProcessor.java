@@ -1,7 +1,7 @@
-package com.backbase.stream.m10y.events;
+package com.backbase.stream.context.events;
 
 import com.backbase.buildingblocks.backend.communication.event.scs.MessageInProcessor;
-import com.backbase.stream.m10y.TenantContext;
+import com.backbase.stream.context.TenantContext;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
