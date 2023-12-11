@@ -15,7 +15,7 @@
 
     <properties>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
-        <sonar.tests />
+        <sonar.tests/>
     </properties>
 
     <dependencies>

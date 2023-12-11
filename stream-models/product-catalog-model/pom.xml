@@ -54,31 +54,19 @@
                 <executions>
                     <execution>
                         <id>cursor</id>
-                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>generate-spring-boot-embedded</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
-                            <generatorName>spring</generatorName>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
-                            <generateApiTests>false</generateApiTests>
-                            <generateApis>false</generateApis>
-                            <generateModels>true</generateModels>
-                            <generateSupportingFiles>false</generateSupportingFiles>
                             <output>${openapi-generator-maven-plugin.output}</output>
+                            <modelPackage>com.backbase.stream.productcatalog.model</modelPackage>
+                            <apiPackage>com.backbase.stream.productcatalog</apiPackage>
                             <configOptions>
-                                <library>spring-boot</library>
-                                <reactive>true</reactive>
-                                <java8>true</java8>
-                                <dateLibrary>java8</dateLibrary>
-                                <openapiDocketConfig>true</openapiDocketConfig>
-                                <interfaceOnly>false</interfaceOnly>
-                                <modelPackage>com.backbase.stream.productcatalog.model</modelPackage>
-                                <apiPackage>com.backbase.stream.productcatalog.api</apiPackage>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                                <performBeanValidation>true</performBeanValidation>
-                                <apis />
-                                <models />
+                                <useBeanValidation>false</useBeanValidation>
+                                <useReflectionEqualsHashCode>false</useReflectionEqualsHashCode>
                             </configOptions>
                         </configuration>
                     </execution>

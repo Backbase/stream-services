@@ -1,7 +1,6 @@
 package com.backbase.stream.config;
 
-import org.springframework.boot.actuate.trace.http.HttpTraceRepository;
-import org.springframework.boot.actuate.trace.http.InMemoryHttpTraceRepository;
+import org.springframework.boot.actuate.web.exchanges.InMemoryHttpExchangeRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,8 +28,8 @@ public class LegalEntityHttpConfiguration {
      */
     @Bean
     @ConditionalOnExpression("${management.endpoints.enabled-by-default:false} or ${management.trace.http.enabled:false}")
-    public HttpTraceRepository httpTraceRepository() {
-        return new InMemoryHttpTraceRepository();
+    public InMemoryHttpExchangeRepository httpTraceRepository() {
+        return new InMemoryHttpExchangeRepository();
     }
 
 }

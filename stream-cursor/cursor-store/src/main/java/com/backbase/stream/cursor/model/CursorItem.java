@@ -1,6 +1,7 @@
 package com.backbase.stream.cursor.model;
 
 
+import com.backbase.stream.legalentity.model.IngestionCursor;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Map;

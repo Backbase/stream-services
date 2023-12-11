@@ -38,6 +38,7 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -282,7 +283,7 @@ public class ProductIngestionSaga {
         ProductGroup productGroup = streamTask.getData();
         return productFlux
             .map(p -> ensureLegalEntityId(productGroup.getUsers(), p))
-            .sort(comparing(AccountArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
+            .sort(comparing(AccountArrangementItemPost::getExternalArrangementId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
             .flatMapSequential(arrangementItemPost -> upsertArrangement(streamTask, arrangementItemPost))
             .collectList();
     }
@@ -401,7 +402,7 @@ public class ProductIngestionSaga {
         if (!isEmpty(product.getExternalLegalEntityIds())) {
             legalEntityExternalIds.addAll(product.getExternalLegalEntityIds());
         }
-        product.setExternalLegalEntityIds(new ArrayList<>(legalEntityExternalIds));
+        product.setExternalLegalEntityIds(new HashSet<>(legalEntityExternalIds));
         return product;
     }
 

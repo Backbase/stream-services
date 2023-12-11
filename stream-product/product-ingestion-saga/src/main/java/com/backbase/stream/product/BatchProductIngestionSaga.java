@@ -200,7 +200,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
 
         Set<String> upsertedInternalIds = new HashSet<>();
         return Flux.fromIterable(itemsToUpsert)
-                .sort(comparing(AccountArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
+                .sort(comparing(AccountArrangementItemPost::getExternalArrangementId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
                 .buffer(50) // hardcoded to match DBS limitation
                 .concatMap(batch -> arrangementService.upsertBatchArrangements(batch)
                         .doOnNext(r -> batchProductGroupTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, UPDATED, r.getResourceId(), r.getArrangementId(), "Updated Arrangements (in batch)"))

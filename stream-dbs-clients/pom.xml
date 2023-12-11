@@ -71,6 +71,7 @@
             <artifactId>stream-dbs-web-client</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <!-- Swagger codegen dependencies -->
         <dependency>
             <groupId>io.swagger</groupId>
@@ -220,7 +221,7 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>0.16.5</version>
+                <version>0.17.24</version>
                 <executions>
                     <execution>
                         <id>generate-accesscontrol-client-api-code</id>
@@ -229,6 +230,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v3*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.service.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.service.v3.model</modelPackage>
@@ -241,9 +243,10 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v2</apiPackage>
-                            <modelPackage>com.backbase.dbs.accesscontrol.api.integration.v2.model</modelPackage>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v3*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v3</apiPackage>
+                            <modelPackage>com.backbase.dbs.accesscontrol.api.integration.v3.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
@@ -253,6 +256,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.arrangement.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.arrangement.api.service.v2.model</modelPackage>
@@ -265,28 +269,10 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/loan/loan-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.loan.inbound.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.loan.inbound.api.service.v1.model</modelPackage>
-                            <generateSupportingFiles>true</generateSupportingFiles>
-                            <generatorName>java</generatorName>
-                            <strictSpec>true</strictSpec>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelTests>false</generateModelTests>
-                            <configOptions>
-                                <library>resttemplate</library>
-                                <restTemplateBeanName>interServiceRestTemplate</restTemplateBeanName>
-                                <dateLibrary>java8</dateLibrary>
-                                <interfaceOnly>true</interfaceOnly>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                                <useBeanValidation>true</useBeanValidation>
-                                <generateAliasAsModel>true</generateAliasAsModel>
-                                <useClassLevelBeanValidation>false</useClassLevelBeanValidation>
-                                <useTags>true</useTags>
-                                <java8>true</java8>
-                                <useOptional>false</useOptional>
-                                <sourceFolder>/</sourceFolder>
-                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -296,6 +282,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.user.api.service.v2.model</modelPackage>
@@ -308,6 +295,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.profile.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.user.profile.api.service.v2.model</modelPackage>
@@ -320,6 +308,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.transaction.api.service.v2.model</modelPackage>
@@ -338,6 +327,7 @@
                             <importMappings>
                                 <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
                             </importMappings>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.paymentorder.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.paymentorder.api.service.v2.model</modelPackage>
@@ -350,6 +340,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/audit/audit-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.audit.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.audit.api.service.v2.model</modelPackage>
@@ -362,6 +353,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/limit/limit-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.limit.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.limit.api.service.v2.model</modelPackage>
@@ -374,6 +366,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.approval.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.approval.api.service.v2.model</modelPackage>
@@ -386,6 +379,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/identity/identity-integration-outbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.identity.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.identity.integration.api.service.v1.model</modelPackage>
@@ -398,6 +392,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-instrument-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.portfolio.instrument.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.portfolio.instrument.integration.api.service.v1.model</modelPackage>
@@ -410,6 +405,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.portfolio.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.portfolio.api.service.integration.v1.model</modelPackage>
@@ -422,6 +418,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.build.directory}/yaml/contact-manager/contact-manager-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.contact.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.contact.api.service.v2.model</modelPackage>
@@ -445,6 +442,7 @@
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <inputSpec>${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.audiences.collector.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.audiences.collector.api.service.v1.model</modelPackage>
