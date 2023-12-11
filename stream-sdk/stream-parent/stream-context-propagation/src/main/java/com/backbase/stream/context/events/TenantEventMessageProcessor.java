@@ -1,5 +1,7 @@
 package com.backbase.stream.context.events;
 
+import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_EVENT_HEADER_NAME;
+
 import com.backbase.buildingblocks.backend.communication.context.OriginatorContext;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.scs.EventMessageProcessor;
@@ -16,10 +18,8 @@ import org.springframework.messaging.support.MessageBuilder;
 @Slf4j
 public class TenantEventMessageProcessor implements EventMessageProcessor, MessageFactoryProcessor {
 
-    public static final String TID_HEADER_NAME = "bbTenantId";
-
     /**
-     * Adds the currently-bound tenant ID to the {@link #TID_HEADER_NAME} header of the given {@link MessageBuilder}.
+     * Adds the currently-bound tenant ID to the TENANT_EVENT_HEADER_NAME header of the given {@link MessageBuilder}.
      */
     @Override
     public <T extends Event> void prepareEventMessage(MessageBuilder<T> messageBuilder,
@@ -29,14 +29,14 @@ public class TenantEventMessageProcessor implements EventMessageProcessor, Messa
     }
 
     /**
-     * Adds the currently-bound tenant ID to the {@link #TID_HEADER_NAME} header of the given {@link MessageBuilder}.
+     * Adds the currently-bound tenant ID to the TENANT_EVENT_HEADER_NAME header of the given {@link MessageBuilder}.
      */
     @Override
     public <T> void prepareEventMessage(MessageBuilder<T> messageBuilder, OriginatorContext context) {
         Optional<String> tenant = TenantContext.getTenant();
         log.debug("prepareEventMessage {}", tenant);
         if (tenant.isPresent()) {
-            messageBuilder.setHeader(TID_HEADER_NAME, tenant.get());
+            messageBuilder.setHeader(TENANT_EVENT_HEADER_NAME, tenant.get());
         } else {
             log.debug("A Tenant is not present in the context.");
         }

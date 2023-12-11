@@ -1,6 +1,6 @@
 package com.backbase.stream.context.reactor;
 
-import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_HEADER_NAME;
+import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_HTTP_HEADER_NAME;
 import static com.backbase.stream.context.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
 
 import com.backbase.stream.context.TenantContext;
@@ -41,7 +41,7 @@ public class TenantAwareContextSubscriberRegistrar implements InitializingBean, 
             return delegate;
         }
         HttpHeaders headers = new HttpHeaders();
-        headers.put(TENANT_HEADER_NAME, List.of(TenantContext.getTenant().get()));
+        headers.put(TENANT_HTTP_HEADER_NAME, List.of(TenantContext.getTenant().get()));
         return new HeaderForwardingContextSubscriber<>(delegate, headers);
     }
 

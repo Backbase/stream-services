@@ -1,6 +1,6 @@
 package com.backbase.stream.context.reactor;
 
-import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_HEADER_NAME;
+import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_HTTP_HEADER_NAME;
 
 import com.backbase.stream.context.TenantContext;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ public class HeaderForwardingContextSubscriber<T> implements CoreSubscriber<T> {
         if (currentContext.hasKey(FORWARDED_HEADERS_CONTEXT_KEY)) {
             return currentContext;
         }
-        log.debug("Setting tenant in reactor context: {}", headers.getFirst(TENANT_HEADER_NAME));
+        log.debug("Setting tenant in reactor context: {}", headers.getFirst(TENANT_HTTP_HEADER_NAME));
         return currentContext.put(FORWARDED_HEADERS_CONTEXT_KEY, headers);
     }
 
@@ -65,7 +65,7 @@ public class HeaderForwardingContextSubscriber<T> implements CoreSubscriber<T> {
     private void setTenantInThreadContext() {
         // TODO: Use the new reactor context propagator when upgrading to SSDK 16 to avoid concurrency issues.
         MultiValueMap<String, String> headers = currentContext().get(FORWARDED_HEADERS_CONTEXT_KEY);
-        headers.get(TENANT_HEADER_NAME)
+        headers.get(TENANT_HTTP_HEADER_NAME)
             .stream()
             .findFirst()
             .map(tenant -> {

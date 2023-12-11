@@ -10,11 +10,12 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @ConfigurationProperties("backbase.stream.context")
 public class ContextPropagationConfigurationProperties {
 
-    public static final String TENANT_HEADER_NAME = "X-TID";
+    public static final String TENANT_HTTP_HEADER_NAME = "X-TID";
+    public static final String TENANT_EVENT_HEADER_NAME = "bbTenantId";
 
     /**
      * Header keys from the original request to forward to DBS Service calls.
      */
-    private List<String> headersToForward = List.of(TENANT_HEADER_NAME);
+    private List<String> headersToForward = List.of(TENANT_HTTP_HEADER_NAME);
 
 }
