@@ -1,7 +1,7 @@
 package com.backbase.stream.controller;
 
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
-import com.backbase.stream.productcatalog.api.ProductCatalogApi;
+import com.backbase.stream.productcatalog.ProductCatalogApi;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

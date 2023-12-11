@@ -65,6 +65,7 @@
                             <modelPackage>com.backbase.stream.productcatalog.model</modelPackage>
                             <apiPackage>com.backbase.stream.productcatalog</apiPackage>
                             <configOptions>
+                                <reactive>true</reactive>
                                 <useBeanValidation>false</useBeanValidation>
                                 <useReflectionEqualsHashCode>false</useReflectionEqualsHashCode>
                             </configOptions>
