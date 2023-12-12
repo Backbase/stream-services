@@ -1,0 +1,48 @@
+{
+  "request" : {
+    "urlPathPattern" : "/service-api/v2/legal-entity",
+    "method" : "POST"
+  },
+  "response" : {
+    "status" : 200,
+    "jsonBody" : {
+      "legalEntity": {
+        "name": "TESS JACKQUELINE SHOOK",
+        "externalId": "{{ jsonPath request.body '$.legalEntityExternalId' }}",
+        "legalEntityType": "CUSTOMER",
+        "realmName": "backbase",
+        "parentExternalId": "BANK",
+        "users": [
+          {
+            "user": {
+              "externalId": "{{ jsonPath request.body '$.userExternalId' }}",
+              "emailAddress": {
+                "address": "{{ jsonPath request.body '$.userExternalId' }}@backbase.com"
+              },
+              "mobileNumber": {
+                "number": "+31611193399"
+              },
+              "fullName": "TESS JACKQUELINE SHOOK",
+              "identityLinkStrategy": "CREATE_IN_IDENTITY"
+            },
+            "referenceJobRoleNames": [
+              "Retail User - USA"
+            ]
+          }
+        ]
+      }
+    },
+    "headers" : {
+      "X-Content-Type-Options" : "nosniff",
+      "X-XSS-Protection" : "1; mode=block",
+      "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma" : "no-cache",
+      "Expires" : "0",
+      "X-Frame-Options" : "DENY",
+      "Content-Type" : "application/json",
+      "Date" : "Wed, 26 Oct 2022 12:16:40 GMT",
+      "Keep-Alive" : "timeout=60"
+    },
+    "transformers": ["response-template"]
+  }
+}

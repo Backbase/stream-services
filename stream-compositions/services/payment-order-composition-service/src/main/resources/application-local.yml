@@ -2,14 +2,13 @@ server:
   port: 9005
 
 spring:
+  cloud:
+    loadbalancer:
+      enabled: false
   activemq:
     broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
-  main:
-    allow-bean-definition-overriding: true
-  codec:
-    max-in-memory-size: 10MB
 sso.jwt.internal.signature.key:
   type: VALUE
   value: JWTSecretKeyDontUseInProduction!
@@ -35,7 +34,6 @@ backbase:
             direct-uri: http://localhost:7004
     http:
       client-secret: bb-secret
-      client-id: bb-client
       access-token-uri: "http://localhost:7779/oauth/token"
   activemq:
     enabled: true
@@ -46,9 +44,7 @@ backbase:
 
 eureka:
   instance:
-    metadata-map:
-      public: true
-      role: live
+    hostname: host.docker.internal
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/

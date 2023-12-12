@@ -1,6 +1,24 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.70.0](https://github.com/Backbase/stream-services/compare/3.69.0...3.70.0)
+### Added
+- Support to Events via Azure Service Bus for the Stream Composition Services
+- Product Composition now supports transaction-manager's out-of-the-box pulling mechanism, via the `transaction-pull-integration-service`. A separate chain was created for that, enabled via: `backbase.stream.compositions.product.chains.transaction-manager.enabled`
+  - Only one of the transaction chains can be enabled, either the `transaction-manager` or `transaction-composition`.
+  - The purpose of this new chain is to create better support for the OOTB implementation and enable ModelBank projects.
+  - The refresh supports fine graining the pulling requests per arrangement, or a bulk request for all arrangements at once via configuring `splitPerArrangement` and `concurrency` properties.
+- Multi-tenancy support to SSDK message broker Events
+  - Only supported for `spring.cloud.stream.default.consumer.concurrency=1` - Will be enhanced when upgraded to Service SDK 16
+  - **Breaking Change**: Property `backbase.stream.client.headersToForward` is now replaced by `backbase.stream.context.headersToForward`
+
+### Changed
+- Bumping Service SDK to **15.2.4**
+- Bumping Banking Services clients to **2023.09.17-LTS**
+- **Breaking Change**: Stream Composition services Async chains will now use SSDK message broker Events instead of relying in Reactive Subscriptions.
+  - This will bring better isolation during events processing and more control in terms of throughput and concurency.
+- Enhancing Api Client logs when `logging.level.reactor.netty.http.client=DEBUG`
+
 ## [3.69.0](https://github.com/Backbase/stream-services/compare/3.68.0...3.69.0)
 ### Added
 - Add customer category to service agreement spec

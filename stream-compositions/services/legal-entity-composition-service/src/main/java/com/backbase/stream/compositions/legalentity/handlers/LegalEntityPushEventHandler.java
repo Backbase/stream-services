@@ -19,7 +19,8 @@ public class LegalEntityPushEventHandler implements EventHandler<LegalEntityPush
     @Override
     public void handle(EnvelopedEvent<LegalEntityPushEvent> envelopedEvent) {
         //TODO: TBD implementation of Push events
-        legalEntityIngestionService.ingestPush(buildRequest(envelopedEvent));
+        legalEntityIngestionService.ingestPush(buildRequest(envelopedEvent))
+            .block();
     }
 
     /**

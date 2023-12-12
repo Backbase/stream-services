@@ -12,19 +12,19 @@ import com.backbase.stream.compositions.transaction.core.mapper.TransactionMappe
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPullRequest;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.stream.Collectors;
-
 @Component
 @AllArgsConstructor
 @Slf4j
 @EnableConfigurationProperties(TransactionConfigurationProperties.class)
 public class TransactionIngestPullEventHandler implements EventHandler<TransactionsPullEvent> {
+
     private final TransactionConfigurationProperties configProperties;
     private final TransactionIngestionService transactionIngestionService;
     private final TransactionMapper mapper;
@@ -38,8 +38,9 @@ public class TransactionIngestPullEventHandler implements EventHandler<Transacti
     @Override
     public void handle(EnvelopedEvent<TransactionsPullEvent> envelopedEvent) {
         transactionIngestionService.ingestPull(buildRequest(envelopedEvent.getEvent()))
-                .onErrorResume(this::handleError)
-                .subscribe(this::handleResponse);
+            .doOnSuccess(this::handleResponse)
+            .onErrorResume(this::handleError)
+            .block();
     }
 
 

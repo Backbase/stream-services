@@ -34,6 +34,9 @@ import com.backbase.stream.portfolio.model.RegionBundle;
 import com.backbase.stream.portfolio.model.SubAssetClass;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -215,7 +218,7 @@ class InstrumentIntegrationServiceTest {
         Mockito.verify(instrumentPriceManagementApi)
             .putInstrumentHistoryPrices(instrumentId, new InstrumentPricesHistoryPutRequest()
                 .priceData(List.of(new InstrumentHistoryPricesRequestItem()
-                    .date(localDate)
+                    .date(OffsetDateTime.of(localDate, LocalTime.NOON, ZoneOffset.UTC))
                     .price(new com.backbase.portfolio.instrument.integration.api.service.v1.model.Money()
                         .amount(BigDecimal.ONE)
                         .currencyCode("USD"))

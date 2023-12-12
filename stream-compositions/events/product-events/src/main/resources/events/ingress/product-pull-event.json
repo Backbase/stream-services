@@ -6,6 +6,10 @@
       "description": "Legal entity external id",
       "type": "string"
     },
+    "legalEntityInternalId": {
+      "description": "Legal entity internal id",
+      "type": "string"
+    },
     "serviceAgreementExternalId": {
       "type": "string"
     },
@@ -17,6 +21,21 @@
     },
     "userInternalId": {
       "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "transactionChainEnabled": {
+      "type": "boolean"
+    },
+    "paymentOrderChainEnabled": {
+      "type": "boolean"
+    },
+    "referenceJobRoleNames": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "membershipAccounts": {
       "type": "array",

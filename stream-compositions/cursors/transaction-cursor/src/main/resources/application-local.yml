@@ -17,7 +17,6 @@ spring:
     enabled: true
     change-log: db/changelog/db.changelog-persistence.xml
 
-
 backbase:
   communication:
     services:
@@ -40,23 +39,10 @@ logging:
   level:
     com.backbase.stream.compositions: DEBUG
 
-backbase.activemq.enabled: true
-spring.activemq.broker-url: tcp://localhost:61616
-
 eureka:
   instance:
-    metadata-map:
-      public: true
-      role: live
+    hostname: host.docker.internal
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
-
-sso:
-  jwt:
-    internal:
-      signature:
-        key:
-          type: ENV
-          value: SIG_SECRET_KEY
 
