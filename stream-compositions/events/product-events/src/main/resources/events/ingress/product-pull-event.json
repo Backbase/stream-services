@@ -22,6 +22,15 @@
     "userInternalId": {
       "type": "string"
     },
+    "source": {
+      "type": "string"
+    },
+    "transactionChainEnabled": {
+      "type": "boolean"
+    },
+    "paymentOrderChainEnabled": {
+      "type": "boolean"
+    },
     "referenceJobRoleNames": {
       "type": "array",
       "items": {

@@ -103,9 +103,9 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     }
 
     private Mono<ProductIngestResponse> ingestTransactions(ProductIngestResponse res) {
-        return extractProducts(res.getProductGroups())
-            .map(product -> buildTransactionPullRequest(product, res))
-            .flatMap(transactionIngestionService::ingestTransactions)
+        return transactionIngestionService.ingestTransactions(
+                extractProducts(res.getProductGroups())
+                    .map(product -> buildTransactionPullRequest(product, res)))
             .onErrorResume(this::handleTransactionError)
             .collectList()
             .map(p -> res);
@@ -123,9 +123,9 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     }
 
     private Mono<ProductIngestResponse> ingestTransactionsAsync(ProductIngestResponse res) {
-        return extractProducts(res.getProductGroups())
-            .map(product -> buildTransactionPullRequest(product, res))
-            .flatMap(transactionIngestionService::ingestTransactionsAsync)
+        return transactionIngestionService.ingestTransactionsAsync(
+                extractProducts(res.getProductGroups())
+                    .map(product -> buildTransactionPullRequest(product, res)))
             .collectList()
             .map(p -> res);
     }

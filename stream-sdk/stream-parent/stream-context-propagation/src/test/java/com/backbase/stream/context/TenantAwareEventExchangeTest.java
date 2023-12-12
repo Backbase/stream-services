@@ -16,17 +16,16 @@ import com.backbase.buildingblocks.backend.communication.event.config.SpringClou
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.buildingblocks.persistence.model.Event;
-import com.backbase.stream.context.TenantAwareEventExchangeTest.TestEventHandlerConfiguration;
+import com.backbase.stream.context.TenantAwareEventExchangeTest.TestEventHandler;
 import com.backbase.stream.context.config.ContextPropagationConfiguration;
 import com.backbase.stream.context.events.TenantEventMessageProcessor;
 import com.backbase.stream.context.events.TenantMessageInProcessor;
-import lombok.Builder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
-import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.function.cloudevent.CloudEventsFunctionExtensionConfiguration;
 import org.springframework.cloud.function.context.config.ContextFunctionCatalogAutoConfiguration;
@@ -34,7 +33,7 @@ import org.springframework.cloud.stream.binder.test.TestChannelBinderConfigurati
 import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
 import org.springframework.cloud.stream.config.BindingServiceConfiguration;
 import org.springframework.cloud.stream.function.FunctionConfiguration;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -54,9 +53,9 @@ import reactor.test.StepVerifier;
     EventBindableAutoConfiguration.class,
     JacksonAutoConfiguration.class,
     ContextPropagationConfiguration.class,
-    TestChannelBinderConfiguration.class,
-    TestEventHandlerConfiguration.class
+    TestChannelBinderConfiguration.class
 })
+@Import(TestEventHandler.class)
 public class TenantAwareEventExchangeTest {
 
     @Autowired
@@ -71,8 +70,8 @@ public class TenantAwareEventExchangeTest {
     @Test
     void tenantIdShouldBeSetInEventHeadersAndReactorHeaderContext() {
         TenantContext.setTenant("t1");
-        var event = new EnvelopedEvent<TestEvent>();
-        event.setEvent(TestEvent.builder().message("Test").build());
+        var event = new EnvelopedEvent<Event>();
+        event.setEvent(new Event());
         eventBus.emitEvent(event);
 
         verify(tenantEventMessageProcessor).prepareEventMessage(any(), any(EnvelopedEvent.class));
@@ -80,47 +79,26 @@ public class TenantAwareEventExchangeTest {
             .processPostReceived(argThat(m -> "t1".equals(m.getHeaders().get(TENANT_EVENT_HEADER_NAME))), any(), any());
     }
 
-    @Builder
-    static class TestEvent extends Event {
+    @TestComponent
+    static class TestEventHandler implements EventHandler<Event> {
 
-        private String message;
+        @Autowired
+        WebClient.Builder webClientBuilder;
 
         @Override
-        public String toString() {
-            return "TestEvent [message="
-                + message
-                + "]";
-        }
-    }
-
-    @TestConfiguration
-    static class TestEventHandlerConfiguration {
-
-        @Bean
-        public TestEventHandler testEventHandler() {
-            return new TestEventHandler();
-        }
-
-        static class TestEventHandler implements EventHandler<TestEvent> {
-
-            @Autowired
-            WebClient.Builder webClientBuilder;
-
-            @Override
-            public void handle(EnvelopedEvent<TestEvent> internalRequest) {
-                StepVerifier.create(webClientBuilder.build()
-                        .get()
-                        .uri("http://localhost")
-                        .retrieve()
-                        .toBodilessEntity())
-                    .expectAccessibleContext()
-                    .matches(c -> {
-                        MultiValueMap<String, String> headers = c.get(FORWARDED_HEADERS_CONTEXT_KEY);
-                        return "t1".equals(headers.get(TENANT_HTTP_HEADER_NAME).get(0));
-                    })
-                    .then()
-                    .verifyError();
-            }
+        public void handle(EnvelopedEvent<Event> internalRequest) {
+            StepVerifier.create(webClientBuilder.build()
+                    .get()
+                    .uri("http://localhost")
+                    .retrieve()
+                    .toBodilessEntity())
+                .expectAccessibleContext()
+                .matches(c -> {
+                    MultiValueMap<String, String> headers = c.get(FORWARDED_HEADERS_CONTEXT_KEY);
+                    return "t1".equals(headers.get(TENANT_HTTP_HEADER_NAME).get(0));
+                })
+                .then()
+                .verifyError();
         }
     }
 

@@ -41,15 +41,13 @@ public class ProductConfigurationProperties implements InitializingBean {
 
     public boolean isTransactionChainEnabled(RequestConfig requestConfig) {
         return requestConfig == null || requestConfig.isTransactionChainEnabled().isEmpty()
-            ? Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
-            || Boolean.TRUE.equals(chains.getTransactionManager().getEnabled())
+            ? isTransactionChainEnabled()
             : requestConfig.isTransactionChainEnabled().orElse(false);
     }
 
     public boolean isTransactionChainAsync(RequestConfig requestConfig) {
         return requestConfig == null || requestConfig.isTransactionChainAsync().isEmpty()
-            ? Boolean.TRUE.equals(chains.getTransactionComposition().getAsync())
-            || Boolean.TRUE.equals(chains.getTransactionManager().getAsync())
+            ? isTransactionChainAsync()
             : requestConfig.isTransactionChainAsync().orElse(false);
     }
 
@@ -128,8 +126,19 @@ public class ProductConfigurationProperties implements InitializingBean {
         private Boolean async = Boolean.FALSE;
     }
 
+    @Getter
+    @Setter
     public static class TransactionManager extends TransactionComposition {
 
+        /**
+         * The transaction manager supports a refresh call for all accounts at a single time;
+         * however, some systems can't handle the throughput, so we enable one request per arrangement.
+         */
+        private Boolean splitPerArrangement = Boolean.TRUE;
+        /**
+         * In case a split per arrangement is made, and in sync mode, it limits the number of concurrent calls.
+         */
+        private Integer concurrency = 1;
     }
 
     @Data

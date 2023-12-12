@@ -50,6 +50,8 @@ backbase:
           transaction-manager:
             enabled: false
             async: false
+            splitPerArrangement: false
+            concurrency: 1
           transaction-composition:
             enabled: false
             async: false
