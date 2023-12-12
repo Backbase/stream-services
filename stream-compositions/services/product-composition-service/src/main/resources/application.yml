@@ -1,6 +1,4 @@
 spring:
-  zipkin:
-    enabled: false
   main:
     allow-bean-definition-overriding: true
 sso:
@@ -16,9 +14,6 @@ backbase:
   communication:
     http:
       default-service-port: 8080
-      client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: http://token-converter:8080/oauth/token
   mtls:
     enabled: false
   security:
@@ -27,16 +22,13 @@ backbase:
   stream:
     compositions:
       product:
-        integration-base-url: http://product-integration:8080
         chains:
           transaction-composition:
             enabled: true
-            base-url: http://transaction-composition:8080
             async: false
             excludeProductTypeExternalIds:
           payment-order-composition:
             enabled: true
-            base-url: http://payment-order-composition:8080
             async: false
             excludeProductTypeExternalIds:
         events:
@@ -44,16 +36,12 @@ backbase:
           enableFailed: true
         cursor:
           enabled: false
-          base-url: http://product-cursor:8080
         ingestion-mode:
           function-groups: UPSERT
           data-groups: UPSERT
           arrangements: UPSERT
 logging:
   level:
-    #    root: DEBUG
-    com:
-      backbase:
-        dbs: DEBUG
-        buildingblocks: DEBUG
+    com.backbase.dbs: DEBUG
+    com.backbase.buildingblocks: DEBUG
 

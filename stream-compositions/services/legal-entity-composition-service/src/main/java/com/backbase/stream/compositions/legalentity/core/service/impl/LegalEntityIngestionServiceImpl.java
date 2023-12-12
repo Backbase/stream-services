@@ -4,6 +4,7 @@ import com.backbase.buildingblocks.presentation.errors.BadRequestException;
 import com.backbase.buildingblocks.presentation.errors.Error;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
+import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
@@ -11,18 +12,17 @@ import com.backbase.stream.compositions.legalentity.core.service.LegalEntityInge
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityPostIngestionService;
 import com.backbase.stream.legalentity.model.LegalEntity;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,6 +33,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
     private final LegalEntityIntegrationService legalEntityIntegrationService;
     private final Validator validator;
     private final LegalEntityPostIngestionService legalEntityPostIngestionService;
+    private final LegalEntityConfigurationProperties legalEntityConfigurationProperties;
 
     /**
      * {@inheritDoc}
@@ -73,10 +74,15 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
      * @return LegalEntity
      */
     private Mono<LegalEntityResponse> sendToDbs(LegalEntityResponse res) {
-        return legalEntitySaga.executeTask(new LegalEntityTask(res.getLegalEntity()))
+        return legalEntitySaga
+                .executeTask(
+                        new LegalEntityTask(
+                                res.getLegalEntity(),
+                                legalEntityConfigurationProperties.ingestionMode()))
                 .map(LegalEntityTask::getData)
                 .map(le -> LegalEntityResponse.builder()
                         .legalEntity(le)
+                        .additions(res.getAdditions())
                         .membershipAccounts(res.getMembershipAccounts())
                         .productChainEnabledFromRequest(res.getProductChainEnabledFromRequest())
                         .build());

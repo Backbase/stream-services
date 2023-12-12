@@ -36,6 +36,7 @@ import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.ValueMapping;
 import org.mapstruct.ValueMappings;
@@ -67,6 +68,7 @@ public interface ProductMapper {
     @InheritConfiguration
     @Mapping(source = "debitCardsItems", target = "debitCards")
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     AccountArrangementItemPost toPresentation(CurrentAccount currentAccount);
 
 
@@ -75,6 +77,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITY_IDS)
     @Mapping(source = ProductMapperConstants.DEBIT_CARDS_ITEMS, target = ProductMapperConstants.DEBIT_CARDS)
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @InheritConfiguration
     AccountArrangementItemPost toPresentation(SavingsAccount savingsAccount);
 
@@ -83,6 +86,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_PRODUCT_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITY_IDS)
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = "debitCard", qualifiedByName = "mapDebitCardNumber", target = ProductMapperConstants.NUMBER)
     @InheritConfiguration
     AccountArrangementItemPost toPresentation(DebitCard debitCard);
 
@@ -91,6 +95,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_PRODUCT_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITY_IDS)
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = "creditCard", qualifiedByName = "mapCreditCardNumber", target = ProductMapperConstants.NUMBER)
     @InheritConfiguration
     AccountArrangementItemPost toPresentation(CreditCard creditCard);
 
@@ -98,6 +103,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_PRODUCT_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITY_IDS)
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @InheritConfiguration
     AccountArrangementItemPost toPresentation(TermDeposit termDeposit);
 
@@ -105,6 +111,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_PRODUCT_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITY_IDS)
     @Mapping(source = "currentInvestment.amount", target = "currentInvestmentValue")
+    @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @InheritConfiguration
     AccountArrangementItemPost toPresentation(InvestmentAccount investmentAccount);
 
@@ -113,6 +120,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_PRODUCT_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITY_IDS)
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @InheritConfiguration
     AccountArrangementItemPost toPresentation(Loan loan);
 
@@ -122,7 +130,9 @@ public interface ProductMapper {
 
     AccountArrangementItemBase toArrangementItemBase(AccountArrangementItemPost arrangementItemPost);
 
-    AccountArrangementItem toArrangementItem(AccountArrangementItemBase arrangementItemPost);
+    AccountArrangementItem toArrangementItem(AccountArrangementItemBase arrangementItemBase);
+
+    AccountArrangementItem toArrangementItem(AccountArrangementItemPut arrangementItemPut);
 
     //
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
@@ -357,4 +367,19 @@ public interface ProductMapper {
     @Mapping(source = "userExternalId", target = "userId")
     AccountUserPreferencesItemPut mapUserPreference(UserPreferences userPreferences);
 
+    @Named("mapDebitCardNumber")
+    default String mapDebitCardNumber(DebitCard debitCard) {
+        if (StringUtils.hasText(debitCard.getNumber())) {
+            return debitCard.getNumber();
+        }
+        return debitCard.getPanSuffix();
+    }
+
+    @Named("mapCreditCardNumber")
+    default String mapCreditCardNumber(CreditCard creditCard) {
+        if (StringUtils.hasText(creditCard.getNumber())) {
+            return creditCard.getNumber();
+        }
+        return creditCard.getPanSuffix();
+    }
 }

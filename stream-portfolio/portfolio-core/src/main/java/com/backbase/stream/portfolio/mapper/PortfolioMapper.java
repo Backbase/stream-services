@@ -39,9 +39,9 @@ import com.backbase.stream.portfolio.model.TransactionCategory;
 @Mapper
 public interface PortfolioMapper {
 
-    PortfoliosPostRequest mapPortfolio(Portfolio region);
+    PortfoliosPostRequest mapPortfolio(Portfolio portfolio);
 
-    PortfoliosPutRequest mapPutPortfolio(Portfolio region);
+    PortfoliosPutRequest mapPutPortfolio(Portfolio portfolio);
 
     SubPortfoliosPostRequest mapSubPortfolio(SubPortfolio subPortfolio);
 

@@ -15,6 +15,10 @@ import com.backbase.stream.portfolio.model.Instrument;
 import com.backbase.stream.portfolio.model.InstrumentHistoryPrice;
 import com.backbase.stream.portfolio.model.Region;
 import com.backbase.stream.portfolio.model.SubAssetClass;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -41,5 +45,9 @@ public interface InstrumentMapper {
     SubAssetClassPutRequest mapPutSubAssetClass(SubAssetClass assetClass);
 
     List<InstrumentHistoryPricesRequestItem> mapHistoryPrices(List<InstrumentHistoryPrice> historyPrices);
+
+    default OffsetDateTime map(LocalDate value) {
+        return OffsetDateTime.of(value, LocalTime.NOON, ZoneOffset.UTC);
+    }
 
 }

@@ -8,7 +8,7 @@ spring:
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:root}
     url: jdbc:mysql://localhost:3306/transaction_cursor?createDatabaseIfNotExist=true&useSSL=false
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
   zipkin:
     enabled: false
   main:
@@ -17,46 +17,32 @@ spring:
     enabled: true
     change-log: db/changelog/db.changelog-persistence.xml
 
-
 backbase:
   communication:
     services:
       usermanager:
-        direct-uri: http://localhost:8086/user-manager
+        direct-uri: http://localhost:8060
       access-control:
-        direct-uri: http://localhost:8086/access-control
+        direct-uri: http://localhost:8040
       arrangement:
         manager:
-          direct-uri: http://localhost:8082/arrangement-manager
+          direct-uri: http://localhost:8061
       user:
         profile:
           direct-uri: http://localhost:8086/user-profile-manager
     http:
       client-secret: bb-secret
       client-id: bb-client
-      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+      access-token-uri: "http://localhost:7779/oauth/token"
 
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
 
-backbase.activemq.enabled: true
-spring.activemq.broker-url: tcp://localhost:61616
-
 eureka:
   instance:
-    metadata-map:
-      public: true
-      role: live
+    hostname: host.docker.internal
   client:
     serviceUrl:
-      defaultZone: http://localhost:8080/registry/eureka/
-
-sso:
-  jwt:
-    internal:
-      signature:
-        key:
-          type: ENV
-          value: SIG_SECRET_KEY
+      defaultZone: http://localhost:8761/eureka/
 

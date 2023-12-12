@@ -1,33 +1,22 @@
 package com.backbase.stream.service;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntitiesApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntityApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntitiesBatchDelete;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityCreateItem;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityItemId;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.LegalEntityPut;
+import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntitiesBatchDelete;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityCreateItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityPut;
 import com.backbase.stream.exceptions.LegalEntityException;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.mapper.AccessGroupMapper;
 import com.backbase.stream.mapper.LegalEntityMapper;
 import com.backbase.stream.utils.BatchResponseUtils;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Objects;
-import java.util.UUID;
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -45,19 +34,10 @@ public class LegalEntityService {
     @NonNull
     private final LegalEntitiesApi legalEntitiesApi;
     @NonNull
-    private final LegalEntityApi legalEntityApi;
-    @NonNull
     private final BatchResponseUtils batchResponseUtils;
 
     private final LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
     private final AccessGroupMapper serviceAgreementMapper = Mappers.getMapper(AccessGroupMapper.class);
-
-    // Configured at access-control service
-    @Value("${backbase.accesscontrol.token.key:Bar12345Bar12345}")
-    private final String accessControlApiTokenKey = "Bar12345Bar12345";
-
-    @Value("${backbase.accesscontrol.token.initPhrase:RandomInitVecto2}")
-    private final String accessControlApiTokenInitPhrase = "RandomInitVecto2";
 
     /**
      * Create Legal Entity in Access Control.
@@ -75,7 +55,7 @@ public class LegalEntityService {
             });
     }
 
-    private Mono<LegalEntityItemId> createLegalEntity(LegalEntityCreateItem legalEntity) {
+    private Mono<IdItem> createLegalEntity(LegalEntityCreateItem legalEntity) {
         // Create Legal Entity without master service agreement
         return legalEntitiesApi.postCreateLegalEntities(legalEntity)
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
@@ -95,7 +75,7 @@ public class LegalEntityService {
         return getLegalEntityByExternalId(legalEntityExternalId)
             .flux()
             .flatMap(legalEntity ->
-                legalEntitiesApi.getSubEntities(legalEntity.getInternalId(), null,
+                legalEntitiesApi.getSubEntities(legalEntity.getInternalId(),
                     Math.toIntExact(pageable.getOffset()), pageable.getPageSize(), null)
                     .map(mapper::toStream));
     }
@@ -124,7 +104,7 @@ public class LegalEntityService {
      */
     public Mono<ServiceAgreement> getMasterServiceAgreementForInternalLegalEntityId(String legalEntityInternalId) {
         log.info("Getting Service Agreement for: {}", legalEntityInternalId);
-        return legalEntityApi.getMasterServiceAgreement(legalEntityInternalId)
+        return legalEntitiesApi.getMasterServiceAgreement(legalEntityInternalId)
             .doOnNext(serviceAgreementItem -> log.info("Service Agreement: {} found for legal entity: {}", serviceAgreementItem.getExternalId(), legalEntityInternalId))
             .onErrorResume(WebClientResponseException.NotFound.class, throwable -> {
                 log.info("Master Service Agreement not found for: {}. Request:[{}] {}  Response: {}", legalEntityInternalId,  throwable.getRequest().getMethod(), throwable.getRequest().getURI() , throwable.getResponseBodyAsString());
@@ -166,7 +146,6 @@ public class LegalEntityService {
     public Mono<Void> deleteLegalEntity(String legalEntityExternalId) {
         return legalEntitiesApi.postLegalEntitiesBatchDelete(
                 new LegalEntitiesBatchDelete()
-                        .accessToken(getAccessControlAccessToken())
                         .externalIds(Collections.singletonList(legalEntityExternalId)))
                 .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Remove Legal Entity", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
                 .collectList()
@@ -184,34 +163,6 @@ public class LegalEntityService {
     }
 
     /**
-     * Generate access token which is usually verified by Access Control APIs during delete action.
-     *
-     * This implementation is brought here to avoid calling the
-     *
-     * @return access token.
-     */
-    private String getAccessControlAccessToken() {
-        try {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(accessControlApiTokenKey.getBytes(StandardCharsets.UTF_8), "AES");
-            IvParameterSpec iv = new IvParameterSpec(accessControlApiTokenInitPhrase.getBytes(StandardCharsets.UTF_8));
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-            cipher.init(1, secretKeySpec, iv);
-
-            byte[] encrypted = cipher.doFinal(Long.toString(Date.from(
-                    LocalDateTime.now()
-                            .atZone(ZoneId.systemDefault()).toInstant()).getTime()).getBytes());
-
-            ByteBuffer bb = ByteBuffer.wrap(encrypted);
-            long firstLong = bb.getLong();
-            long secondLong = bb.getLong();
-            return new UUID(firstLong, secondLong).toString();
-        } catch (Exception e) {
-            log.error("Error obtaining access token: ", e);
-            return null;
-        }
-    }
-
-    /**
      * Update Legal Entity in Access Control.
      *
      * @param legalEntity The Legal Entity to update
@@ -224,7 +175,7 @@ public class LegalEntityService {
                 .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
                 .onErrorResume(WebClientResponseException.class, exception -> Mono.error(new RuntimeException("Failed to update Legal Entity",  exception)))
                 .onErrorStop()
-                .then(getLegalEntityByExternalId(legalEntityPut.getExternalId()));
+                .then(getLegalEntityByExternalId(legalEntityPut.getNewValues().getExternalId()));
     }
 
 }

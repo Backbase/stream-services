@@ -7,9 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntitiesApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntityApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.contact.api.service.v2.ContactsApi;
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
@@ -17,6 +16,8 @@ import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserProfileManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.loan.inbound.api.service.v1.LoansApi;
+import com.backbase.stream.audiences.UserKindSegmentationSaga;
 import com.backbase.stream.config.LegalEntityHttpConfiguration;
 import com.backbase.stream.configuration.LegalEntitySagaConfiguration;
 import com.backbase.stream.configuration.UpdatedServiceAgreementSagaConfiguration;
@@ -96,7 +97,7 @@ class LegalEntityAsyncControllerTest {
     private LegalEntitiesApi legalEntitiesApi;
 
     @MockBean
-    private LegalEntityApi legalEntityApi;
+    private LoansApi loansApi;
 
     @MockBean
     private IdentityManagementApi identityManagementApi;
@@ -109,6 +110,9 @@ class LegalEntityAsyncControllerTest {
 
     @MockBean
     private ArrangementsApi arrangementsApi;
+
+    @MockBean
+    private UserKindSegmentationSaga userKindSegmentationSaga;
 
     @Autowired
     private WebTestClient webTestClient;

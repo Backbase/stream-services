@@ -5,19 +5,25 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>15.2.0</version>
+        <version>15.2.4</version>
         <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-task-starter-parent</artifactId>
-    <version>3.38.0-SNAPSHOT</version>
+    <version>3.70.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Task Starter</name>
     <description>Parent for Stream Executable Tasks</description>
 
     <properties>
         <jib.container.volumes>/tmp</jib.container.volumes>
+
+        <!-- Values from the parent's 'no-scs' profile used by default - stream tasks normally don't use events -->
+        <docker.scs.rabbit>provided</docker.scs.rabbit>
+        <docker.scs.kafka>provided</docker.scs.kafka>
+        <docker.scs.azure>provided</docker.scs.azure>
+
         <spring-cloud-kubernetes.version>2.1.3</spring-cloud-kubernetes.version>
     </properties>
 

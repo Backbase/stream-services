@@ -9,14 +9,9 @@
 </head>
 <body>
 <ul class="nav nav-tabs" id="myTab" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" id="payment-composition-tab" data-bs-target="#payment-composition" type="button" role="tab"
-            aria-controls="payment-composition" aria-selected="true">Payment Order
-    </button>
-  </li>
-  <li class="nav-item" role="presentation">
+  <li class="nav-item active" role="presentation">
     <button class="nav-link" id="legal-entity-composition-tab" data-bs-target="#legal-entity-composition" type="button" role="tab"
-            aria-controls="legal-entity-composition" aria-selected="false">Legal Entity
+            aria-controls="legal-entity-composition" aria-selected="true">Legal Entity
     </button>
   </li>
   <li class="nav-item" role="presentation">
@@ -34,13 +29,18 @@
             aria-controls="transaction-composition" aria-selected="false">Transaction
     </button>
   </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="payment-composition-tab" data-bs-target="#payment-composition" type="button" role="tab"
+            aria-controls="payment-composition" aria-selected="false">Payment Order
+    </button>
+  </li>
 </ul>
 <div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade show active" id="payment-composition" role="tabpanel" aria-labelledby="payment-composition-tab"></div>
-  <div class="tab-pane fade" id="legal-entity-composition" role="tabpanel" aria-labelledby="legal-entity-composition-tab"></div>
+  <div class="tab-pane fade show active" id="legal-entity-composition" role="tabpanel" aria-labelledby="legal-entity-composition-tab"></div>
   <div class="tab-pane fade" id="product-catalog-composition" role="tabpanel" aria-labelledby="product-catalog-composition-tab"></div>
   <div class="tab-pane fade" id="product-composition" role="tabpanel" aria-labelledby="product-composition-tab"></div>
   <div class="tab-pane fade" id="transaction-composition" role="tabpanel" aria-labelledby="transaction-composition-tab"></div>
+  <div class="tab-pane fade" id="payment-composition" role="tabpanel" aria-labelledby="payment-composition-tab"></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3"
@@ -48,11 +48,11 @@
 <script src="https://cdn.jsdelivr.net/npm/redoc@2.0.0/bundles/redoc.standalone.js"></script>
 <script>
   const specs = {
-    "payment-composition": "payment-order-composition-api/src/main/resources/service-api-v2.yaml",
     "legal-entity-composition": "legal-entity-composition-api/src/main/resources/service-api-v2.yaml",
     "product-catalog-composition": "product-catalog-composition-api/src/main/resources/service-api-v2.yaml",
     "product-composition": "product-composition-api/src/main/resources/service-api-v2.yaml",
-    "transaction-composition": "transaction-composition-api/src/main/resources/service-api-v2.yaml"
+    "transaction-composition": "transaction-composition-api/src/main/resources/service-api-v2.yaml",
+    "payment-composition": "payment-order-composition-api/src/main/resources/service-api-v2.yaml"
   }
   const triggerTabList = document.querySelectorAll('#myTab button');
   triggerTabList.forEach(triggerEl => {

@@ -7,7 +7,9 @@ spring:
         enabled: false
       enabled: false
       discovery:
-        enabled: true
+        enabled: false
+    loadbalancer:
+      enabled: false
   activemq:
     broker-url: vm://activemq
   main:
@@ -35,6 +37,12 @@ backbase:
       transaction:
         manager:
           direct-uri: http://localhost:8083/transaction-manager
+      stream:
+        transaction:
+          integration:
+            direct-uri: http://localhost:18000
+          cursor:
+            direct-uri: http://localhost:12000
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -51,14 +59,12 @@ backbase:
     compositions:
       transaction:
         defaultStartOffsetInDays: 30
-        integration-base-url: http://localhost:18000
         events:
           enableCompleted: true
           enableFailed: true
         cursor:
           enabled: true
           transactionIdsFilterEnabled: false
-          base-url: http://localhost:12000
 
 logging:
   level:

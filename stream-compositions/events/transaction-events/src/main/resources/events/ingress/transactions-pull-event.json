@@ -12,10 +12,12 @@
       "type": "string"
     },
     "dateRangeStart": {
-      "type": "string"
+      "type": "string",
+      "format": "date-time"
     },
     "dateRangeEnd": {
-      "type": "string"
+      "type": "string",
+      "format": "date-time"
     },
     "billingCycles": {
       "type": "integer"

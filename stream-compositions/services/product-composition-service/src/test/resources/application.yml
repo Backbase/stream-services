@@ -5,6 +5,9 @@ spring:
     enabled: false
   main:
     allow-bean-definition-overriding: true
+  cloud:
+    loadbalancer:
+      enabled: false
 sso:
   jwt:
     internal:
@@ -28,6 +31,16 @@ backbase:
       arrangement:
         manager:
           direct-uri: http://localhost:8082/arrangement-manager
+      stream:
+        product:
+          integration:
+            direct-uri: http://localhost:18000
+        transaction:
+          composition:
+            direct-uri: http://localhost:12000
+        payment-order:
+          composition:
+            direct-uri: http://localhost:13000
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -40,16 +53,13 @@ backbase:
   stream:
     compositions:
       product:
-        integration-base-url: http://localhost:18000
         chains:
           transaction-composition:
             enabled: true
-            base-url: http://localhost:12000
             async: false
             excludeProductTypeExternalIds:
           payment-order-composition:
             enabled: true
-            base-url: http://localhost:13000
             async: false
             excludeProductTypeExternalIds:
         events:
@@ -57,7 +67,6 @@ backbase:
           enableFailed: true
         cursor:
           enabled: false
-          base-url: http://localhost:9999
 
 logging:
   level:

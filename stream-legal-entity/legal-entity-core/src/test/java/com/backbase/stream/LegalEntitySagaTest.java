@@ -1,6 +1,17 @@
 package com.backbase.stream;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.model.ServiceAgreementParticipantsGetResponseBody;
+import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
+import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
+
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostResponseBody;
@@ -10,6 +21,9 @@ import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
 import com.backbase.dbs.user.api.service.v2.model.Realm;
+import com.backbase.dbs.user.profile.api.service.v2.model.GetUserProfile;
+import com.backbase.stream.audiences.UserKindSegmentationSaga;
+import com.backbase.stream.audiences.UserKindSegmentationTask;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
@@ -17,6 +31,7 @@ import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CurrentAccount;
+import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.ExternalAccountInformation;
 import com.backbase.stream.legalentity.model.ExternalContact;
@@ -28,6 +43,8 @@ import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.Limit;
+import com.backbase.stream.legalentity.model.Loan;
+import com.backbase.stream.legalentity.model.Multivalued;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -35,6 +52,7 @@ import com.backbase.stream.legalentity.model.ReferenceJobRole;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.legalentity.model.UserProfile;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.product.BatchProductIngestionSaga;
@@ -44,19 +62,9 @@ import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
+import com.backbase.stream.worker.exception.StreamTaskException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,17 +72,27 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
-import static java.util.Collections.singletonList;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class LegalEntitySagaTest {
 
     @InjectMocks
@@ -100,6 +118,9 @@ class LegalEntitySagaTest {
 
     @Mock
     private ContactsSaga contactsSaga;
+
+    @Mock
+    private UserKindSegmentationSaga userKindSegmentationSaga;
 
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
@@ -379,6 +400,7 @@ class LegalEntitySagaTest {
                             .name("Account 2")
                             .currency("GBP")
                     ))
+                    .loans(singletonList(new Loan().IBAN("IBAN123321")))
             ))
             .users(singletonList(
                 new JobProfileUser()
@@ -420,21 +442,25 @@ class LegalEntitySagaTest {
             .thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
         when(legalEntityService.getLegalEntityByInternalId("100001"))
             .thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
-        when(legalEntityService.createLegalEntity(legalEntityTask.getLegalEntity()))
-            .thenReturn(Mono.empty());
         when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntityTask.getLegalEntity()));
         when(legalEntitySagaConfigurationProperties.isUseIdentityIntegration())
             .thenReturn(true);
+        when(legalEntitySagaConfigurationProperties.isServiceAgreementUpdateEnabled())
+                .thenReturn(true);
         when(userService.setupRealm(legalEntityTask.getLegalEntity()))
             .thenReturn(Mono.empty());
         when(userService.linkLegalEntityToRealm(legalEntityTask.getLegalEntity()))
             .thenReturn(Mono.empty());
+        when(userService.updateIdentity(any()))
+                .thenReturn(Mono.empty());
         when(userService.getUserByExternalId("john.doe"))
             .thenReturn(Mono.just(new User().internalId("100").externalId("john.doe")));
         when(userService.createOrImportIdentityUser(any(), any(), any()))
             .thenReturn(Mono.empty());
         when(accessGroupService.getServiceAgreementByExternalId("Service_Agreement_Id"))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
+        lenient().when(accessGroupService.updateServiceAgreementItem(any(), any()))
+                .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
         when(accessGroupService.updateServiceAgreementAssociations(any(), any(), any()))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
         when(accessGroupService.createServiceAgreement(any(), any()))
@@ -463,9 +489,10 @@ class LegalEntitySagaTest {
                     });
             });
 
+
         // When
         legalEntitySaga.executeTask(legalEntityTask)
-            .block(Duration.ofSeconds(10));
+            .block(Duration.ofSeconds(20));
 
         // Then
         Assertions.assertEquals(
@@ -587,7 +614,6 @@ class LegalEntitySagaTest {
 
         when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.just(legalEntity));
         when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.empty());
         when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(newLE));
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
@@ -648,7 +674,8 @@ class LegalEntitySagaTest {
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(customSa))).thenReturn(Mono.just(customSa));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
-        when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(customSa), any())).thenReturn(Mono.just(customSa));
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(customSa), any())).thenReturn(
+            Mono.just(customSa));
         when(userService.getUserByExternalId(eq(regularUserExId))).thenReturn(Mono.just(oldRegularUser.getUser()));
         when(userService.getUserByExternalId(eq(adminExId))).thenReturn(Mono.just(adminUser));
         when(userService.createUser(any(), any(), any())).thenReturn(Mono.just(adminUser));
@@ -839,6 +866,124 @@ class LegalEntitySagaTest {
         Assertions.assertEquals(leExternalId, result.getData().getUsers().get(0).getContacts().get(0).getExternalId());
     }
 
+    @Test
+    void userKindSegmentationIsDisabled() {
+        getMockLegalEntity();
+
+        when(userKindSegmentationSaga.isEnabled()).thenReturn(false);
+
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+
+        verify(userKindSegmentationSaga, never()).executeTask(Mockito.any());
+    }
+
+    @Test
+    void userKindSegmentationUsesLegalEntityCustomerCategory() {
+        getMockLegalEntity();
+        legalEntity.setCustomerCategory(CustomerCategory.RETAIL);
+
+        when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
+
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+
+        verify(userKindSegmentationSaga, times(0)).getDefaultCustomerCategory();
+    }
+
+    @Test
+    void userKindSegmentationUsesDefaultCustomerCategory() {
+        getMockLegalEntity();
+        legalEntity.legalEntityType(LegalEntityType.CUSTOMER);
+
+        when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
+        when(userKindSegmentationSaga.getDefaultCustomerCategory()).thenReturn(CustomerCategory.RETAIL.getValue());
+        when(userKindSegmentationSaga.executeTask(any())).thenReturn(
+            Mono.just(Mockito.mock(UserKindSegmentationTask.class)));
+
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+
+        verify(userKindSegmentationSaga, times(1)).getDefaultCustomerCategory();
+    }
+
+    @Test
+    void whenUserKindSegmentationIsEnabledAndNoCustomerCategoryCanBeDeterminedReturnsError() {
+        getMockLegalEntity();
+        legalEntity.legalEntityType(LegalEntityType.CUSTOMER);
+
+        when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
+        when(userKindSegmentationSaga.getDefaultCustomerCategory()).thenReturn(null);
+
+        var task = mockLegalEntityTask(legalEntity);
+
+        Assertions.assertThrows(
+            StreamTaskException.class,
+            () -> executeLegalEntityTaskAndBlock(task),
+            "Failed to determine LE customerCategory for UserKindSegmentationSage."
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parameters_upster_error")
+    void upster_error(Exception ex, String error) {
+
+        // Given
+        LegalEntityTask leTask = new LegalEntityTask(new LegalEntity().externalId(leExternalId));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.error(ex));
+
+        // When
+        Mono<LegalEntityTask> result = legalEntitySaga.executeTask(leTask);
+        StreamTaskException stEx = null;
+        try {
+            result.block();
+        } catch (StreamTaskException e) {
+            stEx = e;
+        }
+
+        // Then
+        verify(legalEntityService).getLegalEntityByExternalId(any());
+        org.assertj.core.api.Assertions.assertThat(stEx)
+            .isNotNull()
+            .extracting(e -> e.getTask().getHistory().get(1).getErrorMessage())
+            .isEqualTo(error);
+    }
+
+    @Test
+    void upsertUserWithProfile() {
+        getMockLegalEntity();
+        User user = regularUser.getUser();
+
+        user.fullName("User With Profile")
+            .emailAddress(new EmailAddress().address("userwp@test.com").primary(true))
+            .mobileNumber(new PhoneNumber().number("0123456").primary(true))
+            .userProfile(new UserProfile()
+                .userId(user.getInternalId())
+                .profileUrl("http://backbase.eu")
+                .addAdditionalEmailsItem(new Multivalued().primary(true).value("userwp@test.com"))
+                .addAdditionalPhoneNumbersItem(new Multivalued().primary(true).value("0123456")));
+
+        legalEntity.setUsers(singletonList(new JobProfileUser().user(user)));
+
+        GetUserProfile getUserProfile = new GetUserProfile().userId(user.getInternalId());
+        when(userProfileService.upsertUserProfile(any())).thenReturn(Mono.just(getUserProfile));
+        when(userService.getUserProfile(user.getInternalId())).thenReturn(
+            Mono.just(new com.backbase.dbs.user.api.service.v2.model.UserProfile().fullName("User With Profile")));
+
+        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
+
+        verify(userService).getUserProfile(user.getInternalId());
+    }
+
+    private static Stream<Arguments> parameters_upster_error() {
+        return Stream.of(
+            Arguments.of(new RuntimeException("Fake error"), "Fake error"),
+            Arguments.of(new WebClientResponseException(400, "Bad request", null,
+                "Fake validation error".getBytes(), Charset.defaultCharset()), "Fake validation error"));
+    }
+
+
+    private LegalEntityTask executeLegalEntityTaskAndBlock(LegalEntityTask task) {
+        return legalEntitySaga.executeTask(task).block();
+    }
+
     private List<GetUser> getUsers(int amount) {
         List<GetUser> users = new ArrayList<>();
 
@@ -861,6 +1006,7 @@ class LegalEntitySagaTest {
     private LegalEntitySagaConfigurationProperties getLegalEntitySagaConfigurationProperties() {
         LegalEntitySagaConfigurationProperties sagaConfiguration =  new LegalEntitySagaConfigurationProperties();
         sagaConfiguration.setUseIdentityIntegration(true);
+        sagaConfiguration.setUserProfileEnabled(true);
         return sagaConfiguration;
     }
 

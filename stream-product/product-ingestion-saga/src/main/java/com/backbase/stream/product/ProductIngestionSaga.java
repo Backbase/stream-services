@@ -5,7 +5,7 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.model.FunctionGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPost;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
@@ -25,6 +25,7 @@ import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.loan.LoansSaga;
 import com.backbase.stream.product.configuration.ProductIngestionSagaConfigurationProperties;
 import com.backbase.stream.product.exception.ArrangementCreationException;
 import com.backbase.stream.product.exception.ArrangementUpdateException;
@@ -80,12 +81,14 @@ public class ProductIngestionSaga {
     protected final AccessGroupService accessGroupService;
     protected final UserService userService;
     protected final ProductIngestionSagaConfigurationProperties configurationProperties;
+    protected final LoansSaga loansSaga;
 
-    public ProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties) {
+    public ProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties, LoansSaga loansSaga) {
         this.arrangementService = arrangementService;
         this.accessGroupService = accessGroupService;
         this.userService = userService;
         this.configurationProperties = configurationProperties;
+        this.loansSaga = loansSaga;
     }
 
     @ContinueSpan(log = "processProducts")
@@ -302,7 +305,8 @@ public class ProductIngestionSaga {
                 return arrangementService.updateArrangement(arrangemenItemBase)
                     .onErrorResume(ArrangementUpdateException.class, e -> {
                         streamTask.error(ARRANGEMENT, UPDATE_ARRANGEMENT, FAILED, arrangementItemPost.getExternalArrangementId(), internalId, e, e.getHttpResponse(), "Failed to update arrangement: %s", arrangementItemPost.getExternalArrangementId());
-                        return Mono.error(new StreamTaskException(streamTask, e, "Failed to update arrangement"));
+                        return Mono.error(new StreamTaskException(streamTask, e.getCause(),
+                            e.getMessage() + " " + e.getCause().getMessage()));
                     })
                     .map(actual -> {
                         log.info("Updated arrangement: {}", actual.getExternalArrangementId());

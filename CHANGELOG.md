@@ -1,6 +1,230 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.70.0](https://github.com/Backbase/stream-services/compare/3.69.0...3.70.0)
+### Added
+- Support to Events via Azure Service Bus for the Stream Composition Services
+- Product Composition now supports transaction-manager's out-of-the-box pulling mechanism, via the `transaction-pull-integration-service`. A separate chain was created for that, enabled via: `backbase.stream.compositions.product.chains.transaction-manager.enabled`
+  - Only one of the transaction chains can be enabled, either the `transaction-manager` or `transaction-composition`.
+  - The purpose of this new chain is to create better support for the OOTB implementation and enable ModelBank projects.
+  - The refresh supports fine graining the pulling requests per arrangement, or a bulk request for all arrangements at once via configuring `splitPerArrangement` and `concurrency` properties.
+- Multi-tenancy support to SSDK message broker Events
+  - Only supported for `spring.cloud.stream.default.consumer.concurrency=1` - Will be enhanced when upgraded to Service SDK 16
+  - **Breaking Change**: Property `backbase.stream.client.headersToForward` is now replaced by `backbase.stream.context.headersToForward`
+
+### Changed
+- Bumping Service SDK to **15.2.4**
+- Bumping Banking Services clients to **2023.09.17-LTS**
+- **Breaking Change**: Stream Composition services Async chains will now use SSDK message broker Events instead of relying in Reactive Subscriptions.
+  - This will bring better isolation during events processing and more control in terms of throughput and concurency.
+- Enhancing Api Client logs when `logging.level.reactor.netty.http.client=DEBUG`
+
+## [3.69.0](https://github.com/Backbase/stream-services/compare/3.68.0...3.69.0)
+### Added
+- Add customer category to service agreement spec
+
+## [3.68.1](https://github.com/Backbase/stream-services/compare/3.68.0...3.68.1)
+### Changed
+- Add AccountArrangementItemPut mapping in ProductMapper
+
+## [3.68.0](https://github.com/Backbase/stream-services/compare/3.67.0...3.68.0)
+### Changed
+- Add CardsReference to legal-entity openapi spec
+
+## [3.67.0](https://github.com/Backbase/stream-services/compare/3.66.0...3.67.0)
+### Changed
+- Fix transaction-cursor k8 deployment failure issue: `org.springframework.beans.factory.NoSuchBeanDefinitionException: No qualifying bean of type 'com.backbase.stream.compositions.transaction.cursor.core.mapper.TransactionCursorMapper' available`
+- Fix transaction-cursor `application-local.yaml` config
+
+## [3.66.0](https://github.com/Backbase/stream-services/compare/3.65.0...3.66.0)
+### Changed
+- Always check cursor and create if it does not exist.
+- If `DateRangeEnd` is passed in the composition request set that as lastTxnDate instead of system date.
+
+## [3.65.0](https://github.com/Backbase/stream-services/compare/3.64.0...3.65.0)
+### Changed
+- Move call to processAudiencesSegmentation after setupUsers 
+
+## [3.64.0](https://github.com/Backbase/stream-services/compare/3.63.0...3.64.0)
+### Changed
+- Return error when transaction composition failed.
+
+## [3.63.0](https://github.com/Backbase/stream-services/compare/3.62.0...3.63.0)
+### Changed
+- Enabling service discovery for stream composition components, direct endpoint urls were removed.
+- To use static uri settings, configure it as the following example:
+```yaml
+backbase:
+  communication:
+    services:
+      stream:
+        legal-entity:
+          integration:
+            direct-uri: http://legal-entity-integration:8080
+        product:
+          integration:
+            direct-uri: http://product-integration:8080
+          composition:
+            direct-uri: http://product-composition:8080
+        product-catalog:
+          integration:
+            direct-uri: http://product-catalog-ingestion-integration:8080
+        payment-order:
+          integration:
+            direct-uri: http://payment-order-integration:8080
+          composition:
+            direct-uri: http://payment-order-composition:8080
+        transaction:
+          composition:
+            direct-uri: http://transaction-composition:8080
+          cursor:
+            direct-uri: http://transaction-cursor:8080
+          integration:
+            direct-uri: http://transaction-integration:8080
+```
+> To keep it retro-compatible you also need to set: `spring.cloud.loadbalancer.enabled=false`
+
+## [3.62.0](https://github.com/Backbase/stream-services/compare/3.61.0...3.62.0)
+### Added
+- Secondary Service Agreement update
+## [3.60.3](https://github.com/Backbase/stream-services/compare/3.60.1...3.60.2)
+### Changed
+- Enhance Legal Entity level Limit Object to set Limit based on Privilege, Business Function and Legal Entity
+
+## [3.60.2](https://github.com/Backbase/stream-services/compare/3.60.1...3.60.2)
+### Changed
+- Fix formatting of StreamTask error messages
+- Fix message placeholders of `AccessGroupService`
+
+## [3.60.1](https://github.com/Backbase/stream-services/compare/3.60.0...3.60.1)
+### Added
+- Add populating the user manager cache with user profile data.
+
+## [3.60.0](https://github.com/Backbase/stream-services/compare/3.59.0...3.60.0)
+### Added
+- Adding the ability to retrieve the arrangement a payment belongs to.
+### Changed
+- updated application-local configurations to be aligned with the new Backbase Local env.
+
+## [3.59.0](https://github.com/Backbase/stream-services/compare/3.58.2...3.59.0)
+### Added
+- Add update identity user attributes in case it's previously created.
+## [3.58.2](https://github.com/Backbase/stream-services/compare/3.58.1...3.58.2)
+### Changed
+- Avoiding race condition when assigning a realm to a legal entity when ingesting multiple subsidiaries at the same time.
+
+## [3.58.0](https://github.com/Backbase/stream-services/compare/3.57.0...3.58.0)
+### Changed
+- For the IMPORT_FROM_IDENTIY strategy use the user manager importIdentity API call
+
+## [3.57.0](https://github.com/Backbase/stream-services/compare/3.56.0...3.57.0)
+### Added
+- Add feature flag for limits ingestion default is true, `backbase.stream.limits.worker.enabled`
+## [3.56.0](https://github.com/Backbase/stream-services/compare/3.55.0...3.56.0)
+### Changed
+- Fix missing portfolio aggregation model attribute `externalId`
+## [3.55.0](https://github.com/Backbase/stream-services/compare/3.54.0...3.55.0)
+### Changed
+- Removed the no-scs tag used during the docker image build. The latest baas use service bus and these libraries will be required.
+## [3.53.0](https://github.com/Backbase/stream-services/compare/3.52.0...3.53.0)
+### Changed
+- Fixed a bug that was causing the Product Composition integration with Transaction Composition to fail due to a missing required request parameter (`arrangementId`)
+
+## [3.52.0](https://github.com/Backbase/stream-services/compare/3.51.0...3.52.0)
+### Changed
+- Fixed two small bugs caused by introduction of UserKindSegmentationSage
+  add check for LE not having users before processing. (should fix error when LE is empty)
+  add AudiencesSegmentationConfiguration to LegalEntitySagaConfiguration
+
+## [3.51.0](https://github.com/Backbase/stream-services/compare/3.50.0...3.51.0)
+### Changed
+- Upgrading Stream from `2023.06` to `2023.06.2`
+- 
+## [3.50.0](https://github.com/Backbase/stream-services/compare/3.49.0...3.50.0)
+### Changed
+- Upgrading Stream from `2023.02-LTS` to `2023.06`
+- Updated Portfolio's position stream contract to include new fields
+
+## [3.49.0](https://github.com/Backbase/stream-services/compare/3.48.0...3.49.0)
+### Added
+- Added Support for ingesting LE customers into audiences user-kind segments (for both Retail and Business banking)
+- The customer category is taken from the LE and if not present the default property will be used.
+- UserKindSegmentationSage Needs to be enabled explicitly through these properties:
+    ```properties
+    backbase.stream.audiences.segmentation.user-kind.enabled=true|false
+    backbase.stream.audiences.segmentation.user-kind.default-customer-category=RETAIL|BUSINESS
+    ``` 
+
+## [3.48.0](https://github.com/Backbase/stream-services/compare/3.47.0...3.48.0)
+### Changed
+- Updated UserService.createOrImportIdentityUser to populate user's additions to DBS with IMPORT_FROM_IDENTITY linking strategy
+
+## [3.47.0](https://github.com/Backbase/stream-services/compare/3.46.0...3.47.0)
+### Changed
+- Removed unused parameter from Payment Orders filter request. 
+The `from` parameter was set to Integer.MAX_VALUE and that was causing errors on newer Backbase versions. 
+
+## [3.46.0](https://github.com/Backbase/stream-services/compare/3.45.0...3.46.0)
+### Added
+- Ingestion mode configuration for legal-entity and product compositions
+
+    New properties for `legal-entity-composition`:
+    ```properties
+    backbase.stream.compositions.legal-entity.ingestion-mode.function-groups=UPSERT|REPLACE
+    backbase.stream.compositions.legal-entity.ingestion-mode.data-groups=UPSERT|REPLACE
+    backbase.stream.compositions.legal-entity.ingestion-mode.arrangements=UPSERT|REPLACE
+    ```
+
+    New properties for `product-composition`:
+    ```properties
+    backbase.stream.compositions.product.ingestion-mode.function-groups=UPSERT|REPLACE
+    backbase.stream.compositions.product.ingestion-mode.data-groups=UPSERT|REPLACE
+    backbase.stream.compositions.product.ingestion-mode.arrangements=UPSERT|REPLACE
+    ```
+    Defaults stay the same as before (`UPSERT` for all)
+
+## [3.45.0](https://github.com/Backbase/stream-services/compare/3.44.0...3.45.0)
+### Added
+- Added support for loans ingestion into DBS.
+- Included the ingestion of loans to BatchProductIngestionSage where productGroups are being processed.
+- After related arrangements were created in Products capability the loans part is ingested to Loans.
+
+## [3.44.0](https://github.com/Backbase/stream-services/compare/3.43.0...3.44.0)
+### Added
+- Added Pull request body(description and checklist) validation workflow
+
+## [3.43.0](https://github.com/Backbase/stream-services/compare/3.42.0...3.43.0)
+### Changed
+- Upgraded Access-Control service-api from v2 to v3
+
+## [3.42.0](https://github.com/Backbase/stream-services/compare/3.41.0...3.42.0)
+### Added
+- Added Pull Request template for Stream contributors.
+
+## [3.41.0](https://github.com/Backbase/stream-services/compare/3.40.0...3.41.0)
+### Added
+- Added additions to `DebitCardItem` openapi schema.
+
+## [3.40.0](https://github.com/Backbase/stream-services/compare/3.39.2...3.40.0)
+### Added
+- Add support for propagating additions from the legal entity ingestion request.
+
+## [3.39.2](https://github.com/Backbase/stream-services/compare/3.39.0...3.40.1)
+### Changed
+- Propagate additions returned by the Product and Transaction integration Response to the Product and Transaction composition Response.
+
+## [3.39.1](https://github.com/Backbase/stream-services/compare/3.39.0...3.40.1)
+### Changed
+- Bugfix for putAssignUserPermissions error `Data groups cannot be duplicated in scope of a single function group during assigning permissions`
+
+## [3.39.0](https://github.com/Backbase/stream-services/compare/3.38.0...3.39.0)
+### Added
+- Add PermissionSetApi to stream-dbs-clients for APS ingestion scenarios
+
+## [3.38.0](https://github.com/Backbase/stream-services/compare/3.37.0...3.38.0)
+### Added
+- Updated Product Mapper to map panSuffix to all product types `panSuffix` to `number`
+
 ## [3.37.0](https://github.com/Backbase/stream-services/compare/3.36.0...3.37.0)
 ### Added
 - Adds `bankBranchCode` field to `TermDeposit` openapi schema

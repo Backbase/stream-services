@@ -1,0 +1,26 @@
+{
+  "request": {
+    "method": "PUT",
+    "urlPathPattern": "/user-manager/service-api/v2/users/identities/([\\w-]+)",
+    "headers": {
+      "X-B3-TraceId": {
+        "matches": "[\\w-]+"
+      },
+      "X-B3-SpanId": {
+        "matches": "[\\w-]+"
+      },
+      "X-TID": {
+        "contains": "tenant1"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": {
+
+    },
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Builder
@@ -13,4 +14,5 @@ import java.util.List;
 public class TransactionIngestResponse {
     private final String arrangementId;
     private final List<TransactionsPostResponseBody> transactions;
+    private final Map<String, String> additions;
 }

@@ -2,13 +2,17 @@ package com.backbase.stream.compositions.legalentity.core.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntityTask;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPullEvent;
 import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
+import com.backbase.stream.compositions.legalentity.core.mapper.ProductCompositionMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
@@ -50,6 +54,8 @@ class LegalEntityIngestionServiceImplTest {
 
     LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
 
+    ProductCompositionMapper compositionMapper = Mappers.getMapper(ProductCompositionMapper.class);
+
     @Mock
     Validator validator;
 
@@ -67,34 +73,29 @@ class LegalEntityIngestionServiceImplTest {
     @Mock
     ProductCompositionApi productCompositionApi;
 
+    @Mock
+    LegalEntityConfigurationProperties legalEntityConfigurationProperties;
+
     @BeforeEach
     void setUp() {
         legalEntityPostIngestionService = new LegalEntityPostIngestionServiceImpl(eventBus, config,
-                productCompositionApi, mapper);
+                productCompositionApi, mapper, compositionMapper);
 
         legalEntityIngestionService = new LegalEntityIngestionServiceImpl(
                 legalEntitySaga,
                 legalEntityIntegrationService,
                 validator,
-                legalEntityPostIngestionService);
+                legalEntityPostIngestionService,
+                legalEntityConfigurationProperties);
     }
-
 
     @Test
     @Tag("true")
     void ingestionInPullModeAsync_Success(TestInfo testInfo) {
         List<String> tags = new ArrayList<>(testInfo.getTags());
-        when(productCompositionApi.pullIngestProduct(any()))
-                .thenReturn(Mono.just(new ProductIngestionResponse()
-                        .withProductGroups(
-                                Arrays.asList((com.backbase.stream.compositions.product.client.model.ProductGroup)
-                                        new com.backbase.stream.compositions.product.client.model.ProductGroup()
-                                                .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN")))))));
-
-        Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
-                Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
-        StepVerifier.create(legalEntityIngestResponseMono)
-            .assertNext(Assertions::assertNotNull).verifyComplete();
+        executeIngestionWithPullMode(Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE).block();
+        verify(eventBus)
+            .emitEvent(argThat(e -> ((ProductPullEvent)e.getEvent()).getLegalEntityExternalId().equals("externalId")));
     }
 
     @Test

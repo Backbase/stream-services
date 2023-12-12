@@ -164,7 +164,7 @@ class TransactionIngestionServiceImplTest {
         Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
                 .ingestPull(mockTransactionIngestPullRequest());
         StepVerifier.create(productIngestResponse)
-                .verifyComplete();
+                .verifyError();
     }
 
     @Test
@@ -172,7 +172,8 @@ class TransactionIngestionServiceImplTest {
 
         mockConfigForTransaction();
         mockTransactionService();
-        when(transactionCursorApi.patchByArrangementId(anyString(), any())).thenReturn(Mono.empty());
+        TransactionCursorResponse transactionCursorResponse = mockTransactionCursorResponse();
+        mockCursorApiForTransactions(transactionCursorResponse, false);
 
         TransactionIngestPullRequest transactionIngestPullRequest = mockTransactionIngestPullRequest();
         transactionIngestPullRequest.setDateRangeStart(OffsetDateTime.now());
@@ -247,5 +248,29 @@ class TransactionIngestionServiceImplTest {
                 .ingestPush(request);
         StepVerifier.create(productIngestResponse)
                 .assertNext(Assertions::assertNotNull).verifyComplete();
+    }
+
+    @Test
+    void ingestionInPullModePatchCursor_Success_withDates() {
+
+        mockConfigForTransaction();
+        mockTransactionService();
+        TransactionCursorResponse transactionCursorResponse = mockTransactionCursorResponse();
+        mockCursorApiForTransactions(transactionCursorResponse, false);
+
+        TransactionIngestPullRequest transactionIngestPullRequest = mockTransactionIngestPullRequest();
+        transactionIngestPullRequest.setDateRangeStart(OffsetDateTime.now().minusDays(10));
+        transactionIngestPullRequest.setDateRangeEnd(OffsetDateTime.now().minusDays(5));
+
+        when(transactionIntegrationService.pullTransactions(transactionIngestPullRequest))
+            .thenReturn(Flux.just(new TransactionsPostRequestBody().withType("type1").
+                withArrangementId("1234").withReference("ref")
+                .withExternalArrangementId("externalArrId")));
+
+        Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
+            .ingestPull(transactionIngestPullRequest);
+        StepVerifier.create(productIngestResponse)
+            .assertNext(Assertions::assertNotNull)
+            .verifyComplete();
     }
 }

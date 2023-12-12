@@ -6,19 +6,24 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>15.2.0</version>
+        <version>15.2.4</version>
         <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-http-starter-parent</artifactId>
-    <version>3.38.0-SNAPSHOT</version>
+    <version>3.70.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: HTTP Services Starter</name>
     <description>Parent for Stream HTTP Services</description>
 
     <properties>
         <jib.container.volumes>/tmp</jib.container.volumes>
+
+        <!-- Values from the parent's 'no-scs' profile used by default (Azure Service Bus bug workaround) -->
+        <docker.scs.rabbit>provided</docker.scs.rabbit>
+        <docker.scs.kafka>provided</docker.scs.kafka>
+        <docker.scs.azure>provided</docker.scs.azure>
 
         <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
         <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>

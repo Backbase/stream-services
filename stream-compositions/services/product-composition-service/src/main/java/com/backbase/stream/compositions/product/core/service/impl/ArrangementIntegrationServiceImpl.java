@@ -28,6 +28,7 @@ public class ArrangementIntegrationServiceImpl implements ArrangementIntegration
                                 .arrangementExternalId(ingestionRequest.getExternalArrangementId()))
                 .map(item -> arrangementMapper.mapIntegrationToStream(item.getArrangement()))
                 .map(item -> ArrangementIngestResponse.builder()
+                        .arrangementInternalId(ingestionRequest.getArrangementId())
                         .arrangement(item)
                         .build())
                 .onErrorResume(this::handleIntegrationError)

@@ -7,7 +7,9 @@ spring:
         enabled: false
       enabled: false
       discovery:
-        enabled: true
+        enabled: false
+    loadbalancer:
+      enabled: false
   activemq:
     broker-url: vm://activemq
   main:
@@ -38,6 +40,10 @@ backbase:
       transaction:
         manager:
           direct-uri: http://localhost:8083/transaction-manager
+      stream:
+        payment-order:
+          integration:
+            direct-uri: http://localhost:18000
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -50,10 +56,6 @@ backbase:
     service-api:
       authentication:
         required-scope: api:service
-  stream:
-    compositions:
-      paymentorder:
-        integration-base-url: http://localhost:18000
 
 logging:
   level:

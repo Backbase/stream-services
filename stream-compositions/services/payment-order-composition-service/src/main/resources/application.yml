@@ -1,6 +1,4 @@
 spring:
-  zipkin:
-    enabled: false
   main:
     allow-bean-definition-overriding: true
   codec:
@@ -19,9 +17,6 @@ backbase:
   communication:
     http:
       default-service-port: 8080
-      client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: http://token-converter:8080/oauth/token
   mtls:
     enabled: false
   security:
@@ -34,6 +29,3 @@ backbase:
     paymentorder:
       worker:
         deletePaymentOrder: false
-    compositions:
-      paymentorder:
-        integration-base-url: http://payment-order-integration:8080

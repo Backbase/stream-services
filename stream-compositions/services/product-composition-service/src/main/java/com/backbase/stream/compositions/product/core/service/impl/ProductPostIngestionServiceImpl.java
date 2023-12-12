@@ -12,23 +12,21 @@ import com.backbase.stream.compositions.product.core.config.ProductConfiguration
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductPostIngestionService;
-import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
-import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
+import com.backbase.stream.compositions.product.core.service.TransactionIngestionService;
 import com.backbase.stream.compositions.transaction.client.model.TransactionPullIngestionRequest;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.ProductGroup;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -37,9 +35,9 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
 
     private final EventBus eventBus;
     private final ProductConfigurationProperties config;
-    private final TransactionCompositionApi transactionCompositionApi;
     private final PaymentOrderCompositionApi paymentOrderCompositionApi;
     private final ProductGroupMapper mapper;
+    private final TransactionIngestionService transactionIngestionService;
 
     @Override
     public Mono<ProductIngestResponse> handleSuccess(ProductIngestResponse res) {
@@ -105,16 +103,12 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     }
 
     private Mono<ProductIngestResponse> ingestTransactions(ProductIngestResponse res) {
-        return extractProducts(res.getProductGroups())
-                .map(product -> buildTransactionPullRequest(product, res))
-                .flatMap(transactionCompositionApi::pullTransactions)
-                .onErrorResume(this::handleTransactionError)
-                .doOnNext(response -> {
-                    log.debug("Response from Transaction Composition: {}",
-                            response.getTransactions());
-                })
-                .collectList()
-                .map(p -> res);
+        return transactionIngestionService.ingestTransactions(
+                extractProducts(res.getProductGroups())
+                    .map(product -> buildTransactionPullRequest(product, res)))
+            .onErrorResume(this::handleTransactionError)
+            .collectList()
+            .map(p -> res);
     }
 
     private Mono<ProductIngestResponse> ingestPaymentOrder(ProductIngestResponse res) {
@@ -129,13 +123,11 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     }
 
     private Mono<ProductIngestResponse> ingestTransactionsAsync(ProductIngestResponse res) {
-        return extractProducts(res.getProductGroups())
-                .map(product -> buildTransactionPullRequest(product, res))
-                .doOnNext(request -> transactionCompositionApi.pullTransactions(request).subscribe())
-                .doOnNext(t -> log.info("Async transaction ingestion called for arrangement: {}",
-                        t.getArrangementId()))
-                .collectList()
-                .map(p -> res);
+        return transactionIngestionService.ingestTransactionsAsync(
+                extractProducts(res.getProductGroups())
+                    .map(product -> buildTransactionPullRequest(product, res)))
+            .collectList()
+            .map(p -> res);
     }
 
     private Mono<ProductIngestResponse> ingestPaymentOrderAsync(ProductIngestResponse res) {
@@ -169,9 +161,9 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
         }
     }
 
-    private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
-        log.error("Error while calling Transaction Composition: {}", t.getMessage());
-        return Mono.error(new InternalServerErrorException(t.getMessage()));
+    private <T> Mono<T> handleTransactionError(Throwable t) {
+        log.error("Error while calling Transaction Chain: {}", t.getMessage());
+        return Mono.empty();
     }
 
     private Mono<PaymentOrderIngestionResponse> handlePaymentOrderError(Throwable t) {
@@ -231,8 +223,11 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
     }
 
     private TransactionPullIngestionRequest buildTransactionPullRequest(BaseProduct product, ProductIngestResponse res) {
+        var legalEntityId = CollectionUtils.isEmpty(product.getLegalEntities())
+            ? res.getLegalEntityInternalId()
+            : product.getLegalEntities().get(0).getInternalId();
         return new TransactionPullIngestionRequest()
-                .withLegalEntityInternalId(product.getLegalEntities().get(0).getInternalId())
+                .withLegalEntityInternalId(legalEntityId)
                 .withAdditions(res.getAdditions())
                 .withArrangementId(product.getInternalId())
                 .withExternalArrangementId(product.getExternalId());

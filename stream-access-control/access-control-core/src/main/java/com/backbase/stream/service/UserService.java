@@ -1,40 +1,21 @@
 package com.backbase.stream.service;
 
-import static java.util.Optional.ofNullable;
-
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
-import com.backbase.dbs.user.api.service.v2.model.AddRealmRequest;
-import com.backbase.dbs.user.api.service.v2.model.AssignRealm;
-import com.backbase.dbs.user.api.service.v2.model.BatchResponseItem;
-import com.backbase.dbs.user.api.service.v2.model.BatchUser;
-import com.backbase.dbs.user.api.service.v2.model.CreateIdentityRequest;
-import com.backbase.dbs.user.api.service.v2.model.GetUser;
-import com.backbase.dbs.user.api.service.v2.model.GetUsersByLegalEntityIdsRequest;
-import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
-import com.backbase.dbs.user.api.service.v2.model.Realm;
-import com.backbase.dbs.user.api.service.v2.model.UpdateIdentityRequest;
-import com.backbase.dbs.user.api.service.v2.model.UserCreated;
-import com.backbase.dbs.user.api.service.v2.model.UserExternal;
+import com.backbase.dbs.user.api.service.v2.UserProfileManagementApi;
+import com.backbase.dbs.user.api.service.v2.model.*;
+import com.backbase.dbs.user.api.service.v2.model.UserProfile;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
 import com.backbase.stream.exceptions.UserUpsertException;
-import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.legalentity.model.*;
 import com.backbase.stream.mapper.RealmMapper;
 import com.backbase.stream.mapper.UserMapper;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
@@ -44,6 +25,14 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+
+import javax.validation.constraints.NotNull;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNullElse;
+import static java.util.Optional.ofNullable;
 
 /**
  * Stream User Management. Still needs to be adapted to use Identity correctly
@@ -62,6 +51,7 @@ public class UserService {
     private final UserManagementApi usersApi;
     private final IdentityManagementApi identityManagementApi;
     private final Optional<IdentityIntegrationServiceApi> identityIntegrationApi;
+    private final UserProfileManagementApi userManagerProfileApi;
 
     /**
      * Get User by external ID.
@@ -218,9 +208,8 @@ public class UserService {
                 log.error("Error getting realm: {} Response: {}", realmName, e.getResponseBodyAsString());
                 return Mono.error(e);
             })
-            .collectList()
-            .map(realms -> realms.stream().filter(realm -> realmName.equals(realm.getRealmName())).findFirst())
-            .flatMap(Mono::justOrEmpty);
+            .filter(realm -> realmName.equals(realm.getRealmName()))
+            .next();
     }
 
     /**
@@ -233,11 +222,8 @@ public class UserService {
         if (StringUtils.isEmpty(legalEntity.getRealmName())) {
             return Mono.empty();
         }
-        Mono<Realm> existingRealm = existingRealm(legalEntity.getRealmName());
-        Mono<Realm> createNewRealm = createRealm(legalEntity.getRealmName());
-        return existingRealm.switchIfEmpty(createNewRealm)
-            .map(actual -> actual);
-
+        return existingRealm(legalEntity.getRealmName())
+                .switchIfEmpty(createRealm(legalEntity.getRealmName()));
     }
 
     /**
@@ -273,48 +259,74 @@ public class UserService {
      * @return the same User with updated internal and external id on success
      */
     public Mono<User> createOrImportIdentityUser(User user, String legalEntityInternalId, StreamTask streamTask) {
-        CreateIdentityRequest createIdentityRequest = new CreateIdentityRequest();
-        createIdentityRequest.setLegalEntityInternalId(legalEntityInternalId);
-        createIdentityRequest.setExternalId(user.getExternalId());
+
+        Mono<CreateIdentityResponse> upsertCall;
 
         if (IdentityUserLinkStrategy.CREATE_IN_IDENTITY.equals(user.getIdentityLinkStrategy())) {
-            Objects.requireNonNull(user.getFullName(), "User Full Name is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
-            Objects.requireNonNull(user.getEmailAddress(), "User Email Address is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
-            Objects.requireNonNull(user.getMobileNumber(), "User Mobile Number is required for user: " + user.getExternalId() + " in legal entity: " + legalEntityInternalId);
+            Objects.requireNonNull(user.getFullName(),
+                "User Full Name is required for user: " + user.getExternalId() + " in legal entity: "
+                    + legalEntityInternalId);
+            Objects.requireNonNull(
+                Optional.ofNullable(user.getEmailAddress()).map(EmailAddress::getAddress).orElse(null),
+                "User Email Address is required for user: " + user.getExternalId() + " in legal entity: "
+                    + legalEntityInternalId);
+            Objects.requireNonNull(Optional.ofNullable(user.getMobileNumber()).map(PhoneNumber::getNumber).orElse(null),
+                "User Mobile Number is required for user: " + user.getExternalId() + " in legal entity: "
+                    + legalEntityInternalId);
 
+            CreateIdentityRequest createIdentityRequest = new CreateIdentityRequest();
+            createIdentityRequest.setLegalEntityInternalId(legalEntityInternalId);
+            createIdentityRequest.setExternalId(user.getExternalId());
+            createIdentityRequest.setAdditions(user.getAdditions());
             createIdentityRequest.setFullName(user.getFullName());
             createIdentityRequest.setEmailAddress(user.getEmailAddress().getAddress());
             createIdentityRequest.setMobileNumber(user.getMobileNumber().getNumber());
             ofNullable(user.getAttributes()).ifPresent(createIdentityRequest::setAttributes);
-            ofNullable(user.getAdditions()).ifPresent(createIdentityRequest::setAdditions);
+
+            upsertCall = identityManagementApi.createIdentity(createIdentityRequest)
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    log.error("Error creating identity: {} Response: {}", createIdentityRequest,
+                        e.getResponseBodyAsString());
+                    String message = "Failed to create user: " + user.getExternalId();
+                    streamTask.error("user", "create-identity", "failed",
+                        user.getExternalId(), legalEntityInternalId, e, e.getMessage(), message);
+                    return Mono.error(new StreamTaskException(streamTask, message));
+                });
+        } else {
+            ImportIdentity importIdentity = new ImportIdentity();
+            importIdentity.setLegalEntityInternalId(legalEntityInternalId);
+            importIdentity.setExternalId(user.getExternalId());
+            importIdentity.additions(user.getAdditions());
+            upsertCall = identityManagementApi.importIdentity(importIdentity)
+                .onErrorResume(WebClientResponseException.class, e -> {
+                    log.error("Error importing identity: {} Response: {}", importIdentity, e.getResponseBodyAsString());
+                    String message = "Failed to import user: " + user.getExternalId();
+                    streamTask.error("user", "import-identity", "failed",
+                        user.getExternalId(), legalEntityInternalId, e, e.getMessage(), message);
+                    return Mono.error(new StreamTaskException(streamTask, message));
+                });
         }
 
-        return identityManagementApi.createIdentity(createIdentityRequest)
-            .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Error creating identity: {} Response: {}", createIdentityRequest, e.getResponseBodyAsString());
-                String message = "Failed to create user: " + user.getExternalId();
-                streamTask.error("user", "create-identity", "failed",
-                    user.getExternalId(), legalEntityInternalId, e, e.getMessage(), message);
-                return Mono.error(new StreamTaskException(streamTask, message));
-            })
+        return upsertCall
             .map(identityCreatedItem -> {
                 user.setInternalId(identityCreatedItem.getInternalId());
                 user.setExternalId(identityCreatedItem.getExternalId());
                 return user;
             })
-            .flatMap(newUser -> this.updateIdentityUserAttributes(user, streamTask));
+            .flatMap(newUser -> this.updateIdentityUser(user, streamTask));
     }
 
-    private Mono<User> updateIdentityUserAttributes(User user, StreamTask streamTask) {
+    private Mono<User> updateIdentityUser(User user, StreamTask streamTask) {
         if (IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())
-            && user.getAttributes() != null) {
+            && (user.getAttributes() != null || user.getAdditions() != null)) {
             UpdateIdentityRequest replaceIdentity = new UpdateIdentityRequest();
             replaceIdentity.attributes(user.getAttributes());
+            replaceIdentity.additions(user.getAdditions());
             return identityManagementApi.updateIdentity(user.getInternalId(), replaceIdentity)
                 .onErrorResume(WebClientResponseException.class, e -> {
                     log.error("Error updating identity: {} Response: {}", user.getExternalId(), e.getResponseBodyAsString());
                     String message = "Failed to update identity: " + user.getExternalId();
-                    streamTask.error("user", "update-identity-attributes", "failed",
+                    streamTask.error("user", "update-identity-attributes-and-additions", "failed",
                         user.getExternalId(), user.getInternalId(), e, e.getMessage(), message);
 
                     return Mono.error(new StreamTaskException(streamTask, message));
@@ -416,6 +428,39 @@ public class UserService {
         return updateRequired ? Optional.of(userRequestBody) : Optional.empty();
     }
 
+
+    /**
+     * Update Identity User, ex: emailAddress, mobileNumber, attributes, and additions
+     *
+     * @param user
+     * @return Mono<User>
+     */
+    public Mono<User> updateIdentity(User user) {
+
+        Objects.requireNonNull(user.getInternalId(), "user internalId is required");
+
+        return identityManagementApi.getIdentity(user.getInternalId())
+                .map(mapper::mapUpdateIdentity)
+                .flatMap(updateIdentityRequest -> {
+                    log.debug("Trying to update identity attributes and additions, externalId [{}]", user.getExternalId());
+                        if (updateIdentityRequest.getAttributes() == null) {
+                            updateIdentityRequest.attributes(new HashMap<>());
+                        }
+                        if (updateIdentityRequest.getAdditions() == null) {
+                            updateIdentityRequest.additions(new HashMap<>());
+                        }
+                        updateIdentityRequest.getAttributes().putAll(requireNonNullElse(user.getAttributes(), Map.of()));
+                        updateIdentityRequest.getAdditions().putAll(requireNonNullElse(user.getAdditions(), Map.of()));
+
+                        return identityManagementApi.updateIdentity(user.getInternalId(), updateIdentityRequest)
+                                .onErrorResume(WebClientResponseException.class, e -> {
+                                    log.error("Failed to update identity: {}", e.getResponseBodyAsString(), e);
+                                    return Mono.error(e);
+                                });
+                        }
+                ).thenReturn(user);
+    }
+
     /**
      * Update user
      *
@@ -445,4 +490,22 @@ public class UserService {
                 .then(getUserByExternalId(user.getExternalId()));
     }
 
+    /**
+     * Return user profile.
+     *
+     * @param userId user internal id.
+     * @return User profile if exists. Empty if not.
+     */
+    public Mono<UserProfile> getUserProfile(String userId) {
+        if (userId == null) {
+            return Mono.empty();
+        }
+
+        return userManagerProfileApi.getUserProfile(userId)
+            .doOnNext(userProfile -> log.info("Found user profile for internalId {}", userId))
+            .onErrorResume(WebClientResponseException.NotFound.class, notFound -> {
+                log.info("User profile with id: {} does not exist: {}", userId, notFound.getResponseBodyAsString());
+                return Mono.empty();
+            });
+    }
 }

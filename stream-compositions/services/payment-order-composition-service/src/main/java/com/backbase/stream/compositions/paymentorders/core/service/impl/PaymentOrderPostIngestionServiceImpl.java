@@ -1,25 +1,20 @@
 package com.backbase.stream.compositions.paymentorders.core.service.impl;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.stream.compositions.paymentorders.core.config.PaymentOrderConfigurationProperties;
 import com.backbase.stream.compositions.paymentorders.core.service.PaymentOrderPostIngestionService;
 import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
-
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
 @AllArgsConstructor
 public class PaymentOrderPostIngestionServiceImpl implements PaymentOrderPostIngestionService {
-    private final EventBus eventBus;
 
-    private final PaymentOrderConfigurationProperties paymentOrderConfigurationProperties;
+    private final EventBus eventBus;
 
     @Override
     public void handleSuccess(List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses) {

@@ -1,8 +1,5 @@
 package com.backbase.stream.webclient.configuration;
 
-import static java.util.Arrays.asList;
-
-import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -19,10 +16,5 @@ public class DbsWebClientConfigurationProperties {
      * X-TID Header in single execution tasks when setting the right tenant context in a multi-tenant environment.
      */
     private MultiValueMap<String, String> additionalHeaders;
-
-    /**
-     * Header keys from the original request to forward to DBS Service calls.
-     */
-    private List<String> headersToForward = asList("X-TID");
 
 }

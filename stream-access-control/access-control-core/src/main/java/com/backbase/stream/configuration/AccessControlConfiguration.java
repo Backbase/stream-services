@@ -1,16 +1,10 @@
 package com.backbase.stream.configuration;
 
-import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.DataGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.FunctionGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntitiesApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.LegalEntityApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementQueryApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.ServiceAgreementsApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.UserQueryApi;
-import com.backbase.dbs.accesscontrol.api.service.v2.UsersApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi;
@@ -40,7 +34,7 @@ import org.springframework.context.annotation.Import;
 public class AccessControlConfiguration {
 
     @Bean
-    public BatchResponseUtils batchResponseUtils(){
+    public BatchResponseUtils batchResponseUtils() {
         return new BatchResponseUtils();
     }
 
@@ -55,15 +49,16 @@ public class AccessControlConfiguration {
 
     @Bean
     public LegalEntityService legalEntityService(LegalEntitiesApi legalEntitiesApi,
-        LegalEntityApi legalEntityApi, BatchResponseUtils batchResponseUtils) {
-        return new LegalEntityService(legalEntitiesApi, legalEntityApi, batchResponseUtils);
+        BatchResponseUtils batchResponseUtils) {
+        return new LegalEntityService(legalEntitiesApi, batchResponseUtils);
     }
 
     @Bean
     public UserService userService(Optional<IdentityIntegrationServiceApi> identityApi,
         UserManagementApi usersApi,
-        IdentityManagementApi identityManagementApi) {
-        return new UserService(usersApi, identityManagementApi, identityApi);
+        IdentityManagementApi identityManagementApi,
+        com.backbase.dbs.user.api.service.v2.UserProfileManagementApi userProfileManagementApi) {
+        return new UserService(usersApi, identityManagementApi, identityApi, userProfileManagementApi);
     }
 
     @Bean
@@ -74,13 +69,12 @@ public class AccessControlConfiguration {
     @Bean
     public AccessGroupService accessGroupService(
         UserManagementApi usersApi,
-        DeletionProperties configurationProperties, UserQueryApi userQueryApi,
-        UsersApi accessControlUsersApi, DataGroupApi dataGroupApi,
+        DeletionProperties configurationProperties,
+        UsersApi accessControlUsersApi,
         DataGroupsApi dataGroupsApi, ServiceAgreementsApi serviceAgreementsApi,
-        ServiceAgreementApi serviceAgreementApi, ServiceAgreementQueryApi serviceAgreementQueryApi,
-        FunctionGroupsApi functionGroupsApi, FunctionGroupApi functionGroupApi, BatchResponseUtils batchResponseUtils) {
-        return new AccessGroupService(usersApi, userQueryApi, accessControlUsersApi, dataGroupApi, dataGroupsApi,
-            functionGroupApi, functionGroupsApi, serviceAgreementQueryApi, serviceAgreementApi, serviceAgreementsApi,
+        FunctionGroupsApi functionGroupsApi, BatchResponseUtils batchResponseUtils) {
+        return new AccessGroupService(usersApi, accessControlUsersApi, dataGroupsApi,
+            functionGroupsApi, serviceAgreementsApi,
             configurationProperties, batchResponseUtils);
     }
 

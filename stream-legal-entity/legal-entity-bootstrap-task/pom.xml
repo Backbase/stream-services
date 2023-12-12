@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-task-starter-parent</artifactId>
-        <version>3.38.0-SNAPSHOT</version>
+        <version>3.70.0</version>
         <relativePath>../../stream-sdk/stream-starter-parents/stream-task-starter-parent</relativePath>
     </parent>
 
@@ -15,7 +15,7 @@
     <name>Stream :: Legal Entity Bootstrap Task</name>
 
     <properties>
-        <wiremock-jre8.version>2.33.2</wiremock-jre8.version>
+        <wiremock-jre8.version>2.35.1</wiremock-jre8.version>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
     </properties>
 

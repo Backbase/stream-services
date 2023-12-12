@@ -66,7 +66,8 @@ public class ProductRestMapper {
                         .withProductGroups(
                                 response.getProductGroups().stream()
                                         .map(productMapper::mapStreamToComposition)
-                                        .collect(Collectors.toList())),
+                                        .collect(Collectors.toList()))
+                                        .withAdditions(response.getAdditions()),
                 HttpStatus.CREATED);
     }
 }
