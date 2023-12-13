@@ -26,6 +26,7 @@
         <!--        <module>stream-cursor</module>-->
         <module>stream-product-catalog</module>
         <module>stream-limits</module>
+        <module>stream-audiences</module>
         <module>stream-legal-entity</module>
         <module>stream-approvals</module>
         <module>stream-payment-order</module>
@@ -33,7 +34,6 @@
         <module>stream-contacts</module>
         <!--        <module>stream-compositions</module>-->
         <!--        <module>stream-loans</module>-->
-        <!--        <module>stream-audiences</module>-->
     </modules>
 
     <properties>
@@ -56,16 +56,16 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.jetbrains</groupId>
-                <artifactId>annotations</artifactId>
-                <version>22.0.0</version>
-            </dependency>
-            <dependency>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>backbase-building-blocks-release</artifactId>
                 <version>${ssdk.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>22.0.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -92,10 +92,10 @@
                     <executions>
                         <execution>
                             <id>add-sources</id>
-                            <phase>generate-sources</phase>
                             <goals>
                                 <goal>add-source</goal>
                             </goals>
+                            <phase>generate-sources</phase>
                             <configuration>
                                 <sources>
                                     <source>${annotations.generated-sources-dir}</source>

@@ -16,6 +16,7 @@ import com.backbase.stream.mapper.RealmMapper;
 import com.backbase.stream.mapper.UserMapper;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
@@ -26,7 +27,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
-import javax.validation.constraints.NotNull;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
