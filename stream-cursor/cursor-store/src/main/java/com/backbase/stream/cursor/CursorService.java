@@ -2,7 +2,7 @@ package com.backbase.stream.cursor;
 
 import com.backbase.stream.cursor.configuration.CursorRepository;
 import com.backbase.stream.cursor.mapper.CursorMapper;
-import com.backbase.stream.legalentity.model.IngestionCursor;
+import com.backbase.stream.cursor.model.IngestionCursor;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import lombok.AllArgsConstructor;

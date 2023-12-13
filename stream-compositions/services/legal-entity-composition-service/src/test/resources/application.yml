@@ -1,6 +1,4 @@
 spring:
-  zipkin:
-    enabled: false
   main:
     allow-bean-definition-overriding: true
   activemq:

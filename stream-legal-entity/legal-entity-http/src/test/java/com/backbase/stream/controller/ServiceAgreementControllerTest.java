@@ -53,12 +53,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(SpringExtension.class)
-@WebFluxTest(LegalEntityAsyncController.class)
+@WebFluxTest(ServiceAgreementController.class)
 @AutoConfigureWebTestClient
-@TestPropertySource(properties = "spring.cloud.kubernetes.enabled=false")
+@TestPropertySource(properties = {"spring.cloud.kubernetes.enabled=false", "spring.cloud.config.enabled=false"})
 @Import({LegalEntityHttpConfiguration.class, LegalEntitySagaConfiguration.class,
     UpdatedServiceAgreementSagaConfiguration.class})
-class LegalEntityAsyncControllerTest {
+class ServiceAgreementControllerTest {
 
     @MockBean
     private ReactiveClientRegistrationRepository reactiveClientRegistrationRepository;

@@ -8,7 +8,7 @@
         "method": "POST",
         "bodyPatterns": [
           {
-            "equalToJson": "{\"externalId\":null,\"externalTypeId\":null,\"typeName\":\"Savings Accounts\",\"externalProductId\":\"savings-account\",\"externalProductKindId\":\"kind2\",\"productKindName\":\"Savings Account\",\"externalProductTypeId\":null,\"productTypeName\":\"Savings Accounts\",\"productKind\":null,\"translations\":null,\"additions\":null}",
+            "equalToJson": "{\"externalId\":null,\"externalTypeId\":null,\"typeName\":\"Savings Accounts\",\"externalProductId\":\"savings-account\",\"externalProductKindId\":\"kind2\",\"productKindName\":\"Savings Account\",\"externalProductTypeId\":null,\"productTypeName\":\"Savings Accounts\",\"productKind\":null}",
             "ignoreArrayOrder": true,
             "ignoreExtraElements": true
           }
@@ -43,7 +43,7 @@
         "method": "POST",
         "bodyPatterns": [
           {
-            "equalToJson": "{\"externalId\":null,\"externalTypeId\":null,\"typeName\":\"Current Account\",\"externalProductId\":\"current-account\",\"externalProductKindId\":\"kind1\",\"productKindName\":\"Current Account\",\"externalProductTypeId\":null,\"productTypeName\":\"Current Account\",\"productKind\":null,\"translations\":null,\"additions\":null}",
+            "equalToJson": "{\"externalId\":null,\"externalTypeId\":null,\"typeName\":\"Current Account\",\"externalProductId\":\"current-account\",\"externalProductKindId\":\"kind1\",\"productKindName\":\"Current Account\",\"externalProductTypeId\":null,\"productTypeName\":\"Current Account\",\"productKind\":null}",
             "ignoreArrayOrder": true,
             "ignoreExtraElements": true
           }

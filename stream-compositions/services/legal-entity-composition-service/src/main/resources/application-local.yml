@@ -4,8 +4,6 @@ server:
 spring:
   activemq:
     broker-url: tcp://localhost:61616
-  zipkin:
-    enabled: false
   cloud:
     loadbalancer:
       enabled: false

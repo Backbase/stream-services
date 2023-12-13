@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
+### Changed
+- SSDK 16 Upgrade
+
 ## [3.70.0](https://github.com/Backbase/stream-services/compare/3.69.0...3.70.0)
 ### Added
 - Support to Events via Azure Service Bus for the Stream Composition Services
@@ -224,9 +228,6 @@ The `from` parameter was set to Integer.MAX_VALUE and that was causing errors on
 ## [3.38.0](https://github.com/Backbase/stream-services/compare/3.37.0...3.38.0)
 ### Added
 - Updated Product Mapper to map panSuffix to all product types `panSuffix` to `number`
-## [4.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.37.0)
-### Changed
-- migrade to ssdk 16
 
 ## [3.37.0](https://github.com/Backbase/stream-services/compare/3.36.0...3.37.0)
 ### Added

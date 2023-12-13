@@ -2,14 +2,10 @@
 server:
   shutdown: graceful
 spring:
-  main:
-    register-shutdown-hook: false
   cloud:
     task:
       events:
         enabled: false
-  zipkin:
-    enabled: false
 
 ---
 spring:
@@ -21,8 +17,6 @@ spring:
       discovery:
         # Set to false if using Eureka for service discovery
         enabled: true
-  zipkin:
-    enabled: false
 
 logging:
   level:

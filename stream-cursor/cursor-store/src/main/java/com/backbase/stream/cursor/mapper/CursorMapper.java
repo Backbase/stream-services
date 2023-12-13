@@ -1,7 +1,7 @@
 package com.backbase.stream.cursor.mapper;
 
 import com.backbase.stream.cursor.model.CursorItem;
-import com.backbase.stream.legalentity.model.IngestionCursor;
+import com.backbase.stream.cursor.model.IngestionCursor;
 import org.mapstruct.Mapper;
 
 @Mapper

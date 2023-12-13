@@ -18,6 +18,7 @@
     <properties>
         <findMainClass.skip>true</findMainClass.skip>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+        <mockito.version>5.2.0</mockito.version>
         <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
         <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
         <docker.distroless.latest.skip>true</docker.distroless.latest.skip>

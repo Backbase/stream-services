@@ -2,15 +2,16 @@
 server:
   shutdown: graceful
 spring:
-  main:
-    register-shutdown-hook: false
   cloud:
     task:
       events:
         enabled: false
-  zipkin:
-    enabled: false
 
+management:
+  tracing:
+    enabled: true
+    propagation:
+      type: B3_MULTI
 ---
 spring:
   config:

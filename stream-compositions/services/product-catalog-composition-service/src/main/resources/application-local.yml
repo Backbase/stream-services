@@ -7,8 +7,6 @@ spring:
   cloud:
     loadbalancer:
       enabled: false
-  zipkin:
-    enabled: false
 backbase:
   activemq:
     enabled: true

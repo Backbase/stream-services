@@ -23,17 +23,17 @@
         <module>stream-product</module>
         <module>stream-access-control</module>
         <module>stream-transactions</module>
-        <!--        <module>stream-cursor</module>-->
+        <module>stream-cursor</module>
         <module>stream-product-catalog</module>
         <module>stream-limits</module>
-        <module>stream-audiences</module>
         <module>stream-legal-entity</module>
         <module>stream-approvals</module>
         <module>stream-payment-order</module>
         <module>stream-portfolio</module>
         <module>stream-contacts</module>
+        <module>stream-loans</module>
+        <module>stream-audiences</module>
         <!--        <module>stream-compositions</module>-->
-        <!--        <module>stream-loans</module>-->
     </modules>
 
     <properties>

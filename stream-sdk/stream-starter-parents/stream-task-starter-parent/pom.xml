@@ -78,7 +78,7 @@
 
     <profiles>
         <profile>
-            <id>mac-m1</id>
+            <id>apple-chip</id>
             <activation>
                 <os>
                     <family>mac</family>

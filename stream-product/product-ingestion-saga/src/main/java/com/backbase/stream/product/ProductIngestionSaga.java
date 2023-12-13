@@ -37,7 +37,7 @@ import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.util.ArrayList;
+import io.micrometer.tracing.annotation.ContinueSpan;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +47,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import org.springframework.cloud.sleuth.annotation.ContinueSpan;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -283,7 +282,7 @@ public class ProductIngestionSaga {
         ProductGroup productGroup = streamTask.getData();
         return productFlux
             .map(p -> ensureLegalEntityId(productGroup.getUsers(), p))
-            .sort(comparing(AccountArrangementItemPost::getExternalArrangementId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
+            .sort(comparing(AccountArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
             .flatMapSequential(arrangementItemPost -> upsertArrangement(streamTask, arrangementItemPost))
             .collectList();
     }

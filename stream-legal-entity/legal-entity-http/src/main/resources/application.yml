@@ -1,3 +1,9 @@
 spring:
   codec:
     max-in-memory-size: 10MB
+
+management:
+  tracing:
+    enabled: true
+    propagation:
+      type: B3_MULTI
