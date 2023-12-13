@@ -55,10 +55,10 @@
                     </execution>
                     <execution>
                         <id>generate-egress-events</id>
-                        <phase>generate-sources</phase>
                         <goals>
                             <goal>events-generation</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
                             <packageVersion>1</packageVersion>
                             <useJavaTime>true</useJavaTime>
@@ -77,10 +77,10 @@
                 <executions>
                     <execution>
                         <id>add-source</id>
-                        <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
                             <sources>
                                 <source>${project.build.directory}/generated-sources/annotations</source>
@@ -90,10 +90,10 @@
                     </execution>
                     <execution>
                         <id>add-resource</id>
-                        <phase>generate-resources</phase>
                         <goals>
                             <goal>add-resource</goal>
                         </goals>
+                        <phase>generate-resources</phase>
                         <configuration>
                             <resources>
                                 <resource>
