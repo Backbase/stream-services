@@ -27,15 +27,6 @@ public class ServiceAgreementTaskV2 extends StreamTask {
         this.ingestionMode = ingestionMode;
     }
 
-    public ServiceAgreementV2 getData() {
-        return serviceAgreement;
-    }
-
-    public ServiceAgreementTaskV2 data(ServiceAgreementV2 data) {
-        this.serviceAgreement = data;
-        return this;
-    }
-
     @Override
     public String getName() {
         return serviceAgreement.getExternalId();

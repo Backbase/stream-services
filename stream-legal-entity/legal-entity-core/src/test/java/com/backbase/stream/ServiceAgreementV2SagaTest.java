@@ -161,7 +161,7 @@ class ServiceAgreementV2SagaTest {
             .block();
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(customSaExId, result.getData().getExternalId());
+        Assertions.assertEquals(customSaExId, result.getServiceAgreement().getExternalId());
 
         verify(accessGroupService).createServiceAgreement(eq(task), eq(transformServiceAgreement(customSa)));
         verify(accessGroupService).updateServiceAgreementRegularUsers(eq(task), eq(transformServiceAgreement(customSa)), any());
@@ -388,7 +388,7 @@ class ServiceAgreementV2SagaTest {
         customSa.setContacts(Collections.singletonList(contact));
         result = serviceAgreementSaga.executeTask(task).block();
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(leExternalId, result.getData().getContacts().get(0).getExternalId());
+        Assertions.assertEquals(leExternalId, result.getServiceAgreement().getContacts().get(0).getExternalId());
 
         LegalEntityParticipant participant = new LegalEntityParticipant()
                 .externalId(leExternalId)
@@ -397,13 +397,13 @@ class ServiceAgreementV2SagaTest {
         customSa.setParticipants(singletonList(participant));
         result = serviceAgreementSaga.executeTask(task).block();
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("USER1", result.getData().getParticipants().get(0).getUsers().get(0));
+        Assertions.assertEquals("USER1", result.getServiceAgreement().getParticipants().get(0).getUsers().get(0));
 
         participant = participant.users(null).admins(singletonList("ADMIN1"));
         customSa.setParticipants(singletonList(participant));
         result = serviceAgreementSaga.executeTask(task).block();
         Assertions.assertNotNull(result);
-        Assertions.assertEquals("ADMIN1", result.getData().getParticipants().get(0).getAdmins().get(0));
+        Assertions.assertEquals("ADMIN1", result.getServiceAgreement().getParticipants().get(0).getAdmins().get(0));
     }
 
 
@@ -423,14 +423,12 @@ class ServiceAgreementV2SagaTest {
         result = serviceAgreementSaga.executeTask(task).block();
         Assertions.assertNotNull(result);
         Assertions.assertEquals(leExternalId,
-            result.getData().getJobProfileUsers().get(0).getContacts().get(0).getExternalId());
+            result.getServiceAgreement().getJobProfileUsers().get(0).getContacts().get(0).getExternalId());
     }
 
     private ServiceAgreementTaskV2 mockServiceAgreementTask(ServiceAgreementV2 serviceAgreement) {
         ServiceAgreementTaskV2 task = Mockito.mock(ServiceAgreementTaskV2.class);
-        when(task.getData()).thenReturn(serviceAgreement);
         when(task.getServiceAgreement()).thenReturn(serviceAgreement);
-        when(task.data(any())).thenReturn(task);
         when(task.addHistory(any())).thenReturn(task);
         return task;
     }

@@ -156,7 +156,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private Mono<ServiceAgreementTaskV2> postServiceAgreementContacts(ServiceAgreementTaskV2 streamTask) {
-        ServiceAgreementV2 serviceAgreement = streamTask.getData();
+        ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
         if (isEmpty(serviceAgreement.getContacts())) {
             streamTask.info(SERVICE_AGREEMENT, PROCESS_CONTACTS, FAILED, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
                 "Service Agreement: %s does not have any Contacts defined", serviceAgreement.getExternalId());
@@ -240,7 +240,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private Mono<ServiceAgreementTaskV2> processProducts(ServiceAgreementTaskV2 streamTask) {
-        ServiceAgreementV2 serviceAgreement = streamTask.getData();
+        ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
         if (serviceAgreement.getProductGroups() == null || serviceAgreement.getProductGroups().isEmpty()) {
             streamTask.info(SERVICE_AGREEMENT, PROCESS_PRODUCTS, FAILED, serviceAgreement.getInternalId(),
                 serviceAgreement.getExternalId(),
@@ -278,7 +278,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private ProductGroupTask createProductGroupTask(ServiceAgreementTaskV2 streamTask, ProductGroup productGroup) {
-        ServiceAgreementV2 serviceAgreement = streamTask.getData();
+        ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
 
         if (productGroup.getUsers() == null) {
             log.error("Product group {} does not have users", productGroup.getName());
@@ -311,7 +311,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
 
     private Mono<ServiceAgreementTaskV2> createJobRoles(ServiceAgreementTaskV2 streamTask) {
 
-        ServiceAgreementV2 serviceAgreement = streamTask.getData();
+        ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
 
         if (isEmpty(serviceAgreement.getReferenceJobRoles()) && isEmpty(serviceAgreement.getJobRoles())) {
             log.debug("Skipping creation of job roles, no reference job roles or job roles are present.");
@@ -335,7 +335,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
 
     private Mono<ServiceAgreementTaskV2> processJobProfiles(ServiceAgreementTaskV2 streamTask) {
         log.info("Processing Job Profiles for: {}", streamTask.getName());
-        ServiceAgreementV2 serviceAgreement = streamTask.getData();
+        ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
 
         if (serviceAgreement.getJobProfileUsers() == null) {
             streamTask.warn(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, REJECTED,
@@ -382,7 +382,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             "", "Using Reference Job Roles and Custom Job Roles defined in Job Profile User");
         List<BusinessFunctionGroup> businessFunctionGroups = jobProfileUser.getBusinessFunctionGroups();
         if (!isEmpty(jobProfileUser.getReferenceJobRoleNames())) {
-            return accessGroupService.getFunctionGroupsForServiceAgreement(streamTask.getData().getInternalId())
+            return accessGroupService.getFunctionGroupsForServiceAgreement(streamTask.getServiceAgreement().getInternalId())
                 .map(functionGroups -> {
                     Map<String, FunctionGroupItem> idByFunctionGroupName = functionGroups
                         .stream()
@@ -400,13 +400,13 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     return bf;
                 })
                 .doOnError(throwable -> log.error("error fetching function group for service agreement {} with error {}",
-                    streamTask.getData().getInternalId(), throwable.getMessage()));
+                    streamTask.getServiceAgreement().getInternalId(), throwable.getMessage()));
         }
         return Mono.justOrEmpty(businessFunctionGroups);
     }
 
     private Mono<ServiceAgreementTaskV2> postUserContacts(ServiceAgreementTaskV2 streamTask) {
-        ServiceAgreementV2 serviceAgreement = streamTask.getData();
+        ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
 
         Flux<JobProfileUser> jobProfileUsers = Flux.fromStream(nullableCollectionToStream(
             serviceAgreement.getJobProfileUsers()));
@@ -435,7 +435,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
 
     public Mono<ServiceAgreementTaskV2> setupUserPermissions(ServiceAgreementTaskV2 serviceAgreementTaskV2,
         JobProfileUser userJobProfile) {
-        ServiceAgreementV2 serviceAgreement = serviceAgreementTaskV2.getData();
+        ServiceAgreementV2 serviceAgreement = serviceAgreementTaskV2.getServiceAgreement();
         log.info("Setup user permissions for user: {}", userJobProfile.getUser().getExternalId());
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = Stream.of(userJobProfile)
             // Ensure internal Id present.
@@ -464,7 +464,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
 
     public Mono<ServiceAgreementTaskV2> setupAdministratorPermissions(ServiceAgreementTaskV2 streamTask) {
         // Assign permissions for the user for all business function groups.
-        ServiceAgreementV2 serviceAgreement = streamTask.getData();
+        ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = nullableCollectionToStream(
             serviceAgreement.getJobProfileUsers())
@@ -494,7 +494,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private Mono<ServiceAgreementTaskV2> setupServiceAgreement(ServiceAgreementTaskV2 streamTask) {
-        ServiceAgreementV2 sa = streamTask.getData();
+        ServiceAgreementV2 sa = streamTask.getServiceAgreement();
 
         if (sa.getIsMaster() == null || !sa.getIsMaster()) {
             return setupCustomServiceAgreement(streamTask);
@@ -534,8 +534,8 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     return new StreamTaskException(streamTask, accessGroupException);
                 })
                 .flatMap(serviceAgreement -> {
-                    streamTask.getData().getParticipants().get(0).setSharingAccounts(true);
-                    streamTask.getData().getParticipants().get(0).setSharingUsers(true);
+                    streamTask.getServiceAgreement().getParticipants().get(0).setSharingAccounts(true);
+                    streamTask.getServiceAgreement().getParticipants().get(0).setSharingUsers(true);
                     streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED,
                         serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
                         "Created new Service Agreement: %s", serviceAgreement.getExternalId(),
@@ -600,18 +600,17 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                 serviceAgreement.setInternalId(createdSa.getInternalId());
                 streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, createdSa.getExternalId(),
                     createdSa.getInternalId(),
-                    "Created new Service Agreement: %s for Legal Entities: %s",
-                    createdSa.getExternalId(),
+                    "Created new Service Agreement: %s",
                     createdSa.getExternalId(),
                         serviceAgreement.getParticipants().stream()
                             .map(LegalEntityParticipant::getExternalId)
                             .collect(Collectors.joining(", ")));
-                return Mono.just(streamTask);
-            })
-            .then(accessGroupService.updateServiceAgreementRegularUsers(streamTask,
-                    saMapper.map(serviceAgreement), userActions)
-                .doOnError(throwable -> log.error("error updating service agreement regular users {}", throwable.getMessage()))
-                .thenReturn(streamTask));
+
+                return accessGroupService.updateServiceAgreementRegularUsers(streamTask,
+                        saMapper.map(serviceAgreement), userActions)
+                    .doOnError(throwable -> log.error("error updating service agreement regular users {}", throwable.getMessage()))
+                    .thenReturn(streamTask);
+            });
 
         return existingServiceAgreement.switchIfEmpty(createServiceAgreement);
     }
@@ -633,7 +632,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private Mono<ServiceAgreementTaskV2> setupServiceAgreementLimits(ServiceAgreementTaskV2 streamTask) {
-        ServiceAgreementV2 sa = streamTask.getData();
+        ServiceAgreementV2 sa = streamTask.getServiceAgreement();
         ServiceAgreement serviceAgreement = saMapper.map(sa);
         if (isNull(serviceAgreement.getLimit())) {
             streamTask.info(SERVICE_AGREEMENT, PROCESS_LIMITS, FAILED,
@@ -661,7 +660,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private Mono<ServiceAgreementTaskV2> setupServiceAgreementParticipantLimits(ServiceAgreementTaskV2 streamTask) {
-        ServiceAgreementV2 saV2 = streamTask.getData();
+        ServiceAgreementV2 saV2 = streamTask.getServiceAgreement();
         ServiceAgreement serviceAgreement = saMapper.map(saV2);
         if(isNull(serviceAgreement.getParticipants())
             || serviceAgreement.getParticipants().stream().noneMatch(legalEntityParticipant -> legalEntityParticipant.getLimit() != null)) {
@@ -697,7 +696,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     @NotNull
     private Mono<ServiceAgreementTaskV2> setupJobRoleLimits(ServiceAgreementTaskV2 streamTask) {
 
-        ServiceAgreementV2 saV2 = streamTask.getData();
+        ServiceAgreementV2 saV2 = streamTask.getServiceAgreement();
         ServiceAgreement serviceAgreement = saMapper.map(saV2);
         if (noLimitsInJobRole(saV2.getJobRoles())
             && noLimitsInJobRole(saV2.getReferenceJobRoles())) {
@@ -744,7 +743,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private Mono<ServiceAgreementTaskV2> retrieveUsersInternalIds(ServiceAgreementTaskV2 streamTask) {
-        ServiceAgreementV2 serviceAgreement = streamTask.getData();
+        ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
         if (serviceAgreement.getProductGroups() == null
             || serviceAgreement.getProductGroups().stream().allMatch(productGroup -> Objects.isNull(productGroup.getUsers()))
             || serviceAgreement.getProductGroups().stream().filter(productGroup -> nonNull(productGroup.getUsers()))
@@ -867,7 +866,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private Mono<ServiceAgreementTaskV2> retrieveUsersInternalIdsForJobProfile(ServiceAgreementTaskV2 streamTask) {
-        var sa = streamTask.getData();
+        var sa = streamTask.getServiceAgreement();
         if(sa.getParticipants() == null || CollectionUtils.isEmpty(sa.getJobProfileUsers())) {
             return Mono.just(streamTask);
         }
