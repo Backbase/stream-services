@@ -99,7 +99,7 @@ class LegalEntityControllerIT extends IntegrationTest {
 
         URI uri = URI.create("/service-api/v2/ingest/pull");
         LegalEntityPullIngestionRequest pullIngestionRequest =
-                new LegalEntityPullIngestionRequest().withLegalEntityExternalId("externalId");
+                new LegalEntityPullIngestionRequest().legalEntityExternalId("externalId");
 
         WebTestClient webTestClient = WebTestClient.bindToController(legalEntityController).build();
         webTestClient.post().uri(uri)

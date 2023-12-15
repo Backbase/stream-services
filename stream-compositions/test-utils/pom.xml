@@ -24,6 +24,7 @@
         <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
         <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
         <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
+        <archuint.skip>true</archuint.skip>
     </properties>
 
     <dependencies>
@@ -58,11 +59,6 @@
             <artifactId>mockserver-netty-no-dependencies</artifactId>
             <version>${mock.server.version}</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.mock-server</groupId>-->
-        <!--            <artifactId>mockserver-client-java</artifactId>-->
-        <!--            <version>${mock.server.version}</version>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>

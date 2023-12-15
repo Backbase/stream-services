@@ -183,7 +183,7 @@ public class AccessGroupService {
         log.info("Updating Service Agreement with external Id: {}", serviceAgreement.getExternalId());
         ServiceAgreementPut serviceAgreementPut = accessGroupMapper.toPresentationPut(serviceAgreement);
         return serviceAgreementsApi.putServiceAgreementItem(serviceAgreement.getInternalId(), serviceAgreementPut)
-                .onErrorResume(HttpClientErrorException.class, throwable -> {
+                .onErrorResume(WebClientResponseException.class, throwable -> {
                     log.error(SERVICE_AGREEMENT, "update", "failed", serviceAgreement.getExternalId(),
                             "", throwable, throwable.getResponseBodyAsString(), "Failed to update Service Agreement");
                     return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to update Service Agreement"));

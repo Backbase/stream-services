@@ -43,14 +43,14 @@ class LegalEntityIntegrationServiceImplTest {
     @Test
     void callLE() throws UnsupportedOperationException {
         String leName = "Legal Entity 1";
-        LegalEntity legalEntity1 = new LegalEntity().withName(leName);
+        LegalEntity legalEntity1 = new LegalEntity().name(leName);
         com.backbase.stream.legalentity.model.LegalEntity legalEntity2 =
                 new com.backbase.stream.legalentity.model.LegalEntity().name(leName);
         List<String> membershipAccounts = Collections.singletonList("012");
         LegalEntityResponse res1 = new LegalEntityResponse(Boolean.TRUE, legalEntity2,
                 membershipAccounts, null);
         Mono<PullLegalEntityResponse> res = Mono.just(new PullLegalEntityResponse()
-                .withLegalEntity(legalEntity1).withMembershipAccounts(Collections.singletonList("012")));
+                .legalEntity(legalEntity1).membershipAccounts(Collections.singletonList("012")));
 
         when(legalEntityIntegrationApi.pullLegalEntity(any())).thenReturn(res);
         when(legalEntityMapper.mapResponseIntegrationToStream(any())).thenReturn(res1);
@@ -74,14 +74,14 @@ class LegalEntityIntegrationServiceImplTest {
 
     @Test
     void callIntegrationService_LegalEntitiesFound() throws UnsupportedOperationException {
-        LegalEntity legalEntity1 = new LegalEntity().withName("Legal Entity 1");
+        LegalEntity legalEntity1 = new LegalEntity().name("Legal Entity 1");
         com.backbase.stream.legalentity.model.LegalEntity legalEntity2 =
                 new com.backbase.stream.legalentity.model.LegalEntity().name("Legal Entity 1");
         List<String> membershipAccounts = Collections.singletonList("012");
         LegalEntityResponse res1 = new LegalEntityResponse(Boolean.TRUE, legalEntity2,
                 membershipAccounts, Map.of("test", "test"));
         PullLegalEntityResponse getLegalEntityListResponse = new PullLegalEntityResponse()
-                .withLegalEntity(legalEntity1);
+                .legalEntity(legalEntity1);
 
         when(legalEntityIntegrationApi.pullLegalEntity(any()))
                 .thenReturn(Mono.just(getLegalEntityListResponse));

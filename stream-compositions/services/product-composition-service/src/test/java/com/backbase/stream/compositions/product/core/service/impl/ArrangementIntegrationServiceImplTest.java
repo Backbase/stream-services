@@ -1,11 +1,11 @@
 package com.backbase.stream.compositions.product.core.service.impl;
 
-import com.backbase.stream.compositions.integration.product.api.ArrangementIntegrationApi;
-import com.backbase.stream.compositions.integration.product.model.AccountArrangementItemPut;
-import com.backbase.stream.compositions.integration.product.model.PullArrangementResponse;
 import com.backbase.stream.compositions.product.core.mapper.ArrangementMapper;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
+import com.backbase.stream.compositions.product.integration.client.ArrangementIntegrationApi;
+import com.backbase.stream.compositions.product.integration.client.model.AccountArrangementItemPut;
+import com.backbase.stream.compositions.product.integration.client.model.PullArrangementResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

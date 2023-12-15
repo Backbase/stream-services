@@ -218,12 +218,12 @@ class ProductIngestionServiceImplTest {
         if (!isChainAsync) {
             when(transactionCompositionApi.pullTransactions(any()))
                 .thenReturn(Mono.just(new TransactionIngestionResponse()
-                    .withTransactions(List.of(
-                        new TransactionsPostResponseBody().withId("id").withExternalId("externalId")))));
+                    .transactions(List.of(
+                        new TransactionsPostResponseBody().id("id").externalId("externalId")))));
         }
         doReturn(Mono.just(new PaymentOrderIngestionResponse()
-                .withNewPaymentOrder(List.of(
-                        new PaymentOrderPostResponse().withId("id"))))).when(paymentOrderCompositionApi).pullPaymentOrder(any());
+                .newPaymentOrder(List.of(
+                        new PaymentOrderPostResponse().id("id"))))).when(paymentOrderCompositionApi).pullPaymentOrder(any());
         Mono<ProductIngestResponse> productIngestResponse = productIngestionService
                 .ingestPull(productIngestPullRequest);
         StepVerifier.create(productIngestResponse)

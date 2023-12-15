@@ -55,23 +55,23 @@ components:
       type: object
       properties:
         legalEntityExternalId:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/externalId'
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/LegalEntity/properties/externalId'
         taxId:
           type: string
           description: The Tax ID associated with the legal entity
         userExternalId:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/User/properties/externalId'
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/User/properties/externalId'
         parentLegalEntityExternalId:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/parentExternalId'
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/LegalEntity/properties/parentExternalId'
         realmName:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/realmName'
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/LegalEntity/properties/realmName'
         referenceJobRoleNames:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
         isAdmin:
           type: boolean
           description: Indicates if the user is an administrator on the Legal Entity
         identityUserLinkStrategy:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/IdentityUserLinkStrategy'
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/IdentityUserLinkStrategy'
         additions:
           type: object
           additionalProperties:
@@ -81,7 +81,7 @@ components:
       type: object
       properties:
         legalEntity:
-          $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity'
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/LegalEntity'
         membershipAccounts:
           type: array
           items:

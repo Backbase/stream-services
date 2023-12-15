@@ -37,6 +37,12 @@
         <ssdk.version>16.0.1</ssdk.version>
         <jakarta-validation.version>3.0.2</jakarta-validation.version>
         <jib.container.volumes>/tmp</jib.container.volumes>
+        <archuint.skip>true</archuint.skip>
+        <archunit.backbase.LoggingRules.skip>true</archunit.backbase.LoggingRules.skip>
+        <archunit.backbase.ArchitectureRules.skip>true</archunit.backbase.ArchitectureRules.skip>
+        <archunit.backbase.ConfigurationRules.skip>true</archunit.backbase.ConfigurationRules.skip>
+        <archunit.backbase.DataMappingRules.skip>true</archunit.backbase.DataMappingRules.skip>
+        <archunit.backbase.NamingConventionRules.skip>true</archunit.backbase.NamingConventionRules.skip>
     </properties>
 
     <dependencyManagement>

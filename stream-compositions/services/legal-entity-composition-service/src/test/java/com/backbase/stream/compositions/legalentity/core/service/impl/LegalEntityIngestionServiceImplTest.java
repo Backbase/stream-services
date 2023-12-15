@@ -105,10 +105,10 @@ class LegalEntityIngestionServiceImplTest {
         when(config.getChains().getIncludeSubsidiaries()).thenReturn(Boolean.TRUE);
         when(productCompositionApi.pullIngestProduct(any()))
                 .thenReturn(Mono.just(new ProductIngestionResponse()
-                        .withProductGroups(
+                        .productGroups(
                                 Arrays.asList((com.backbase.stream.compositions.product.client.model.ProductGroup)
                                         new com.backbase.stream.compositions.product.client.model.ProductGroup()
-                                                .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN")))))));
+                                                .currentAccounts(List.of(new CurrentAccount().BBAN("test BBAN")))))));
 
         Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
                 Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);
