@@ -99,7 +99,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     public static final String PROCESS_CONTACTS = "process-contacts";
     public static final String REJECTED = "rejected";
     public static final String SETUP_SERVICE_AGREEMENT = "setup-service-agreement";
-    public static final String SETUP_SERVICE_AGREEMENT_USERS = "setup-service-agreement-users";
     private static final String BATCH_PRODUCT_GROUP_ID = "batch_product_group_task-";
 
     private static final String LEGAL_ENTITY_E_TYPE = "LE";
