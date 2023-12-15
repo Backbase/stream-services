@@ -73,7 +73,7 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
     private ResponseEntity<ProductCatalogIngestionResponse> mapIngestionToResponse(ProductCatalogIngestResponse response) {
         return new ResponseEntity<>(
                 new ProductCatalogIngestionResponse()
-                        .withProductCatalog(mapper.mapStreamToComposition(response.getProductCatalog())),
+                        .productCatalog(mapper.mapStreamToComposition(response.getProductCatalog())),
                 HttpStatus.CREATED);
     }
 }

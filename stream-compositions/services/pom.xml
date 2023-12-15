@@ -16,6 +16,10 @@
 
     <name>Stream :: Compositions :: Services</name>
 
+    <properties>
+        <activemq.version>6.0.1</activemq.version>
+    </properties>
+
     <modules>
         <module>legal-entity-composition-service</module>
         <module>product-composition-service</module>

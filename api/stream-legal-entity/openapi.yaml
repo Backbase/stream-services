@@ -1109,7 +1109,7 @@ components:
         referenceJobRoles:
           type: array
           items:
-            $ref: '#/components/schemas/ReferenceJobRole'
+            $ref: '#/components/schemas/JobRole'
         administrators:
           type: array
           items:
@@ -2856,10 +2856,6 @@ components:
       required:
         - name
         - description
-    ReferenceJobRole:
-      title: "Reference Job Role"
-      allOf:
-        - $ref: '#/components/schemas/JobRole'
     UpdatedServiceAgreement:
       description: "Updated Service Agreement"
       allOf:

@@ -136,15 +136,15 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
         List<String> referenceJobRoleNames = getReferenceobRoleNamesFromLegalEntity(legalEntity);
 
         requests.add(new ProductPullIngestionRequest()
-            .withLegalEntityInternalId(legalEntity.getInternalId())
-            .withLegalEntityExternalId(legalEntity.getExternalId())
-            .withServiceAgreementExternalId(serviceAgreement.getExternalId())
-            .withServiceAgreementInternalId(serviceAgreement.getInternalId())
-            .withUserExternalId(user.getExternalId())
-            .withUserInternalId(user.getInternalId())
-            .withReferenceJobRoleNames(referenceJobRoleNames)
-            .withMembershipAccounts(membershipAccounts)
-            .withAdditions(additions));
+            .legalEntityInternalId(legalEntity.getInternalId())
+            .legalEntityExternalId(legalEntity.getExternalId())
+            .serviceAgreementExternalId(serviceAgreement.getExternalId())
+            .serviceAgreementInternalId(serviceAgreement.getInternalId())
+            .userExternalId(user.getExternalId())
+            .userInternalId(user.getInternalId())
+            .referenceJobRoleNames(referenceJobRoleNames)
+            .membershipAccounts(membershipAccounts)
+            .additions(additions));
 
         if (config.getChains().getIncludeSubsidiaries() && !CollectionUtils.isEmpty(
             legalEntity.getSubsidiaries())) {

@@ -56,22 +56,17 @@ components:
       properties:
         legalEntityExternalId:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/externalId'
-          description: The Legal Entity External Identifier. This is usually the pivot for the entity (a person or a company) in the Bank's core
         taxId:
           type: string
           description: The Tax ID associated with the legal entity
         userExternalId:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/User/properties/externalId'
-          description: The external identifier for the user. In most cases, this will be the username
         parentLegalEntityExternalId:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/parentExternalId'
-          description: The parent Legal Entity's External Identifier
         realmName:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/realmName'
-          description: The Identity realm name that the legal entity belongs to.
         referenceJobRoleNames:
           $ref: '../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
-          description: The reference job roles that should get assigned to the user
         isAdmin:
           type: boolean
           description: Indicates if the user is an administrator on the Legal Entity
@@ -99,4 +94,3 @@ components:
       properties:
         message:
           type: string
-

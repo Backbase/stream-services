@@ -30,7 +30,7 @@
         <backbase-bom.version>2023.12</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
         <testcontainers.version>1.12.5</testcontainers.version>
-        <mock.server.version>5.11.2</mock.server.version>
+        <mock.server.version>5.15.0</mock.server.version>
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
         <spring-cloud-kubernetes.version>3.0.4</spring-cloud-kubernetes.version>

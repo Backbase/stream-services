@@ -1,9 +1,10 @@
 package com.backbase.stream.compositions.product.core.mapper;
 
-import com.backbase.stream.compositions.integration.product.model.PullProductGroupRequest;
-import com.backbase.stream.compositions.integration.product.model.PullProductGroupResponse;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+import com.backbase.stream.compositions.product.integration.client.model.PullProductGroupRequest;
+import com.backbase.stream.compositions.product.integration.client.model.PullProductGroupResponse;
+import java.time.OffsetDateTime;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
@@ -28,7 +29,7 @@ public interface ProductGroupMapper {
      * @return Stream product group
      */
     com.backbase.stream.legalentity.model.ProductGroup mapIntegrationToStream(
-            com.backbase.stream.compositions.integration.product.model.ProductGroup productGroup);
+            com.backbase.stream.compositions.product.integration.client.model.ProductGroup productGroup);
 
     /**
      * Maps integration ProductGroup to composition ProductGroup model.
@@ -37,7 +38,7 @@ public interface ProductGroupMapper {
      * @return Composition product group
      */
     com.backbase.stream.compositions.product.api.model.ProductGroup mapIntegrationToComposition(
-            com.backbase.stream.compositions.integration.product.model.ProductGroup productGroup);
+        com.backbase.stream.compositions.product.integration.client.model.ProductGroup productGroup);
 
     /**
      * Maps composition ProductGroup to stream ProductGroup model.
@@ -90,4 +91,13 @@ public interface ProductGroupMapper {
      * @return Stream Product Response
      */
     ProductIngestResponse mapResponseIntegrationToStream(PullProductGroupResponse pullProductGroupResponse);
+
+    default String map(OffsetDateTime value) {
+        return value == null ? null : value.toString();
+    }
+
+    default OffsetDateTime map(String value) {
+        return value == null ? null : OffsetDateTime.parse(value);
+    }
+
 }

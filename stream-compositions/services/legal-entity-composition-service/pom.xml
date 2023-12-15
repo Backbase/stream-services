@@ -15,44 +15,44 @@
 
     <name>Stream :: Compositions :: Services :: Legal Entity</name>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <!-- Streams dependencies -->
-    <dependency>
-      <groupId>com.backbase.stream.compositions.events</groupId>
-      <artifactId>legal-entity-events</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.backbase.stream.compositions.events</groupId>
-      <artifactId>product-events</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.backbase.stream</groupId>
-      <artifactId>legal-entity-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.backbase.stream.compositions.api</groupId>
-      <artifactId>legal-entity-composition-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.backbase.stream.compositions.api</groupId>
-      <artifactId>legal-entity-integration-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.backbase.stream.compositions.api</groupId>
-      <artifactId>product-composition-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Streams dependencies -->
+        <dependency>
+            <groupId>com.backbase.stream.compositions.events</groupId>
+            <artifactId>legal-entity-events</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.events</groupId>
+            <artifactId>product-events</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>legal-entity-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>legal-entity-composition-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>legal-entity-integration-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.api</groupId>
+            <artifactId>product-composition-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <finalName>${project.artifactId}</finalName>
@@ -82,7 +82,6 @@
                             <inputSpec>
                                 ${project.basedir}/../../api/service-api/legal-entity-composition-api/src/main/resources/service-api-v2.yaml
                             </inputSpec>
-                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
                             <apiPackage>com.backbase.stream.compositions.legalentity.api</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.legalentity.api.model</modelPackage>
                             <configOptions>
@@ -107,10 +106,6 @@
                             </apiPackage>
                             <modelPackage>com.backbase.stream.compositions.legalentity.integration.client.model
                             </modelPackage>
-                            <additionalProperties>useWithModifiers=true</additionalProperties>
-                            <configOptions>
-                                <reactive>true</reactive>
-                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -125,11 +120,10 @@
                             </inputSpec>
                             <apiPackage>com.backbase.stream.compositions.product.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.product.client.model</modelPackage>
-                            <additionalProperties>useWithModifiers=true</additionalProperties>
                             <configOptions>
                                 <reactive>true</reactive>
+                                <additionalProperties>useWithModifiers=true</additionalProperties>
                             </configOptions>
-
                         </configuration>
                     </execution>
                 </executions>

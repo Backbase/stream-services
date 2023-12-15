@@ -87,7 +87,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
             LegalEntityResponse response) {
         return new ResponseEntity<>(
                 new LegalEntityIngestionResponse()
-                        .withLegalEntity(mapper.mapStreamToComposition(response.getLegalEntity())),
+                        .legalEntity(mapper.mapStreamToComposition(response.getLegalEntity())),
                 HttpStatus.CREATED);
     }
 

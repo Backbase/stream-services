@@ -57,7 +57,7 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.ReferenceJobRole;
+import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
@@ -1184,7 +1184,7 @@ public class AccessGroupService {
         presentationIngestFunctionGroup.setExternalServiceAgreementId(serviceAgreement.getExternalId());
         presentationIngestFunctionGroup.setMetadata(jobRole.getMetadata());
 
-        if(jobRole instanceof ReferenceJobRole) {
+        if(jobRole instanceof JobRole) {
             log.debug("Creating a Reference Job Role.");
             presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
         }

@@ -87,9 +87,8 @@ public class TransactionController implements TransactionCompositionApi {
     private ResponseEntity<TransactionIngestionResponse> mapIngestionToResponse(TransactionIngestResponse response) {
         return new ResponseEntity<>(
                 new TransactionIngestionResponse()
-                        .withTransactions(
+                        .transactions(
                                 response.getTransactions().stream().map(mapper::mapStreamToComposition).collect(Collectors.toList()))
-                        .withAdditions(response.getAdditions()),
-                HttpStatus.CREATED);
+                        .additions(response.getAdditions()), HttpStatus.CREATED);
     }
 }

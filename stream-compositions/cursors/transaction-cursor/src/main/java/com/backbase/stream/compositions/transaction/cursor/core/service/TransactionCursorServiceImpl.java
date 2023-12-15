@@ -82,7 +82,7 @@ public class TransactionCursorServiceImpl implements TransactionCursorService {
                 .map(transactionCursorRepository::save)
                 .doOnNext(entity -> log.info("Id is {}", entity.getId()))
                 .map(entity -> new ResponseEntity<>(
-                        new TransactionCursorUpsertResponse().withId(entity.getId()),
+                        new TransactionCursorUpsertResponse().id(entity.getId()),
                         HttpStatus.CREATED));
     }
 

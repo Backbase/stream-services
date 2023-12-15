@@ -45,7 +45,7 @@
                 <executions>
                     <execution>
                         <id>boat-validation</id>
-                        <phase>generate-sources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>
@@ -59,12 +59,12 @@
                         <goals>
                             <goal>bundle</goal>
                         </goals>
-                        <phase>generate-sources</phase>
+                        <phase>prepare-package</phase>
                         <configuration>
                             <input>${project.basedir}/src/main/resources</input>
                             <output>${project.build.directory}</output>
                             <versionFileName>true</versionFileName>
-                            <includes>*api*.yaml</includes>
+                            <includes>service-api-v2*.yaml</includes>
                         </configuration>
                     </execution>
                 </executions>
