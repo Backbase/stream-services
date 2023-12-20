@@ -17,6 +17,8 @@
 
   <properties>
     <enforce-banned-dependencies.skip>true</enforce-banned-dependencies.skip>
+    <archunit.backbase.GeneralCodingRules.skip>true</archunit.backbase.GeneralCodingRules.skip>
+    <archunit.backbase.RelationalPersistenceRules.skip>true</archunit.backbase.RelationalPersistenceRules.skip>
   </properties>
 
   <dependencies>

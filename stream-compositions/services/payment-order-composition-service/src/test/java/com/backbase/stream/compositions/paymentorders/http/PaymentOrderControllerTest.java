@@ -55,7 +55,7 @@ class PaymentOrderControllerTest {
     void testPullIngestion_Success() {
 
         Mono<PaymentOrderPullIngestionRequest> requestMono = Mono.just(
-                new PaymentOrderPullIngestionRequest().withInternalUserId("internalUserId"));
+                new PaymentOrderPullIngestionRequest().internalUserId("internalUserId"));
 
         List<PaymentOrderIngestDbsResponse> paymentOrderIngestDbsResponses = new ArrayList<>();
         paymentOrderIngestDbsResponses.add(new NewPaymentOrderIngestDbsResponse(new PaymentOrderPostResponse()));

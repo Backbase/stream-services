@@ -59,11 +59,6 @@
             <artifactId>mockserver-netty-no-dependencies</artifactId>
             <version>${mock.server.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>${mockito.version}</version>
-        </dependency>
     </dependencies>
 
     <build>

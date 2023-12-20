@@ -77,15 +77,15 @@ class TransactionCursorMapperTest {
 
     private TransactionCursorUpsertRequest getMockModel() {
         return new TransactionCursorUpsertRequest()
-                .withCursor(new TransactionCursor()
-                        .withId("3337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-                        .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-                        .withExtArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-                        .withLegalEntityId("test-ext-emp")
-                        .withLastTxnDate("2022-05-24 03:18:19")
-                        .withStatus(StatusEnum.IN_PROGRESS)
-                        .withLastTxnIds(List.of("11", "12", "13", "14"))
-                        .withAdditions(Map.of("key1", "val1")));
+                .cursor(new TransactionCursor()
+                        .id("3337f8cc-d66d-41b3-a00e-f71ff15d93cq")
+                        .arrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq")
+                        .extArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq")
+                        .legalEntityId("test-ext-emp")
+                        .lastTxnDate("2022-05-24 03:18:19")
+                        .status(StatusEnum.IN_PROGRESS)
+                        .lastTxnIds(List.of("11", "12", "13", "14"))
+                        .additions(Map.of("key1", "val1")));
     }
 
     private TransactionCursorEntity getMockDomain() {
