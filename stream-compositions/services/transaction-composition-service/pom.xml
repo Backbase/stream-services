@@ -34,7 +34,12 @@
         <!-- Streams dependencies -->
         <dependency>
             <groupId>com.backbase.stream.compositions.events</groupId>
-            <artifactId>transaction-events</artifactId>
+            <artifactId>transaction-egress</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.events</groupId>
+            <artifactId>transaction-ingress</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -46,12 +46,6 @@
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-core</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-sleuth-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.backbase.stream.compositions.api</groupId>
