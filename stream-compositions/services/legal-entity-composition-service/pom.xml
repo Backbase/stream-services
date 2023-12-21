@@ -24,12 +24,22 @@
         <!-- Streams dependencies -->
         <dependency>
             <groupId>com.backbase.stream.compositions.events</groupId>
-            <artifactId>legal-entity-events</artifactId>
+            <artifactId>legal-entity-ingress</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.backbase.stream.compositions.events</groupId>
-            <artifactId>product-events</artifactId>
+            <artifactId>legal-entity-egress</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.events</groupId>
+            <artifactId>product-ingress</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.events</groupId>
+            <artifactId>product-egress</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties" : {
+    "bookedBalance" : {
+      "$ref" : "base-schema.json#/schemas/BookedBalance"
+    },
+    "availableBalance" : {
+      "$ref" : "base-schema.json#/schemas/AvailableBalance"
+    },
+    "IBAN" : {
+      "$ref" : "base-schema.json#/schemas/IBAN"
+    },
+    "BBAN" : {
+      "$ref" : "base-schema.json#/schemas/BBAN"
+    },
+    "bankBranchCode" : {
+      "$ref" : "base-schema.json#/schemas/BankBranchCode"
+    }
+  },
+  "extends" : {
+    "$ref" : "base-schema.json#/schemas/BaseProduct"
+  }
+}

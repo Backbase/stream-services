@@ -33,7 +33,12 @@
         <!-- Streams dependencies -->
         <dependency>
             <groupId>com.backbase.stream.compositions.events</groupId>
-            <artifactId>product-catalog-events</artifactId>
+            <artifactId>product-catalog-egress</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.backbase.stream.compositions.events</groupId>
+            <artifactId>product-catalog-ingress</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

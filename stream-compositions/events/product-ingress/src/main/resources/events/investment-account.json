@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties" : {
+    "currentInvestment" : {
+      "$ref" : "base-schema.json#/schemas/CurrentInvestment"
+    },
+    "urgentTransferAllowed" : {
+      "$ref" : "base-schema.json#/schemas/UrgentTransfer"
+    },
+    "panSuffix" : {
+      "$ref" : "base-schema.json#/schemas/PanSuffix"
+    },
+    "productNumber" : {
+      "$ref" : "base-schema.json#/schemas/ProductNumber"
+    },
+    "IBAN" : {
+      "$ref" : "base-schema.json#/schemas/IBAN"
+    },
+    "BBAN" : {
+      "$ref" : "base-schema.json#/schemas/BBAN"
+    }
+  },
+  "allOf" : [ {
+    "$ref" : "base-schema.json#/schemas/BaseProduct"
+  } ]
+}

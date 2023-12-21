@@ -54,7 +54,6 @@ backbase:
           composition:
             direct-uri: http://localhost:9003
     http:
-      client-secret: bb-secret
       client-id: bb-client
       access-token-uri: http://localhost:17000/oauth/token
   stream:

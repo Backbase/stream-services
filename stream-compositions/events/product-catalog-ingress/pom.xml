@@ -9,9 +9,9 @@
     </parent>
 
     <groupId>com.backbase.stream.compositions.events</groupId>
-    <artifactId>legal-entity-events</artifactId>
+    <artifactId>product-catalog-ingress</artifactId>
 
-    <name>Stream :: Compositions :: Events :: Legal Entity</name>
+    <name>Stream :: Compositions :: Events :: Product Catalog</name>
 
     <properties>
         <findMainClass.skip>true</findMainClass.skip>
@@ -46,26 +46,11 @@
                         </goals>
                         <configuration>
                             <packageVersion>1</packageVersion>
-                            <useJavaTime>true</useJavaTime>
-                            <outputFile>${project.basedir}/target/generated-sources/jsonschema-events</outputFile>
+                            <groupNameStrategy>APP_NAME</groupNameStrategy>
+                            <outputFile>${project.build.directory}/generated-sources/jsonschema-events</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
-                            <!-- The packageName should not contain com.backbase as that is already the default value of the basePackageName -->
                             <packageName>stream.compositions.events.ingress</packageName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-egress-events</id>
-                        <goals>
-                            <goal>events-generation</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <packageVersion>1</packageVersion>
-                            <useJavaTime>true</useJavaTime>
-                            <outputFile>${project.basedir}/target/generated-sources/jsonschema-events</outputFile>
-                            <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
-                            <!-- The packageName should not contain com.backbase as that is already the default value of the basePackageName -->
-                            <packageName>stream.compositions.events.egress</packageName>
+                            <groupNameStrategy>APP_NAME</groupNameStrategy>
                         </configuration>
                     </execution>
                 </executions>
@@ -77,10 +62,10 @@
                 <executions>
                     <execution>
                         <id>add-source</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
                         </goals>
-                        <phase>generate-sources</phase>
                         <configuration>
                             <sources>
                                 <source>${project.build.directory}/generated-sources/annotations</source>
@@ -90,10 +75,10 @@
                     </execution>
                     <execution>
                         <id>add-resource</id>
+                        <phase>generate-resources</phase>
                         <goals>
                             <goal>add-resource</goal>
                         </goals>
-                        <phase>generate-resources</phase>
                         <configuration>
                             <resources>
                                 <resource>

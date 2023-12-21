@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "properties" : {
+    "availableBalance" : {
+      "$ref" : "base-schema.json#/schemas/AvailableBalance"
+    },
+    "bookedBalance" : {
+      "$ref" : "base-schema.json#/schemas/BookedBalance"
+    },
+    "IBAN" : {
+      "$ref" : "base-schema.json#/schemas/IBAN"
+    },
+    "BBAN" : {
+      "$ref" : "base-schema.json#/schemas/BBAN"
+    },
+    "bankBranchCode" : {
+      "$ref" : "base-schema.json#/schemas/BankBranchCode"
+    },
+    "principalAmount" : {
+      "$ref" : "base-schema.json#/schemas/PrincipalAmount"
+    },
+    "creditAccount" : {
+      "$ref" : "base-schema.json#/schemas/CreditAccount"
+    },
+    "debitAccount" : {
+      "$ref" : "base-schema.json#/schemas/DebitAccount"
+    }
+  },
+  "extends" : {
+    "$ref" : "base-schema.json#/schemas/BaseProduct"
+  }
+}

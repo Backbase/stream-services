@@ -9,9 +9,9 @@
     </parent>
 
     <groupId>com.backbase.stream.compositions.events</groupId>
-    <artifactId>product-catalog-events</artifactId>
+    <artifactId>product-egress</artifactId>
 
-    <name>Stream :: Compositions :: Events :: Product Catalog</name>
+    <name>Stream :: Compositions :: Events :: Product</name>
 
     <properties>
         <findMainClass.skip>true</findMainClass.skip>
@@ -39,21 +39,6 @@
                 <version>${ssdk.version}</version>
                 <executions>
                     <execution>
-                        <id>generate-ingress-events</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>events-generation</goal>
-                        </goals>
-                        <configuration>
-                            <packageVersion>1</packageVersion>
-                            <groupNameStrategy>APP_NAME</groupNameStrategy>
-                            <outputFile>${project.build.directory}/generated-sources/jsonschema-events</outputFile>
-                            <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
-                            <packageName>stream.compositions.events.ingress</packageName>
-                            <groupNameStrategy>APP_NAME</groupNameStrategy>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>generate-egress-events</id>
                         <phase>generate-sources</phase>
                         <goals>
@@ -61,11 +46,10 @@
                         </goals>
                         <configuration>
                             <packageVersion>1</packageVersion>
-                            <groupNameStrategy>APP_NAME</groupNameStrategy>
-                            <outputFile>${project.build.directory}/generated-sources/jsonschema-events</outputFile>
+                            <useJavaTime>true</useJavaTime>
+                            <outputFile>${project.basedir}/target/generated-sources/jsonschema-events</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
                             <packageName>stream.compositions.events.egress</packageName>
-                            <groupNameStrategy>APP_NAME</groupNameStrategy>
                         </configuration>
                     </execution>
                 </executions>

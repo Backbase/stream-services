@@ -9,7 +9,7 @@
     </parent>
 
     <groupId>com.backbase.stream.compositions.events</groupId>
-    <artifactId>product-events</artifactId>
+    <artifactId>product-ingress</artifactId>
 
     <name>Stream :: Compositions :: Events :: Product</name>
 
@@ -50,20 +50,6 @@
                             <outputFile>${project.basedir}/target/generated-sources/jsonschema-events</outputFile>
                               <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
                             <packageName>stream.compositions.events.ingress</packageName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-egress-events</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>events-generation</goal>
-                        </goals>
-                        <configuration>
-                            <packageVersion>1</packageVersion>
-                            <useJavaTime>true</useJavaTime>
-                            <outputFile>${project.basedir}/target/generated-sources/jsonschema-events</outputFile>
-                            <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
-                            <packageName>stream.compositions.events.egress</packageName>
                         </configuration>
                     </execution>
                 </executions>
