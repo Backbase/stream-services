@@ -1,9 +1,11 @@
 spring:
+  cloud:
+    config:
+      enabled: false
   main:
     allow-bean-definition-overriding: true
   activemq:
     broker-url: vm://activemq
-  cloud:
     kubernetes:
       config:
         enabled: false

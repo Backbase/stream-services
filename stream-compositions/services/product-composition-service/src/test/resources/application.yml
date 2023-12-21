@@ -4,6 +4,8 @@ spring:
   main:
     allow-bean-definition-overriding: true
   cloud:
+    config:
+      enabled: false
     loadbalancer:
       enabled: false
 sso:

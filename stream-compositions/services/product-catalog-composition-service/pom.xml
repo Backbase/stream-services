@@ -40,6 +40,12 @@
             <groupId>com.backbase.stream</groupId>
             <artifactId>product-catalog-core</artifactId>
             <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-sleuth-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
