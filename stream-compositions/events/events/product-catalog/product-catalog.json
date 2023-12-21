@@ -5,19 +5,19 @@
     "productKinds": {
       "type": "array",
       "items": {
-        "$ref": "./product-kind.json"
+        "$ref": "product-kind.json"
       }
     },
     "productTypes": {
       "type": "array",
       "items": {
-        "$ref": "./product-type.json"
+        "$ref": "product-type.json"
       }
     },
     "productStates": {
       "type": "array",
       "items": {
-        "$ref": "./product-state.json"
+        "$ref": "product-state.json"
       }
     }
   }

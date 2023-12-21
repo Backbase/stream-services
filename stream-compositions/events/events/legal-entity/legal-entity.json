@@ -2,16 +2,17 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "eventId": {
-      "description": "Unique identifier of the event",
+    "internalId": {
+      "description": "Legal entity internal id",
       "type": "string"
     },
-    "message": {
-      "description": "Error message.",
+    "externalId": {
+      "description": "Legal entity external id",
       "type": "string"
     }
   },
   "required": [
-    "eventId"
+    "internalId",
+    "externalId"
   ]
 }

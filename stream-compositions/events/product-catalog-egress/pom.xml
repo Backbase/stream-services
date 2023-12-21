@@ -48,7 +48,7 @@
                             <packageVersion>1</packageVersion>
                             <groupNameStrategy>APP_NAME</groupNameStrategy>
                             <outputFile>${project.build.directory}/generated-sources/jsonschema-events</outputFile>
-                            <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
+                            <inputFile>${project.basedir}/../events/product-catalog/egress</inputFile>
                             <packageName>stream.compositions.events.egress</packageName>
                             <groupNameStrategy>APP_NAME</groupNameStrategy>
                         </configuration>

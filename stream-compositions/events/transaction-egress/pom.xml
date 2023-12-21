@@ -49,6 +49,7 @@
                             <useJavaTime>true</useJavaTime>
                             <outputFile>${project.basedir}/target/generated-sources/jsonschema-events</outputFile>
                             <inputFile>${project.basedir}/src/main/resources/events/egress</inputFile>
+                            <inputFile>${project.basedir}/../events/transaction/egress</inputFile>
                             <!-- The packageName should not contain com.backbase as that is already the default value of the basePackageName -->
                             <packageName>stream.compositions.events.egress</packageName>
                         </configuration>

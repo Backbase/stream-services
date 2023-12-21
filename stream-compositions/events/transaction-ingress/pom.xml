@@ -48,7 +48,7 @@
                             <packageVersion>1</packageVersion>
                             <useJavaTime>true</useJavaTime>
                             <outputFile>${project.basedir}/target/generated-sources/jsonschema-events</outputFile>
-                            <inputFile>${project.basedir}/src/main/resources/events/ingress</inputFile>
+                            <inputFile>${project.basedir}/../events/transaction/ingress</inputFile>
                             <!-- The packageName should not contain com.backbase as that is already the default value of the basePackageName -->
                             <packageName>stream.compositions.events.ingress</packageName>
                         </configuration>

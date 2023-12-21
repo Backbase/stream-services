@@ -167,7 +167,6 @@ class ProductControllerIT extends IntegrationTest {
     }
 
     @Test
-    @Disabled
     void pullIngestProduct_Success() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode node = mapper.readTree(readContentFromClasspath("integration-data/response.json"))

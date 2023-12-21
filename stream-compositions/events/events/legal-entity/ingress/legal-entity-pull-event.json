@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "legalEntityExternalId": {
+      "type": "string"
+    },
+    "taxId": {
+      "type": "string"
+    },
+    "userExternalId": {
+      "type": "string"
+    },
+    "parentLegalEntityExternalId": {
+      "type": "string"
+    },
+    "realmName": {
+      "type": "string"
+    },
+    "referenceJobRoleNames": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "isAdmin": {
+      "type": "boolean"
+    },
+    "identityUserLinkStrategy": {
+      "type": "string",
+      "enum": ["IMPORT_FROM_IDENTIY","CREATE_IN_IDENTITY","IDENTITY_AGNOSTIC"]
+    }
+  }
+}
