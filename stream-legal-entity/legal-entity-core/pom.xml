@@ -58,12 +58,12 @@
             <version>${project.version}</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>backbase-bom</artifactId>
                     <groupId>com.backbase</groupId>
+                    <artifactId>backbase-bom</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>backbase-bom</artifactId>
                     <groupId>com.backbase</groupId>
+                    <artifactId>backbase-bom</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -114,47 +114,11 @@
 
     <build>
         <plugins>
+
             <plugin>
-                <groupId>com.backbase.oss</groupId>
-                <artifactId>boat-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
-                            <generateApiTests>false</generateApiTests>
-                            <output>${openapi-generator-maven-plugin.output}</output>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                            <generateApis>true</generateApis>
-                            <generateModels>false</generateModels>
-                            <configOptions>
-                                <library>spring-boot</library>
-                                <reactive>true</reactive>
-                                <java8>true</java8>
-                                <dateLibrary>java8</dateLibrary>
-                                <openapiDocketConfig>true</openapiDocketConfig>
-                                <interfaceOnly>true</interfaceOnly>
-                                <modelPackage>com.backbase.stream.legalentity.model</modelPackage>
-                                <apiPackage>com.backbase.stream.legalentity.api</apiPackage>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                                <apis />
-                                <models />
-                            </configOptions>
-                            <typeMappings>
-                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
-                            </typeMappings>
-                        </configuration>
-                    </execution>
-
-                </executions>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
-
         </plugins>
     </build>
-
 </project>

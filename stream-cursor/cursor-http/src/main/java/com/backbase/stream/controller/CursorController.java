@@ -1,10 +1,10 @@
 package com.backbase.stream.controller;
 
+import com.backbase.stream.cursor.CursorService;
 import com.backbase.stream.cursor.api.CursorsApi;
 import com.backbase.stream.cursor.model.IngestionCursor;
-import com.backbase.stream.cursor.CursorService;
+import jakarta.validation.Valid;
 import java.util.UUID;
-import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

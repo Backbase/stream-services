@@ -11,14 +11,6 @@ import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementsFilter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.dbs.paymentorder.api.service.v2.model.GetPaymentOrderResponse;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterRequest;
@@ -36,7 +28,12 @@ import com.backbase.stream.worker.UnitOfWorkExecutor;
 import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
-
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -118,7 +115,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
     private Mono<AccountArrangementItems> getArrangement(PaymentOrderPostRequest paymentOrderPostRequest) {
         AccountArrangementsFilter accountArrangementsFilter = new AccountArrangementsFilter()
-                .externalArrangementIds(Collections.singletonList(paymentOrderPostRequest.getOriginatorAccount().getExternalArrangementId()));
+                .externalArrangementIds(Collections.singleton(paymentOrderPostRequest.getOriginatorAccount().getExternalArrangementId()));
         return arrangementsApi.postFilter(accountArrangementsFilter);
     }
 

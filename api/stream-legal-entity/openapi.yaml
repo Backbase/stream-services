@@ -1109,7 +1109,7 @@ components:
         referenceJobRoles:
           type: array
           items:
-            $ref: '#/components/schemas/ReferenceJobRole'
+            $ref: '#/components/schemas/JobRole'
         administrators:
           type: array
           items:
@@ -1670,7 +1670,7 @@ components:
       title: External Identifier
       maxLength: 64
       minLength: 1
-      pattern: ^[^\r\n]{1,64}$
+#      pattern: ^{1,64}$
       type: string
       description: External legal entity identifier.
     UrgentTransfer:
@@ -2193,7 +2193,7 @@ components:
           maxLength: 255
           type: string
           description: Email-id of the contact
-          format: email
+#          format: email
         addressLine1:
           maxLength: 70
           type: string
@@ -2361,7 +2361,7 @@ components:
       type: string
       description: "An email account identifier. At least one of the account identifiers\
         \ (accountNumber, IBAN, phoneNumber or email) is mandatory."
-      format: email
+#      format: email
     Additions:
       title: Additions
       type: object
@@ -2856,12 +2856,8 @@ components:
       required:
         - name
         - description
-    ReferenceJobRole:
-      title: "Reference Job Role"
-      allOf:
-        - $ref: '#/components/schemas/JobRole'
     UpdatedServiceAgreement:
-      title: "Updated Service Agreement"
+      description: "Updated Service Agreement"
       allOf:
         - $ref: '#/components/schemas/ServiceAgreement'
       properties:
@@ -2879,10 +2875,10 @@ components:
             $ref: '#/components/schemas/ServiceAgreementUserAction'
     ServiceAgreementUserAction:
       title: "Service Agreement user update action"
+      description: User and job roles to associate under service agreement
       properties:
         userProfile:
           $ref: '#/components/schemas/JobProfileUser'
-          description: User and job roles to associate under service agreement
         action:
           type: string
           description: add or remove user from service agreement

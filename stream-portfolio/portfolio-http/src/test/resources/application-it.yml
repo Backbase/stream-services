@@ -1,7 +1,7 @@
 spring:
-  zipkin:
-    enabled: false
   cloud:
+    config:
+      enabled: false
     discovery:
       client:
         simple:
@@ -25,4 +25,4 @@ eureka:
 logging:
   level:
     root: INFO
-    '[com.backbase.stream]': DEBUG
+    com.backbase.stream: DEBUG

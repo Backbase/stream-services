@@ -4,19 +4,20 @@ import com.backbase.stream.compositions.transaction.cursor.core.domain.Transacti
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorFilterRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.criteria.ParameterExpression;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +90,7 @@ public class TransactionCursorRepositoryImpl implements TransactionCursorCustomR
         Root<TransactionCursorEntity> transactionCursor = cq.from(TransactionCursorEntity.class);
         Predicate statusPredicate = equalPredicate(criteriaBuilder, transactionCursor.get(STATUS),
                 transactionCursorFilterRequest.getStatus());
-        ParameterExpression<java.util.Date> parameter = criteriaBuilder.parameter(java.util.Date.class);
+        ParameterExpression<Date> parameter = criteriaBuilder.parameter(java.util.Date.class);
         java.util.Date txnDate;
         try {
             txnDate = new SimpleDateFormat(DATE_FORMAT).parse(

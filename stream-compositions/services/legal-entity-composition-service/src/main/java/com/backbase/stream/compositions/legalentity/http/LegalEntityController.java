@@ -10,9 +10,7 @@ import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRe
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
-
-import javax.validation.Valid;
-
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -89,7 +87,7 @@ public class LegalEntityController implements LegalEntityCompositionApi {
             LegalEntityResponse response) {
         return new ResponseEntity<>(
                 new LegalEntityIngestionResponse()
-                        .withLegalEntity(mapper.mapStreamToComposition(response.getLegalEntity())),
+                        .legalEntity(mapper.mapStreamToComposition(response.getLegalEntity())),
                 HttpStatus.CREATED);
     }
 

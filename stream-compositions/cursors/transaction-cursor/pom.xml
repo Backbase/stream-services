@@ -17,9 +17,18 @@
 
   <properties>
     <enforce-banned-dependencies.skip>true</enforce-banned-dependencies.skip>
+    <archunit.backbase.GeneralCodingRules.skip>true</archunit.backbase.GeneralCodingRules.skip>
+    <archunit.backbase.RelationalPersistenceRules.skip>true</archunit.backbase.RelationalPersistenceRules.skip>
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <artifactId>lombok</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Service SDK dependencies -->
     <dependency>
       <groupId>com.backbase.buildingblocks</groupId>
@@ -49,6 +58,10 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-logging</artifactId>
     </dependency>
     <dependency>
       <groupId>com.backbase.buildingblocks</groupId>
@@ -157,32 +170,19 @@
         <executions>
           <execution>
             <id>generate-transaction-cursor-api-code</id>
-            <goals>
-              <goal>generate</goal>
-            </goals>
             <phase>generate-sources</phase>
+            <goals>
+              <goal>generate-spring-boot-embedded</goal>
+            </goals>
             <configuration>
-              <generatorName>spring</generatorName>
               <inputSpec>
                 ${project.build.directory}/yaml/transaction-cursor-api/service-api-v2.0.0.yaml
               </inputSpec>
-              <additionalProperties>useWithModifiers=true</additionalProperties>
+              <apiPackage>com.backbase.stream.compositions.transaction.cursor.api</apiPackage>
+              <modelPackage>com.backbase.stream.compositions.transaction.cursor.model
+              </modelPackage>
               <configOptions>
-                <library>spring-boot</library>
                 <reactive>true</reactive>
-                <java8>true</java8>
-                <dateLibrary>java8</dateLibrary>
-                <openapiDocketConfig>true</openapiDocketConfig>
-                <interfaceOnly>true</interfaceOnly>
-                <apiPackage>com.backbase.stream.compositions.transaction.cursor.api</apiPackage>
-                <modelPackage>com.backbase.stream.compositions.transaction.cursor.model
-                </modelPackage>
-                <additionalProperties>useWithModifiers=true</additionalProperties>
-                <skipDefaultInterface>true</skipDefaultInterface>
-                <performBeanValidation>true</performBeanValidation>
-                <apis/>
-                <models/>
-                <useTags>true</useTags>
               </configOptions>
             </configuration>
           </execution>

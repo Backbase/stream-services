@@ -2,7 +2,6 @@ package com.backbase.stream.compositions.productcatalog.http;
 
 import com.backbase.stream.compositions.productcatalog.core.model.ProductCatalogIngestResponse;
 import com.backbase.stream.compositions.productcatalog.core.service.ProductCatalogIngestionService;
-import com.backbase.stream.compositions.productcatalog.http.ProductCatalogController;
 import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapper;
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalogIngestionResponse;
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalog;
@@ -59,7 +58,7 @@ class ProductCatalogControllerTest {
     @Test
     void testPushIngestion_Success() {
         Mono<ProductCatalogPushIngestionRequest> requestMono = Mono.just(
-                new ProductCatalogPushIngestionRequest().withProductCatalog(new ProductCatalog()));
+                new ProductCatalogPushIngestionRequest().productCatalog(new ProductCatalog()));
 
         doAnswer(invocation -> {
             Mono mono = invocation.getArgument(0);

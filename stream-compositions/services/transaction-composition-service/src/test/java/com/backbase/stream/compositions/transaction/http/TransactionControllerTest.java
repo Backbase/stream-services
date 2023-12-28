@@ -43,9 +43,9 @@ class TransactionControllerTest {
     void testPullIngestion_Success() {
 
         Mono<TransactionPullIngestionRequest> requestMono = Mono
-                .just(new TransactionPullIngestionRequest().withArrangementId("arrangementId")
-                        .withBillingCycles(3).withExternalArrangementId("extArrangementId")
-                        .withLegalEntityInternalId("legalEntityId"));
+                .just(new TransactionPullIngestionRequest().arrangementId("arrangementId")
+                        .billingCycles(3).externalArrangementId("extArrangementId")
+                        .legalEntityInternalId("legalEntityId"));
 
         when(transactionIngestionService.ingestPull(any())).thenReturn(Mono.just(
                 TransactionIngestResponse.builder()
@@ -60,8 +60,8 @@ class TransactionControllerTest {
     void testPushIngestion_Success() {
         Mono<TransactionPushIngestionRequest> requestMono = Mono.just(
                 new TransactionPushIngestionRequest()
-                        .withTransactions(List.of(new TransactionsPostRequestBody()
-                                .withReference("ref").withType("type").withArrangementId("arrangementId"))));
+                        .transactions(List.of(new TransactionsPostRequestBody()
+                                .reference("ref").type("type").arrangementId("arrangementId"))));
 
         when(transactionIngestionService.ingestPush(any())).thenReturn(
                 Mono.just(TransactionIngestResponse.builder()

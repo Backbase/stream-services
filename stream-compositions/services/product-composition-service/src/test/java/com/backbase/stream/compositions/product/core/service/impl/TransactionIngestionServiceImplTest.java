@@ -46,9 +46,9 @@ public class TransactionIngestionServiceImplTest {
         properties.getChains().getTransactionManager().setSplitPerArrangement(splitPerArrangement);
 
         var request1 = new TransactionPullIngestionRequest()
-            .withExternalArrangementId("id1");
+            .externalArrangementId("id1");
         var request2 = new TransactionPullIngestionRequest()
-            .withExternalArrangementId("id2");
+            .externalArrangementId("id2");
 
         StepVerifier.create(target.ingestTransactions(Flux.fromIterable(List.of(request1, request2))))
             .verifyComplete();
@@ -62,9 +62,9 @@ public class TransactionIngestionServiceImplTest {
         properties.getChains().getTransactionManager().setSplitPerArrangement(splitPerArrangement);
 
         var request1 = new TransactionPullIngestionRequest()
-            .withExternalArrangementId("id1");
+            .externalArrangementId("id1");
         var request2 = new TransactionPullIngestionRequest()
-            .withExternalArrangementId("id2");
+            .externalArrangementId("id2");
 
         Step<?> step = StepVerifier.create(
                 target.ingestTransactionsAsync(Flux.fromIterable(List.of(request1, request2))))

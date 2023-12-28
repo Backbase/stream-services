@@ -6,13 +6,6 @@ import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemP
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountUserPreferencesItemPut;
 import com.backbase.dbs.arrangement.api.service.v2.model.TimeUnit;
-
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.backbase.stream.legalentity.model.AvailableBalance;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BookedBalance;
@@ -32,6 +25,12 @@ import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.TermUnit;
 import com.backbase.stream.legalentity.model.UserPreferences;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.mapstruct.InheritConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -134,7 +133,6 @@ public interface ProductMapper {
 
     AccountArrangementItem toArrangementItem(AccountArrangementItemPut arrangementItemPut);
 
-    //
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
     AccountArrangementItem toPresentationWithWeirdSpellingError(Product product);
 
@@ -194,6 +192,18 @@ public interface ProductMapper {
     @Mapping(source = "currentInvestmentValue", target = "currentInvestment")
     InvestmentAccount mapInvestmentAccount(AccountArrangementItem product);
 
+
+    default List<LegalEntityReference> mapLegalEntities(Set<String> externalIds) {
+        if (externalIds == null)
+            return null;
+        return externalIds.stream().map(id -> new LegalEntityReference().externalId(id)).toList();
+    }
+
+    default Set<String> mapLegalEntitiesIds(List<LegalEntityReference> externalIds) {
+        if (externalIds == null)
+            return null;
+        return externalIds.stream().map(id -> id.getExternalId()).collect(Collectors.toSet());
+    }
 
     default BookedBalance mapBookedBalance(BigDecimal bigDecimal) {
         if (bigDecimal == null)
