@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 - Bumping Service SDK to **16.0.1**
   - Multiple breaking changes were introduced as part of this upgrade, including Spring Boot 3 upgrade, replacing Spring Sleuth by Micrometer and modules structure for the Composition Events.
 - Bumping Banking Services clients to **2023.12**
+- Enhancing Multi-tenancy support by removing the concurrency limitation from `v3.70.0` using the new reactor's context propagation.
 
 ## [3.70.0](https://github.com/Backbase/stream-services/compare/3.69.0...3.70.0)
 ### Added

@@ -1,7 +1,6 @@
 package com.backbase.stream.context.web;
 
-import static com.backbase.stream.context.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
-
+import com.backbase.stream.context.ForwardedHeadersAccessor;
 import com.backbase.stream.context.config.ContextPropagationConfigurationProperties;
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.RequestPath;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -29,15 +27,15 @@ public class HeaderForwardingServerFilter implements WebFilter {
                 .map(ServerHttpRequest::getPath)
                 .map(RequestPath::toString)
                 .orElse("null"));
-        LinkedMultiValueMap<String, String> headers =
+        HttpHeaders headers =
             assemblyHeadersToForward(properties.getHeadersToForward(), exchange.getRequest().getHeaders());
         return chain.filter(exchange)
-            .contextWrite(ctx -> headers.isEmpty() ? ctx : ctx.put(FORWARDED_HEADERS_CONTEXT_KEY, headers));
+            .contextWrite(ctx -> headers.isEmpty() ? ctx : ctx.put(ForwardedHeadersAccessor.KEY, headers));
     }
 
-    private LinkedMultiValueMap<String, String> assemblyHeadersToForward(
+    private HttpHeaders assemblyHeadersToForward(
         List<String> headersToForward, HttpHeaders requestHeaders) {
-        LinkedMultiValueMap<String, String> forwardedHeaders = new LinkedMultiValueMap<>();
+        HttpHeaders forwardedHeaders = new HttpHeaders();
         headersToForward.forEach(headerKey -> {
             List<String> headerValues = requestHeaders.get(headerKey);
             if (headerValues != null && !headerValues.isEmpty()) {
