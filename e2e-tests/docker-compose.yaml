@@ -17,7 +17,6 @@ x-common-variables: &common-variables
   backbase.multi-tenancy.tenants[0].id: t1
   backbase.multi-tenancy.tenants[1].id: t2
   spring.main.banner-mode: off
-  spring.zipkin.enabled: false
   spring.cloud.config.enabled: false
   spring.cloud.kubernetes.enabled: false
   backbase.audit.enabled: false

@@ -28,7 +28,7 @@ public class SetupProductCatalogApplicationIT {
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
         String wiremockUrl = String.format("http://localhost:%d", wiremock.getPort());
-        registry.add("spring.zipkin.base-url", () -> wiremockUrl);
+        registry.add("management.zipkin.tracing.endpoint", () -> wiremockUrl + "/api/v2/spans");
         registry.add("spring.cloud.discovery.client.simple.instances.token-converter[0].uri", () -> wiremockUrl);
         registry.add("spring.cloud.discovery.client.simple.instances.arrangement-manager[0].uri", () -> wiremockUrl);
     }

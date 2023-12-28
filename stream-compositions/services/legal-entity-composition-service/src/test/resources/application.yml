@@ -2,10 +2,6 @@ spring:
   cloud:
     config:
       enabled: false
-  main:
-    allow-bean-definition-overriding: true
-  activemq:
-    broker-url: vm://activemq
     kubernetes:
       config:
         enabled: false
@@ -14,6 +10,10 @@ spring:
         enabled: false
     loadbalancer:
       enabled: false
+  main:
+    allow-bean-definition-overriding: true
+  activemq:
+    broker-url: vm://activemq
 
 eureka:
   client:

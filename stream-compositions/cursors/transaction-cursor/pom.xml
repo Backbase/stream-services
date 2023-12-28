@@ -79,12 +79,6 @@
       <groupId>com.backbase.stream.compositions.api</groupId>
       <artifactId>transaction-cursor-api</artifactId>
       <version>${project.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.springframework.cloud</groupId>
-          <artifactId>spring-cloud-sleuth-api</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>

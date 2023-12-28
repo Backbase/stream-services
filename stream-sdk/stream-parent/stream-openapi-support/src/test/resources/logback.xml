@@ -22,5 +22,4 @@
 <!--    <logger name="reactor.netty.resources.PooledConnectionProvider" level="INFO"/>-->
 <!--    <logger name="org.springframework.web.reactive.function.client.ExchangeFunctions" level="WARN"/>-->
 <!--    <logger name="io.micrometer.tracing.annotation" level="debug"/>-->
-<!--    <logger name="org.springframework.cloud.sleuth.instrument.reactor" level="trace"/>-->
 </configuration>
