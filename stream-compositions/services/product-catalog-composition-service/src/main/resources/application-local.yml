@@ -5,6 +5,8 @@ spring:
   activemq:
     broker-url: tcp://localhost:61616
   cloud:
+    config:
+      enabled: false
     loadbalancer:
       enabled: false
 backbase:

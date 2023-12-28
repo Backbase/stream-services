@@ -3,6 +3,8 @@ server:
 
 spring:
   cloud:
+    config:
+      enabled: false
     loadbalancer:
       enabled: false
   activemq:

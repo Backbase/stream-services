@@ -2,6 +2,9 @@ server:
   port: 9005
 
 spring:
+  cloud:
+    config:
+      enabled: false
   jpa:
     database-platform: org.hibernate.dialect.MySQL5Dialect
   datasource:

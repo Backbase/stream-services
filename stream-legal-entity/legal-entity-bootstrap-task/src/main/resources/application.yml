@@ -2,6 +2,8 @@
 server:
   shutdown: graceful
 spring:
+  application:
+    name: legal-entity-bootstrap-task
   cloud:
     task:
       events:

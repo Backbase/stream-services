@@ -2,6 +2,8 @@
 server:
   shutdown: graceful
 spring:
+  application:
+    name: approvals-bootstrap-task
   cloud:
     task:
       events:

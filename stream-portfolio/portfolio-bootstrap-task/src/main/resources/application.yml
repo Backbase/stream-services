@@ -1,6 +1,8 @@
 server:
   shutdown: graceful
 spring:
+  application:
+    name: portfolio-bootstrap-task
   cloud:
     task:
       events:

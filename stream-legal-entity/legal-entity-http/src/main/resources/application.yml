@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: legal-entity-http
   codec:
     max-in-memory-size: 10MB
 
