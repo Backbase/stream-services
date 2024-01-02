@@ -10,7 +10,6 @@ import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.legalentity.repository.LegalEntityUnitOfWorkRepository;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.product.BatchProductIngestionSaga;
-import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.ProductIngestionSagaConfiguration;
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.service.AccessGroupService;
@@ -18,7 +17,6 @@ import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -69,7 +67,6 @@ public class LegalEntitySagaConfiguration {
         UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
-        ServiceAgreementSagaV2 serviceAgreementSagaV2,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
@@ -80,7 +77,6 @@ public class LegalEntitySagaConfiguration {
             userService,
             userProfileService,
             accessGroupService,
-            serviceAgreementSagaV2,
             limitsSaga,
             contactsSaga,
             sinkConfigurationProperties,

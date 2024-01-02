@@ -32,8 +32,6 @@ import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityParticipant;
-import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.Limit;
@@ -56,12 +54,10 @@ import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
-import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.cloud.sleuth.annotation.SpanTag;
@@ -120,7 +116,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
         UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
-        ServiceAgreementSagaV2 serviceAgreementSagaV2,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties,
@@ -247,10 +242,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
         accessContext.setExternalUserId(externalUserId);
         accessContext.setScope(scope);
         return accessContext;
-    }
-
-    private ServiceAgreementV2 getServiceAgreement(LegalEntityV2 legalEntity) {
-        return legalEntity.getMasterServiceAgreement();
     }
 
     @Override
@@ -493,39 +484,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
                     return user;
                 });
         return getExistingIdentityUser.switchIfEmpty(createNewIdentityUser);
-    }
-
-    private ServiceAgreementV2 createMasterServiceAgreement(LegalEntityV2 legalEntity, @Valid List<User> admins) {
-
-        List<String> adminExternalIds = admins != null
-            ? admins.stream().map(User::getExternalId).toList() :
-            null;
-
-        LegalEntityParticipant legalEntityParticipant = new LegalEntityParticipant();
-        legalEntityParticipant.setExternalId(legalEntity.getExternalId());
-        legalEntityParticipant.setSharingAccounts(true);
-        legalEntityParticipant.setSharingUsers(true);
-        legalEntityParticipant.setAdmins(adminExternalIds);
-        legalEntityParticipant.setUsers(Collections.emptyList());
-
-        ServiceAgreementV2 serviceAgreement;
-
-        if (legalEntity.getMasterServiceAgreement() == null) {
-            serviceAgreement = new ServiceAgreementV2();
-            serviceAgreement.setExternalId("sa_" + legalEntity.getExternalId());
-            serviceAgreement.setName(legalEntity.getName());
-            serviceAgreement.setDescription("Master Service Agreement for " + legalEntity.getName());
-            serviceAgreement.setStatus(LegalEntityStatus.ENABLED);
-        } else {
-            serviceAgreement = legalEntity.getMasterServiceAgreement();
-        }
-
-        serviceAgreement.setIsMaster(true);
-        if (isEmpty(serviceAgreement.getParticipants())) {
-            serviceAgreement.addParticipantsItem(legalEntityParticipant);
-        }
-
-        return serviceAgreement;
     }
 
     private Mono<LegalEntityTaskV2> processSubsidiaries(LegalEntityTaskV2 streamTask) {

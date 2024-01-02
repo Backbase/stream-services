@@ -470,14 +470,11 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             .filter(jobProfileUser -> !isEmpty(jobProfileUser.getBusinessFunctionGroups()))
             .collect(Collectors.toMap(
                 JobProfileUser::getUser,
-                jobProfileUser -> {
-                    // Map each business function group to an empty list of products.
-                    return jobProfileUser.getBusinessFunctionGroups().stream()
-                        .collect(Collectors.toMap(
-                            Function.identity(), // Specify the type explicitly
-                            bfg -> Collections.emptyList()
-                        ));
-                }
+                jobProfileUser -> jobProfileUser.getBusinessFunctionGroups().stream()
+                    .collect(Collectors.toMap(
+                        Function.identity(), // Specify the type explicitly
+                        bfg -> Collections.emptyList()
+                    ))
             ));
 
         if (request.isEmpty()) {
@@ -512,7 +509,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     .flatMap(serviceAgreement -> {
                         serviceAgreement.setLimit(serviceAgreementV1.getLimit());
                         serviceAgreement.setParticipants(serviceAgreementV1.getParticipants());
-                        //TODO check if correct
                         if (serviceAgreementV1.getJobRoles() != null) {
                             serviceAgreement.setJobRoles(serviceAgreementV1.getJobRoles());
                         }
@@ -579,14 +575,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                         .thenReturn(streamTask);
                 }
             });
-        // As creatorLegalEntity doesnt accept external ID
-        // If creatorLegalEntity property is specified and equals to LE's parentExternalId then setup the
-        // creatorLegalEntity for SA as the LE's parent Internal ID
 
-        //TODO: check why we need it
-        //      if (legalEntity.getParentExternalId().equals(newSa.getCreatorLegalEntity())) {
-        //        newSa.setCreatorLegalEntity(legalEntity.getParentInternalId());
-        //   }
         Mono<ServiceAgreementTaskV2> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask,
                 saMapper.map(serviceAgreement))
             .onErrorMap(AccessGroupException.class, accessGroupException -> {
