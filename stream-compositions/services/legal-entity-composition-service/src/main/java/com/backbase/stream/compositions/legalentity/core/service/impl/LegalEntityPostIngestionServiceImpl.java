@@ -7,8 +7,10 @@ import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.LegalEntityCompletedEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.LegalEntityFailedEvent;
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPullEvent;
 import com.backbase.stream.compositions.legalentity.core.config.LegalEntityConfigurationProperties;
 import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMapper;
+import com.backbase.stream.compositions.legalentity.core.mapper.ProductCompositionMapper;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityPostIngestionService;
 import com.backbase.stream.compositions.product.client.ProductCompositionApi;
@@ -40,6 +42,8 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
     private final ProductCompositionApi productCompositionApi;
 
     private final LegalEntityMapper mapper;
+
+    private final ProductCompositionMapper productCompositionMapper;
 
 
     @Override
@@ -82,10 +86,16 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
     private Mono<LegalEntityResponse> ingestProductsAsync(LegalEntityResponse res) {
         return buildProductPullRequest(res)
-                .collectList()
-                .doOnNext(requests -> requests.forEach(r -> productCompositionApi.pullIngestProduct(r)
-                    .subscribe(t -> log.debug("Async product ingestion called"))))
-                .map(p -> res);
+            .map(productCompositionMapper::map)
+            .map(e -> {
+                var event = new EnvelopedEvent<ProductPullEvent>();
+                event.setEvent(e);
+                return event;
+            })
+            .doOnNext(eventBus::emitEvent)
+            .doOnNext(t -> log.debug("Async product ingestion called"))
+            .collectList()
+            .map(p -> res);
     }
 
 

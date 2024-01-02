@@ -1,5 +1,10 @@
 package com.backbase.stream.compositions.transaction.handlers;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
@@ -10,7 +15,8 @@ import com.backbase.stream.compositions.transaction.core.mapper.TransactionMappe
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestPullRequest;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;
 import com.backbase.stream.compositions.transaction.core.service.TransactionIngestionService;
-import com.backbase.stream.compositions.transaction.handlers.TransactionIngestPullEventHandler;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
@@ -19,13 +25,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
-
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Map;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionIngestPullEventHandlerTest {
@@ -78,8 +77,8 @@ class TransactionIngestPullEventHandlerTest {
                 .arrangementId(event.getArrangementId())
                 .legalEntityInternalId(event.getLegalEntityInternalId())
                 .externalArrangementId(event.getExternalArrangementId())
-                .dateRangeStart(event.getDateRangeStart() == null ? null : OffsetDateTime.parse(event.getDateRangeStart()))
-                .dateRangeEnd(event.getDateRangeEnd() == null ? null : OffsetDateTime.parse(event.getDateRangeEnd()))
+                .dateRangeStart(event.getDateRangeStart() == null ? null : event.getDateRangeStart().toOffsetDateTime())
+                .dateRangeEnd(event.getDateRangeEnd() == null ? null : event.getDateRangeEnd().toOffsetDateTime())
                 .build());
         Mono<TransactionIngestResponse> responseMono = Mono.just(
                 TransactionIngestResponse.builder()
@@ -117,8 +116,8 @@ class TransactionIngestPullEventHandlerTest {
                 .arrangementId(event.getArrangementId())
                 .legalEntityInternalId(event.getLegalEntityInternalId())
                 .externalArrangementId(event.getExternalArrangementId())
-                .dateRangeStart(event.getDateRangeStart() == null ? null : OffsetDateTime.parse(event.getDateRangeStart()))
-                .dateRangeEnd(event.getDateRangeEnd() == null ? null : OffsetDateTime.parse(event.getDateRangeEnd()))
+                .dateRangeStart(event.getDateRangeStart() == null ? null : event.getDateRangeStart().toOffsetDateTime())
+                .dateRangeEnd(event.getDateRangeEnd() == null ? null : event.getDateRangeEnd().toOffsetDateTime())
                 .build());
         when(transactionIngestionService.ingestPull(any())).thenReturn(Mono.error(new RuntimeException()));
 

@@ -1,6 +1,6 @@
 package com.backbase.stream.webclient.filter;
 
-import static com.backbase.stream.webclient.configuration.DbsWebClientConfiguration.CONTEXT_KEY_FORWARDED_HEADERS;
+import static com.backbase.stream.context.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
 
 import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
 import java.util.Optional;
@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @AllArgsConstructor
-public class HeadersForwardingClientFilter implements ExchangeFilterFunction {
+public class HeaderForwardingClientFilter implements ExchangeFilterFunction {
 
     private final DbsWebClientConfigurationProperties properties;
 
@@ -24,7 +24,7 @@ public class HeadersForwardingClientFilter implements ExchangeFilterFunction {
         ClientRequest additionalHeadersRequest = enrichRequestWithAdditionalHeaders(originalRequest);
 
         return Mono.deferContextual(context -> {
-            Optional<MultiValueMap<String, String>> forwardHeaders = context.getOrEmpty(CONTEXT_KEY_FORWARDED_HEADERS);
+            Optional<MultiValueMap<String, String>> forwardHeaders = context.getOrEmpty(FORWARDED_HEADERS_CONTEXT_KEY);
             log.trace("Context contains headers? {}", forwardHeaders.isPresent());
             log.trace("Forwarded headers: {}", forwardHeaders.map(MultiValueMap::toString).orElse("none"));
 

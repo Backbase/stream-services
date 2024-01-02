@@ -8,14 +8,12 @@ import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFaile
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ArrangementPostIngestionService;
-import com.backbase.stream.compositions.transaction.client.TransactionCompositionApi;
-import com.backbase.stream.compositions.transaction.client.model.TransactionIngestionResponse;
+import com.backbase.stream.compositions.product.core.service.TransactionIngestionService;
 import com.backbase.stream.compositions.transaction.client.model.TransactionPullIngestionRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @Service
 @Slf4j
@@ -24,7 +22,7 @@ public class ArrangementPostIngestionServiceImpl implements ArrangementPostInges
 
     private final EventBus eventBus;
     private final ProductConfigurationProperties config;
-    private final TransactionCompositionApi transactionCompositionApi;
+    private final TransactionIngestionService transactionIngestionService;
 
     @Override
     public Mono<ArrangementIngestResponse> handleSuccess(ArrangementIngestResponse res) {
@@ -65,21 +63,17 @@ public class ArrangementPostIngestionServiceImpl implements ArrangementPostInges
 
     private Mono<ArrangementIngestResponse> ingestTransactions(ArrangementIngestResponse res) {
         return Mono.just(res)
-                .map(this::buildTransactionPullRequest)
-                .flatMap(transactionCompositionApi::pullTransactions)
-                .onErrorResume(this::handleTransactionError)
-                .doOnNext(response -> log.debug("Response from Transaction Composition: {}", response.getTransactions()))
-                .map(p -> res);
+            .map(this::buildTransactionPullRequest)
+            .flatMap(transactionIngestionService::ingestTransactions)
+            .onErrorResume(this::handleTransactionError)
+            .map(p -> res);
     }
 
     private Mono<ArrangementIngestResponse> ingestTransactionsAsync(ArrangementIngestResponse res) {
         return Mono.just(res)
-                .map(this::buildTransactionPullRequest)
-                .publishOn(Schedulers.boundedElastic())
-                .doOnNext(request -> transactionCompositionApi.pullTransactions(request).subscribe())
-                .doOnNext(t -> log.info("Async transaction ingestion called for arrangement: {}",
-                        t.getArrangementId()))
-                .map(p -> res);
+            .map(this::buildTransactionPullRequest)
+            .flatMap(transactionIngestionService::ingestTransactionsAsync)
+            .map(p -> res);
     }
 
     private void processSuccessEvent(ArrangementIngestResponse res) {
@@ -97,8 +91,8 @@ public class ArrangementPostIngestionServiceImpl implements ArrangementPostInges
         }
     }
 
-    private Mono<TransactionIngestionResponse> handleTransactionError(Throwable t) {
-        log.error("Error while calling Transaction Composition: {}", t.getMessage());
+    private <T> Mono<T> handleTransactionError(Throwable t) {
+        log.error("Error while calling Transaction Chain: {}", t.getMessage());
         return Mono.error(new InternalServerErrorException(t.getMessage()));
     }
 

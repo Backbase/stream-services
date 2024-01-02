@@ -1,0 +1,57 @@
+{
+  "request": {
+    "urlPathPattern": "/service-api/v2/transactions/filter",
+    "method": "POST"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": [
+      {
+        "id": "{{ jsonPath request.body '$[0].arrangementId' }}_20221202_000441137",
+        "arrangementId": "{{ jsonPath request.body '$[0].arrangementId' }}",
+        "description": "TFR DEP - TRANSFER FROM 30189485",
+        "typeGroup": "Payment",
+        "type": "Deposit",
+        "bookingDate": "2022-12-02",
+        "transactionAmountCurrency": {
+          "amount": "72000.0",
+          "currencyCode": "USD"
+        },
+        "billingStatus": "BILLED",
+        "runningBalance": "72000.0",
+        "creditDebitIndicator": "CRDT",
+        "creationTime": "2022-12-02T00:00:00+01:00"
+      },
+      {
+        "id": "{{ jsonPath request.body '$[0].arrangementId' }}_20221202_000441138",
+        "arrangementId": "{{ jsonPath request.body '$[0].arrangementId' }}",
+        "description": "TFR DEP - TRANSFER FROM 30189485",
+        "typeGroup": "Payment",
+        "type": "Withdrawal",
+        "bookingDate": "2022-12-02",
+        "transactionAmountCurrency": {
+          "amount": "72000.0",
+          "currencyCode": "USD"
+        },
+        "billingStatus": "BILLED",
+        "runningBalance": "72000.0",
+        "creditDebitIndicator": "DBIT",
+        "creationTime": "2022-12-02T00:00:00+01:00"
+      }
+    ],
+    "headers": {
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "1; mode=block",
+      "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      "X-Frame-Options": "DENY",
+      "Content-Type": "application/json",
+      "Date": "Wed, 26 Oct 2022 12:16:40 GMT",
+      "Keep-Alive": "timeout=60"
+    },
+    "transformers": [
+      "response-template"
+    ]
+  }
+}

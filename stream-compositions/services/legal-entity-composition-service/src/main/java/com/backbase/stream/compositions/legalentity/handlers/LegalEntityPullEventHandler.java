@@ -11,12 +11,11 @@ import com.backbase.stream.compositions.legalentity.core.mapper.LegalEntityMappe
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIngestionService;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
-
-import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -36,9 +35,9 @@ public class LegalEntityPullEventHandler implements EventHandler<LegalEntityPull
     @Override
     public void handle(EnvelopedEvent<LegalEntityPullEvent> envelopedEvent) {
         legalEntityIngestionService.ingestPull(buildRequest(envelopedEvent.getEvent()))
-                .doOnSuccess(this::handleResponse)
-                .onErrorResume(this::handleError)
-                .subscribe();
+            .doOnSuccess(this::handleResponse)
+            .onErrorResume(this::handleError)
+            .block();
     }
 
     /**
