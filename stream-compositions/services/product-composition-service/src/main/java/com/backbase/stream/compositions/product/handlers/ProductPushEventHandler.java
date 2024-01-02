@@ -20,7 +20,7 @@ public class ProductPushEventHandler implements EventHandler<ProductPushEvent> {
     public void handle(EnvelopedEvent<ProductPushEvent> envelopedEvent) {
         buildRequest(envelopedEvent)
                 .flatMap(productIngestionService::ingestPush)
-                .subscribe();
+                .block();
     }
 
     /**

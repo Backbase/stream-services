@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
+import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
@@ -20,6 +22,7 @@ import com.backbase.stream.compositions.product.core.config.ProductConfiguration
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Chains;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.Events;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties.TransactionComposition;
+import com.backbase.stream.compositions.product.core.mapper.EventRequestsMapper;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPushRequest;
@@ -90,16 +93,22 @@ class ProductIngestionServiceImplTest {
     TransactionCompositionApi transactionCompositionApi;
 
     @Mock
+    TransactionPresentationServiceApi transactionPresentationServiceApi;
+
+    @Mock
     PaymentOrderCompositionApi paymentOrderCompositionApi;
 
     ProductGroupMapper mapper = Mappers.getMapper(ProductGroupMapper.class);
+
+    EventRequestsMapper eventRequestsMapper = Mappers.getMapper(EventRequestsMapper.class);
 
 
     @BeforeEach
     void setUp() {
 
-        productPostIngestionService = new ProductPostIngestionServiceImpl(eventBus, config,
-                transactionCompositionApi, paymentOrderCompositionApi, mapper);
+        productPostIngestionService = new ProductPostIngestionServiceImpl(eventBus, config, paymentOrderCompositionApi,
+            mapper, new TransactionIngestionServiceImpl(eventBus, eventRequestsMapper,
+            transactionCompositionApi, transactionPresentationServiceApi, config));
 
         productIngestionService = new ProductIngestionServiceImpl(
                 batchProductIngestionSaga,
@@ -206,10 +215,12 @@ class ProductIngestionServiceImplTest {
                 .thenReturn(Mono.just(new BatchProductGroupTask()
                         .data(new BatchProductGroup().productGroups(List.of(productGroup))
                                 .serviceAgreement(productGroup.getServiceAgreement()))));
-        when(transactionCompositionApi.pullTransactions(any()))
+        if (!isChainAsync) {
+            when(transactionCompositionApi.pullTransactions(any()))
                 .thenReturn(Mono.just(new TransactionIngestionResponse()
-                        .withTransactions(List.of(
-                                new TransactionsPostResponseBody().withId("id").withExternalId("externalId")))));
+                    .withTransactions(List.of(
+                        new TransactionsPostResponseBody().withId("id").withExternalId("externalId")))));
+        }
         doReturn(Mono.just(new PaymentOrderIngestionResponse()
                 .withNewPaymentOrder(List.of(
                         new PaymentOrderPostResponse().withId("id"))))).when(paymentOrderCompositionApi).pullPaymentOrder(any());
@@ -223,22 +234,24 @@ class ProductIngestionServiceImplTest {
     }
 
     private void verifyProductCompletedEvent() {
-        ArgumentCaptor<EnvelopedEvent<ProductCompletedEvent>> argumentCaptor = ArgumentCaptor.forClass(EnvelopedEvent.class);
-        verify(eventBus, times(1)).emitEvent(argumentCaptor.capture());
-        ProductCompletedEvent event = argumentCaptor.getValue().getEvent();
-
-        Map<String, String> additions = event.getAdditions();
-        assertThat(additions.get("addition"), is("addition1"));
-        assertThat(event.getSource(), is("source_of_ingestion_process"));
-        assertThat(event.getLegalEntityExternalId(), is("le_externalId"));
-        assertThat(event.getLegalEntityInternalId(), is("le_internalId"));
-        assertThat(event.getUserExternalId(), is("user_externalId"));
-        assertThat(event.getUserInternalId(), is("user_internalId"));
-        assertThat(event.getProductGroups().get(0).getCurrentAccounts(), notNullValue());
-        assertThat(event.getProductGroups().get(0).getSavingAccounts(), notNullValue());
-        assertThat(event.getProductGroups().get(0).getLoans(), notNullValue());
-        assertThat(event.getProductGroups().get(0).getTermDeposits(), notNullValue());
-        assertThat(event.getProductGroups().get(0).getCreditCards(), notNullValue());
+        verify(eventBus, times(1)).emitEvent(argThat(e -> {
+            if (e.getEvent() instanceof ProductCompletedEvent event){
+                Map<String, String> additions = event.getAdditions();
+                assertThat(additions.get("addition"), is("addition1"));
+                assertThat(event.getSource(), is("source_of_ingestion_process"));
+                assertThat(event.getLegalEntityExternalId(), is("le_externalId"));
+                assertThat(event.getLegalEntityInternalId(), is("le_internalId"));
+                assertThat(event.getUserExternalId(), is("user_externalId"));
+                assertThat(event.getUserInternalId(), is("user_internalId"));
+                assertThat(event.getProductGroups().get(0).getCurrentAccounts(), notNullValue());
+                assertThat(event.getProductGroups().get(0).getSavingAccounts(), notNullValue());
+                assertThat(event.getProductGroups().get(0).getLoans(), notNullValue());
+                assertThat(event.getProductGroups().get(0).getTermDeposits(), notNullValue());
+                assertThat(event.getProductGroups().get(0).getCreditCards(), notNullValue());
+                return true;
+            }
+            return false;
+        }));
     }
 
     @NotNull

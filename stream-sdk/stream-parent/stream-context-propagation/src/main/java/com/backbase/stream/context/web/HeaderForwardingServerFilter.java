@@ -1,8 +1,8 @@
-package com.backbase.stream.webclient.filter;
+package com.backbase.stream.context.web;
 
-import static com.backbase.stream.webclient.configuration.DbsWebClientConfiguration.CONTEXT_KEY_FORWARDED_HEADERS;
+import static com.backbase.stream.context.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
 
-import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
+import com.backbase.stream.context.config.ContextPropagationConfigurationProperties;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +18,9 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @RequiredArgsConstructor
-public class HeadersForwardingServerFilter implements WebFilter {
+public class HeaderForwardingServerFilter implements WebFilter {
 
-    private final DbsWebClientConfigurationProperties properties;
+    private final ContextPropagationConfigurationProperties properties;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -32,7 +32,7 @@ public class HeadersForwardingServerFilter implements WebFilter {
         LinkedMultiValueMap<String, String> headers =
             assemblyHeadersToForward(properties.getHeadersToForward(), exchange.getRequest().getHeaders());
         return chain.filter(exchange)
-            .contextWrite(ctx -> headers.isEmpty() ? ctx : ctx.put(CONTEXT_KEY_FORWARDED_HEADERS, headers));
+            .contextWrite(ctx -> headers.isEmpty() ? ctx : ctx.put(FORWARDED_HEADERS_CONTEXT_KEY, headers));
     }
 
     private LinkedMultiValueMap<String, String> assemblyHeadersToForward(

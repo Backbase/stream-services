@@ -2,23 +2,14 @@ server:
   port: 9004
 
 spring:
+  cloud:
+    loadbalancer:
+      enabled: false
   activemq:
     broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
-  main:
-    allow-bean-definition-overriding: true
-  codec:
-    max-in-memory-size: 10MB
-sso:
-  jwt:
-    internal:
-      type: signed
-      signature:
-        algorithm: HS256
-        key:
-          type: ENV
-          value: SIG_SECRET_KEY
+
 backbase:
   communication:
     services:
@@ -57,9 +48,7 @@ backbase:
 
 eureka:
   instance:
-    metadata-map:
-      public: true
-      role: live
+    hostname: host.docker.internal
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/

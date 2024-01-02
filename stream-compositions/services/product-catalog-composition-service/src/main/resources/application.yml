@@ -1,15 +1,10 @@
 spring:
-  zipkin:
-    enabled: false
   main:
     allow-bean-definition-overriding: true
 backbase:
   communication:
     http:
       default-service-port: 8080
-      client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: http://token-converter:8080/oauth/token
   mtls:
     enabled: false
   security:

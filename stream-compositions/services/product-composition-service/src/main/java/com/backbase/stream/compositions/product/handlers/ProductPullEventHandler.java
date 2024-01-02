@@ -7,8 +7,8 @@ import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompl
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
 import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPullEvent;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
+import com.backbase.stream.compositions.product.core.mapper.EventRequestsMapper;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
-import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
 import java.util.stream.Collectors;
@@ -23,10 +23,12 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @EnableConfigurationProperties(ProductConfigurationProperties.class)
 public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
+
     private final ProductConfigurationProperties configProperties;
     private final ProductIngestionService productIngestionService;
     private final ProductGroupMapper mapper;
     private final EventBus eventBus;
+    private final EventRequestsMapper eventsRequestMapper;
 
     /**
      * Handles ProductsPullEvent.
@@ -35,23 +37,11 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
      */
     @Override
     public void handle(EnvelopedEvent<ProductPullEvent> envelopedEvent) {
-        buildRequest(envelopedEvent.getEvent())
-                .flatMap(productIngestionService::ingestPull)
-                .doOnError(this::handleError)
-                .subscribe(this::handleResponse);
-    }
-
-    /**
-     * Builds ingestion request for downstream service.
-     *
-     * @param event ProductsPullEvent
-     * @return ProductPullRequest
-     */
-    private Mono<ProductIngestPullRequest> buildRequest(ProductPullEvent event) {
-        return Mono.just(
-                ProductIngestPullRequest.builder()
-                        .legalEntityExternalId(event.getLegalEntityExternalId())
-                        .build());
+        Mono.just(eventsRequestMapper.map(envelopedEvent.getEvent()))
+            .flatMap(productIngestionService::ingestPull)
+            .doOnError(this::handleError)
+            .doOnSuccess(this::handleResponse)
+            .block();
     }
 
     /**
@@ -66,7 +56,7 @@ public class ProductPullEventHandler implements EventHandler<ProductPullEvent> {
         ProductCompletedEvent event = new ProductCompletedEvent()
                 .withProductGroups(
                         response.getProductGroups().stream()
-                                .map( productGroup -> mapper.mapStreamToEvent(productGroup))
+                                .map(mapper::mapStreamToEvent)
                                 .collect(Collectors.toList()));
 
         EnvelopedEvent<ProductCompletedEvent> envelopedEvent = new EnvelopedEvent<>();

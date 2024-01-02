@@ -6,15 +6,22 @@ spring:
     broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
-  main:
-    allow-bean-definition-overriding: true
+  cloud:
+    loadbalancer:
+      enabled: false
+
 eureka:
+  instance:
+    hostname: host.docker.internal
   client:
-    enabled: true
-    serviceUrl.defaultZone: http://localhost:8761/eureka/
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
 
 backbase:
   communication:
+    http:
+      client-secret: bb-secret
+      access-token-uri: http://localhost:7779/oauth/token
     services:
       usermanager:
         direct-uri: http://localhost:8060
@@ -36,10 +43,7 @@ backbase:
         product:
           composition:
             direct-uri: http://localhost:9003
-    http:
-      client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: "http://localhost:7779/oauth/token"
+
   stream:
     legalentity:
       sink:
@@ -449,5 +453,6 @@ bootstrap:
 
 logging:
   level:
-    com.backbase.stream: INFO
-    com.backbase.stream.compositions: DEBUG
+    com.backbase: DEBUG
+    reactor.netty.http.client: DEBUG
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG

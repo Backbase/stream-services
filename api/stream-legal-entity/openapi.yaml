@@ -1645,6 +1645,8 @@ components:
           description: End time of the service agreement.
         status:
           $ref: '#/components/schemas/LegalEntityStatus'
+        customerCategory:
+          $ref: '#/components/schemas/CustomerCategory'
         isMaster:
           type: boolean
           description: Master flag
