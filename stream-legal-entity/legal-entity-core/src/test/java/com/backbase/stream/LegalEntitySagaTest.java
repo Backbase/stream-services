@@ -63,6 +63,7 @@ import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
+import com.backbase.stream.worker.model.StreamTask;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.time.Duration;
@@ -463,7 +464,7 @@ class LegalEntitySagaTest {
                 .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
         when(accessGroupService.updateServiceAgreementAssociations(any(), any(), any()))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("Service_Agreement_Id")));
-        when(accessGroupService.createServiceAgreement(any(), any()))
+        when(accessGroupService.createServiceAgreement(any(), (ServiceAgreement) any()))
             .thenReturn(Mono.empty());
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
             .thenReturn(Mono.empty());
@@ -526,7 +527,7 @@ class LegalEntitySagaTest {
         when(accessGroupService.removePermissionsForUser(any(), any())).thenReturn(Mono.empty());
 
         when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.empty());
-        when(accessGroupService.deleteAdmins(any())).thenReturn(Mono.empty());
+        when(accessGroupService.deleteAdmins((ServiceAgreement) any())).thenReturn(Mono.empty());
         when(userService.archiveUsers(any(), any())).thenReturn(Mono.empty());
         when(legalEntityService.deleteLegalEntity(any())).thenReturn(Mono.empty());
 
@@ -569,7 +570,7 @@ class LegalEntitySagaTest {
         when(accessGroupService.removePermissionsForUser(any(), any())).thenReturn(Mono.empty());
 
         when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.empty());
-        when(accessGroupService.deleteAdmins(any())).thenReturn(Mono.empty());
+        when(accessGroupService.deleteAdmins((ServiceAgreement) any())).thenReturn(Mono.empty());
         when(userService.archiveUsers(any(), any())).thenReturn(Mono.empty());
         when(legalEntityService.deleteLegalEntity(any())).thenReturn(Mono.empty());
 

@@ -15,6 +15,7 @@ import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -30,12 +31,18 @@ public interface AccessGroupMapper {
     ServiceAgreement toStream(ServiceAgreementItemQuery getServiceAgreement);
 
     @Mapping(source = "id", target = "internalId")
+    ServiceAgreementV2 toStreamV2(ServiceAgreementItemQuery getServiceAgreement);
+
+    @Mapping(source = "id", target = "internalId")
     ServiceAgreement toStream(ServiceAgreementItem serviceAgreementItem);
 
     BusinessFunction toStream(FunctionGroupItem functionsGetResponseBody);
 
     @Mapping(source = "participants", target = "participantsToIngest")
     ServicesAgreementIngest toPresentation(ServiceAgreement serviceAgreement);
+
+    @Mapping(source = "participants", target = "participantsToIngest")
+    ServicesAgreementIngest toPresentation(ServiceAgreementV2 serviceAgreement);
 
     ServiceAgreementPut toPresentationPut(ServiceAgreement serviceAgreement);
 
