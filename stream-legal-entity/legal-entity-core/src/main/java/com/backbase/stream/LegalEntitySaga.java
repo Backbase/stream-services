@@ -59,7 +59,6 @@ import com.backbase.stream.mapper.ExternalContactMapper;
 import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.BusinessFunctionGroupMapper;
-import com.backbase.stream.product.ProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
@@ -156,7 +155,6 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
-        ProductIngestionSaga productIngestionSaga,
         BatchProductIngestionSaga batchProductIngestionSaga,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,

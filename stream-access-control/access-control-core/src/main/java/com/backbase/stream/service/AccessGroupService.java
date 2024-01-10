@@ -60,6 +60,7 @@ import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
+import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.mapper.AccessGroupMapper;
 import com.backbase.stream.mapper.ParticipantMapper;
@@ -454,6 +455,14 @@ public class AccessGroupService {
         };
     }
 
+    private BiFunction<IdItem, ServiceAgreementV2, ServiceAgreementV2> storeIdInServiceAgreementV2() {
+        return (idItem, serviceAgreement1) -> {
+            serviceAgreement1.setInternalId(idItem.getId());
+            log.info("Created Service Agreement: {} with id: {}", serviceAgreement1.getName(), idItem.getId());
+            return serviceAgreement1;
+        };
+    }
+
     public Mono<LegalEntity> setAdministrators(LegalEntity legalEntity) {
 
         List<PresentationServiceAgreementUserPair> userPairs = legalEntity.getAdministrators().stream().map(user -> {
@@ -536,9 +545,9 @@ public class AccessGroupService {
                             .dataGroupIdentifiers(
                                 usersPermissions.get(user).get(bfg).stream()
                                     .map(pg -> mapDataGroupId(pg.getInternalId()))
-                                    .collect(Collectors.toList())))
-                        .collect(Collectors.toList())))
-            .collect(Collectors.toList());
+                                    .toList()))
+                        .toList()))
+            .toList();
 
         return Mono.just(request)
             .flatMap(userPermissionsRequest -> {
@@ -1075,6 +1084,38 @@ public class AccessGroupService {
                         new PresentationServiceAgreementUsersBatchUpdate()
                             .action(PresentationAction.REMOVE)
                             .users(admins))
+                        .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Delete Admin", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
+                        .collectList()
+                        .onErrorResume(WebClientResponseException.class, e -> {
+                            log.error("Failed to delete admin: {}", e.getResponseBodyAsString(), e);
+                            return Mono.error(e);
+                        }).then();
+                }
+            });
+    }
+
+    public Mono<Void> deleteAdmins(ServiceAgreementV2 serviceAgreement) {
+        log.debug("Removing admins for Service Agreement {}", serviceAgreement.getName());
+        return serviceAgreementsApi.getServiceAgreementAdmins(serviceAgreement.getInternalId())
+            .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins()))
+            // get External  ID for each admin.
+            // We need to  get the user by using the internal id to facilitate the delete for issue #46
+            .flatMap(userId -> usersApi.getUserById(userId, true)).map(GetUser::getExternalId)
+            .collectList()
+            .doOnNext(adminIds -> log.debug("Found  admins: {}", adminIds))
+            .map(adminsExternalIds -> adminsExternalIds.stream()
+                .map(adminId -> new PresentationServiceAgreementUserPair()
+                    .externalServiceAgreementId(serviceAgreement.getExternalId())
+                    .externalUserId(adminId))
+                .collect(Collectors.toList()))
+            .flatMap(admins -> {
+                if (CollectionUtils.isEmpty(admins)) {
+                    return Mono.empty();
+                } else {
+                    return serviceAgreementsApi.putPresentationServiceAgreementAdminsBatchUpdate(
+                            new PresentationServiceAgreementUsersBatchUpdate()
+                                .action(PresentationAction.REMOVE)
+                                .users(admins))
                         .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Delete Admin", r.getStatus().getValue(), r.getResourceId(), r.getErrors()))
                         .collectList()
                         .onErrorResume(WebClientResponseException.class, e -> {

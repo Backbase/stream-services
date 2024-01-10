@@ -10,8 +10,6 @@ import static org.mockito.Mockito.verify;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.config.EventBindableAutoConfiguration;
-import com.backbase.buildingblocks.backend.communication.event.config.MessagingConfiguration;
-import com.backbase.buildingblocks.backend.communication.event.config.SpringCloudStreamEventingAutoConfiguration;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
 import com.backbase.buildingblocks.persistence.model.Event;
@@ -21,17 +19,11 @@ import com.backbase.stream.context.events.TenantEventMessageProcessor;
 import com.backbase.stream.context.events.TenantMessageInProcessor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.cloud.function.cloudevent.CloudEventsFunctionExtensionConfiguration;
 import org.springframework.cloud.function.context.config.ContextFunctionCatalogAutoConfiguration;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
-import org.springframework.cloud.stream.config.BinderFactoryAutoConfiguration;
-import org.springframework.cloud.stream.config.BindingServiceConfiguration;
-import org.springframework.cloud.stream.function.FunctionConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -40,21 +32,13 @@ import reactor.test.StepVerifier;
 
 
 @SpringJUnitConfig(classes = {
-    PropertyPlaceholderAutoConfiguration.class,
-    WebClientAutoConfiguration.class,
-    BinderFactoryAutoConfiguration.class,
-    BindingServiceConfiguration.class,
-    CloudEventsFunctionExtensionConfiguration.class,
     ContextFunctionCatalogAutoConfiguration.class,
-    FunctionConfiguration.class,
-    SpringCloudStreamEventingAutoConfiguration.class,
-    MessagingConfiguration.class,
     EventBindableAutoConfiguration.class,
-    JacksonAutoConfiguration.class,
-    ContextPropagationConfiguration.class,
-    TestChannelBinderConfiguration.class
+    TestChannelBinderConfiguration.class,
+    ContextPropagationConfiguration.class
 })
 @Import(TestEventHandler.class)
+@EnableAutoConfiguration
 public class TenantAwareEventExchangeTest {
 
     @Autowired

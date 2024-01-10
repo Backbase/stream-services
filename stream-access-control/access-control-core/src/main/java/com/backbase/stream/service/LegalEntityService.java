@@ -177,5 +177,4 @@ public class LegalEntityService {
                 .onErrorStop()
                 .then(getLegalEntityByExternalId(legalEntityPut.getNewValues().getExternalId()));
     }
-
 }
