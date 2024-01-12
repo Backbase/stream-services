@@ -63,7 +63,7 @@ backbase:
           enabled: false
     user:
       management:
-        update-identity: false
+        update-identity: true
 bootstrap:
   enabled: true
   # This is an Backbase OOTB Configuration. Please update as per project requirements
