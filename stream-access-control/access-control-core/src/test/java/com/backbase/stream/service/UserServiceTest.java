@@ -17,6 +17,7 @@ import com.backbase.dbs.user.api.service.v2.model.*;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
+import com.backbase.stream.configuration.UserManagementProperties;
 import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.PhoneNumber;
@@ -61,10 +62,14 @@ class UserServiceTest {
     @Mock
     private UserProfileManagementApi userManagerProfileApi;
 
+    private UserManagementProperties userManagementProperties;
+
     @BeforeEach
     void setup() {
+        userManagementProperties = new UserManagementProperties();
+        userManagementProperties.setUpdateIdentity(true);
         subject = new UserService(usersApi, identityManagementApi, Optional.of(identityIntegrationApi),
-            userManagerProfileApi);
+            userManagerProfileApi, userManagementProperties);
     }
 
     @Test
@@ -515,5 +520,30 @@ class UserServiceTest {
         StepVerifier.create(result)
             .expectNextCount(0)
             .verifyComplete();
+    }
+    @Test
+    void createOrImportIdentityUser_when_update_is_false() {
+        final String internalId = "someInternalId";
+        final String externalId = "someExternalId";
+        final String legalEntityId = "someLegalEntityId";
+        final Map<String, String> attributesMap = Collections.singletonMap("someKey", "someValue");
+
+        CreateIdentityResponse response = new CreateIdentityResponse().externalId(externalId).internalId(internalId);
+        when(identityManagementApi.importIdentity(any())).thenReturn(Mono.just(response));
+
+
+        User user = new User().externalId(externalId).attributes(attributesMap)
+            .identityLinkStrategy(IMPORT_FROM_IDENTIY);
+
+        userManagementProperties.setUpdateIdentity(false);
+        Mono<User> result = subject.createOrImportIdentityUser(user, legalEntityId, new ProductGroupTask());
+
+
+        result.subscribe(assertEqualsTo(user));
+        ImportIdentity expectedImportIdentityRequest = new ImportIdentity().externalId(externalId)
+            .legalEntityInternalId(legalEntityId);
+        verify(identityManagementApi).importIdentity(expectedImportIdentityRequest);
+        UpdateIdentityRequest expectedUpdateIdentityRequest = new UpdateIdentityRequest().attributes(attributesMap);
+
     }
 }

@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(ProductConfiguration.class)
 @Slf4j
-@EnableConfigurationProperties(DeletionProperties.class)
+@EnableConfigurationProperties({DeletionProperties.class,UserManagementProperties.class})
 public class AccessControlConfiguration {
 
     @Bean
@@ -57,8 +57,10 @@ public class AccessControlConfiguration {
     public UserService userService(Optional<IdentityIntegrationServiceApi> identityApi,
         UserManagementApi usersApi,
         IdentityManagementApi identityManagementApi,
-        com.backbase.dbs.user.api.service.v2.UserProfileManagementApi userProfileManagementApi) {
-        return new UserService(usersApi, identityManagementApi, identityApi, userProfileManagementApi);
+        com.backbase.dbs.user.api.service.v2.UserProfileManagementApi userProfileManagementApi,
+                                   UserManagementProperties userManagementProperties) {
+        return new UserService(usersApi, identityManagementApi, identityApi,
+            userProfileManagementApi, userManagementProperties);
     }
 
     @Bean
