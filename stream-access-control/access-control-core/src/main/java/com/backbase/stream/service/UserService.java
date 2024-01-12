@@ -8,6 +8,7 @@ import com.backbase.dbs.user.api.service.v2.model.UserProfile;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
+import com.backbase.stream.configuration.UserManagementProperties;
 import com.backbase.stream.exceptions.UserUpsertException;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.User;
@@ -52,6 +53,7 @@ public class UserService {
     private final IdentityManagementApi identityManagementApi;
     private final Optional<IdentityIntegrationServiceApi> identityIntegrationApi;
     private final UserProfileManagementApi userManagerProfileApi;
+    private final UserManagementProperties userManagementProperties;
 
     /**
      * Get User by external ID.
@@ -317,7 +319,8 @@ public class UserService {
     }
 
     private Mono<User> updateIdentityUser(User user, StreamTask streamTask) {
-        if (IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())
+        if (userManagementProperties.isUpdateIdentity()
+            && IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())
             && (user.getAttributes() != null || user.getAdditions() != null)) {
             UpdateIdentityRequest replaceIdentity = new UpdateIdentityRequest();
             replaceIdentity.attributes(user.getAttributes());
@@ -452,11 +455,14 @@ public class UserService {
                         updateIdentityRequest.getAttributes().putAll(requireNonNullElse(user.getAttributes(), Map.of()));
                         updateIdentityRequest.getAdditions().putAll(requireNonNullElse(user.getAdditions(), Map.of()));
 
-                        return identityManagementApi.updateIdentity(user.getInternalId(), updateIdentityRequest)
+                        if(userManagementProperties.isUpdateIdentity()) {
+                            return identityManagementApi.updateIdentity(user.getInternalId(), updateIdentityRequest)
                                 .onErrorResume(WebClientResponseException.class, e -> {
                                     log.error("Failed to update identity: {}", e.getResponseBodyAsString(), e);
                                     return Mono.error(e);
                                 });
+                        }
+                        return Mono.just(updateIdentityRequest);
                         }
                 ).thenReturn(user);
     }
