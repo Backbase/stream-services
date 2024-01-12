@@ -5,6 +5,7 @@ import static com.backbase.stream.legalentity.model.IdentityUserLinkStrategy.IMP
 import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -543,7 +544,49 @@ class UserServiceTest {
         ImportIdentity expectedImportIdentityRequest = new ImportIdentity().externalId(externalId)
             .legalEntityInternalId(legalEntityId);
         verify(identityManagementApi).importIdentity(expectedImportIdentityRequest);
-        UpdateIdentityRequest expectedUpdateIdentityRequest = new UpdateIdentityRequest().attributes(attributesMap);
 
+    }
+    @Test
+    void update_Identity() {
+        final String userId = UUID.randomUUID().toString();
+        userManagementProperties.setUpdateIdentity(true);
+        when(identityManagementApi.getIdentity(anyString())).thenReturn(Mono.just(new GetIdentity().externalId("").externalId(userId)));
+        when(identityManagementApi.updateIdentity(anyString(), any())).thenReturn(Mono.empty());
+
+        User user = new User().internalId(userId);
+        Mono<User> result = subject.updateIdentity(user);
+
+        StepVerifier.create(result)
+            .expectNext(user)
+            .expectComplete()
+            .verify();
+    }
+    @Test
+    void update_Identity_flag_set_to_false() {
+        final String userId = UUID.randomUUID().toString();
+        userManagementProperties.setUpdateIdentity(false);
+        when(identityManagementApi.getIdentity(anyString())).thenReturn(Mono.just(new GetIdentity().externalId("").externalId(userId)));
+
+        User user = new User().internalId(userId);
+        Mono<User> result = subject.updateIdentity(user);
+
+        StepVerifier.create(result)
+            .expectNext(user)
+            .expectComplete()
+            .verify();
+    }
+    @Test
+    void update_Identity_Error() {
+        final String userId = UUID.randomUUID().toString();
+        userManagementProperties.setUpdateIdentity(true);
+        when(identityManagementApi.getIdentity(anyString())).thenReturn(Mono.just(new GetIdentity().externalId("").externalId(userId)));
+        when(identityManagementApi.updateIdentity(anyString(), any())).thenReturn(Mono.error(WebClientResponseException.create(500,"", new HttpHeaders(), "Error response".getBytes(StandardCharsets.UTF_8), null)));
+
+        User user = new User().internalId(userId);
+        Mono<User> result = subject.updateIdentity(user);
+
+        StepVerifier.create(result)
+            .expectError(WebClientResponseException.class)
+            .verify();
     }
 }
