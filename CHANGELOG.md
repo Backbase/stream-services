@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 ## [3.71.0](https://github.com/Backbase/stream-services/compare/3.70.0...3.71.0)
 ### Added
 - Added new models for LE and SA to cover requirements in the new bootstrap. In the new structure, LE supports just master service agreement and custom service agreement has been dropped. Product groups, job profile users, reference job roles, contacts were moved from LE to new SA model. In the new bootstrap, LE and SA are now separated and can be defined in the different JSON files and independently ingested.  
+## [3.70.1](https://github.com/Backbase/stream-services/compare/3.70.0...3.70.1)
+### Added
+- A flag to skip updates to user in Identity `backbase.stream.user.management.update-identity`.
 
 ## [3.70.0](https://github.com/Backbase/stream-services/compare/3.69.0...3.70.0)
 ### Added
