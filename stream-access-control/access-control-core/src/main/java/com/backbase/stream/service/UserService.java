@@ -336,6 +336,7 @@ public class UserService {
                 })
                 .then(Mono.just(user));
         }
+        log.debug("The identity: {} update call is skipped as the specified update conditions are not met.", user.getExternalId());
         return Mono.just(user);
     }
 
@@ -462,6 +463,7 @@ public class UserService {
                                     return Mono.error(e);
                                 });
                         }
+                        log.debug("The identity: {} update call is skipped because Update Identity flag is set to: {} ", user.getExternalId(), userManagementProperties.isUpdateIdentity());
                         return Mono.just(updateIdentityRequest);
                         }
                 ).thenReturn(user);
