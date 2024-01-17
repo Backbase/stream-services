@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.70.1](https://github.com/Backbase/stream-services/compare/3.70.0...3.70.1)
+### Added
+- A flag to skip updates to user in Identity `backbase.stream.user.management.update-identity`.
+
 ## [3.70.0](https://github.com/Backbase/stream-services/compare/3.69.0...3.70.0)
 ### Added
 - Support to Events via Azure Service Bus for the Stream Composition Services
