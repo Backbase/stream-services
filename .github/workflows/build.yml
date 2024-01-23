@@ -97,8 +97,8 @@ jobs:
       - name: Commit files
         if: "contains(github.ref, 'master') || contains(github.ref, 'support/')"
         run: |
-         git config --local user.email "stream_releaser@backbase.com"
-         git config --local user.name "bb-stream-bot"
+         git config --local user.email "oss@backbase.com"
+         git config --local user.name "backbaseoss"
          git commit -m "[skip bump] version bump" -a
          git tag -a $NEW_VERSION -m "[version bump]"
 
