@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.product.core.config;
 
+import com.backbase.audit.rest.spec.v3.model.AuditMessage;
 import com.backbase.stream.compositions.product.core.model.RequestConfig;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("backbase.stream.compositions.product")
 public class ProductConfigurationProperties implements InitializingBean {
 
+    private LoginEvent loginEvent = new LoginEvent();
     private Chains chains = new Chains();
     private Events events = new Events();
     private Cursor cursor = new Cursor();
@@ -79,6 +81,19 @@ public class ProductConfigurationProperties implements InitializingBean {
             throw new InvalidPropertyException(this.getClass(), "backbase.stream.compositions.product.chains",
                 "Either Transaction Composition or Transaction Manager should be enabled, never both");
         }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class LoginEvent {
+
+        private Boolean enabled = Boolean.FALSE;
+        private List<String> realms = List.of("retail");
+        private String eventCategory = "Identity and Access";
+        private String eventAction = "Attempt Login";
+        private String objectType = "Authentication";
+        private AuditMessage.Status status = AuditMessage.Status.SUCCESSFUL;
+
     }
 
     @Data

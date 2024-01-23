@@ -57,6 +57,55 @@
   <build>
     <finalName>${project.artifactId}</finalName>
     <plugins>
+      <!-- Unpack OpenAPI specs from zip dependencies -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.backbase.dbs.audit</groupId>
+                  <artifactId>audit-spec</artifactId>
+                  <version>6.0.4</version>
+                  <type>zip</type>
+                  <classifier>events</classifier>
+                  <overWrite>true</overWrite>
+                  <outputDirectory>${project.build.directory}/unpacked-specs/audit-spec/events</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+              <includes>**/*.yaml, **/*.json</includes>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.backbase.codegen</groupId>
+        <artifactId>jsonschema-events-maven-plugin</artifactId>
+        <version>${ssdk.version}</version>
+        <executions>
+          <execution>
+            <id>audit-spec</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>events-generation</goal>
+            </goals>
+            <configuration>
+              <inputFile>target/unpacked-specs/audit-spec/events/</inputFile>
+              <outputFile>target/generated-sources/</outputFile>
+              <packageVersion>1</packageVersion>
+              <packageName>audit.persistence</packageName>
+              <groupNameStrategy>APP_NAME</groupNameStrategy>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>com.backbase.oss</groupId>
         <artifactId>boat-maven-plugin</artifactId>
