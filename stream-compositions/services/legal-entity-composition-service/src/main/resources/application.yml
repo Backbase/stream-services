@@ -29,6 +29,9 @@ backbase:
           enableFailed: true
         cursor:
           enabled: false
+    user:
+      management:
+        update-identity: true
 bootstrap:
   enabled: false
   # This is just an example. Replace it with data corresponding to your bank
