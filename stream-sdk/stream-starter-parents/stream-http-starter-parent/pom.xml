@@ -12,7 +12,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-http-starter-parent</artifactId>
-    <version>3.71.0</version>
+    <version>3.72.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: HTTP Services Starter</name>
     <description>Parent for Stream HTTP Services</description>
