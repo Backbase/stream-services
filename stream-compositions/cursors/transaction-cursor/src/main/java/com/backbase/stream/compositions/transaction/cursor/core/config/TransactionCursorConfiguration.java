@@ -16,7 +16,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 public class TransactionCursorConfiguration {
 
     @Bean
-    public TransactionCursorMapper mapper() {
+    public TransactionCursorMapper transactionCursorMapper() {
         return Mappers.getMapper(TransactionCursorMapper.class);
     }
 
