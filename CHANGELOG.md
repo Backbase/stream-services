@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.72.1](https://github.com/Backbase/stream-services/compare/3.72.0...3.72.1)
+### Added
+- Change name of transaction cursor mapper bean so that it does not clash with dependencies.
+
 ## [3.72.0](https://github.com/Backbase/stream-services/compare/3.71.0...3.72.0)
 ### Added
 - A flag to skip updates to user in Identity `backbase.stream.user.management.update-identity`.
