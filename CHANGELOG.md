@@ -20,7 +20,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Support to Events via Azure Service Bus for the Stream Composition Services
 - Product Composition now supports transaction-manager's out-of-the-box pulling mechanism, via the `transaction-pull-integration-service`. A separate chain was created for that, enabled via: `backbase.stream.compositions.product.chains.transaction-manager.enabled`
-  - Only one of [CHANGELOG.md](CHANGELOG.md)the transaction chains can be enabled, either the `transaction-manager` or `transaction-composition`.
+  - Only one of the transaction chains can be enabled, either the `transaction-manager` or `transaction-composition`.
   - The purpose of this new chain is to create better support for the OOTB implementation and enable ModelBank projects.
   - The refresh supports fine graining the pulling requests per arrangement, or a bulk request for all arrangements at once via configuring `splitPerArrangement` and `concurrency` properties.
 - Multi-tenancy support to SSDK message broker Events
