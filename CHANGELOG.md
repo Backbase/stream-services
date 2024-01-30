@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.72.1](https://github.com/Backbase/stream-services/compare/3.72.0...3.72.1)
+### Added
+- Change name of transaction cursor mapper bean so that it does not clash with dependencies.
+
 ## [3.72.0](https://github.com/Backbase/stream-services/compare/3.71.0...3.72.0)
 ### Added
 - A flag to skip updates to user in Identity `backbase.stream.user.management.update-identity`.
@@ -16,7 +20,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Support to Events via Azure Service Bus for the Stream Composition Services
 - Product Composition now supports transaction-manager's out-of-the-box pulling mechanism, via the `transaction-pull-integration-service`. A separate chain was created for that, enabled via: `backbase.stream.compositions.product.chains.transaction-manager.enabled`
-  - Only one of the transaction chains can be enabled, either the `transaction-manager` or `transaction-composition`.
+  - Only one of [CHANGELOG.md](CHANGELOG.md)the transaction chains can be enabled, either the `transaction-manager` or `transaction-composition`.
   - The purpose of this new chain is to create better support for the OOTB implementation and enable ModelBank projects.
   - The refresh supports fine graining the pulling requests per arrangement, or a bulk request for all arrangements at once via configuring `splitPerArrangement` and `concurrency` properties.
 - Multi-tenancy support to SSDK message broker Events
