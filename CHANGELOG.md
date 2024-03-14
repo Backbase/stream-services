@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.1.0](https://github.com/Backbase/stream-services/compare/4.1.0...4.0.0)
+### Changed
+- Bumping Service SDK to **16.1.6**
 ## [4.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
 ### Changed
 - Bumping Service SDK to **16.0.1**

@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>backbase-parent</artifactId>
-        <version>16.0.1</version>
+        <version>16.1.6</version>
         <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
@@ -38,7 +38,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <ssdk.version>16.0.1</ssdk.version>
+        <ssdk.version>16.1.6</ssdk.version>
         <backbase-bom.version>2023.12</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>

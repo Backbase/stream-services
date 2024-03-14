@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>16.0.1</version>
+        <version>16.1.6</version>
         <relativePath/>
     </parent>
 
@@ -34,7 +34,7 @@
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
         <spring-cloud-kubernetes.version>3.0.4</spring-cloud-kubernetes.version>
-        <ssdk.version>16.0.1</ssdk.version>
+        <ssdk.version>16.1.6</ssdk.version>
         <jakarta-validation.version>3.0.2</jakarta-validation.version>
         <jib.container.volumes>/tmp</jib.container.volumes>
         <archuint.skip>true</archuint.skip>
