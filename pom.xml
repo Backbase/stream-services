@@ -41,7 +41,7 @@
         <ssdk.version>17.0.0-rc.7</ssdk.version>
         <backbase-bom.version>2023.12</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
-        <spring-boot.reackage.skip>true</spring-boot.reackage.skip>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
         <openapi-generator-maven-plugin.library>spring-boot</openapi-generator-maven-plugin.library>
         <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
