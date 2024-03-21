@@ -57,7 +57,7 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.ReferenceJobRole;
+import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
@@ -70,7 +70,7 @@ import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.math.BigDecimal;
+import jakarta.validation.constraints.NotNull;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +88,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -185,7 +184,7 @@ public class AccessGroupService {
         log.info("Updating Service Agreement with external Id: {}", serviceAgreement.getExternalId());
         ServiceAgreementPut serviceAgreementPut = accessGroupMapper.toPresentationPut(serviceAgreement);
         return serviceAgreementsApi.putServiceAgreementItem(serviceAgreement.getInternalId(), serviceAgreementPut)
-                .onErrorResume(HttpClientErrorException.class, throwable -> {
+                .onErrorResume(WebClientResponseException.class, throwable -> {
                     log.error(SERVICE_AGREEMENT, "update", "failed", serviceAgreement.getExternalId(),
                             "", throwable, throwable.getResponseBodyAsString(), "Failed to update Service Agreement");
                     return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to update Service Agreement"));
@@ -1226,7 +1225,7 @@ public class AccessGroupService {
         presentationIngestFunctionGroup.setExternalServiceAgreementId(serviceAgreement.getExternalId());
         presentationIngestFunctionGroup.setMetadata(jobRole.getMetadata());
 
-        if(jobRole instanceof ReferenceJobRole) {
+        if(jobRole instanceof JobRole) {
             log.debug("Creating a Reference Job Role.");
             presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
         }

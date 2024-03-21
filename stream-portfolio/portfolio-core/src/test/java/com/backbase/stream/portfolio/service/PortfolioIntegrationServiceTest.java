@@ -6,19 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AllocationClassifierType;
@@ -38,8 +26,8 @@ import com.backbase.portfolio.api.service.integration.v1.model.PortfolioValuatio
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioValuationsPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPutRequest;
-import com.backbase.portfolio.api.service.integration.v1.model.PositionGetResponse;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionTransactionPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PositionsGetItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionsPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.SubPortfolioGetResponse;
@@ -86,6 +74,19 @@ import com.backbase.stream.portfolio.model.WealthPositionsBundle;
 import com.backbase.stream.portfolio.model.WealthSubPortfolioBundle;
 import com.backbase.stream.portfolio.model.WealthTransactionCategoriesBundle;
 import com.backbase.stream.portfolio.util.PortfolioTestUtil;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -305,7 +306,7 @@ class PortfolioIntegrationServiceTest {
         List<Position> positions = wealthPositionsBundle.getPositions();
         Position position0 = positions.get(0);
 
-        Mono<PositionGetResponse> positionGetResponse = Mono.just(new PositionGetResponse().externalId(positionId));
+        Mono<PositionsGetItem> positionGetResponse = Mono.just(new PositionsGetItem().externalId(positionId));
 
         when(positionManagementApi.getPositionById(positionId)).thenReturn(positionGetResponse);
         when(positionManagementApi.putPosition(anyString(), any(PositionsPutRequest.class))).thenReturn(Mono.empty());

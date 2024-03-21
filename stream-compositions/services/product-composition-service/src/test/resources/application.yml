@@ -1,11 +1,11 @@
 spring:
   activemq:
     broker-url: vm://activemq
-  zipkin:
-    enabled: false
   main:
     allow-bean-definition-overriding: true
   cloud:
+    config:
+      enabled: false
     loadbalancer:
       enabled: false
 sso:

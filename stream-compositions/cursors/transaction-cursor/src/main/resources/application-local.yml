@@ -2,6 +2,9 @@ server:
   port: 9005
 
 spring:
+  cloud:
+    config:
+      enabled: false
   jpa:
     database-platform: org.hibernate.dialect.MySQL5Dialect
   datasource:
@@ -9,8 +12,6 @@ spring:
     password: ${DB_PASSWORD:root}
     url: jdbc:mysql://localhost:3306/transaction_cursor?createDatabaseIfNotExist=true&useSSL=false
     driver-class-name: com.mysql.cj.jdbc.Driver
-  zipkin:
-    enabled: false
   main:
     allow-bean-definition-overriding: true
   liquibase:

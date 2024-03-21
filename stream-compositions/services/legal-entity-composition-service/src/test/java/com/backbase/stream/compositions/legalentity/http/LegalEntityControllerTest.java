@@ -41,7 +41,7 @@ class LegalEntityControllerTest {
     @Test
     void testPullIngestion_Success() {
         Mono<LegalEntityPullIngestionRequest> requestMono = Mono.just(
-                new LegalEntityPullIngestionRequest().withLegalEntityExternalId("externalId"));
+                new LegalEntityPullIngestionRequest().legalEntityExternalId("externalId"));
 
         when(legalEntityIngestionService.ingestPull(any())).thenReturn(
                 Mono.just(LegalEntityResponse.builder()
@@ -55,7 +55,7 @@ class LegalEntityControllerTest {
     @Test
     void testPushIngestion_Success() {
         Mono<LegalEntityPushIngestionRequest> requestMono = Mono.just(
-                new LegalEntityPushIngestionRequest().withLegalEntity(
+                new LegalEntityPushIngestionRequest().legalEntity(
                         new com.backbase.stream.compositions.legalentity.api.model.LegalEntity()));
 
         when(legalEntityIngestionService.ingestPush(any())).thenReturn(

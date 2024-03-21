@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-task-starter-parent</artifactId>
-        <version>3.72.1</version>
+        <version>4.0.0-SNAPSHOT</version>
         <relativePath>../../stream-sdk/stream-starter-parents/stream-task-starter-parent</relativePath>
     </parent>
 
@@ -17,6 +17,7 @@
     <properties>
         <wiremock-jre8.version>2.35.1</wiremock-jre8.version>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
+        <archunit.backbase.LoggingRules.skip>true</archunit.backbase.LoggingRules.skip>
     </properties>
 
     <dependencies>
@@ -46,7 +47,7 @@
 
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8</artifactId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
             <version>${wiremock-jre8.version}</version>
             <scope>test</scope>
         </dependency>

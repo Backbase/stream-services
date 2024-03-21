@@ -1,12 +1,12 @@
 package com.backbase.stream.compositions.product.core.service.impl;
 
 import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
-import com.backbase.stream.compositions.integration.product.api.ArrangementIntegrationApi;
-import com.backbase.stream.compositions.integration.product.model.PullArrangementRequest;
 import com.backbase.stream.compositions.product.core.mapper.ArrangementMapper;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ArrangementIntegrationService;
+import com.backbase.stream.compositions.product.integration.client.ArrangementIntegrationApi;
+import com.backbase.stream.compositions.product.integration.client.model.PullArrangementRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

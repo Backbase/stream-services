@@ -63,11 +63,11 @@ public class ProductRestMapper {
     public ResponseEntity<ProductIngestionResponse> mapResponse(ProductIngestResponse response) {
         return new ResponseEntity<>(
                 new ProductIngestionResponse()
-                        .withProductGroups(
+                        .productGroups(
                                 response.getProductGroups().stream()
                                         .map(productMapper::mapStreamToComposition)
                                         .collect(Collectors.toList()))
-                                        .withAdditions(response.getAdditions()),
+                                        .additions(response.getAdditions()),
                 HttpStatus.CREATED);
     }
 }

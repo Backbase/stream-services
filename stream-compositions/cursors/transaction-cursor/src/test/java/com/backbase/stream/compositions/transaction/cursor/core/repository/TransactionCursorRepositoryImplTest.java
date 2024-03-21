@@ -13,21 +13,21 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorFilterRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.criteria.ParameterExpression;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,15 +94,15 @@ class TransactionCursorRepositoryImplTest {
 
         int result = transactionCursorCustomRepository
                 .patchByArrangementId("123", new TransactionCursorPatchRequest()
-                        .withStatus(StatusEnum.IN_PROGRESS.getValue()).withLastTxnIds("11,12,13,14")
-                        .withLastTxnDate("2022-06-02 03:18:19"));
+                        .status(StatusEnum.IN_PROGRESS.getValue()).lastTxnIds("11,12,13,14")
+                        .lastTxnDate("2022-06-02 03:18:19"));
         assertEquals(1, result);
         verify(entityManager, times(1)).getCriteriaBuilder();
         verify(criteriaBuilder, times(1)).createCriteriaUpdate(TransactionCursorEntity.class);
 
         int resultWithOutTxnDate = transactionCursorCustomRepository
                 .patchByArrangementId("123", new TransactionCursorPatchRequest()
-                        .withStatus(StatusEnum.IN_PROGRESS.getValue()).withLastTxnIds("11,12,13,14"));
+                        .status(StatusEnum.IN_PROGRESS.getValue()).lastTxnIds("11,12,13,14"));
         assertEquals(1, resultWithOutTxnDate);
     }
 
@@ -115,8 +115,8 @@ class TransactionCursorRepositoryImplTest {
         try {
             transactionCursorCustomRepository
                     .patchByArrangementId("123", new TransactionCursorPatchRequest()
-                            .withStatus(StatusEnum.IN_PROGRESS.getValue()).withLastTxnIds("11,12,13,14")
-                            .withLastTxnDate("2022-06 03:18:19"));
+                            .status(StatusEnum.IN_PROGRESS.getValue()).lastTxnIds("11,12,13,14")
+                            .lastTxnDate("2022-06 03:18:19"));
         } catch (Exception exception) {
             assertThat(exception instanceof ParseException);
         }
@@ -141,8 +141,8 @@ class TransactionCursorRepositoryImplTest {
                 .thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(getMockDomain()));
         List<TransactionCursorEntity> transactionCursorEntities = transactionCursorCustomRepository
-                .filterCursor(new TransactionCursorFilterRequest().withStatus(StatusEnum.SUCCESS
-                        .getValue()).withLastTxnDate("2022-05-24 03:18:59"));
+                .filterCursor(new TransactionCursorFilterRequest().status(StatusEnum.SUCCESS
+                        .getValue()).lastTxnDate("2022-05-24 03:18:59"));
         assertNotNull(transactionCursorEntities);
         assertThat(transactionCursorEntities.size()).isEqualTo(1);
         assertThat(transactionCursorEntities.get(0).getArrangementId())
@@ -162,8 +162,8 @@ class TransactionCursorRepositoryImplTest {
                 .thenReturn(predicate);
         try {
             transactionCursorCustomRepository
-                    .filterCursor(new TransactionCursorFilterRequest().withStatus(StatusEnum.SUCCESS
-                            .getValue()).withLastTxnDate("2022-12 03:18:59"));
+                    .filterCursor(new TransactionCursorFilterRequest().status(StatusEnum.SUCCESS
+                            .getValue()).lastTxnDate("2022-12 03:18:59"));
         } catch (Exception exception) {
             assertThat(exception instanceof ParseException);
         }

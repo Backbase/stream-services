@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: payment-order-composition
   main:
     allow-bean-definition-overriding: true
   codec:

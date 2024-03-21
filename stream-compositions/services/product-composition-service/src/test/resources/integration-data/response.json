@@ -7,9 +7,9 @@
       "description": "somePgDescription",
       "savingAccounts": [
         {
-          "bban": "*188-S00",
-          "iban": null,
-          "bic": null,
+          "BBAN": "*188-S00",
+          "IBAN": null,
+          "BIC": null,
           "internalId": null,
           "externalId": "0000099188-S00",
           "productTypeExternalId": "Savings",
@@ -102,9 +102,9 @@
       "description": "somePgDescription",
       "savingAccounts": [
         {
-          "bban": "*188-S00",
-          "iban": null,
-          "bic": null,
+          "BBAN": "*188-S00",
+          "IBAN": null,
+          "BIC": null,
           "internalId": null,
           "externalId": "0000099188-S00",
           "productTypeExternalId": "Savings",
