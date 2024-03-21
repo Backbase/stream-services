@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
+### Changed
+- Bumping Service SDK to **16.0.1**
+  - Multiple breaking changes were introduced as part of this upgrade, including Spring Boot 3 upgrade, replacing Spring Sleuth by Micrometer and modules structure for the Composition Events.
+- Bumping Banking Services clients to **2023.12**
+- Enhancing Multi-tenancy support by removing the concurrency limitation from `v3.70.0` using the new reactor's context propagation.
+
 ## [3.72.1](https://github.com/Backbase/stream-services/compare/3.72.0...3.72.1)
 ### Added
 - Change name of transaction cursor mapper bean so that it does not clash with dependencies.
@@ -9,12 +16,6 @@ All notable changes to this project will be documented in this file.
 ### Added
 - A flag to skip updates to user in Identity `backbase.stream.user.management.update-identity`.
 
-## [4.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
-### Changed
-- Bumping Service SDK to **16.0.1**
-  - Multiple breaking changes were introduced as part of this upgrade, including Spring Boot 3 upgrade, replacing Spring Sleuth by Micrometer and modules structure for the Composition Events.
-- Bumping Banking Services clients to **2023.12**
-- Enhancing Multi-tenancy support by removing the concurrency limitation from `v3.70.0` using the new reactor's context propagation.
 ## [3.71.0](https://github.com/Backbase/stream-services/compare/3.70.0...3.71.0)
 ### Added
 - Added new models for LE and SA to cover requirements in the new bootstrap. In the new structure, LE supports just master service agreement and custom service agreement has been dropped. Product groups, job profile users, reference job roles, contacts were moved from LE to new SA model. In the new bootstrap, LE and SA are now separated and can be defined in the different JSON files and independently ingested.  
