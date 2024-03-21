@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-parent</artifactId>
-        <version>3.72.1</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>stream-worker</artifactId>
@@ -24,6 +24,11 @@
         </dependency>
 
         <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>service-sdk-starter-mapping</artifactId>
         </dependency>
@@ -31,11 +36,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-actuator-autoconfigure</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-sleuth-api</artifactId>
         </dependency>
 
         <dependency>

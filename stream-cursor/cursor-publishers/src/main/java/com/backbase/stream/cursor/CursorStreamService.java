@@ -1,12 +1,12 @@
 package com.backbase.stream.cursor;
 
-import com.backbase.stream.cursor.events.PaymentListener;
-import com.backbase.stream.cursor.model.IngestionCursor;
 import com.backbase.stream.cursor.events.ArrangementListener;
 import com.backbase.stream.cursor.events.AuditLoginEventListener;
 import com.backbase.stream.cursor.events.LoginEventListener;
+import com.backbase.stream.cursor.events.PaymentListener;
+import com.backbase.stream.cursor.model.IngestionCursor;
+import jakarta.validation.Valid;
 import java.util.List;
-import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;

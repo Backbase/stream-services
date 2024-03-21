@@ -49,11 +49,11 @@ import com.backbase.stream.legalentity.model.TermUnit;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
+import jakarta.validation.Validator;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javax.validation.Validator;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -218,12 +218,12 @@ class ProductIngestionServiceImplTest {
         if (!isChainAsync) {
             when(transactionCompositionApi.pullTransactions(any()))
                 .thenReturn(Mono.just(new TransactionIngestionResponse()
-                    .withTransactions(List.of(
-                        new TransactionsPostResponseBody().withId("id").withExternalId("externalId")))));
+                    .transactions(List.of(
+                        new TransactionsPostResponseBody().id("id").externalId("externalId")))));
         }
         doReturn(Mono.just(new PaymentOrderIngestionResponse()
-                .withNewPaymentOrder(List.of(
-                        new PaymentOrderPostResponse().withId("id"))))).when(paymentOrderCompositionApi).pullPaymentOrder(any());
+                .newPaymentOrder(List.of(
+                        new PaymentOrderPostResponse().id("id"))))).when(paymentOrderCompositionApi).pullPaymentOrder(any());
         Mono<ProductIngestResponse> productIngestResponse = productIngestionService
                 .ingestPull(productIngestPullRequest);
         StepVerifier.create(productIngestResponse)

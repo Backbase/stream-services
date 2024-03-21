@@ -143,7 +143,7 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
     private TransactionCursorPatchRequest buildPatchCursorRequest(TransactionCursor.StatusEnum statusEnum,
                                                                   String lastTxnDate, String lastTxnIds) {
         TransactionCursorPatchRequest cursorPatchRequest = new TransactionCursorPatchRequest()
-                .withStatus(statusEnum.toString());
+                .status(statusEnum.toString());
 
         if (TransactionCursor.StatusEnum.SUCCESS.equals(statusEnum)) {
             cursorPatchRequest.setLastTxnDate(lastTxnDate);
@@ -183,11 +183,11 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
 
     private TransactionCursorUpsertRequest buildUpsertCursorRequest(TransactionIngestPullRequest request) {
         return new TransactionCursorUpsertRequest()
-                .withCursor(new TransactionCursor()
-                        .withArrangementId(request.getArrangementId())
-                        .withLegalEntityId(request.getLegalEntityInternalId())
-                        .withExtArrangementId(request.getExternalArrangementId())
-                        .withStatus(TransactionCursor.StatusEnum.IN_PROGRESS));
+                .cursor(new TransactionCursor()
+                        .arrangementId(request.getArrangementId())
+                        .legalEntityId(request.getLegalEntityInternalId())
+                        .extArrangementId(request.getExternalArrangementId())
+                        .status(TransactionCursor.StatusEnum.IN_PROGRESS));
     }
 
     /**

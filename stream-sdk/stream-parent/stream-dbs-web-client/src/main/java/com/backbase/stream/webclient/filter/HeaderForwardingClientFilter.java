@@ -1,11 +1,11 @@
 package com.backbase.stream.webclient.filter;
 
-import static com.backbase.stream.context.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
-
+import com.backbase.stream.context.ForwardedHeadersAccessor;
 import com.backbase.stream.webclient.configuration.DbsWebClientConfigurationProperties;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -24,7 +24,7 @@ public class HeaderForwardingClientFilter implements ExchangeFilterFunction {
         ClientRequest additionalHeadersRequest = enrichRequestWithAdditionalHeaders(originalRequest);
 
         return Mono.deferContextual(context -> {
-            Optional<MultiValueMap<String, String>> forwardHeaders = context.getOrEmpty(FORWARDED_HEADERS_CONTEXT_KEY);
+            Optional<HttpHeaders> forwardHeaders = context.getOrEmpty(ForwardedHeadersAccessor.KEY);
             log.trace("Context contains headers? {}", forwardHeaders.isPresent());
             log.trace("Forwarded headers: {}", forwardHeaders.map(MultiValueMap::toString).orElse("none"));
 
@@ -48,7 +48,7 @@ public class HeaderForwardingClientFilter implements ExchangeFilterFunction {
     }
 
     private ClientRequest enrichRequestWithForwardedHeaders(ClientRequest additionalHeadersRequest,
-        Optional<MultiValueMap<String, String>> forwardHeaders) {
+        Optional<HttpHeaders> forwardHeaders) {
         return forwardHeaders.map(headers -> {
                 log.debug("Adding additional headers: {} from Reactive subscriber context to Request: {}", headers,
                     additionalHeadersRequest.url());

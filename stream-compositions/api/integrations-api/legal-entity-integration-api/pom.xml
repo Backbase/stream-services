@@ -6,7 +6,7 @@
     <parent>
         <artifactId>integrations-api</artifactId>
         <groupId>com.backbase.stream.compositions</groupId>
-        <version>3.72.1</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions.api</groupId>
@@ -40,13 +40,38 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-realm</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>../../../../api/stream-legal-entity</directory>
+                                    <includes>
+                                        <include>openapi.yaml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                            <outputDirectory>${project.build.directory}/copy</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
                 <version>${boat-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>boat-validation</id>
-                        <phase>generate-sources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>
@@ -57,7 +82,7 @@
                     </execution>
                     <execution>
                         <id>boat-bundle</id>
-                        <phase>generate-sources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>bundle</goal>
                         </goals>
@@ -65,7 +90,7 @@
                             <input>${project.basedir}/src/main/resources</input>
                             <output>${project.build.directory}</output>
                             <versionFileName>true</versionFileName>
-                            <includes>*api*.yaml</includes>
+                            <includes>service-api-v2*.yaml</includes>
                         </configuration>
                     </execution>
                 </executions>

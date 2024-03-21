@@ -14,8 +14,8 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
 
+import jakarta.persistence.EntityManager;
 import java.util.Optional;
-import javax.persistence.EntityManager;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -118,9 +118,9 @@ public class TransactionCursorControllerIT {
         String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
 
         TransactionCursorPatchRequest transactionCursorPatchRequest = new TransactionCursorPatchRequest()
-                .withLastTxnDate("2022-05-24 03:18:19")
-                .withStatus(StatusEnum.SUCCESS.getValue())
-                .withLastTxnIds("11,12,13,14");
+                .lastTxnDate("2022-05-24 03:18:19")
+                .status(StatusEnum.SUCCESS.getValue())
+                .lastTxnIds("11,12,13,14");
 
         webTestClient
                 .patch().uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
@@ -133,7 +133,7 @@ public class TransactionCursorControllerIT {
     @Test
     void filterCursor_Success() {
         TransactionCursorFilterRequest transactionCursorFilterRequest = new TransactionCursorFilterRequest()
-                .withLastTxnDate("2022-05-24 03:18:59").withStatus(StatusEnum.SUCCESS.getValue());
+                .lastTxnDate("2022-05-24 03:18:59").status(StatusEnum.SUCCESS.getValue());
         webTestClient.post().uri("/service-api/v2/cursor/filter")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(transactionCursorFilterRequest), TransactionCursorFilterRequest.class)
@@ -143,11 +143,11 @@ public class TransactionCursorControllerIT {
     // @Test
     void upsertCursor_Success() {
         TransactionCursorUpsertRequest transactionCursorUpsertRequest =
-                new TransactionCursorUpsertRequest().withCursor(new TransactionCursor()
-                        .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-                        .withExtArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-                        .withLegalEntityId("beta-emp-ext")
-                        .withStatus(StatusEnum.IN_PROGRESS));
+                new TransactionCursorUpsertRequest().cursor(new TransactionCursor()
+                        .arrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq")
+                        .extArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq")
+                        .legalEntityId("beta-emp-ext")
+                        .status(StatusEnum.IN_PROGRESS));
         TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
         transactionCursorEntity.setId("3337f8cc-d66d-41b3-a00e-f71ff15d93cq");
 

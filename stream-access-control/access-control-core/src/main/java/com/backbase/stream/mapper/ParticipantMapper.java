@@ -19,7 +19,7 @@ public interface ParticipantMapper {
 
     @AfterMapping
     default void afterMapping(ServiceAgreement serviceAgreement,
-                              @MappingTarget PresentationParticipantBatchUpdate participants) {
+        @MappingTarget PresentationParticipantBatchUpdate participants) {
         if (participants.getParticipants() != null) {
             participants.getParticipants().forEach(participant ->
                 participant.setExternalServiceAgreementId(serviceAgreement.getExternalId()));

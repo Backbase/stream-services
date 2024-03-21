@@ -27,10 +27,10 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
+import jakarta.validation.Validator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.validation.Validator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -105,10 +105,10 @@ class LegalEntityIngestionServiceImplTest {
         when(config.getChains().getIncludeSubsidiaries()).thenReturn(Boolean.TRUE);
         when(productCompositionApi.pullIngestProduct(any()))
                 .thenReturn(Mono.just(new ProductIngestionResponse()
-                        .withProductGroups(
+                        .productGroups(
                                 Arrays.asList((com.backbase.stream.compositions.product.client.model.ProductGroup)
                                         new com.backbase.stream.compositions.product.client.model.ProductGroup()
-                                                .withCurrentAccounts(List.of(new CurrentAccount().withBBAN("test BBAN")))))));
+                                                .currentAccounts(List.of(new CurrentAccount().BBAN("test BBAN")))))));
 
         Mono<LegalEntityResponse> legalEntityIngestResponseMono = executeIngestionWithPullMode(
                 Boolean.valueOf(tags.get(0)), Boolean.TRUE, Boolean.TRUE);

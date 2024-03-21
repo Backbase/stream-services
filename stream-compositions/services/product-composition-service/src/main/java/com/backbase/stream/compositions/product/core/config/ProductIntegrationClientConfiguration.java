@@ -1,9 +1,9 @@
 package com.backbase.stream.compositions.product.core.config;
 
 import com.backbase.stream.clients.config.CompositeApiClientConfig;
-import com.backbase.stream.compositions.integration.product.ApiClient;
-import com.backbase.stream.compositions.integration.product.api.ArrangementIntegrationApi;
-import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
+import com.backbase.stream.compositions.product.integration.ApiClient;
+import com.backbase.stream.compositions.product.integration.client.ArrangementIntegrationApi;
+import com.backbase.stream.compositions.product.integration.client.ProductIntegrationApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.springframework.boot.context.properties.ConfigurationProperties;

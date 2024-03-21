@@ -5,14 +5,13 @@ import com.backbase.stream.compositions.product.api.model.ProductPullIngestionRe
 import com.backbase.stream.compositions.product.api.model.ProductPushIngestionRequest;
 import com.backbase.stream.compositions.product.core.mapper.ProductRestMapper;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import javax.validation.Valid;
 
 @Slf4j
 @Service

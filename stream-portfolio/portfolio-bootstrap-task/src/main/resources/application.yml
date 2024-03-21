@@ -1,11 +1,9 @@
 server:
   shutdown: graceful
 spring:
-  main:
-    register-shutdown-hook: false
+  application:
+    name: portfolio-bootstrap-task
   cloud:
     task:
       events:
         enabled: false
-  zipkin:
-    enabled: false

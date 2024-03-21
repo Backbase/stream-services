@@ -1,12 +1,12 @@
 package com.backbase.stream.portfolio;
 
-import org.springframework.cloud.sleuth.annotation.ContinueSpan;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
 import com.backbase.stream.portfolio.exceptions.PortfolioBundleException;
 import com.backbase.stream.portfolio.service.InstrumentIntegrationService;
 import com.backbase.stream.portfolio.service.PortfolioIntegrationService;
 import com.backbase.stream.portfolio.service.ReactiveStreamHandler;
 import com.backbase.stream.worker.StreamTaskExecutor;
+import io.micrometer.tracing.annotation.ContinueSpan;
+import io.micrometer.tracing.annotation.SpanTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;

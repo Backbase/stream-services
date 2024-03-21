@@ -1,15 +1,15 @@
 package com.backbase.stream.worker.model;
 
+
+import io.micrometer.tracing.annotation.ContinueSpan;
+import io.micrometer.tracing.annotation.SpanTag;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.sleuth.annotation.ContinueSpan;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
 
 @Data
 @NoArgsConstructor

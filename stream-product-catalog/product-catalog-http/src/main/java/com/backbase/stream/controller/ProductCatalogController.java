@@ -1,9 +1,8 @@
 package com.backbase.stream.controller;
 
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
-import com.backbase.stream.productcatalog.api.ProductCatalogApi;
+import com.backbase.stream.productcatalog.ProductCatalogApi;
 import com.backbase.stream.productcatalog.model.ProductCatalog;
-import javax.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,7 +38,7 @@ public class ProductCatalogController implements ProductCatalogApi {
      * @return Created and updated Product Catalog
      */
     @Override
-    public Mono<ResponseEntity<ProductCatalog>> setupProductCatalog(@Valid Mono<ProductCatalog> productCatalog,
+    public Mono<ResponseEntity<ProductCatalog>> setupProductCatalog(Mono<ProductCatalog> productCatalog,
         ServerWebExchange exchange) {
         return productCatalog.flatMap(productService::setupProductCatalog)
             .map(ResponseEntity::ok);
