@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
   - Multiple breaking changes were introduced as part of this upgrade, including Spring Boot 3 upgrade, replacing Spring Sleuth by Micrometer and modules structure for the Composition Events.
 - Bumping Banking Services clients to **2023.12**
 - Enhancing Multi-tenancy support by removing the concurrency limitation from `v3.70.0` using the new reactor's context propagation.
+
 ## [3.72.1](https://github.com/Backbase/stream-services/compare/3.72.0...3.72.1)
 ### Added
 - Change name of transaction cursor mapper bean so that it does not clash with dependencies.
