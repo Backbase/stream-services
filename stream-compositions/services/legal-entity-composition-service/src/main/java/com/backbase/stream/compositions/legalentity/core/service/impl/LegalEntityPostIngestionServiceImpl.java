@@ -49,18 +49,18 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
     @Override
     public Mono<LegalEntityResponse> handleSuccess(LegalEntityResponse res) {
         return Mono.just(res)
-                .doOnNext(r -> log.info("Legal entities ingestion completed successfully. {}",
-                        res.getLegalEntity().getInternalId()))
-                .flatMap(this::processChains)
-                .doOnNext(this::processSuccessEvent)
-                .doOnNext(r -> log.debug("Ingested legal entity: {}", res.getLegalEntity()));
+            .doOnNext(r -> log.info("Legal entities ingestion completed successfully. {}",
+                res.getLegalEntity().getInternalId()))
+            .flatMap(this::processChains)
+            .doOnNext(this::processSuccessEvent)
+            .doOnNext(r -> log.debug("Ingested legal entity: {}", res.getLegalEntity()));
     }
 
     private Mono<LegalEntityResponse> processChains(LegalEntityResponse res) {
         Mono<LegalEntityResponse> productChainMono;
         boolean isProductChainEnabled = res.getProductChainEnabledFromRequest() == null ?
-                config.isProductChainEnabled() :
-                res.getProductChainEnabledFromRequest();
+            config.isProductChainEnabled() :
+            res.getProductChainEnabledFromRequest();
 
         if (!isProductChainEnabled) {
             log.debug("Product Chain is disabled");
@@ -77,11 +77,11 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
     private Mono<LegalEntityResponse> ingestProducts(LegalEntityResponse res) {
         return buildProductPullRequest(res)
-                .flatMap(productCompositionApi::pullIngestProduct)
-                .onErrorResume(this::handleProductError)
-                .doOnNext(response -> log.debug("Response from Product Composition: {}", response.getProductGroups()))
-                .last()
-                .map(p -> res);
+            .flatMap(productCompositionApi::pullIngestProduct)
+            .onErrorResume(this::handleProductError)
+            .doOnNext(response -> log.debug("Response from Product Composition: {}", response.getProductGroups()))
+            .last()
+            .map(p -> res);
     }
 
     private Mono<LegalEntityResponse> ingestProductsAsync(LegalEntityResponse res) {
@@ -102,7 +102,7 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
     private void processSuccessEvent(LegalEntityResponse res) {
         if (Boolean.TRUE.equals(config.isCompletedEventEnabled())) {
             LegalEntityCompletedEvent event = new LegalEntityCompletedEvent()
-                    .withLegalEntity(mapper.mapStreamToEvent(res.getLegalEntity()));
+                .withLegalEntity(mapper.mapStreamToEvent(res.getLegalEntity()));
             EnvelopedEvent<LegalEntityCompletedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
@@ -113,8 +113,8 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
         log.error("Legal entities ingestion failed. {}", error.getMessage());
         if (Boolean.TRUE.equals(config.isFailedEventEnabled())) {
             LegalEntityFailedEvent event = new LegalEntityFailedEvent()
-                    .withEventId(UUID.randomUUID().toString())
-                    .withMessage(error.getMessage());
+                .withEventId(UUID.randomUUID().toString())
+                .withMessage(error.getMessage());
             EnvelopedEvent<LegalEntityFailedEvent> envelopedEvent = new EnvelopedEvent<>();
             envelopedEvent.setEvent(event);
             eventBus.emitEvent(envelopedEvent);
@@ -161,7 +161,7 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
     }
 
     private User getUserFromLegalEntity(LegalEntity lg) {
-        if(nonNull(lg.getUsers()) && !lg.getUsers().isEmpty()) {
+        if (nonNull(lg.getUsers()) && !lg.getUsers().isEmpty()) {
             return lg.getUsers().get(0).getUser();
         } else {
             return new User();
@@ -169,10 +169,10 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
     }
 
     private List<String> getReferenceobRoleNamesFromLegalEntity(LegalEntity lg) {
-        if(
-                nonNull(lg.getUsers()) &&
-                        !lg.getUsers().isEmpty() &&
-                        nonNull(lg.getUsers().get(0).getReferenceJobRoleNames())) {
+        if (
+            nonNull(lg.getUsers()) &&
+                !lg.getUsers().isEmpty() &&
+                nonNull(lg.getUsers().get(0).getReferenceJobRoleNames())) {
             return lg.getUsers().get(0).getReferenceJobRoleNames();
         } else {
             return new ArrayList<>();
@@ -181,8 +181,8 @@ public class LegalEntityPostIngestionServiceImpl implements LegalEntityPostInges
 
     private ServiceAgreement getServiceAgreementFromLegalEntity(LegalEntity lg) {
         return nonNull(lg.getMasterServiceAgreement()) ?
-                lg.getMasterServiceAgreement() :
-                lg.getCustomServiceAgreement();
+            lg.getMasterServiceAgreement() :
+            lg.getCustomServiceAgreement();
     }
 
     private Mono<ProductIngestionResponse> handleProductError(Throwable t) {

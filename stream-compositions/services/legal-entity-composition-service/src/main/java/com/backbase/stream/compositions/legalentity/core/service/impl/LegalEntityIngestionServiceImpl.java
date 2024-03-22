@@ -12,17 +12,17 @@ import com.backbase.stream.compositions.legalentity.core.service.LegalEntityInge
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityIntegrationService;
 import com.backbase.stream.compositions.legalentity.core.service.LegalEntityPostIngestionService;
 import com.backbase.stream.legalentity.model.LegalEntity;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -57,6 +57,31 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
     }
 
     /**
+     * Ingests Batch legal entity in push mode.
+     *
+     * @param ingestBatchPushRequest Ingest batch push request
+     * @return LegalEntityIngestResponse
+     */
+    public Mono<LegalEntityResponse> ingestBatchPush(List<LegalEntityPushRequest> ingestBatchPushRequest) {
+        Flux<LegalEntityPushRequest> pushRequestFlux = Flux.fromIterable(ingestBatchPushRequest);
+        return pushRequestFlux
+            .flatMap(this::pushLegalEntity)
+            .flatMap(this::validate)
+            .flatMap(this::sendToDbs)
+            .flatMap(legalEntityPostIngestionService::handleSuccess)
+            //.doOnError(legalEntityPostIngestionService::handleFailure)
+            .collectList()
+            .map(this::mergeResponses);
+    }
+
+    private LegalEntityResponse mergeResponses(List<LegalEntityResponse> responses) {
+        // Your logic to merge multiple responses into a single response
+        // For example, you might want to aggregate success/failure information or combine data from all responses.
+        // This is just a placeholder, you should implement your own logic here
+        return new LegalEntityResponse();
+    }
+
+    /**
      * Pulls and remaps legal entity from integration service.
      *
      * @param request LegalEntityIngestPullRequest
@@ -74,6 +99,7 @@ public class LegalEntityIngestionServiceImpl implements LegalEntityIngestionServ
      * @return LegalEntity
      */
     private Mono<LegalEntityResponse> sendToDbs(LegalEntityResponse res) {
+        log.info("Sending Legal Entity {} to DBS ", res);
         return legalEntitySaga
                 .executeTask(
                         new LegalEntityTask(

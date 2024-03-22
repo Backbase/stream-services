@@ -9,6 +9,7 @@ import com.backbase.stream.compositions.legalentity.integration.client.model.Pul
 import com.backbase.stream.compositions.legalentity.integration.client.model.PullLegalEntityResponse;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.stereotype.Component;
 
 /**
@@ -56,6 +57,7 @@ public interface LegalEntityMapper {
      * @param legalEntity Event legal entity
      * @return Stream legal entity
      */
+    @Mapping(target = "legalEntityType", source = "type")
     com.backbase.stream.legalentity.model.LegalEntity mapEventToStream(
             com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntity legalEntity);
 

@@ -9,10 +9,39 @@
     "externalId": {
       "description": "Legal entity external id",
       "type": "string"
+    },
+    "name": {
+      "description": "Legal Entity name",
+      "type": "string"
+    },
+    "parentExternalId": {
+      "description": "External legal entity identifier.",
+      "type": "string"
+    },
+    "type": {
+      "description": "Type of the legal entity. Bank or Customer.",
+      "type": "string",
+      "enum": [
+        "CUSTOMER",
+        "BANK"
+      ]
+    },
+    "customerCategory": {
+      "description": "Property to differentiate between Retail and SME Service Agreement / Legal Entity.",
+      "type": "string",
+      "enum": [
+        "RETAIL",
+        "BUSINESS"
+      ]
+    },
+    "activateSingleServiceAgreement": {
+      "description": "Defines whether a master service agreement is activated or disabled for a legal entity.\n\n",
+      "type": "boolean"
     }
   },
   "required": [
-    "internalId",
-    "externalId"
+    "externalId",
+    "name",
+    "type"
   ]
 }

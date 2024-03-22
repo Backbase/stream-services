@@ -1,5 +1,5 @@
-export DOCKER_REGISTRY=<dockerRegistry>
-export MAVEN_REPO=<targetRepositoryForMetaData>
+export DOCKER_REGISTRY=https://repo.backbase.com/backbase-stream-releases/
+export MAVEN_REPO=repo.backbase.com
 export CRED_HELPER=<dockerRegisteryCredentialHelper>
 
 export MVN_CMD = mvn package jib:build deploy  \

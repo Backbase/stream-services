@@ -1,8 +1,10 @@
 package com.backbase.stream.compositions.legalentity.core.service;
 
+import com.backbase.stream.compositions.events.ingress.event.spec.v1.LegalEntityBatchPushEvent;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPullRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityPushRequest;
 import com.backbase.stream.compositions.legalentity.core.model.LegalEntityResponse;
+import java.util.List;
 import reactor.core.publisher.Mono;
 
 public interface LegalEntityIngestionService {
@@ -22,4 +24,12 @@ public interface LegalEntityIngestionService {
      * @return LegalEntityIngestResponse
      */
     Mono<LegalEntityResponse> ingestPush(LegalEntityPushRequest ingestPushRequest);
+
+    /**
+     * Ingests Batch legal entity in push mode.
+     *
+     * @param ingestBatchPushRequest Ingest batch push request
+     * @return LegalEntityIngestResponse
+     */
+    Mono<LegalEntityResponse> ingestBatchPush(List<LegalEntityPushRequest> ingestBatchPushRequest);
 }
