@@ -1,21 +1,21 @@
 package com.backbase.stream.paymentorder;
 
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.ACCEPTED;
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.CANCELLATION_PENDING;
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.CANCELLED;
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.PROCESSED;
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.READY;
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.REJECTED;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.ACCEPTED;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.CANCELLATION_PENDING;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.CANCELLED;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.PROCESSED;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.READY;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.REJECTED;
 
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementsFilter;
-import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
-import com.backbase.dbs.paymentorder.api.service.v2.model.GetPaymentOrderResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterRequest;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
+import com.backbase.dbs.paymentorder.api.service.v3.model.GetPaymentOrderResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilterRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilterResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
 import com.backbase.stream.config.PaymentOrderWorkerConfigurationProperties;
 import com.backbase.stream.mappers.PaymentOrderTypeMapper;
 import com.backbase.stream.model.PaymentOrderIngestContext;
@@ -134,7 +134,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         return paymentOrdersApi.postFilterPaymentOrders(
                 null, null, null, null, null, null, null, null, null, null, null,
                 internalUserId, null, null, null, Integer.MAX_VALUE,
-                null, null, paymentOrderPostFilterRequest);
+                null, null, null, paymentOrderPostFilterRequest);
     }
 
     private Flux<PaymentOrderIngestRequest> getPaymentOrderIngestRequest(PaymentOrderIngestContext paymentOrderIngestContext) {
