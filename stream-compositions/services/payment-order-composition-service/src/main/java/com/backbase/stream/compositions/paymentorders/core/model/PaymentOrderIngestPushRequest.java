@@ -1,6 +1,6 @@
 package com.backbase.stream.compositions.paymentorders.core.model;
 
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

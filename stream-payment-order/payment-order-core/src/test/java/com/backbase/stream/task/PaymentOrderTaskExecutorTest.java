@@ -1,8 +1,8 @@
 package com.backbase.stream.task;
 
-import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPutResponse;
 import com.backbase.stream.common.PaymentOrderBaseTest;
 import com.backbase.stream.model.request.DeletePaymentOrderIngestRequest;
 import com.backbase.stream.model.request.NewPaymentOrderIngestRequest;
@@ -43,8 +43,7 @@ public class PaymentOrderTaskExecutorTest extends PaymentOrderBaseTest {
 
         PaymentOrderTask paymentOrderTask = new PaymentOrderTask("po_task_id", paymentOrderIngestRequestList);
         PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse()
-                .id("po_post_resp_id")
-                .putAdditionsItem("key", "val");
+                .id("po_post_resp_id");
 
         Mockito.lenient().when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));

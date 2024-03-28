@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.compositions.paymentorders.core.mapper.PaymentOrderMapper;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPullRequest;

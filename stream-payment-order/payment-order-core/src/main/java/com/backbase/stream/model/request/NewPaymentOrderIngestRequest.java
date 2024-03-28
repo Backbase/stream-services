@@ -1,6 +1,6 @@
 package com.backbase.stream.model.request;
 
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

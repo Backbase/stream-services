@@ -182,7 +182,7 @@ class AccessGroupServiceTest {
             .collect(Collectors.toList()));
         when(serviceAgreementsApi.putPresentationServiceAgreementUsersBatchUpdate(any())).thenReturn(usersResponse);
 
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId), eq(false)))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
 
         Mono<ServiceAgreementUsersQuery> emptyExistingUsersList = Mono.just(new ServiceAgreementUsersQuery());
@@ -245,7 +245,7 @@ class AccessGroupServiceTest {
             new ServiceAgreementParticipantsGetResponseBody().externalId("p1");
         ServiceAgreementParticipantsGetResponseBody existingPar2 =
             new ServiceAgreementParticipantsGetResponseBody().externalId("p2");
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId), eq(false)))
             .thenReturn(Flux.fromIterable(asList(existingPar1, existingPar2)));
 
         // users
@@ -306,7 +306,7 @@ class AccessGroupServiceTest {
                     .status(HTTP_STATUS_OK))
             ));
 
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId), eq(false)))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
 
 

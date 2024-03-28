@@ -4,8 +4,8 @@ import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems
 import java.util.ArrayList;
 import java.util.List;
 
-import com.backbase.dbs.paymentorder.api.service.v2.model.GetPaymentOrderResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.GetPaymentOrderResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

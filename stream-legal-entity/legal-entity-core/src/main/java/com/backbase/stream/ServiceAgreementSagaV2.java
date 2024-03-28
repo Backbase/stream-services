@@ -576,6 +576,26 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                 }
             });
 
+        //unlike LegalEntitySaga, we simply check if there is a creatorLegalEntity specified, and if it is
+        //external Id, we change it to relevant internal id
+        if (StringUtils.isNotEmpty(serviceAgreement.getCreatorLegalEntity())) {
+            Mono<ServiceAgreementTaskV2> mono = legalEntityService.getLegalEntityByExternalId(
+                    serviceAgreement.getCreatorLegalEntity())
+                .flatMap(le -> {
+                    serviceAgreement.setCreatorLegalEntity(le.getInternalId());
+                    return createServiceAgreementTaskV2(streamTask, serviceAgreement, userActions, existingServiceAgreement);
+                })
+                .doOnError(throwable -> log.error("Creator Legal Entity for SA {} is not existing externalId",
+                    serviceAgreement.getExternalId()));
+        }
+
+        return createServiceAgreementTaskV2(streamTask, serviceAgreement, userActions, existingServiceAgreement);
+    }
+
+    @NotNull
+    private Mono<ServiceAgreementTaskV2> createServiceAgreementTaskV2(ServiceAgreementTaskV2 streamTask,
+        ServiceAgreementV2 serviceAgreement, List<ServiceAgreementUserAction> userActions,
+        Mono<ServiceAgreementTaskV2> existingServiceAgreement) {
         Mono<ServiceAgreementTaskV2> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask,
                 saMapper.map(serviceAgreement))
             .onErrorMap(AccessGroupException.class, accessGroupException -> {

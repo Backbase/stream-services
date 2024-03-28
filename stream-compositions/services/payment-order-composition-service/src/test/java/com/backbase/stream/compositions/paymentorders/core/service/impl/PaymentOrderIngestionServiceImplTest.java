@@ -4,8 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPutRequest;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.compositions.paymentorders.core.mapper.PaymentOrderMapper;
 import com.backbase.stream.compositions.paymentorders.core.model.PaymentOrderIngestPullRequest;

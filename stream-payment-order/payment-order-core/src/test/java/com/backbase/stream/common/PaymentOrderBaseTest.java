@@ -1,6 +1,6 @@
 package com.backbase.stream.common;
 
-import com.backbase.dbs.paymentorder.api.service.v2.model.*;
+import com.backbase.dbs.paymentorder.api.service.v3.model.*;
 import com.backbase.stream.mappers.PaymentOrderTypeMapper;
 import java.math.BigDecimal;
 import org.mapstruct.factory.Mappers;
@@ -55,7 +55,6 @@ public abstract class PaymentOrderBaseTest {
                     .originator(involvedParty)
                     .originatorAccount(originatorAccount)
                     .totalAmount(new Currency().amount(BigDecimal.valueOf(idx)))
-                    .batchBooking(true)
                     .instructionPriority(InstructionPriority.NORM)
                     .status(Status.ACCEPTED)
                     .requestedExecutionDate(LocalDate.of(2023, 3, idx))
