@@ -13,6 +13,12 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{ end }}
       {{- include "stream-bootstrap-task.init-containers" . | nindent 6 }}
+      volumes:
+        {{- if .Values.customFiles }}
+        - name: customfiles
+          configMap:
+            name: {{ template "stream-bootstrap-task.fullname" . }}-customfiles
+        {{- end }}
       containers:
         - name: stream-bootstrap-task-job
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -21,6 +27,14 @@ spec:
           {{- range $key, $value := .Values.env }}
           - name: {{ $key | quote }}
             value: {{ $value | quote }}
+          {{- end }}
+          {{- if .Values.customFiles }}
+          volumeMounts:
+            {{- range $key, $val := .Values.customFiles }}
+            - name: customfiles
+              mountPath: {{ $.Values.customFilesPath }}{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
           {{- end }}
           resources:
             limits:
