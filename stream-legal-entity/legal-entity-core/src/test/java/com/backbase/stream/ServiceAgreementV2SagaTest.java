@@ -216,6 +216,8 @@ class ServiceAgreementV2SagaTest {
         when(accessGroupService.getUserByExternalId(any(), anyBoolean())).thenReturn(Mono.just(new GetUser()
             .externalId(regularUser.getUser().getExternalId())
             .id(regularUser.getUser().getInternalId())));
+        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId)))
+            .thenReturn(Mono.just(new LegalEntity().internalId("id")));
         when(limitsSaga.executeTask(any(LimitsTask.class)))
             .thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
 
@@ -375,6 +377,8 @@ class ServiceAgreementV2SagaTest {
             .thenReturn(Mono.just(transformServiceAgreement(customSa)));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
             any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId)))
+            .thenReturn(Mono.just(new LegalEntity().internalId("id")));
 
         ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task).block();
 
@@ -409,6 +413,8 @@ class ServiceAgreementV2SagaTest {
         ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
 
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
+        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId)))
+            .thenReturn(Mono.just(new LegalEntity().internalId("id")));
 
         ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task).block();
 
