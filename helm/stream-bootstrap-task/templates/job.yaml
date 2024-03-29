@@ -12,13 +12,13 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{ end }}
-      {{- include "stream-bootstrap-task.init-containers" . | nindent 6 }}
+      {{- if .Values.customFiles }}
       volumes:
-        {{- if .Values.customFiles }}
         - name: customfiles
           configMap:
             name: {{ template "stream-bootstrap-task.fullname" . }}-customfiles
-        {{- end }}
+      {{- end }}
+      {{- include "stream-bootstrap-task.init-containers" . | nindent 6 }}
       containers:
         - name: stream-bootstrap-task-job
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
