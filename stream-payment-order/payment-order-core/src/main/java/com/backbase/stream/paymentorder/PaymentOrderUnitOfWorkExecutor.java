@@ -255,11 +255,15 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
                 });
     }
 
-    private Boolean isEmptyUserId(String userId) {
+    private boolean isEmptyUserId(String userId) {
         return userId == null || userId.isBlank();
     }
 
     private String getInternalUserId(List<PaymentOrderPostRequest> paymentOrderPostRequests) {
-        return paymentOrderPostRequests == null ? null : paymentOrderPostRequests.isEmpty() ? null : paymentOrderPostRequests.get(0).getInternalUserId();
+        if (paymentOrderPostRequests == null || paymentOrderPostRequests.isEmpty()) {
+            return null;
+        } else {
+            return paymentOrderPostRequests.get(0).getInternalUserId();
+        }
     }
 }
