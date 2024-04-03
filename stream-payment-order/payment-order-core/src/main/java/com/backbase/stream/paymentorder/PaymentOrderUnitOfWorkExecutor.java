@@ -96,7 +96,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
     private PaymentOrderIngestContext createPaymentOrderIngestContext(List<PaymentOrderPostRequest> paymentOrderPostRequests) {
         PaymentOrderIngestContext paymentOrderIngestContext = new PaymentOrderIngestContext();
         paymentOrderIngestContext.corePaymentOrder(paymentOrderPostRequests == null ? emptyList() : paymentOrderPostRequests);
-        paymentOrderIngestContext.internalUserId(paymentOrderPostRequests == null ? null : paymentOrderPostRequests.isEmpty() ? null : paymentOrderPostRequests.get(0).getInternalUserId());
+        paymentOrderIngestContext.internalUserId(getInternalUserId(paymentOrderPostRequests));
         return paymentOrderIngestContext;
     }
 
@@ -144,7 +144,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
      */
     private Mono<PaymentOrderPostFilterResponse> getPayments(String internalUserId) {
 
-        if (internalUserId == null || internalUserId.isBlank()) {
+        if (isEmptyUserId(internalUserId)) {
             return Mono.just(new PaymentOrderPostFilterResponse().paymentOrders(emptyList()).totalElements(new BigDecimal(0)));
         }
         return pullFromDBS(internalUserId).map(result -> {
@@ -199,6 +199,12 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         });
 
         // build delete payment list (Bank ref is in DBS, but not in core)
+        buildDeletePaymentList(existing, coreBankRefIds, paymentOrderIngestRequests);
+
+        return Flux.fromIterable(paymentOrderIngestRequests);
+    }
+
+    private void buildDeletePaymentList(List<GetPaymentOrderResponse> existing, List<String> coreBankRefIds, List<PaymentOrderIngestRequest> paymentOrderIngestRequests) {
         if (((PaymentOrderWorkerConfigurationProperties) streamWorkerConfiguration).isDeletePaymentOrder()) {
             existing.forEach(existingPaymentOrder -> {
                 if(!coreBankRefIds.contains(existingPaymentOrder.getBankReferenceId())) {
@@ -206,8 +212,6 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
                 }
             });
         }
-
-        return Flux.fromIterable(paymentOrderIngestRequests);
     }
 
     private AccountArrangementItem getInternalArrangementId(List<AccountArrangementItems> accountArrangementItemsList, String externalArrangementId) {
@@ -253,5 +257,9 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
     private Boolean isEmptyUserId(String userId) {
         return userId == null || userId.isBlank();
+    }
+
+    private String getInternalUserId(List<PaymentOrderPostRequest> paymentOrderPostRequests) {
+        return paymentOrderPostRequests == null ? null : paymentOrderPostRequests.isEmpty() ? null : paymentOrderPostRequests.get(0).getInternalUserId();
     }
 }
