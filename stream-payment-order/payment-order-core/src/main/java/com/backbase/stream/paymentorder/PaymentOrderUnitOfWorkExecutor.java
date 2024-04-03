@@ -159,7 +159,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
         List<PaymentOrderIngestRequest> paymentOrderIngestRequests = new ArrayList<>();
         final var userId = paymentOrderIngestContext.internalUserId();
-        if (userId == null || userId.isBlank()) {
+        if (isEmptyUserId(userId)) {
             return Flux.fromIterable(paymentOrderIngestRequests);
         }
         final List<PaymentOrderPostRequest> orders = paymentOrderIngestContext.corePaymentOrder() == null ? new ArrayList<>() : paymentOrderIngestContext.corePaymentOrder();
@@ -249,5 +249,9 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
                     final var total = resp.getTotalElements() == null ? new BigDecimal(0).intValue() : resp.getTotalElements().intValue();
                     return new DBSPaymentOrderPageResult(currentCount + results.size(), total, results);
                 });
+    }
+
+    private Boolean isEmptyUserId(String userId) {
+        return userId == null || userId.isBlank();
     }
 }
