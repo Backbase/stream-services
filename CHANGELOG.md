@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.72.3](https://github.com/Backbase/stream-services/compare/3.72.1...3.72.3)
+### Added
+- Update payments to be in line with latest Banking Services
+
 ## [3.72.1](https://github.com/Backbase/stream-services/compare/3.72.0...3.72.1)
 ### Added
 - Change name of transaction cursor mapper bean so that it does not clash with dependencies.
