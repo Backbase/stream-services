@@ -110,7 +110,8 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
                 .thenReturn(Mono.just(paymentOrderPostResponse));
 
         GetPaymentOrderResponse getPaymentOrderResponse = new GetPaymentOrderResponse()
-                .id("arrangementId_1");
+                .id("arrangementId_1")
+                .bankReferenceId("bankReferenceId_1");
         PaymentOrderPostFilterResponse paymentOrderPostFilterResponse = new PaymentOrderPostFilterResponse()
                 .addPaymentOrdersItem(getPaymentOrderResponse)
                 .totalElements(new BigDecimal(1));
