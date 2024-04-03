@@ -24,6 +24,8 @@ import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import java.math.BigDecimal;
+
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -144,7 +146,10 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
                 repository, streamTaskExecutor, streamWorkerConfiguration,
                 paymentOrdersApi, arrangementsApi, null);
 
-        Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux = Flux.fromIterable(paymentOrderPostRequestWithEmptyUserId);
+        paymentOrderPostRequest.get(0).setInternalUserId(StringUtils.EMPTY);
+        paymentOrderPostRequest.get(1).setInternalUserId(null);
+
+        Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux = Flux.fromIterable(paymentOrderPostRequest);
 
         AccountArrangementItem accountArrangementItem = new AccountArrangementItem()
                 .id("arrangementId_1")

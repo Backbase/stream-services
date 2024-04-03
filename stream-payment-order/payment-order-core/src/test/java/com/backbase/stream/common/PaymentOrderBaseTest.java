@@ -14,9 +14,7 @@ public abstract class PaymentOrderBaseTest {
     protected final PaymentOrderTypeMapper paymentOrderTypeMapper = Mappers.getMapper(PaymentOrderTypeMapper.class);
 
     protected final List<GetPaymentOrderResponse> getPaymentOrderResponse = buildGetPaymentOrderResponse();
-    protected final List<GetPaymentOrderResponse> getPaymentOrderResponseWithEmptyUserId = buildGetPaymentOrderResponseWithEmptyUserId();
     protected final List<PaymentOrderPostRequest> paymentOrderPostRequest = paymentOrderTypeMapper.mapPaymentOrderPostRequest(getPaymentOrderResponse);
-    protected final List<PaymentOrderPostRequest> paymentOrderPostRequestWithEmptyUserId = paymentOrderTypeMapper.mapPaymentOrderPostRequest(getPaymentOrderResponseWithEmptyUserId);
 
     protected PaymentOrderPutRequest buildPaymentOrderPutRequest(PaymentOrderPostRequest source) {
         return paymentOrderTypeMapper.mapPaymentOrderPostRequest(source);
@@ -47,64 +45,6 @@ public abstract class PaymentOrderBaseTest {
                     .bankReferenceId("bankReferenceId_" + idx)
                     .bankReferenceId("bankReferenceId_" + idx)
                     .internalUserId("internalUserId" + idx)
-                    .paymentSetupId("paymentSetupId_" + idx)
-                    .approvalId("approvalId_" + idx)
-                    .bankStatus("bankStatus_" + idx)
-                    .reasonCode("reasonCode_" + idx)
-                    .reasonText("reasonText_" + idx)
-                    .errorDescription("errorDescription_" + idx)
-                    .originator(involvedParty)
-                    .originatorAccount(originatorAccount)
-                    .totalAmount(new Currency().amount(String.valueOf(idx)))
-                    .batchBooking(true)
-                    .instructionPriority(InstructionPriority.NORM)
-                    .status(Status.ACCEPTED)
-                    .requestedExecutionDate(LocalDate.of(2023, 3, idx))
-                    .paymentMode(PaymentMode.SINGLE)
-                    .paymentType("paymentType_" + idx)
-                    .entryClass("entryClass_" + idx)
-                    .schedule(schedule)
-                    .transferTransactionInformation(new SimpleTransaction().transferFee(new Currency().amount(String.valueOf(idx))))
-                    .createdBy("createdBy_" + idx)
-                    .createdAt("createdAt_" + idx)
-                    .updatedBy("updatedBy_" + idx)
-                    .updatedAt("updatedAt_" + idx)
-                    .intraLegalEntity(true)
-                    .serviceAgreementId("serviceAgreementId_" + idx)
-                    .originatorAccountCurrency("originatorAccountCurrency_" + idx)
-                    .confirmationId("confirmationId_" + idx)
-                    .putAdditionsItem("key_" + idx, "value_" + idx);
-
-            getPaymentOrderResponseList.add(getPaymentOrderResponse);
-        }
-        return getPaymentOrderResponseList;
-    }
-
-    List<GetPaymentOrderResponse> buildGetPaymentOrderResponseWithEmptyUserId() {
-        List<GetPaymentOrderResponse> getPaymentOrderResponseList = new ArrayList<>();
-        for(int idx=1; idx<=2; idx++) {
-            SimpleInvolvedParty involvedParty = new SimpleInvolvedParty()
-                    .name("name_" + idx)
-                    .recipientId("recipientId_" + idx)
-                    .role(InvolvedPartyRole.CREDITOR);
-
-            SimpleOriginatorAccount originatorAccount = new SimpleOriginatorAccount()
-                    .arrangementId("arrangementId_" + idx)
-                    .externalArrangementId("externalArrangementId_" + idx)
-                    .identification(new Identification().identification("identification_" + idx));
-
-            SimpleSchedule schedule = new SimpleSchedule()
-                    .on(idx)
-                    .startDate(LocalDate.of(2023, 3, idx))
-                    .endDate(LocalDate.of(2023, 3, idx))
-                    .nextExecutionDate(LocalDate.of(2023, 3, idx))
-                    .transferFrequency(SimpleSchedule.TransferFrequencyEnum.ONCE);
-
-            GetPaymentOrderResponse getPaymentOrderResponse = new GetPaymentOrderResponse()
-                    .id("id_" + idx)
-                    .bankReferenceId("bankReferenceId_" + idx)
-                    .bankReferenceId("bankReferenceId_" + idx)
-                    .internalUserId(null)
                     .paymentSetupId("paymentSetupId_" + idx)
                     .approvalId("approvalId_" + idx)
                     .bankStatus("bankStatus_" + idx)
