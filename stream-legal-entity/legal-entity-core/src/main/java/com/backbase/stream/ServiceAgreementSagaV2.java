@@ -493,6 +493,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private Mono<ServiceAgreementTaskV2> setupServiceAgreement(ServiceAgreementTaskV2 streamTask) {
         ServiceAgreementV2 sa = streamTask.getServiceAgreement();
 
+        log.info("Starting setup of Service Agreement with id {}", sa.getExternalId());
         if (sa.getIsMaster() == null || !sa.getIsMaster()) {
             return setupCustomServiceAgreement(streamTask);
         } else {
