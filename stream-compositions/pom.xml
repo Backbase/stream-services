@@ -162,6 +162,16 @@
 
     <profiles>
         <profile>
+            <id>docker-image</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-devtools</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
             <id>apple-chip</id>
             <activation>
                 <os>
