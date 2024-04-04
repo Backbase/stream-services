@@ -149,8 +149,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private Mono<ServiceAgreementTaskV2> postContacts(ServiceAgreementTaskV2 streamTask) {
-        return Mono.just(streamTask)
-            .flatMap(this::postServiceAgreementContacts)
+        return postServiceAgreementContacts(streamTask)
             .flatMap(this::postUserContacts);
     }
 
@@ -634,8 +633,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private Mono<ServiceAgreementTaskV2> setupLimits(ServiceAgreementTaskV2 streamTask) {
-        return Mono.just(streamTask)
-            .flatMap(this::setupServiceAgreementLimits)
+        return setupServiceAgreementLimits(streamTask)
             .flatMap(this::setupServiceAgreementParticipantLimits)
             .flatMap(this::retrieveUsersInternalIds)
             .flatMap(this::setupJobRoleLimits);
