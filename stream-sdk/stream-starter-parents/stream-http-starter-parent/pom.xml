@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>16.0.1</version>
+        <version>16.1.5</version>
         <relativePath/>
     </parent>
 
@@ -28,15 +28,15 @@
         <codegen.generated-sources-dir>${project.build.directory}/generated-sources</codegen.generated-sources-dir>
         <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
         <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
-        <spring-cloud-kubernetes.version>3.0.4</spring-cloud-kubernetes.version>
+        <spring-cloud.version>2022.0.4</spring-cloud.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-kubernetes-dependencies</artifactId>
-                <version>${spring-cloud-kubernetes.version}</version>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -99,6 +99,16 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>docker-image</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-devtools</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+        </profile>
         <profile>
             <id>apple-chip</id>
             <activation>

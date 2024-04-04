@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>16.0.1</version>
+        <version>16.1.5</version>
         <relativePath/>
     </parent>
 
@@ -33,8 +33,8 @@
         <mock.server.version>5.15.0</mock.server.version>
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
-        <spring-cloud-kubernetes.version>3.0.4</spring-cloud-kubernetes.version>
-        <ssdk.version>16.0.1</ssdk.version>
+        <spring-cloud.version>2022.0.4</spring-cloud.version>
+        <ssdk.version>16.1.5</ssdk.version>
         <jakarta-validation.version>3.0.2</jakarta-validation.version>
         <jib.container.volumes>/tmp</jib.container.volumes>
         <archuint.skip>true</archuint.skip>
@@ -49,8 +49,8 @@
         <dependencies>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-kubernetes-dependencies</artifactId>
-                <version>${spring-cloud-kubernetes.version}</version>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -161,6 +161,16 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>docker-image</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-devtools</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+        </profile>
         <profile>
             <id>apple-chip</id>
             <activation>
