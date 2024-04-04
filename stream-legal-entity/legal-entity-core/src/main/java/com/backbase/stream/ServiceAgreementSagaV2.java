@@ -246,6 +246,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                 "Service agreement: %s does not have any products defied", serviceAgreement.getExternalId());
             return Mono.just(streamTask);
         }
+        log.info("Creating Arrangements for Service Agreement Id {}", serviceAgreement.getExternalId());
 
         return Flux.fromIterable(serviceAgreement.getProductGroups())
             .mapNotNull(actual -> createProductGroupTask(streamTask, actual))
