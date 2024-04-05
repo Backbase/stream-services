@@ -517,7 +517,11 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                             serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
                             "Existing Master Service Agreement: %s found for Legal Entity: %s",
                             serviceAgreement.getExternalId(), legalEntityParticipant.get().getExternalId());
-                        streamTask.setServiceAgreement(saMapper.mapV2(serviceAgreement));
+                        ServiceAgreementV2 serviceAgreementV2 = saMapper.mapV2(serviceAgreement);
+                        serviceAgreementV2.setProductGroups(sa.getProductGroups());
+                        serviceAgreementV2.setReferenceJobRoles(sa.getReferenceJobRoles());
+                        serviceAgreementV2.setJobProfileUsers(sa.getJobProfileUsers());
+                        streamTask.setServiceAgreement(serviceAgreementV2);
                         return Mono.just(streamTask);
                     });
 
