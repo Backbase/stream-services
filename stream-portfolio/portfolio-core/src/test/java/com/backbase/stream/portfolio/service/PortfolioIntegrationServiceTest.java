@@ -1,6 +1,7 @@
 package com.backbase.stream.portfolio.service;
 
 import static com.backbase.stream.portfolio.util.PortfolioTestUtil.EUR_CURRENCY_CODE;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -446,6 +447,10 @@ class PortfolioIntegrationServiceTest {
                 .postPortfolioBenchmark(new PortfolioBenchmarkPostRequest().id(portfolioId).name(benchmarkName));
         verify(portfolioValuationManagementApi).putPortfolioValuations(portfolioId, new PortfolioValuationsPutRequest()
                 .addValuationsItem(new PortfolioValuationsItem().valuePct(BigDecimal.ONE)));
+
+        portfolioBundle.setBenchmark(null);
+        var bundle = portfolioIntegrationService.upsertPortfolio(portfolioBundle).blockLast();
+        assertNull(bundle);
 
     }
 
