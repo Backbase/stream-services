@@ -36,6 +36,8 @@ public class ProductRestMapper {
                 .membershipAccounts(request.getMembershipAccounts())
                 .additions(request.getAdditions())
                 .referenceJobRoleNames(request.getReferenceJobRoleNames())
+                .paymentOrderChainEnabled(request.getPaymentOrderChainEnabled())
+                .transactionChainEnabled(request.getTransactionChainEnabled())
                 .source(request.getSource())
                 .build();
     }

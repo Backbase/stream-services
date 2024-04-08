@@ -13,7 +13,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>3.72.1</version>
+    <version>3.72.3</version>
 
     <properties>
         <backbase-bom.version>2023.09.17-LTS</backbase-bom.version>
@@ -60,6 +60,11 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>com.backbase.buildingblocks</groupId>
+                <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
+                <version>15.2.4</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>

@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-task-starter-parent</artifactId>
-        <version>3.72.1</version>
+        <version>3.72.3</version>
         <relativePath>../../stream-sdk/stream-starter-parents/stream-task-starter-parent</relativePath>
     </parent>
 
