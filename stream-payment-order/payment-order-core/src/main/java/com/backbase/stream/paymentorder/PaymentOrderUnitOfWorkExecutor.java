@@ -24,9 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.dbs.paymentorder.api.service.v2.model.GetPaymentOrderResponse;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterRequest;
@@ -46,10 +43,6 @@ import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
