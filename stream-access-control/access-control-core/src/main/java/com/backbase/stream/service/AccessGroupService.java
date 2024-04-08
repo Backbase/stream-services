@@ -45,12 +45,12 @@ import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.configuration.DeletionProperties.FunctionGroupItemType;
-import com.backbase.stream.legalentity.model.ApprovalStatus;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup.TypeEnum;
+import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
@@ -70,7 +70,6 @@ import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -773,10 +772,11 @@ public class AccessGroupService {
 
     public Mono<BatchProductGroupTask> updateExistingDataGroupsBatch(BatchProductGroupTask task, List<DataGroupItem> existingDataGroups, List<BaseProductGroup> productGroups) {
         List<PresentationDataGroupItemPutRequestBody> batchUpdateRequest = new ArrayList<>();
-        final Set<String> affectedArrangements = productGroups.stream()
-            .map(StreamUtils::getInternalProductIds)
-            .flatMap(List::stream)
-            .collect(Collectors.toSet());
+        final Set<String> affectedArrangements = Stream.concat(productGroups.stream()
+                        .map(StreamUtils::getInternalProductIds), productGroups.stream()
+                        .map(StreamUtils::getCustomDataGroupItems))
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
         if (task.getIngestionMode().isDataGroupsReplaceEnabled()) {
             // if REPLACE mode, existing products (not sent in the request) also need to be added to the set of affected arrangements.
             affectedArrangements.addAll(existingDataGroups.stream()
@@ -794,7 +794,14 @@ public class AccessGroupService {
             List<String> arrangementsToAdd = new ArrayList<>();
             List<String> arrangementsToRemove = new ArrayList<>();
             affectedArrangements.forEach(arrangement -> pg.ifPresent(p -> {
-                boolean shouldBeInGroup = StreamUtils.getInternalProductIds(pg.get()).contains(arrangement);
+                boolean shouldBeInArrangementsGroup = BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS
+                        .equals(pg.get().getProductGroupType()) &&
+                        StreamUtils.getInternalProductIds(pg.get()).contains(arrangement);
+                boolean shouldBeInRepositoriesGroup = BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES
+                        .equals(pg.get().getProductGroupType()) &&
+                        pg.get().getCustomDataGroupItems().stream().map(CustomDataGroupItem::getInternalId)
+                                .anyMatch(arrangement::equals);
+                boolean shouldBeInGroup = shouldBeInArrangementsGroup || shouldBeInRepositoriesGroup;
                 if (!dbsDataGroup.getItems().contains(arrangement) && shouldBeInGroup) {
                     // ADD.
                     log.debug("Arrangement item {} to be added to Data Group {}", arrangement, dbsDataGroup.getName());
