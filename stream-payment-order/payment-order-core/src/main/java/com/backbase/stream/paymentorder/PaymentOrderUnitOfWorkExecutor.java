@@ -44,7 +44,12 @@ import com.backbase.stream.worker.UnitOfWorkExecutor;
 import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
-
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -132,7 +137,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
     private Mono<AccountArrangementItems> getArrangement(PaymentOrderPostRequest paymentOrderPostRequest) {
         AccountArrangementsFilter accountArrangementsFilter = new AccountArrangementsFilter()
-                .externalArrangementIds(Collections.singletonList(paymentOrderPostRequest.getOriginatorAccount().getExternalArrangementId()));
+                .externalArrangementIds(Collections.singleton(paymentOrderPostRequest.getOriginatorAccount().getExternalArrangementId()));
         return arrangementsApi.postFilter(accountArrangementsFilter);
     }
 

@@ -1,7 +1,7 @@
 package com.backbase.stream.config;
 
 import com.backbase.stream.legalentity.model.LegalEntity;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;

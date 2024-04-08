@@ -44,7 +44,7 @@ class TransactionCursorControllerTest {
     void testFindByArrangementId_success() {
         when(transactionCursorService.findByArrangementId(any()))
                 .thenReturn(Mono.just(new ResponseEntity<>
-                        (new TransactionCursorResponse().withCursor(new TransactionCursor()), HttpStatus.OK)));
+                        (new TransactionCursorResponse().cursor(new TransactionCursor()), HttpStatus.OK)));
         Mono<ResponseEntity<TransactionCursorResponse>> responseEntity = transactionCursorController
                 .getByArrangementId(anyString(), null);
         assertNotNull(responseEntity.block().getBody());
@@ -55,7 +55,7 @@ class TransactionCursorControllerTest {
     void testFindById_success() {
         when(transactionCursorService.findById(any()))
                 .thenReturn(Mono.just(new ResponseEntity<>
-                        (new TransactionCursorResponse().withCursor(new TransactionCursor()), HttpStatus.OK)));
+                        (new TransactionCursorResponse().cursor(new TransactionCursor()), HttpStatus.OK)));
         Mono<ResponseEntity<TransactionCursorResponse>> responseEntity = transactionCursorController
                 .getById(anyString(), null);
         assertNotNull(responseEntity.block().getBody());

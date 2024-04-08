@@ -7,16 +7,20 @@ import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.scs.EventMessageProcessor;
 import com.backbase.buildingblocks.backend.communication.event.scs.MessageFactoryProcessor;
 import com.backbase.buildingblocks.persistence.model.Event;
-import com.backbase.stream.context.TenantContext;
-import java.util.Optional;
+import com.backbase.stream.context.ForwardedHeadersHolder;
+import com.backbase.stream.context.config.ContextPropagationConfigurationProperties;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.support.MessageBuilder;
 
 /**
- * Propagates the TenantContext when using spring-cloud-stream eventing.
+ * Propagates the ForwardedHeadersHolder when using spring-cloud-stream eventing.
  */
 @Slf4j
+@RequiredArgsConstructor
 public class TenantEventMessageProcessor implements EventMessageProcessor, MessageFactoryProcessor {
+
+    private final ContextPropagationConfigurationProperties properties;
 
     /**
      * Adds the currently-bound tenant ID to the TENANT_EVENT_HEADER_NAME header of the given {@link MessageBuilder}.
@@ -33,12 +37,15 @@ public class TenantEventMessageProcessor implements EventMessageProcessor, Messa
      */
     @Override
     public <T> void prepareEventMessage(MessageBuilder<T> messageBuilder, OriginatorContext context) {
-        Optional<String> tenant = TenantContext.getTenant();
-        log.debug("prepareEventMessage {}", tenant);
-        if (tenant.isPresent()) {
-            messageBuilder.setHeader(TENANT_EVENT_HEADER_NAME, tenant.get());
-        } else {
-            log.debug("A Tenant is not present in the context.");
+        var headers = ForwardedHeadersHolder.getValue();
+        log.debug("prepareEventMessage {}", headers);
+        if (headers != null) {
+            var tenantId = headers.getFirst(properties.getTenantHttpHeaderName());
+            if (tenantId != null) {
+                messageBuilder.setHeader(TENANT_EVENT_HEADER_NAME, tenantId);
+            } else {
+                log.debug("A Tenant is not present in the context.");
+            }
         }
     }
 

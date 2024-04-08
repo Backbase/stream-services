@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-parent</artifactId>
-        <version>3.72.1</version>
+        <version>4.1.0</version>
         <relativePath>../stream-parent</relativePath>
     </parent>
 
@@ -20,7 +20,7 @@
     </organization>
 
     <licenses>
-        <license />
+        <license/>
     </licenses>
     <developers>
         <developer>

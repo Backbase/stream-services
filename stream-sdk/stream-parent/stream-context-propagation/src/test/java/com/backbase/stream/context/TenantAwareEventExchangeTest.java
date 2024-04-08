@@ -3,7 +3,6 @@ package com.backbase.stream.context;
 
 import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_EVENT_HEADER_NAME;
 import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_HTTP_HEADER_NAME;
-import static com.backbase.stream.context.reactor.HeaderForwardingContextSubscriber.FORWARDED_HEADERS_CONTEXT_KEY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.timeout;
@@ -26,8 +25,8 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cloud.function.context.config.ContextFunctionCatalogAutoConfiguration;
 import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.test.StepVerifier;
 
@@ -53,14 +52,17 @@ public class TenantAwareEventExchangeTest {
 
     @Test
     void tenantIdShouldBeSetInEventHeadersAndReactorHeaderContext() {
-        TenantContext.setTenant("t1");
+        var headers = new HttpHeaders();
+        headers.add(TENANT_HTTP_HEADER_NAME, "t1");
+        ForwardedHeadersHolder.setValue(headers);
         var event = new EnvelopedEvent<Event>();
         event.setEvent(new Event());
         eventBus.emitEvent(event);
 
         verify(tenantEventMessageProcessor).prepareEventMessage(any(), any(EnvelopedEvent.class));
         verify(tenantMessageInProcessor, timeout(2000))
-            .processPostReceived(argThat(m -> "t1".equals(m.getHeaders().get(TENANT_EVENT_HEADER_NAME))), any(), any());
+            .processPostReceived(argThat(m -> "t1".equals(m.getHeaders().get(TENANT_EVENT_HEADER_NAME))), any(),
+                any());
     }
 
     @TestComponent
@@ -75,11 +77,12 @@ public class TenantAwareEventExchangeTest {
                     .get()
                     .uri("http://localhost")
                     .retrieve()
-                    .toBodilessEntity())
+                    .toBodilessEntity()
+                    .contextCapture())
                 .expectAccessibleContext()
                 .matches(c -> {
-                    MultiValueMap<String, String> headers = c.get(FORWARDED_HEADERS_CONTEXT_KEY);
-                    return "t1".equals(headers.get(TENANT_HTTP_HEADER_NAME).get(0));
+                    HttpHeaders headers = c.get(ForwardedHeadersAccessor.KEY);
+                    return "t1".equals(headers.getFirst(TENANT_HTTP_HEADER_NAME));
                 })
                 .then()
                 .verifyError();

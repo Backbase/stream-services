@@ -1,11 +1,11 @@
 package com.backbase.stream.compositions.product.core.service.impl;
 
 import com.backbase.buildingblocks.presentation.errors.InternalServerErrorException;
-import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.ProductIntegrationService;
+import com.backbase.stream.compositions.product.integration.client.ProductIntegrationApi;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

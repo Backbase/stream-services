@@ -1,6 +1,7 @@
 spring:
-  zipkin:
-    enabled: true
+  cloud:
+    config:
+      enabled: false
 
 eureka:
   client:

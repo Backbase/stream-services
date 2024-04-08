@@ -53,6 +53,7 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import io.micrometer.tracing.annotation.SpanTag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +61,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
@@ -78,7 +78,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
 
     public static final String LEGAL_ENTITY = "LEGAL_ENTITY";
     public static final String IDENTITY_USER = "IDENTITY_USER";
-    public static final String SERVICE_AGREEMENT = "SERVICE_AGREEMENT";
     public static final String USER = "USER";
     public static final String UPSERT_LEGAL_ENTITY = "upsert-legal-entity";
     public static final String FAILED = "failed";
@@ -89,7 +88,6 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
     public static final String PROCESS_LIMITS = "process-limits";
     public static final String PROCESS_CONTACTS = "process-contacts";
     public static final String UPSERT = "upsert";
-    public static final String SETUP_SERVICE_AGREEMENT = "setup-service-agreement";
 
     private static final String LEGAL_ENTITY_E_TYPE = "LE";
     private static final String SERVICE_AGREEMENT_E_TYPE = "SA";

@@ -2,6 +2,7 @@ package com.backbase.stream.common;
 
 import com.backbase.dbs.paymentorder.api.service.v2.model.*;
 import com.backbase.stream.mappers.PaymentOrderTypeMapper;
+import java.math.BigDecimal;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -53,7 +54,7 @@ public abstract class PaymentOrderBaseTest {
                     .errorDescription("errorDescription_" + idx)
                     .originator(involvedParty)
                     .originatorAccount(originatorAccount)
-                    .totalAmount(new Currency().amount(String.valueOf(idx)))
+                    .totalAmount(new Currency().amount(BigDecimal.valueOf(idx)))
                     .batchBooking(true)
                     .instructionPriority(InstructionPriority.NORM)
                     .status(Status.ACCEPTED)
@@ -62,7 +63,7 @@ public abstract class PaymentOrderBaseTest {
                     .paymentType("paymentType_" + idx)
                     .entryClass("entryClass_" + idx)
                     .schedule(schedule)
-                    .transferTransactionInformation(new SimpleTransaction().transferFee(new Currency().amount(String.valueOf(idx))))
+                    .transferTransactionInformation(new SimpleTransaction().transferFee(new Currency().amount(BigDecimal.valueOf(idx))))
                     .createdBy("createdBy_" + idx)
                     .createdAt("createdAt_" + idx)
                     .updatedBy("updatedBy_" + idx)

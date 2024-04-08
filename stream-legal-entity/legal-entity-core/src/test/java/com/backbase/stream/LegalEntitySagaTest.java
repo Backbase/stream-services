@@ -48,7 +48,6 @@ import com.backbase.stream.legalentity.model.Multivalued;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.ReferenceJobRole;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
@@ -352,7 +351,7 @@ class LegalEntitySagaTest {
             .parentExternalId("parent-100000")
             .legalEntityType(LegalEntityType.CUSTOMER)
             .realmName("customer-bank")
-            .referenceJobRoles(Collections.singletonList((ReferenceJobRole) new ReferenceJobRole()
+            .referenceJobRoles(Collections.singletonList(new JobRole()
                 .name("Job Role with Limits").functionGroups(Collections.singletonList(new BusinessFunctionGroup()
                     .name("someFunctionGroup")
                 .addFunctionsItem(new BusinessFunction().functionId("1071").name("US Domestic Wire")

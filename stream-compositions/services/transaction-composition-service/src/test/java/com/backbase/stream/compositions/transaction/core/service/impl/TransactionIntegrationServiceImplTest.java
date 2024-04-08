@@ -42,12 +42,12 @@ class TransactionIntegrationServiceImplTest {
     void callIntegrationService_Success() {
 
         TransactionsPostRequestBody transactionsPostRequestBody =
-                new TransactionsPostRequestBody().withArrangementId("1234");
+                new TransactionsPostRequestBody().arrangementId("1234");
 
         when(transactionIntegrationApi.pullTransactions(any()))
                 .thenReturn(Mono.just(new PullTransactionsResponse()
-                        .withTransactions(List.of(new TransactionsPostRequestBody()
-                                .withArrangementId("1234")))));
+                        .transactions(List.of(new TransactionsPostRequestBody()
+                                .arrangementId("1234")))));
 
         TransactionIngestPullRequest transactionIngestPullRequest =
                 new TransactionIngestPullRequest("1234",

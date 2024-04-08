@@ -7,25 +7,13 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>15.2.4</version>
+        <version>16.1.5</version>
         <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>3.72.1</version>
-
-    <properties>
-        <backbase-bom.version>2023.09.17-LTS</backbase-bom.version>
-        <boat-maven-plugin.version>0.16.6</boat-maven-plugin.version>
-        <testcontainers.version>1.12.5</testcontainers.version>
-        <mock.server.version>5.11.2</mock.server.version>
-        <skip.integration.tests>false</skip.integration.tests>
-        <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
-        <spring-cloud-kubernetes.version>2.1.3</spring-cloud-kubernetes.version>
-        <ssdk.version>15.2.4</ssdk.version>
-        <jib.container.volumes>/tmp</jib.container.volumes>
-    </properties>
+    <version>4.1.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Compositions</name>
@@ -38,25 +26,36 @@
         <module>cursors</module>
     </modules>
 
+    <properties>
+        <backbase-bom.version>2023.12</backbase-bom.version>
+        <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
+        <testcontainers.version>1.12.5</testcontainers.version>
+        <mock.server.version>5.15.0</mock.server.version>
+        <skip.integration.tests>false</skip.integration.tests>
+        <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
+        <spring-cloud.version>2022.0.4</spring-cloud.version>
+        <ssdk.version>16.1.5</ssdk.version>
+        <jakarta-validation.version>3.0.2</jakarta-validation.version>
+        <jib.container.volumes>/tmp</jib.container.volumes>
+        <archuint.skip>true</archuint.skip>
+        <archunit.backbase.LoggingRules.skip>true</archunit.backbase.LoggingRules.skip>
+        <archunit.backbase.ArchitectureRules.skip>true</archunit.backbase.ArchitectureRules.skip>
+        <archunit.backbase.ConfigurationRules.skip>true</archunit.backbase.ConfigurationRules.skip>
+        <archunit.backbase.DataMappingRules.skip>true</archunit.backbase.DataMappingRules.skip>
+        <archunit.backbase.NamingConventionRules.skip>true</archunit.backbase.NamingConventionRules.skip>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-kubernetes-dependencies</artifactId>
-                <version>${spring-cloud-kubernetes.version}</version>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>
@@ -100,10 +99,10 @@
                     <!-- Ensures that the code coverage report for unit tests is created after unit tests have been run. -->
                     <execution>
                         <id>post-unit-test</id>
-                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <phase>test</phase>
                         <configuration>
                             <!-- Sets the path to the file which contains the execution data. -->
                             <dataFile>${coverage.reports.dir}/jacoco.exec</dataFile>
@@ -113,10 +112,10 @@
                     </execution>
                     <execution>
                         <id>pre-integration-test</id>
-                        <phase>pre-integration-test</phase>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
+                        <phase>pre-integration-test</phase>
                         <configuration>
                             <!-- Sets the path to the file which contains the execution data. -->
                             <destFile>${coverage.reports.dir}/jacoco-it.exec</destFile>
@@ -125,10 +124,10 @@
                     </execution>
                     <execution>
                         <id>post-integration-test</id>
-                        <phase>post-integration-test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <phase>post-integration-test</phase>
                         <configuration>
                             <!-- Sets the path to the file which contains the execution data. -->
                             <dataFile>${coverage.reports.dir}/jacoco-it.exec</dataFile>
@@ -146,6 +145,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <layout>ZIP</layout>
+                </configuration>
                 <executions>
                     <execution>
                         <id>repackage</id>
@@ -154,16 +156,23 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <layout>ZIP</layout>
-                </configuration>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
         <profile>
-            <id>mac-m1</id>
+            <id>docker-image</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-devtools</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>apple-chip</id>
             <activation>
                 <os>
                     <family>mac</family>

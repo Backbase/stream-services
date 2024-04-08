@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Example Task that setup Product Catalog in DBS. Please change and adapt for your own project. Or change to read
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @AllArgsConstructor
 @Slf4j
+@Validated
 @EnableConfigurationProperties(ProductCatalogConfigurationProperties.class)
 public class SetupProductCatalogConfiguration {
 

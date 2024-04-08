@@ -8,6 +8,7 @@ import com.backbase.stream.worker.model.UnitOfWork;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.lang.NonNull;
 import reactor.core.publisher.Flux;
@@ -24,7 +25,7 @@ public class TransactionsItemWriter implements ItemWriter<TransactionsPostReques
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void write(@NonNull List<? extends TransactionsPostRequestBody> items) throws Exception {
+    public void write(@NonNull Chunk<? extends TransactionsPostRequestBody> items) throws Exception {
 
         List<TransactionsPostRequestBody> list = (List<TransactionsPostRequestBody>) items;
         Flux<UnitOfWork<TransactionTask>> unitOfWorkFlux = transactionTaskUnitOfWorkExecutor.prepareUnitOfWork(list);

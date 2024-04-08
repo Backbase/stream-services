@@ -12,6 +12,9 @@ properties:
     type: string
     description: Date for the instrument price.
     format: date
+  # TODO: upgrade input data
+  #    description: Date time for the instrument price.
+  #    format: date-time
   priceType:
     type: string
     description: Type of the price. Can be opening, closing, minimal or maximal.

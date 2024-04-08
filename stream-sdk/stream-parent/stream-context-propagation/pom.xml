@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-parent</artifactId>
-        <version>3.72.1</version>
+        <version>4.1.0</version>
     </parent>
 
     <artifactId>stream-context-propagation</artifactId>
@@ -23,15 +23,9 @@
             <artifactId>events</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-reactor-netty</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webflux</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>
@@ -39,14 +33,23 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-stream-test-binder</artifactId>
-            <version>4.1.0</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-stream-test-binder</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webflux</artifactId>
             <scope>test</scope>
         </dependency>
 

@@ -1,10 +1,14 @@
 package com.backbase.stream.portfolio.controller.it;
 
-import static com.backbase.stream.portfolio.controller.it.WealthPortfolioIT.NotEmptyPattern.notEmpty;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+
+import com.backbase.stream.portfolio.model.Portfolio;
+import com.backbase.stream.portfolio.util.PortfolioHttpTestUtil;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,18 +16,13 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import com.backbase.stream.portfolio.model.Portfolio;
-import com.backbase.stream.portfolio.util.PortfolioHttpTestUtil;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import com.github.tomakehurst.wiremock.matching.MatchResult;
-import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 
 /**
  * WealthPortfolio IT.
- * 
+ *
  * @author Vladimir Kirchev
  *
  */
@@ -32,6 +31,14 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 @AutoConfigureWebTestClient(timeout = "20000")
 @ActiveProfiles({"it"})
 class WealthPortfolioIT {
+
+    @DynamicPropertySource
+    static void registerDynamicProperties(DynamicPropertyRegistry registry) {
+        registry.add("management.tracing.enabled", () -> true);
+        registry.add("management.tracing.propagation.type", () -> "B3_MULTI");
+        registry.add("management.zipkin.tracing.endpoint", () -> "http://localhost:10000/api/v2/spans");
+    }
+
     @Autowired
     private WebTestClient webTestClient;
 
@@ -56,8 +63,8 @@ class WealthPortfolioIT {
         verify(WireMock
                 .getRequestedFor(WireMock.urlEqualTo("/portfolio/integration-api/v1/portfolios/ARRANGEMENT_SARA"))
                 .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-                .withHeader("X-B3-TraceId", notEmpty())
-                .withHeader("X-B3-SpanId", notEmpty()));
+                .withHeader("X-B3-TraceId", hexString())
+                .withHeader("X-B3-SpanId", hexString()));
 
         Assertions.assertTrue(WireMock.findUnmatchedRequests().isEmpty());
     }
@@ -89,18 +96,7 @@ class WealthPortfolioIT {
                         .withBody("{\"regions\":[]}")));
     }
 
-    static class NotEmptyPattern extends StringValuePattern {
-        public NotEmptyPattern(@JsonProperty("something") String expectedValue) {
-            super(expectedValue);
-        }
-
-        @Override
-        public MatchResult match(String value) {
-            return MatchResult.of(StringUtils.isNotBlank(value));
-        }
-
-        public static NotEmptyPattern notEmpty() {
-            return new NotEmptyPattern("(always)");
-        }
+    public static RegexPattern hexString() {
+        return new RegexPattern("^[0-9a-f]+$");
     }
 }

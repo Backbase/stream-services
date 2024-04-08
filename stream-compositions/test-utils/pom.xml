@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <artifactId>stream-compositions</artifactId>
         <groupId>com.backbase.stream</groupId>
-        <version>3.72.1</version>
+        <version>4.1.0</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions</groupId>
@@ -18,12 +19,20 @@
     <properties>
         <findMainClass.skip>true</findMainClass.skip>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+        <mockito.version>5.2.0</mockito.version>
+        <activemq.version>6.0.1</activemq.version>
         <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
         <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
         <docker.distroless.latest.skip>true</docker.distroless.latest.skip>
+        <archuint.skip>true</archuint.skip>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-broker</artifactId>
@@ -47,18 +56,8 @@
         </dependency>
         <dependency>
             <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-netty</artifactId>
+            <artifactId>mockserver-netty-no-dependencies</artifactId>
             <version>${mock.server.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mock-server</groupId>
-            <artifactId>mockserver-client-java</artifactId>
-            <version>${mock.server.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>${mockito.version}</version>
         </dependency>
     </dependencies>
 

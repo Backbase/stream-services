@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-cursor</artifactId>
-        <version>3.72.1</version>
+        <version>4.1.0</version>
     </parent>
 
     <artifactId>cursor-core</artifactId>
@@ -52,32 +52,14 @@
                 <executions>
                     <execution>
                         <id>cursor</id>
-                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>generate-spring-boot-embedded</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
-                            <generatorName>spring</generatorName>
                             <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
-                            <generateApiTests>false</generateApiTests>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                            <generateModels>true</generateModels>
-                            <generateApis>false</generateApis>
                             <output>${openapi-generator-maven-plugin.output}</output>
-                            <configOptions>
-                                <library>spring-boot</library>
-                                <reactive>true</reactive>
-                                <java8>true</java8>
-                                <dateLibrary>java8</dateLibrary>
-                                <openapiDocketConfig>true</openapiDocketConfig>
-                                <interfaceOnly>true</interfaceOnly>
-                                <modelPackage>com.backbase.stream.cursor.model</modelPackage>
-                                <apiPackage>com.backbase.stream.cursor.api</apiPackage>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                                <performBeanValidation>true</performBeanValidation>
-                                <apis />
-                                <models />
-                            </configOptions>
+                            <modelPackage>com.backbase.stream.cursor.model</modelPackage>
                         </configuration>
                     </execution>
 

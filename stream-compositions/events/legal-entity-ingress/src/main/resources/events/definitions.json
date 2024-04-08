@@ -1,0 +1,748 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "LegalEntityType": {
+    "type": "string",
+    "title": "Legal Entity Type",
+    "description": "Type of the legal entity. Bank or Customer.",
+    "enum": [
+      "CUSTOMER",
+      "BANK"
+    ]
+  },
+  "IdentityUserLinkStrategy": {
+    "type": "string",
+    "title": "Strategy to link user in Identity.",
+    "description": "Identity User Creation Strategy to Create Users in Identity or Import Users from Identity.",
+    "default": "IDENTITY_AGNOSTIC",
+    "enum": [
+      "IMPORT_FROM_IDENTIY",
+      "CREATE_IN_IDENTITY",
+      "IDENTITY_AGNOSTIC"
+    ]
+  },
+  "CurrencyCode": {
+    "type": "string"
+  },
+  "ReferenceJobRole": {
+    "$ref": "definitions.json#JobRole"
+  },
+  "JobRole": {
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "functionGroups": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#BusinessFunctionGroup"
+        }
+      },
+      "validFromDate": {
+        "type": "string",
+        "description": "Start date of the function group. (date-only from RFC3339 - yyyy-MM-dd)"
+      },
+      "validFromTime": {
+        "type": "string",
+        "description": "Start time of the function group. (time-only from RFC3339 - HH:mm:ss)"
+      },
+      "validUntilDate": {
+        "type": "string",
+        "description": "End date of the function group. (date-only from RFC3339 - yyyy-MM-dd)"
+      },
+      "validUntilTime": {
+        "type": "string",
+        "description": "End time of the function group. (time-only from RFC3339 - HH:mm:ss)"
+      },
+      "apsId": {
+        "type": "number",
+        "description": "Assignable Permission Set Id"
+      },
+      "apsName": {
+        "type": "string",
+        "description": "Assignable Permission Set name"
+      }
+    },
+    "required": [
+      "name",
+      "description"
+    ]
+  },
+  "BusinessFunctionGroup": {
+    "required": [
+      "name"
+    ],
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "legalEntityId": {
+        "type": "string"
+      },
+      "serviceAgreementId": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string",
+        "enum": [
+          "DEFAULT",
+          "SYSTEM",
+          "TEMPLATE"
+        ],
+        "description": "Type of function group",
+        "default": "DEFAULT"
+      },
+      "dataGroupsAllowed": {
+        "type": "boolean"
+      },
+      "functions": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#BusinessFunction"
+        }
+      }
+    }
+  },
+  "BusinessFunction": {
+    "required": [
+      "name",
+      "functionCode",
+      "functionId",
+      "privileges",
+      "resourceCode",
+      "resourceName"
+    ],
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "functionId": {
+        "type": "string"
+      },
+      "functionCode": {
+        "type": "string"
+      },
+      "resourceName": {
+        "type": "string"
+      },
+      "resourceCode": {
+        "type": "string"
+      },
+      "privileges": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#Privilege"
+        }
+      }
+    }
+  },
+  "Privilege": {
+    "required": [
+      "privilege"
+    ],
+    "type": "object",
+    "properties": {
+      "privilege": {
+        "type": "string"
+      },
+      "supportsLimit": {
+        "type": "boolean"
+      },
+      "limit": {
+        "$ref": "definitions.json#Limit"
+      }
+    }
+  },
+  "Limit": {
+    "title": "Limit",
+    "type": "object",
+    "properties": {
+      "transactional": {
+        "$ref": "definitions.json#LimitReference"
+      },
+      "daily": {
+        "$ref": "definitions.json#LimitReference"
+      },
+      "weekly": {
+        "$ref": "definitions.json#LimitReference"
+      },
+      "monthly": {
+        "$ref": "definitions.json#LimitReference"
+      },
+      "quarterly": {
+        "$ref": "definitions.json#LimitReference"
+      },
+      "yearly": {
+        "$ref": "definitions.json#LimitReference"
+      }
+    }
+  },
+  "LimitReference": {
+    "type": "object",
+    "properties": {
+      "amount": {
+        "type": "number",
+        "format": "double"
+      },
+      "currencyCode": {
+        "type": "string"
+      }
+    }
+  },
+  "LegalEntityReference": {
+    "title": "Legal Entity Reference",
+    "properties": {
+      "internalId": {
+        "type": "string"
+      },
+      "externalId": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "internalId",
+      "externalId"
+    ]
+  },
+  "JobProfileUser": {
+    "type": "object",
+    "properties": {
+      "user": {
+        "$ref": "definitions.json#User"
+      },
+      "legalEntityReference": {
+        "$ref": "definitions.json#LegalEntityReference"
+      },
+      "referenceJobRoleNames": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "businessFunctionGroups": {
+        "type": "array",
+        "description": "Business Function Groups",
+        "items": {
+          "$ref": "definitions.json#BusinessFunctionGroup"
+        }
+      },
+      "approvalStatus": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "user"
+    ]
+  },
+  "User": {
+    "title": "User",
+    "description": "User that accessses the system on behalf of the Legal Entity\nA User is a person who interacts with the bank and who uses Backbase applications on behalf of the legal entity they are representing.\n",
+    "type": "object",
+    "properties": {
+      "internalId": {
+        "type": "string"
+      },
+      "externalId": {
+        "type": "string"
+      },
+      "legalEntityId": {
+        "type": "string"
+      },
+      "emailAddress": {
+        "$ref": "definitions.json#EmailAddress"
+      },
+      "mobileNumber": {
+        "$ref": "definitions.json#PhoneNumber"
+      },
+      "fullName": {
+        "type": "string"
+      },
+      "limit": {
+        "$ref": "definitions.json#Limit"
+      },
+      "attributes": {
+        "type": "object",
+        "description": "Custom attributes to be added to the user.",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "identityLinkStrategy": {
+        "$ref": "definitions.json#IdentityUserLinkStrategy"
+      },
+      "userProfile": {
+        "$ref": "definitions.json#UserProfile"
+      },
+      "locked": {
+        "type": "boolean",
+        "description": "Identity status. If true identity will be locked."
+      }
+    },
+    "required": [
+      "externalId",
+      "fullName"
+    ]
+  },
+  "EmailAddress": {
+    "title": "The email addresses the user can be reached by.",
+    "required": [
+      "address",
+      "key",
+      "type"
+    ],
+    "type": "object",
+    "properties": {
+      "key": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "primary": {
+        "type": "boolean",
+        "description": "Flag denoting whether this is the main electronic address."
+      },
+      "address": {
+        "type": "string"
+      }
+    }
+  },
+  "PhoneNumber": {
+    "required": [
+      "key",
+      "number",
+      "type"
+    ],
+    "type": "object",
+    "properties": {
+      "key": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "primary": {
+        "type": "boolean",
+        "description": "Flag denoting whether this is the main phone number."
+      },
+      "number": {
+        "type": "string"
+      }
+    }
+  },
+  "PostalAddress": {
+    "required": [
+      "key",
+      "type"
+    ],
+    "type": "object",
+    "properties": {
+      "key": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "primary": {
+        "type": "boolean",
+        "description": "Flag denoting whether this is the main postal address."
+      },
+      "department": {
+        "type": "string"
+      },
+      "subDepartment": {
+        "type": "string"
+      },
+      "addressLine": {
+        "type": "string"
+      },
+      "buildingNumber": {
+        "type": "string"
+      },
+      "streetName": {
+        "type": "string"
+      },
+      "townName": {
+        "type": "string"
+      },
+      "postalCode": {
+        "type": "string"
+      },
+      "countrySubDivision": {
+        "type": "string"
+      },
+      "country": {
+        "type": "string"
+      }
+    }
+  },
+  "UserProfile": {
+    "title": "UserProfile",
+    "description": "User Data for User Profile Manager. Additional to Data included in User Model\n",
+    "type": "object",
+    "properties": {
+      "userId": {
+        "type": "string"
+      },
+      "externalId": {
+        "type": "string"
+      },
+      "userName": {
+        "type": "string"
+      },
+      "name": {
+        "$ref": "definitions.json#Name"
+      },
+      "displayName": {
+        "type": "string"
+      },
+      "nickName": {
+        "type": "string"
+      },
+      "profileUrl": {
+        "type": "string"
+      },
+      "personalInformation": {
+        "$ref": "definitions.json#PersonalInformation"
+      },
+      "identificationDetails": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#IdentificationDetails"
+        }
+      },
+      "title": {
+        "type": "string"
+      },
+      "userType": {
+        "type": "string"
+      },
+      "preferredLanguage": {
+        "type": "string"
+      },
+      "locale": {
+        "type": "string"
+      },
+      "timezone": {
+        "type": "string"
+      },
+      "active": {
+        "type": "boolean"
+      },
+      "additionalEmails": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#Multivalued"
+        }
+      },
+      "additionalPhoneNumbers": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#Multivalued"
+        }
+      },
+      "ims": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#Multivalued"
+        }
+      },
+      "photos": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#Multivalued"
+        }
+      },
+      "x509Certificates": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#Multivalued"
+        }
+      },
+      "addresses": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#Address"
+        }
+      },
+      "extended": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "userId",
+      "externalId",
+      "userName"
+    ]
+  },
+  "Name": {
+    "title": "Name",
+    "type": "object",
+    "properties": {
+      "formatted": {
+        "type": "string"
+      },
+      "familyName": {
+        "type": "string"
+      },
+      "givenName": {
+        "type": "string"
+      },
+      "middleName": {
+        "type": "string"
+      },
+      "honorificPrefix": {
+        "type": "string"
+      },
+      "honorificSuffix": {
+        "type": "string"
+      }
+    }
+  },
+  "PersonalInformation": {
+    "title": "PersonalInformation",
+    "type": "object",
+    "properties": {
+      "gender": {
+        "type": "string"
+      },
+      "dateOfBirth": {
+        "type": "string"
+      },
+      "countryOfBirth": {
+        "type": "string"
+      },
+      "countryOfResidence": {
+        "type": "string"
+      },
+      "nationalities": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "maritalStatus": {
+        "type": "string"
+      },
+      "educationLevel": {
+        "type": "string"
+      },
+      "employer": {
+        "type": "string"
+      },
+      "employmentStatus": {
+        "type": "string"
+      }
+    }
+  },
+  "IdentificationDetails": {
+    "title": "IdentificationDetails",
+    "type": "object",
+    "properties": {
+      "value": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "issueDate": {
+        "type": "string",
+        "format": "date"
+      },
+      "expiryDate": {
+        "type": "string",
+        "format": "date"
+      },
+      "issueCountryCode": {
+        "type": "string"
+      }
+    }
+  },
+  "Multivalued": {
+    "title": "Multivalued",
+    "type": "object",
+    "properties": {
+      "value": {
+        "type": "string"
+      },
+      "display": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "primary": {
+        "type": "boolean"
+      }
+    }
+  },
+  "Address": {
+    "title": "Address",
+    "type": "object",
+    "properties": {
+      "formatted": {
+        "type": "string"
+      },
+      "streetAddress": {
+        "type": "string"
+      },
+      "locality": {
+        "type": "string"
+      },
+      "region": {
+        "type": "string"
+      },
+      "postalCode": {
+        "type": "string"
+      },
+      "country": {
+        "type": "string"
+      },
+      "type": {
+        "type": "string"
+      },
+      "primary": {
+        "type": "boolean"
+      }
+    }
+  },
+  "ServiceAgreement": {
+    "title": "Service Agreement",
+    "description": "The formal vehicle that allows users of one entity to access products of that or other entities\nA Service agreement is:\n- A contract that includes one or more legal entities. A legal entity that is participating in a service agreement can allow a subset of its users to act through that service agreement and/or allow a subset of its products to be accessed through the service agreement. Within each service agreement, permissions to perform specific tasks are granted to users, including access to products shared by one or more legal entities (participating in that service agreement). As such, a service agreement is a way to give third party users specific access to your products.\n- A special kind of service agreement is called the master service agreement. This service agreement has one legal entity participant and once configured, the participant cannot be changed. Important to know is that once the user is granted with administrative permissions (e.g. manage account groups), he or she has the power to execute the task in any service agreement lower in the hierarchy. For example, if the user of the bank is assigned with manage account groups permission in the master service agreement of the bank, the user can manage account groups in any service agreement lower in the hierarchy.\n- A service agreement may be restricted in time, by setting a time bound. Permissions granted to users in the time-restricted service agreement, are active and may be consumed, only while the time bound is valid.\n",
+    "properties": {
+      "internalId": {
+        "type": "string"
+      },
+      "externalId": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "participants": {
+        "type": "array",
+        "description": "Participants of the service agreement",
+        "items": {
+          "$ref": "definitions.json#LegalEntityParticipant"
+        }
+      },
+      "validFromDate": {
+        "type": "string"
+      },
+      "validFromTime": {
+        "type": "string"
+      },
+      "validUntilDate": {
+        "type": "string"
+      },
+      "validUntilTime": {
+        "type": "string"
+      },
+      "status": {
+        "$ref": "definitions.json#LegalEntityStatus"
+      },
+      "isMaster": {
+        "type": "boolean",
+        "description": "Master flag"
+      },
+      "regularUserAps": {
+        "$ref": "definitions.json#ApsIdentifiers"
+      },
+      "adminUserAps": {
+        "$ref": "definitions.json#ApsIdentifiers"
+      },
+      "jobRoles": {
+        "type": "array",
+        "items": {
+          "$ref": "definitions.json#JobRole"
+        }
+      },
+      "creatorLegalEntity": {
+        "type": "string"
+      }
+    }
+  },
+  "ApsIdentifiers": {
+    "type": "object",
+    "properties": {
+      "nameIdentifiers": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "idIdentifiers": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "LegalEntityParticipant": {
+    "required": [
+      "externalId",
+      "sharingAccounts",
+      "sharingUsers"
+    ],
+    "type": "object",
+    "properties": {
+      "externalId": {
+        "type": "string"
+      },
+      "sharingUsers": {
+        "type": "boolean",
+        "description": "Boolean value if the Participant is sharing users"
+      },
+      "sharingAccounts": {
+        "type": "boolean",
+        "description": "Boolean value if the participant is sharing accounts"
+      },
+      "admins": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "users": {
+        "type": "array",
+        "description": "User external ids",
+        "items": {
+          "type": "string"
+        }
+      },
+      "action": {
+        "type": "string",
+        "description": "the action to perform for this participant. Required for participant update flow",
+        "enum": [
+          "ADD",
+          "REMOVE"
+        ]
+      }
+    }
+  },
+  "LegalEntityStatus": {
+    "type": "string",
+    "description": "Status of the entity",
+    "enum": [
+      "ENABLED",
+      "DISABLED"
+    ]
+  }
+}

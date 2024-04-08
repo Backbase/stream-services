@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>backbase-parent</artifactId>
-        <version>15.2.4</version>
-        <relativePath />
+        <version>16.1.5</version>
+        <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-parent</artifactId>
-    <version>3.72.1</version>
+    <version>4.1.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Parent</name>
     <description>Parent for all Stream SDK modules</description>
@@ -22,10 +22,10 @@
     </organization>
 
     <licenses>
-        <license />
+        <license/>
     </licenses>
     <developers>
-        <developer />
+        <developer/>
     </developers>
 
     <modules>
@@ -38,12 +38,19 @@
 
     <properties>
         <java.version>17</java.version>
-        <ssdk.version>15.2.4</ssdk.version>
+        <ssdk.version>16.1.5</ssdk.version>
         <japicmp.skip>true</japicmp.skip>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.backbase.buildingblocks</groupId>
+                <artifactId>backbase-building-blocks-release</artifactId>
+                <version>${ssdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
@@ -58,13 +65,6 @@
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
                 <version>1.70</version>
-            </dependency>
-            <dependency>
-                <groupId>com.backbase.buildingblocks</groupId>
-                <artifactId>backbase-building-blocks-release</artifactId>
-                <version>${ssdk.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
 
         </dependencies>

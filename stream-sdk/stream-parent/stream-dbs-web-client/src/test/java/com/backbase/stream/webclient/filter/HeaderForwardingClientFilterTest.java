@@ -56,7 +56,7 @@ public class HeaderForwardingClientFilterTest {
         will(a -> assertClientRequestHeader(a.getArgument(0), "x-tid"))
             .given(exchangeFunction).exchange(any());
 
-        var serverRequestHeaders = new LinkedMultiValueMap<>();
+        var serverRequestHeaders = new HttpHeaders();
         serverRequestHeaders.add("X-TID", "tenant1");
 
         ExchangeFilterFunction underTest = new HeaderForwardingClientFilter(new DbsWebClientConfigurationProperties());
@@ -81,7 +81,7 @@ public class HeaderForwardingClientFilterTest {
         properties.setAdditionalHeaders(headersToBeIncluded);
         ExchangeFilterFunction underTest = new HeaderForwardingClientFilter(properties);
 
-        var serverRequestHeaders = new LinkedMultiValueMap<>();
+        var serverRequestHeaders = new HttpHeaders();
         serverRequestHeaders.add("X-TID", "tenant1");
 
         StepVerifier.create(underTest.filter(clientRequest, exchangeFunction)

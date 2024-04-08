@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>stream-compositions</artifactId>
         <groupId>com.backbase.stream</groupId>
-        <version>3.72.1</version>
+        <artifactId>stream-compositions</artifactId>
+        <version>4.1.0</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions</groupId>
@@ -15,6 +15,12 @@
 
     <name>Stream :: Compositions :: API</name>
 
+    <modules>
+        <module>service-api</module>
+        <module>cursors-api</module>
+        <module>integrations-api</module>
+    </modules>
+
     <properties>
         <!-- TODO: This module shouldn't be inheriting from SSDK Starter Parent, disabling Jib plugin as workaround -->
         <docker.distroless.tag.skip>true</docker.distroless.tag.skip>
@@ -23,10 +29,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
         </dependency>
@@ -34,6 +36,10 @@
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <!-- Swagger codegen dependencies -->
         <dependency>
@@ -45,11 +51,5 @@
             <artifactId>swagger-annotations</artifactId>
         </dependency>
     </dependencies>
-
-    <modules>
-        <module>service-api</module>
-        <module>cursors-api</module>
-        <module>integrations-api</module>
-    </modules>
 
 </project>

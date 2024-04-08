@@ -46,10 +46,10 @@ class ArrangementRestMapperTest {
 
         ArrangementPushIngestionRequest request =
                 new ArrangementPushIngestionRequest()
-                        .withInternalArrangementId(ARRANGEMENT_ID)
-                        .withSource(SOURCE)
-                        .withArrangement(arrangementItemPut)
-                        .withConfig(requestConfig);
+                        .internalArrangementId(ARRANGEMENT_ID)
+                        .source(SOURCE)
+                        .arrangement(arrangementItemPut)
+                        .config(requestConfig);
 
         ArrangementIngestPushRequest mappedRequest = arrangementRestMapper.mapPushRequest(request);
         assertEquals(SOURCE, mappedRequest.getSource());
@@ -66,10 +66,10 @@ class ArrangementRestMapperTest {
 
         ArrangementPullIngestionRequest request =
                 new ArrangementPullIngestionRequest()
-                        .withInternalArrangementId(ARRANGEMENT_ID)
-                        .withExternalArrangementId(EXTERNAL_ARRANGEMENT_ID)
-                        .withSource(SOURCE)
-                        .withConfig(requestConfig);
+                        .internalArrangementId(ARRANGEMENT_ID)
+                        .externalArrangementId(EXTERNAL_ARRANGEMENT_ID)
+                        .source(SOURCE)
+                        .config(requestConfig);
 
         ArrangementIngestPullRequest mappedRequest = arrangementRestMapper.mapPullRequest(request);
         assertEquals(SOURCE, mappedRequest.getSource());

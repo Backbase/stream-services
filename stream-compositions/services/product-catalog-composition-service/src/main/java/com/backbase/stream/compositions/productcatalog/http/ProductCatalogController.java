@@ -9,14 +9,13 @@ import com.backbase.stream.compositions.productcatalog.mapper.ProductCatalogMapp
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalogIngestionResponse;
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalogPullIngestionRequest;
 import com.backbase.stream.compositions.productcatalog.model.ProductCatalogPushIngestionRequest;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import javax.validation.Valid;
 
 @RestController
 @AllArgsConstructor
@@ -74,7 +73,7 @@ public class ProductCatalogController implements ProductCatalogCompositionApi {
     private ResponseEntity<ProductCatalogIngestionResponse> mapIngestionToResponse(ProductCatalogIngestResponse response) {
         return new ResponseEntity<>(
                 new ProductCatalogIngestionResponse()
-                        .withProductCatalog(mapper.mapStreamToComposition(response.getProductCatalog())),
+                        .productCatalog(mapper.mapStreamToComposition(response.getProductCatalog())),
                 HttpStatus.CREATED);
     }
 }

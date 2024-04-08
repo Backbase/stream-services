@@ -36,7 +36,7 @@ public class ArrangementRestMapper {
 
     public ResponseEntity<ArrangementIngestionResponse> mapResponse(ArrangementIngestResponse response) {
         return ResponseEntity.ok(new ArrangementIngestionResponse()
-                .withArrangement(
+                .arrangement(
                         arrangementMapper.mapStreamToComposition(response.getArrangement())));
     }
 }
