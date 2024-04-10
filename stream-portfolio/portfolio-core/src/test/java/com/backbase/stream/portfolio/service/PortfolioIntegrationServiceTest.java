@@ -1,6 +1,7 @@
 package com.backbase.stream.portfolio.service;
 
 import static com.backbase.stream.portfolio.util.PortfolioTestUtil.EUR_CURRENCY_CODE;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -16,7 +17,6 @@ import com.backbase.portfolio.api.service.integration.v1.model.PortfolioAllocati
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioBenchmarkPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesPutRequest;
-import com.backbase.portfolio.api.service.integration.v1.model.PortfolioGetResponse;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionTransactionsPostItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionsHierarchyItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionsHierarchyPutRequest;
@@ -24,6 +24,8 @@ import com.backbase.portfolio.api.service.integration.v1.model.PortfolioTransact
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioTransactionsPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioValuationsItem;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfolioValuationsPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosGetItem;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosGetResponse;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.PositionTransactionPutRequest;
@@ -446,6 +448,10 @@ class PortfolioIntegrationServiceTest {
         verify(portfolioValuationManagementApi).putPortfolioValuations(portfolioId, new PortfolioValuationsPutRequest()
                 .addValuationsItem(new PortfolioValuationsItem().valuePct(BigDecimal.ONE)));
 
+        portfolioBundle.setBenchmark(null);
+        var bundle = portfolioIntegrationService.upsertPortfolio(portfolioBundle).blockLast();
+        assertNull(bundle);
+
     }
 
     @Test
@@ -494,7 +500,9 @@ class PortfolioIntegrationServiceTest {
         String portfolioCode = "ARRANGEMENT_SARA";
 
         when(portfolioManagementApi.getPortfolio(anyString()))
-                .thenReturn(Mono.just(new PortfolioGetResponse().code(portfolioCode)));
+            .thenReturn(Mono.just(
+                new PortfoliosGetResponse().addPortfoliosItem(new PortfoliosGetItem().code(portfolioCode))
+                    .getPortfolios().get(0)));
         when(portfolioManagementApi.putPortfolio(anyString(), any(PortfoliosPutRequest.class)))
                 .thenReturn(Mono.empty());
 
