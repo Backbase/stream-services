@@ -1,5 +1,7 @@
 package com.backbase.stream.compositions.product.handlers;
 
+import static java.util.Objects.nonNull;
+
 import com.backbase.audit.persistence.event.spec.v1.AuditMessagesCreatedEvent;
 import com.backbase.audit.rest.spec.v3.model.AuditMessage;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
@@ -43,6 +45,7 @@ public class ProductPullLoginEventHandler implements EventHandler<AuditMessagesC
         ProductConfigurationProperties.LoginEvent loginEventConfig = properties.getLoginEvent();
         envelopedEvent.getEvent().getAuditMessages().forEach(auditMessage -> {
             if (auditMessage.getEventMetaData() != null
+                    && nonNull(auditMessage.getEventMetaData().get("Realm"))
                     && loginEventConfig.getRealms().contains(auditMessage.getEventMetaData().get("Realm"))
                     && auditMessage.getEventCategory().equalsIgnoreCase(loginEventConfig.getEventCategory())
                     && auditMessage.getObjectType().equalsIgnoreCase(loginEventConfig.getObjectType())

@@ -115,8 +115,8 @@
                             <goal>events-generation</goal>
                         </goals>
                         <configuration>
-                            <inputFile>target/unpacked-specs/audit-spec/events/</inputFile>
-                            <outputFile>target/generated-sources/</outputFile>
+                            <inputFile>${project.build.directory}/unpacked-specs/audit-spec/events/</inputFile>
+                            <outputFile>${project.build.directory}/generated-sources/</outputFile>
                             <packageVersion>1</packageVersion>
                             <packageName>audit.persistence</packageName>
                             <groupNameStrategy>APP_NAME</groupNameStrategy>
@@ -201,15 +201,29 @@
                 <executions>
                     <execution>
                         <id>add-source</id>
-                        <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
                             <sources>
                                 <source>${project.build.directory}/generated-sources/annotations</source>
-                                <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
+                                <source>${project.build.directory}/generated-sources/jsonschema-events</source>
                             </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-resource</id>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/generated-resources</directory>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>

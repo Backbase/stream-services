@@ -88,7 +88,7 @@ public class ProductConfigurationProperties implements InitializingBean {
     public static class LoginEvent {
 
         private Boolean enabled = Boolean.FALSE;
-        private List<String> realms = List.of("retail");
+        private List<String> realms = List.of("customer");
         private String eventCategory = "Identity and Access";
         private String eventAction = "Attempt Login";
         private String objectType = "Authentication";
