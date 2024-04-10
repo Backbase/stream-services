@@ -2,7 +2,7 @@ imagePullSecrets: [ ]
 image:
   registry: repo.backbase.com/backbase-stream-images
   repository: # legal-entity-bootstrap-task
-  tag: 3.8.0
+  tag: 4.0.0
   pullPolicy: Always
   restartPolicy: OnFailure
 backoffLimit: 1
@@ -26,3 +26,15 @@ resources:
     memory: 256Mi
 env:
   JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=70.0 -Dspring.cloud.config.enabled=false"
+
+# -- Allows for some small text payloads to be mounted as files that are accessible to the containers.  Typically used to deploy some additional config file.
+# Note that this is not a recommended approach; the use of environment variables is preferred.
+# A `ConfigMap` will be generated taking this object's keys as filename and values as the content.  The `ConfigMap` will be mounted at `customFilesPath`.
+customFiles: {}
+  # my-first-file.yaml: |
+  #   foo: baa
+  # my-second-file.yaml: |
+  #   baa: baa2
+#   foo: foo2
+# -- Path where custom files `ConfigMap` entries will be mounted.  See `customFiles`
+customFilesPath: /home/nonroot/customfiles/
