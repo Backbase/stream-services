@@ -345,25 +345,29 @@ public class PortfolioIntegrationService {
 
     @NotNull
     private Mono<Void> upsertBenchmark(PortfolioBundle portfolioBundle, Portfolio portfolio) {
-        return portfolioBenchmarksManagementApi.getPortfolioBenchmarks(0, Integer.MAX_VALUE)
+        if(portfolioBundle.getBenchmark() != null) {
+            return portfolioBenchmarksManagementApi.getPortfolioBenchmarks(0, Integer.MAX_VALUE)
                 .map(PortfolioBenchmarksGetResponse::getBenchmarks)
                 .switchIfEmpty(Mono.defer(() -> Mono.just(Collections.emptyList())))
                 .flatMap(existBenchmarks ->
                 {
                     String name = portfolioBundle.getBenchmark().getName();
                     return existBenchmarks.stream()
-                            .filter(b -> b.getName().equalsIgnoreCase(name))
-                            .findAny()
-                            .map(existBenchmark -> portfolioBenchmarksManagementApi
-                                    .putPortfolioBenchmark(existBenchmark.getId(), portfolioMapper.mapBenchmark(name)))
-                            .or(() -> Optional.of(portfolioBenchmarksManagementApi
-                                    .postPortfolioBenchmark(portfolioMapper.mapBenchmark(portfolio.getCode(), name))))
-                            .orElse(Mono.empty())
-                            .doOnError(WebClientResponseException.class,
-                                    ReactiveStreamHandler::handleWebClientResponseException)
-                            .onErrorResume(WebClientResponseException.class,
-                                    ReactiveStreamHandler.error(name, "Failed to create Portfolio Benchmark"));
+                        .filter(b -> b.getName().equalsIgnoreCase(name))
+                        .findAny()
+                        .map(existBenchmark -> portfolioBenchmarksManagementApi
+                            .putPortfolioBenchmark(existBenchmark.getId(), portfolioMapper.mapBenchmark(name)))
+                        .or(() -> Optional.of(portfolioBenchmarksManagementApi
+                            .postPortfolioBenchmark(portfolioMapper.mapBenchmark(portfolio.getCode(), name))))
+                        .orElse(Mono.empty())
+                        .doOnError(WebClientResponseException.class,
+                            ReactiveStreamHandler::handleWebClientResponseException)
+                        .onErrorResume(WebClientResponseException.class,
+                            ReactiveStreamHandler.error(name, "Failed to create Portfolio Benchmark"));
                 });
+        } else {
+            return Mono.empty();
+        }
     }
 
     @NotNull

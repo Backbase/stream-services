@@ -6,13 +6,13 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>16.0.1</version>
+        <version>17.0.0</version>
         <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-http-starter-parent</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: HTTP Services Starter</name>
     <description>Parent for Stream HTTP Services</description>
