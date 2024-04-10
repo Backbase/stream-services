@@ -43,6 +43,7 @@ import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
+import com.backbase.stream.mapper.ServiceAgreementV2ToV1Mapper;
 import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
@@ -72,6 +73,7 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ServiceAgreementV2SagaTest {
+    private static final ServiceAgreementV2ToV1Mapper saMapper = ServiceAgreementV2ToV1Mapper.INSTANCE;
 
     @InjectMocks
     private ServiceAgreementSagaV2 serviceAgreementSaga;
@@ -216,6 +218,8 @@ class ServiceAgreementV2SagaTest {
         when(accessGroupService.getUserByExternalId(any(), anyBoolean())).thenReturn(Mono.just(new GetUser()
             .externalId(regularUser.getUser().getExternalId())
             .id(regularUser.getUser().getInternalId())));
+        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId)))
+            .thenReturn(Mono.just(new LegalEntity().internalId("id")));
         when(limitsSaga.executeTask(any(LimitsTask.class)))
             .thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
 
@@ -369,12 +373,18 @@ class ServiceAgreementV2SagaTest {
     @Test
     void test_PostSAContacts() {
         getMockServiceAgreement();
+        customSa.setIsMaster(true);
         ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.SA));
         when(accessGroupService.createServiceAgreement(any(), any()))
             .thenReturn(Mono.just(transformServiceAgreement(customSa)));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
             any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+        when(legalEntityService.getLegalEntityByExternalId(any()))
+            .thenReturn(Mono.just(new LegalEntity().internalId("id")));
+        when(legalEntityService.getLegalEntityByExternalId(any())).thenReturn(Mono.empty());
+        when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(any())).thenReturn(
+            Mono.just(saMapper.map(customSa)));
 
         ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task).block();
 
@@ -409,6 +419,10 @@ class ServiceAgreementV2SagaTest {
         ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
 
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
+        when(legalEntityService.getLegalEntityByExternalId(any()))
+            .thenReturn(Mono.just(new LegalEntity().internalId("id")));
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
+            any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
 
         ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task).block();
 
