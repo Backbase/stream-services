@@ -4,7 +4,6 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMoc
 
 import com.backbase.stream.config.BootstrapConfigurationProperties;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,9 @@ class SetupLegalEntityHierarchyTaskApplicationIT {
     @DynamicPropertySource
     static void registerDynamicProperties(DynamicPropertyRegistry registry) {
         String wiremockUrl = String.format("http://localhost:%d", wiremock.getPort());
-        registry.add("spring.zipkin.base-url", () -> wiremockUrl);
+        registry.add("management.tracing.enabled", () -> true);
+        registry.add("management.tracing.propagation.type", () -> "B3_MULTI");
+        registry.add("management.zipkin.tracing.endpoint", () -> wiremockUrl + "/api/v2/spans");
         registry.add("spring.cloud.discovery.client.simple.instances.token-converter[0].uri", () -> wiremockUrl);
         registry.add("spring.cloud.discovery.client.simple.instances.user-manager[0].uri", () -> wiremockUrl);
         registry.add("spring.cloud.discovery.client.simple.instances.user-manager[0].metadata.contextPath",

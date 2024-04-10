@@ -1,12 +1,29 @@
 package com.backbase.stream.it;
 
-import static com.backbase.stream.it.LegalEntitySagaIT.NotEmptyPattern.notEmpty;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
-
-import com.backbase.stream.legalentity.model.*;
-
+import com.backbase.stream.LegalEntityTask;
+import com.backbase.stream.legalentity.model.BaseProductGroup;
+import com.backbase.stream.legalentity.model.BusinessFunctionLimit;
+import com.backbase.stream.legalentity.model.CurrentAccount;
+import com.backbase.stream.legalentity.model.EmailAddress;
+import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
+import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.LegalEntityParticipant;
+import com.backbase.stream.legalentity.model.LegalEntityStatus;
+import com.backbase.stream.legalentity.model.LegalEntityType;
+import com.backbase.stream.legalentity.model.Limit;
+import com.backbase.stream.legalentity.model.Loan;
+import com.backbase.stream.legalentity.model.PhoneNumber;
+import com.backbase.stream.legalentity.model.Privilege;
+import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.User;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import com.github.tomakehurst.wiremock.matching.RegexPattern;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,22 +35,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import com.backbase.stream.LegalEntityTask;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import com.github.tomakehurst.wiremock.matching.MatchResult;
-import com.github.tomakehurst.wiremock.matching.StringValuePattern;
-import java.util.Arrays;
-import java.util.Collections;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest
@@ -41,6 +44,13 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @WireMockTest(httpPort = 10000)
 @AutoConfigureWebTestClient(timeout = "20000")
 class LegalEntitySagaIT {
+
+    @DynamicPropertySource
+    static void registerDynamicProperties(DynamicPropertyRegistry registry) {
+        registry.add("management.tracing.enabled", () -> true);
+        registry.add("management.tracing.propagation.type", () -> "B3_MULTI");
+        registry.add("management.zipkin.tracing.endpoint", () -> "http://localhost:10000/api/v2/spans");
+    }
 
     @Autowired
     private WebTestClient webTestClient;
@@ -331,8 +341,8 @@ class LegalEntitySagaIT {
         // Then
         verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v3/accesscontrol/legal-entities/500000"))
             .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-            .withHeader("X-B3-TraceId", notEmpty())
-            .withHeader("X-B3-SpanId", notEmpty()));
+            .withHeader("X-B3-TraceId", hexString())
+            .withHeader("X-B3-SpanId", hexString()));
     }
 
     @Test
@@ -355,8 +365,8 @@ class LegalEntitySagaIT {
 
         // Then
         verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v3/accesscontrol/legal-entities/500000"))
-            .withHeader("X-B3-TraceId", notEmpty())
-            .withHeader("X-B3-SpanId", notEmpty()));
+            .withHeader("X-B3-TraceId", hexString())
+            .withHeader("X-B3-SpanId", hexString()));
     }
 
     @Test
@@ -386,8 +396,8 @@ class LegalEntitySagaIT {
         // Then
         verify(WireMock.getRequestedFor(WireMock.urlEqualTo("/access-control/service-api/v3/accesscontrol/legal-entities/500000"))
             .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-            .withHeader("X-B3-TraceId", notEmpty())
-            .withHeader("X-B3-SpanId", notEmpty()));
+            .withHeader("X-B3-TraceId", hexString())
+            .withHeader("X-B3-SpanId", hexString()));
     }
 
     @Test
@@ -409,27 +419,16 @@ class LegalEntitySagaIT {
         // Then
         verify(WireMock.postRequestedFor(WireMock.urlEqualTo("/limit/service-api/v2/limits/retrieval"))
                 .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-                .withHeader("X-B3-TraceId", notEmpty())
-                .withHeader("X-B3-SpanId", notEmpty()));
+                .withHeader("X-B3-TraceId", hexString())
+                .withHeader("X-B3-SpanId", hexString()));
 
         verify(WireMock.postRequestedFor(WireMock.urlEqualTo("/limit/service-api/v2/limits"))
                 .withHeader("X-TID", WireMock.equalTo("tenant-id"))
-                .withHeader("X-B3-TraceId", notEmpty())
-                .withHeader("X-B3-SpanId", notEmpty()));
+                .withHeader("X-B3-TraceId", hexString())
+                .withHeader("X-B3-SpanId", hexString()));
     }
 
-    static class NotEmptyPattern extends StringValuePattern {
-        public NotEmptyPattern(@JsonProperty("something") String expectedValue) {
-            super(expectedValue);
-        }
-
-        @Override
-        public MatchResult match(String value) {
-            return MatchResult.of(value != null && !value.isEmpty());
-        }
-
-        public static NotEmptyPattern notEmpty() {
-            return new NotEmptyPattern("(always)");
-        }
+    public static RegexPattern hexString() {
+        return new RegexPattern("^[0-9a-f]+$");
     }
 }

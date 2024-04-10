@@ -14,6 +14,11 @@ public class ContextPropagationConfigurationProperties {
     public static final String TENANT_EVENT_HEADER_NAME = "bbTenantId";
 
     /**
+     * Configurable tenant http header name with default value to 'X-TID'.
+     */
+    private String tenantHttpHeaderName = TENANT_HTTP_HEADER_NAME;
+
+    /**
      * Header keys from the original request to forward to DBS Service calls.
      */
     private List<String> headersToForward = List.of(TENANT_HTTP_HEADER_NAME);

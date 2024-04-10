@@ -4,9 +4,9 @@ server:
 spring:
   activemq:
     broker-url: tcp://localhost:61616
-  zipkin:
-    enabled: false
   cloud:
+    config:
+      enabled: false
     loadbalancer:
       enabled: false
 
@@ -61,7 +61,9 @@ backbase:
           enableFailed: false
         cursor:
           enabled: false
-
+    user:
+      management:
+        update-identity: true
 bootstrap:
   enabled: true
   # This is an Backbase OOTB Configuration. Please update as per project requirements

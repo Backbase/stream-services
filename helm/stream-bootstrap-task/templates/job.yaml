@@ -12,6 +12,12 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{ end }}
+      {{- if .Values.customFiles }}
+      volumes:
+        - name: customfiles
+          configMap:
+            name: {{ template "stream-bootstrap-task.fullname" . }}-customfiles
+      {{- end }}
       {{- include "stream-bootstrap-task.init-containers" . | nindent 6 }}
       containers:
         - name: stream-bootstrap-task-job
@@ -21,6 +27,14 @@ spec:
           {{- range $key, $value := .Values.env }}
           - name: {{ $key | quote }}
             value: {{ $value | quote }}
+          {{- end }}
+          {{- if .Values.customFiles }}
+          volumeMounts:
+            {{- range $key, $val := .Values.customFiles }}
+            - name: customfiles
+              mountPath: {{ $.Values.customFilesPath }}{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
           {{- end }}
           resources:
             limits:

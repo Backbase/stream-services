@@ -7,17 +7,16 @@ import com.backbase.stream.worker.model.TaskHistory;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
+import io.micrometer.tracing.annotation.ContinueSpan;
+import io.micrometer.tracing.annotation.NewSpan;
+import io.micrometer.tracing.annotation.SpanTag;
+import java.time.OffsetDateTime;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.sleuth.annotation.ContinueSpan;
-import org.springframework.cloud.sleuth.annotation.NewSpan;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-
-import java.time.OffsetDateTime;
-import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class UnitOfWorkExecutor<T extends StreamTask> {

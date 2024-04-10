@@ -1,21 +1,50 @@
 package com.backbase.stream.service;
 
+import static java.util.Objects.requireNonNullElse;
+import static java.util.Optional.ofNullable;
+
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserProfileManagementApi;
-import com.backbase.dbs.user.api.service.v2.model.*;
+import com.backbase.dbs.user.api.service.v2.model.AddRealmRequest;
+import com.backbase.dbs.user.api.service.v2.model.AssignRealm;
+import com.backbase.dbs.user.api.service.v2.model.BatchResponseItem;
+import com.backbase.dbs.user.api.service.v2.model.BatchUser;
+import com.backbase.dbs.user.api.service.v2.model.CreateIdentityRequest;
+import com.backbase.dbs.user.api.service.v2.model.CreateIdentityResponse;
+import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.dbs.user.api.service.v2.model.GetUsersByLegalEntityIdsRequest;
+import com.backbase.dbs.user.api.service.v2.model.GetUsersList;
+import com.backbase.dbs.user.api.service.v2.model.ImportIdentity;
+import com.backbase.dbs.user.api.service.v2.model.Realm;
+import com.backbase.dbs.user.api.service.v2.model.UpdateIdentityRequest;
+import com.backbase.dbs.user.api.service.v2.model.UserCreated;
+import com.backbase.dbs.user.api.service.v2.model.UserExternal;
 import com.backbase.dbs.user.api.service.v2.model.UserProfile;
 import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServiceApi;
 import com.backbase.identity.integration.api.service.v1.model.EnhancedUserRepresentation;
 import com.backbase.identity.integration.api.service.v1.model.UserRequestBody;
+import com.backbase.stream.configuration.UserManagementProperties;
 import com.backbase.stream.exceptions.UserUpsertException;
+import com.backbase.stream.legalentity.model.EmailAddress;
+import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
 import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.User;
-import com.backbase.stream.legalentity.model.*;
 import com.backbase.stream.mapper.RealmMapper;
 import com.backbase.stream.mapper.UserMapper;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import jakarta.validation.constraints.NotNull;
+import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
@@ -25,14 +54,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-
-import javax.validation.constraints.NotNull;
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static java.util.Objects.requireNonNullElse;
-import static java.util.Optional.ofNullable;
 
 /**
  * Stream User Management. Still needs to be adapted to use Identity correctly
@@ -52,6 +73,7 @@ public class UserService {
     private final IdentityManagementApi identityManagementApi;
     private final Optional<IdentityIntegrationServiceApi> identityIntegrationApi;
     private final UserProfileManagementApi userManagerProfileApi;
+    private final UserManagementProperties userManagementProperties;
 
     /**
      * Get User by external ID.
@@ -317,8 +339,9 @@ public class UserService {
     }
 
     private Mono<User> updateIdentityUser(User user, StreamTask streamTask) {
-        if (IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())
-            && (user.getAttributes() != null || user.getAdditions() != null)) {
+        if (userManagementProperties.isUpdateIdentity()
+            && IdentityUserLinkStrategy.IMPORT_FROM_IDENTIY.equals(user.getIdentityLinkStrategy())
+            && (!CollectionUtils.isEmpty(user.getAttributes()) || !CollectionUtils.isEmpty(user.getAdditions()))) {
             UpdateIdentityRequest replaceIdentity = new UpdateIdentityRequest();
             replaceIdentity.attributes(user.getAttributes());
             replaceIdentity.additions(user.getAdditions());
@@ -333,6 +356,7 @@ public class UserService {
                 })
                 .then(Mono.just(user));
         }
+        log.debug("The identity: {} update call is skipped as the specified update conditions are not met.", user.getExternalId());
         return Mono.just(user);
     }
 
@@ -452,11 +476,15 @@ public class UserService {
                         updateIdentityRequest.getAttributes().putAll(requireNonNullElse(user.getAttributes(), Map.of()));
                         updateIdentityRequest.getAdditions().putAll(requireNonNullElse(user.getAdditions(), Map.of()));
 
-                        return identityManagementApi.updateIdentity(user.getInternalId(), updateIdentityRequest)
+                        if(userManagementProperties.isUpdateIdentity()) {
+                            return identityManagementApi.updateIdentity(user.getInternalId(), updateIdentityRequest)
                                 .onErrorResume(WebClientResponseException.class, e -> {
                                     log.error("Failed to update identity: {}", e.getResponseBodyAsString(), e);
                                     return Mono.error(e);
                                 });
+                        }
+                        log.debug("The identity: {} update call is skipped because Update Identity flag is set to: {} ", user.getExternalId(), userManagementProperties.isUpdateIdentity());
+                        return Mono.just(updateIdentityRequest);
                         }
                 ).thenReturn(user);
     }

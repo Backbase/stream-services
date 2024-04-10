@@ -1,7 +1,7 @@
 spring:
-  zipkin:
-    enabled: false
   cloud:
+    config:
+      enabled: false
     kubernetes:
       config:
         enabled: false

@@ -4,18 +4,14 @@ import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
-import com.backbase.stream.compositions.integration.product.model.ProductGroup;
-import com.backbase.stream.compositions.integration.product.model.PullProductGroupResponse;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapperImpl;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
-
-import java.util.Arrays;
-import java.util.Collections;
+import com.backbase.stream.compositions.product.integration.client.ProductIntegrationApi;
+import com.backbase.stream.compositions.product.integration.client.model.ProductGroup;
+import com.backbase.stream.compositions.product.integration.client.model.PullProductGroupResponse;
 import java.util.Map;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

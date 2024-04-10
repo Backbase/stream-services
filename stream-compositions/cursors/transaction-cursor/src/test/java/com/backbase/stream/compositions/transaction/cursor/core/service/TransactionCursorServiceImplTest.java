@@ -92,9 +92,9 @@ class TransactionCursorServiceImplTest {
         transactionCursorEntity.setId("1234567890");
         when(transactionCursorRepository.save(any())).thenReturn(transactionCursorEntity);
         TransactionCursorUpsertRequest transactionCursorUpsertRequest = new TransactionCursorUpsertRequest()
-                .withCursor(new TransactionCursor().withArrangementId("123"));
+                .cursor(new TransactionCursor().arrangementId("123"));
         TransactionCursorUpsertResponse transactionCursorUpsertResponse = new TransactionCursorUpsertResponse()
-                .withId("1234567890");
+                .id("1234567890");
         StepVerifier
                 .create(transactionCursorService.upsertCursor(Mono.just(transactionCursorUpsertRequest)))
                 .expectNext(new ResponseEntity<>
@@ -114,8 +114,8 @@ class TransactionCursorServiceImplTest {
     @Test
     void patchByArrangementId_error() {
         StepVerifier.create(transactionCursorService.patchByArrangementId("123",
-                Mono.just(new TransactionCursorPatchRequest().withLastTxnDate("123-123-123")
-                        .withStatus(StatusEnum.SUCCESS.getValue())))).expectError(ParseException.class);
+                Mono.just(new TransactionCursorPatchRequest().lastTxnDate("123-123-123")
+                        .status(StatusEnum.SUCCESS.getValue())))).expectError(ParseException.class);
     }
 
 

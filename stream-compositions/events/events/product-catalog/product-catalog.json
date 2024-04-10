@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "productKinds": {
+      "type": "array",
+      "items": {
+        "$ref": "product-kind.json"
+      }
+    },
+    "productTypes": {
+      "type": "array",
+      "items": {
+        "$ref": "product-type.json"
+      }
+    },
+    "productStates": {
+      "type": "array",
+      "items": {
+        "$ref": "product-state.json"
+      }
+    }
+  }
+}

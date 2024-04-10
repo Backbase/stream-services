@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-http-starter-parent</artifactId>
-        <version>3.71.0</version>
+        <version>4.1.0</version>
         <relativePath>../../stream-sdk/stream-starter-parents/stream-http-starter-parent</relativePath>
     </parent>
 
@@ -47,29 +47,17 @@
                         <id>cursor</id>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>generate-spring-boot-embedded</goal>
                         </goals>
                         <configuration>
-                            <generatorName>spring</generatorName>
                             <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
-                            <generateApiTests>false</generateApiTests>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                            <generateModels>false</generateModels>
-                            <generateApis>true</generateApis>
                             <output>${openapi-generator-maven-plugin.output}</output>
+                            <apiPackage>com.backbase.stream.cursor.api</apiPackage>
+                            <modelPackage>com.backbase.stream.cursor.model</modelPackage>
                             <configOptions>
-                                <library>spring-boot</library>
                                 <reactive>true</reactive>
-                                <java8>true</java8>
-                                <dateLibrary>java8</dateLibrary>
-                                <openapiDocketConfig>true</openapiDocketConfig>
-                                <interfaceOnly>true</interfaceOnly>
-                                <modelPackage>com.backbase.stream.cursor.model</modelPackage>
-                                <apiPackage>com.backbase.stream.cursor.api</apiPackage>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                                <performBeanValidation>true</performBeanValidation>
-                                <apis/>
-                                <models/>
+                                <useBeanValidation>false</useBeanValidation>
+                                <useReflectionEqualsHashCode>false</useReflectionEqualsHashCode>
                             </configOptions>
                         </configuration>
                     </execution>

@@ -13,12 +13,12 @@ class ConfigMapperTest {
     void map() {
         ArrangementIngestionConfig config =
                 new ArrangementIngestionConfig()
-                        .withChains(
+                        .chains(
                                 new ArrangementsChainsConfig()
-                                        .withTransactionComposition(
+                                        .transactionComposition(
                                                 new TransactionCompositionChainConfig()
-                                                        .withEnabled(true)
-                                                        .withAsync(true)));
+                                                        .enabled(true)
+                                                        .async(true)));
 
         ConfigMapper configMapper = new ConfigMapper();
         RequestConfig requestConfig = configMapper.map(config);
@@ -31,7 +31,7 @@ class ConfigMapperTest {
     void mapNullTransactionComposition() {
         ArrangementIngestionConfig config =
                 new ArrangementIngestionConfig()
-                        .withChains(
+                        .chains(
                                 new ArrangementsChainsConfig());
 
         ConfigMapper configMapper = new ConfigMapper();

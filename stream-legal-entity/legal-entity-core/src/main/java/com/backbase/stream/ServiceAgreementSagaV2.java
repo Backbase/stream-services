@@ -53,6 +53,7 @@ import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import io.micrometer.tracing.annotation.SpanTag;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,7 +71,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
@@ -401,7 +401,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                 .doOnError(throwable -> log.error("error fetching function group for service agreement {} with error {}",
                     streamTask.getServiceAgreement().getInternalId(), throwable.getMessage()));
         }
-        return Mono.justOrEmpty(businessFunctionGroups);
+        return Mono.justOrEmpty(CollectionUtils.isEmpty(businessFunctionGroups) ? null : businessFunctionGroups);
     }
 
     private Mono<ServiceAgreementTaskV2> postUserContacts(ServiceAgreementTaskV2 streamTask) {

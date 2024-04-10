@@ -102,7 +102,7 @@ class TransactionIngestionServiceImplTest {
         }
         when(transactionCursorApi.upsertCursor(any()))
                 .thenReturn(Mono.just(
-                        new TransactionCursorUpsertResponse().withId("7337f8cc-d66d-41b3-a00e-f71ff15d93cg")));
+                        new TransactionCursorUpsertResponse().id("7337f8cc-d66d-41b3-a00e-f71ff15d93cg")));
         when(transactionCursorApi.patchByArrangementId(anyString(), any())).thenReturn(Mono.empty());
     }
 
@@ -120,9 +120,9 @@ class TransactionIngestionServiceImplTest {
     TransactionCursorResponse mockTransactionCursorResponse() {
         return
                 new TransactionCursorResponse()
-                        .withCursor(new TransactionCursor().withId("1").withStatus(StatusEnum.IN_PROGRESS)
-                                .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
-                                .withLegalEntityId("leInternalId"));
+                        .cursor(new TransactionCursor().id("1").status(StatusEnum.IN_PROGRESS)
+                                .arrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
+                                .legalEntityId("leInternalId"));
     }
 
     void mockTransactionService() {
@@ -146,9 +146,11 @@ class TransactionIngestionServiceImplTest {
         TransactionIngestPullRequest transactionIngestPullRequest = mockTransactionIngestPullRequest();
 
         when(transactionIntegrationService.pullTransactions(transactionIngestPullRequest))
-                .thenReturn(Flux.just(new TransactionsPostRequestBody().withType("type1").
-                        withArrangementId("1234").withReference("ref")
-                        .withExternalArrangementId("externalArrId")));
+                .thenReturn(Flux.just(new TransactionsPostRequestBody()
+                    .type("type1")
+                    .arrangementId("1234")
+                    .reference("ref")
+                    .externalArrangementId("externalArrId")));
 
         Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
                 .ingestPull(transactionIngestPullRequest);
@@ -179,9 +181,11 @@ class TransactionIngestionServiceImplTest {
         transactionIngestPullRequest.setDateRangeStart(OffsetDateTime.now());
 
         when(transactionIntegrationService.pullTransactions(transactionIngestPullRequest))
-                .thenReturn(Flux.just(new TransactionsPostRequestBody().withType("type1").
-                        withArrangementId("1234").withReference("ref")
-                        .withExternalArrangementId("externalArrId")));
+                .thenReturn(Flux.just(new TransactionsPostRequestBody()
+                    .type("type1")
+                    .arrangementId("1234")
+                    .reference("ref")
+                    .externalArrangementId("externalArrId")));
 
         Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
                 .ingestPull(transactionIngestPullRequest);
@@ -195,15 +199,17 @@ class TransactionIngestionServiceImplTest {
         mockConfigForTransaction();
         mockTransactionService();
         TransactionCursorResponse transactionCursorResponse = mockTransactionCursorResponse();
-        transactionCursorResponse.getCursor().withLastTxnDate("2022-05-24T03:18:59+01:00")
-                .withLastTxnIds(List.of("123", "345"));
+        transactionCursorResponse.getCursor().lastTxnDate("2022-05-24T03:18:59+01:00")
+                .lastTxnIds(List.of("123", "345"));
         mockCursorApiForTransactions(transactionCursorResponse, false);
         TransactionIngestPullRequest transactionIngestPullRequest = mockTransactionIngestPullRequest();
 
         when(transactionIntegrationService.pullTransactions(transactionIngestPullRequest))
-                .thenReturn(Flux.just(new TransactionsPostRequestBody().withType("type1").
-                        withArrangementId("1234").withReference("ref")
-                        .withExternalArrangementId("externalArrId")));
+                .thenReturn(Flux.just(new TransactionsPostRequestBody()
+                    .type("type1")
+                    .arrangementId("1234")
+                    .reference("ref")
+                    .externalArrangementId("externalArrId")));
 
         Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
                 .ingestPull(transactionIngestPullRequest);
@@ -221,9 +227,10 @@ class TransactionIngestionServiceImplTest {
         TransactionIngestPullRequest transactionIngestPullRequest = mockTransactionIngestPullRequest();
 
         when(transactionIntegrationService.pullTransactions(transactionIngestPullRequest))
-                .thenReturn(Flux.just(new TransactionsPostRequestBody().withType("type1").
-                        withArrangementId("1234").withReference("ref")
-                        .withExternalArrangementId("externalArrId")));
+                .thenReturn(Flux.just(new TransactionsPostRequestBody()
+                    .type("type1")
+                    .arrangementId("1234").reference("ref")
+                        .externalArrangementId("externalArrId")));
 
         Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
                 .ingestPull(transactionIngestPullRequest);
@@ -263,9 +270,8 @@ class TransactionIngestionServiceImplTest {
         transactionIngestPullRequest.setDateRangeEnd(OffsetDateTime.now().minusDays(5));
 
         when(transactionIntegrationService.pullTransactions(transactionIngestPullRequest))
-            .thenReturn(Flux.just(new TransactionsPostRequestBody().withType("type1").
-                withArrangementId("1234").withReference("ref")
-                .withExternalArrangementId("externalArrId")));
+            .thenReturn(Flux.just(new TransactionsPostRequestBody().type("type1")
+                    .arrangementId("1234").reference("ref").externalArrangementId("externalArrId")));
 
         Mono<TransactionIngestResponse> productIngestResponse = transactionIngestionService
             .ingestPull(transactionIngestPullRequest);

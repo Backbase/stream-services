@@ -25,6 +25,7 @@ import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
@@ -129,8 +130,8 @@ class ProductControllerIT extends IntegrationTest {
                                 .withContentType(MediaType.APPLICATION_JSON)
                                 .withBody(
                                         objectMapper.writeValueAsString(new TransactionIngestionResponse()
-                                                .withTransactions(List.of(new TransactionsPostResponseBody().withId("id")
-                                                        .withExternalId("externalId"))))
+                                                .transactions(List.of(new TransactionsPostResponseBody().id("id")
+                                                        .externalId("externalId"))))
                                 ));
     }
 
@@ -148,7 +149,7 @@ class ProductControllerIT extends IntegrationTest {
                                 .withContentType(MediaType.APPLICATION_JSON)
                                 .withBody(
                                         objectMapper.writeValueAsString(new PaymentOrderIngestionResponse()
-                                                .withNewPaymentOrder(List.of(new PaymentOrderPostResponse().withId("id"))))
+                                                .newPaymentOrder(List.of(new PaymentOrderPostResponse().id("id"))))
                                 ));
     }
 
@@ -186,13 +187,13 @@ class ProductControllerIT extends IntegrationTest {
 
         ProductPullIngestionRequest pullIngestionRequest =
                 new ProductPullIngestionRequest()
-                        .withLegalEntityExternalId("leId")
-                        .withServiceAgreementExternalId("saExId")
-                        .withServiceAgreementInternalId("saId")
-                        .withUserExternalId("userId")
-                        .withReferenceJobRoleNames(List.of("Admin Role"))
-                        .withMembershipAccounts(null)
-                        .withAdditions(Map.of());
+                        .legalEntityExternalId("leId")
+                        .serviceAgreementExternalId("saExId")
+                        .serviceAgreementInternalId("saId")
+                        .userExternalId("userId")
+                        .referenceJobRoleNames(List.of("Admin Role"))
+                        .membershipAccounts(null)
+                        .additions(Map.of());
 
         URI uri = URI.create("/service-api/v2/ingest/pull");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
@@ -206,7 +207,7 @@ class ProductControllerIT extends IntegrationTest {
     @Test
     void pushIngestProduct_Success() throws Exception {
         ProductPushIngestionRequest pushIngestionRequest = new ProductPushIngestionRequest()
-                .withProductGroup(new com.backbase.stream.compositions.product.api.model.ProductGroup());
+                .productGroup(new com.backbase.stream.compositions.product.api.model.ProductGroup());
         URI uri = URI.create("/service-api/v2/ingest/push");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
 
@@ -223,9 +224,9 @@ class ProductControllerIT extends IntegrationTest {
 
         ArrangementPullIngestionRequest pullIngestionRequest =
                 new ArrangementPullIngestionRequest()
-                        .withInternalArrangementId("arrangementId")
-                        .withExternalArrangementId("externalArrangementId")
-                        .withAdditions(Map.of());
+                        .internalArrangementId("arrangementId")
+                        .externalArrangementId("externalArrangementId")
+                        .additions(Map.of());
 
         URI uri = URI.create("/service-api/v2/ingest/arrangement/pull");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
@@ -243,9 +244,9 @@ class ProductControllerIT extends IntegrationTest {
 
         ArrangementPullIngestionRequest pullIngestionRequest =
                 new ArrangementPullIngestionRequest()
-                        .withInternalArrangementId("arrangementId")
-                        .withExternalArrangementId("externalArrangementId")
-                        .withAdditions(Map.of());
+                        .internalArrangementId("arrangementId")
+                        .externalArrangementId("externalArrangementId")
+                        .additions(Map.of());
 
         URI uri = URI.create("/service-api/v2/ingest/arrangement/pull");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();
@@ -269,8 +270,8 @@ class ProductControllerIT extends IntegrationTest {
 
         ArrangementPushIngestionRequest pushIngestionRequest =
                 new ArrangementPushIngestionRequest()
-                        .withInternalArrangementId("arrangementId")
-                        .withArrangement(arrangementItemPut);
+                        .internalArrangementId("arrangementId")
+                        .arrangement(arrangementItemPut);
 
         URI uri = URI.create("/service-api/v2/ingest/arrangement/push");
         WebTestClient webTestClient = WebTestClient.bindToController(productController).build();

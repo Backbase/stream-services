@@ -3,7 +3,7 @@ package com.backbase.stream.portfolio.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
-import com.backbase.stream.portfolio.api.PortfoliosApi;
+import com.backbase.stream.portfolio.PortfoliosApi;
 import com.backbase.stream.portfolio.model.AllocationBundle;
 import com.backbase.stream.portfolio.model.AssetClassBundle;
 import com.backbase.stream.portfolio.model.HierarchyBundle;
