@@ -8,13 +8,9 @@ import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.Policy;
 import com.backbase.stream.approval.model.PolicyAssignmentItem;
 import com.backbase.stream.approval.model.PolicyItem;
-import com.backbase.stream.exceptions.ApprovalTypeException;
-import com.backbase.stream.exceptions.PolicyAssignmentException;
-import com.backbase.stream.exceptions.PolicyException;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.ApprovalsIntegrationService;
 import com.backbase.stream.worker.StreamTaskExecutor;
-import com.backbase.stream.worker.exception.StreamTaskException;
 import io.micrometer.tracing.annotation.ContinueSpan;
 import io.micrometer.tracing.annotation.SpanTag;
 import java.util.Collection;
@@ -75,12 +71,10 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
         task.info(APPROVAL_TYPE_ENTITY, UPSERT, null, null, null, "Upsert Approval Types");
         return Flux.fromStream(nullableCollectionToStream(task.getData().getApprovalTypes()))
             .flatMap(approvalsIntegrationService::createApprovalType)
-            .onErrorResume(ApprovalTypeException.class, approvalTypeException -> {
+            .onErrorContinue((throwable, o) ->
                 task.error(APPROVAL_TYPE_ENTITY, UPSERT_APPROVAL_TYPE, FAILED, null, null,
-                    approvalTypeException, approvalTypeException.getHttpResponse(),
-                    approvalTypeException.getMessage());
-                return Mono.error(new StreamTaskException(task, approvalTypeException));
-            })
+                throwable, throwable.getMessage(),
+                throwable.getMessage()))
             .collectList()
             .map(approvals -> {
                 Map<String, String> approvalTypeIdByName =
@@ -105,12 +99,10 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
                 return p;
             })
             .flatMap(approvalsIntegrationService::createPolicy)
-            .onErrorResume(PolicyException.class, policyException -> {
+            .onErrorContinue((throwable, o) ->
                 task.error(POLICY_ENTITY, UPSERT_POLICY, FAILED, null, null,
-                    policyException, policyException.getHttpResponse(),
-                    policyException.getMessage());
-                return Mono.error(new StreamTaskException(task, policyException));
-            })
+                    throwable, throwable.getMessage(),
+                    throwable.getMessage()))
             .collectList()
             .map(policies -> {
                 Map<String, String> policyIdByName =
@@ -143,11 +135,9 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
                 return pa;
             })
             .flatMap(approvalsIntegrationService::assignPolicies)
-            .onErrorResume(PolicyAssignmentException.class, e -> {
-                task.error(ASSIGN_POLICY, UPSERT_POLICY_ASSIGNMENT, FAILED, null, null, e,
-                    e.getHttpResponse(), e.getMessage());
-                return Mono.error(new StreamTaskException(task, e));
-            })
+            .onErrorContinue((throwable, o) ->
+                task.error(ASSIGN_POLICY, UPSERT_POLICY_ASSIGNMENT, FAILED, null, null, throwable,
+                    throwable.getMessage(), throwable.getMessage()))
             .collectList()
             .map(v -> task);
     }
@@ -189,11 +179,7 @@ public class ApprovalSaga implements StreamTaskExecutor<ApprovalTask> {
                     });
             })
             .flatMap(approvalsIntegrationService::assignApprovalTypeLevels)
-            .onErrorResume(PolicyAssignmentException.class, e -> {
-                task.error(ASSIGN_POLICY, UPSERT_POLICY_ASSIGNMENT, FAILED, null, null,
-                    e, e.getHttpResponse(), e.getMessage());
-                return Mono.error(new StreamTaskException(task, e));
-            })
+            .onErrorContinue((throwable, o) -> Mono.just(task))
             .collectList()
             .map(v -> task);
     }

@@ -9,11 +9,11 @@ import static org.mockito.Mockito.lenient;
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
-import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
-import com.backbase.dbs.paymentorder.api.service.v2.model.GetPaymentOrderResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
+import com.backbase.dbs.paymentorder.api.service.v3.model.GetPaymentOrderResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilterResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostResponse;
 import com.backbase.stream.common.PaymentOrderBaseTest;
 import com.backbase.stream.config.PaymentOrderWorkerConfigurationProperties;
 import com.backbase.stream.model.request.NewPaymentOrderIngestRequest;
@@ -74,8 +74,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
         );
 
         PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse()
-                .id("po_post_resp_id")
-                .putAdditionsItem("key", "val");
+                .id("po_post_resp_id");
 
         lenient().when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));
@@ -105,8 +104,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
         Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux = Flux.fromIterable(paymentOrderPostRequest);
 
         PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse()
-                .id("po_post_resp_id")
-                .putAdditionsItem("key", "val");
+                .id("po_post_resp_id");
 
         lenient().when(paymentOrdersApi.postPaymentOrder(any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));
@@ -118,7 +116,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
                 .addPaymentOrdersItem(getPaymentOrderResponse)
                 .totalElements(new BigDecimal(1));
 
-        doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+        doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
 
         AccountArrangementItem accountArrangementItem = new AccountArrangementItem()
                 .id("arrangementId_1")
@@ -167,7 +165,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
                 .addPaymentOrdersItem(getPaymentOrderResponseWithEmptyUserId)
                 .totalElements(new BigDecimal(1));
 
-        lenient().doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+        lenient().doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
 
         StepVerifier
                 .create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))

@@ -1,22 +1,21 @@
 package com.backbase.stream.paymentorder;
 
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.ACCEPTED;
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.CANCELLATION_PENDING;
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.CANCELLED;
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.PROCESSED;
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.READY;
-import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.REJECTED;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.Collections.emptyList;
 import static reactor.core.publisher.Flux.defer;
 import static reactor.core.publisher.Flux.empty;
 import static reactor.util.retry.Retry.fixedDelay;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.ACCEPTED;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.CANCELLATION_PENDING;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.CANCELLED;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.PROCESSED;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.READY;
+import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.REJECTED;
 
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementsFilter;
-
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -24,11 +23,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
-import com.backbase.dbs.paymentorder.api.service.v2.model.GetPaymentOrderResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterRequest;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
+import com.backbase.dbs.paymentorder.api.service.v3.model.GetPaymentOrderResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilterRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilterResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
 import com.backbase.stream.config.PaymentOrderWorkerConfigurationProperties;
 import com.backbase.stream.mappers.PaymentOrderTypeMapper;
 import com.backbase.stream.model.PaymentOrderIngestContext;
@@ -240,7 +239,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
     }
 
     private Mono<DBSPaymentOrderPageResult> retrieveNextPage(int currentCount, final @NotNull String userId) {
-        return paymentOrdersApi.postFilterPaymentOrders(null, null, null, null, null, null, null, null,
+        return paymentOrdersApi.postFilterPaymentOrders(null, null, null, null, null, null, null, null, null,
                         null, null, null, userId, null, null, currentCount / PAGE_SIZE, PAGE_SIZE, null,
                         null, FILTER)
                 .retryWhen(fixedDelay(3, Duration.of(2000, MILLIS)).filter(
