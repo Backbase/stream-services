@@ -5,6 +5,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
 import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.limit.api.service.v2.model.LimitsRetrievalPostResponseBody;
+import com.backbase.stream.configuration.LimitsWorkerConfigurationProperties;
 import com.backbase.stream.mapper.LimitsMapper;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
@@ -33,9 +34,16 @@ public class LimitsSaga implements StreamTaskExecutor<LimitsTask> {
     private final LimitsServiceApi limitsApi;
     private final LimitsMapper mapper = Mappers.getMapper(LimitsMapper.class);
 
+    private final LimitsWorkerConfigurationProperties limitsWorkerConfigurationProperties;
+
     @Override
     public Mono<LimitsTask> executeTask(LimitsTask limitsTask) {
         CreateLimitRequestBody item = limitsTask.getData();
+
+        if (!limitsWorkerConfigurationProperties.isEnabled()) {
+            log.info("backbase.stream.limits.worker.limitsEnabled is false, Skipping limits ingestion");
+            return Mono.just(limitsTask);
+        }
 
         log.info("Started ingestion of limits {} for user {}",
             item.getEntities().stream().map(entity -> entity.getEtype() + COLON + SPACE + entity.getEref())

@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.15.4](https://github.com/Backbase/stream-services/compare/3.15.3...3.15.4)
+### Changed
+- Add feature flag for limits ingestion default is true, `backbase.stream.limits.worker.enabled`
+
 ## [3.15.3](https://github.com/Backbase/stream-services/compare/3.15.2...3.15.3)
 ### Changed
 - Add auto-configuration for user context service API in stream-dbs-clients module
