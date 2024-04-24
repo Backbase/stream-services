@@ -1,0 +1,49 @@
+logging:
+  level:
+    root: INFO
+    com.backbase: DEBUG
+    com.backbase.stream: DEBUG
+    org.springframework: INFO
+    org.springframework.web.reactive: INFO
+
+eureka:
+  client:
+    enabled: false
+# Stream config
+spring:
+  cloud:
+    loadbalancer:
+      enabled: false
+    config:
+      enabled: false
+    discovery:
+      enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          bb:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+        provider:
+          bb:
+            token-uri: http://localhost:7779/oauth/token
+  datasource:
+    url: jdbc:h2:mem:backbase_stream:security_permission;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+
+backbase:
+  communication:
+    services:
+      access-control:
+        direct-uri: http://localhost:8040
+      usermanager:
+        direct-uri: http://localhost:8060
+      identity:
+        integration:
+          direct-uri: http://localhost:8070
+      arrangement:
+        manager:
+          direct-uri:  http://localhost:8050
+
+

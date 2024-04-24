@@ -41,6 +41,7 @@ public class SetupLegalEntityHierarchyConfiguration {
         Flux.fromIterable(aggregates)
             .map(LegalEntityTask::new)
             .flatMap(legalEntitySaga::executeTask)
+            .doOnNext(LegalEntityTask::logSummary)
             .collectList()
             .block();
 
