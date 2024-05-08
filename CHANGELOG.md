@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.0.2](https://github.com/Backbase/stream-services/compare/5.0.1...5.0.2)
+### Changed
+- Upgrade stream composition to 2024.03.10-LTS
+
 ## [5.0.1](https://github.com/Backbase/stream-services/compare/5.0.0...5.0.1)
 ### Changed
 - Use pagination to query Payment Orders
