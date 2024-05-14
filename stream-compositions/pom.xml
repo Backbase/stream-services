@@ -27,7 +27,7 @@
     </modules>
 
     <properties>
-        <backbase-bom.version>2024.03.10-LTS</backbase-bom.version>
+        <backbase-bom.version>2024.04</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
         <testcontainers.version>1.12.5</testcontainers.version>
         <mock.server.version>5.15.0</mock.server.version>
@@ -51,6 +51,13 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
                 <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.backbase</groupId>
+                <artifactId>backbase-bom</artifactId>
+                <version>${backbase-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
