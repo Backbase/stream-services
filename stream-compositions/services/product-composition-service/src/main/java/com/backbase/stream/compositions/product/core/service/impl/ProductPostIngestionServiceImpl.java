@@ -227,19 +227,19 @@ public class ProductPostIngestionServiceImpl implements ProductPostIngestionServ
             ? res.getLegalEntityInternalId()
             : product.getLegalEntities().get(0).getInternalId();
         return new TransactionPullIngestionRequest()
-                .withLegalEntityInternalId(legalEntityId)
-                .withAdditions(res.getAdditions())
-                .withArrangementId(product.getInternalId())
-                .withExternalArrangementId(product.getExternalId());
+                .legalEntityInternalId(legalEntityId)
+                .additions(res.getAdditions())
+                .arrangementId(product.getInternalId())
+                .externalArrangementId(product.getExternalId());
     }
 
     private PaymentOrderPullIngestionRequest buildPaymentOrderPullRequest(ProductIngestResponse res) {
         return new PaymentOrderPullIngestionRequest()
-                .withLegalEntityInternalId(res.getLegalEntityInternalId())
-                .withLegalEntityExternalId(res.getLegalEntityExternalId())
-                .withInternalUserId(res.getUserInternalId())
-                .withMemberNumber(res.getUserExternalId())
-                .withServiceAgreementInternalId(res.getServiceAgreementInternalId())
-                .withAdditions(res.getAdditions());
+                .legalEntityInternalId(res.getLegalEntityInternalId())
+                .legalEntityExternalId(res.getLegalEntityExternalId())
+                .internalUserId(res.getUserInternalId())
+                .memberNumber(res.getUserExternalId())
+                .serviceAgreementInternalId(res.getServiceAgreementInternalId())
+                .additions(res.getAdditions());
     }
 }

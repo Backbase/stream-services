@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "legalEntityExternalId": {
+      "description": "Legal entity external id.",
+      "type": "string"
+    },
+    "name": {
+      "description": "Full name associated with the legal entity",
+      "type": "string"
+    },
+    "type": {
+      "description": "Type of Legal Entity",
+      "enum": ["RETAIL", "SME", "CORPORATE"],
+      "type": "string"
+    }
+  },
+  "required": [
+    "legalEntityExternalId"
+  ]
+}

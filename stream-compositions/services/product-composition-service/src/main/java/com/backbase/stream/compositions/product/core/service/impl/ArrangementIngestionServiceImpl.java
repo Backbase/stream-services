@@ -10,17 +10,16 @@ import com.backbase.stream.compositions.product.core.service.ArrangementIngestio
 import com.backbase.stream.compositions.product.core.service.ArrangementIntegrationService;
 import com.backbase.stream.compositions.product.core.service.ArrangementPostIngestionService;
 import com.backbase.stream.product.service.ArrangementService;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service

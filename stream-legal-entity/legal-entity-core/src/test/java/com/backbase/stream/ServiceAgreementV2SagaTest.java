@@ -16,7 +16,6 @@ import com.backbase.dbs.contact.api.service.v2.model.ExternalAccessContext;
 import com.backbase.dbs.contact.api.service.v2.model.IngestMode;
 import com.backbase.dbs.limit.api.service.v2.model.CreateLimitRequestBody;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
-import com.backbase.dbs.user.api.service.v2.model.Realm;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
@@ -38,7 +37,6 @@ import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.ReferenceJobRole;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
@@ -50,10 +48,8 @@ import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
-import com.backbase.stream.service.UserService;
 import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -244,7 +240,7 @@ class ServiceAgreementV2SagaTest {
             .name("Custom SA")
             .externalId("100000")
             .isMaster(false)
-            .referenceJobRoles(Collections.singletonList((ReferenceJobRole) new ReferenceJobRole()
+            .referenceJobRoles(Collections.singletonList((JobRole) new JobRole()
                 .name("Job Role with Limits").functionGroups(Collections.singletonList(new BusinessFunctionGroup()
                     .name("someFunctionGroup")
                 .addFunctionsItem(new BusinessFunction().functionId("1071").name("US Domestic Wire")

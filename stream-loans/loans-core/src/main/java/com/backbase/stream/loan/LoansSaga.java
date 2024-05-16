@@ -5,12 +5,11 @@ import com.backbase.loan.inbound.api.service.v1.model.BatchUpsertLoans;
 import com.backbase.loan.inbound.api.service.v1.model.InboundIntegrationArrangementAttributes;
 import com.backbase.loan.inbound.api.service.v1.model.InboundIntegrationLoan;
 import com.backbase.stream.worker.StreamTaskExecutor;
+import io.micrometer.tracing.annotation.SpanTag;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

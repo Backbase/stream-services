@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: transaction-composition
   main:
     allow-bean-definition-overriding: true
   codec:

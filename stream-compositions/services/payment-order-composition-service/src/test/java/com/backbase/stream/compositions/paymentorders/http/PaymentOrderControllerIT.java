@@ -111,11 +111,11 @@ class PaymentOrderControllerIT extends IntegrationTest {
 
         PaymentOrderPullIngestionRequest pullIngestionRequest =
                 new PaymentOrderPullIngestionRequest()
-                        .withInternalUserId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
-                        .withMemberNumber("memberId")
-                        .withServiceAgreementInternalId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
-                        .withLegalEntityExternalId("leExternalId")
-                        .withLegalEntityInternalId("leInternalId");
+                        .internalUserId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
+                        .memberNumber("memberId")
+                        .serviceAgreementInternalId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
+                        .legalEntityExternalId("leExternalId")
+                        .legalEntityInternalId("leInternalId");
         webTestClient.post().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(Mono.just(pullIngestionRequest), PaymentOrderPullIngestionRequest.class).exchange()
@@ -144,12 +144,12 @@ class PaymentOrderControllerIT extends IntegrationTest {
 
         PaymentOrderPushIngestionRequest pushIngestionRequest =
                 new PaymentOrderPushIngestionRequest()
-                        .withPaymentOrders(List.of(new PaymentOrderPostRequest()
-                                .withInternalUserId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
-                                .withBankReferenceId("bankRefId")
-                                .withServiceAgreementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
-                                .withPaymentSetupId("paymentSetupId")
-                                .withPaymentSubmissionId("paymentSubmissionId")));
+                        .paymentOrders(List.of(new PaymentOrderPostRequest()
+                                .internalUserId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
+                                .bankReferenceId("bankRefId")
+                                .serviceAgreementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
+                                .paymentSetupId("paymentSetupId")
+                                .paymentSubmissionId("paymentSubmissionId")));
 
         webTestClient.post().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)

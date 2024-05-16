@@ -265,7 +265,7 @@ public class ReactiveProductCatalogService {
 
     public Mono<ProductType> getProductTypeByExternalId(String productTypeExternalId) {
         log.info("Get Product Type: {}", productTypeExternalId);
-        return productsApi.getProducts(Collections.singletonList(productTypeExternalId), null)
+        return productsApi.getProducts(Collections.singleton(productTypeExternalId), null)
             .doOnNext(productItem -> log.info("Found product: {} for id: {}", productItem.getTypeName(), productTypeExternalId))
             .doOnError(WebClientResponseException.class, ex -> {
                 log.error("Failed to get product type by external id: {}. Response: {}", productTypeExternalId, ex.getResponseBodyAsString());

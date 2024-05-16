@@ -1,25 +1,28 @@
 package com.backbase.stream.product.service;
 
-
-import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
-import com.backbase.dbs.arrangement.api.service.v2.model.*;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPost;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountBatchResponseItemExtended;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountExternalLegalEntityIds;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountInternalIdGetResponseBody;
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountUserPreferencesItemPut;
+import com.backbase.dbs.arrangement.api.service.v2.model.BatchResponseStatusCode;
+import com.backbase.dbs.arrangement.api.service.v2.model.ErrorItem;
 import com.backbase.stream.product.exception.ArrangementCreationException;
 import com.backbase.stream.product.exception.ArrangementUpdateException;
 import com.backbase.stream.product.mapping.ProductMapper;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Manage Products (In DBS Called Arrangements).
@@ -54,7 +57,7 @@ public class ArrangementService {
     public Mono<AccountArrangementItemPut> updateArrangement( AccountArrangementItemPut accountArrangementItemPut) {
         log.info("Updating Arrangement: {}", accountArrangementItemPut.getExternalArrangementId());
         if(accountArrangementItemPut.getDebitCards() == null)
-            accountArrangementItemPut.setDebitCards(Collections.emptyList());
+            accountArrangementItemPut.setDebitCards(Collections.emptySet());
         return arrangementsApi.putArrangements(accountArrangementItemPut)
             .doOnNext(aVoid -> log.info("Updated Arrangement: {}", accountArrangementItemPut.getExternalArrangementId())).map(aVoid -> accountArrangementItemPut)
             .thenReturn(accountArrangementItemPut)
@@ -176,9 +179,11 @@ public class ArrangementService {
      * @param legalEntitiesExternalIds list of Legal Entities external identifiers.
      * @return Mono<Void>
      */
-    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, List<String> legalEntitiesExternalIds){
+    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId,
+        List<String> legalEntitiesExternalIds) {
         log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, legalEntitiesExternalIds);
-        return arrangementsApi.postArrangementLegalEntities(arrangementExternalId, new AccountExternalLegalEntityIds().ids(legalEntitiesExternalIds));
+        return arrangementsApi.postArrangementLegalEntities(arrangementExternalId,
+            new AccountExternalLegalEntityIds().ids(new HashSet<>(legalEntitiesExternalIds)));
     }
 
     /**
@@ -188,25 +193,11 @@ public class ArrangementService {
      * @param legalEntityExternalIds List of Legal Entities identified by external identifier.
      * @return Mono<Void>
      */
-    public Mono<Void> removeLegalEntityFromArrangement(String arrangementExternalId, List<String> legalEntityExternalIds) {
+    public Mono<Void> removeLegalEntityFromArrangement(String arrangementExternalId,
+        List<String> legalEntityExternalIds) {
         log.debug("Removing Arrangement {} from Legal Entities {}", arrangementExternalId, legalEntityExternalIds);
-        // TODO: Very ugly, but seems like BOAT doesn't generate body for DELETE requests. Not sure it is incorrect though..
-        ApiClient apiClient = arrangementsApi.getApiClient();
-        return apiClient.invokeAPI(
-                "/arrangements/{externalArrangementId}/legalentities",
-                HttpMethod.DELETE,
-                Collections.singletonMap("externalArrangementId", arrangementExternalId),
-                new LinkedMultiValueMap<>(),
-                Collections.singletonMap("ids", legalEntityExternalIds),
-                new HttpHeaders(),
-                new LinkedMultiValueMap<>(),
-                new LinkedMultiValueMap<>(),
-                apiClient.selectHeaderAccept(new String[]{"application/json"}),
-                apiClient.selectHeaderContentType(new String[]{}),
-                new String[]{},
-                new ParameterizedTypeReference<Void>() {
-                }
-        );
+        return arrangementsApi.deleteArrangementLegalEntities(arrangementExternalId,
+            new AccountExternalLegalEntityIds().ids(new HashSet<>(legalEntityExternalIds)));
     }
 
 }

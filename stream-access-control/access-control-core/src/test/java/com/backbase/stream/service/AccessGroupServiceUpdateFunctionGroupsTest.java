@@ -137,7 +137,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .apsId(1L)
                 .name("jobRoleNew")
                 .description("jobRoleNew")
-                .type(PresentationIngestFunctionGroup.TypeEnum.REGULAR)
+                .type(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE)
                 .metadata(Map.of("key1","value1"))
                 .addPermissionsItem(new PresentationPermission()
                     .functionId("101")

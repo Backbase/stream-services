@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: product-composition
   main:
     allow-bean-definition-overriding: true
 sso:

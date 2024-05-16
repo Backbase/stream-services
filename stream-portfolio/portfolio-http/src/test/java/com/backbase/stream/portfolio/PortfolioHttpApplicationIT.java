@@ -13,6 +13,6 @@ class PortfolioHttpApplicationIT {
 
 	@Test
 	void shouldStartApplication() {
-		Assertions.assertDoesNotThrow(() -> PortfolioHttpApplication.main(new String[] {}));
+		Assertions.assertDoesNotThrow(() -> PortfolioHttpApplication.main(new String[] {"--spring.cloud.config.enabled=false"}));
 	}
 }

@@ -98,7 +98,7 @@ public class ArrangementPostIngestionServiceImpl implements ArrangementPostInges
 
     private TransactionPullIngestionRequest buildTransactionPullRequest(ArrangementIngestResponse res) {
         return new TransactionPullIngestionRequest()
-                .withArrangementId(res.getArrangementInternalId())
-                .withExternalArrangementId(res.getArrangement().getExternalArrangementId());
+                .arrangementId(res.getArrangementInternalId())
+                .externalArrangementId(res.getArrangement().getExternalArrangementId());
     }
 }

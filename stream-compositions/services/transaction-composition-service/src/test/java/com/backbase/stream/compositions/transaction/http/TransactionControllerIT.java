@@ -112,8 +112,8 @@ class TransactionControllerIT extends IntegrationTest {
                                 .withContentType(MediaType.APPLICATION_JSON)
                                 .withBody(
                                         objectMapper.writeValueAsString(new TransactionCursorResponse()
-                                                .withCursor(new TransactionCursor().withId("1")
-                                                        .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg"))
+                                                .cursor(new TransactionCursor().id("1")
+                                                        .arrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg"))
                                         )
                                 ));
 
@@ -157,10 +157,10 @@ class TransactionControllerIT extends IntegrationTest {
 
         TransactionPullIngestionRequest pullIngestionRequest =
                 new TransactionPullIngestionRequest()
-                        .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
-                        .withBillingCycles(3)
-                        .withExternalArrangementId("externalArrangementId")
-                        .withLegalEntityInternalId("leInternalId");
+                        .arrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
+                        .billingCycles(3)
+                        .externalArrangementId("externalArrangementId")
+                        .legalEntityInternalId("leInternalId");
         webTestClient.post().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .body(Mono.just(pullIngestionRequest), TransactionPullIngestionRequest.class).exchange()
@@ -175,9 +175,9 @@ class TransactionControllerIT extends IntegrationTest {
 
         TransactionPushIngestionRequest pushIngestionRequest =
                 new TransactionPushIngestionRequest()
-                        .withTransactions(List.of(new TransactionsPostRequestBody().withType("type1").
-                                withArrangementId("1234").withReference("ref")
-                                .withExternalArrangementId("externalArrId")));
+                        .transactions(List.of(new TransactionsPostRequestBody().type("type1").
+                                arrangementId("1234").reference("ref")
+                                .externalArrangementId("externalArrId")));
 
         webTestClient.post().uri(uri)
                 .contentType(org.springframework.http.MediaType.APPLICATION_JSON)

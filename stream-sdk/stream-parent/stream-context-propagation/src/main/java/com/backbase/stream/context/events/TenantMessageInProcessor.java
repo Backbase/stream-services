@@ -3,13 +3,19 @@ package com.backbase.stream.context.events;
 import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_EVENT_HEADER_NAME;
 
 import com.backbase.buildingblocks.backend.communication.event.scs.MessageInProcessor;
-import com.backbase.stream.context.TenantContext;
+import com.backbase.stream.context.ForwardedHeadersHolder;
+import com.backbase.stream.context.config.ContextPropagationConfigurationProperties;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.messaging.Message;
 
 @Slf4j
+@RequiredArgsConstructor
 public class TenantMessageInProcessor implements MessageInProcessor {
+
+    private final ContextPropagationConfigurationProperties properties;
 
     /**
      * Extracts the tenant ID from the TENANT_EVENT_HEADER_NAME header of the given {@link Message} and uses it to bind
@@ -25,7 +31,9 @@ public class TenantMessageInProcessor implements MessageInProcessor {
         log.debug("filterReceivedEvent {}", tenantId);
         Optional<String> tenant = Optional.ofNullable(tenantId);
         if (tenant.isPresent()) {
-            TenantContext.setTenant(tenant.get());
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(properties.getTenantHttpHeaderName(), tenantId);
+            ForwardedHeadersHolder.setValue(headers);
         } else {
             log.debug("Could not identify Tenant {}. ", this);
         }
@@ -36,8 +44,8 @@ public class TenantMessageInProcessor implements MessageInProcessor {
      */
     @Override
     public <T> void processPostReceived(Message<T> message, String channelName, String messageType) {
-        log.debug("leaveContext {}", TenantContext.getTenant());
-        TenantContext.clear();
-        log.trace("TenantContext cleared");
+        log.debug("leaveContext {}", ForwardedHeadersHolder.getValue());
+        ForwardedHeadersHolder.reset();
+        log.trace("ForwardedHeadersHolder cleared");
     }
 }

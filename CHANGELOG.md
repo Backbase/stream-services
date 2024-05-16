@@ -8,6 +8,20 @@ All notable changes to this project will be documented in this file.
 ## [3.72.3](https://github.com/Backbase/stream-services/compare/3.72.1...3.72.3)
 ### Added
 - Update payments to be in line with latest Banking Services
+## [4.1.1](https://github.com/Backbase/stream-services/compare/4.1.1...4.1.0)
+### Added
+- Adding login-based ingestion for product composition. Disabled by default, to enable: `backbase.stream.compositions.product.login-event.enabled=true`.
+
+## [4.1.0](https://github.com/Backbase/stream-services/compare/4.1.0...4.0.0)
+### Changed
+- Bumping Service SDK to **16.1.5**
+
+## [4.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
+### Changed
+- Bumping Service SDK to **16.0.1**
+  - Multiple breaking changes were introduced as part of this upgrade, including Spring Boot 3 upgrade, replacing Spring Sleuth by Micrometer and modules structure for the Composition Events.
+- Bumping Banking Services clients to **2023.12**
+- Enhancing Multi-tenancy support by removing the concurrency limitation from `v3.70.0` using the new reactor's context propagation.
 
 ## [3.72.1](https://github.com/Backbase/stream-services/compare/3.72.0...3.72.1)
 ### Added
