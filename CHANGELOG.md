@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.72.4](https://github.com/Backbase/stream-services/compare/3.72.1...3.72.3)
+### Added
+- Update BatchProductIngestion saga to ignore the user external ID case when getting products for specified user.
+
 ## [3.72.3](https://github.com/Backbase/stream-services/compare/3.72.1...3.72.3)
 ### Added
 - Update payments to be in line with latest Banking Services
