@@ -1,13 +1,42 @@
 package com.backbase.stream.portfolio.service;
 
 import static com.backbase.stream.portfolio.util.PortfolioTestUtil.EUR_CURRENCY_CODE;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.portfolio.api.service.integration.v1.model.*;
+import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.AllocationClassifierType;
+import com.backbase.portfolio.api.service.integration.v1.model.Money;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioAllocationsParentItem;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioAllocationsPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioBenchmarkPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesItem;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioCumulativePerformancesPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionTransactionsPostItem;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionsHierarchyItem;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioPositionsHierarchyPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioTransactionsPostItem;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioTransactionsPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioValuationsItem;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfolioValuationsPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosGetItem;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosGetResponse;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PortfoliosPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PositionTransactionPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PositionsGetItem;
+import com.backbase.portfolio.api.service.integration.v1.model.PositionsPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.PositionsPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.SubPortfolioGetResponse;
+import com.backbase.portfolio.api.service.integration.v1.model.SubPortfoliosPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.SubPortfoliosPutRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.TransactionCategoryPostRequest;
+import com.backbase.portfolio.api.service.integration.v1.model.TransactionCategoryPutRequest;
 import com.backbase.portfolio.integration.api.service.v1.AggregatePortfolioManagementApi;
 import com.backbase.portfolio.integration.api.service.v1.PortfolioBenchmarksManagementApi;
 import com.backbase.portfolio.integration.api.service.v1.PortfolioCumulativePerformanceManagementApi;
@@ -467,7 +496,9 @@ class PortfolioIntegrationServiceTest {
         String portfolioCode = "ARRANGEMENT_SARA";
 
         when(portfolioManagementApi.getPortfolio(anyString()))
-                .thenReturn(Mono.just(new PortfoliosGetItem().code(portfolioCode)));
+            .thenReturn(Mono.just(
+                new PortfoliosGetResponse().addPortfoliosItem(new PortfoliosGetItem().code(portfolioCode))
+                    .getPortfolios().get(0)));
         when(portfolioManagementApi.putPortfolio(anyString(), any(PortfoliosPutRequest.class)))
                 .thenReturn(Mono.empty());
 

@@ -76,7 +76,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -189,7 +188,7 @@ class AccessGroupServiceTest {
             .collect(Collectors.toList()));
         when(serviceAgreementsApi.putPresentationServiceAgreementUsersBatchUpdate(any())).thenReturn(usersResponse);
 
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId), anyBoolean()))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
 
         Mono<ServiceAgreementUsersQuery> emptyExistingUsersList = Mono.just(new ServiceAgreementUsersQuery());
@@ -252,7 +251,7 @@ class AccessGroupServiceTest {
             new ServiceAgreementParticipantsGetResponseBody().externalId("p1");
         ServiceAgreementParticipantsGetResponseBody existingPar2 =
             new ServiceAgreementParticipantsGetResponseBody().externalId("p2");
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId), anyBoolean()))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
             .thenReturn(Flux.fromIterable(asList(existingPar1, existingPar2)));
 
         // users
@@ -313,7 +312,7 @@ class AccessGroupServiceTest {
                     .status(HTTP_STATUS_OK))
             ));
 
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId), anyBoolean()))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
 
 

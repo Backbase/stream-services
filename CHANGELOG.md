@@ -7,8 +7,23 @@ All notable changes to this project will be documented in this file.
 - Upgrade to Backbase version `2024.03-LTS`
 
 ## [4.1.1](https://github.com/Backbase/stream-services/compare/4.1.1...4.1.0)
+## [5.2.0](https://github.com/Backbase/stream-services/compare/5.1.0...5.2.0)
 ### Added
 - Adding login-based ingestion for product composition. Disabled by default, to enable: `backbase.stream.compositions.product.login-event.enabled=true`.
+- Upgrade stream composition to 2024.04
+- 
+## [5.1.0](https://github.com/Backbase/stream-services/compare/5.0.1...5.1.0)
+### Changed
+- Upgrade stream composition to 2024.03.10-LTS
+
+## [5.0.1](https://github.com/Backbase/stream-services/compare/5.0.0...5.0.1)
+### Changed
+- Use pagination to query Payment Orders
+
+## [5.0.0](https://github.com/Backbase/stream-services/compare/5.0.0...4.0.0)
+### Changed
+- Bumping Service SDK to **17.0.0**
+- Bumping Banking Services clients to **2024.04**
 
 ## [4.1.0](https://github.com/Backbase/stream-services/compare/4.1.0...4.0.0)
 ### Changed
