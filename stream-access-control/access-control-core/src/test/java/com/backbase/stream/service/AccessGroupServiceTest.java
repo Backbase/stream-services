@@ -1,6 +1,5 @@
 package com.backbase.stream.service;
 
-import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_BAD_REQUEST;
 import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_INTERNAL_SERVER_ERROR;
 import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_OK;
 import static com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction.ADD;
@@ -11,8 +10,7 @@ import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -75,10 +73,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.client.HttpClientErrorException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -182,7 +177,7 @@ class AccessGroupServiceTest {
             .collect(Collectors.toList()));
         when(serviceAgreementsApi.putPresentationServiceAgreementUsersBatchUpdate(any())).thenReturn(usersResponse);
 
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId),anyBoolean()))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
 
         Mono<ServiceAgreementUsersQuery> emptyExistingUsersList = Mono.just(new ServiceAgreementUsersQuery());
@@ -245,7 +240,7 @@ class AccessGroupServiceTest {
             new ServiceAgreementParticipantsGetResponseBody().externalId("p1");
         ServiceAgreementParticipantsGetResponseBody existingPar2 =
             new ServiceAgreementParticipantsGetResponseBody().externalId("p2");
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId), anyBoolean()))
             .thenReturn(Flux.fromIterable(asList(existingPar1, existingPar2)));
 
         // users
@@ -306,7 +301,7 @@ class AccessGroupServiceTest {
                     .status(HTTP_STATUS_OK))
             ));
 
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId),anyBoolean()))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
 
 

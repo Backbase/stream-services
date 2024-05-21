@@ -385,7 +385,7 @@ public class AccessGroupService {
 
     public Flux<ServiceAgreementParticipantsGetResponseBody> getServiceAgreementParticipants(
         StreamTask streamTask, ServiceAgreement serviceAgreement) {
-        return serviceAgreementsApi.getServiceAgreementParticipants(serviceAgreement.getInternalId())
+        return serviceAgreementsApi.getServiceAgreementParticipants(serviceAgreement.getInternalId(),false)
             .onErrorResume(WebClientResponseException.NotFound.class, e -> Flux.empty())
             .onErrorResume(WebClientResponseException.class, e -> {
                 streamTask.error("participant", "update-participant", "failed",
