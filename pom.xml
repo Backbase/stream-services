@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>backbase-parent</artifactId>
-        <version>16.1.5</version>
+        <version>16.1.7</version>
         <relativePath/>
     </parent>
 
