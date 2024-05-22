@@ -24,7 +24,7 @@
         <docker.scs.kafka>provided</docker.scs.kafka>
         <docker.scs.azure>provided</docker.scs.azure>
 
-        <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <spring-cloud.version>2022.0.4</spring-cloud.version>
     </properties>
 
     <dependencyManagement>
