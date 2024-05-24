@@ -43,8 +43,7 @@ public class PaymentOrderTaskExecutorTest extends PaymentOrderBaseTest {
 
         PaymentOrderTask paymentOrderTask = new PaymentOrderTask("po_task_id", paymentOrderIngestRequestList);
         PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse()
-                .id("po_post_resp_id")
-                .putAdditionsItem("key", "val");
+                .id("po_post_resp_id");
 
         Mockito.lenient().when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));

@@ -11,8 +11,7 @@ import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,6 +23,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem.TypeEnum;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
@@ -31,6 +31,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPe
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAssignUserPermissions;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupItemPutRequestBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationFunctionGroupDataGroup;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationParticipantBatchUpdate;
@@ -50,6 +51,8 @@ import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.utils.BatchResponseUtils;
@@ -67,12 +70,7 @@ import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -109,6 +107,9 @@ class AccessGroupServiceTest {
 
     @Spy
     private BatchResponseUtils batchResponseUtils;
+
+    @Captor
+    private ArgumentCaptor<List<PresentationDataGroupItemPutRequestBody>> presentationDataGroupItemPutRequestBodyCaptor;
 
     @Test
     void getServiceAgreementByExternalIdRetrievesServiceAgreementByExternalId() {
@@ -182,7 +183,7 @@ class AccessGroupServiceTest {
             .collect(Collectors.toList()));
         when(serviceAgreementsApi.putPresentationServiceAgreementUsersBatchUpdate(any())).thenReturn(usersResponse);
 
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId),anyBoolean()))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
 
         Mono<ServiceAgreementUsersQuery> emptyExistingUsersList = Mono.just(new ServiceAgreementUsersQuery());
@@ -245,7 +246,7 @@ class AccessGroupServiceTest {
             new ServiceAgreementParticipantsGetResponseBody().externalId("p1");
         ServiceAgreementParticipantsGetResponseBody existingPar2 =
             new ServiceAgreementParticipantsGetResponseBody().externalId("p2");
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId),anyBoolean()))
             .thenReturn(Flux.fromIterable(asList(existingPar1, existingPar2)));
 
         // users
@@ -306,7 +307,7 @@ class AccessGroupServiceTest {
                     .status(HTTP_STATUS_OK))
             ));
 
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId)))
+        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId),anyBoolean()))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
 
 
@@ -509,6 +510,176 @@ class AccessGroupServiceTest {
         Assertions.assertSame(batchProductGroupTask, result);
 
         verify(accessControlUsersApi).putAssignUserPermissions(expectedPermissions);
+    }
+
+    @Test
+    void updateExistingDataGroupsBatchWithSameInDbsIngestionModeReplace() {
+        // Given
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+                List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroupItem dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
+                "Repository Group Template Custom", "template-custom");
+        DataGroupItem dataGroupItemEngagementTemplateCustom = buildDataGroupItem(
+                "Repository Group Engagement Template Custom",
+                "Repository Group Engagement Template Custom", "engagement-template-custom");
+        DataGroupItem dataGroupItemEngagementTemplateNotification = buildDataGroupItem(
+                "Repository Group Engagement Template Notification",
+                "Repository Group Engagement Template Notification", "engagement-template-notification");
+
+        BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
+                "Repository Group Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "template-custom");
+        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup("Repository Group Engagement Template Custom",
+                "Repository Group Engagement Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "engagement-template-custom");
+        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup("Repository Group Engagement Template Notification",
+                "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "engagement-template-notification");
+
+        // When
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                        List.of(dataGroupItemTemplateCustom,
+                                dataGroupItemEngagementTemplateCustom,
+                                dataGroupItemEngagementTemplateNotification),
+                        List.of(baseProductGroupTemplateCustom,
+                                baseProductGroupEngagementTemplateCustom,
+                                baseProductGroupEngagementTemplateNotification))
+                .block();
+
+        // Then
+        verify(dataGroupsApi, times(0)).putDataGroupItemsUpdate(any());
+    }
+
+    @Test
+    void updateExistingDataGroupsBatchWithMissingInDbsIngestionModeReplace() {
+        // Given
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+                List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroupItem dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
+                "Repository Group Template Custom");
+        DataGroupItem dataGroupItemEngagementTemplateCustom = buildDataGroupItem("Repository Group Engagement Template Custom",
+                "Repository Group Engagement Template Custom");
+        DataGroupItem dataGroupItemEngagementTemplateNotification = buildDataGroupItem("Repository Group Engagement Template Notification",
+                "Repository Group Engagement Template Notification");
+
+        BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
+                "Repository Group Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "template-custom");
+        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup("Repository Group Engagement Template Custom",
+                "Repository Group Engagement Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "engagement-template-custom");
+        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup("Repository Group Engagement Template Notification",
+                "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "engagement-template-notification");
+        when(dataGroupsApi.putDataGroupItemsUpdate(any())).thenReturn(Flux.just(new BatchResponseItemExtended()
+                .status(HTTP_STATUS_OK)
+                .resourceId("test-resource-id")));
+
+        // When
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                        List.of(dataGroupItemTemplateCustom,
+                                dataGroupItemEngagementTemplateCustom,
+                                dataGroupItemEngagementTemplateNotification),
+                        List.of(baseProductGroupTemplateCustom,
+                                baseProductGroupEngagementTemplateCustom,
+                                baseProductGroupEngagementTemplateNotification))
+                .block();
+
+        // Then
+        verify(dataGroupsApi).putDataGroupItemsUpdate(presentationDataGroupItemPutRequestBodyCaptor.capture());
+        assertEquals(3, presentationDataGroupItemPutRequestBodyCaptor.getValue().stream()
+                .map(PresentationDataGroupItemPutRequestBody::getAction)
+                .filter(ADD::equals)
+                .toList()
+                .size());
+    }
+
+    @Test
+    void updateExistingDataGroupsBatchWithIncorrectInDbsIngestionModeReplace() {
+        // Given
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+                List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroupItem dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
+                "Repository Group Template Custom", "template-custom-test");
+        DataGroupItem dataGroupItemEngagementTemplateCustom = buildDataGroupItem("Repository Group Engagement Template Custom",
+                "Repository Group Engagement Template Custom", "engagement-template-custom-test");
+        DataGroupItem dataGroupItemEngagementTemplateNotification = buildDataGroupItem("Repository Group Engagement Template Notification",
+                "Repository Group Engagement Template Notification", "engagement-template-notification-test");
+
+        BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
+                "Repository Group Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "template-custom");
+        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup("Repository Group Engagement Template Custom",
+                "Repository Group Engagement Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "engagement-template-custom");
+        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup("Repository Group Engagement Template Notification",
+                "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "engagement-template-notification");
+        when(dataGroupsApi.putDataGroupItemsUpdate(any())).thenReturn(Flux.just(new BatchResponseItemExtended()
+                .status(HTTP_STATUS_OK)
+                .resourceId("test-resource-id")));
+
+        // When
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                        List.of(dataGroupItemTemplateCustom,
+                                dataGroupItemEngagementTemplateCustom,
+                                dataGroupItemEngagementTemplateNotification),
+                        List.of(baseProductGroupTemplateCustom,
+                                baseProductGroupEngagementTemplateCustom,
+                                baseProductGroupEngagementTemplateNotification))
+                .block();
+
+        // Then
+        verify(dataGroupsApi).putDataGroupItemsUpdate(presentationDataGroupItemPutRequestBodyCaptor.capture());
+        assertEquals(3, presentationDataGroupItemPutRequestBodyCaptor.getValue().stream()
+                .map(PresentationDataGroupItemPutRequestBody::getAction)
+                .filter(REMOVE::equals)
+                .toList()
+                .size());
+        assertEquals(3, presentationDataGroupItemPutRequestBodyCaptor.getValue().stream()
+                .map(PresentationDataGroupItemPutRequestBody::getAction)
+                .filter(ADD::equals)
+                .toList()
+                .size());
+    }
+
+    @Test
+    void updateExistingDataGroupsBatchWithEmptyDbsIngestionModeReplace() {
+        // Given
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+                List.of(new BaseProductGroup().name("Test product group"))));
+
+        BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
+                "Repository Group Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "template-custom");
+        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup("Repository Group Engagement Template Custom",
+                "Repository Group Engagement Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "engagement-template-custom");
+        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup("Repository Group Engagement Template Notification",
+                "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+                "engagement-template-notification");
+
+        // When
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                        List.of(),
+                        List.of(baseProductGroupTemplateCustom,
+                                baseProductGroupEngagementTemplateCustom,
+                                baseProductGroupEngagementTemplateNotification))
+                .block();
+
+        // Then
+        verify(dataGroupsApi, times(0)).putDataGroupItemsUpdate(any());
     }
 
     /*
@@ -746,6 +917,27 @@ class AccessGroupServiceTest {
             .validFromTime(validFromTime)
             .validUntilDate(validUntilDate)
             .validUntilTime(validUntilTime);
+    }
+
+    private DataGroupItem buildDataGroupItem(String name, String description, String... items) {
+        return new DataGroupItem()
+                .name(name)
+                .description(description)
+                .items(List.of(items));
+    }
+
+    private BaseProductGroup buildBaseProductGroup(String name, String description,
+                                                   BaseProductGroup.ProductGroupTypeEnum productGroupTypeEnum,
+                                                   String dataGroupItemId) {
+        ProductGroup productGroup = new ProductGroup();
+        productGroup.setName(name);
+        productGroup.setDescription(description);
+        productGroup.setProductGroupType(productGroupTypeEnum);
+        productGroup.addCustomDataGroupItemsItem(
+                new CustomDataGroupItem()
+                        .internalId(dataGroupItemId)
+                        .externalId(dataGroupItemId));
+        return productGroup;
     }
 
     @AllArgsConstructor

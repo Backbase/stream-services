@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>16.1.5</version>
+        <version>16.1.7</version>
         <relativePath/>
     </parent>
 
@@ -27,14 +27,14 @@
     </modules>
 
     <properties>
-        <backbase-bom.version>2023.12</backbase-bom.version>
+        <backbase-bom.version>2024.03-LTS</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
         <testcontainers.version>1.12.5</testcontainers.version>
         <mock.server.version>5.15.0</mock.server.version>
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
-        <ssdk.version>16.1.5</ssdk.version>
+        <ssdk.version>16.1.7</ssdk.version>
         <jakarta-validation.version>3.0.2</jakarta-validation.version>
         <jib.container.volumes>/tmp</jib.container.volumes>
         <archuint.skip>true</archuint.skip>
@@ -51,6 +51,13 @@
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
                 <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.backbase</groupId>
+                <artifactId>backbase-bom</artifactId>
+                <version>${backbase-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

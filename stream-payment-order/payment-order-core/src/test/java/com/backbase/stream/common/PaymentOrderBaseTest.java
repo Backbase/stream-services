@@ -55,7 +55,6 @@ public abstract class PaymentOrderBaseTest {
                     .originator(involvedParty)
                     .originatorAccount(originatorAccount)
                     .totalAmount(new Currency().amount(BigDecimal.valueOf(idx)))
-                    .batchBooking(true)
                     .instructionPriority(InstructionPriority.NORM)
                     .status(Status.ACCEPTED)
                     .requestedExecutionDate(LocalDate.of(2023, 3, idx))

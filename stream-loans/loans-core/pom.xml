@@ -20,6 +20,7 @@
             <dependency>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>backbase-building-blocks-release</artifactId>
+                <version>${ssdk.version}</version>
                 <scope>compile</scope>
             </dependency>
         </dependencies>

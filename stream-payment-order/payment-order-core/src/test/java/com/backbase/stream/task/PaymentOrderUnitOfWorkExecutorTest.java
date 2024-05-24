@@ -53,7 +53,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
     private final PaymentOrderWorkerConfigurationProperties streamWorkerConfiguration = new PaymentOrderWorkerConfigurationProperties();
 
-//    @InjectMocks
+    //    @InjectMocks
     private PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor;
 
     @BeforeEach
@@ -126,13 +126,13 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
                 .thenReturn(Mono.just(accountArrangementItems));
 
         StepVerifier.create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
-            .assertNext(unitOfWork -> {
-                Assertions.assertTrue(unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
-                Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
-                Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
-                Assertions.assertEquals(paymentOrderPostRequest.size(), unitOfWork.getStreamTasks().get(0).getData().size());
-            })
-            .verifyComplete();
+                .assertNext(unitOfWork -> {
+                    Assertions.assertTrue(unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
+                    Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
+                    Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
+                    Assertions.assertEquals(paymentOrderPostRequest.size(), unitOfWork.getStreamTasks().get(0).getData().size());
+                })
+                .verifyComplete();
     }
 
 }

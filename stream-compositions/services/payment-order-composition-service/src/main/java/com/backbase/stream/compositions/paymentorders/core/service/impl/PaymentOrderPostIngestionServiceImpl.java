@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @Service
 @Slf4j
@@ -25,6 +26,7 @@ public class PaymentOrderPostIngestionServiceImpl implements PaymentOrderPostIng
     @Override
     public Mono<List<PaymentOrderIngestDbsResponse>> handleFailure(Throwable error) {
         // events can be handled here as part of a different ticket.
+        Schedulers.boundedElastic().schedule(()->log.error("error occurred with po ingestion",error));
         return Mono.empty();
     }
 }

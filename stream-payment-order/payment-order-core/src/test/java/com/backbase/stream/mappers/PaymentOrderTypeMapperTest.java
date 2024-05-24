@@ -56,7 +56,6 @@ public class PaymentOrderTypeMapperTest extends PaymentOrderBaseTest {
             Assertions.assertNotNull(target.getOriginatorAccount());
             Assertions.assertEquals(source.getOriginatorAccount().getArrangementId(), target.getOriginatorAccount().getArrangementId());
             Assertions.assertEquals(source.getTotalAmount(), target.getTotalAmount());
-            Assertions.assertEquals(source.getBatchBooking(), target.getBatchBooking());
             Assertions.assertEquals(source.getInstructionPriority(), target.getInstructionPriority());
             Assertions.assertEquals(source.getStatus(), target.getStatus());
             Assertions.assertEquals(source.getRequestedExecutionDate(), target.getRequestedExecutionDate());

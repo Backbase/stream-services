@@ -46,11 +46,11 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
     private final PaymentOrderTypeMapper paymentOrderTypeMapper;
 
     public PaymentOrderUnitOfWorkExecutor(UnitOfWorkRepository<PaymentOrderTask, String> repository,
-            StreamTaskExecutor<PaymentOrderTask> streamTaskExecutor,
-            StreamWorkerConfiguration streamWorkerConfiguration,
-            PaymentOrdersApi paymentOrdersApi,
-            ArrangementsApi arrangementsApi,
-            PaymentOrderTypeMapper paymentOrderTypeMapper) {
+                                          StreamTaskExecutor<PaymentOrderTask> streamTaskExecutor,
+                                          StreamWorkerConfiguration streamWorkerConfiguration,
+                                          PaymentOrdersApi paymentOrdersApi,
+                                          ArrangementsApi arrangementsApi,
+                                          PaymentOrderTypeMapper paymentOrderTypeMapper) {
         super(repository, streamTaskExecutor, streamWorkerConfiguration);
         this.paymentOrdersApi = paymentOrdersApi;
         this.arrangementsApi = arrangementsApi;
