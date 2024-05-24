@@ -1,7 +1,7 @@
 package com.backbase.stream.clients.config;
 
 import com.backbase.dbs.paymentorder.api.service.ApiClient;
-import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
+import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

@@ -1,8 +1,8 @@
 package com.backbase.stream.task;
 
-import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostResponse;
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPutResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutResponse;
 import com.backbase.stream.common.PaymentOrderBaseTest;
 import com.backbase.stream.model.request.DeletePaymentOrderIngestRequest;
 import com.backbase.stream.model.request.NewPaymentOrderIngestRequest;

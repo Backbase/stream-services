@@ -1,15 +1,8 @@
 package com.backbase.stream.compositions.paymentorders.core.mapper;
 
-import java.util.List;
-
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPutResponse;
-import org.mapstruct.InjectionStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.springframework.stereotype.Component;
-
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutResponse;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderIngestionResponse;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPullIngestionRequest;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPushIngestionRequest;
@@ -20,6 +13,11 @@ import com.backbase.stream.model.response.DeletePaymentOrderIngestDbsResponse;
 import com.backbase.stream.model.response.NewPaymentOrderIngestDbsResponse;
 import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
 import com.backbase.stream.model.response.UpdatePaymentOrderIngestDbsResponse;
+import java.util.List;
+import org.mapstruct.InjectionStrategy;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.springframework.stereotype.Component;
 
 /**
  * This is a mapper for various Payment Order request and response objects used in:

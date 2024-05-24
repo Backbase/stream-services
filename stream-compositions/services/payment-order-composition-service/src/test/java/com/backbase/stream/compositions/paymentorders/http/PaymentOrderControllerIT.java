@@ -1,6 +1,6 @@
 package com.backbase.stream.compositions.paymentorders.http;
 
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostRequest;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPullIngestionRequest;

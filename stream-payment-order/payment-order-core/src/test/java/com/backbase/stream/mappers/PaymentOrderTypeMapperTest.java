@@ -1,7 +1,7 @@
 package com.backbase.stream.mappers;
 
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPutRequest;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutRequest;
 import com.backbase.stream.common.PaymentOrderBaseTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

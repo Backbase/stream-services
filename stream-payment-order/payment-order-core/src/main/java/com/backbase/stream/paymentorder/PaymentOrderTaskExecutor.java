@@ -4,13 +4,13 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPutResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutResponse;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostResponse;
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPutRequest;
+import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutRequest;
 import com.backbase.stream.model.request.DeletePaymentOrderIngestRequest;
 import com.backbase.stream.model.request.NewPaymentOrderIngestRequest;
 import com.backbase.stream.model.request.PaymentOrderIngestRequest;
