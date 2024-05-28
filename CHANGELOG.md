@@ -19,6 +19,11 @@ All notable changes to this project will be documented in this file.
 - Bumping Service SDK to **17.0.0**
 - Bumping Banking Services clients to **2024.04**
 
+## [4.1.1](https://github.com/Backbase/stream-services/compare/4.1.1...4.1.0)
+### Changed
+- update with fixes from 3.72.4
+- Upgrade to Backbase version `2024.03-LTS`
+
 ## [4.1.0](https://github.com/Backbase/stream-services/compare/4.1.0...4.0.0)
 ### Changed
 - Bumping Service SDK to **16.1.5**
