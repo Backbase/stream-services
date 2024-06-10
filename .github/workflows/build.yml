@@ -40,8 +40,7 @@ jobs:
 
       - name: Get version from POM
         run: |
-          VERSION=$(mvn -B help:evaluate -Dexpression=project.version)
-          echo "${VERSION}"
+          VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
           VERSION_PARTS=($(echo $VERSION | tr "." "\n"))
           echo "MAJOR=${VERSION_PARTS[0]}" >> $GITHUB_ENV
           echo "MINOR=${VERSION_PARTS[1]}" >> $GITHUB_ENV
