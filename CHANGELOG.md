@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Adding login-based ingestion for product composition. Disabled by default, to enable: `backbase.stream.compositions.product.login-event.enabled=true`.
 - Upgrade stream composition to 2024.04
-- 
+- Add CUSTOMERS product group type to OpenAPI contract
+
 ## [5.1.0](https://github.com/Backbase/stream-services/compare/5.0.1...5.1.0)
 ### Changed
 - Upgrade stream composition to 2024.03.10-LTS
