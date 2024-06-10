@@ -42,9 +42,9 @@ jobs:
         run: |
           VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
           VERSION_PARTS=($(echo $VERSION | tr "." "\n"))
-          echo "MAJOR=${VERSION_PARTS[0]}" >> $GITHUB_ENV
-          echo "MINOR=${VERSION_PARTS[1]}" >> $GITHUB_ENV
-          echo "PATCH=${VERSION_PARTS[2]}" >> $GITHUB_ENV
+          echo "MAJOR=${VERSION_PARTS[1]}" >> $GITHUB_ENV
+          echo "MINOR=${VERSION_PARTS[2]}" >> $GITHUB_ENV
+          echo "PATCH=${VERSION_PARTS[3]}" >> $GITHUB_ENV
           echo "DOCKER_TAG_VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Setup release version
