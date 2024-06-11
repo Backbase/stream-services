@@ -8,7 +8,7 @@
     "productGroupType" : {
       "type" : "string",
       "default" : "ARRANGEMENTS",
-      "enum" : [ "ARRANGEMENTS", "JOURNEYS", "REPOSITORIES", "CUSTOM" ]
+      "enum" : [ "ARRANGEMENTS", "JOURNEYS", "REPOSITORIES", "CUSTOMERS", "CUSTOM" ]
     },
     "name" : {
       "maxLength" : 128,
