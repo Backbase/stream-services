@@ -2,6 +2,8 @@ package com.backbase.stream.portfolio.controller.it;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.findUnmatchedRequests;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -52,7 +54,7 @@ class PortfolioIT {
                 .getRequestedFor(WireMock.urlEqualTo("/portfolio/integration-api/v1/regions?from=0&size=2147483647"))
                 .withHeader("X-TID", WireMock.equalTo("tenant-id")));
 
-        Assertions.assertTrue(findUnmatchedRequests().isEmpty());
+        Assertions.assertTrue(findUnmatchedRequests().isEmpty(), "unmatched found: " + findUnmatchedRequests());
     }
 
     private void setupWireMock() {
