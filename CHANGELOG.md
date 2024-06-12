@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [4.1.2](https://github.com/Backbase/stream-services/compare/4.1.2...4.1.1)
 ### Added
-- Added CUSTOMERS data group type to LE OpenAPI contract
+- Added CUSTOMERS data group enum type to legal entity OpenAPI contract 
 
 ## [4.1.1](https://github.com/Backbase/stream-services/compare/4.1.1...4.1.0)
 ### Changed
