@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.1.2](https://github.com/Backbase/stream-services/compare/4.1.2...4.1.1)
+### Added
+- Added CUSTOMERS data group type
+
 ## [4.1.1](https://github.com/Backbase/stream-services/compare/4.1.1...4.1.0)
 ### Changed
 - update with fixes from 3.72.4
