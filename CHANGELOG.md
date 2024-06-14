@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.72.6](https://github.com/Backbase/stream-services/compare/3.72.5...3.72.6)
+### Updated
+- Replaced `openapi-generator-maven-plugin` with `BOAT` when generating webclient for product integration ap
+
+
 ## [3.72.4](https://github.com/Backbase/stream-services/compare/3.72.1...3.72.3)
 ### Added
 - Update BatchProductIngestion saga to ignore the user external ID case when getting products for specified user.
