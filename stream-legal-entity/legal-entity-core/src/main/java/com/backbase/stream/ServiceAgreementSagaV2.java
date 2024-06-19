@@ -176,10 +176,18 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         } else {
             externalUserId = externalUserOptional.get();
         }
-        return contactsSaga.executeTask(createContactsTask(streamTask.getId(), serviceAgreement.getExternalId(),
-                serviceAgreement.getExternalId(), externalUserId, AccessContextScope.SA, serviceAgreement.getContacts()))
+        return contactsSaga.executeTask(
+                createContactsTask(streamTask.getId(), getLegalEntityBySharingAccounts(serviceAgreement),
+                    serviceAgreement.getExternalId(), externalUserId, AccessContextScope.SA,
+                    serviceAgreement.getContacts()))
             .flatMap(contactsTask -> requireNonNull(Mono.just(streamTask)))
             .then(Mono.just(streamTask));
+    }
+
+    private String getLegalEntityBySharingAccounts(ServiceAgreementV2 serviceAgreement) {
+        return serviceAgreement.getParticipants().stream()
+            .filter(LegalEntityParticipant::getSharingAccounts).map(LegalEntityParticipant::getExternalId).findFirst()
+            .orElseGet(() -> serviceAgreement.getParticipants().getFirst().getExternalId());
     }
 
     private String getParticipantUser(ServiceAgreement serviceAgreement) {
@@ -412,7 +420,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             serviceAgreement.getJobProfileUsers()));
         return jobProfileUsers
             .flatMap(jobProfileUser -> postUserContacts(streamTask, jobProfileUser.getContacts(),
-                jobProfileUser.getUser().getExternalId(), serviceAgreement.getExternalId()))
+                jobProfileUser.getUser().getExternalId(), jobProfileUser.getLegalEntityReference().getExternalId()))
             .collectList()
             .thenReturn(streamTask);
 
