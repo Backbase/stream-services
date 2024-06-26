@@ -96,6 +96,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
             .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
                 .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
 
+        serviceAgreement.setIsMaster(true);
+
         Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
             .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
                 .name("jobRoleOld").id("2")

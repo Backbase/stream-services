@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.4.0](https://github.com/Backbase/stream-services/compare/5.3.0...5.4.0)
+### Changed
+- Fix the logic for creating Template type job roles only for MSA
+
 ## [5.3.0](https://github.com/Backbase/stream-services/compare/5.2.0...5.3.0)
 ### Added
 - Add CUSTOMERS product group type to OpenAPI contract
