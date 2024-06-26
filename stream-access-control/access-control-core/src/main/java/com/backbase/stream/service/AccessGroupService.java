@@ -1225,7 +1225,9 @@ public class AccessGroupService {
         presentationIngestFunctionGroup.setExternalServiceAgreementId(serviceAgreement.getExternalId());
         presentationIngestFunctionGroup.setMetadata(jobRole.getMetadata());
 
-        if(jobRole instanceof JobRole) {
+        //since ReferenceJobRole class was removed, now all job roles have the same class, and
+        //reference job role can be created only for MSA, for CSA it failed
+        if(serviceAgreement.getIsMaster()) {
             log.debug("Creating a Reference Job Role.");
             presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
         }
