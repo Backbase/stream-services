@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>4.1.2</version>
+        <version>4.1.3</version>
     </parent>
 
     <artifactId>payment-order-composition-service</artifactId>
