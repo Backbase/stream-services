@@ -3,13 +3,6 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.backbase.buildingblocks</groupId>
-        <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>17.0.0</version>
-        <relativePath/>
-    </parent>
-
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-http-starter-parent</artifactId>
     <version>5.5.0</version>
@@ -40,6 +33,20 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <dependency>
+                <groupId>com.backbase.buildingblocks</groupId>
+                <artifactId>service-sdk-starter-core</artifactId>
+                <version>17.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.backbase.buildingblocks</groupId>
+                        <artifactId>service-sdk-starter-security</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -65,6 +72,70 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-kubernetes-fabric8-loadbalancer</artifactId>
         </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>com.backbase.buildingblocks</groupId>-->
+<!--            <artifactId>service-sdk-starter-core</artifactId>-->
+<!--            <version>17.0.0</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.backbase.buildingblocks</groupId>-->
+<!--                    <artifactId>service-sdk-starter-security</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>com.backbase.buildingblocks</groupId>-->
+<!--            <artifactId>service-sdk-starter-security</artifactId>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.backbase.buildingblocks</groupId>-->
+<!--                    <artifactId>internal-jwt</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework.boot</groupId>-->
+<!--                    <artifactId>spring-boot-actuator-autoconfigure</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-security</artifactId>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework.security</groupId>-->
+<!--                    <artifactId>spring-security-web</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-web</artifactId>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework</groupId>-->
+<!--                    <artifactId>spring-web</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework</groupId>-->
+<!--                    <artifactId>spring-webmvc</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-actuator</artifactId>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.springframework.boot</groupId>-->
+<!--                    <artifactId>spring-boot-actuator-autoconfigure</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>

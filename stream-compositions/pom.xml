@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
-        <artifactId>service-sdk-starter-reactive</artifactId>
+        <artifactId>service-sdk-starter-core</artifactId>
         <version>17.0.0</version>
         <relativePath/>
     </parent>
