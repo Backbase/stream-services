@@ -23,10 +23,12 @@
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>events</artifactId>
+            <version>${ssdk.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
+            <version>${commons-lang.version}</version>
         </dependency>
     </dependencies>
 

@@ -41,14 +41,17 @@
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>auth-security</artifactId>
+            <version>${ssdk.version}</version>
         </dependency>
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>communication</artifactId>
+            <version>${ssdk.version}</version>
         </dependency>
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>service-sdk-starter-test</artifactId>
+            <version>${ssdk.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.backbase.buildingblocks</groupId>
-        <artifactId>service-sdk-starter-core</artifactId>
-        <version>17.0.0</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.3</version>
         <relativePath/>
     </parent>
 
@@ -43,6 +43,7 @@
         <archunit.backbase.ConfigurationRules.skip>true</archunit.backbase.ConfigurationRules.skip>
         <archunit.backbase.DataMappingRules.skip>true</archunit.backbase.DataMappingRules.skip>
         <archunit.backbase.NamingConventionRules.skip>true</archunit.backbase.NamingConventionRules.skip>
+        <commons-lang.version>2.6</commons-lang.version>
     </properties>
 
     <dependencyManagement>
@@ -90,7 +91,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco.version}</version>
+                <version>0.8.11</version>
                 <executions>
                     <execution>
                         <id>pre-unit-test</id>
@@ -147,7 +148,7 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>${sonar-maven-plugin.version}</version>
+                <version>3.10.0.2594</version>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

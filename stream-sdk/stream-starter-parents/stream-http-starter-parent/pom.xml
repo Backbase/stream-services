@@ -3,6 +3,13 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.3</version>
+        <relativePath />
+    </parent>
+
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-http-starter-parent</artifactId>
     <version>5.5.0</version>
@@ -22,7 +29,8 @@
         <annotations.generated-sources-dir>${codegen.generated-sources-dir}/annotations</annotations.generated-sources-dir>
         <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
-        <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
+
+        <ssdk.version>17.0.0</ssdk.version>
     </properties>
 
     <dependencyManagement>
@@ -33,24 +41,6 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.backbase.buildingblocks</groupId>
-                <artifactId>service-sdk-starter-core</artifactId>
-                <version>17.0.0</version>
-                <type>pom</type>
-                <scope>import</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.backbase.buildingblocks</groupId>
-                        <artifactId>service-sdk-starter-security</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-starter-web</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -68,6 +58,7 @@
         <dependency>
             <groupId>com.backbase.buildingblocks</groupId>
             <artifactId>service-sdk-starter-eureka-client</artifactId>
+            <version>${ssdk.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -90,7 +81,6 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>${build-helper-maven-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>add-sources</id>
