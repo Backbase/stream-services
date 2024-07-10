@@ -41,6 +41,10 @@
                         <groupId>com.backbase.buildingblocks</groupId>
                         <artifactId>service-sdk-starter-security</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-web</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
         </dependencies>
