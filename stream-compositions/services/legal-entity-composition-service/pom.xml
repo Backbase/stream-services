@@ -62,11 +62,6 @@
             <artifactId>product-composition-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-broker</artifactId>
-            <version>6.0.1</version>
-        </dependency>
     </dependencies>
 
     <build>
