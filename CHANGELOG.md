@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.5.0](https://github.com/Backbase/stream-services/compare/5.4.0...5.5.0)
+### Changed
+- Removed the service-sdk-starter-reactive since it will be removed soon and created stream-starter with all the dependencies in service-sdk-starter-reactive
+
 ## [5.4.0](https://github.com/Backbase/stream-services/compare/5.3.0...5.4.0)
 ### Changed
 - Fix the logic for creating Template type job roles only for MSA

@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.backbase.buildingblocks</groupId>
-        <artifactId>service-sdk-starter-reactive</artifactId>
-        <version>17.0.0</version>
-        <relativePath/>
+        <groupId>com.backbase.stream</groupId>
+        <artifactId>stream-starter</artifactId>
+        <version>5.5.0</version>
+        <relativePath>../../stream-starter</relativePath>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
