@@ -1,12 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [5.5.0](https://github.com/Backbase/stream-services/compare/5.5.0...5.6.0)
+## [5.7.0](https://github.com/Backbase/stream-services/compare/5.6.0...5.7.0)
 ### Changed
-- bug fixed - missing stream-starter module in stream-sdk 
+- bug fixed - missing stream-starter module in stream-sdk
 
-
-## [5.5.0](https://github.com/Backbase/stream-services/compare/5.4.0...5.5.0)
+## [5.6.0](https://github.com/Backbase/stream-services/compare/5.5.0...5.6.0)
 ### Changed
 - Removed the service-sdk-starter-reactive since it will be removed soon and created stream-starter with all the dependencies in service-sdk-starter-reactive
 
