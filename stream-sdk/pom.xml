@@ -12,6 +12,7 @@
     <modules>
         <module>stream-parent</module>
         <module>stream-starter-parents</module>
+        <module>stream-starter</module>
     </modules>
 
 </project>

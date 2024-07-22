@@ -13,105 +13,102 @@
     <version>5.5.0</version>
     <packaging>pom</packaging>
 
+    <organization>
+        <name>Backbase B.V.</name>
+        <url>http://www.backbase.com</url>
+    </organization>
+    <licenses>
+        <license/>
+    </licenses>
+    <developers>
+        <developer/>
+    </developers>
     <properties>
-        <!-- latest, managed up from '4.24.0' BEFOUND-1134 -->
-        <liquibase.version>4.25.0</liquibase.version>
-
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <java.version>21</java.version>
-
-        <!-- other config -->
-        <jacoco.version>0.8.11</jacoco.version>
-        <skip.integration.tests>false</skip.integration.tests>
-        <skip.unit.tests>false</skip.unit.tests>
-        <sonar-maven-plugin.version>3.10.0.2594</sonar-maven-plugin.version>
-        <sonar.java.codeCoveragePlugin>jacoco</sonar.java.codeCoveragePlugin>
-        <coverage.reports.dir>${project.build.directory}/coverage-reports</coverage.reports.dir>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.reporting.outputDirectory}/jacoco-ut/jacoco.xml,${project.reporting.outputDirectory}/jacoco-it/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <sonar.sources>${project.basedir}/src/main/</sonar.sources>
-        <sonar.tests>${project.basedir}/src/test/</sonar.tests>
-        <sonar.java.binaries>target/classes/</sonar.java.binaries>
-        <sonar.exclusions>target/checkout/**,src/test/**</sonar.exclusions>
-        <run.addResources>false</run.addResources>
-
-        <!-- Checkstyle -->
-        <checkstyle.version>10.3.1</checkstyle.version>
-        <checkstyle.fails-on-error>true</checkstyle.fails-on-error>
-        <checkstyle.fail-on-violation>true</checkstyle.fail-on-violation>
-        <!-- Checkstyle is disabled initially, to be enabled by default in future releases -->
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
-        <checkstyle.config.location>backbase_checks.xml</checkstyle.config.location>
-        <ssdk-checkstyle-config.version>1.0.22</ssdk-checkstyle-config.version>
-        <checkstyle.allowMissingThrowsTags>false</checkstyle.allowMissingThrowsTags>
-
-        <!--breaking change detection -->
-        <previous.release.version>0.0.0</previous.release.version>
-        <japicmp.plugin.version>0.17.2</japicmp.plugin.version>
-
-        <!-- ## docker configuration -->
-        <docker.repo.project>development</docker.repo.project>
-        <docker.image.name>${docker.repo.url}/${docker.repo.project}/${project.artifactId}</docker.image.name>
-        <!-- set by groovy <local-client.arch>amd64</local-client.arch> -->
-        <local-client.os>linux</local-client.os>
-
-        <!-- when enabled removes "SNAPSHOT" from default tag (project version) -->
-        <docker.tag.trim>false</docker.tag.trim>
-        <!-- base image gcr.io/distroless/java21-debian12:nonroot -->
-        <docker.distroless.image>gcr.io/distroless/java21-debian12@sha256:68e11975ae9e7911becda53c8746fd4564182c2c402a1c4c0d4e3479ad50b3ba</docker.distroless.image>
-        <!-- execution control -->
-        <docker.jib.goal>build</docker.jib.goal>
-        <!-- image dependencies -->
-        <!-- db drivers -->
-        <docker.jdbc.mysql>compile</docker.jdbc.mysql>
-        <docker.jdbc.mssql>compile</docker.jdbc.mssql>
-        <docker.jdbc.oracle>compile</docker.jdbc.oracle>
-        <!-- binders -->
-        <docker.scs.rabbit>compile</docker.scs.rabbit>
-        <docker.scs.kafka>compile</docker.scs.kafka>
-        <docker.scs.azure>compile</docker.scs.azure>
-        <!-- azure-identity -->
-        <docker.azure.identity>compile</docker.azure.identity>
-
-        <!-- jib preset properties -->
-        <jib.container.creationTime>USE_CURRENT_TIMESTAMP</jib.container.creationTime>
-        <jib.container.ports>8080</jib.container.ports>
-
-        <!-- Plugin versions -->
-        <jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>
-        <gmavenplus-plugin.version>3.0.0</gmavenplus-plugin.version>
-        <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
-        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
-        <spring-cloud-app-starter-metadata-maven-plugin.version>2.0.2.RELEASE</spring-cloud-app-starter-metadata-maven-plugin.version>
-        <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
-        <maven-site-plugin.version>4.0.0-M9</maven-site-plugin.version>
-        <doxia-module-markdown.version>1.9.1</doxia-module-markdown.version>
-        <reflow-velocity-tools.version>1.1.1</reflow-velocity-tools.version>
-        <velocity.version>1.7</velocity.version>
-        <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
-        <sortpom-maven-plugin.version>3.3.0</sortpom-maven-plugin.version>
         <arch-unit-maven-plugin.version>3.0.0</arch-unit-maven-plugin.version>
-        <!-- Skip enforcing banned dependencies such as mysql drivers, this is used for building containers in the docker-image profile -->
-        <enforce-banned-dependencies.skip>false</enforce-banned-dependencies.skip>
-
-        <!-- Skip arch unit maven rules -->
-        <archunit.skip>false</archunit.skip>
         <archunit.backbase.ArchitectureRules.skip>false</archunit.backbase.ArchitectureRules.skip>
-        <archunit.backbase.GeneralCodingRules.skip>false</archunit.backbase.GeneralCodingRules.skip>
         <archunit.backbase.ConfigurationRules.skip>false</archunit.backbase.ConfigurationRules.skip>
         <archunit.backbase.ControllerRules.skip>false</archunit.backbase.ControllerRules.skip>
         <archunit.backbase.DataMappingRules.skip>false</archunit.backbase.DataMappingRules.skip>
+        <archunit.backbase.GeneralCodingRules.skip>false</archunit.backbase.GeneralCodingRules.skip>
         <archunit.backbase.LoggingRules.skip>false</archunit.backbase.LoggingRules.skip>
         <archunit.backbase.NamingConventionRules.skip>false</archunit.backbase.NamingConventionRules.skip>
         <archunit.backbase.RelationalPersistenceRules.skip>false</archunit.backbase.RelationalPersistenceRules.skip>
-
         <!-- Do not fail build if ArchUnit rules violated -->
         <archunit.noFailOnError>false</archunit.noFailOnError>
-
         <!-- Set package to apply ArchUnit maven rules on -->
         <archunit.projectPackage>${main-package}</archunit.projectPackage>
+        <!-- Skip arch unit maven rules -->
+        <archunit.skip>false</archunit.skip>
+        <checkstyle.allowMissingThrowsTags>false</checkstyle.allowMissingThrowsTags>
+        <checkstyle.config.location>backbase_checks.xml</checkstyle.config.location>
+        <!-- Checkstyle is disabled initially, to be enabled by default in future releases -->
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
+        <checkstyle.fail-on-violation>true</checkstyle.fail-on-violation>
+        <checkstyle.fails-on-error>true</checkstyle.fails-on-error>
+        <!-- Checkstyle -->
+        <checkstyle.version>10.3.1</checkstyle.version>
+        <coverage.reports.dir>${project.build.directory}/coverage-reports</coverage.reports.dir>
+        <!-- azure-identity -->
+        <docker.azure.identity>compile</docker.azure.identity>
+        <!-- base image gcr.io/distroless/java21-debian12:nonroot -->
+        <docker.distroless.image>gcr.io/distroless/java21-debian12@sha256:68e11975ae9e7911becda53c8746fd4564182c2c402a1c4c0d4e3479ad50b3ba</docker.distroless.image>
+        <docker.image.name>${docker.repo.url}/${docker.repo.project}/${project.artifactId}</docker.image.name>
+        <docker.jdbc.mssql>compile</docker.jdbc.mssql>
+        <!-- image dependencies -->
+        <!-- db drivers -->
+        <docker.jdbc.mysql>compile</docker.jdbc.mysql>
+        <docker.jdbc.oracle>compile</docker.jdbc.oracle>
+        <!-- execution control -->
+        <docker.jib.goal>build</docker.jib.goal>
+        <!-- ## docker configuration -->
+        <docker.repo.project>development</docker.repo.project>
+        <docker.scs.azure>compile</docker.scs.azure>
+        <docker.scs.kafka>compile</docker.scs.kafka>
+        <!-- binders -->
+        <docker.scs.rabbit>compile</docker.scs.rabbit>
+        <!-- when enabled removes "SNAPSHOT" from default tag (project version) -->
+        <docker.tag.trim>false</docker.tag.trim>
+        <doxia-module-markdown.version>1.9.1</doxia-module-markdown.version>
+        <!-- Skip enforcing banned dependencies such as mysql drivers, this is used for building containers in the docker-image profile -->
+        <enforce-banned-dependencies.skip>false</enforce-banned-dependencies.skip>
+        <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
+        <gmavenplus-plugin.version>3.0.0</gmavenplus-plugin.version>
+        <!-- other config -->
+        <jacoco.version>0.8.11</jacoco.version>
+        <japicmp.plugin.version>0.17.2</japicmp.plugin.version>
+        <java.version>21</java.version>
+        <!-- Plugin versions -->
+        <jib-maven-plugin.version>3.3.2</jib-maven-plugin.version>
+        <!-- jib preset properties -->
+        <jib.container.creationTime>USE_CURRENT_TIMESTAMP</jib.container.creationTime>
+        <jib.container.ports>8080</jib.container.ports>
+        <!-- latest, managed up from '4.24.0' BEFOUND-1134 -->
+        <liquibase.version>4.25.0</liquibase.version>
+        <!-- set by groovy <local-client.arch>amd64</local-client.arch> -->
+        <local-client.os>linux</local-client.os>
+        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
+        <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+        <maven-site-plugin.version>4.0.0-M9</maven-site-plugin.version>
+        <!--breaking change detection -->
+        <previous.release.version>0.0.0</previous.release.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <properties-maven-plugin.version>1.0.0</properties-maven-plugin.version>
+        <reflow-velocity-tools.version>1.1.1</reflow-velocity-tools.version>
+        <run.addResources>false</run.addResources>
+        <skip.integration.tests>false</skip.integration.tests>
+        <skip.unit.tests>false</skip.unit.tests>
+        <sonar-maven-plugin.version>3.10.0.2594</sonar-maven-plugin.version>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.reporting.outputDirectory}/jacoco-ut/jacoco.xml,${project.reporting.outputDirectory}/jacoco-it/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.exclusions>target/checkout/**,src/test/**</sonar.exclusions>
+        <sonar.java.binaries>target/classes/</sonar.java.binaries>
+        <sonar.java.codeCoveragePlugin>jacoco</sonar.java.codeCoveragePlugin>
+        <sonar.sources>${project.basedir}/src/main/</sonar.sources>
+        <sonar.tests>${project.basedir}/src/test/</sonar.tests>
+        <sortpom-maven-plugin.version>3.3.0</sortpom-maven-plugin.version>
+        <spring-cloud-app-starter-metadata-maven-plugin.version>2.0.2.RELEASE</spring-cloud-app-starter-metadata-maven-plugin.version>
+        <ssdk-checkstyle-config.version>1.0.22</ssdk-checkstyle-config.version>
+        <velocity.version>1.7</velocity.version>
     </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -919,7 +916,7 @@
                                     <scripts>
                                         <script>tag = "${project.version}"
                                             if ("${docker.tag.trim}".equals("true")) {
-                                            tag = tag.minus("-SNAPSHOT")
+                                                tag = tag.minus("-SNAPSHOT")
                                             }
                                             project.properties.setProperty('docker.default.tag', tag)
                                             println "docker.default.tag: " + project.properties['docker.default.tag']
@@ -928,17 +925,17 @@
                                             try {
                                             gitTime = "${git.commit.time}"
                                             if (gitTime?.trim()) {
-                                            project.properties.setProperty('jib.container.creationTime', gitTime)
+                                                 project.properties.setProperty('jib.container.creationTime', gitTime)
                                             }
                                             println "jib.container.creationTime: " + project.properties['jib.container.creationTime']
                                             } catch(Exception ex) {
-                                            println "WARN: Not a git repo";
+                                                println "WARN: Not a git repo";
                                             }
 
                                             if (System.getProperty("os.arch") == "aarch64") {
-                                            project.properties.setProperty('local-client.arch', "arm64")
+                                              project.properties.setProperty('local-client.arch', "arm64")
                                             } else {
-                                            project.properties.setProperty('local-client.arch', "amd64")
+                                              project.properties.setProperty('local-client.arch', "amd64")
                                             }</script>
                                     </scripts>
                                 </configuration>
