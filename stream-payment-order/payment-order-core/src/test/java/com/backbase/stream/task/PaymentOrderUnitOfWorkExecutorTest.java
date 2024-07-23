@@ -14,6 +14,7 @@ import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilter
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
 import com.backbase.stream.common.PaymentOrderBaseTest;
+import com.backbase.stream.config.PaymentOrderTypeConfiguration;
 import com.backbase.stream.config.PaymentOrderWorkerConfigurationProperties;
 import com.backbase.stream.model.request.NewPaymentOrderIngestRequest;
 import com.backbase.stream.model.request.PaymentOrderIngestRequest;
@@ -23,6 +24,7 @@ import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,6 +52,8 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
     @Mock
     private UnitOfWorkRepository<PaymentOrderTask, String> repository;
 
+    private PaymentOrderTypeConfiguration paymentOrderTypeConfiguration = new PaymentOrderTypeConfiguration();
+
     private final PaymentOrderTaskExecutor streamTaskExecutor = new PaymentOrderTaskExecutor(paymentOrdersApi);
 
     private final PaymentOrderWorkerConfigurationProperties streamWorkerConfiguration = new PaymentOrderWorkerConfigurationProperties();
@@ -58,9 +63,13 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
     @BeforeEach
     void setup() {
+        List<String> pmtTypes = new ArrayList<>();
+        pmtTypes.add("INTRA_PMT");
+        paymentOrderTypeConfiguration.setTypes(pmtTypes);
         paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
                 repository, streamTaskExecutor, streamWorkerConfiguration,
-                paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper);
+                paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper,
+                paymentOrderTypeConfiguration);
     }
 
     @Test
