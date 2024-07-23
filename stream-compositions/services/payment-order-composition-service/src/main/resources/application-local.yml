@@ -40,7 +40,8 @@ backbase:
     enabled: true
   stream:
     paymentorder:
-      types: "INT_TRANS_CLOSED"
+      types:
+        - INT_TRANS_CLOSED
       worker:
         deletePaymentOrder: false
 
@@ -54,3 +55,4 @@ eureka:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
+
