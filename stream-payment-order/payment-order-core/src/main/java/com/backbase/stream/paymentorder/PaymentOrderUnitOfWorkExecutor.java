@@ -12,7 +12,6 @@ import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementsFilter;
 import com.backbase.dbs.paymentorder.api.service.v2.model.AccessFilter;
-import com.backbase.dbs.transaction.api.service.v2.model.ArrangementItem;
 import com.backbase.stream.config.PaymentOrderTypeConfiguration;
 import java.util.ArrayList;
 import java.util.Collections;
