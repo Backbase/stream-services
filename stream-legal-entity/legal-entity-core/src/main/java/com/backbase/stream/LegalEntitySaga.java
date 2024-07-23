@@ -879,6 +879,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .getServiceAgreementByExternalId(newSa.getExternalId())
             .flatMap(sa -> {
                 newSa.setInternalId(sa.getInternalId());
+                newSa.setName(sa.getName());
                 streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS, sa.getExternalId(), sa.getInternalId(),
                     "Existing Service Agreement: %s found for Legal Entity: %s", sa.getExternalId(),
                     legalEntity.getExternalId());
