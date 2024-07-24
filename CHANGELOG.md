@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.1.3](https://github.com/Backbase/stream-services/compare/4.1.3...4.1.4)
+### Changed
+- Query for existing payments by using arrangement IDs instead of user IDs. This will eliminate duplicate payments from being ingested when joint owners are added.
+
 ## [4.1.2](https://github.com/Backbase/stream-services/compare/4.1.2...4.1.3)
 ### Added
 - Added Payment order Page size to fix an issue with payment order ingestion.
