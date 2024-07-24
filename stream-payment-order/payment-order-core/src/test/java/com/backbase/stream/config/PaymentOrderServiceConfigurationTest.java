@@ -25,6 +25,9 @@ class PaymentOrderServiceConfigurationTest {
             .withBean(InterServiceWebClientConfiguration.class)
             .withUserConfiguration(PaymentOrderServiceConfiguration.class)
             .withUserConfiguration(PaymentOrderTypeConfiguration.class)
+            .withPropertyValues(
+                    "backbase.stream.paymentorder.types=type1,type2,type3"
+            )
             .run(context -> {
                 assertThat(context).hasSingleBean(PaymentOrderTaskExecutor.class);
             });
