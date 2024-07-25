@@ -17,6 +17,7 @@ import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementsFilter;
 import com.backbase.dbs.paymentorder.api.service.v3.model.AccessFilter;
+import com.backbase.dbs.paymentorder.api.service.v3.model.Status;
 import com.backbase.stream.config.PaymentOrderTypeConfiguration;
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -54,7 +55,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOrderTask> {
 
-    private static final PaymentOrderPostFilterRequest FILTER = new PaymentOrderPostFilterRequest().statuses(List.of(READY, ACCEPTED, PROCESSED, CANCELLED, REJECTED, CANCELLATION_PENDING));
+    private static final List<Status> FILTER = List.of(READY, ACCEPTED, PROCESSED, CANCELLED, REJECTED, CANCELLATION_PENDING);
 
     private static final int PAGE_SIZE = 1000;
 
@@ -261,10 +262,11 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
             accessFilters.add(accessFilter);
         }
         paymentOrderPostFilterRequest.setAccessFilters(accessFilters);
+        paymentOrderPostFilterRequest.setStatuses(FILTER);
 
         return paymentOrdersApi.postFilterPaymentOrders(null, null, null, null, null, null, null, null, null,
                         null, null, null, null, null, null, currentCount / PAGE_SIZE, PAGE_SIZE, null,
-                        null, FILTER)
+                        null, paymentOrderPostFilterRequest)
                 .retryWhen(fixedDelay(3, Duration.of(2000, MILLIS)).filter(
                         t -> t instanceof WebClientRequestException
                                 || t instanceof WebClientResponseException.ServiceUnavailable))
