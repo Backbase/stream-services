@@ -24,7 +24,7 @@ backbase:
           direct-uri: http://localhost:8050
       payment:
         order:
-          direct-uri: http://localhost:8051
+          direct-uri: http://localhost:8090
       transaction:
         manager:
           direct-uri: http://localhost:8083
@@ -39,6 +39,8 @@ backbase:
     enabled: true
   stream:
     paymentorder:
+      types:
+        - INT_TRANS_CLOSED
       worker:
         deletePaymentOrder: false
 
