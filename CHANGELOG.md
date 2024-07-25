@@ -20,6 +20,9 @@ All notable changes to this project will be documented in this file.
 ## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
 ### Changed
 - make ContactsSaga use continueOnError flag
+## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
+### Changed
+- feature - improved payment ingestion to allow for joint owner accounts to be shared.
 
 ## [5.7.0](https://github.com/Backbase/stream-services/compare/5.6.0...5.7.0)
 ### Changed
