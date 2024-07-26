@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.UpdateStatusPut;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderIngestionResponse;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPullIngestionRequest;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPushIngestionRequest;

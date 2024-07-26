@@ -11,9 +11,12 @@ import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementsFilter;
+import com.backbase.dbs.paymentorder.api.service.v2.model.AccessFilter;
+import com.backbase.stream.config.PaymentOrderTypeConfiguration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.validation.Valid;
@@ -47,17 +50,20 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
     private final PaymentOrdersApi paymentOrdersApi;
     private final ArrangementsApi arrangementsApi;
     private final PaymentOrderTypeMapper paymentOrderTypeMapper;
+    private final PaymentOrderTypeConfiguration paymentOrderTypeConfiguration;
 
     public PaymentOrderUnitOfWorkExecutor(UnitOfWorkRepository<PaymentOrderTask, String> repository,
             StreamTaskExecutor<PaymentOrderTask> streamTaskExecutor,
             StreamWorkerConfiguration streamWorkerConfiguration,
             PaymentOrdersApi paymentOrdersApi,
             ArrangementsApi arrangementsApi,
-            PaymentOrderTypeMapper paymentOrderTypeMapper) {
+            PaymentOrderTypeMapper paymentOrderTypeMapper,
+            PaymentOrderTypeConfiguration paymentOrderTypeConfiguration) {
         super(repository, streamTaskExecutor, streamWorkerConfiguration);
         this.paymentOrdersApi = paymentOrdersApi;
         this.arrangementsApi = arrangementsApi;
         this.paymentOrderTypeMapper = paymentOrderTypeMapper;
+        this.paymentOrderTypeConfiguration = paymentOrderTypeConfiguration;
     }
 
     public Flux<UnitOfWork<PaymentOrderTask>> prepareUnitOfWork(List<PaymentOrderIngestRequest> items) {
@@ -90,19 +96,19 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
      * Gets the list of payments that are persisted in DBS for a specific user.
      * The transfers have been divided by destination product type.
      *
-     * @param paymentOrderIngestContext2 Holds all the Ingestion details.
+     * @param paymentOrderIngestContext Holds all the Ingestion details.
      * @return A Mono of List of GetPaymentOrderResponse.
      */
-    private @NotNull @Valid Mono<PaymentOrderIngestContext> getPersistedScheduledTransfers(PaymentOrderIngestContext paymentOrderIngestContext2) {
+    private @NotNull @Valid Mono<PaymentOrderIngestContext> getPersistedScheduledTransfers(PaymentOrderIngestContext paymentOrderIngestContext) {
 
         List<GetPaymentOrderResponse> listOfPayments = new ArrayList<>();
 
-        return getPayments(paymentOrderIngestContext2.internalUserId())
+        return getPayments(paymentOrderIngestContext.arrangementIds())
                 .map(response -> {
                     listOfPayments.addAll(response.getPaymentOrders());
                     return listOfPayments;
                 })
-                .map(getPaymentOrderResponses -> paymentOrderIngestContext2.existingPaymentOrder(getPaymentOrderResponses))
+                .map(getPaymentOrderResponses -> paymentOrderIngestContext.existingPaymentOrder(getPaymentOrderResponses))
                 .doOnSuccess(result ->
                         log.debug("Successfully fetched dbs scheduled payment orders"));
     }
@@ -125,18 +131,33 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
     /**
      * Calls the payment order service to retrieve existing payments.
      *
-     * @param internalUserId   The user's internal id that came with the Payments.
+     * @param arrangementIds   Check for all the arrangements that belong to this PMT.
      * @return A Mono with the response from the service api.
      */
-    private Mono<PaymentOrderPostFilterResponse> getPayments(String internalUserId) {
+    private Mono<PaymentOrderPostFilterResponse> getPayments(List<AccountArrangementItems> arrangementIds) {
 
+        List<String> allArrangementIds = arrangementIds
+                .stream().flatMap(accountArrangementItems ->
+                        accountArrangementItems.getArrangementElements().stream())
+                .map(AccountArrangementItem::getId)
+                .collect(Collectors.toList());
+
+        List<String> paymentTypes = paymentOrderTypeConfiguration.getTypes();
         var paymentOrderPostFilterRequest = new PaymentOrderPostFilterRequest();
+
+        List<AccessFilter> accessFilters = paymentTypes.stream()
+                .map(paymentType -> new AccessFilter()
+                        .paymentType(paymentType)
+                        .arrangementIds(allArrangementIds))
+                .collect(Collectors.toList());
+
+        paymentOrderPostFilterRequest.setAccessFilters(accessFilters);
         paymentOrderPostFilterRequest.setStatuses(
                 List.of(READY, ACCEPTED, PROCESSED, CANCELLED, REJECTED, CANCELLATION_PENDING));
-
+        
         return paymentOrdersApi.postFilterPaymentOrders(
                 null, null, null, null, null, null, null, null, null, null, null,
-                internalUserId, null, null, null, Integer.MAX_VALUE,
+                null, null, null, null, Integer.MAX_VALUE,
                 null, null, paymentOrderPostFilterRequest);
     }
 

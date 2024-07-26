@@ -32,5 +32,7 @@ backbase:
         required-scope: api:service
   stream:
     paymentorder:
+      types:
+        - INT_TRANS_CLOSED
       worker:
         deletePaymentOrder: false

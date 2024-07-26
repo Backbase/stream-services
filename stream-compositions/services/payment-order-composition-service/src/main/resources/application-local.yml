@@ -2,14 +2,13 @@ server:
   port: 9005
 
 spring:
+  cloud:
+    loadbalancer:
+      enabled: false
   activemq:
     broker-url: tcp://localhost:61616
   zipkin:
     enabled: false
-  main:
-    allow-bean-definition-overriding: true
-  codec:
-    max-in-memory-size: 10MB
 sso.jwt.internal.signature.key:
   type: VALUE
   value: JWTSecretKeyDontUseInProduction!
@@ -25,7 +24,7 @@ backbase:
           direct-uri: http://localhost:8050
       payment:
         order:
-          direct-uri: http://localhost:8051
+          direct-uri: http://localhost:8090
       transaction:
         manager:
           direct-uri: http://localhost:8083
@@ -41,14 +40,14 @@ backbase:
     enabled: true
   stream:
     paymentorder:
+      types:
+        - INT_TRANS_CLOSED
       worker:
         deletePaymentOrder: false
 
 eureka:
   instance:
-    metadata-map:
-      public: true
-      role: live
+    hostname: host.docker.internal
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
