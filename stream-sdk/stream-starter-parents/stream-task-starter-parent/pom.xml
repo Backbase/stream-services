@@ -76,6 +76,17 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.backbase.buildingblocks</groupId>
+                    <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
+                    <version>${project.parent.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
     <profiles>
         <profile>
             <id>mac-m1</id>
