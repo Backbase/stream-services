@@ -68,7 +68,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 
@@ -88,7 +87,7 @@
                 <plugin>
                     <groupId>com.backbase.buildingblocks</groupId>
                     <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
-                    <version>${ssdk.version}</version>
+                    <version>15.2.4</version>
                 </plugin>
                 <plugin>
                     <groupId>com.backbase.oss</groupId>
