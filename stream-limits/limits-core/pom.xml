@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-limits</artifactId>
-        <version>3.70.6</version>
+        <version>3.70.7</version>
     </parent>
 
     <artifactId>limits-core</artifactId>
