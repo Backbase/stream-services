@@ -256,13 +256,11 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
     private Mono<DBSPaymentOrderPageResult> retrieveNextPage(int currentCount, final @NotNull List<String> arrangementIds) {
         List<String> paymentTypes = paymentOrderTypeConfiguration.getTypes();
         var paymentOrderPostFilterRequest = new PaymentOrderPostFilterRequest();
-        List<AccessFilter> accessFilters = new ArrayList<>();
-        for (String paymentType : paymentTypes) {
-            AccessFilter accessFilter = new AccessFilter();
-            accessFilter.setPaymentType(paymentType);
-            accessFilter.setArrangementIds(arrangementIds);
-            accessFilters.add(accessFilter);
-        }
+        List<AccessFilter> accessFilters = paymentTypes.stream()
+                .map(paymentType -> new AccessFilter()
+                        .paymentType(paymentType)
+                        .arrangementIds(arrangementIds))
+                .collect(Collectors.toList());
         paymentOrderPostFilterRequest.setAccessFilters(accessFilters);
         paymentOrderPostFilterRequest.setStatuses(FILTER);
 
