@@ -155,8 +155,6 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         paymentOrderPostFilterRequest.setStatuses(
                 List.of(READY, ACCEPTED, PROCESSED, CANCELLED, REJECTED, CANCELLATION_PENDING));
         
-        log.debug("request POJO: {}", paymentOrderPostFilterRequest);
-
         return paymentOrdersApi.postFilterPaymentOrders(
                 null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, Integer.MAX_VALUE,
