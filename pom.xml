@@ -36,6 +36,7 @@
         <module>stream-audiences</module>
     </modules>
 
+    
     <properties>
         <java.version>17</java.version>
         <ssdk.version>15.2.4</ssdk.version>
