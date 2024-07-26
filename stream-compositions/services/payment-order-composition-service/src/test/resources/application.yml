@@ -42,6 +42,8 @@ backbase:
           direct-uri: http://localhost:8083/transaction-manager
       stream:
         payment-order:
+          types:
+            - INT_TRANS_CLOSED
           integration:
             direct-uri: http://localhost:18000
     http:

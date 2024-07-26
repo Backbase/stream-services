@@ -46,7 +46,9 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
 @DirtiesContext
-@SpringBootTest
+@SpringBootTest(properties = {
+        "backbase.stream.paymentorder.types=type1,type2,type3"
+})
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
 @Slf4j

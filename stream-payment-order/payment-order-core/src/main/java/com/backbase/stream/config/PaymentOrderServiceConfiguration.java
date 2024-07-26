@@ -17,13 +17,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @EnableConfigurationProperties({
-    PaymentOrderWorkerConfigurationProperties.class
+    PaymentOrderWorkerConfigurationProperties.class,
+    PaymentOrderTypeConfiguration.class
 })
 @AllArgsConstructor
 @Configuration
 public class PaymentOrderServiceConfiguration {
 
     private final PaymentOrderTypeMapper paymentOrderTypeMapper;
+    private final PaymentOrderTypeConfiguration paymentOrderTypeConfiguration;
 
     @Bean
     public PaymentOrderTaskExecutor paymentOrderTaskExecutor(PaymentOrdersApi paymentOrdersApi) {
@@ -39,7 +41,8 @@ public class PaymentOrderServiceConfiguration {
             ArrangementsApi arrangementsApi) {
 
         return new PaymentOrderUnitOfWorkExecutor(paymentOrderUnitOfWorkRepository, paymentOrderTaskExecutor,
-                paymentOrderWorkerConfigurationProperties, paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper);
+                paymentOrderWorkerConfigurationProperties, paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper,
+                paymentOrderTypeConfiguration);
     }
 
     @Bean

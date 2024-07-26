@@ -15,6 +15,7 @@ import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilter
 import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
 import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostResponse;
 import com.backbase.stream.common.PaymentOrderBaseTest;
+import com.backbase.stream.config.PaymentOrderTypeConfiguration;
 import com.backbase.stream.config.PaymentOrderWorkerConfigurationProperties;
 import com.backbase.stream.model.request.NewPaymentOrderIngestRequest;
 import com.backbase.stream.model.request.PaymentOrderIngestRequest;
@@ -25,6 +26,7 @@ import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import java.math.BigDecimal;
 
+import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +54,8 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
     @Mock
     private UnitOfWorkRepository<PaymentOrderTask, String> repository;
 
+    private PaymentOrderTypeConfiguration paymentOrderTypeConfiguration = new PaymentOrderTypeConfiguration();
+
     private final PaymentOrderTaskExecutor streamTaskExecutor = new PaymentOrderTaskExecutor(paymentOrdersApi);
 
     private final PaymentOrderWorkerConfigurationProperties streamWorkerConfiguration = new PaymentOrderWorkerConfigurationProperties();
@@ -61,9 +65,13 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
     @BeforeEach
     void setup() {
+        List<String> pmtTypes = new ArrayList<>();
+        pmtTypes.add("INTRA_PMT");
+        paymentOrderTypeConfiguration.setTypes(pmtTypes);
         paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
                 repository, streamTaskExecutor, streamWorkerConfiguration,
-                paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper);
+                paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper,
+                paymentOrderTypeConfiguration);
     }
 
     @Test
@@ -142,7 +150,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
         paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
                 repository, streamTaskExecutor, streamWorkerConfiguration,
-                paymentOrdersApi, arrangementsApi, null);
+                paymentOrdersApi, arrangementsApi, null, paymentOrderTypeConfiguration);
 
         paymentOrderPostRequest.get(0).setInternalUserId(StringUtils.EMPTY);
         paymentOrderPostRequest.get(1).setInternalUserId(null);
