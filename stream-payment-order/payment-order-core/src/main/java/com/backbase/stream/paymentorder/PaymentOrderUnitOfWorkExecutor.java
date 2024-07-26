@@ -144,16 +144,18 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
         List<String> paymentTypes = paymentOrderTypeConfiguration.getTypes();
         var paymentOrderPostFilterRequest = new PaymentOrderPostFilterRequest();
-        List<AccessFilter> accessFilters = new ArrayList<>();
-        for (String paymentType : paymentTypes) {
-            AccessFilter accessFilter = new AccessFilter();
-            accessFilter.setPaymentType(paymentType);
-            accessFilter.setArrangementIds(allArrangementIds);
-            accessFilters.add(accessFilter);
-        }
+
+        List<AccessFilter> accessFilters = paymentTypes.stream()
+                .map(paymentType -> new AccessFilter()
+                        .paymentType(paymentType)
+                        .arrangementIds(allArrangementIds))
+                .collect(Collectors.toList());
+
         paymentOrderPostFilterRequest.setAccessFilters(accessFilters);
         paymentOrderPostFilterRequest.setStatuses(
                 List.of(READY, ACCEPTED, PROCESSED, CANCELLED, REJECTED, CANCELLATION_PENDING));
+        
+        log.debug("request POJO: {}", paymentOrderPostFilterRequest);
 
         return paymentOrdersApi.postFilterPaymentOrders(
                 null, null, null, null, null, null, null, null, null, null, null,
