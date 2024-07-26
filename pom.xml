@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>3.70.2</version>
+    <version>3.70.4</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
@@ -36,6 +36,7 @@
         <module>stream-audiences</module>
     </modules>
 
+    
     <properties>
         <java.version>17</java.version>
         <ssdk.version>15.2.4</ssdk.version>
