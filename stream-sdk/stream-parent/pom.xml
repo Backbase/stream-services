@@ -76,4 +76,14 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.backbase.buildingblocks</groupId>
+                <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
+                <version>15.2.3</version>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
