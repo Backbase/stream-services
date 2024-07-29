@@ -12,13 +12,13 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip bump]') && !contains(github.event.head_commit.message, 'nobump/')"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false # otherwise, the token used is the GITHUB_TOKEN, instead of your personal access token.
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of sonar analysis
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: adopt
@@ -111,4 +111,4 @@ jobs:
 
       - name: Upload to Repo
         if: "contains(github.ref, 'master') || contains(github.ref, 'support/') || contains(github.ref, 'develop')" # In case of develop branch it will upload the snapshot version
-        run: mvn -B deploy -Pdocker-image,no-latest-tag,no-scs -Dmaven.test.skip=true -Ddocker.default.tag=${{ env.DOCKER_TAG_VERSION }} -Ddocker.repo.url=repo.backbase.com -Ddocker.repo.project=backbase-stream-images -Djib.to.auth.username=${{ secrets.REPO_USERNAME }} -Djib.to.auth.password=${{ secrets.REPO_PASSWORD }} -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
+        run: mvn -B clean deploy -Pdocker-image,no-latest-tag,no-scs -Dmaven.test.skip=true -Ddocker.default.tag=${{ env.DOCKER_TAG_VERSION }} -Ddocker.repo.url=repo.backbase.com -Ddocker.repo.project=backbase-stream-images -Djib.to.auth.username=${{ secrets.REPO_USERNAME }} -Djib.to.auth.password=${{ secrets.REPO_PASSWORD }} -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
