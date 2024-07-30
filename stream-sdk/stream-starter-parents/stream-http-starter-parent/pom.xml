@@ -71,6 +71,11 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>com.backbase.buildingblocks</groupId>
+                    <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
+                    <version>16.1.7</version>
+                </plugin>
+                <plugin>
                     <groupId>com.backbase.oss</groupId>
                     <artifactId>boat-maven-plugin</artifactId>
                     <version>0.17.24</version>
@@ -96,6 +101,13 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>com.backbase.buildingblocks</groupId>
+                <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
+                <version>16.1.7</version>
+            </plugin>
+        </plugins>
     </build>
 
     <profiles>
