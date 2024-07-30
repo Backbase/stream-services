@@ -12,6 +12,7 @@ import java.util.List;
 public interface PaymentOrderTypeMapper {
 
     @Mapping(source = "schedule.nextExecutionDate", target = "nextExecutionDate")
+    @Mapping(source = "schedule.remainingOccurrences", target = "remainingOccurrences")
     PaymentOrderPutRequest mapPaymentOrderPostRequest(PaymentOrderPostRequest paymentOrderPostRequest);
 
     List<PaymentOrderPostRequest> mapPaymentOrderPostRequest(List<GetPaymentOrderResponse> paymentOrderPostRequest);

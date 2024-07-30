@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.1.3](https://github.com/Backbase/stream-services/compare/4.1.3...4.1.4)
+### Changed
+- Query for existing payments by using arrangement IDs instead of user IDs. This will eliminate duplicate payments from being ingested when joint owners are added.
+
 ## [4.1.2](https://github.com/Backbase/stream-services/compare/4.1.2...4.1.3)
 ### Added
 - Added Payment order Page size to fix an issue with payment order ingestion.
@@ -84,6 +88,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Always check cursor and create if it does not exist.
 - If `DateRangeEnd` is passed in the composition request set that as lastTxnDate instead of system date.
+## [3.65.0](https://github.com/Backbase/stream-services/compare/3.65.0...3.65.1)
+### Changed
+- Query for existing payments by using arrangement IDs instead of user IDs. This will eliminate duplicate payments from being ingested when joint owners are added.
 
 ## [3.65.0](https://github.com/Backbase/stream-services/compare/3.64.0...3.65.0)
 ### Changed
