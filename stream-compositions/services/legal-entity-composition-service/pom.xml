@@ -15,6 +15,12 @@
 
     <name>Stream :: Compositions :: Services :: Legal Entity</name>
 
+    <properties>
+        <backbase.specs.url>https://repo.backbase.com/artifactory/specs</backbase.specs.url>
+        <wagon-maven.version>2.0.2</wagon-maven.version>
+        <grand-central-party-api.version>0.2.30</grand-central-party-api.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -62,6 +68,11 @@
             <artifactId>product-composition-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.9</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -76,12 +87,57 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>wagon-maven-plugin</artifactId>
+                <version>${wagon-maven.version}</version>
+                <configuration>
+                    <!-- Required by wagon plugin, this server-id needs to match the one configured in the GH workflow step:
+                    Configure Maven - 'whelk-io/maven-settings-xml-action'  -->
+                    <serverId>backbase</serverId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>download-access-control-service-api-spec</id>
+                        <goals>
+                            <goal>download-single</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <url>${backbase.specs.url}/unified-api/party</url>
+                            <fromFile>party-api-v${grand-central-party-api.version}.yaml</fromFile>
+                            <toDir>${project.build.directory}/grandcentral/party/</toDir>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <!-- Generate models and clients from unpacked OpenAPI specs -->
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
                 <version>${boat-maven-plugin.version}</version>
                 <executions>
+                    <execution>
+                        <id>generate-customer-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.build.directory}/grandcentral/party/party-api-v${grand-central-party-api.version}.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <generateApis>false</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateModelTests>false</generateModelTests>
+                            <modelPackage>com.backbase.gc.party</modelPackage>
+                            <library>rest-assured</library>
+                            <configOptions>
+                                <dateLibrary>java8</dateLibrary>
+                                <serializationLibrary>jackson</serializationLibrary>
+                            </configOptions>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>generate-legal-entity-composition-api-code</id>
                         <goals>

@@ -1,6 +1,6 @@
 ARG IDENTITY_BUILDER
 
-FROM $IDENTITY_BUILDER as auth-server-builder
+FROM $IDENTITY_BUILDER AS auth-server-builder
 
 # In this first build-stage we are configuring build-time settings and including project-specific artifacts
 # (such as custom themes and authenticators) that are all input to the Quarkus build optimisation phase.
