@@ -253,10 +253,9 @@ services:
       spring.cloud.discovery.client.simple.instances.legal-entity-integration[0].uri: http://wiremock:8080
       backbase.stream.compositions.legal-entity.chains.product-composition.enabled: true
       backbase.stream.compositions.legal-entity.chains.product-composition.async: true
-      backbase.stream.compositions.legal-entity.gc.party.realmName: backbase
-      backbase.stream.compositions.legal-entity.gc.party.parentExternalId: BANK
-      backbase.stream.compositions.legal-entity.gc.party.identityUserLinkStrategy: CREATE_IN_IDENTITY
-      backbase.stream.compositions.legal-entity.gc.party.referenceJobRoleNames: "Retail User - USA"
+      backbase.stream.compositions.legal-entity.gc-defaults.party.realmName: backbase
+      backbase.stream.compositions.legal-entity.gc-defaults.party.parentExternalId: BANK
+      backbase.stream.compositions.legal-entity.gc-defaults.party.referenceJobRoleNames: "Retail User - USA"
     volumes:
       - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:

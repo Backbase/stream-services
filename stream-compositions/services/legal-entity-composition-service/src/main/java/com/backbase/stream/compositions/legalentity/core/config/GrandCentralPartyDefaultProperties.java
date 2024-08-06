@@ -6,11 +6,11 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-@ConfigurationProperties(prefix = "backbase.stream.compositions.legal-entity.gc.party")
+@ConfigurationProperties("backbase.stream.compositions.legal-entity.gc-defaults.party")
 public class GrandCentralPartyDefaultProperties {
 
     private String realmName;
     private String parentExternalId;
-    private IdentityUserLinkStrategy identityUserLinkStrategy;
     private List<String> referenceJobRoleNames;
+    private IdentityUserLinkStrategy identityUserLinkStrategy = IdentityUserLinkStrategy.CREATE_IN_IDENTITY;
 }

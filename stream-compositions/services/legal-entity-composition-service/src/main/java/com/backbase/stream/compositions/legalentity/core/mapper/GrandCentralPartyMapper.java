@@ -1,21 +1,15 @@
 package com.backbase.stream.compositions.legalentity.core.mapper;
 
-import com.backbase.gc.party.Email;
-import com.backbase.gc.party.Party;
-import com.backbase.gc.party.Party.PartyTypeEnum;
-import com.backbase.gc.party.PartyDatesInner;
-import com.backbase.gc.party.PartyDatesInner.DateTypeEnum;
-import com.backbase.gc.party.PhoneAddress;
+import com.backbase.grandcentral.event.spec.v1.Data;
+import com.backbase.grandcentral.event.spec.v1.Email;
+import com.backbase.grandcentral.event.spec.v1.PhoneAddress;
 import com.backbase.stream.compositions.legalentity.core.config.GrandCentralPartyDefaultProperties;
 import com.backbase.stream.legalentity.model.EmailAddress;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.PhoneNumber;
-import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
-import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -36,73 +30,63 @@ public abstract class GrandCentralPartyMapper {
 
     @Mapping(source = "partyId", target = "externalId")
     @Mapping(constant = "CUSTOMER", target = "legalEntityType")
-    public abstract LegalEntity mapLegalEntity(Party party);
+    public abstract LegalEntity mapLegalEntity(Data party);
 
     @Mapping(source = "partyId", target = "externalId")
-    @Mapping(constant = "true", target = "isMaster")
-    public abstract ServiceAgreement mapServiceAgreement(Party party);
-
-    @Mapping(source = "partyId", target = "externalId")
-    public abstract User mapUser(Party party);
+    public abstract User mapUser(Data party);
 
     public abstract EmailAddress map(Email email);
 
     public abstract PhoneNumber map(PhoneAddress phoneAddress);
 
     @AfterMapping
-    protected void updateLegalEntity(Party party, @MappingTarget LegalEntity legalEntity) {
+    protected void updateLegalEntity(Data party, @MappingTarget LegalEntity legalEntity) {
+        if (properties.getParentExternalId() == null
+            || properties.getReferenceJobRoleNames() == null
+            || properties.getReferenceJobRoleNames().isEmpty()) {
+            throw new RuntimeException("Parent external id or reference job role names is empty");
+        }
+
         legalEntity.setName(getPartyName(party));
         legalEntity.setRealmName(properties.getRealmName());
         legalEntity.setParentExternalId(properties.getParentExternalId());
-        legalEntity.setMasterServiceAgreement(mapServiceAgreement(party));
-        if (PartyTypeEnum.PERSON.equals(party.getPartyType())) {
+        if (Data.PartyType.PERSON.equals(party.getPartyType())) {
             legalEntity.setUsers(List.of(new JobProfileUser(mapUser(party))
                 .referenceJobRoleNames(properties.getReferenceJobRoleNames())));
         } else if (party.getCustomFields() != null) {
             // If a party is not a person, the custom fields should be applicable for the LE, not the User
-            legalEntity.setAdditions(mapCustomFields(party.getCustomFields()));
+            legalEntity.setAdditions(party.getCustomFields().getAdditions());
         }
     }
 
     @AfterMapping
-    protected void updateUser(Party party, @MappingTarget User user) {
+    protected void updateUser(Data party, @MappingTarget User user) {
         user.setFullName(getPartyName(party));
         user.setIdentityLinkStrategy(properties.getIdentityUserLinkStrategy());
-        var email = getPartyEmail(party, Email.TypeEnum.PERSONAL, true)
+        var email = getPartyEmail(party, Email.Type.PERSONAL, true)
             .map(this::map)
             .orElseThrow(() -> new RuntimeException("Email is required"));
         user.setEmailAddress(email);
-        var mobilePhone = getPartyPhone(party, PhoneAddress.TypeEnum.MOBILE)
+        var mobilePhone = getPartyPhone(party, PhoneAddress.Type.MOBILE)
             .map(this::map)
             .orElseThrow(() -> new RuntimeException("Mobile phone is required"));
         user.setMobileNumber(mobilePhone);
         if (party.getStatus() != null) {
             user.setLocked(!"ACTIVE".equals(party.getStatus()));
         }
-        if (PartyTypeEnum.PERSON.equals(party.getPartyType()) && party.getCustomFields() != null) {
-            user.setAdditions(mapCustomFields(party.getCustomFields()));
+        if (Data.PartyType.PERSON.equals(party.getPartyType()) && party.getCustomFields() != null) {
+            user.setAdditions(party.getCustomFields().getAdditions());
         }
     }
 
-    @AfterMapping
-    protected void updateServiceAgreement(Party party, @MappingTarget ServiceAgreement serviceAgreement) {
-        serviceAgreement.setName(getPartyName(party));
-        getPartyDate(party, DateTypeEnum.OPENING_DATETIME)
-            .map(OffsetDateTime::toLocalDate)
-            .ifPresent(serviceAgreement::validFromDate);
-        getPartyDate(party, DateTypeEnum.CLOSING_DATETIME)
-            .map(OffsetDateTime::toLocalDate)
-            .ifPresent(serviceAgreement::validUntilDate);
-    }
-
-    protected String getPartyName(Party party) {
-        if (PartyTypeEnum.ORGANISATION.equals(party.getPartyType()) && party.getOrganisationName() != null) {
+    private String getPartyName(Data party) {
+        if (Data.PartyType.ORGANISATION.equals(party.getPartyType()) && party.getOrganisationName() != null) {
             return party.getOrganisationName();
         }
-        return getPersonFullName(party).orElseThrow(() -> new RuntimeException("Party name is required"));
+        return getPersonFullName(party).orElseThrow(() -> new RuntimeException("Data name is required"));
     }
 
-    protected Optional<Email> getPartyEmail(Party party, Email.TypeEnum type, boolean fallbackToFirst) {
+    private Optional<Email> getPartyEmail(Data party, Email.Type type, boolean fallbackToFirst) {
         if (party.getElectronicAddress() == null || party.getElectronicAddress().getEmails() == null) {
             return Optional.empty();
         }
@@ -114,7 +98,7 @@ public abstract class GrandCentralPartyMapper {
             : selectedEmail;
     }
 
-    protected Optional<PhoneAddress> getPartyPhone(Party party, PhoneAddress.TypeEnum type) {
+    private Optional<PhoneAddress> getPartyPhone(Data party, PhoneAddress.Type type) {
         if (party.getPhoneAddresses() == null) {
             return Optional.empty();
         }
@@ -123,17 +107,7 @@ public abstract class GrandCentralPartyMapper {
             .findFirst();
     }
 
-    protected Optional<OffsetDateTime> getPartyDate(Party party, DateTypeEnum dateType) {
-        if (party.getDates() == null) {
-            return Optional.empty();
-        }
-        return party.getDates().stream()
-            .filter(d -> dateType.equals(d.getDateType()))
-            .map(PartyDatesInner::getDateValue)
-            .findFirst();
-    }
-
-    protected Optional<String> getPersonFullName(Party party) {
+    private Optional<String> getPersonFullName(Data party) {
         if (party.getPersonName() == null) {
             return Optional.empty();
         }
@@ -145,14 +119,6 @@ public abstract class GrandCentralPartyMapper {
             .collect(Collectors.joining(" ")));
     }
 
-    private static Map<String, String> mapCustomFields(Map<String, Object> customFields) {
-        return customFields.entrySet()
-            .stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                e -> e.getValue().toString()
-            ));
-    }
 }
 
 
