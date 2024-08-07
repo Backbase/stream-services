@@ -1,0 +1,34 @@
+backbase:
+  communication:
+    services:
+      usermanager:
+        direct-uri: http://localhost:${wiremock.server.port}
+      access-control:
+        direct-uri: http://localhost:${wiremock.server.port}
+      user:
+        profile:
+          direct-uri: http://localhost:${wiremock.server.port}
+      identity:
+        integration:
+          direct-uri: http://localhost:${wiremock.server.port}
+    http:
+      client-id: bb-client
+      access-token-uri: http://localhost:${wiremock.server.port}/oauth/token
+  stream:
+    compositions:
+      legal-entity:
+        gc-defaults:
+          party:
+            realmName: backbase
+            parentExternalId: BANK
+            identityUserLinkStrategy: CREATE_IN_IDENTITY
+            referenceJobRoleNames: "Retail User - USA"
+
+logging:
+  level:
+    com.backbase.stream.compositions: DEBUG
+    org.mockserver: DEBUG
+
+activemq:
+  store:
+    dir: /tmp
