@@ -23,12 +23,3 @@ backbase:
             parentExternalId: BANK
             identityUserLinkStrategy: CREATE_IN_IDENTITY
             referenceJobRoleNames: "Retail User - USA"
-
-logging:
-  level:
-    com.backbase.stream.compositions: DEBUG
-    org.mockserver: DEBUG
-
-activemq:
-  store:
-    dir: /tmp
