@@ -16,3 +16,4 @@ bin
 
 *.versionsBackup
 **/src/main/resources/lib
+**/*.flattened-pom.xml

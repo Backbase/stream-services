@@ -1,0 +1,34 @@
+{
+  "id": "327b8e2d-7270-3f44-9914-841e71a86cbb",
+  "request": {
+    "url": "/service-api/v2/users/identities/realms/backbase/legalentities",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"legalEntityId\":\"2c9280899126d76f01912cbb0a420006\",\"additions\":{}}",
+        "ignoreArrayOrder": true,
+        "ignoreExtraElements": true
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "bodyFileName": "body-service-api-v2-users-identities-realms-backbase-legalentities-qx1YG.txt",
+    "headers": {
+      "Vary": [
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
+      ],
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "0",
+      "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      "X-Frame-Options": "DENY",
+      "Date": "Wed, 07 Aug 2024 12:05:41 GMT",
+      "Keep-Alive": "timeout=60"
+    }
+  },
+  "uuid": "327b8e2d-7270-3f44-9914-841e71a86cbb"
+}

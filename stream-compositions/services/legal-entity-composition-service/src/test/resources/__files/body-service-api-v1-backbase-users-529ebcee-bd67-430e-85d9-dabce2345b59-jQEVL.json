@@ -1,0 +1,37 @@
+{
+  "access": {
+    "manageGroupMembership": "true",
+    "view": "true",
+    "mapRoles": "true",
+    "impersonate": "true",
+    "manage": "true"
+  },
+  "attributes": {
+    "mobileNumber": "9888887888"
+  },
+  "clientConsents": null,
+  "clientRoles": null,
+  "createdTimestamp": "2024-08-07T12:05:41.646Z",
+  "credentials": null,
+  "disableCredentialTypes": null,
+  "email": "gc-party@example.com",
+  "emailVerified": false,
+  "enabled": true,
+  "federatedIdentities": null,
+  "federationLink": null,
+  "firstName": "Sachin Ramesh",
+  "groups": [],
+  "id": "529ebcee-bd67-430e-85d9-dabce2345b59",
+  "lastName": "Tendulkar",
+  "notBefore": 0,
+  "origin": null,
+  "realmRoles": [
+    "default-roles-backbase"
+  ],
+  "requiredActions": [],
+  "self": null,
+  "serviceAccountClientId": null,
+  "temporarilyLocked": false,
+  "username": "gc-party",
+  "additions": null
+}

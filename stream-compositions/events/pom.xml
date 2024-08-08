@@ -31,7 +31,7 @@
         <module>product-catalog-egress</module>
         <module>transaction-egress</module>
         <module>transaction-ingress</module>
-<!--        <module>payment-order-events</module>-->
+        <module>grandcentral</module>
     </modules>
 
 </project>

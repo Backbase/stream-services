@@ -12,8 +12,6 @@ spring:
       enabled: false
   main:
     allow-bean-definition-overriding: true
-  activemq:
-    broker-url: vm://activemq
 
 eureka:
   client:

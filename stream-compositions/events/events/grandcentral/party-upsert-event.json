@@ -1,0 +1,282 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$id": "https://syncservice.backbase.com/party.json",
+  "type": "object",
+  "description": "Event to create a new Party - v0.2.30",
+  "properties": {
+    "eventSource": {
+      "type": "string",
+      "description": "identifies the producer of this event."
+    },
+    "eventVersion": {
+      "type": "string",
+      "description": "The event (major) version. (eg v1, v2, v3)"
+    },
+    "identifier": {
+      "type": "string",
+      "description": ""
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the event emitted from the core. e.g: 2023-11-13T20:20:39+00:00"
+    },
+    "dataContentType": {
+      "type": "string",
+      "default": "application/json"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "birthDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "customFields": {
+          "type": "object",
+          "description": "Hosts custom fields related to party",
+          "existingJavaType": "java.util.Map<String,Object>"
+        },
+        "dates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dateType": {
+                "type": "string",
+                "enum": [
+                  "OPENING_DATETIME",
+                  "CLOSING_DATETIME",
+                  "LIVE_DATETIME",
+                  "APPROVED_DATETIME",
+                  "LAST_UPDATED_DATETIME"
+                ]
+              },
+              "dateValue": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        },
+        "electronicAddress": {
+          "type": "object",
+          "properties": {
+            "emails": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "type": "string"
+                  },
+                  "key": {
+                    "type": "string"
+                  },
+                  "primary": {
+                    "type": "boolean"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "WORK",
+                      "PERSONAL",
+                      "HOME",
+                      "OTHERS"
+                    ]
+                  }
+                }
+              }
+            },
+            "urls": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "address": {
+                    "type": "string"
+                  },
+                  "key": {
+                    "type": "string"
+                  },
+                  "primary": {
+                    "type": "boolean"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "WORK",
+                      "PERSONAL"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "gender": {
+          "type": "string",
+          "enum": [
+            "MALE",
+            "FEMALE",
+            "NON_BINARY"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        },
+        "organisationName": {
+          "type": "string"
+        },
+        "partyId": {
+          "type": "string"
+        },
+        "partyType": {
+          "type": "string",
+          "enum": [
+            "PERSON",
+            "ORGANISATION"
+          ]
+        },
+        "personIdentifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ALIEN_REGISTRATION_NUMBER",
+                  "CUSTOMER_IDENTIFICATION_NUMBER",
+                  "EMPLOYEE_IDENTIFICATION_NUMBER",
+                  "NATIONAL_IDENTITY_NUMBER",
+                  "TAX_IDENTIFICATION_NUMBER",
+                  "SOCIAL_SECURITY_NUMBER",
+                  "DRIVERS_LICENSE_NUMBER",
+                  "PASSPORT_NUMBER",
+                  "IDENTITY_CARD_NUMBER",
+                  "EMPLOYER_IDENTIFICATION_NUMBER"
+                ]
+              }
+            }
+          }
+        },
+        "personName": {
+          "type": "object",
+          "properties": {
+            "familyName": {
+              "type": "string"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "middleName": {
+              "type": "string"
+            }
+          }
+        },
+        "phoneAddresses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "countryCode": {
+                "type": "string"
+              },
+              "countryIsoCode": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "number": {
+                "type": "string"
+              },
+              "primary": {
+                "type": "boolean"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "MOBILE",
+                  "HOME",
+                  "WORK",
+                  "OTHER"
+                ]
+              }
+            }
+          }
+        },
+        "postalAddresses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "addressLine": {
+                "type": "string"
+              },
+              "buildingNumber": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              },
+              "countrySubDivision": {
+                "type": "string"
+              },
+              "department": {
+                "type": "string"
+              },
+              "key": {
+                "type": "string"
+              },
+              "postalCode": {
+                "type": "string"
+              },
+              "primary": {
+                "type": "boolean"
+              },
+              "streetName": {
+                "type": "string"
+              },
+              "subDepartment": {
+                "type": "string"
+              },
+              "townName": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "BUSINESS",
+                  "CORRESPONDENCE",
+                  "POSTAL",
+                  "PO_BOX",
+                  "RESIDENTIAL",
+                  "PERMANENT",
+                  "TEMPORARY"
+                ]
+              }
+            }
+          }
+        },
+        "preferredLanguage": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "required": [
+    "eventSource",
+    "eventVersion",
+    "identifier",
+    "data",
+    "dateTime"
+  ]
+}

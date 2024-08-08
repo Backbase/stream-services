@@ -1,0 +1,28 @@
+{
+  "id": "381215a1-dc37-37d2-bf5f-4f5c31164840",
+  "request": {
+    "url": "/service-api/v2/users/externalids/gc-party?skipHierarchyCheck=true",
+    "method": "GET"
+  },
+  "response": {
+    "status": 404,
+    "bodyFileName": "body-service-api-v2-users-externalids-gc-party-hgxsV.json",
+    "headers": {
+      "Vary": [
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
+      ],
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "0",
+      "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      "X-Frame-Options": "DENY",
+      "Content-Type": "application/json",
+      "Date": "Wed, 07 Aug 2024 12:05:41 GMT",
+      "Keep-Alive": "timeout=60"
+    }
+  },
+  "uuid": "381215a1-dc37-37d2-bf5f-4f5c31164840"
+}

@@ -1,0 +1,28 @@
+{
+  "id": "03ca3b1f-f7e8-3e0c-9f67-14e8497dbf4f",
+  "request": {
+    "url": "/service-api/v3/accesscontrol/legal-entities/2c9280899126d76f01912cbb0a420006/service-agreements/master",
+    "method": "GET"
+  },
+  "response": {
+    "status": 404,
+    "bodyFileName": "body-service-api-v3-accesscontrol-legal-entities-2c9280899126d76f01912cbb0a420006-service-agreements-master-6w5J4.json",
+    "headers": {
+      "Vary": [
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
+      ],
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "0",
+      "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      "X-Frame-Options": "DENY",
+      "Content-Type": "application/json",
+      "Date": "Wed, 07 Aug 2024 12:05:41 GMT",
+      "Keep-Alive": "timeout=60"
+    }
+  },
+  "uuid": "03ca3b1f-f7e8-3e0c-9f67-14e8497dbf4f"
+}
