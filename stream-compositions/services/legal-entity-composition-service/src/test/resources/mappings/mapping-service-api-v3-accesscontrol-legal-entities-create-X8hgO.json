@@ -5,7 +5,7 @@
     "method": "POST",
     "bodyPatterns": [
       {
-        "equalToJson": "{\"externalId\":\"gc-party\",\"name\":\"Sachin Ramesh Tendulkar\",\"parentExternalId\":\"BANK\",\"type\":\"CUSTOMER\",\"customerCategory\":null,\"activateSingleServiceAgreement\":null,\"additions\":{}}",
+        "equalToJson": "{\"externalId\":\"gc-party\",\"parentExternalId\":\"BANK\",\"type\":\"CUSTOMER\",\"customerCategory\":null,\"activateSingleServiceAgreement\":null,\"additions\":{}}",
         "ignoreArrayOrder": true,
         "ignoreExtraElements": true
       }

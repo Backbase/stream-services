@@ -6,14 +6,9 @@
   "dataContentType": "application/json",
   "data": {
     "partyId": "gc-party",
-    "partyType": "PERSON",
+    "partyType": "ORGANISATION",
     "status": "ACTIVE",
     "birthDate": "2012-09-23",
-    "personName": {
-      "firstName": "Sachin",
-      "middleName": "Ramesh",
-      "familyName": "Tendulkar"
-    },
     "organisationName": "ABC Pvt Ltd",
     "gender": "MALE",
     "preferredLanguage": "SPANISH",
@@ -73,6 +68,9 @@
         "dateType": "OPENING_DATETIME",
         "dateValue": "2022-10-25T10:29:19Z"
       }
-    ]
+    ],
+    "customFields": {
+      "shouldExtend": false
+    }
   }
 }

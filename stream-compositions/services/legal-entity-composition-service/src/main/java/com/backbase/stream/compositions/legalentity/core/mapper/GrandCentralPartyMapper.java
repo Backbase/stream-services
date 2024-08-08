@@ -45,7 +45,7 @@ public abstract class GrandCentralPartyMapper {
         if (properties.getParentExternalId() == null
             || properties.getReferenceJobRoleNames() == null
             || properties.getReferenceJobRoleNames().isEmpty()) {
-            throw new RuntimeException("Parent external id or reference job role names is empty");
+            throw new RuntimeException("Default party parent external id or reference job roles are empty");
         }
 
         legalEntity.setName(getPartyName(party));
@@ -66,11 +66,11 @@ public abstract class GrandCentralPartyMapper {
         user.setIdentityLinkStrategy(properties.getIdentityUserLinkStrategy());
         var email = getPartyEmail(party, Email.Type.PERSONAL)
             .map(this::map)
-            .orElseThrow(() -> new RuntimeException("Email is required"));
+            .orElseThrow(() -> new RuntimeException("Party email is required"));
         user.setEmailAddress(email);
         var mobilePhone = getPartyPhone(party, PhoneAddress.Type.MOBILE)
             .map(this::map)
-            .orElseThrow(() -> new RuntimeException("Mobile phone is required"));
+            .orElseThrow(() -> new RuntimeException("Party phone is required"));
         user.setMobileNumber(mobilePhone);
         if (party.getStatus() != null) {
             user.setLocked(!"ACTIVE".equals(party.getStatus()));

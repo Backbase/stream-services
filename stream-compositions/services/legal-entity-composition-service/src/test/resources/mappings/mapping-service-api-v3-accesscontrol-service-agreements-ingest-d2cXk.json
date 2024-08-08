@@ -5,7 +5,7 @@
     "method": "POST",
     "bodyPatterns": [
       {
-        "equalToJson": "{\"name\":\"Sachin Ramesh Tendulkar\",\"externalId\":\"sa_gc-party\",\"description\":\"Master Service Agreement for Sachin Ramesh Tendulkar\",\"participantsToIngest\":[{\"externalId\":\"gc-party\",\"sharingUsers\":true,\"sharingAccounts\":true,\"admins\":[],\"users\":[]}],\"validFromDate\":null,\"validFromTime\":null,\"validUntilDate\":null,\"validUntilTime\":null,\"status\":\"ENABLED\",\"isMaster\":true,\"regularUserAps\":null,\"adminUserAps\":null,\"creatorLegalEntity\":null,\"customerCategory\":null,\"additions\":{}}",
+        "equalToJson": "{\"externalId\":\"sa_gc-party\",\"participantsToIngest\":[{\"externalId\":\"gc-party\",\"sharingUsers\":true,\"sharingAccounts\":true,\"admins\":[],\"users\":[]}],\"validFromDate\":null,\"validFromTime\":null,\"validUntilDate\":null,\"validUntilTime\":null,\"status\":\"ENABLED\",\"isMaster\":true,\"regularUserAps\":null,\"adminUserAps\":null,\"creatorLegalEntity\":null,\"customerCategory\":null,\"additions\":{}}",
         "ignoreArrayOrder": true,
         "ignoreExtraElements": true
       }
