@@ -37,7 +37,7 @@ class ArrangementRestMapperTest {
         AccountArrangementItemPut arrangementItemPut = new AccountArrangementItemPut();
 
         when(arrangementMapper.mapCompositionToStream(arrangementItemPut))
-                .thenReturn(new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut());
+                .thenReturn(new com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem());
 
         when(chainsMapper.map(any()))
                 .thenReturn(RequestConfig.builder().build());
@@ -79,8 +79,8 @@ class ArrangementRestMapperTest {
 
     @Test
     void mapResponse() {
-        com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut streamArrangement =
-                new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut();
+        com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem streamArrangement =
+                new com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem();
 
         AccountArrangementItemPut compositionArrangement = new AccountArrangementItemPut();
 
@@ -89,7 +89,7 @@ class ArrangementRestMapperTest {
 
         ArrangementIngestResponse response = ArrangementIngestResponse
                 .builder()
-                .arrangement(new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut())
+                .arrangement(new com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem())
                 .build();
 
         ResponseEntity<ArrangementIngestionResponse> responseEntity = arrangementRestMapper.mapResponse(response);

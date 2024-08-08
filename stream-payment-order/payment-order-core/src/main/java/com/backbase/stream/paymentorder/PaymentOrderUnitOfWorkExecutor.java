@@ -7,15 +7,22 @@ import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.PROCESSE
 import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.READY;
 import static com.backbase.dbs.paymentorder.api.service.v3.model.Status.REJECTED;
 
-import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementsFilter;
+import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementSearchesListResponse;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementsSearchesPostRequest;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
 import com.backbase.dbs.paymentorder.api.service.v3.model.GetPaymentOrderResponse;
 import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilterRequest;
 import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilterResponse;
 import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.SimpleOriginatorAccount;
 import com.backbase.stream.config.PaymentOrderWorkerConfigurationProperties;
 import com.backbase.stream.mappers.PaymentOrderTypeMapper;
 import com.backbase.stream.model.PaymentOrderIngestContext;
@@ -30,10 +37,6 @@ import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -68,7 +71,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
     public Flux<UnitOfWork<PaymentOrderTask>> prepareUnitOfWork(Flux<PaymentOrderPostRequest> items) {
         return items.collectList()
-                .map(paymentOrderPostRequests -> this.createPaymentOrderIngestContext(paymentOrderPostRequests))
+                .map(this::createPaymentOrderIngestContext)
                 .flatMap(this::addArrangementIdMap)
                 .flatMap(this::getPersistedScheduledTransfers)
                 .flatMapMany(this::getPaymentOrderIngestRequest)
@@ -79,7 +82,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
     private PaymentOrderIngestContext createPaymentOrderIngestContext(List<PaymentOrderPostRequest> paymentOrderPostRequests) {
         PaymentOrderIngestContext paymentOrderIngestContext = new PaymentOrderIngestContext();
         paymentOrderIngestContext.corePaymentOrder(paymentOrderPostRequests);
-        paymentOrderIngestContext.internalUserId(paymentOrderPostRequests.get(0).getInternalUserId());
+        paymentOrderIngestContext.internalUserId(paymentOrderPostRequests.getFirst().getInternalUserId());
         return paymentOrderIngestContext;
     }
 
@@ -99,7 +102,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
                     listOfPayments.addAll(response.getPaymentOrders());
                     return listOfPayments;
                 })
-                .map(getPaymentOrderResponses -> paymentOrderIngestContext2.existingPaymentOrder(getPaymentOrderResponses))
+                .map(paymentOrderIngestContext2::existingPaymentOrder)
                 .doOnSuccess(result ->
                         log.debug("Successfully fetched dbs scheduled payment orders"));
     }
@@ -110,13 +113,16 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
                 .flatMap(this::getArrangement)
                 .distinct()
                 .collectList()
-                .map(accountInternalIdGetResponseBody -> paymentOrderIngestContext.arrangementIds(accountInternalIdGetResponseBody));
+                .map(paymentOrderIngestContext::arrangementIds);
     }
 
-    private Mono<AccountArrangementItems> getArrangement(PaymentOrderPostRequest paymentOrderPostRequest) {
-        AccountArrangementsFilter accountArrangementsFilter = new AccountArrangementsFilter()
-                .externalArrangementIds(Collections.singleton(paymentOrderPostRequest.getOriginatorAccount().getExternalArrangementId()));
-        return arrangementsApi.postFilter(accountArrangementsFilter);
+    private Mono<ArrangementSearchesListResponse> getArrangement(PaymentOrderPostRequest paymentOrderPostRequest) {
+        SimpleOriginatorAccount originatorAccount = paymentOrderPostRequest.getOriginatorAccount();
+        if (originatorAccount == null) {
+            return Mono.empty();
+        }
+        return arrangementsApi.postSearchArrangements(new ArrangementsSearchesPostRequest()
+            .externalArrangementIds(Collections.singleton(originatorAccount.getExternalArrangementId())));
     }
 
     /**
@@ -156,10 +162,14 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         // build new payment list (Bank ref is in core, but not in DBS)
         paymentOrderIngestContext.corePaymentOrder().forEach(corePaymentOrder -> {
             if(!existingBankRefIds.contains(corePaymentOrder.getBankReferenceId())) {
-                AccountArrangementItem accountArrangementItem = getInternalArrangementId(paymentOrderIngestContext.arrangementIds(),
-                        corePaymentOrder.getOriginatorAccount().getExternalArrangementId());
-                if (accountArrangementItem != null) {
-                    corePaymentOrder.getOriginatorAccount().setArrangementId(accountArrangementItem.getId());
+                SimpleOriginatorAccount simpleOriginatorAccount = corePaymentOrder.getOriginatorAccount();
+                if (simpleOriginatorAccount == null) {
+                    return;
+                }
+                ArrangementItem arrangementItem = getInternalArrangementId(paymentOrderIngestContext.arrangementIds(),
+                        simpleOriginatorAccount.getExternalArrangementId());
+                if (arrangementItem != null) {
+                    simpleOriginatorAccount.setArrangementId(arrangementItem.getId());
                 }
                 paymentOrderIngestRequests.add(new NewPaymentOrderIngestRequest(corePaymentOrder));
             }
@@ -185,10 +195,10 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         return Flux.fromIterable(paymentOrderIngestRequests);
     }
 
-    private AccountArrangementItem getInternalArrangementId(List<AccountArrangementItems> accountArrangementItemsList, String externalArrangementId) {
-
+    private ArrangementItem getInternalArrangementId(List<ArrangementSearchesListResponse> accountArrangementItemsList, String externalArrangementId) {
         return accountArrangementItemsList.stream()
                 .flatMap(a -> a.getArrangementElements().stream())
+                .filter(b -> Objects.nonNull(b.getExternalArrangementId()))
                 .filter(b -> b.getExternalArrangementId().equalsIgnoreCase(externalArrangementId))
                 .findFirst()
                 .orElse(null);

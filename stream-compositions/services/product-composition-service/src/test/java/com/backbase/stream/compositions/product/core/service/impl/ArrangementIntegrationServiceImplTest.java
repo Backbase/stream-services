@@ -44,7 +44,7 @@ class ArrangementIntegrationServiceImplTest {
                                         .name("name")
                         )));
         when(arrangementMapper.mapIntegrationToStream(any()))
-                .thenReturn(new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut());
+                .thenReturn(new com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem());
 
         Mono<ArrangementIngestResponse> responseMono = arrangementIntegrationService.pullArrangement(request);
 

@@ -1,16 +1,15 @@
 package com.backbase.stream.service;
 
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.stream.exceptions.UserNotFoundException;
 import com.backbase.stream.legalentity.model.AssignedPermission;
+import com.backbase.stream.legalentity.model.BaseProductGroup.ProductGroupTypeEnum;
 import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.service.ArrangementService;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
@@ -71,42 +70,10 @@ public class EntitlementsService {
                     .map(products -> setAssignedPermissionForArrangements(permission, products)));
     }
 
-    /**
-     * Get All Products a legal entity has access to.
-     *
-     * @param legalEntityId Internal Legal Entity Id
-     * @return List of Products
-     */
-    public Flux<AccountArrangementItem> getProductsForInternalLegalEntityId(String legalEntityId) {
-        return legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntityId)
-            .flatMapMany(sa -> accessGroupService.getDataGroupItemIdsByServiceAgreementId(sa.getInternalId())
-                .flatMap(arrangementService::getArrangement)
-            );
-    }
-
-    /**
-     * Get All Products a legal entity has access to.
-     *
-     * @param legalEntityId External Legal Entity Id
-     * @return List of Products
-     */
-    public Flux<AccountArrangementItem> getProductsForExternalLegalEntityId(String legalEntityId) {
-        return legalEntityService.getLegalEntityByExternalId(legalEntityId).flux()
-            .flatMap(legalEntity -> getProductsForInternalLegalEntityId(legalEntity.getInternalId()));
-    }
-
-    private AssignedPermission setAssignedPermissionForJourneys(AssignedPermission permission, List<String> externalIds,
-        ProductGroup.ProductGroupTypeEnum productGroupTypeEnum) {
-        permission.setPermittedObjectExternalIds(externalIds);
-        return permission;
-    }
-
     private AssignedPermission setAssignedPermissionForArrangements(AssignedPermission permission,
-        List<AccountArrangementItem> products) {
-        List<String> externalIds = products.stream().map(AccountArrangementItem::getExternalArrangementId)
-            .collect(Collectors.toList());
-        permission.setPermittedObjects(
-            Collections.singletonMap(ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS.name(), products));
+        List<ArrangementItem> products) {
+        List<String> externalIds = products.stream().map(ArrangementItem::getExternalArrangementId).toList();
+        permission.setPermittedObjects(Collections.singletonMap(ProductGroupTypeEnum.ARRANGEMENTS.name(), products));
         permission.setPermittedObjectExternalIds(externalIds);
         return permission;
     }

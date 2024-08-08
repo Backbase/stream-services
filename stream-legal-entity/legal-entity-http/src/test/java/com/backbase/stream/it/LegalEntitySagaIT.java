@@ -263,7 +263,7 @@ class LegalEntitySagaIT {
         );
 
         stubFor(
-            WireMock.post("/arrangement-manager/service-api/v2/arrangements/batch")
+            WireMock.post("/arrangement-manager/integration-api/v2/arrangements/batch")
                 .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
         );
 
