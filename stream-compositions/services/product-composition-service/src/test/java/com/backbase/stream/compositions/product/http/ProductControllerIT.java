@@ -1,6 +1,6 @@
 package com.backbase.stream.compositions.product.http;
 
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderPostResponse;
 import com.backbase.stream.compositions.product.api.model.ArrangementPullIngestionRequest;
@@ -220,7 +220,7 @@ class ProductControllerIT extends IntegrationTest {
     @Test
     void pullIngestArrangement_Success() throws Exception {
         when(arrangementService.updateArrangement(any()))
-                .thenReturn(Mono.just(new AccountArrangementItemPut()));
+                .thenReturn(Mono.just(new ArrangementPutItem()));
 
         ArrangementPullIngestionRequest pullIngestionRequest =
                 new ArrangementPullIngestionRequest()
@@ -266,7 +266,7 @@ class ProductControllerIT extends IntegrationTest {
                 mapper.treeToValue(node, com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut.class);
 
         when(arrangementService.updateArrangement(any()))
-                .thenReturn(Mono.just(new AccountArrangementItemPut()));
+                .thenReturn(Mono.just(new ArrangementPutItem()));
 
         ArrangementPushIngestionRequest pushIngestionRequest =
                 new ArrangementPushIngestionRequest()

@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
+### Changed
+- **Arrangement Manager API** has been updated to `V3`, impacting its dependencies as follows:
+  - **User Preferences Update Operations:** These operations are no longer available. Since they were internal, the related `POST` and `PUT` endpoints have been removed. Consequently, any processes that involved creating or updating **User Preferences** have also been eliminated.
+  - **Arrangement Batch Upsert Operation:** This operation has been removed from the service-api layer and is now only available in the integration-api layer. It is primarily used for data ingestion by banks into Backbase’s platform. All data ingestion streams now use the integration-api for this purpose. The only change required is to use a different endpoint.
+  - **Retrieving Arrangements:** In `V3`, calls to retrieve a list of arrangements or an arrangement by `ID` can now be made using the new `POST /service-api/v3/arrangements/searches` endpoint. This endpoint provides multiple ways to retrieve arrangements through a single API call.
+  - **Product Kind Operations:** Only `GET` operations are now available for **Product Kinds**. The database management has been _deprecated_, as **Product Kind** data is now maintained statically through a `YAML` settings file in **Arrangement Manager**. As a result, `POST` and `PUT` endpoints are no longer available.
+
 ## [5.7.0](https://github.com/Backbase/stream-services/compare/5.6.0...5.7.0)
 ### Changed
 - bug fixed - missing stream-starter module in stream-sdk

@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
@@ -108,7 +108,7 @@ class UpdatedServiceAgreementSagaTest {
 
         when(arrangementService.getArrangementByExternalId(ArgumentMatchers.<List<String>>any()))
             .thenReturn(Flux.fromIterable(
-                Collections.singletonList(new AccountArrangementItem().id(loanInId).externalArrangementId(loanExId))));
+                Collections.singletonList(new ArrangementItem().id(loanInId).externalArrangementId(loanExId))));
 
 
         UpdatedServiceAgreementTask actual = updatedServiceAgreementSaga.executeTask(task).block();

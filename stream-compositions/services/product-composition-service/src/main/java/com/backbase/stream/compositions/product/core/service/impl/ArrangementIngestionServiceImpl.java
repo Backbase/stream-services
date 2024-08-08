@@ -2,7 +2,7 @@ package com.backbase.stream.compositions.product.core.service.impl;
 
 import com.backbase.buildingblocks.presentation.errors.BadRequestException;
 import com.backbase.buildingblocks.presentation.errors.Error;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
@@ -68,7 +68,7 @@ public class ArrangementIngestionServiceImpl implements ArrangementIngestionServ
     }
 
     private Mono<ArrangementIngestResponse> validate(ArrangementIngestResponse res) {
-        Set<ConstraintViolation<AccountArrangementItemPut>> violations = validator.validate(res.getArrangement());
+        Set<ConstraintViolation<ArrangementPutItem>> violations = validator.validate(res.getArrangement());
 
         if (!CollectionUtils.isEmpty(violations)) {
             List<Error> errors = violations.stream().map(c -> new Error()
