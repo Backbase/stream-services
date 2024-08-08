@@ -22,9 +22,7 @@ class ProductCatalogServiceConfigurationTest {
             .withBean(DbsApiClientsAutoConfiguration.class)
             .withBean(InterServiceWebClientConfiguration.class)
             .withUserConfiguration(ProductCatalogServiceConfiguration.class)
-            .run(context -> {
-                assertThat(context).hasSingleBean(ProductCatalogService.class);
-            });
+            .run(context -> assertThat(context).hasSingleBean(ProductCatalogService.class));
     }
 
 }

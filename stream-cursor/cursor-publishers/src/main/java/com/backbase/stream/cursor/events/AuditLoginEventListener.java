@@ -39,7 +39,7 @@ public class AuditLoginEventListener extends AbstractLoginEventListener {
             auditMessagesEvent = objectMapper.readValue(message, AuditMessagesEvent.class);
             log.info("auditMessagesEvent: {}", auditMessagesEvent);
 
-            AuditMessagesEvent.AuditMessage auditMessage = auditMessagesEvent.getAuditMessages().get(0);
+            AuditMessagesEvent.AuditMessage auditMessage = auditMessagesEvent.getAuditMessages().getFirst();
 
             if (auditMessage.getEventCategory().equalsIgnoreCase("Identity and Access")
                 && auditMessage.getObjectType().equalsIgnoreCase("Authentication")
