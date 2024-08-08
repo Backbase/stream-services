@@ -35,9 +35,7 @@
         "customFields": {
           "type": "object",
           "description": "Hosts custom fields related to party",
-          "additionalProperties": {
-            "type": "string"
-          }
+          "existingJavaType": "java.util.Map<String,Object>"
         },
         "dates": {
           "type": "array",

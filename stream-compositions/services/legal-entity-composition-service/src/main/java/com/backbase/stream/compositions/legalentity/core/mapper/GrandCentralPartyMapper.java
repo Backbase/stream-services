@@ -10,6 +10,7 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.User;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,7 +56,7 @@ public abstract class GrandCentralPartyMapper {
                 .referenceJobRoleNames(properties.getReferenceJobRoleNames())));
         } else if (party.getCustomFields() != null) {
             // If a party is not a person, the custom fields should be applicable for the LE, not the User
-            legalEntity.setAdditions(party.getCustomFields().getAdditions());
+            legalEntity.setAdditions(mapCustomFields(party.getCustomFields()));
         }
     }
 
@@ -63,7 +64,7 @@ public abstract class GrandCentralPartyMapper {
     protected void updateUser(Data party, @MappingTarget User user) {
         user.setFullName(getPartyName(party));
         user.setIdentityLinkStrategy(properties.getIdentityUserLinkStrategy());
-        var email = getPartyEmail(party, Email.Type.PERSONAL, true)
+        var email = getPartyEmail(party, Email.Type.PERSONAL)
             .map(this::map)
             .orElseThrow(() -> new RuntimeException("Email is required"));
         user.setEmailAddress(email);
@@ -75,7 +76,7 @@ public abstract class GrandCentralPartyMapper {
             user.setLocked(!"ACTIVE".equals(party.getStatus()));
         }
         if (Data.PartyType.PERSON.equals(party.getPartyType()) && party.getCustomFields() != null) {
-            user.setAdditions(party.getCustomFields().getAdditions());
+            user.setAdditions(mapCustomFields(party.getCustomFields()));
         }
     }
 
@@ -83,28 +84,27 @@ public abstract class GrandCentralPartyMapper {
         if (Data.PartyType.ORGANISATION.equals(party.getPartyType()) && party.getOrganisationName() != null) {
             return party.getOrganisationName();
         }
-        return getPersonFullName(party).orElseThrow(() -> new RuntimeException("Data name is required"));
+        return getPersonFullName(party).orElseThrow(() -> new RuntimeException("Party name is required"));
     }
 
-    private Optional<Email> getPartyEmail(Data party, Email.Type type, boolean fallbackToFirst) {
+    private Optional<Email> getPartyEmail(Data party, Email.Type preferredType) {
         if (party.getElectronicAddress() == null || party.getElectronicAddress().getEmails() == null) {
             return Optional.empty();
         }
-        var selectedEmail = party.getElectronicAddress().getEmails().stream()
-            .filter(e -> type.equals(e.getType()))
-            .findFirst();
-        return fallbackToFirst && selectedEmail.isEmpty()
-            ? party.getElectronicAddress().getEmails().stream().findFirst()
-            : selectedEmail;
+        return party.getElectronicAddress().getEmails().stream()
+            .filter(e -> preferredType.equals(e.getType()))
+            .findFirst()
+            .or(party.getElectronicAddress().getEmails().stream()::findFirst);
     }
 
-    private Optional<PhoneAddress> getPartyPhone(Data party, PhoneAddress.Type type) {
+    private Optional<PhoneAddress> getPartyPhone(Data party, PhoneAddress.Type preferredType) {
         if (party.getPhoneAddresses() == null) {
             return Optional.empty();
         }
         return party.getPhoneAddresses().stream()
-            .filter(e -> type.equals(e.getType()))
-            .findFirst();
+            .filter(e -> preferredType.equals(e.getType()))
+            .findFirst()
+            .or(party.getPhoneAddresses().stream()::findFirst);
     }
 
     private Optional<String> getPersonFullName(Data party) {
@@ -117,6 +117,15 @@ public abstract class GrandCentralPartyMapper {
                 party.getPersonName().getFamilyName())
             .filter(Objects::nonNull)
             .collect(Collectors.joining(" ")));
+    }
+
+    private Map<String, String> mapCustomFields(Map<String, Object> customFields) {
+        return customFields.entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().toString()
+            ));
     }
 
 }

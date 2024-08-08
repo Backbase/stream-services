@@ -6,7 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
-import com.backbase.grandcentral.event.spec.v1.PartyEvent;
+import com.backbase.grandcentral.event.spec.v1.PartyUpsertEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
@@ -29,9 +29,9 @@ public class GrandCentralPartyEventListenerIT {
 
     @Test
     void processPartyEventTest() throws IOException {
-        var resource = new ClassPathResource("events/party-event.json");
-        PartyEvent event = objectMapper.readValue(resource.getInputStream(), PartyEvent.class);
-        var envelopedEvent = new EnvelopedEvent<PartyEvent>();
+        var resource = new ClassPathResource("events/party-upsert-event.json");
+        PartyUpsertEvent event = objectMapper.readValue(resource.getInputStream(), PartyUpsertEvent.class);
+        var envelopedEvent = new EnvelopedEvent<PartyUpsertEvent>();
         envelopedEvent.setEvent(event);
         listener.handle(envelopedEvent);
 
