@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
+### Added
+- Introducing Grand Central customer canonical model: Processing the `PartyUpsertEvent` using the Legal Entity Saga via the [legal-entity-composition-service](stream-compositions/services/legal-entity-composition-service)
+
 ## [5.7.0](https://github.com/Backbase/stream-services/compare/5.6.0...5.7.0)
 ### Changed
 - bug fixed - missing stream-starter module in stream-sdk
