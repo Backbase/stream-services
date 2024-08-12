@@ -17,28 +17,7 @@ import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
-import com.backbase.stream.legalentity.model.BaseProductGroup;
-import com.backbase.stream.legalentity.model.BusinessFunction;
-import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
-import com.backbase.stream.legalentity.model.CurrentAccount;
-import com.backbase.stream.legalentity.model.EmailAddress;
-import com.backbase.stream.legalentity.model.ExternalAccountInformation;
-import com.backbase.stream.legalentity.model.ExternalContact;
-import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
-import com.backbase.stream.legalentity.model.JobProfileUser;
-import com.backbase.stream.legalentity.model.JobRole;
-import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityParticipant;
-import com.backbase.stream.legalentity.model.LegalEntityReference;
-import com.backbase.stream.legalentity.model.Limit;
-import com.backbase.stream.legalentity.model.Loan;
-import com.backbase.stream.legalentity.model.PhoneNumber;
-import com.backbase.stream.legalentity.model.Privilege;
-import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.SavingsAccount;
-import com.backbase.stream.legalentity.model.ServiceAgreement;
-import com.backbase.stream.legalentity.model.ServiceAgreementV2;
-import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.legalentity.model.*;
 import com.backbase.stream.limit.LimitsSaga;
 import com.backbase.stream.limit.LimitsTask;
 import com.backbase.stream.mapper.ServiceAgreementV2ToV1Mapper;
@@ -447,7 +426,7 @@ class ServiceAgreementV2SagaTest {
         when(plansService.isEnabled()).thenReturn(false);
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
         when(legalEntityService.getLegalEntityByExternalId(any()))
-                .thenReturn(Mono.just(new LegalEntity().internalId("id")));
+                .thenReturn(Mono.just(new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
                 any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
 
@@ -463,7 +442,7 @@ class ServiceAgreementV2SagaTest {
 
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
         when(legalEntityService.getLegalEntityByExternalId(any()))
-                .thenReturn(Mono.just(new LegalEntity().internalId("id")));
+                .thenReturn(Mono.just(new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
                 any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
 
@@ -486,7 +465,7 @@ class ServiceAgreementV2SagaTest {
     void getMockServiceAgreement() {
         regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
             .externalId(regularUserExId))
-            .legalEntityReference(new LegalEntityReference().externalId(leExternalId))
+            .legalEntityReference(new LegalEntityReference(leInternalId, leExternalId))
             .planName("somPlanName");
 
         SavingsAccount account = new SavingsAccount();

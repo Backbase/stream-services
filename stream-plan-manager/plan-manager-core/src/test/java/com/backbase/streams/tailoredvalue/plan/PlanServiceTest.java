@@ -49,7 +49,7 @@ class PlanServiceTest {
         when(plansProperties.isEnabled()).thenReturn(true);
         mockPlansApi();
 
-        //When Postcontruct method runs
+        //When Post construct method runs
         plansService.init();
 
         //Then verify plansAPI gets called
@@ -62,7 +62,7 @@ class PlanServiceTest {
 
     @Test
     void testPostConstruct_whenPlansPropertiesIsNotEnabled() {
-        //When Postcontruct method runs
+        //When Post construct method runs
         plansService.init();
 
         //Then verify plansAPI is not called so the plansMap should be empty
@@ -77,7 +77,8 @@ class PlanServiceTest {
         when(plansProperties.isEnabled()).thenReturn(true);
         mockPlansApi();
         UserPlanUpdateRequestBody reqBody = createUserPlanUpdateRequestBody();
-        when(userPlansApi.updateUserPlan(INTERNAL_USER_ID, reqBody)).thenReturn(Mono.just(new UserPlanUpdateResponseBody()));
+        when(userPlansApi.updateUserPlan(INTERNAL_USER_ID, reqBody))
+                .thenReturn(Mono.just(new UserPlanUpdateResponseBody()));
         plansService.init();
 
         //When
@@ -94,7 +95,8 @@ class PlanServiceTest {
     void testExecuteTask_whenPlansPropertiesIsEnabled_andPlansApi_throws_Exception() {
         //Given
         when(plansProperties.isEnabled()).thenReturn(true);
-        when(plansApi.getPlans(any(), any(), any())).thenReturn(Mono.error(new WebClientResponseException(400, "Bad Request", null, null, null)));
+        when(plansApi.getPlans(any(), any(), any()))
+                .thenReturn(Mono.error(new WebClientResponseException(400, "Bad Request", null, null, null)));
         //When Then
         Assertions.assertThrows(PlanManagerException.class, () -> plansService.init());
     }
@@ -109,8 +111,11 @@ class PlanServiceTest {
                 .thenReturn(Mono.error(new WebClientResponseException(400, "Bad Request", null, null, null)));
         plansService.init();
 
-        //When Then
-        Assertions.assertThrows(PlanManagerException.class, () -> plansService.updateUserPlan(INTERNAL_USER_ID, reqBody, PLAN_NAME).block());
+        //When
+        Mono<Void> mono = plansService.updateUserPlan(INTERNAL_USER_ID, reqBody, PLAN_NAME);
+
+        //Then
+        Assertions.assertThrows(PlanManagerException.class,mono::block);
     }
 
 
