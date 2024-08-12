@@ -1,13 +1,20 @@
 package com.backbase.streams.tailoredvalue.plan;
 
-import com.backbase.stream.worker.exception.StreamTaskException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.backbase.streams.tailoredvalue.PlansService;
 import com.backbase.streams.tailoredvalue.configuration.PlansProperties;
+import com.backbase.streams.tailoredvalue.exceptions.PlanManagerException;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.PlansApi;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.UserPlansApi;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.model.Plan;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.model.PlansGetResponseBody;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.model.UserPlanUpdateRequestBody;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.model.UserPlanUpdateResponseBody;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,23 +23,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class PlanSagaTest {
+class PlanServiceTest {
 
     private static final String PLAN_NAME = "plan-name";
-    private static final String INTERNAl_USER_ID = "interUserId";
+    private static final String INTERNAL_USER_ID = "interUserId";
     private static final String PLAN_ID = "plan-id";
 
     @InjectMocks
-    private PlansSaga plansSaga;
+    private PlansService plansService;
 
     @Mock
     PlansApi plansApi;
@@ -50,23 +50,23 @@ public class PlanSagaTest {
         mockPlansApi();
 
         //When Postcontruct method runs
-        plansSaga.init();
+        plansService.init();
 
         //Then verify plansAPI gets called
         verify(plansApi).getPlans(any(), any(), any());
         // Verify that the plansMap get populated with size 1 and that the planName is the key and planId is the value
-        assertEquals(1, plansSaga.getPlansMap().size());
-        assertEquals(PLAN_ID, plansSaga.getPlansMap().get(PLAN_NAME));
+        assertEquals(1, plansService.getPlansMap().size());
+        assertEquals(PLAN_ID, plansService.getPlansMap().get(PLAN_NAME));
 
     }
 
     @Test
     void testPostConstruct_whenPlansPropertiesIsNotEnabled() {
         //When Postcontruct method runs
-        plansSaga.init();
+        plansService.init();
 
         //Then verify plansAPI is not called so the plansMap should be empty
-        assertEquals(0, plansSaga.getPlansMap().size());
+        assertEquals(0, plansService.getPlansMap().size());
 
 
     }
@@ -76,18 +76,18 @@ public class PlanSagaTest {
         //Given
         when(plansProperties.isEnabled()).thenReturn(true);
         mockPlansApi();
-        PlansTask plansTask = createPlanTask();
-        when(userPlansApi.updateUserPlan(plansTask.getInternalUserId(), plansTask.getReqData())).thenReturn(Mono.just(new UserPlanUpdateResponseBody()));
-        plansSaga.init();
+        UserPlanUpdateRequestBody reqBody = createUserPlanUpdateRequestBody();
+        when(userPlansApi.updateUserPlan(INTERNAL_USER_ID, reqBody)).thenReturn(Mono.just(new UserPlanUpdateResponseBody()));
+        plansService.init();
 
         //When
-        plansSaga.executeTask(plansTask).block();
+        plansService.updateUserPlan(INTERNAL_USER_ID, reqBody, PLAN_NAME).block();
 
         //Then
         // PlanTask ReqData should have the planId set
-        assertEquals(PLAN_ID, plansTask.getReqData().getId());
+        assertEquals(PLAN_ID, reqBody.getId());
         //Then verify userPlansApi gets called
-        verify(userPlansApi).updateUserPlan(plansTask.getInternalUserId(), plansTask.getReqData());
+        verify(userPlansApi).updateUserPlan(INTERNAL_USER_ID, reqBody);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class PlanSagaTest {
         when(plansProperties.isEnabled()).thenReturn(true);
         when(plansApi.getPlans(any(), any(), any())).thenReturn(Mono.error(new WebClientResponseException(400, "Bad Request", null, null, null)));
         //When Then
-        Assertions.assertThrows(RuntimeException.class, () -> plansSaga.init());
+        Assertions.assertThrows(PlanManagerException.class, () -> plansService.init());
     }
 
     @Test
@@ -104,13 +104,13 @@ public class PlanSagaTest {
         //Given
         when(plansProperties.isEnabled()).thenReturn(true);
         mockPlansApi();
-        PlansTask plansTask = createPlanTask();
-        when(userPlansApi.updateUserPlan(plansTask.getInternalUserId(), plansTask.getReqData()))
+        UserPlanUpdateRequestBody reqBody = createUserPlanUpdateRequestBody();
+        when(userPlansApi.updateUserPlan(INTERNAL_USER_ID, reqBody))
                 .thenReturn(Mono.error(new WebClientResponseException(400, "Bad Request", null, null, null)));
-        plansSaga.init();
+        plansService.init();
 
         //When Then
-        Assertions.assertThrows(StreamTaskException.class, () -> plansSaga.executeTask(plansTask).block());
+        Assertions.assertThrows(PlanManagerException.class, () -> plansService.updateUserPlan(INTERNAL_USER_ID, reqBody, PLAN_NAME).block());
     }
 
 
@@ -120,11 +120,11 @@ public class PlanSagaTest {
         when(plansApi.getPlans(any(), any(), any())).thenAnswer(invocation -> Mono.just(plansGetResponseBody));
     }
 
-    private PlansTask createPlanTask() {
+    private UserPlanUpdateRequestBody createUserPlanUpdateRequestBody() {
         UserPlanUpdateRequestBody reqBody = new UserPlanUpdateRequestBody();
-        reqBody.setId(""); // To be filled by saga itself
+        reqBody.setId(""); // To be filled by plansService itself
         reqBody.serviceAgreementId("serviceAgreementId");
         reqBody.setLegalEntityId("legalEntityId");
-        return new PlansTask("work-id", INTERNAl_USER_ID, reqBody, PLAN_NAME);
+        return reqBody;
     }
 }

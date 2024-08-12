@@ -18,7 +18,7 @@ import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
 import com.backbase.streams.tailoredvalue.configuration.PlanServiceConfiguration;
-import com.backbase.streams.tailoredvalue.plan.PlansSaga;
+import com.backbase.streams.tailoredvalue.PlansService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -94,7 +94,7 @@ public class LegalEntitySagaConfiguration {
         BatchProductIngestionSaga batchProductIngestionSaga,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
-        PlansSaga plansSaga,
+        PlansService plansService,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties
     ) {
         return new ServiceAgreementSagaV2(
@@ -103,7 +103,7 @@ public class LegalEntitySagaConfiguration {
             batchProductIngestionSaga,
             limitsSaga,
             contactsSaga,
-            plansSaga,
+                plansService,
             sinkConfigurationProperties
         );
     }

@@ -38,7 +38,7 @@ import com.backbase.stream.service.AccessGroupService;
 import java.net.URI;
 import java.util.List;
 
-import com.backbase.streams.tailoredvalue.plan.PlansSaga;
+import com.backbase.streams.tailoredvalue.PlansService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,7 +117,7 @@ class ServiceAgreementControllerTest {
     private UserKindSegmentationSaga userKindSegmentationSaga;
 
     @MockBean
-    private PlansSaga plansSaga;
+    private PlansService plansService;
 
     @Autowired
     private WebTestClient webTestClient;

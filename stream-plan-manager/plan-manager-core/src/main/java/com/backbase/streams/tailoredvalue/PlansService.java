@@ -1,8 +1,7 @@
-package com.backbase.streams.tailoredvalue.plan;
+package com.backbase.streams.tailoredvalue;
 
-import com.backbase.stream.worker.StreamTaskExecutor;
-import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.streams.tailoredvalue.configuration.PlansProperties;
+import com.backbase.streams.tailoredvalue.exceptions.PlanManagerException;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.PlansApi;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.UserPlansApi;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.model.PlansGetResponseBody;
@@ -18,7 +17,7 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-public class PlansSaga implements StreamTaskExecutor<PlansTask> {
+public class PlansService {
 
     private final PlansApi plansApi;
     private final UserPlansApi userPlansApi;
@@ -39,7 +38,7 @@ public class PlansSaga implements StreamTaskExecutor<PlansTask> {
                 .doOnNext(this::processPlans).subscribe();
 
         if (plansMap.isEmpty()) {
-            throw new RuntimeException("Error getting all plans");
+            throw new PlanManagerException("Error getting all plans");
         }
     }
 
@@ -50,32 +49,25 @@ public class PlansSaga implements StreamTaskExecutor<PlansTask> {
         return plansProperties.isEnabled();
     }
 
-    @Override
-    public Mono<PlansTask> executeTask(PlansTask plansTask) {
-        UserPlanUpdateRequestBody userPlanUpdateRequestBody = plansTask.getReqData();
+    public Mono<Void> updateUserPlan(String internalUserId, UserPlanUpdateRequestBody userPlanUpdateRequestBody, String planName) {
 
-        if (!plansMap.containsKey(plansTask.getPlanName())) {
-            log.warn("Plan {} not found", plansTask.getPlanName());
-            return Mono.just(plansTask);
+        if (!plansMap.containsKey(planName)) {
+            log.warn("No PlanId found for planName = " + planName);
+            return Mono.error(new PlanManagerException("No PlanId found for planName = " + planName));
         }
         // Set planId
-        userPlanUpdateRequestBody.setId(plansMap.get(plansTask.getPlanName()));
+        userPlanUpdateRequestBody.setId(plansMap.get(planName));
         log.info("Started ingestion of plans {} for user {}",
-                userPlanUpdateRequestBody.getId(), plansTask.getInternalUserId());
-        return userPlansApi.updateUserPlan(plansTask.getInternalUserId(), userPlanUpdateRequestBody)
+                userPlanUpdateRequestBody.getId(), internalUserId);
+        return userPlansApi.updateUserPlan(internalUserId, userPlanUpdateRequestBody)
                 .map(userPlanUpdateResponseBody -> {
                     log.info("Plan updated: {}", userPlanUpdateResponseBody.toString());
-                    return plansTask;
+                    return Mono.empty();
                 })
                 .onErrorResume(throwable -> {
                     log.error("Error updating plan", throwable);
-                    return Mono.error(new StreamTaskException(plansTask, throwable, "Error updating plan"));
-                });
-    }
-
-    @Override
-    public Mono<PlansTask> rollBack(PlansTask streamTask) {
-        return null;
+                    return Mono.error(new PlanManagerException(throwable, "Error updating plan"));
+                }).then();
     }
 
     private void processPlans(PlansGetResponseBody responseBody) {

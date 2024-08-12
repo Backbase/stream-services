@@ -55,8 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.backbase.streams.tailoredvalue.plan.PlansSaga;
-import com.backbase.streams.tailoredvalue.plan.PlansTask;
+import com.backbase.streams.tailoredvalue.PlansService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,7 +94,7 @@ class ServiceAgreementV2SagaTest {
     private ContactsSaga contactsSaga;
 
     @Mock
-    private PlansSaga plansSaga;
+    private PlansService plansService;
 
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
@@ -445,7 +444,7 @@ class ServiceAgreementV2SagaTest {
         getMockServiceAgreement();
         ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
 
-        when(plansSaga.isEnabled()).thenReturn(false);
+        when(plansService.isEnabled()).thenReturn(false);
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
         when(legalEntityService.getLegalEntityByExternalId(any()))
                 .thenReturn(Mono.just(new LegalEntity().internalId("id")));
@@ -454,7 +453,7 @@ class ServiceAgreementV2SagaTest {
 
         serviceAgreementSaga.executeTask(task).block();
 
-        verify(plansSaga, never()).executeTask(Mockito.any());
+        verify(plansService, never()).updateUserPlan(any(), any(), any());
     }
 
     @Test
@@ -469,13 +468,12 @@ class ServiceAgreementV2SagaTest {
                 any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
 
         //Plans mocks
-        when(plansSaga.isEnabled()).thenReturn(true);
-        when(plansSaga.executeTask(any())).thenReturn(
-                Mono.just(Mockito.mock(PlansTask.class)));
+        when(plansService.isEnabled()).thenReturn(true);
+        when(plansService.updateUserPlan(any(), any(), any())).thenReturn(Mono.empty());
 
         serviceAgreementSaga.executeTask(task).block();
 
-        verify(plansSaga, times(1)).executeTask(any());
+        verify(plansService, times(1)).updateUserPlan(any(), any(), any());
     }
 
     private ServiceAgreementTaskV2 mockServiceAgreementTask(ServiceAgreementV2 serviceAgreement) {

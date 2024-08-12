@@ -1,6 +1,6 @@
 package com.backbase.streams.tailoredvalue.configuration;
 
-import com.backbase.streams.tailoredvalue.plan.PlansSaga;
+import com.backbase.streams.tailoredvalue.PlansService;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.PlansApi;
 import com.backbase.tailoredvalue.planmanager.service.api.v0.UserPlansApi;
 import lombok.AllArgsConstructor;
@@ -16,8 +16,8 @@ import org.springframework.context.annotation.Configuration;
 public class PlanServiceConfiguration {
 
     @Bean
-    public PlansSaga plansSaga(PlansApi plansApi, UserPlansApi userPlansApi, PlansProperties plansProperties) {
-        return new PlansSaga(plansApi, userPlansApi, plansProperties);
+    public PlansService plansService(PlansApi plansApi, UserPlansApi userPlansApi, PlansProperties plansProperties) {
+        return new PlansService(plansApi, userPlansApi, plansProperties);
     }
 
 }
