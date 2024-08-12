@@ -1,6 +1,18 @@
 package com.backbase.stream.clients.autoconfigure;
 
-import com.backbase.stream.clients.config.*;
+import com.backbase.stream.clients.config.AccessControlClientConfig;
+import com.backbase.stream.clients.config.ApprovalClientConfig;
+import com.backbase.stream.clients.config.ArrangementManagerClientConfig;
+import com.backbase.stream.clients.config.ContactManagerClientConfig;
+import com.backbase.stream.clients.config.IdentityIntegrationClientConfig;
+import com.backbase.stream.clients.config.InstrumentApiConfiguration;
+import com.backbase.stream.clients.config.LimitsClientConfig;
+import com.backbase.stream.clients.config.PaymentOrderClientConfig;
+import com.backbase.stream.clients.config.PortfolioApiConfiguration;
+import com.backbase.stream.clients.config.TransactionManagerClientConfig;
+import com.backbase.stream.clients.config.UserManagerClientConfig;
+import com.backbase.stream.clients.config.UserProfileManagerClientConfig;
+import com.backbase.stream.clients.config.PlanManagerClientConfig;
 import com.backbase.stream.context.config.ContextPropagationConfiguration;
 import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
