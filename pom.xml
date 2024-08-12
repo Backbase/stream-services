@@ -34,6 +34,7 @@
         <module>stream-loans</module>
         <module>stream-audiences</module>
         <module>stream-compositions</module>
+        <module>stream-plan-manager</module>
     </modules>
 
     <properties>

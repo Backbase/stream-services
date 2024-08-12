@@ -4,9 +4,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
@@ -56,6 +54,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.backbase.streams.tailoredvalue.plan.PlansSaga;
+import com.backbase.streams.tailoredvalue.plan.PlansTask;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -92,6 +93,9 @@ class ServiceAgreementV2SagaTest {
 
     @Mock
     private ContactsSaga contactsSaga;
+
+    @Mock
+    private PlansSaga plansSaga;
 
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
@@ -436,6 +440,44 @@ class ServiceAgreementV2SagaTest {
             result.getServiceAgreement().getJobProfileUsers().get(0).getContacts().get(0).getExternalId());
     }
 
+    @Test
+    void test_updatePlans_whenDisabled() {
+        getMockServiceAgreement();
+        ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
+
+        when(plansSaga.isEnabled()).thenReturn(false);
+        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
+        when(legalEntityService.getLegalEntityByExternalId(any()))
+                .thenReturn(Mono.just(new LegalEntity().internalId("id")));
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
+                any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+
+        serviceAgreementSaga.executeTask(task).block();
+
+        verify(plansSaga, never()).executeTask(Mockito.any());
+    }
+
+    @Test
+    void test_updatePlans_whenIsEnabled() {
+        getMockServiceAgreement();
+        ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
+
+        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
+        when(legalEntityService.getLegalEntityByExternalId(any()))
+                .thenReturn(Mono.just(new LegalEntity().internalId("id")));
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
+                any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+
+        //Plans mocks
+        when(plansSaga.isEnabled()).thenReturn(true);
+        when(plansSaga.executeTask(any())).thenReturn(
+                Mono.just(Mockito.mock(PlansTask.class)));
+
+        serviceAgreementSaga.executeTask(task).block();
+
+        verify(plansSaga, times(1)).executeTask(any());
+    }
+
     private ServiceAgreementTaskV2 mockServiceAgreementTask(ServiceAgreementV2 serviceAgreement) {
         ServiceAgreementTaskV2 task = Mockito.mock(ServiceAgreementTaskV2.class);
         when(task.getServiceAgreement()).thenReturn(serviceAgreement);
@@ -446,7 +488,8 @@ class ServiceAgreementV2SagaTest {
     void getMockServiceAgreement() {
         regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
             .externalId(regularUserExId))
-            .legalEntityReference(new LegalEntityReference().externalId(leExternalId));
+            .legalEntityReference(new LegalEntityReference().externalId(leExternalId))
+            .planName("somPlanName");
 
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP")
