@@ -30,6 +30,7 @@ import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
+import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.Privilege;
@@ -163,20 +164,18 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             return Mono.just(streamTask);
         }
         log.info("Updating Plan for Service Agreement Id {}", serviceAgreement.getExternalId());
-        serviceAgreement.getJobProfileUsers().forEach(jobProfileUser -> {
-            legalEntityService
-                    .getLegalEntityByExternalId(jobProfileUser.getLegalEntityReference().getExternalId())
-                    .map(legalEntity -> legalEntity.getInternalId())
-                    .map(legalEntityInternalId -> {
-                        UserPlanUpdateRequestBody userPlanUpdateRequestBody = new UserPlanUpdateRequestBody();
-                        userPlanUpdateRequestBody.setId(""); // Plan id will be set internally by the saga by PlanName
-                        userPlanUpdateRequestBody.serviceAgreementId(serviceAgreement.getInternalId());
-                        userPlanUpdateRequestBody.setLegalEntityId(legalEntityInternalId);
-                        return userPlanUpdateRequestBody;
-                    }).map(reqBody -> plansService
-                            .updateUserPlan(jobProfileUser.getUser().getInternalId(), reqBody, jobProfileUser.getPlanName()))
-                    .subscribe();
-        });
+        serviceAgreement.getJobProfileUsers().forEach(jobProfileUser -> legalEntityService
+                .getLegalEntityByExternalId(jobProfileUser.getLegalEntityReference().getExternalId())
+                .map(LegalEntity::getInternalId)
+                .map(legalEntityInternalId -> {
+                    UserPlanUpdateRequestBody userPlanUpdateRequestBody = new UserPlanUpdateRequestBody();
+                    userPlanUpdateRequestBody.setId(""); // Plan id will be set internally by the saga by PlanName
+                    userPlanUpdateRequestBody.serviceAgreementId(serviceAgreement.getInternalId());
+                    userPlanUpdateRequestBody.setLegalEntityId(legalEntityInternalId);
+                    return userPlanUpdateRequestBody;
+                }).map(reqBody -> plansService
+                        .updateUserPlan(jobProfileUser.getUser().getInternalId(), reqBody, jobProfileUser.getPlanName()))
+                .subscribe());
         return Mono.just(streamTask);
     }
 
