@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [5.9.0](https://github.com/Backbase/stream-services/compare/5.8.0...5.9.0)
+## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
 ### Changed
 - make ContactsSaga use continueOnError flag
 
