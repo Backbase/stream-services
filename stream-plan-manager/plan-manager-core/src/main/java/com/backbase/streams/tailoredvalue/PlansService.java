@@ -9,8 +9,6 @@ import com.backbase.tailoredvalue.planmanager.service.api.v0.model.UserPlanUpdat
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClientException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
