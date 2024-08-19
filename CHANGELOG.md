@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Added plan-manager for TVP (Tailored Value Proposition) 
 - 
+### Changed
+- make ContactsSaga use continueOnError flag
+
 ## [5.7.0](https://github.com/Backbase/stream-services/compare/5.6.0...5.7.0)
 ### Changed
 - bug fixed - missing stream-starter module in stream-sdk

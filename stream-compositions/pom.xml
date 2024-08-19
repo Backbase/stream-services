@@ -7,13 +7,13 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-starter</artifactId>
-        <version>5.7.0</version>
+        <version>5.8.0</version>
         <relativePath>../stream-sdk/stream-starter</relativePath>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>5.7.0</version>
+    <version>5.8.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Compositions</name>

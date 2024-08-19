@@ -2,14 +2,18 @@ package com.backbase.stream.contact;
 
 import com.backbase.dbs.contact.api.service.v2.ContactsApi;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
+import com.backbase.stream.configuration.ContactsWorkerConfigurationProperties;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Slf4j
 @RequiredArgsConstructor
+@Getter
 public class ContactsSaga implements StreamTaskExecutor<ContactsTask> {
 
     public static final String ENTITY = "contact";
@@ -19,6 +23,7 @@ public class ContactsSaga implements StreamTaskExecutor<ContactsTask> {
     public static final String CREATED_SUCCESSFULLY = "Contact created successfully";
     public static final String FAILED_TO_INGEST_CONTACTS = "Failed to ingest contacts";
     private final ContactsApi contactsApi;
+    private final ContactsWorkerConfigurationProperties contactsWorkerConfigurationProperties;
 
     @Override
     public Mono<ContactsTask> executeTask(ContactsTask contactsTask) {
@@ -32,8 +37,13 @@ public class ContactsSaga implements StreamTaskExecutor<ContactsTask> {
                     return contactsTask;
                 })
                 .onErrorResume(throwable -> {
-                    contactsTask.error(ENTITY, CREATE, ERROR, item.getAccessContext().getExternalUserId(), null, throwable, "Failed to ingest contact " + throwable.getMessage(), FAILED_TO_INGEST_CONTACTS);
-                    return Mono.error(new StreamTaskException(contactsTask, throwable, FAILED_TO_INGEST_CONTACTS));
+                    if (contactsWorkerConfigurationProperties.isContinueOnError()) {
+                        contactsTask.warn(ENTITY, CREATE, ERROR, item.getAccessContext().getExternalUserId(), null, "Failed to ingest contact but continueOnError is enabled " + throwable.getMessage(), FAILED_TO_INGEST_CONTACTS);
+                        return Mono.just(contactsTask);
+                    } else {
+                        contactsTask.error(ENTITY, CREATE, ERROR, item.getAccessContext().getExternalUserId(), null, throwable, "Failed to ingest contact " + throwable.getMessage(), FAILED_TO_INGEST_CONTACTS);
+                        return Mono.error(new StreamTaskException(contactsTask, throwable, FAILED_TO_INGEST_CONTACTS));
+                    }
                 });
 
     }

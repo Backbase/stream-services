@@ -20,8 +20,9 @@ import org.springframework.context.annotation.Configuration;
 public class ContactsServiceConfiguration {
 
     @Bean
-    public ContactsSaga contactsSaga(ContactsApi contactsApi) {
-        return new ContactsSaga(contactsApi);
+    public ContactsSaga contactsSaga(ContactsApi contactsApi,
+        ContactsWorkerConfigurationProperties contactsWorkerConfigurationProperties) {
+        return new ContactsSaga(contactsApi, contactsWorkerConfigurationProperties);
     }
 
     public static class InMemoryContactsUnitOfWorkRepository extends
