@@ -73,12 +73,6 @@
             <artifactId>plan-manager-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>plan-manager-core</artifactId>
-            <version>5.7.0</version>
-            <scope>compile</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.backbase.stream</groupId>
