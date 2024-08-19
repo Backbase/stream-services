@@ -173,7 +173,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     userPlanUpdateRequestBody.serviceAgreementId(serviceAgreement.getInternalId());
                     userPlanUpdateRequestBody.setLegalEntityId(legalEntityInternalId);
                     return userPlanUpdateRequestBody;
-                }).map(reqBody -> plansService
+                }).flatMap(reqBody -> plansService
                         .updateUserPlan(jobProfileUser.getUser().getInternalId(), reqBody, jobProfileUser.getPlanName()))
                 .subscribe());
         return Mono.just(streamTask);

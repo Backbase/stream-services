@@ -9,6 +9,8 @@ import com.backbase.tailoredvalue.planmanager.service.api.v0.model.UserPlanUpdat
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
@@ -34,12 +36,11 @@ public class PlansService {
         }
         log.info("PostConstruct init to populate all plans with their ids");
 
-        plansApi.getPlans(new HashSet<>(), new HashSet<>(), "")
-                .doOnNext(this::processPlans).subscribe();
-
-        if (plansMap.isEmpty()) {
-            throw new PlanManagerException("Error getting all plans");
-        }
+        plansApi.getPlans(new HashSet<>(), new HashSet<>(), null)
+                .doOnNext(this::processPlans)
+                .doOnError(error -> {
+                    throw new PlanManagerException(error, "Error getting all plans");
+                }).subscribe();
     }
 
     public boolean isEnabled() {
@@ -71,6 +72,9 @@ public class PlansService {
     }
 
     private void processPlans(PlansGetResponseBody responseBody) {
+        if (responseBody.getPlans().isEmpty()) {
+            throw new PlanManagerException("Received plans list is empty");
+        }
         responseBody.getPlans().forEach(plan -> plansMap.put(plan.getName(), plan.getId()));
     }
 
