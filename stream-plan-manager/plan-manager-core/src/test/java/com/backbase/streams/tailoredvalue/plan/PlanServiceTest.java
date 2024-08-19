@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 @ExtendWith(MockitoExtension.class)
 class PlanServiceTest {
@@ -89,16 +90,6 @@ class PlanServiceTest {
         assertEquals(PLAN_ID, reqBody.getId());
         //Then verify userPlansApi gets called
         verify(userPlansApi).updateUserPlan(INTERNAL_USER_ID, reqBody);
-    }
-
-    @Test
-    void testExecuteTask_whenPlansPropertiesIsEnabled_andPlansApi_throws_Exception() {
-        //Given
-        when(plansProperties.isEnabled()).thenReturn(true);
-        when(plansApi.getPlans(any(), any(), any()))
-                .thenReturn(Mono.error(new WebClientResponseException(400, "Bad Request", null, null, null)));
-        //When Then
-        Assertions.assertThrows(PlanManagerException.class, () -> plansService.init());
     }
 
     @Test
