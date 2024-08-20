@@ -456,7 +456,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.basedir}/src/main/openapi/plan-manager-service-api-v0.3.0.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/openapi/plan-manager-service-api-v0.5.0.yaml</inputSpec>
                             <apiPackage>com.backbase.tailoredvalue.planmanager.service.api.v0</apiPackage>
                             <modelPackage>com.backbase.tailoredvalue.planmanager.service.api.v0.model</modelPackage>
                         </configuration>

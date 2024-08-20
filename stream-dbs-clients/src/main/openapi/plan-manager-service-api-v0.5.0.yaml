@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Plan Manager Service
-  version: 0.3.0
+  version: 0.5.0
   description: Manage plans and user plans
   x-icon: manage_accounts
   x-deprecated: false
@@ -41,11 +41,14 @@ paths:
                   - functionGroupId: b1198a20-5a40-4eb7-b47f-a553db920422
                     functionGroupName: Retail Functional Permissions
                     entitlementType: Functional
+                    dataGroupName: Retail Data Group
+                    dataGroupType: ARRANGEMENTS
                     description: The adult feature entitlements
                   - functionGroupId: c1198a20-5a40-4eb7-b47f-a553db920423
                     functionGroupName: Retail Data Permissions
                     entitlementType: Data
                     dataGroupName: Individual Owner Data Group
+                    dataGroupType: ARRANGEMENTS
                     description: The adult data entitlements on their own deposit account
         '404':
           description: If entitlement permissions not found for the plan
@@ -89,6 +92,16 @@ paths:
                 name: Individual Context - Adult User Plan
                 description: The plan of the adult in the context of individual
                 serviceAgreementType: Individual
+                segment:
+                  id: be6fac90-26f5-453e-9ff1-706ade2d5d17
+                  externalId: retail_customers_segment
+                  name: Retail Customers
+                  description: Designed to provide comprehensive banking solutions for everyday individuals and families.
+                bundle:
+                  id: 6553d4ef-e0e8-4407-a63d-759bb8e1c48a
+                  externalId: young_professional_bundle
+                  name: Young Professionals Bundle
+                  description: Designed for recent graduates and young adults starting their careers.
         '404':
           description: If default plan not found
           content:
@@ -120,10 +133,10 @@ paths:
             uniqueItems: true
             minItems: 1
             items:
-              minLength: 36
+              minLength: 32
               maxLength: 36
               type: string
-              pattern: '^[0-9a-f-]{36}$'
+              pattern: '^[0-9a-f]{32}$|^[0-9a-f-]{36}$'
           example:
             - b1198a20-5a40-4eb7-b47f-a553db934215
             - c67a8a20-5a40-4eb7-b47f-a553db876542
@@ -164,6 +177,16 @@ paths:
                     name: Individual Context - Adult User Plan
                     description: The plan of the adult in the context of individual
                     serviceAgreementType: Individual
+                    segment:
+                      id: be6fac90-26f5-453e-9ff1-706ade2d5d17
+                      externalId: retail_customers_segment
+                      name: Retail Customers
+                      description: Designed to provide comprehensive banking solutions for everyday individuals and families.
+                    bundle:
+                      id: 6553d4ef-e0e8-4407-a63d-759bb8e1c48a
+                      externalId: young_professional_bundle
+                      name: Young Professionals Bundle
+                      description: Designed for recent graduates and young adults starting their careers.
   '/service-api/v0/users/{internalUserId}/plans':
     put:
       tags:
@@ -340,6 +363,68 @@ components:
           description: The service agreement type
           minLength: 1
           maxLength: 64
+        segment:
+          $ref: '#/components/schemas/Segment'
+        bundle:
+          $ref: '#/components/schemas/Bundle'
+        additions:
+          description: Additional properties
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - id
+        - name
+    Segment:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/UniqueUUIDIdentifier'
+        externalId:
+          type: string
+          description: The external segment identifier
+          minLength: 1
+          maxLength: 64
+        name:
+          type: string
+          description: The name of the segment
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          description: The description of the segment
+          minLength: 1
+          maxLength: 256
+        additions:
+          description: Additional properties
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - id
+        - name
+    Bundle:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/UniqueUUIDIdentifier'
+        externalId:
+          type: string
+          description: The external bundle identifier
+          minLength: 1
+          maxLength: 64
+        name:
+          type: string
+          description: The name of the bundle
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          description: The description of the bundle
+          minLength: 1
+          maxLength: 256
         additions:
           description: Additional properties
           type: object
@@ -391,9 +476,9 @@ components:
     UniqueUUIDIdentifier:
       type: string
       description: The unique identifier
-      minLength: 36
+      minLength: 32
       maxLength: 36
-      pattern: '^[0-9a-f-]{36}$'
+      pattern: '^[0-9a-f]{32}$|^[0-9a-f-]{36}$'
     ErrorItem:
       title: ErrorItem
       type: object
