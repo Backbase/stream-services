@@ -165,7 +165,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         }
         log.info("Updating Plan for Service Agreement Id {}", serviceAgreement.getExternalId());
         serviceAgreement.getJobProfileUsers().stream()
-                .filter(jobProfileUser -> Objects.nonNull(jobProfileUser.getPlanName()))
+                .filter(jobProfileUser -> StringUtils.isNotEmpty(jobProfileUser.getPlanName()))
                 .forEach(jobProfileUser -> legalEntityService
                 .getLegalEntityByExternalId(jobProfileUser.getLegalEntityReference().getExternalId())
                 .map(LegalEntity::getInternalId)
