@@ -12,6 +12,7 @@ import com.backbase.stream.clients.config.PortfolioApiConfiguration;
 import com.backbase.stream.clients.config.TransactionManagerClientConfig;
 import com.backbase.stream.clients.config.UserManagerClientConfig;
 import com.backbase.stream.clients.config.UserProfileManagerClientConfig;
+import com.backbase.stream.clients.config.PlanManagerClientConfig;
 import com.backbase.stream.context.config.ContextPropagationConfiguration;
 import com.backbase.stream.webclient.configuration.DbsWebClientConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -40,7 +41,8 @@ import org.springframework.context.annotation.Import;
     UserManagerClientConfig.class,
     UserProfileManagerClientConfig.class,
     InstrumentApiConfiguration.class,
-    PortfolioApiConfiguration.class
+    PortfolioApiConfiguration.class,
+    PlanManagerClientConfig.class
 })
 @EnableConfigurationProperties
 public class DbsApiClientsAutoConfiguration {

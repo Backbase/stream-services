@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.9.0](https://github.com/Backbase/stream-services/compare/5.8.0...5.9.0)
+### Added
+- Added plan-manager for TVP (Tailored Value Proposition)
+
 ## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
 ### Changed
 - make ContactsSaga use continueOnError flag
@@ -1551,4 +1555,3 @@ backbase:
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
 [2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
 [2.75.0]: https://github.com/Backbase/stream-services/compare/2.74.0...2.75.0
-
