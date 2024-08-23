@@ -19,6 +19,7 @@ import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -57,6 +58,7 @@ import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BaseProductGroup.ProductGroupTypeEnum;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
+import com.backbase.stream.legalentity.model.CurrentAccount;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
@@ -812,6 +814,66 @@ class AccessGroupServiceTest {
         assertFalse(actionForItemIsPresent(actions, REMOVE, "custom-dg-item2"));
         assertFalse(actionForItemIsPresent(actions, ADD, "custom-dg-item1"));
         assertFalse(actionForItemIsPresent(actions, ADD, "custom-dg-item2"));
+    }
+
+    @Test
+    void updateArrangementDataGroupsWhenArrangementAlreadyExists() {
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+            List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroupItem existingDGroup = new DataGroupItem().id("dgId1").name("arrangement1")
+            .addItemsItem("debitAccountInId").serviceAgreementId("saInId");
+
+        BaseProductGroup upsertProductGroupArrangement = new BaseProductGroup()
+            .name("arrangement1")
+            .internalId("dgId1")
+            .productGroupType(ProductGroupTypeEnum.ARRANGEMENTS)
+            .addCurrentAccountsItem(new CurrentAccount().internalId("debitAccountInId").name("arrangement1")
+                .externalId("debitAccountExId"));
+
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                List.of(existingDGroup),
+                List.of(upsertProductGroupArrangement))
+            .block();
+
+        verify(dataGroupsApi, times(0)).putDataGroupItemsUpdate(any());
+
+    }
+
+    @Test
+    void updateArrangementDataGroupsWhenArrangementItemDoesNotExist() {
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+            List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroupItem existingDGroup = new DataGroupItem().id("debitAccountInId1").name("arrangement1")
+            .addItemsItem("debitAccountExId1").serviceAgreementId("saInId");
+
+        when(dataGroupsApi.putDataGroupItemsUpdate(any()))
+            .thenReturn(
+                Flux.just(new BatchResponseItemExtended().status(HTTP_STATUS_OK).resourceId("test-resource-id")));
+
+        BaseProductGroup upsertProductGroupArrangement = new BaseProductGroup()
+            .name("arrangement1")
+            .internalId("debitAccountInId")
+            .productGroupType(ProductGroupTypeEnum.ARRANGEMENTS)
+            .addCurrentAccountsItem(new CurrentAccount().name("arrangement1").internalId("debitAccountInId2")
+                .externalId("debitAccountExId2"));
+
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                List.of(existingDGroup),
+                List.of(upsertProductGroupArrangement))
+            .block();
+
+        verify(dataGroupsApi).putDataGroupItemsUpdate(presentationDataGroupItemPutRequestBodyCaptor.capture());
+
+        List<PresentationDataGroupItemPutRequestBody> actions = presentationDataGroupItemPutRequestBodyCaptor.getValue();
+        assertEquals(2, actions.size());
+        assertTrue(actionForItemIsPresent(actions, ADD, "debitAccountInId2"));
+        assertTrue(actionForItemIsPresent(actions, REMOVE, "debitAccountExId1"));
     }
 
     @Test
