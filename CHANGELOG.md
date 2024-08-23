@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.65.2](https://github.com/Backbase/stream-services/compare/3.65.2...3.65.3)
+### Changed
+- Adding additional mapping attributes, reservedAmount, to Credit card.
+
 ## [3.65.0](https://github.com/Backbase/stream-services/compare/3.65.0...3.65.1)
 ### Changed
 - Query for existing payments by using arrangement IDs instead of user IDs. This will eliminate duplicate payments from being ingested when joint owners are added.
