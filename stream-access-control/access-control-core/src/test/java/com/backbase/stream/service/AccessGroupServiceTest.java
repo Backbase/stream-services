@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,14 +28,18 @@ import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItemSystemBase;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem.TypeEnum;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissionsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAssignUserPermissions;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupItemPutRequestBody;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationFunctionGroupDataGroup;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationItemIdentifier;
@@ -44,6 +50,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationServiceAg
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementUsersQuery;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -59,6 +66,8 @@ import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
+import com.backbase.stream.product.task.ProductGroupTask;
+import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -77,10 +86,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.client.HttpClientErrorException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -114,6 +120,62 @@ class AccessGroupServiceTest {
 
     @Captor
     private ArgumentCaptor<List<PresentationDataGroupItemPutRequestBody>> presentationDataGroupItemPutRequestBodyCaptor;
+
+
+    @Test
+    void shouldCreateServiceAgreement() {
+        String saExId = "someSaExId";
+        String saName = "someSaName";
+        String saDesc = "someSaDesc";
+        String participantExId = "someParticipantExId";
+        String saInId = "someSaInId";
+
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+        ServiceAgreement serviceAgreement = new ServiceAgreement()
+            .externalId(saExId).name(saName).description(saDesc)
+            .participants(List.of(new LegalEntityParticipant().externalId(participantExId)));
+
+        when(serviceAgreementsApi.postServiceAgreementIngest(any())).thenReturn(Mono.just(new IdItem().id(saInId)));
+
+        ServiceAgreement actual = subject.createServiceAgreement(streamTask, serviceAgreement).block();
+
+        assertEquals(saInId, actual.getInternalId());
+
+        ServicesAgreementIngest expectedSA = new ServicesAgreementIngest()
+            .status(null).isMaster(null)
+            .externalId(saExId).name(saName).description(saDesc)
+            .participantsToIngest(List.of(new ParticipantIngest().externalId(participantExId)));
+        verify(serviceAgreementsApi).postServiceAgreementIngest(expectedSA);
+    }
+
+    @Test
+    void shouldSetupProductGroupThatAlreadyExists() {
+        String saInId = "someSaInId";
+        String saExId = "someSaExId";
+        String newDgItemExId1 = "someDgItemExId1";
+        String productGroupName = "somePgName";
+
+        ProductGroupTask streamTask = new ProductGroupTask().data(new ProductGroup()
+            .serviceAgreement(new ServiceAgreement().externalId(saExId).internalId(saInId))
+            .productGroupType(ProductGroupTypeEnum.CUSTOM)
+            .name(productGroupName)
+            .customDataGroupItems(List.of(
+                new CustomDataGroupItem().externalId(newDgItemExId1))));
+
+        when(dataGroupsApi.getDataGroups(saInId, ProductGroupTypeEnum.CUSTOM.name(), true))
+            .thenReturn(Flux.empty());
+
+        when(dataGroupsApi.putDataGroups(any())).thenReturn(Mono.empty());
+
+
+        subject.setupProductGroups(streamTask).block();
+
+
+        DataGroupItemSystemBase expected = new DataGroupItemSystemBase().name(productGroupName)
+                .addItemsItem(newDgItemExId1).externalServiceAgreementId(saExId);
+
+        verify(dataGroupsApi).postDataGroups(expected);
+    }
 
     @Test
     void getServiceAgreementByExternalIdRetrievesServiceAgreementByExternalId() {
