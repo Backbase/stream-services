@@ -58,7 +58,9 @@ import com.backbase.stream.legalentity.model.BaseProductGroup.ProductGroupTypeEn
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
+import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
@@ -149,6 +151,33 @@ class AccessGroupServiceTest {
     }
 
     @Test
+    void shouldHandleErrorOnCreateServiceAgreement() {
+        String saExId = "someSaExId";
+        String saName = "someSaName";
+        String saDesc = "someSaDesc";
+        String participantExId = "someParticipantExId";
+        String saInId = "someSaInId";
+
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+        ServiceAgreement serviceAgreement = new ServiceAgreement()
+            .externalId(saExId).name(saName).description(saDesc)
+            .participants(List.of(new LegalEntityParticipant().externalId(participantExId)));
+
+        String errorMessage = "some error";
+        WebClientResponseException.InternalServerError error =
+            Mockito.mock(WebClientResponseException.InternalServerError.class);
+        when(error.getResponseBodyAsString()).thenReturn(errorMessage);
+        when(serviceAgreementsApi.postServiceAgreementIngest(any()))
+            .thenReturn(Mono.error(error));
+
+        assertThrows(StreamTaskException.class,
+            () -> subject.createServiceAgreement(streamTask, serviceAgreement).block());
+
+        verify(streamTask).error("service-agreement", "create", "failed", saExId, "", error, errorMessage,
+            "Failed to create Service Agreement");
+    }
+
+    @Test
     void shouldSetupProductGroupThatAlreadyExists() {
         String saInId = "someSaInId";
         String saExId = "someSaExId";
@@ -168,16 +197,39 @@ class AccessGroupServiceTest {
 
         when(dataGroupsApi.putDataGroups(any())).thenReturn(Mono.empty());
 
-
         subject.setupProductGroups(streamTask).block();
 
-
         PresentationDataGroupUpdate expectedDGUpdate1 = new PresentationDataGroupUpdate();
-        expectedDGUpdate1.setDataGroupIdentifier(new PresentationDataGroupIdentifier().idIdentifier(existingDgItemInId1));
+        expectedDGUpdate1.setDataGroupIdentifier(
+            new PresentationDataGroupIdentifier().idIdentifier(existingDgItemInId1));
         expectedDGUpdate1.setDataItems(List.of(new PresentationItemIdentifier().id(existingDgItemInId1)));
         expectedDGUpdate1.setName(productGroupName);
 
         verify(dataGroupsApi).putDataGroups(expectedDGUpdate1);
+    }
+
+    @Test
+    void shouldSetAdministrators() {
+        String leName = "someLeName";
+        String leInId = "someLeInId";
+        String saExId = "someSaExId";
+        String fullName = "John Smith";
+        String userExId = "someUserExId";
+
+        LegalEntity legalEntity =
+            new LegalEntity(leName, LegalEntityType.CUSTOMER, List.of(
+                new User().fullName(fullName).legalEntityId(leInId).externalId(userExId)))
+                .masterServiceAgreement(new ServiceAgreement().externalId(saExId));
+
+        when(serviceAgreementsApi.putPresentationServiceAgreementAdminsBatchUpdate(any()))
+            .thenReturn(Flux.just(new BatchResponseItemExtended()));
+
+        subject.setAdministrators(legalEntity).block();
+
+        PresentationServiceAgreementUsersBatchUpdate expected = new PresentationServiceAgreementUsersBatchUpdate()
+            .action(ADD).addUsersItem(new PresentationServiceAgreementUserPair()
+                .externalServiceAgreementId(saExId).externalUserId(userExId));
+        verify(serviceAgreementsApi).putPresentationServiceAgreementAdminsBatchUpdate(expected);
     }
 
     @Test
