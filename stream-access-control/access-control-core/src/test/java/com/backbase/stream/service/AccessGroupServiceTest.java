@@ -815,12 +815,37 @@ class AccessGroupServiceTest {
     }
 
     @Test
+    void updateExistingDataGroupsHandleError() {
+
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup()
+            .serviceAgreement(new ServiceAgreement())
+            .productGroups(List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroupItem existingDGroupItemCustom = buildDataGroupItem("Custom data group item",
+            "custom desc", "custom-dg-item1");
+
+        BaseProductGroup upsertProductGroupCustom = buildBaseProductGroup("Custom data group item",
+            "custom desc", ProductGroupTypeEnum.CUSTOM,
+            "custom-dg-item2");
+        when(dataGroupsApi.putDataGroupItemsUpdate(any())).thenReturn(
+            Flux.error(WebClientResponseException.create(500, "Internal error", null, null, null, null)));
+
+        assertThrows(StreamTaskException.class,
+            () -> subject.updateExistingDataGroupsBatch(batchProductGroupTask, List.of(existingDGroupItemCustom),
+                List.of(upsertProductGroupCustom)).block());
+
+        assertEquals("Failed to update product groups", batchProductGroupTask.getError());
+    }
+
+    @Test
     void updateExistingDataGroupsBatchWithEmptyDbsIngestionModeReplace() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
-                List.of(new BaseProductGroup().name("Test product group"))));
+            List.of(new BaseProductGroup().name("Test product group"))));
 
         BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
                 "Repository Group Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
