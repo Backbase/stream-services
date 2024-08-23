@@ -152,7 +152,8 @@ class AccessGroupServiceTest {
     void shouldSetupProductGroupThatAlreadyExists() {
         String saInId = "someSaInId";
         String saExId = "someSaExId";
-        String newDgItemExId1 = "someDgItemExId1";
+        String existingDgItemExId1 = "someDgItemExId1";
+        String existingDgItemInId1 = existingDgItemExId1 + "in";
         String productGroupName = "somePgName";
 
         ProductGroupTask streamTask = new ProductGroupTask().data(new ProductGroup()
@@ -160,10 +161,10 @@ class AccessGroupServiceTest {
             .productGroupType(ProductGroupTypeEnum.CUSTOM)
             .name(productGroupName)
             .customDataGroupItems(List.of(
-                new CustomDataGroupItem().externalId(newDgItemExId1))));
+                new CustomDataGroupItem().internalId(existingDgItemInId1).externalId(existingDgItemExId1))));
 
         when(dataGroupsApi.getDataGroups(saInId, ProductGroupTypeEnum.CUSTOM.name(), true))
-            .thenReturn(Flux.empty());
+            .thenReturn(Flux.just(new DataGroupItem().id(existingDgItemInId1).name(productGroupName)));
 
         when(dataGroupsApi.putDataGroups(any())).thenReturn(Mono.empty());
 
@@ -171,10 +172,12 @@ class AccessGroupServiceTest {
         subject.setupProductGroups(streamTask).block();
 
 
-        DataGroupItemSystemBase expected = new DataGroupItemSystemBase().name(productGroupName)
-                .addItemsItem(newDgItemExId1).externalServiceAgreementId(saExId);
+        PresentationDataGroupUpdate expectedDGUpdate1 = new PresentationDataGroupUpdate();
+        expectedDGUpdate1.setDataGroupIdentifier(new PresentationDataGroupIdentifier().idIdentifier(existingDgItemInId1));
+        expectedDGUpdate1.setDataItems(List.of(new PresentationItemIdentifier().id(existingDgItemInId1)));
+        expectedDGUpdate1.setName(productGroupName);
 
-        verify(dataGroupsApi).postDataGroups(expected);
+        verify(dataGroupsApi).putDataGroups(expectedDGUpdate1);
     }
 
     @Test
