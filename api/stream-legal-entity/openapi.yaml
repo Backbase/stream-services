@@ -852,6 +852,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
         creditLimit:
           $ref: '#/components/schemas/CreditLimit'
         IBAN:
