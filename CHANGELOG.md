@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.1.4](https://github.com/Backbase/stream-services/compare/4.1.3...4.1.4)
+### Fix
+- Fixed deletion of non-repository custom data-group items on data-group update
+- 
 ## [4.1.3](https://github.com/Backbase/stream-services/compare/4.1.3...4.1.4)
 ### Changed
 - Query for existing payments by using arrangement IDs instead of user IDs. This will eliminate duplicate payments from being ingested when joint owners are added.
