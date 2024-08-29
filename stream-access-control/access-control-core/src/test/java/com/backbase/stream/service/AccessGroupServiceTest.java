@@ -10,11 +10,16 @@ import static com.backbase.stream.WebClientTestUtils.buildWebResponseExceptionMo
 import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -24,16 +29,21 @@ import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItemSystemBase;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem.TypeEnum;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissionsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAssignUserPermissions;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupItemPutRequestBody;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationFunctionGroupDataGroup;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIdentifier;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationItemIdentifier;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationParticipantBatchUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationParticipantPutBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationServiceAgreementUserPair;
@@ -41,13 +51,18 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationServiceAg
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementUsersQuery;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
+import com.backbase.stream.legalentity.model.BaseProductGroup.ProductGroupTypeEnum;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
+import com.backbase.stream.legalentity.model.CurrentAccount;
 import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
+import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
@@ -55,6 +70,8 @@ import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
+import com.backbase.stream.product.task.ProductGroupTask;
+import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -73,10 +90,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.springframework.web.client.HttpClientErrorException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -111,6 +125,115 @@ class AccessGroupServiceTest {
     @Captor
     private ArgumentCaptor<List<PresentationDataGroupItemPutRequestBody>> presentationDataGroupItemPutRequestBodyCaptor;
 
+
+    @Test
+    void shouldCreateServiceAgreement() {
+        String saExId = "someSaExId";
+        String saName = "someSaName";
+        String saDesc = "someSaDesc";
+        String participantExId = "someParticipantExId";
+        String saInId = "someSaInId";
+
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+        ServiceAgreement serviceAgreement = new ServiceAgreement()
+            .externalId(saExId).name(saName).description(saDesc)
+            .participants(List.of(new LegalEntityParticipant().externalId(participantExId)));
+
+        when(serviceAgreementsApi.postServiceAgreementIngest(any())).thenReturn(Mono.just(new IdItem().id(saInId)));
+
+        ServiceAgreement actual = subject.createServiceAgreement(streamTask, serviceAgreement).block();
+
+        assertEquals(saInId, actual.getInternalId());
+
+        ServicesAgreementIngest expectedSA = new ServicesAgreementIngest()
+            .status(null).isMaster(null)
+            .externalId(saExId).name(saName).description(saDesc)
+            .participantsToIngest(List.of(new ParticipantIngest().externalId(participantExId)));
+        verify(serviceAgreementsApi).postServiceAgreementIngest(expectedSA);
+    }
+
+    @Test
+    void shouldHandleErrorOnCreateServiceAgreement() {
+        String saExId = "someSaExId";
+        String saName = "someSaName";
+        String saDesc = "someSaDesc";
+        String participantExId = "someParticipantExId";
+        String saInId = "someSaInId";
+
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+        ServiceAgreement serviceAgreement = new ServiceAgreement()
+            .externalId(saExId).name(saName).description(saDesc)
+            .participants(List.of(new LegalEntityParticipant().externalId(participantExId)));
+
+        String errorMessage = "some error";
+        WebClientResponseException.InternalServerError error =
+            Mockito.mock(WebClientResponseException.InternalServerError.class);
+        when(error.getResponseBodyAsString()).thenReturn(errorMessage);
+        when(serviceAgreementsApi.postServiceAgreementIngest(any()))
+            .thenReturn(Mono.error(error));
+
+        assertThrows(StreamTaskException.class,
+            () -> subject.createServiceAgreement(streamTask, serviceAgreement).block());
+
+        verify(streamTask).error("service-agreement", "create", "failed", saExId, "", error, errorMessage,
+            "Failed to create Service Agreement");
+    }
+
+    @Test
+    void shouldSetupProductGroupThatAlreadyExists() {
+        String saInId = "someSaInId";
+        String saExId = "someSaExId";
+        String existingDgItemExId1 = "someDgItemExId1";
+        String existingDgItemInId1 = existingDgItemExId1 + "in";
+        String productGroupName = "somePgName";
+
+        ProductGroupTask streamTask = new ProductGroupTask().data(new ProductGroup()
+            .serviceAgreement(new ServiceAgreement().externalId(saExId).internalId(saInId))
+            .productGroupType(ProductGroupTypeEnum.CUSTOM)
+            .name(productGroupName)
+            .customDataGroupItems(List.of(
+                new CustomDataGroupItem().internalId(existingDgItemInId1).externalId(existingDgItemExId1))));
+
+        when(dataGroupsApi.getDataGroups(saInId, ProductGroupTypeEnum.CUSTOM.name(), true))
+            .thenReturn(Flux.just(new DataGroupItem().id(existingDgItemInId1).name(productGroupName)));
+
+        when(dataGroupsApi.putDataGroups(any())).thenReturn(Mono.empty());
+
+        subject.setupProductGroups(streamTask).block();
+
+        PresentationDataGroupUpdate expectedDGUpdate1 = new PresentationDataGroupUpdate();
+        expectedDGUpdate1.setDataGroupIdentifier(
+            new PresentationDataGroupIdentifier().idIdentifier(existingDgItemInId1));
+        expectedDGUpdate1.setDataItems(List.of(new PresentationItemIdentifier().id(existingDgItemInId1)));
+        expectedDGUpdate1.setName(productGroupName);
+
+        verify(dataGroupsApi).putDataGroups(expectedDGUpdate1);
+    }
+
+    @Test
+    void shouldSetAdministrators() {
+        String leName = "someLeName";
+        String leInId = "someLeInId";
+        String saExId = "someSaExId";
+        String fullName = "John Smith";
+        String userExId = "someUserExId";
+
+        LegalEntity legalEntity =
+            new LegalEntity(leName, LegalEntityType.CUSTOMER, List.of(
+                new User().fullName(fullName).legalEntityId(leInId).externalId(userExId)))
+                .masterServiceAgreement(new ServiceAgreement().externalId(saExId));
+
+        when(serviceAgreementsApi.putPresentationServiceAgreementAdminsBatchUpdate(any()))
+            .thenReturn(Flux.just(new BatchResponseItemExtended()));
+
+        subject.setAdministrators(legalEntity).block();
+
+        PresentationServiceAgreementUsersBatchUpdate expected = new PresentationServiceAgreementUsersBatchUpdate()
+            .action(ADD).addUsersItem(new PresentationServiceAgreementUserPair()
+                .externalServiceAgreementId(saExId).externalUserId(userExId));
+        verify(serviceAgreementsApi).putPresentationServiceAgreementAdminsBatchUpdate(expected);
+    }
+
     @Test
     void getServiceAgreementByExternalIdRetrievesServiceAgreementByExternalId() {
         final String externalId = "someExternalId";
@@ -123,8 +246,8 @@ class AccessGroupServiceTest {
         ServiceAgreement expected = new ServiceAgreement().externalId(externalId);
 
         StepVerifier.create(result)
-                .assertNext(serviceAgreement -> assertEquals(serviceAgreement,expected))
-                .verifyComplete();
+            .assertNext(serviceAgreement -> assertEquals(serviceAgreement, expected))
+            .verifyComplete();
 
     }
 
@@ -411,8 +534,8 @@ class AccessGroupServiceTest {
             Collections.singletonList(new BaseProductGroup().internalId("data-group-0"))
         );
         baseProductGroupMap.put(
-             new BusinessFunctionGroup().id("business-function-group-id-2"),
-             Collections.singletonList(new BaseProductGroup().internalId("data-group-2"))
+            new BusinessFunctionGroup().id("business-function-group-id-2"),
+            Collections.singletonList(new BaseProductGroup().internalId("data-group-2"))
         );
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
@@ -640,16 +763,142 @@ class AccessGroupServiceTest {
 
         // Then
         verify(dataGroupsApi).putDataGroupItemsUpdate(presentationDataGroupItemPutRequestBodyCaptor.capture());
-        assertEquals(3, presentationDataGroupItemPutRequestBodyCaptor.getValue().stream()
-                .map(PresentationDataGroupItemPutRequestBody::getAction)
-                .filter(REMOVE::equals)
-                .toList()
-                .size());
-        assertEquals(3, presentationDataGroupItemPutRequestBodyCaptor.getValue().stream()
-                .map(PresentationDataGroupItemPutRequestBody::getAction)
-                .filter(ADD::equals)
-                .toList()
-                .size());
+        List<PresentationDataGroupItemPutRequestBody> actions = presentationDataGroupItemPutRequestBodyCaptor.getValue();
+        assertEquals(6, actions.size());
+        assertTrue(actionForItemIsPresent(actions, REMOVE, "template-custom-test"));
+        assertTrue(actionForItemIsPresent(actions, REMOVE, "engagement-template-custom-test"));
+        assertTrue(actionForItemIsPresent(actions, REMOVE, "engagement-template-notification-test"));
+        assertTrue(actionForItemIsPresent(actions, ADD, "template-custom"));
+        assertTrue(actionForItemIsPresent(actions, ADD, "engagement-template-custom"));
+        assertTrue(actionForItemIsPresent(actions, ADD, "engagement-template-notification"));
+    }
+
+    @Test
+    void updateExistingDataGroupsDoesNotRemoveCustomDataGroups() {
+        // Given
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+            List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroupItem existingDGroupItemCustom = buildDataGroupItem("Custom data group item",
+            "custom desc", "custom-dg-item1", "custom-dg-item2");
+        DataGroupItem existingDGroupItemRepository = buildDataGroupItem("Repository data group item",
+            "rep desc", "repository-dg-item1");
+
+        BaseProductGroup upsertProductGroupCustom = buildBaseProductGroup("Custom data group item",
+            "custom desc", ProductGroupTypeEnum.CUSTOM,
+            "custom-dg-item1", "custom-dg-item2");
+        BaseProductGroup upsertProductGroupRepository = buildBaseProductGroup("Repository data group item",
+            "rep desc", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
+            "repository-dg-item2");
+        when(dataGroupsApi.putDataGroupItemsUpdate(any())).thenReturn(Flux.just(new BatchResponseItemExtended()
+            .status(HTTP_STATUS_OK)
+            .resourceId("test-resource-id")));
+
+        // When
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                List.of(existingDGroupItemCustom, existingDGroupItemRepository),
+                List.of(upsertProductGroupCustom, upsertProductGroupRepository))
+            .block();
+
+        // Then
+        verify(dataGroupsApi).putDataGroupItemsUpdate(presentationDataGroupItemPutRequestBodyCaptor.capture());
+
+        List<PresentationDataGroupItemPutRequestBody> actions = presentationDataGroupItemPutRequestBodyCaptor.getValue();
+        assertEquals(2, actions.size());
+        assertTrue(actionForItemIsPresent(actions, ADD, "repository-dg-item2"));
+        assertTrue(actionForItemIsPresent(actions, REMOVE, "repository-dg-item1"));
+        // the following assertions is to test if for some reason "custom-dg-item1" and "custom-dg-item2" ended up paired with "repository-dg-item*" ;)
+        assertFalse(actionForItemIsPresent(actions, REMOVE, "custom-dg-item1"));
+        assertFalse(actionForItemIsPresent(actions, REMOVE, "custom-dg-item2"));
+        assertFalse(actionForItemIsPresent(actions, ADD, "custom-dg-item1"));
+        assertFalse(actionForItemIsPresent(actions, ADD, "custom-dg-item2"));
+    }
+
+    @Test
+    void updateArrangementDataGroupsWhenArrangementAlreadyExists() {
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+            List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroupItem existingDGroup = new DataGroupItem().id("dgId1").name("arrangement1")
+            .addItemsItem("debitAccountInId").serviceAgreementId("saInId");
+
+        BaseProductGroup upsertProductGroupArrangement = new BaseProductGroup()
+            .name("arrangement1")
+            .internalId("dgId1")
+            .productGroupType(ProductGroupTypeEnum.ARRANGEMENTS)
+            .addCurrentAccountsItem(new CurrentAccount().internalId("debitAccountInId").name("arrangement1")
+                .externalId("debitAccountExId"));
+
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                List.of(existingDGroup),
+                List.of(upsertProductGroupArrangement))
+            .block();
+
+        verify(dataGroupsApi, times(0)).putDataGroupItemsUpdate(any());
+
+    }
+
+    @Test
+    void updateArrangementDataGroupsWhenArrangementItemDoesNotExist() {
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
+            List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroupItem existingDGroup = new DataGroupItem().id("debitAccountInId1").name("arrangement1")
+            .addItemsItem("debitAccountExId1").serviceAgreementId("saInId");
+
+        when(dataGroupsApi.putDataGroupItemsUpdate(any()))
+            .thenReturn(
+                Flux.just(new BatchResponseItemExtended().status(HTTP_STATUS_OK).resourceId("test-resource-id")));
+
+        BaseProductGroup upsertProductGroupArrangement = new BaseProductGroup()
+            .name("arrangement1")
+            .internalId("debitAccountInId")
+            .productGroupType(ProductGroupTypeEnum.ARRANGEMENTS)
+            .addCurrentAccountsItem(new CurrentAccount().name("arrangement1").internalId("debitAccountInId2")
+                .externalId("debitAccountExId2"));
+
+        subject.updateExistingDataGroupsBatch(batchProductGroupTask,
+                List.of(existingDGroup),
+                List.of(upsertProductGroupArrangement))
+            .block();
+
+        verify(dataGroupsApi).putDataGroupItemsUpdate(presentationDataGroupItemPutRequestBodyCaptor.capture());
+
+        List<PresentationDataGroupItemPutRequestBody> actions = presentationDataGroupItemPutRequestBodyCaptor.getValue();
+        assertEquals(2, actions.size());
+        assertTrue(actionForItemIsPresent(actions, ADD, "debitAccountInId2"));
+        assertTrue(actionForItemIsPresent(actions, REMOVE, "debitAccountExId1"));
+    }
+
+    @Test
+    void updateExistingDataGroupsHandleError() {
+
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup()
+            .serviceAgreement(new ServiceAgreement())
+            .productGroups(List.of(new BaseProductGroup().name("Test product group"))));
+
+        DataGroupItem existingDGroupItemCustom = buildDataGroupItem("Custom data group item",
+            "custom desc", "custom-dg-item1");
+
+        BaseProductGroup upsertProductGroupCustom = buildBaseProductGroup("Custom data group item",
+            "custom desc", ProductGroupTypeEnum.CUSTOM,
+            "custom-dg-item2");
+        when(dataGroupsApi.putDataGroupItemsUpdate(any())).thenReturn(
+            Flux.error(WebClientResponseException.create(500, "Internal error", null, null, null, null)));
+
+        assertThrows(StreamTaskException.class,
+            () -> subject.updateExistingDataGroupsBatch(batchProductGroupTask, List.of(existingDGroupItemCustom),
+                List.of(upsertProductGroupCustom)).block());
+
+        assertEquals("Failed to update product groups", batchProductGroupTask.getError());
     }
 
     @Test
@@ -658,7 +907,7 @@ class AccessGroupServiceTest {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
-                List.of(new BaseProductGroup().name("Test product group"))));
+            List.of(new BaseProductGroup().name("Test product group"))));
 
         BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
                 "Repository Group Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
@@ -884,6 +1133,7 @@ class AccessGroupServiceTest {
         verify(serviceAgreementsApi, times(1))
                 .putServiceAgreementItem(eq("internal-id"), any());
     }
+
     private void thenRegularUsersUpdateCall(String expectedSaExId, PresentationAction expectedAction,
                                             String... expectedUserIds) {
         PresentationServiceAgreementUsersBatchUpdate expectedRegularUserAddUpdate =
@@ -927,17 +1177,20 @@ class AccessGroupServiceTest {
     }
 
     private BaseProductGroup buildBaseProductGroup(String name, String description,
-                                                   BaseProductGroup.ProductGroupTypeEnum productGroupTypeEnum,
-                                                   String dataGroupItemId) {
+        BaseProductGroup.ProductGroupTypeEnum productGroupTypeEnum, String... dataGroupItemId) {
         ProductGroup productGroup = new ProductGroup();
         productGroup.setName(name);
         productGroup.setDescription(description);
         productGroup.setProductGroupType(productGroupTypeEnum);
-        productGroup.addCustomDataGroupItemsItem(
-                new CustomDataGroupItem()
-                        .internalId(dataGroupItemId)
-                        .externalId(dataGroupItemId));
+        productGroup.setCustomDataGroupItems(Arrays.stream(dataGroupItemId)
+            .map(dgi -> new CustomDataGroupItem().internalId(dgi).externalId(dgi)).toList());
         return productGroup;
+    }
+
+    private boolean actionForItemIsPresent(List<PresentationDataGroupItemPutRequestBody> actions,
+        PresentationAction expectedAction, String expectedItem) {
+        return actions.stream().anyMatch(a -> a.getAction().equals(expectedAction)
+            && a.getDataItems().stream().map(PresentationItemIdentifier::getId).anyMatch(expectedItem::equals));
     }
 
     @AllArgsConstructor

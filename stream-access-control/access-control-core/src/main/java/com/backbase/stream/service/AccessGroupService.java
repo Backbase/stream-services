@@ -57,7 +57,6 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
@@ -91,10 +90,10 @@ import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -797,11 +796,10 @@ public class AccessGroupService {
                 boolean shouldBeInArrangementsGroup = BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS
                         .equals(pg.get().getProductGroupType()) &&
                         StreamUtils.getInternalProductIds(pg.get()).contains(arrangement);
-                boolean shouldBeInRepositoriesGroup = BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES
-                        .equals(pg.get().getProductGroupType()) &&
+                boolean shouldBeInCustomGroup = ObjectUtils.isNotEmpty(pg.get().getCustomDataGroupItems()) &&
                         pg.get().getCustomDataGroupItems().stream().map(CustomDataGroupItem::getInternalId)
                                 .anyMatch(arrangement::equals);
-                boolean shouldBeInGroup = shouldBeInArrangementsGroup || shouldBeInRepositoriesGroup;
+                boolean shouldBeInGroup = shouldBeInArrangementsGroup || shouldBeInCustomGroup;
                 if (!dbsDataGroup.getItems().contains(arrangement) && shouldBeInGroup) {
                     // ADD.
                     log.debug("Arrangement item {} to be added to Data Group {}", arrangement, dbsDataGroup.getName());
