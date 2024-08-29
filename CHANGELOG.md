@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.9.1](https://github.com/Backbase/stream-services/compare/5.9.0...5.9.1)
+### Fix
+- Fixed deletion of non-repository custom data-group items on data-group update
+
 ## [5.9.0](https://github.com/Backbase/stream-services/compare/5.8.0...5.9.0)
 ### Added
 - Added plan-manager for TVP (Tailored Value Proposition)
@@ -43,6 +47,21 @@ All notable changes to this project will be documented in this file.
 - Bumping Service SDK to **17.0.0**
 - Bumping Banking Services clients to **2024.04**
 
+## [4.1.5](https://github.com/Backbase/stream-services/compare/4.1.4...4.1.5)
+### Fix
+- Fixed deletion of non-repository custom data-group items on data-group update
+
+## [4.1.4](https://github.com/Backbase/stream-services/compare/4.1.3...4.1.4)
+### Changed
+- Query for existing payments by using arrangement IDs instead of user IDs. This will eliminate duplicate payments from being ingested when joint owners are added.
+
+## [4.1.3](https://github.com/Backbase/stream-services/compare/4.1.2...4.1.3)
+### Added
+- Added Payment order Page size to fix an issue with payment order ingestion.
+## [4.1.2](https://github.com/Backbase/stream-services/compare/4.1.1...4.1.2)
+### Added
+- Added CUSTOMERS data group enum type to legal entity OpenAPI contract
+
 ## [4.1.1](https://github.com/Backbase/stream-services/compare/4.1.1...4.1.0)
 ### Changed
 - update with fixes from 3.72.4
@@ -58,7 +77,13 @@ All notable changes to this project will be documented in this file.
   - Multiple breaking changes were introduced as part of this upgrade, including Spring Boot 3 upgrade, replacing Spring Sleuth by Micrometer and modules structure for the Composition Events.
 - Bumping Banking Services clients to **2023.12**
 - Enhancing Multi-tenancy support by removing the concurrency limitation from `v3.70.0` using the new reactor's context propagation.
+## [3.72.4](https://github.com/Backbase/stream-services/compare/3.72.1...3.72.3)
+### Added
+- Update BatchProductIngestion saga to ignore the user external ID case when getting products for specified user.
 
+## [3.72.3](https://github.com/Backbase/stream-services/compare/3.72.1...3.72.3)
+### Added
+- Update payments to be in line with latest Banking Services
 ## [3.72.1](https://github.com/Backbase/stream-services/compare/3.72.0...3.72.1)
 ### Added
 - Change name of transaction cursor mapper bean so that it does not clash with dependencies.
@@ -113,6 +138,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Always check cursor and create if it does not exist.
 - If `DateRangeEnd` is passed in the composition request set that as lastTxnDate instead of system date.
+## [3.65.0](https://github.com/Backbase/stream-services/compare/3.65.0...3.65.1)
+### Changed
+- Query for existing payments by using arrangement IDs instead of user IDs. This will eliminate duplicate payments from being ingested when joint owners are added.
 
 ## [3.65.0](https://github.com/Backbase/stream-services/compare/3.64.0...3.65.0)
 ### Changed

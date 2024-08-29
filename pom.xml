@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>5.9.0</version>
+    <version>5.9.1</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
@@ -38,9 +38,9 @@
     </modules>
 
     <properties>
-        <java.version>21</java.version>
-        <ssdk.version>17.0.0</ssdk.version>
-        <backbase-bom.version>2024.04</backbase-bom.version>
+        <java.version>17</java.version>
+        <ssdk.version>16.1.7</ssdk.version>
+        <backbase-bom.version>2024.03-LTS</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
@@ -82,6 +82,11 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>com.backbase.buildingblocks</groupId>
+                    <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
+                    <version>17.0.0</version>
+                </plugin>
                 <plugin>
                     <groupId>com.backbase.oss</groupId>
                     <artifactId>boat-maven-plugin</artifactId>

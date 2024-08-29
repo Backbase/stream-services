@@ -370,7 +370,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .filter(group ->
                         group.getUsers().stream()
                                 // get only products for specified user.
-                                .filter(u -> u.getUser().getExternalId().equals(user.getExternalId()))
+                                .filter(u -> u.getUser().getExternalId().equalsIgnoreCase(user.getExternalId()))
                                 .map(JobProfileUser::getBusinessFunctionGroups)
                                 .flatMap(Collection::stream)
                                 .anyMatch(bfg -> bfg.getName().equals(functionGroup.getName()))

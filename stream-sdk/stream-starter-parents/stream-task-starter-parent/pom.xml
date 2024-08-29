@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-starter</artifactId>
-        <version>5.9.0</version>
+        <version>5.9.1</version>
         <relativePath>../../stream-starter</relativePath>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-task-starter-parent</artifactId>
-    <version>5.9.0</version>
+    <version>5.9.1</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Task Starter</name>
     <description>Parent for Stream Executable Tasks</description>
@@ -24,7 +24,7 @@
         <docker.scs.kafka>provided</docker.scs.kafka>
         <docker.scs.azure>provided</docker.scs.azure>
 
-        <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <spring-cloud.version>2022.0.4</spring-cloud.version>
     </properties>
 
     <dependencyManagement>
@@ -75,6 +75,25 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.backbase.buildingblocks</groupId>
+                    <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
+                    <version>17.0.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>com.backbase.buildingblocks</groupId>
+                <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
+                <version>17.0.0</version>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <profile>

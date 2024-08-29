@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-parent</artifactId>
-    <version>5.9.0</version>
+    <version>5.9.1</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Parent</name>
     <description>Parent for all Stream SDK modules</description>
@@ -37,8 +37,8 @@
     </modules>
 
     <properties>
-        <java.version>21</java.version>
-        <ssdk.version>17.0.0</ssdk.version>
+        <java.version>17</java.version>
+        <ssdk.version>16.1.7</ssdk.version>
         <japicmp.skip>true</japicmp.skip>
     </properties>
 
@@ -77,5 +77,15 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.backbase.buildingblocks</groupId>
+                <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
+                <version>17.0.0</version>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

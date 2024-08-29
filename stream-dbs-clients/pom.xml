@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>5.9.0</version>
+        <version>5.9.1</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -328,9 +328,9 @@
                                 <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
                             </importMappings>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v3*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.paymentorder.api.service.v3</apiPackage>
-                            <modelPackage>com.backbase.dbs.paymentorder.api.service.v3.model</modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v2*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.paymentorder.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.paymentorder.api.service.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>

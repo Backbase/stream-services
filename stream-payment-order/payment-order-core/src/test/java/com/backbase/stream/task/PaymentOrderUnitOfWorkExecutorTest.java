@@ -9,12 +9,13 @@ import static org.mockito.Mockito.lenient;
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
-import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
-import com.backbase.dbs.paymentorder.api.service.v3.model.GetPaymentOrderResponse;
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilterResponse;
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
-import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
+import com.backbase.dbs.paymentorder.api.service.v2.model.GetPaymentOrderResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterResponse;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
+import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
 import com.backbase.stream.common.PaymentOrderBaseTest;
+import com.backbase.stream.config.PaymentOrderTypeConfiguration;
 import com.backbase.stream.config.PaymentOrderWorkerConfigurationProperties;
 import com.backbase.stream.model.request.NewPaymentOrderIngestRequest;
 import com.backbase.stream.model.request.PaymentOrderIngestRequest;
@@ -25,12 +26,12 @@ import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import java.math.BigDecimal;
 
+import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -52,18 +53,24 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
     @Mock
     private UnitOfWorkRepository<PaymentOrderTask, String> repository;
 
+    private PaymentOrderTypeConfiguration paymentOrderTypeConfiguration = new PaymentOrderTypeConfiguration();
+
     private final PaymentOrderTaskExecutor streamTaskExecutor = new PaymentOrderTaskExecutor(paymentOrdersApi);
 
     private final PaymentOrderWorkerConfigurationProperties streamWorkerConfiguration = new PaymentOrderWorkerConfigurationProperties();
 
-//    @InjectMocks
+    //    @InjectMocks
     private PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor;
 
     @BeforeEach
     void setup() {
+        List<String> pmtTypes = new ArrayList<>();
+        pmtTypes.add("INTRA_PMT");
+        paymentOrderTypeConfiguration.setTypes(pmtTypes);
         paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
                 repository, streamTaskExecutor, streamWorkerConfiguration,
-                paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper);
+                paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper,
+                paymentOrderTypeConfiguration);
     }
 
     @Test
@@ -74,7 +81,8 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
         );
 
         PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse()
-                .id("po_post_resp_id");
+                .id("po_post_resp_id")
+                .putAdditionsItem("key", "val");
 
         lenient().when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));
@@ -104,7 +112,8 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
         Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux = Flux.fromIterable(paymentOrderPostRequest);
 
         PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse()
-                .id("po_post_resp_id");
+                .id("po_post_resp_id")
+                .putAdditionsItem("key", "val");
 
         lenient().when(paymentOrdersApi.postPaymentOrder(any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));
@@ -116,7 +125,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
                 .addPaymentOrdersItem(getPaymentOrderResponse)
                 .totalElements(new BigDecimal(1));
 
-        doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+        doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
 
         AccountArrangementItem accountArrangementItem = new AccountArrangementItem()
                 .id("arrangementId_1")
@@ -128,13 +137,13 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
                 .thenReturn(Mono.just(accountArrangementItems));
 
         StepVerifier.create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
-            .assertNext(unitOfWork -> {
-                Assertions.assertTrue(unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
-                Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
-                Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
-                Assertions.assertEquals(paymentOrderPostRequest.size(), unitOfWork.getStreamTasks().get(0).getData().size());
-            })
-            .verifyComplete();
+                .assertNext(unitOfWork -> {
+                    Assertions.assertTrue(unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
+                    Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
+                    Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
+                    Assertions.assertEquals(paymentOrderPostRequest.size(), unitOfWork.getStreamTasks().get(0).getData().size());
+                })
+                .verifyComplete();
     }
 
     @Test
@@ -142,7 +151,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
         paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
                 repository, streamTaskExecutor, streamWorkerConfiguration,
-                paymentOrdersApi, arrangementsApi, null);
+                paymentOrdersApi, arrangementsApi, null, paymentOrderTypeConfiguration);
 
         paymentOrderPostRequest.get(0).setInternalUserId(StringUtils.EMPTY);
         paymentOrderPostRequest.get(1).setInternalUserId(null);
@@ -165,7 +174,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
                 .addPaymentOrdersItem(getPaymentOrderResponseWithEmptyUserId)
                 .totalElements(new BigDecimal(1));
 
-        lenient().doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+        lenient().doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
 
         StepVerifier
                 .create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))

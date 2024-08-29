@@ -1,7 +1,7 @@
 package com.backbase.stream.config;
 
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
-import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
+import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.PaymentOrderServiceImpl;
 import com.backbase.stream.mappers.PaymentOrderTypeMapper;
@@ -17,13 +17,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @EnableConfigurationProperties({
-    PaymentOrderWorkerConfigurationProperties.class
+    PaymentOrderWorkerConfigurationProperties.class,
+    PaymentOrderTypeConfiguration.class
 })
 @AllArgsConstructor
 @Configuration
 public class PaymentOrderServiceConfiguration {
 
     private final PaymentOrderTypeMapper paymentOrderTypeMapper;
+    private final PaymentOrderTypeConfiguration paymentOrderTypeConfiguration;
 
     @Bean
     public PaymentOrderTaskExecutor paymentOrderTaskExecutor(PaymentOrdersApi paymentOrdersApi) {
@@ -39,7 +41,8 @@ public class PaymentOrderServiceConfiguration {
             ArrangementsApi arrangementsApi) {
 
         return new PaymentOrderUnitOfWorkExecutor(paymentOrderUnitOfWorkRepository, paymentOrderTaskExecutor,
-                paymentOrderWorkerConfigurationProperties, paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper);
+                paymentOrderWorkerConfigurationProperties, paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper,
+                paymentOrderTypeConfiguration);
     }
 
     @Bean

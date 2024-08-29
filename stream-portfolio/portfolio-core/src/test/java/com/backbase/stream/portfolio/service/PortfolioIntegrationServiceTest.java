@@ -448,10 +448,6 @@ class PortfolioIntegrationServiceTest {
         verify(portfolioValuationManagementApi).putPortfolioValuations(portfolioId, new PortfolioValuationsPutRequest()
                 .addValuationsItem(new PortfolioValuationsItem().valuePct(BigDecimal.ONE)));
 
-        portfolioBundle.setBenchmark(null);
-        var bundle = portfolioIntegrationService.upsertPortfolio(portfolioBundle).blockLast();
-        assertNull(bundle);
-
     }
 
     @Test
