@@ -133,7 +133,8 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
 
     private Mono<List<AccountArrangementItem>> getArrangements(@NotNull List<PaymentOrderPostRequest> coreRequests) {
         final Set<String> externalIds = coreRequests.stream().map(PaymentOrderPostRequest::getOriginatorAccount)
-                .filter(Objects::nonNull).map(SimpleOriginatorAccount::getExternalArrangementId).collect(toSet());
+                .filter(Objects::nonNull).map(SimpleOriginatorAccount::getExternalArrangementId).filter(Objects::nonNull)
+                .collect(toSet());
         final var externalArrangementIdFilter =  new AccountArrangementsFilter().externalArrangementIds(externalIds);
         return arrangementsApi.postFilter(externalArrangementIdFilter)
                 .map(AccountArrangementItems::getArrangementElements).defaultIfEmpty(emptyList());
