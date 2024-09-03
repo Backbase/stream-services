@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.1.6](https://github.com/Backbase/stream-services/compare/4.1.4...4.1.6)
+### Fix
+- Fix arrangements being retrieved per payment order instead of once per payment order ingestion request.
+- 
 ## [4.1.4](https://github.com/Backbase/stream-services/compare/4.1.3...4.1.4)
 ### Fix
 - Fixed deletion of non-repository custom data-group items on data-group update
