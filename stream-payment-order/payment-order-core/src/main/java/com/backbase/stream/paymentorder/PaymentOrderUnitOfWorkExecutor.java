@@ -1,5 +1,8 @@
 package com.backbase.stream.paymentorder;
 
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static java.util.stream.Collectors.toSet;
 import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.ACCEPTED;
 import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.CANCELLATION_PENDING;
 import static com.backbase.dbs.paymentorder.api.service.v2.model.Status.CANCELLED;
@@ -22,19 +25,14 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import com.backbase.dbs.paymentorder.api.service.v2.model.AccessFilter;
 import com.backbase.stream.config.PaymentOrderTypeConfiguration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.*;
 import java.util.stream.Stream;
 
+import com.backbase.dbs.paymentorder.api.service.v2.model.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
-import com.backbase.dbs.paymentorder.api.service.v2.model.GetPaymentOrderResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterRequest;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostFilterResponse;
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostRequest;
 import com.backbase.stream.config.PaymentOrderWorkerConfigurationProperties;
 import com.backbase.stream.mappers.PaymentOrderTypeMapper;
 import com.backbase.stream.model.PaymentOrderIngestContext;
@@ -49,6 +47,7 @@ import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
@@ -127,19 +126,18 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
                         log.debug("Successfully fetched dbs scheduled payment orders"));
     }
 
-    private @NotNull @Valid Mono<PaymentOrderIngestContext> addArrangementIdMap(PaymentOrderIngestContext paymentOrderIngestContext) {
-
-        return Flux.fromIterable(paymentOrderIngestContext.corePaymentOrder())
-            .flatMap(this::getArrangement)
-            .distinct()
-            .collectList()
-            .map(accountInternalIdGetResponseBody -> paymentOrderIngestContext.arrangementIds(accountInternalIdGetResponseBody));
+    private Mono<PaymentOrderIngestContext> addArrangementIdMap(@NotNull PaymentOrderIngestContext paymentOrderIngestContext) {
+        final var arrangements = getArrangements(defaultIfNull(paymentOrderIngestContext.corePaymentOrder(),emptyList()));
+        return arrangements.map(paymentOrderIngestContext::arrangementIds);
     }
 
-    private Mono<AccountArrangementItems> getArrangement(PaymentOrderPostRequest paymentOrderPostRequest) {
-        AccountArrangementsFilter accountArrangementsFilter = new AccountArrangementsFilter()
-            .addExternalArrangementIdsItem(paymentOrderPostRequest.getOriginatorAccount().getExternalArrangementId());
-        return arrangementsApi.postFilter(accountArrangementsFilter);
+    private Mono<List<AccountArrangementItem>> getArrangements(@NotNull List<PaymentOrderPostRequest> coreRequests) {
+        final Set<String> externalIds = coreRequests.stream().map(PaymentOrderPostRequest::getOriginatorAccount)
+                .filter(Objects::nonNull).map(SimpleOriginatorAccount::getExternalArrangementId).filter(Objects::nonNull)
+                .collect(toSet());
+        final var externalArrangementIdFilter =  new AccountArrangementsFilter().externalArrangementIds(externalIds);
+        return arrangementsApi.postFilter(externalArrangementIdFilter)
+                .map(AccountArrangementItems::getArrangementElements).defaultIfEmpty(emptyList());
     }
 
     /**
@@ -148,16 +146,15 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
      * @param arrangementIds   Check for all the arrangements that belong to this PMT.
      * @return A Mono with the response from the service api.
      */
-    private Mono<PaymentOrderPostFilterResponse> getPayments(List<AccountArrangementItems> arrangementIds) {
+    private Mono<PaymentOrderPostFilterResponse> getPayments(List<AccountArrangementItem> arrangementIds) {
 
         if (isEmptyArrangmetIds(arrangementIds)) {
             return Mono.just(new PaymentOrderPostFilterResponse().paymentOrders(emptyList()).totalElements(new BigDecimal(0)));
         }
         List<String> allArrangementIds = arrangementIds
-                .stream().flatMap(accountArrangementItems ->
-                        accountArrangementItems.getArrangementElements().stream())
+                .stream()
                 .map(AccountArrangementItem::getId)
-                .collect(Collectors.toList());
+                .toList();
 
         return pullFromDBS(allArrangementIds).map(result -> {
             final var response = new PaymentOrderPostFilterResponse();
@@ -226,10 +223,9 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         }
     }
 
-    private AccountArrangementItem getInternalArrangementId(List<AccountArrangementItems> accountArrangementItemsList, String externalArrangementId) {
+    private AccountArrangementItem getInternalArrangementId(List<AccountArrangementItem> accountArrangementItemsList, String externalArrangementId) {
 
         return accountArrangementItemsList.stream()
-            .flatMap(a -> a.getArrangementElements().stream())
             .filter(b -> b.getExternalArrangementId().equalsIgnoreCase(externalArrangementId))
             .findFirst()
             .orElse(null);
@@ -260,7 +256,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
                 .map(paymentType -> new AccessFilter()
                         .paymentType(paymentType)
                         .arrangementIds(arrangementIds))
-                .collect(Collectors.toList());
+                .collect(toList());
         paymentOrderPostFilterRequest.setAccessFilters(accessFilters);
         paymentOrderPostFilterRequest.setStatuses(FILTER);
 
@@ -277,7 +273,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
             });
     }
 
-    private boolean isEmptyArrangmetIds(List<AccountArrangementItems> arrangementItems) {
+    private boolean isEmptyArrangmetIds(List<AccountArrangementItem> arrangementItems) {
         return arrangementItems == null || arrangementItems.isEmpty();
     }
 

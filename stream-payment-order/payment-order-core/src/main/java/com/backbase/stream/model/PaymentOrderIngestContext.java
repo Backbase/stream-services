@@ -1,5 +1,6 @@
 package com.backbase.stream.model;
 
+import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,5 +18,5 @@ public class PaymentOrderIngestContext {
     private String internalUserId;
     private List<PaymentOrderPostRequest> corePaymentOrder = new ArrayList<>();
     private List<GetPaymentOrderResponse> existingPaymentOrder = new ArrayList<>();
-    private List<AccountArrangementItems> arrangementIds = new ArrayList<>();
+    private List<AccountArrangementItem> arrangementIds = new ArrayList<>();
 }
