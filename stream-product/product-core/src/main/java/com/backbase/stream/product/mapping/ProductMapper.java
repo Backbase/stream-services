@@ -7,6 +7,7 @@ import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemP
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountUserPreferencesItemPut;
 import com.backbase.dbs.arrangement.api.service.v2.model.TimeUnit;
 
+import com.backbase.stream.legalentity.model.ReservedAmount;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
@@ -199,6 +200,12 @@ public interface ProductMapper {
         return new BookedBalance().amount(bigDecimal);
     }
 
+    default ReservedAmount mapReservedAmount(BigDecimal bigDecimal) {
+        if (bigDecimal == null)
+            return null;
+        return new ReservedAmount().amount(bigDecimal);
+    }
+
     default AvailableBalance mapAvailable(BigDecimal bigDecimal) {
         if (bigDecimal == null)
             return null;
@@ -247,6 +254,20 @@ public interface ProductMapper {
      * @return BigDecimal
      */
     default BigDecimal map(BookedBalance value) {
+        if (value != null) {
+            return value.getAmount();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Convert Object to ReservedAmount.
+     *
+     * @param value wrapped value
+     * @return BigDecimal
+     */
+    default BigDecimal map(ReservedAmount value) {
         if (value != null) {
             return value.getAmount();
         } else {

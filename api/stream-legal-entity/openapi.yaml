@@ -396,6 +396,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
         creditLimit:
           $ref: '#/components/schemas/CreditLimit'
         IBAN:
@@ -560,6 +562,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
         BBAN:
           $ref: '#/components/schemas/BBAN'
         creditLimit:
@@ -848,6 +852,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
         creditLimit:
           $ref: '#/components/schemas/CreditLimit'
         IBAN:
@@ -1856,6 +1862,15 @@ components:
     AvailableBalance:
       type: object
       description: "Available Balance"
+      properties:
+        amount:
+          type: number
+          format: double
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+    ReservedAmount:
+      type: object
+      description: "Reserved Amount"
       properties:
         amount:
           type: number
