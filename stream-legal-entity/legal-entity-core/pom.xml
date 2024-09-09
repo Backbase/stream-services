@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-legal-entity</artifactId>
-        <version>5.7.0</version>
+        <version>5.9.1</version>
     </parent>
 
     <artifactId>legal-entity-core</artifactId>
@@ -66,6 +66,12 @@
                     <artifactId>backbase-bom</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>plan-manager-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>

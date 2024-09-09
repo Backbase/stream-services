@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +34,7 @@ import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityReference;
+import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.PhoneNumber;
@@ -56,6 +59,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.backbase.streams.tailoredvalue.PlansService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -92,6 +97,9 @@ class ServiceAgreementV2SagaTest {
 
     @Mock
     private ContactsSaga contactsSaga;
+
+    @Mock
+    private PlansService plansService;
 
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
@@ -436,6 +444,43 @@ class ServiceAgreementV2SagaTest {
             result.getServiceAgreement().getJobProfileUsers().get(0).getContacts().get(0).getExternalId());
     }
 
+    @Test
+    void test_updatePlans_whenDisabled() {
+        getMockServiceAgreement();
+        ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
+
+        when(plansService.isEnabled()).thenReturn(false);
+        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
+        when(legalEntityService.getLegalEntityByExternalId(any()))
+                .thenReturn(Mono.just(new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
+                any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+
+        serviceAgreementSaga.executeTask(task).block();
+
+        verify(plansService, never()).updateUserPlan(any(), any(), any());
+    }
+
+    @Test
+    void test_updatePlans_whenIsEnabled() {
+        getMockServiceAgreement();
+        ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
+
+        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
+        when(legalEntityService.getLegalEntityByExternalId(any()))
+                .thenReturn(Mono.just(new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
+        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
+                any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+
+        //Plans mocks
+        when(plansService.isEnabled()).thenReturn(true);
+        when(plansService.updateUserPlan(any(), any(), any())).thenReturn(Mono.empty());
+
+        serviceAgreementSaga.executeTask(task).block();
+
+        verify(plansService, times(1)).updateUserPlan(any(), any(), any());
+    }
+
     private ServiceAgreementTaskV2 mockServiceAgreementTask(ServiceAgreementV2 serviceAgreement) {
         ServiceAgreementTaskV2 task = Mockito.mock(ServiceAgreementTaskV2.class);
         when(task.getServiceAgreement()).thenReturn(serviceAgreement);
@@ -446,7 +491,8 @@ class ServiceAgreementV2SagaTest {
     void getMockServiceAgreement() {
         regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
             .externalId(regularUserExId))
-            .legalEntityReference(new LegalEntityReference().externalId(leExternalId));
+            .legalEntityReference(new LegalEntityReference(leInternalId, leExternalId))
+            .planName("somPlanName");
 
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP")

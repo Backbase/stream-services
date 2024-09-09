@@ -8,6 +8,8 @@ import com.backbase.dbs.contact.api.service.v2.model.ExternalAccessContext;
 import com.backbase.dbs.contact.api.service.v2.model.ExternalAccountInformation;
 import com.backbase.dbs.contact.api.service.v2.model.ExternalContact;
 import com.backbase.dbs.contact.api.service.v2.model.IngestMode;
+import com.backbase.stream.configuration.ContactsWorkerConfigurationProperties;
+import com.backbase.stream.worker.exception.StreamTaskException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +20,7 @@ import reactor.core.publisher.Mono;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,6 +33,10 @@ class ContactsSagaTest {
 
     @Mock
     private ContactsApi contactsApi;
+
+    @Mock
+    private ContactsWorkerConfigurationProperties contactsWorkerConfigurationProperties;
+
 
     @Test
     void test_executeTask() {
@@ -44,6 +51,40 @@ class ContactsSagaTest {
         // Then
         verify(contactsApi).postContactsBulk(any());
     }
+
+    @Test
+    void test_executeTaskContinueOnErrorTrue() {
+        // Given
+        ContactsTask contactsTask = createTask();
+        when(contactsApi.postContactsBulk(any())).thenReturn(Mono.error(new Throwable()));
+
+        // When
+        ContactsWorkerConfigurationProperties props = new ContactsWorkerConfigurationProperties();
+        props.setContinueOnError(true);
+        when(contactsWorkerConfigurationProperties.isContinueOnError()).thenReturn(true);
+        Mono<ContactsTask> result = contactsSaga.executeTask(contactsTask);
+        result.block();
+
+        // Then
+        verify(contactsApi).postContactsBulk(any());
+    }
+
+    @Test
+    void test_executeTaskContinueOnErrorFalse() {
+        // Given
+        ContactsTask contactsTask = createTask();
+        when(contactsApi.postContactsBulk(any())).thenReturn(Mono.error(new Throwable()));
+
+        // When
+        ContactsWorkerConfigurationProperties props = new ContactsWorkerConfigurationProperties();
+        props.setContinueOnError(true);
+        when(contactsWorkerConfigurationProperties.isContinueOnError()).thenReturn(false);
+
+        StreamTaskException exception = assertThrows(StreamTaskException.class, () -> {
+            contactsSaga.executeTask(contactsTask).block();
+        });
+    }
+
 
     @Test
     void test_executeTaskReturnResponse() {
