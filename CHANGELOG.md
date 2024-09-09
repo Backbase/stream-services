@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.9.1](https://github.com/Backbase/stream-services/compare/5.9.0...5.9.1)
+### Fixed
+- Update data groups with custom data items
+
 ## [5.9.0](https://github.com/Backbase/stream-services/compare/5.8.0...5.9.0)
 ### Added
 - Added plan-manager for TVP (Tailored Value Proposition)
