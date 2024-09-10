@@ -1,4 +1,4 @@
-ARG IDENTITY_BUILDER
+ARG IDENTITY_BUILDER=repo.backbase.com/backbase-docker-releases/auth-server-builder
 
 FROM $IDENTITY_BUILDER AS auth-server-builder
 
@@ -36,7 +36,7 @@ RUN ["java", "-cp", "/opt/keycloak/lib/quarkus-run.jar:/opt/keycloak/lib/bootstr
 
 # -------------------------------------------------------------------------------------------
 # The production image build; for example, is based on the `distroless` Java image
-FROM gcr.io/distroless/java17-debian11
+FROM gcr.io/distroless/java21-debian12
 
 # Copy the files prepared in the previous build-stage
 COPY --from=auth-server-builder /opt/keycloak /opt/keycloak

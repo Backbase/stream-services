@@ -1,6 +1,11 @@
 {
+  "id": "moustache",
   "realm": "moustache",
   "enabled": true,
+  "eventsListeners": [
+    "audit",
+    "jboss-logging"
+  ],
   "users": [
     {
       "username": "provisioner",
