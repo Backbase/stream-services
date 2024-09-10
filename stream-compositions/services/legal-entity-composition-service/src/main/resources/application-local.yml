@@ -10,6 +10,10 @@ spring:
     loadbalancer:
       enabled: false
 
+management:
+  tracing:
+    enabled: false
+
 eureka:
   instance:
     hostname: host.docker.internal
@@ -45,6 +49,9 @@ backbase:
             direct-uri: http://localhost:9003
 
   stream:
+    client:
+      additional-headers:
+        x-tid: t1
     legalentity:
       sink:
         useIdentityIntegration: true
@@ -61,11 +68,18 @@ backbase:
           enableFailed: false
         cursor:
           enabled: false
+        gc-defaults:
+          party:
+            realmName: backbase
+            parentExternalId: BANK
+            identityUserLinkStrategy: CREATE_IN_IDENTITY
+            referenceJobRoleNames: "Retail User - USA"
     user:
       management:
         update-identity: true
+
 bootstrap:
-  enabled: true
+  enabled: false
   # This is an Backbase OOTB Configuration. Please update as per project requirements
   legalEntity:
     name: "Bank"

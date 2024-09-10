@@ -83,7 +83,7 @@ services:
       retries: 5
 
   wiremock:
-    image: wiremock/wiremock:2.32.0
+    image: wiremock/wiremock:2.35.1-1
     ports:
       - "9000:8080"
     command:
@@ -98,10 +98,10 @@ services:
     ports:
       - "8761:8080"
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar" ]
 
   token-converter:
     image: repo.backbase.com/backbase-docker-releases/oidc-token-converter-service:${BB_VERSION}
@@ -113,11 +113,12 @@ services:
       BACKBASE_OIDCTOKENCONVERTER_WHITELISTEDDOMAINS_0_INTERNALHOST: identity:8080
       BACKBASE_OIDCTOKENCONVERTER_WHITELISTEDDOMAINS_0_ISSUERHOST: localhost
       BACKBASE_MULTITENANCY_TENANTFILTER_SHOULDNOTFILTERPATHS: /oauth/token,/actuator/**
+      backbase.security.public.paths: /oauth/token,/convert
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/token-converter", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/token-converter", "<status>UP</status>" ]
     links:
       - registry
       - identity
@@ -150,10 +151,10 @@ services:
       JAVA_TOOL_OPTIONS: "-Dquarkus.log.category.'\"com.backbase\"'.level=DEBUG \
                           -Dquarkus.log.category.'\"org.keycloak.protocol.oidc\"'.level=TRACE"
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://localhost:8080/auth/realms/backbase/.well-known/openid-configuration", "backbase" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://localhost:8080/auth/realms/backbase/.well-known/openid-configuration", "backbase" ]
     depends_on:
       mysql:
         condition: service_healthy
@@ -168,10 +169,10 @@ services:
       backbase.multi-tenancy.tenants[0].catalog: t1_access_control
       backbase.multi-tenancy.tenants[1].catalog: t2_access_control
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/access-control", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/access-control", "<status>UP</status>" ]
     depends_on:
       mysql:
         condition: service_healthy
@@ -192,10 +193,10 @@ services:
       BACKBASE_USERS_IDENTITYINTEGRATIONENABLED: true
       BACKBASE_USERS_SYNCPRIMARYTOIDENTITYENABLED: true
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/user-manager", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/user-manager", "<status>UP</status>" ]
     depends_on:
       mysql:
         condition: service_healthy
@@ -215,10 +216,10 @@ services:
       IDENTITY_REALMCONFIGURATION_FALLBACKOPTIONS_ENABLEUSER: true
       IDENTITY_REALMCONFIGURATION_FALLBACKOPTIONS_USETEMPORARYPASSWORD: true
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/identity-integration-service", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/identity-integration-service", "<status>UP</status>" ]
     links:
       - registry
 
@@ -252,11 +253,14 @@ services:
       spring.cloud.discovery.client.simple.instances.legal-entity-integration[0].uri: http://wiremock:8080
       backbase.stream.compositions.legal-entity.chains.product-composition.enabled: true
       backbase.stream.compositions.legal-entity.chains.product-composition.async: true
+      backbase.stream.compositions.legal-entity.gc-defaults.party.realmName: backbase
+      backbase.stream.compositions.legal-entity.gc-defaults.party.parentExternalId: BANK
+      backbase.stream.compositions.legal-entity.gc-defaults.party.referenceJobRoleNames: "Retail User - USA"
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/legal-entity-composition" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/legal-entity-composition" ]
     depends_on:
       token-converter:
         condition: service_healthy
@@ -283,10 +287,10 @@ services:
       backbase.multi-tenancy.tenants[0].catalog: t1_arrangement_manager
       backbase.multi-tenancy.tenants[1].catalog: t2_arrangement_manager
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/arrangement-manager", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/arrangement-manager", "<status>UP</status>" ]
     depends_on:
       mysql:
         condition: service_healthy
@@ -307,10 +311,10 @@ services:
       backbase.multi-tenancy.tenants[1].catalog: t2_transaction_manager
       spring.cloud.discovery.client.simple.instances.transaction-integration-mock[0].uri: http://wiremock:8080
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/transaction-manager", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/transaction-manager", "<status>UP</status>" ]
     depends_on:
       mysql:
         condition: service_healthy
@@ -345,10 +349,10 @@ services:
       backbase.stream.compositions.product.chains.transaction-composition.enabled: false
       backbase.stream.compositions.product.chains.payment-order-composition.enabled: false
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/product-composition" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/product-composition" ]
     links:
       - registry
       - activemq
