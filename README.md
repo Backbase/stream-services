@@ -38,12 +38,12 @@ You can find listed here the API specification containing the opinionated model 
 | stream-compositions/cursors      | [specs](stream-compositions/api/cursors-api)            | [Stream Compositions - Cursors](https://engineering.backbase.com/stream-services/stream-compositions/api/cursors-api/index.html)           |
 | stream-compositions/integrations | [specs](stream-compositions/api/integrations-api)       | [Stream Compositions - Integrations](https://engineering.backbase.com/stream-services/stream-compositions/api/integrations-api/index.html) |
 
-## Supported Banking Services versions
+## Compatibility Matrix
 
 | Stream [version](https://github.com/Backbase/stream-services/releases) | Banking Services   | Java | Spring Boot |
 |------------------------------------------------------------------------|--------------------|------|-------------|
 | 5.10.0 to latest                                                       | 2024.07            | 21   | 3.2         |
-| 5.0.0 to 5.9.1                                                         | 2024.04            | 21   | 3.2         |
+| 5.0.0 to 5.9.x                                                         | 2024.04            | 21   | 3.2         |
 | 4.1.1 to 4.x.x                                                         | 2024.03-LTS        | 17   | 3.1         |
 | 4.0.0 to 4.1.0                                                         | 2023.12            | 17   | 3.1         |
 | 3.70.0 to 3.x.x                                                        | 2023.09-LTS        | 17   | 2.7         |
