@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "url": "/arrangement-manager/service-api/v2/arrangements/batch",
+    "url": "/arrangement-manager/integration-api/v2/arrangements/batch",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"
@@ -18,19 +18,22 @@
     "status": 207,
     "jsonBody": [
       {
-        "resourceId": "021000021",
-        "arrangementId": "arrangement-id",
-        "status": 200
+        "arrangementId" : "arrangement-id",
+        "action" : "add",
+        "resourceId" : "021000021",
+        "status" : "200"
       },
       {
-        "resourceId": "021000022",
-        "arrangementId": "arrangement-id",
-        "status": 200
+        "arrangementId" : "arrangement-id",
+        "action" : "add",
+        "resourceId" : "021000022",
+        "status" : "200"
       },
       {
-        "resourceId": "021000023",
-        "arrangementId": "arrangement-id",
-        "status": 200
+        "arrangementId" : "arrangement-id",
+        "action" : "add",
+        "resourceId" : "021000023",
+        "status" : "200"
       }
     ],
     "headers": {
