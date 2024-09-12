@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ## [4.1.7](https://github.com/Backbase/stream-services/compare/4.1.4...4.1.6)
 ### Changed.
-- Performance improvement on function groups setup for ProductIngestionSaga
+- Performance improvement on function groups setup for ProductIngestionSaga.
 
 ## [4.1.6](https://github.com/Backbase/stream-services/compare/4.1.4...4.1.6)
 ### Fix
