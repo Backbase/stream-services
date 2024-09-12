@@ -1,6 +1,15 @@
 package com.backbase.stream.compositions.product.core.mapper;
 
-import com.backbase.stream.compositions.product.api.model.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut;
+import com.backbase.stream.compositions.product.api.model.ArrangementIngestionConfig;
+import com.backbase.stream.compositions.product.api.model.ArrangementIngestionResponse;
+import com.backbase.stream.compositions.product.api.model.ArrangementPullIngestionRequest;
+import com.backbase.stream.compositions.product.api.model.ArrangementPushIngestionRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPushRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
@@ -11,11 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ArrangementRestMapperTest {
@@ -37,7 +41,7 @@ class ArrangementRestMapperTest {
         AccountArrangementItemPut arrangementItemPut = new AccountArrangementItemPut();
 
         when(arrangementMapper.mapCompositionToStream(arrangementItemPut))
-                .thenReturn(new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut());
+            .thenReturn(new com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem());
 
         when(chainsMapper.map(any()))
                 .thenReturn(RequestConfig.builder().build());
@@ -79,8 +83,8 @@ class ArrangementRestMapperTest {
 
     @Test
     void mapResponse() {
-        com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut streamArrangement =
-                new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut();
+        com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem streamArrangement =
+            new com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem();
 
         AccountArrangementItemPut compositionArrangement = new AccountArrangementItemPut();
 
@@ -89,7 +93,7 @@ class ArrangementRestMapperTest {
 
         ArrangementIngestResponse response = ArrangementIngestResponse
                 .builder()
-                .arrangement(new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut())
+                .arrangement(new com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem())
                 .build();
 
         ResponseEntity<ArrangementIngestionResponse> responseEntity = arrangementRestMapper.mapResponse(response);
