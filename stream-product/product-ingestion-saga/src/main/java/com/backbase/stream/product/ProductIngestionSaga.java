@@ -142,16 +142,18 @@ public class ProductIngestionSaga {
         streamTask
             .info(FUNCTION_GROUP, "setup-business-functions", "", "", null, "Setting up Business Functions User: %s",
                 jobProfileUser.getUser().getExternalId());
-        return getBusinessFunctionGroups(jobProfileUser, serviceAgreement)
+        final Mono<List<FunctionGroupItem>> functionGroup = accessGroupService.getFunctionGroupsForServiceAgreement(serviceAgreement.getInternalId()).cache();
+        return getBusinessFunctionGroups(jobProfileUser, functionGroup)
             .flatMap(businessFunctionGroups -> accessGroupService.setupFunctionGroups(streamTask, serviceAgreement, businessFunctionGroups))
             .map(jobProfileUser::businessFunctionGroups);
     }
 
-    protected Mono<List<BusinessFunctionGroup>> getBusinessFunctionGroups(JobProfileUser jobProfileUser, ServiceAgreement serviceAgreement) {
+    protected Mono<List<BusinessFunctionGroup>> getBusinessFunctionGroups(JobProfileUser jobProfileUser,
+        Mono<List<FunctionGroupItem>> functionGroup) {
 
         List<BusinessFunctionGroup> businessFunctionGroups = jobProfileUser.getBusinessFunctionGroups();
         if (!isEmpty(jobProfileUser.getReferenceJobRoleNames())) {
-            return accessGroupService.getFunctionGroupsForServiceAgreement(serviceAgreement.getInternalId())
+            return functionGroup
                 .map(functionGroups -> {
                     Map<String, FunctionGroupItem> idByFunctionGroupName = functionGroups
                         .stream()
