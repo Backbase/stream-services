@@ -4,6 +4,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
 
+import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPost;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -320,9 +321,11 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
 
     protected Mono<List<BusinessFunctionGroup>> setupBusinessFunctions(BatchProductGroupTask streamTask, ServiceAgreement serviceAgreement, List<JobProfileUser> jobProfileUsers) {
         streamTask.info(FUNCTION_GROUP, "setup-business-functions", "", serviceAgreement.getExternalId(), null, "Setting up Business Functions for Users: %s", prettyPrintUsers(jobProfileUsers));
+        final Mono<List<FunctionGroupItem>> functionGroup = accessGroupService.getFunctionGroupsForServiceAgreement(serviceAgreement.getInternalId()).cache();
+
         return Flux.fromIterable(jobProfileUsers)
                 .doOnNext(user -> log.info("Setup Business Function for: {} with Product Groups: {}",user.getUser().getExternalId(), prettyPrintProductGroups(streamTask)))
-                .flatMap(jobProfileUser -> getBusinessFunctionGroups(jobProfileUser, serviceAgreement)
+                .flatMap(jobProfileUser -> getBusinessFunctionGroups(jobProfileUser, functionGroup)
                         .map(bfGroups -> {
                             jobProfileUser.setBusinessFunctionGroups(bfGroups);
                             return bfGroups;
