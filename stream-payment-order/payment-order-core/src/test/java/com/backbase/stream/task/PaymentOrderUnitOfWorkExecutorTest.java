@@ -6,9 +6,9 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.lenient;
 
-import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItems;
+import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementSearchesListResponse;
 import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
 import com.backbase.dbs.paymentorder.api.service.v3.model.GetPaymentOrderResponse;
 import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilterResponse;
@@ -32,7 +32,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -87,22 +86,22 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
         lenient().when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));
 
-        AccountArrangementItem accountArrangementItem = new AccountArrangementItem()
+        ArrangementItem arrangementItem = new ArrangementItem()
                 .id("arrangementId_1")
                 .externalArrangementId("externalArrangementId_1");
 
-        AccountArrangementItems accountArrangementItems = new AccountArrangementItems()
-                .addArrangementElementsItem(accountArrangementItem);
+        ArrangementSearchesListResponse arrangementSearchesListResponse = new ArrangementSearchesListResponse()
+                .addArrangementElementsItem(arrangementItem);
 
-        lenient().when(arrangementsApi.postFilter(Mockito.any()))
-                .thenReturn(Mono.just(accountArrangementItems));
+        Mockito.lenient().when(arrangementsApi.postSearchArrangements(Mockito.any()))
+            .thenReturn(Mono.just(arrangementSearchesListResponse));
 
         StepVerifier.create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderIngestRequestList))
                 .assertNext(unitOfWork -> {
                     Assertions.assertTrue(unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
                     Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
                     Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
-                    Assertions.assertEquals(paymentOrderIngestRequestList.size(), unitOfWork.getStreamTasks().get(0).getData().size());
+                    Assertions.assertEquals(paymentOrderIngestRequestList.size(), unitOfWork.getStreamTasks().getFirst().getData().size());
                 })
                 .verifyComplete();
     }
@@ -126,21 +125,22 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
         doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
 
-        AccountArrangementItem accountArrangementItem = new AccountArrangementItem()
-                .id("arrangementId_1")
-                .externalArrangementId("externalArrangementId_1");
-        AccountArrangementItems accountArrangementItems = new AccountArrangementItems()
-                .addArrangementElementsItem(accountArrangementItem);
+        ArrangementItem arrangementItem = new ArrangementItem()
+            .id("arrangementId_1")
+            .externalArrangementId("externalArrangementId_1");
 
-        Mockito.when(arrangementsApi.postFilter(Mockito.any()))
-                .thenReturn(Mono.just(accountArrangementItems));
+        ArrangementSearchesListResponse arrangementSearchesListResponse = new ArrangementSearchesListResponse()
+            .addArrangementElementsItem(arrangementItem);
+
+        Mockito.lenient().when(arrangementsApi.postSearchArrangements(Mockito.any()))
+            .thenReturn(Mono.just(arrangementSearchesListResponse));
 
         StepVerifier.create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
             .assertNext(unitOfWork -> {
                 Assertions.assertTrue(unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
                 Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
                 Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
-                Assertions.assertEquals(paymentOrderPostRequest.size(), unitOfWork.getStreamTasks().get(0).getData().size());
+                Assertions.assertEquals(paymentOrderPostRequest.size(), unitOfWork.getStreamTasks().getFirst().getData().size());
             })
             .verifyComplete();
     }
@@ -152,19 +152,20 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
                 repository, streamTaskExecutor, streamWorkerConfiguration,
                 paymentOrdersApi, arrangementsApi, null, paymentOrderTypeConfiguration);
 
-        paymentOrderPostRequest.get(0).setInternalUserId(StringUtils.EMPTY);
+        paymentOrderPostRequest.getFirst().setInternalUserId(StringUtils.EMPTY);
         paymentOrderPostRequest.get(1).setInternalUserId(null);
 
         Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux = Flux.fromIterable(paymentOrderPostRequest);
 
-        AccountArrangementItem accountArrangementItem = new AccountArrangementItem()
+        ArrangementItem arrangementItem = new ArrangementItem()
                 .id("arrangementId_1")
                 .externalArrangementId("externalArrangementId_1");
-        AccountArrangementItems accountArrangementItems = new AccountArrangementItems()
-                .addArrangementElementsItem(accountArrangementItem);
 
-        lenient().when(arrangementsApi.postFilter(Mockito.any()))
-                .thenReturn(Mono.just(accountArrangementItems));
+        ArrangementSearchesListResponse arrangementSearchesListResponse = new ArrangementSearchesListResponse()
+            .addArrangementElementsItem(arrangementItem);
+
+        lenient().when(arrangementsApi.postSearchArrangements(Mockito.any()))
+                .thenReturn(Mono.just(arrangementSearchesListResponse));
 
         GetPaymentOrderResponse getPaymentOrderResponseWithEmptyUserId = new GetPaymentOrderResponse()
                 .id("arrangementId_1");
