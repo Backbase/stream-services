@@ -1,6 +1,6 @@
 package com.backbase.stream.cursor.events;
 
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.stream.TransactionService;
 import com.backbase.stream.cursor.configuration.CursorServiceConfigurationProperties;
 import com.backbase.stream.cursor.model.IngestionCursor;
@@ -85,13 +85,11 @@ public class AbstractLoginEventListener {
         List<IngestionCursor> ingestionCursors = new ArrayList<>();
         ProductGroup.ProductGroupTypeEnum arrangements1 = ProductGroup.ProductGroupTypeEnum.ARRANGEMENTS;
         Object arrangements = assignedPermission.getPermittedObjects().get(arrangements1.name());
-        if (arrangements instanceof List && (((List) arrangements).get(0) instanceof AccountArrangementItem)) {
-            List<AccountArrangementItem> products = (List<AccountArrangementItem>) arrangements;
+        if (arrangements instanceof List && (((List<?>) arrangements).getFirst() instanceof ArrangementItem)) {
+            @SuppressWarnings("unchecked") List<ArrangementItem> products = (List<ArrangementItem>) arrangements;
 
-            for (AccountArrangementItem product : products) {
-
+            for (ArrangementItem product : products) {
                 IngestionCursor ingestionCursor = createLoginIngestionCursor(loginEvent, user, legalEntity);
-
                 ingestionCursor.setArrangementId(product.getId());
                 ingestionCursor.setExternalArrangementId(product.getExternalArrangementId());
                 // Make this configurable?

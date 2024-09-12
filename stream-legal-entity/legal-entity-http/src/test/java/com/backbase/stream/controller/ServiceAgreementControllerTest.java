@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
-import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
+import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
 import com.backbase.dbs.contact.api.service.v2.ContactsApi;
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
@@ -35,10 +35,9 @@ import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.streams.tailoredvalue.PlansService;
 import java.net.URI;
 import java.util.List;
-
-import com.backbase.streams.tailoredvalue.PlansService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -111,7 +110,10 @@ class ServiceAgreementControllerTest {
     private com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi userProfileManagement;
 
     @MockBean
-    private ArrangementsApi arrangementsApi;
+    private ArrangementsApi arrangementsApiV3;
+
+    @MockBean
+    private com.backbase.dbs.arrangement.api.integration.v2.ArrangementsApi arrangementsApi;
 
     @MockBean
     private UserKindSegmentationSaga userKindSegmentationSaga;
