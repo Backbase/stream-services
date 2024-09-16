@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.10.0</version>
     </parent>
 
     <artifactId>product-composition-service</artifactId>
@@ -59,13 +59,59 @@
             <artifactId>product-ingestion-saga</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-
     </dependencies>
 
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
+            <!-- Unpack OpenAPI specs from zip dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.backbase.dbs.audit</groupId>
+                                    <artifactId>audit-spec</artifactId>
+                                    <type>zip</type>
+                                    <classifier>events</classifier>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/unpacked-specs/audit-spec/events</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <includes>**/*.yaml, **/*.json</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.backbase.codegen</groupId>
+                <artifactId>jsonschema-events-maven-plugin</artifactId>
+                <version>${ssdk.version}</version>
+                <executions>
+                    <execution>
+                        <id>audit-spec</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>events-generation</goal>
+                        </goals>
+                        <configuration>
+                            <inputFile>${project.build.directory}/unpacked-specs/audit-spec/events/</inputFile>
+                            <outputFile>${project.build.directory}/generated-sources/</outputFile>
+                            <packageVersion>1</packageVersion>
+                            <packageName>audit.persistence</packageName>
+                            <groupNameStrategy>APP_NAME</groupNameStrategy>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
@@ -143,15 +189,30 @@
                 <executions>
                     <execution>
                         <id>add-source</id>
-                        <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
                             <sources>
                                 <source>${project.build.directory}/generated-sources/annotations</source>
                                 <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
+                                <source>${project.build.directory}/generated-sources/jsonschema-events</source>
                             </sources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-resource</id>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/generated-resources</directory>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>

@@ -1,0 +1,31 @@
+{
+  "id": "27f3f149-fa78-3fe2-a61c-2b6528969122",
+  "request": {
+    "url": "/service-api/v3/accesscontrol/service-agreements/ingest",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"externalId\":\"sa_gc-party\",\"participantsToIngest\":[{\"externalId\":\"gc-party\",\"sharingUsers\":true,\"sharingAccounts\":true,\"admins\":[],\"users\":[]}],\"validFromDate\":null,\"validFromTime\":null,\"validUntilDate\":null,\"validUntilTime\":null,\"status\":\"ENABLED\",\"isMaster\":true,\"regularUserAps\":null,\"adminUserAps\":null,\"creatorLegalEntity\":null,\"customerCategory\":null,\"additions\":{}}",
+        "ignoreArrayOrder": true,
+        "ignoreExtraElements": true
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "bodyFileName": "body-service-api-v3-accesscontrol-service-agreements-ingest-d2cXk.json",
+    "headers": {
+      "Vary": "origin,access-control-request-method,access-control-request-headers,accept-encoding",
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "0",
+      "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      "X-Frame-Options": "DENY",
+      "Content-Type": "application/json",
+      "Date": "Wed, 07 Aug 2024 12:05:41 GMT",
+      "Keep-Alive": "timeout=60"
+    }
+  },
+  "uuid": "27f3f149-fa78-3fe2-a61c-2b6528969122"
+}

@@ -1,0 +1,542 @@
+openapi: 3.0.3
+info:
+  title: Plan Manager Service
+  version: 0.5.0
+  description: Manage plans and user plans
+  x-icon: manage_accounts
+  x-deprecated: false
+  x-api-dashboard-tags:
+    - name: Retail
+servers:
+  - description: Prism mock server
+    url: 'http://localhost:4010'
+tags:
+  - name: plans
+  - name: user-plans
+paths:
+  '/service-api/v0/plans/{planId}/entitlements':
+    get:
+      tags:
+        - plans
+      summary: Get the entitlement permissions of the plan
+      description: Retrieve the entitlement permissions of the provided plan
+      operationId: getEntitlements
+      parameters:
+        - name: planId
+          in: path
+          description: The internal plan identifier
+          example: 6d23eb83-ae2c-4c7a-b8f2-2941d67e3be6
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns the entitlement permissions of the plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntitlementsGetResponseBody'
+              example:
+                entitlements:
+                  - functionGroupId: b1198a20-5a40-4eb7-b47f-a553db920422
+                    functionGroupName: Retail Functional Permissions
+                    entitlementType: Functional
+                    dataGroupName: Retail Data Group
+                    dataGroupType: ARRANGEMENTS
+                    description: The adult feature entitlements
+                  - functionGroupId: c1198a20-5a40-4eb7-b47f-a553db920423
+                    functionGroupName: Retail Data Permissions
+                    entitlementType: Data
+                    dataGroupName: Individual Owner Data Group
+                    dataGroupType: ARRANGEMENTS
+                    description: The adult data entitlements on their own deposit account
+        '404':
+          description: If entitlement permissions not found for the plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+              example:
+                $ref: '#/paths/~1service-api~1v0~1plans~1default/get/responses/404/content/application~1json/example'
+  /service-api/v0/plans/default:
+    get:
+      tags:
+        - plans
+      summary: Get the default plan
+      description: Retrieve the default plan
+      operationId: getDefaultPlan
+      parameters:
+        - name: serviceAgreementType
+          in: query
+          description: The service agreement type
+          example: Family
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: query
+          description: The role in service agreement type
+          example: Guardian
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns the default plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultPlanGetResponseBody'
+              example:
+                id: 6d23eb83-ae2c-4c7a-b8f2-2941d67e3be6
+                name: Individual Context - Adult User Plan
+                description: The plan of the adult in the context of individual
+                serviceAgreementType: Individual
+                segment:
+                  id: be6fac90-26f5-453e-9ff1-706ade2d5d17
+                  externalId: retail_customers_segment
+                  name: Retail Customers
+                  description: Designed to provide comprehensive banking solutions for everyday individuals and families.
+                bundle:
+                  id: 6553d4ef-e0e8-4407-a63d-759bb8e1c48a
+                  externalId: young_professional_bundle
+                  name: Young Professionals Bundle
+                  description: Designed for recent graduates and young adults starting their careers.
+        '404':
+          description: If default plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+              example:
+                message: Resource not found.
+                key: GENERAL_ERROR
+                errors:
+                  - message: 'Unable to find the resource requested resource: {resource}.'
+                    key: common.api.resource
+                    context:
+                      resource: aResource
+  /service-api/v0/plans:
+    get:
+      tags:
+        - plans
+      summary: Get plans.
+      description: 'Retrieve the plans based on query parameters. Each parameter (planIds, planName, externalPlanIds) is optional, and when provided, they are combined with an AND condition. Only plans that match all provided parameters will be returned.'
+      operationId: getPlans
+      parameters:
+        - name: planIds
+          in: query
+          description: The list of plan identifiers to search for.
+          required: false
+          schema:
+            type: array
+            uniqueItems: true
+            minItems: 1
+            items:
+              minLength: 32
+              maxLength: 36
+              type: string
+              pattern: '^[0-9a-f]{32}$|^[0-9a-f-]{36}$'
+          example:
+            - b1198a20-5a40-4eb7-b47f-a553db934215
+            - c67a8a20-5a40-4eb7-b47f-a553db876542
+        - name: externalPlanIds
+          in: query
+          description: The list of plan external identifiers to search for.
+          required: false
+          schema:
+            type: array
+            uniqueItems: true
+            minItems: 1
+            items:
+              minLength: 1
+              maxLength: 64
+              type: string
+          example:
+            - us_young_professional_adult_individual_plan
+            - us_family_adult_family_plan
+        - name: planName
+          in: query
+          description: The plan name to search for.Supports fuzzy search.
+          required: false
+          schema:
+            minLength: 1
+            maxLength: 128
+            type: string
+          example: US Young Professional Plan - Adult User - Individual Context
+      responses:
+        '200':
+          description: Returns the plans
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlansGetResponseBody'
+              example:
+                plans:
+                  - id: 6d23eb83-ae2c-4c7a-b8f2-2941d67e3be6
+                    name: Individual Context - Adult User Plan
+                    description: The plan of the adult in the context of individual
+                    serviceAgreementType: Individual
+                    segment:
+                      id: be6fac90-26f5-453e-9ff1-706ade2d5d17
+                      externalId: retail_customers_segment
+                      name: Retail Customers
+                      description: Designed to provide comprehensive banking solutions for everyday individuals and families.
+                    bundle:
+                      id: 6553d4ef-e0e8-4407-a63d-759bb8e1c48a
+                      externalId: young_professional_bundle
+                      name: Young Professionals Bundle
+                      description: Designed for recent graduates and young adults starting their careers.
+  '/service-api/v0/users/{internalUserId}/plans':
+    put:
+      tags:
+        - user-plans
+      summary: Update the user plan
+      description: Update the user plan
+      operationId: updateUserPlan
+      parameters:
+        - name: internalUserId
+          in: path
+          description: The internal user identifier
+          example: 6d23eb83-ae2c-4c7a-b8f2-2941d67e3be6
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The plan details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPlanUpdateRequestBody'
+            example:
+              id: 6d23eb83-ae2c-4c7a-b8f2-2941d67e3be6
+              serviceAgreementId: a1198a20-5a40-4eb7-b47f-a553db958963
+              legalEntityId: e9299302-56d3-40e8-a070-585dabbdc4aa
+      responses:
+        '200':
+          description: Returns the plan details set to the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPlanUpdateResponseBody'
+              example:
+                $ref: '#/paths/~1service-api~1v0~1plans~1default/get/responses/200/content/application~1json/example'
+        '400':
+          description: If one or more request parameters don't comply with the specification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              example:
+                message: Bad Request
+                key: GENERAL_ERROR
+                errors:
+                  - message: 'Value Exceeded. Must be between {min} and {max}.'
+                    key: common.api.shoesize
+                    context:
+                      max: '50'
+                      min: '1'
+        '404':
+          description: If plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+              example:
+                $ref: '#/paths/~1service-api~1v0~1plans~1default/get/responses/404/content/application~1json/example'
+    delete:
+      tags:
+        - user-plans
+      summary: Delete the user plan
+      description: Delete the user plan
+      operationId: deleteUserPlan
+      parameters:
+        - name: internalUserId
+          in: path
+          description: The internal user identifier
+          example: 6d23eb83-ae2c-4c7a-b8f2-2941d67e3be6
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: The plan details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPlanDeleteRequestBody'
+            example:
+              $ref: '#/paths/~1service-api~1v0~1users~1%7BinternalUserId%7D~1plans/put/requestBody/content/application~1json/example'
+      responses:
+        '204':
+          description: UserPlan has been deleted successfully
+        '400':
+          description: If one or more request parameters don't comply with the specification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestError'
+              example:
+                $ref: '#/paths/~1service-api~1v0~1users~1%7BinternalUserId%7D~1plans/put/responses/400/content/application~1json/example'
+        '404':
+          description: If plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+              example:
+                $ref: '#/paths/~1service-api~1v0~1plans~1default/get/responses/404/content/application~1json/example'
+components:
+  schemas:
+    EntitlementsGetResponseBody:
+      type: object
+      additionalProperties: false
+      properties:
+        entitlements:
+          type: array
+          description: The collection of entitlement details of the provided plan
+          items:
+            $ref: '#/components/schemas/Entitlement'
+    DefaultPlanGetResponseBody:
+      allOf:
+        - $ref: '#/components/schemas/Plan'
+    PlansGetResponseBody:
+      type: object
+      additionalProperties: false
+      properties:
+        plans:
+          type: array
+          description: The collection of plans
+          items:
+            $ref: '#/components/schemas/Plan'
+    UserPlanUpdateRequestBody:
+      allOf:
+        - $ref: '#/components/schemas/UserPlan'
+    UserPlanDeleteRequestBody:
+      allOf:
+        - $ref: '#/components/schemas/UserPlan'
+    UserPlan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/UniqueUUIDIdentifier'
+        serviceAgreementId:
+          $ref: '#/components/schemas/UniqueUUIDIdentifier'
+        legalEntityId:
+          $ref: '#/components/schemas/UniqueUUIDIdentifier'
+        additions:
+          description: Additional properties
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - id
+        - legalEntityId
+    UserPlanUpdateResponseBody:
+      allOf:
+        - $ref: '#/components/schemas/Plan'
+    Plan:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/UniqueUUIDIdentifier'
+        externalId:
+          type: string
+          description: The external plan identifier
+          minLength: 1
+          maxLength: 64
+        name:
+          type: string
+          description: The name of the plan
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          description: The description of the plan
+          minLength: 1
+          maxLength: 256
+        serviceAgreementType:
+          type: string
+          description: The service agreement type
+          minLength: 1
+          maxLength: 64
+        segment:
+          $ref: '#/components/schemas/Segment'
+        bundle:
+          $ref: '#/components/schemas/Bundle'
+        additions:
+          description: Additional properties
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - id
+        - name
+    Segment:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/UniqueUUIDIdentifier'
+        externalId:
+          type: string
+          description: The external segment identifier
+          minLength: 1
+          maxLength: 64
+        name:
+          type: string
+          description: The name of the segment
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          description: The description of the segment
+          minLength: 1
+          maxLength: 256
+        additions:
+          description: Additional properties
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - id
+        - name
+    Bundle:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '#/components/schemas/UniqueUUIDIdentifier'
+        externalId:
+          type: string
+          description: The external bundle identifier
+          minLength: 1
+          maxLength: 64
+        name:
+          type: string
+          description: The name of the bundle
+          minLength: 1
+          maxLength: 128
+        description:
+          type: string
+          description: The description of the bundle
+          minLength: 1
+          maxLength: 256
+        additions:
+          description: Additional properties
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - id
+        - name
+    Entitlement:
+      type: object
+      additionalProperties: false
+      properties:
+        functionGroupId:
+          $ref: '#/components/schemas/UniqueUUIDIdentifier'
+        functionGroupName:
+          type: string
+          description: The name of the function group
+          minLength: 1
+          maxLength: 128
+        entitlementType:
+          type: string
+          description: The type of the entitlements permission present under this function group
+          enum:
+            - Functional
+            - Data
+        dataGroupName:
+          type: string
+          description: The name of the data group
+          minLength: 1
+          maxLength: 128
+        dataGroupType:
+          type: string
+          description: The data group type
+          minLength: 1
+          maxLength: 36
+        description:
+          type: string
+          description: The description of the function group
+          minLength: 1
+          maxLength: 256
+        additions:
+          description: Additional properties
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - functionGroupName
+        - entitlementType
+    UniqueUUIDIdentifier:
+      type: string
+      description: The unique identifier
+      minLength: 32
+      maxLength: 36
+      pattern: '^[0-9a-f]{32}$|^[0-9a-f-]{36}$'
+    ErrorItem:
+      title: ErrorItem
+      type: object
+      properties:
+        message:
+          description: Any further information.
+          type: string
+          minLength: 1
+        key:
+          description: '{capability-name}.api.{api-key-name}. For generated validation errors this is the path in the document the error resolves to. e.g. object name + ''.'' + field'
+          type: string
+          minLength: 1
+        context:
+          title: Context
+          description: Context can be anything used to construct localised messages.
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - message
+        - key
+    BadRequestError:
+      title: BadRequestError
+      type: object
+      required:
+        - message
+        - key
+      properties:
+        message:
+          type: string
+          description: Any further information
+          minLength: 1
+        key:
+          type: string
+          description: Error summary
+          minLength: 1
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    NotFoundError:
+      title: NotFoundError
+      type: object
+      required:
+        - message
+        - key
+      properties:
+        message:
+          type: string
+          description: Any further information
+          minLength: 1
+        key:
+          type: string
+          description: Error summary
+          minLength: 1
+        errors:
+          type: array
+          description: Detailed error information
+          items:
+            $ref: '#/components/schemas/ErrorItem'

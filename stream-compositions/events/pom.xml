@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-compositions</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.10.0</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions</groupId>
@@ -31,7 +31,7 @@
         <module>product-catalog-egress</module>
         <module>transaction-egress</module>
         <module>transaction-ingress</module>
-<!--        <module>payment-order-events</module>-->
+        <module>grandcentral</module>
     </modules>
 
 </project>

@@ -4,6 +4,64 @@ All notable changes to this project will be documented in this file.
 ## [5.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
 ### Changed
 - Bumping Service SDK to **17.0.0**
+## [5.10.0](https://github.com/Backbase/stream-services/compare/5.9.1...5.10.0)
+### Added
+- Introducing Grand Central customer canonical model: Processing the `PartyUpsertEvent` using the Legal Entity Saga via the [legal-entity-composition-service](stream-compositions/services/legal-entity-composition-service)
+
+## [5.9.1](https://github.com/Backbase/stream-services/compare/5.9.0...5.9.1)
+### Fixed
+- Update data groups with custom data items
+
+## [5.9.0](https://github.com/Backbase/stream-services/compare/5.8.0...5.9.0)
+### Added
+- Added plan-manager for TVP (Tailored Value Proposition)
+
+## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
+### Changed
+- make ContactsSaga use continueOnError flag
+
+## [5.7.0](https://github.com/Backbase/stream-services/compare/5.6.0...5.7.0)
+### Changed
+- bug fixed - missing stream-starter module in stream-sdk
+
+## [5.6.0](https://github.com/Backbase/stream-services/compare/5.5.0...5.6.0)
+### Changed
+- Removed the service-sdk-starter-reactive since it will be removed soon and created stream-starter with all the dependencies in service-sdk-starter-reactive
+
+## [5.4.0](https://github.com/Backbase/stream-services/compare/5.3.0...5.4.0)
+### Changed
+- Fix the logic for creating Template type job roles only for MSA
+
+## [5.3.0](https://github.com/Backbase/stream-services/compare/5.2.0...5.3.0)
+### Added
+- Add CUSTOMERS product group type to OpenAPI contract
+
+## [5.2.0](https://github.com/Backbase/stream-services/compare/5.1.0...5.2.0)
+### Added
+- Adding login-based ingestion for product composition. Disabled by default, to enable: `backbase.stream.compositions.product.login-event.enabled=true`.
+- Upgrade stream composition to 2024.04
+
+## [5.1.0](https://github.com/Backbase/stream-services/compare/5.0.1...5.1.0)
+### Changed
+- Upgrade stream composition to 2024.03.10-LTS
+
+## [5.0.1](https://github.com/Backbase/stream-services/compare/5.0.0...5.0.1)
+### Changed
+- Use pagination to query Payment Orders
+
+## [5.0.0](https://github.com/Backbase/stream-services/compare/5.0.0...4.0.0)
+### Changed
+- Bumping Service SDK to **17.0.0**
+- Bumping Banking Services clients to **2024.04**
+
+## [4.1.1](https://github.com/Backbase/stream-services/compare/4.1.1...4.1.0)
+### Changed
+- update with fixes from 3.72.4
+- Upgrade to Backbase version `2024.03-LTS`
+
+## [4.1.0](https://github.com/Backbase/stream-services/compare/4.1.0...4.0.0)
+### Changed
+- Bumping Service SDK to **16.1.5**
 
 ## [4.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
 ### Changed
@@ -1508,4 +1566,3 @@ backbase:
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
 [2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
 [2.75.0]: https://github.com/Backbase/stream-services/compare/2.74.0...2.75.0
-

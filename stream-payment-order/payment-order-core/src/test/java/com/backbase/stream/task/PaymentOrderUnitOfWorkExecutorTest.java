@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.lenient;
 
 import com.backbase.dbs.arrangement.api.service.v2.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItem;
@@ -23,6 +24,8 @@ import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import java.math.BigDecimal;
+
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,7 +75,8 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
         PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse()
                 .id("po_post_resp_id");
-        Mockito.lenient().when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
+
+        lenient().when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));
 
         AccountArrangementItem accountArrangementItem = new AccountArrangementItem()
@@ -82,7 +86,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
         AccountArrangementItems accountArrangementItems = new AccountArrangementItems()
                 .addArrangementElementsItem(accountArrangementItem);
 
-        Mockito.lenient().when(arrangementsApi.postFilter(Mockito.any()))
+        lenient().when(arrangementsApi.postFilter(Mockito.any()))
                 .thenReturn(Mono.just(accountArrangementItems));
 
         StepVerifier.create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderIngestRequestList))
@@ -102,11 +106,12 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
         PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse()
                 .id("po_post_resp_id");
 
-        Mockito.lenient().when(paymentOrdersApi.postPaymentOrder(any()))
+        lenient().when(paymentOrdersApi.postPaymentOrder(any()))
                 .thenReturn(Mono.just(paymentOrderPostResponse));
 
         GetPaymentOrderResponse getPaymentOrderResponse = new GetPaymentOrderResponse()
-                .id("arrangementId_1");
+                .id("arrangementId_1")
+                .bankReferenceId("bankReferenceId_1");
         PaymentOrderPostFilterResponse paymentOrderPostFilterResponse = new PaymentOrderPostFilterResponse()
                 .addPaymentOrdersItem(getPaymentOrderResponse)
                 .totalElements(new BigDecimal(1));
@@ -130,6 +135,42 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
                 Assertions.assertEquals(paymentOrderPostRequest.size(), unitOfWork.getStreamTasks().get(0).getData().size());
             })
             .verifyComplete();
+    }
+
+    @Test
+    void test_prepareunitofwork_blankuserid() {
+
+        paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
+                repository, streamTaskExecutor, streamWorkerConfiguration,
+                paymentOrdersApi, arrangementsApi, null);
+
+        paymentOrderPostRequest.get(0).setInternalUserId(StringUtils.EMPTY);
+        paymentOrderPostRequest.get(1).setInternalUserId(null);
+
+        Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux = Flux.fromIterable(paymentOrderPostRequest);
+
+        AccountArrangementItem accountArrangementItem = new AccountArrangementItem()
+                .id("arrangementId_1")
+                .externalArrangementId("externalArrangementId_1");
+        AccountArrangementItems accountArrangementItems = new AccountArrangementItems()
+                .addArrangementElementsItem(accountArrangementItem);
+
+        lenient().when(arrangementsApi.postFilter(Mockito.any()))
+                .thenReturn(Mono.just(accountArrangementItems));
+
+        GetPaymentOrderResponse getPaymentOrderResponseWithEmptyUserId = new GetPaymentOrderResponse()
+                .id("arrangementId_1");
+
+        PaymentOrderPostFilterResponse paymentOrderPostFilterResponse = new PaymentOrderPostFilterResponse()
+                .addPaymentOrdersItem(getPaymentOrderResponseWithEmptyUserId)
+                .totalElements(new BigDecimal(1));
+
+        lenient().doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+
+        StepVerifier
+                .create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
 }

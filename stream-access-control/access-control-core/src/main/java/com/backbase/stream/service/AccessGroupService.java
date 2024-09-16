@@ -51,6 +51,7 @@ import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup.TypeEnum;
+import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
@@ -91,6 +92,7 @@ import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -772,9 +774,9 @@ public class AccessGroupService {
 
     public Mono<BatchProductGroupTask> updateExistingDataGroupsBatch(BatchProductGroupTask task, List<DataGroupItem> existingDataGroups, List<BaseProductGroup> productGroups) {
         List<PresentationDataGroupItemPutRequestBody> batchUpdateRequest = new ArrayList<>();
-        final Set<String> affectedArrangements = productGroups.stream()
-            .map(StreamUtils::getInternalProductIds)
-            .flatMap(List::stream)
+        final Set<String> affectedArrangements = Stream.concat(
+            productGroups.stream().map(StreamUtils::getInternalProductIds).flatMap(List::stream),
+            productGroups.stream().map(BaseProductGroup::getCustomDataGroupItems).flatMap(List::stream).map(CustomDataGroupItem::getInternalId))
             .collect(Collectors.toSet());
         if (task.getIngestionMode().isDataGroupsReplaceEnabled()) {
             // if REPLACE mode, existing products (not sent in the request) also need to be added to the set of affected arrangements.
@@ -793,7 +795,8 @@ public class AccessGroupService {
             List<String> arrangementsToAdd = new ArrayList<>();
             List<String> arrangementsToRemove = new ArrayList<>();
             affectedArrangements.forEach(arrangement -> pg.ifPresent(p -> {
-                boolean shouldBeInGroup = StreamUtils.getInternalProductIds(pg.get()).contains(arrangement);
+                boolean shouldBeInGroup = StreamUtils.getInternalProductIds(pg.get()).contains(arrangement) ||
+                    pg.get().getCustomDataGroupItems().stream().map(CustomDataGroupItem::getInternalId).anyMatch(arrangement::equals);
                 if (!dbsDataGroup.getItems().contains(arrangement) && shouldBeInGroup) {
                     // ADD.
                     log.debug("Arrangement item {} to be added to Data Group {}", arrangement, dbsDataGroup.getName());
@@ -1225,7 +1228,9 @@ public class AccessGroupService {
         presentationIngestFunctionGroup.setExternalServiceAgreementId(serviceAgreement.getExternalId());
         presentationIngestFunctionGroup.setMetadata(jobRole.getMetadata());
 
-        if(jobRole instanceof JobRole) {
+        //since ReferenceJobRole class was removed, now all job roles have the same class, and
+        //reference job role can be created only for MSA, for CSA it failed
+        if(BooleanUtils.isTrue(serviceAgreement.getIsMaster())) {
             log.debug("Creating a Reference Job Role.");
             presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
         }
