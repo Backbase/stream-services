@@ -5,6 +5,7 @@ x-common-variables: &common-variables
   SIG_SECRET_KEY: JWTSecretKeyDontUseInProduction!
   USERCTX_KEY: JWTSecretKeyDontUseInProduction!
   logging.level.com.backbase: DEBUG
+  logging.level.com.backbase.buildingblocks.multitenancy.datasource.MultiDataSourceHealthIndicator: INFO
   logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
   server.shutdown: graceful
   eureka.client.serviceUrl.defaultZone: http://registry:8080/eureka
@@ -20,14 +21,15 @@ x-common-variables: &common-variables
   management.endpoint.configprops.show-values: ALWAYS
   management.tracing.enabled: false
   backbase.multi-tenancy.enabled: true
-  backbase.multi-tenancy.tenants[0].id: t1
-  backbase.multi-tenancy.tenants[1].id: t2
+  backbase.multi-tenancy.tenants[0].id: tbb
+  backbase.multi-tenancy.tenants[1].id: tmt
   spring.main.banner-mode: off
   spring.cloud.config.enabled: false
   spring.cloud.kubernetes.enabled: false
-  backbase.audit.enabled: false
   backbase.security.public.paths: /integration-api/**
   backbase.security.mtls.enabled: false
+  backbase.audit.enabled: true
+  backbase.http.request-logging-filter.max-payload-length: 5000
 
 x-database-variables: &database-variables
   spring.liquibase.enabled: true
@@ -83,7 +85,7 @@ services:
       retries: 5
 
   wiremock:
-    image: wiremock/wiremock:2.32.0
+    image: wiremock/wiremock:2.35.1-1
     ports:
       - "9000:8080"
     command:
@@ -98,10 +100,10 @@ services:
     ports:
       - "8761:8080"
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar" ]
 
   token-converter:
     image: repo.backbase.com/backbase-docker-releases/oidc-token-converter-service:${BB_VERSION}
@@ -109,18 +111,18 @@ services:
       - "7779:8080"
     environment:
       <<: *common-variables
-      BACKBASE_OIDCTOKENCONVERTER_WHITELISTEDDOMAINS_0_INTERNALHOSTSCHEME: http
-      BACKBASE_OIDCTOKENCONVERTER_WHITELISTEDDOMAINS_0_INTERNALHOST: identity:8080
-      BACKBASE_OIDCTOKENCONVERTER_WHITELISTEDDOMAINS_0_ISSUERHOST: localhost
-      BACKBASE_MULTITENANCY_TENANTFILTER_SHOULDNOTFILTERPATHS: /oauth/token,/actuator/**
+      backbase.oidc-token-converter.whitelistedDomains[0].internalHostScheme: http
+      backbase.oidc-token-converter.whitelistedDomains[0].internalHost: identity:8080
+      backbase.oidc-token-converter.whitelistedDomains[0].issuerHost: localhost
+      backbase.multi-tenancy.tenant-filter.should-not-filter-paths: /oauth/token,/actuator/**
+      backbase.security.public.paths: /oauth/token,/convert
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/token-converter", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/token-converter", "<status>UP</status>" ]
     links:
       - registry
-      - identity
 
   identity:
     image: auth-server:${BB_VERSION}
@@ -133,6 +135,9 @@ services:
     environment:
       KEYCLOAK_ADMIN: "admin"
       KEYCLOAK_ADMIN_PASSWORD: "admin"
+      BACKBASE_HTTP_CORS: "true"
+      BACKBASE_HTTP_CORS_EXPOSED_HEADERS: "Location"
+      BACKBASE_HTTP_CORS_ORIGINS: "http://localhost:4200,http://localhost:8080"
       KC_DB_URL: "jdbc:mysql://mysql:3306/backbase_identity?useSSL=false&allowPublicKeyRetrieval=true&cacheServerConfiguration=true&createDatabaseIfNotExist=true"
       KC_DB_USERNAME: "root"
       KC_DB_PASSWORD: "root"
@@ -141,19 +146,20 @@ services:
       KC_HOSTNAME_URL: "http://localhost:8180/auth/"
       KC_SPI_SERVICE_TOKEN_DEFAULT_URL: "http://token-converter:8080"
       KC_SPI_USER_MANAGER_CLIENT_DEFAULT_URL: "http://user-manager:8080"
+      KC_SPI_EVENTS_LISTENER_AUDIT_INTEGRATION_SERVICE_URL: "http://audit-service:8080"
       KC_SPI_CONNECTIONS_JPA_LEGACY_INITIALIZE_EMPTY: "true"
       KC_SPI_CONNECTIONS_JPA_LEGACY_MIGRATION_STRATEGY: "update"
-      kc-spi-tenant-resolver-default-tenants-t1-name: "Backbase"
-      kc-spi-tenant-resolver-default-tenants-t1-realms: "backbase"
-      kc-spi-tenant-resolver-default-tenants-t2-name: "Moustache"
-      kc-spi-tenant-resolver-default-tenants-t2-realms: "moustache"
+      kc.spi-tenant-resolver-default-tenants-tbb-name: "Backbase"
+      kc.spi-tenant-resolver-default-tenants-tbb-realms: "backbase"
+      kc.spi-tenant-resolver-default-tenants-tmt-name: "Moustache"
+      kc.spi-tenant-resolver-default-tenants-tmt-realms: "moustache"
       JAVA_TOOL_OPTIONS: "-Dquarkus.log.category.'\"com.backbase\"'.level=DEBUG \
                           -Dquarkus.log.category.'\"org.keycloak.protocol.oidc\"'.level=TRACE"
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://localhost:8080/auth/realms/backbase/.well-known/openid-configuration", "backbase" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://localhost:8080/auth/realms/backbase/.well-known/openid-configuration", "backbase" ]
     depends_on:
       mysql:
         condition: service_healthy
@@ -164,14 +170,14 @@ services:
       - "8040:8080"
     environment:
       <<: [ *common-variables, *database-variables, *message-broker-variables ]
-      backbase.multi-tenancy.datasource.default-catalog: t1_access_control
-      backbase.multi-tenancy.tenants[0].catalog: t1_access_control
-      backbase.multi-tenancy.tenants[1].catalog: t2_access_control
+      backbase.multi-tenancy.datasource.default-catalog: tbb_access_control
+      backbase.multi-tenancy.tenants[0].catalog: tbb_access_control
+      backbase.multi-tenancy.tenants[1].catalog: tmt_access_control
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/access-control", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/access-control", "<status>UP</status>" ]
     depends_on:
       mysql:
         condition: service_healthy
@@ -185,17 +191,17 @@ services:
       - "8060:8080"
     environment:
       <<: [ *common-variables, *database-variables, *message-broker-variables ]
-      backbase.multi-tenancy.datasource.default-catalog: t1_user_manager
-      backbase.multi-tenancy.tenants[0].catalog: t1_user_manager
-      backbase.multi-tenancy.tenants[1].catalog: t2_user_manager
-      BACKBASE_USERS_IDENTITYENDPOINTSENABLED: true
-      BACKBASE_USERS_IDENTITYINTEGRATIONENABLED: true
-      BACKBASE_USERS_SYNCPRIMARYTOIDENTITYENABLED: true
+      backbase.multi-tenancy.datasource.default-catalog: tbb_user_manager
+      backbase.multi-tenancy.tenants[0].catalog: tbb_user_manager
+      backbase.multi-tenancy.tenants[1].catalog: tmt_user_manager
+      backbase.users.identity-endpoints-enabled: true
+      backbase.users.identity-integration-enabled: true
+      backbase.users.sync-primary-to-identity-enabled: true
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/user-manager", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/user-manager", "<status>UP</status>" ]
     depends_on:
       mysql:
         condition: service_healthy
@@ -209,16 +215,16 @@ services:
       - "8070:8080"
     environment:
       <<: *common-variables
-      IDENTITY_SERVERURL: http://identity:8080/auth
-      IDENTITY_MASTERADMIN_USERNAME: admin
-      IDENTITY_MASTERADMIN_PASSWORD: admin
-      IDENTITY_REALMCONFIGURATION_FALLBACKOPTIONS_ENABLEUSER: true
-      IDENTITY_REALMCONFIGURATION_FALLBACKOPTIONS_USETEMPORARYPASSWORD: true
+      identity.serverUrl: http://identity:8080/auth
+      identity.masterAdmin.username: admin
+      identity.masterAdmin.password: admin
+      identity.realmConfiguration.fallbackOptions.enableUser: true
+      identity.realmConfiguration.fallbackOptions.useTemporaryPassword: true
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/identity-integration-service", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/identity-integration-service", "<status>UP</status>" ]
     links:
       - registry
 
@@ -226,9 +232,10 @@ services:
     image: ${STREAM_REGISTRY}/legal-entity-bootstrap-task:${STREAM_VERSION}
     environment:
       <<: *common-variables
+      eureka.client.register-with-eureka: false
       spring.profiles.include: moustache-bank
       bootstrap.legalEntity.realmName: moustache
-      backbase.stream.client.additional-headers.x-tid: t2
+      backbase.stream.client.additional-headers.x-tid: tmt
     depends_on:
       token-converter:
         condition: service_healthy
@@ -248,15 +255,18 @@ services:
     environment:
       <<: [ *common-variables, *message-broker-variables ]
       bootstrap.enabled: true
-      backbase.stream.client.additional-headers.x-tid: t1
+      backbase.stream.client.additional-headers.x-tid: tbb #Used by the bootstrap task when initializing the application
       spring.cloud.discovery.client.simple.instances.legal-entity-integration[0].uri: http://wiremock:8080
       backbase.stream.compositions.legal-entity.chains.product-composition.enabled: true
       backbase.stream.compositions.legal-entity.chains.product-composition.async: true
+      backbase.stream.compositions.legal-entity.gc-defaults.party.realmName: backbase
+      backbase.stream.compositions.legal-entity.gc-defaults.party.parentExternalId: BANK
+      backbase.stream.compositions.legal-entity.gc-defaults.party.referenceJobRoleNames: "Retail User - USA"
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/legal-entity-composition" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/legal-entity-composition" ]
     depends_on:
       token-converter:
         condition: service_healthy
@@ -269,6 +279,7 @@ services:
       identity:
         condition: service_healthy
     links:
+      - registry
       - activemq
 
   arrangement-manager:
@@ -279,14 +290,15 @@ services:
       - "8050:8080"
     environment:
       <<: [ *common-variables, *database-variables, *message-broker-variables ]
-      backbase.multi-tenancy.datasource.default-catalog: t1_arrangement_manager
-      backbase.multi-tenancy.tenants[0].catalog: t1_arrangement_manager
-      backbase.multi-tenancy.tenants[1].catalog: t2_arrangement_manager
+      backbase.multi-tenancy.datasource.default-catalog: tbb_arrangement_manager
+      backbase.multi-tenancy.tenants[0].catalog: tbb_arrangement_manager
+      backbase.multi-tenancy.tenants[1].catalog: tmt_arrangement_manager
+      spring.cloud.discovery.client.simple.instances.account-integration-service[0].uri: http://wiremock:8080
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/arrangement-manager", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/arrangement-manager", "<status>UP</status>" ]
     depends_on:
       mysql:
         condition: service_healthy
@@ -302,15 +314,15 @@ services:
       - accounts
     environment:
       <<: [ *common-variables, *message-broker-variables, *database-variables ]
-      backbase.multi-tenancy.datasource.default-catalog: t1_transaction_manager
-      backbase.multi-tenancy.tenants[0].catalog: t1_transaction_manager
-      backbase.multi-tenancy.tenants[1].catalog: t2_transaction_manager
+      backbase.multi-tenancy.datasource.default-catalog: tbb_transaction_manager
+      backbase.multi-tenancy.tenants[0].catalog: tbb_transaction_manager
+      backbase.multi-tenancy.tenants[1].catalog: tmt_transaction_manager
       spring.cloud.discovery.client.simple.instances.transaction-integration-mock[0].uri: http://wiremock:8080
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/transaction-manager", "<status>UP</status>" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/transaction-manager", "<status>UP</status>" ]
     depends_on:
       mysql:
         condition: service_healthy
@@ -324,8 +336,9 @@ services:
       - accounts
     environment:
       <<: *common-variables
+      eureka.client.register-with-eureka: false
       spring.profiles.include: moustache-bank
-      backbase.stream.client.additional-headers.x-tid: t1
+      backbase.stream.client.additional-headers.x-tid: tbb
     depends_on:
       token-converter:
         condition: service_healthy
@@ -344,11 +357,75 @@ services:
       backbase.stream.compositions.product.chains.transaction-manager.enabled: true
       backbase.stream.compositions.product.chains.transaction-composition.enabled: false
       backbase.stream.compositions.product.chains.payment-order-composition.enabled: false
+      backbase.stream.compositions.product.login-event.enabled: true
+      backbase.stream.compositions.product.login-event.realms: backbase,moustache
     volumes:
-      - ./utils/HealthCheck.java:/tmp/HealthCheck.java
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
     healthcheck:
       <<: *healthcheck-defaults
-      test: [ "CMD", "java", "-Xmx5M", "-Xmx10M", "/tmp/HealthCheck.java", "http://registry:8080/eureka/apps/product-composition" ]
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/product-composition" ]
     links:
       - registry
       - activemq
+
+  audit-service:
+    image: repo.backbase.com/backbase-docker-releases/audit-service:${BB_VERSION}
+    ports:
+      - "8088:8080"
+    profiles:
+      - accounts
+    environment:
+      <<: [ *common-variables, *message-broker-variables, *database-variables ]
+      backbase.multi-tenancy.datasource.default-catalog: tbb_audit_service
+      backbase.multi-tenancy.tenants[0].catalog: tbb_audit_service
+      backbase.multi-tenancy.tenants[1].catalog: tmt_audit_service
+      backbase.audit.enable-sync-mode: true
+    volumes:
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/audit-service", "<status>UP</status>" ]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    links:
+      - activemq
+      - registry
+
+  edge:
+    image: repo.backbase.com/backbase-docker-releases/edge:${BB_VERSION}
+    profiles:
+      - web
+    environment:
+      <<: *common-variables
+      gateway.actuator.security.enabled: false
+      gateway.csrf.enabled: false
+    volumes:
+      - ./exe/HealthCheck.jar:/tmp/HealthCheck.jar
+    healthcheck:
+      <<: *healthcheck-defaults
+      test: [ "CMD", "java", "-jar", "-Xms5M", "-Xmx10M", "/tmp/HealthCheck.jar", "http://registry:8080/eureka/apps/edge", "<status>UP</status>" ]
+    links:
+      - registry
+
+  business-app:
+    image: harbor.backbase.eu/reference/business-universal:2024.07
+    platform: linux/amd64
+    profiles:
+      - web
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    environment:
+      API_ROOT: /api/
+      AUTH_URL: http://localhost:8180/auth/
+      AUTH_REALM: moustache
+      AUTH_CLIENT_ID: bb-tooling-client
+      FALLBACK_LOCALE: en-US
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx/api.conf:/nginx-config/server/15-api.conf
+    links:
+      - edge

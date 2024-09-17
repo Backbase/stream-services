@@ -1,6 +1,11 @@
 {
+  "id": "backbase",
   "realm": "backbase",
   "enabled": true,
+  "eventsListeners": [
+    "audit",
+    "jboss-logging"
+  ],
   "users": [
     {
       "username": "provisioner",

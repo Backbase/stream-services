@@ -1,0 +1,81 @@
+{
+  "eventSource": "com.backbase.party",
+  "eventVersion": "1.0.0",
+  "identifier": "124532132",
+  "dateTime": "2023-11-13T20:20:39+00:00",
+  "dataContentType": "application/json",
+  "data": {
+    "partyId": "gc-party",
+    "partyType": "PERSON",
+    "status": "ACTIVE",
+    "birthDate": "2012-09-23",
+    "personName": {
+      "firstName": "Sachin",
+      "middleName": "Ramesh",
+      "familyName": "Tendulkar"
+    },
+    "organisationName": "ABC Pvt Ltd",
+    "gender": "MALE",
+    "preferredLanguage": "SPANISH",
+    "notes": "sample notes are over here about the party",
+    "electronicAddress": {
+      "emails": [
+        {
+          "key": "string",
+          "type": "WORK",
+          "primary": true,
+          "address": "gc-party@example.com"
+        }
+      ],
+      "urls": [
+        {
+          "key": "string",
+          "type": "WORK",
+          "primary": true,
+          "address": "www.xyz.com"
+        }
+      ]
+    },
+    "postalAddresses": [
+      {
+        "key": "string",
+        "type": "POSTAL",
+        "primary": true,
+        "department": "",
+        "subDepartment": "Postal",
+        "addressLine": "Perry Cross Road",
+        "buildingNumber": "19-A",
+        "streetName": "",
+        "townName": "Tualatin",
+        "postalCode": "400050",
+        "countrySubDivision": "Oregon",
+        "country": "US"
+      }
+    ],
+    "phoneAddresses": [
+      {
+        "key": "string",
+        "type": "MOBILE",
+        "primary": true,
+        "number": "9888887888",
+        "countryCode": "+91",
+        "countryIsoCode": ""
+      }
+    ],
+    "personIdentifications": [
+      {
+        "type": "ALIEN_REGISTRATION_NUMBER",
+        "id": "123456789"
+      }
+    ],
+    "dates": [
+      {
+        "dateType": "OPENING_DATETIME",
+        "dateValue": "2022-10-25T10:29:19Z"
+      }
+    ],
+    "customFields": {
+      "shouldExtend": true
+    }
+  }
+}

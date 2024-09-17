@@ -1,0 +1,31 @@
+{
+  "id": "d1d22565-5b5f-39d8-94c6-d33028dfaddb",
+  "request": {
+    "url": "/service-api/v2/users/identities",
+    "method": "POST",
+    "bodyPatterns": [
+      {
+        "equalToJson": "{\"externalId\":\"gc-party\",\"legalEntityInternalId\":\"2c9280899126d76f01912cbb0a420006\",\"fullName\":\"Sachin Ramesh Tendulkar\",\"emailAddress\":\"gc-party@example.com\",\"mobileNumber\":\"9888887888\",\"givenName\":null,\"familyName\":null,\"attributes\":{},\"additions\":{}}",
+        "ignoreArrayOrder": true,
+        "ignoreExtraElements": true
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "bodyFileName": "body-service-api-v2-users-identities-GUNJl.json",
+    "headers": {
+      "Vary": "origin,access-control-request-method,access-control-request-headers,accept-encoding",
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "0",
+      "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      "X-Frame-Options": "DENY",
+      "Content-Type": "application/json",
+      "Date": "Wed, 07 Aug 2024 12:05:41 GMT",
+      "Keep-Alive": "timeout=60"
+    }
+  },
+  "uuid": "d1d22565-5b5f-39d8-94c6-d33028dfaddb"
+}

@@ -1,0 +1,28 @@
+{
+  "request" : {
+    "urlPathPattern" : "/service-api/v2/balances",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "jsonBody" : [
+      {
+        "arrangementId": "{{ request.query.arrangementIds.0 }}",
+        "availableBalance": 123,
+        "bookedBalance": 321
+      }
+    ],
+    "headers" : {
+      "X-Content-Type-Options" : "nosniff",
+      "X-XSS-Protection" : "1; mode=block",
+      "Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma" : "no-cache",
+      "Expires" : "0",
+      "X-Frame-Options" : "DENY",
+      "Content-Type" : "application/json",
+      "Date" : "Wed, 26 Oct 2022 12:16:40 GMT",
+      "Keep-Alive" : "timeout=60"
+    },
+    "transformers": ["response-template"]
+  }
+}

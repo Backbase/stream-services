@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Ingest Legal Entity API
   description: Ingestion Saga for Legal Entities and their products
-  version: 2.5.0
+  version: 2.6.0
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
     backgroundColor: "#FFFFFF"
@@ -1207,6 +1207,9 @@ components:
           type: array
           items:
             type: string
+        planName:
+          type: string
+          description: Plan name
         cards:
           $ref: '#/components/schemas/CardsReference'
         businessFunctionGroups:

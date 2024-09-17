@@ -1,9 +1,24 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
+## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
 ### Changed
 - feature - improved payment ingestion to allow for joint owner accounts to be shared.
+## [5.10.0](https://github.com/Backbase/stream-services/compare/5.9.1...5.10.0)
+### Added
+- Introducing Grand Central customer canonical model: Processing the `PartyUpsertEvent` using the Legal Entity Saga via the [legal-entity-composition-service](stream-compositions/services/legal-entity-composition-service)
+
+## [5.9.1](https://github.com/Backbase/stream-services/compare/5.9.0...5.9.1)
+### Fixed
+- Update data groups with custom data items
+
+## [5.9.0](https://github.com/Backbase/stream-services/compare/5.8.0...5.9.0)
+### Added
+- Added plan-manager for TVP (Tailored Value Proposition)
+
+## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
+### Changed
+- make ContactsSaga use continueOnError flag
 
 ## [5.7.0](https://github.com/Backbase/stream-services/compare/5.6.0...5.7.0)
 ### Changed
@@ -1551,4 +1566,3 @@ backbase:
 [2.6.0]: https://github.com/Backbase/stream-services/releases/tag/2.6.0
 [2.70.1]: https://github.com/Backbase/stream-services/compare/2.71.0...2.70.1
 [2.75.0]: https://github.com/Backbase/stream-services/compare/2.74.0...2.75.0
-

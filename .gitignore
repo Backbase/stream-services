@@ -16,5 +16,4 @@ bin
 
 *.versionsBackup
 **/src/main/resources/lib
-
-stream-sdk/stream-starter/.flattened-pom.xml
+**/*.flattened-pom.xml

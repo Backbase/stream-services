@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>5.7.0</version>
+        <version>5.10.0</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -446,6 +446,19 @@
                             <inputSpec>${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.audiences.collector.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.audiences.collector.api.service.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-plan-manager-service-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.basedir}/src/main/openapi/plan-manager-service-api-v0.5.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.tailoredvalue.planmanager.service.api.v0</apiPackage>
+                            <modelPackage>com.backbase.tailoredvalue.planmanager.service.api.v0.model</modelPackage>
                         </configuration>
                     </execution>
                 </executions>

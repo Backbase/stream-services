@@ -54,6 +54,8 @@ import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
+import com.backbase.streams.tailoredvalue.PlansService;
+import com.backbase.tailoredvalue.planmanager.service.api.v0.model.UserPlanUpdateRequestBody;
 import io.micrometer.tracing.annotation.SpanTag;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,11 +95,13 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     public static final String FAILED = "failed";
     public static final String EXISTS = "exists";
     public static final String CREATED = "created";
+    public static final String SKIPPED = "skipped";
 
     public static final String PROCESS_PRODUCTS = "process-products";
     public static final String PROCESS_JOB_PROFILES = "process-job-profiles";
     public static final String PROCESS_LIMITS = "process-limits";
     public static final String PROCESS_CONTACTS = "process-contacts";
+    public static final String PROCESS_PLANS = "process-plans";
     public static final String REJECTED = "rejected";
     public static final String SETUP_SERVICE_AGREEMENT = "setup-service-agreement";
     private static final String BATCH_PRODUCT_GROUP_ID = "batch_product_group_task-";
@@ -118,8 +122,8 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private final BatchProductIngestionSaga batchProductIngestionSaga;
     private final LimitsSaga limitsSaga;
     private final ContactsSaga contactsSaga;
+    private final PlansService plansService;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
-
     private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
     private static final ServiceAgreementV2ToV1Mapper saMapper = ServiceAgreementV2ToV1Mapper.INSTANCE;
 
@@ -128,12 +132,14 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         BatchProductIngestionSaga batchProductIngestionSaga,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
+        PlansService plansService,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
         this.accessGroupService = accessGroupService;
         this.batchProductIngestionSaga = batchProductIngestionSaga;
         this.limitsSaga = limitsSaga;
         this.contactsSaga = contactsSaga;
+        this.plansService = plansService;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
     }
 
@@ -146,7 +152,33 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             .flatMap(this::setupAdministratorPermissions)
             .flatMap(this::setupLimits)
             .flatMap(this::processProducts)
-            .flatMap(this::postContacts);
+            .flatMap(this::postContacts)
+            .flatMap(this::updatePlans);
+    }
+
+    private Mono<ServiceAgreementTaskV2> updatePlans(ServiceAgreementTaskV2 streamTask){
+        ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
+        if (!plansService.isEnabled()) {
+            streamTask.info(SERVICE_AGREEMENT, PROCESS_PLANS, SKIPPED, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
+                    "Plan Saga configured to skipped");
+            return Mono.just(streamTask);
+        }
+        log.info("Updating Plan for Service Agreement Id {}", serviceAgreement.getExternalId());
+        serviceAgreement.getJobProfileUsers().stream()
+                .filter(jobProfileUser -> StringUtils.isNotEmpty(jobProfileUser.getPlanName()))
+                .forEach(jobProfileUser -> legalEntityService
+                .getLegalEntityByExternalId(jobProfileUser.getLegalEntityReference().getExternalId())
+                .map(LegalEntity::getInternalId)
+                .map(legalEntityInternalId -> {
+                    UserPlanUpdateRequestBody userPlanUpdateRequestBody = new UserPlanUpdateRequestBody();
+                    userPlanUpdateRequestBody.setId(""); // Plan id will be set internally by the saga by PlanName
+                    userPlanUpdateRequestBody.serviceAgreementId(serviceAgreement.getInternalId());
+                    userPlanUpdateRequestBody.setLegalEntityId(legalEntityInternalId);
+                    return userPlanUpdateRequestBody;
+                }).flatMap(reqBody -> plansService
+                        .updateUserPlan(jobProfileUser.getUser().getInternalId(), reqBody, jobProfileUser.getPlanName()))
+                .subscribe());
+        return Mono.just(streamTask);
     }
 
     private Mono<ServiceAgreementTaskV2> postContacts(ServiceAgreementTaskV2 streamTask) {

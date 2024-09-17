@@ -7,13 +7,13 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-starter</artifactId>
-        <version>5.7.0</version>
+        <version>5.10.0</version>
         <relativePath>../stream-sdk/stream-starter</relativePath>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>5.7.0</version>
+    <version>5.10.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Compositions</name>
@@ -27,7 +27,7 @@
     </modules>
 
     <properties>
-        <backbase-bom.version>2024.04</backbase-bom.version>
+        <backbase-bom.version>2024.07</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
         <testcontainers.version>1.12.5</testcontainers.version>
         <mock.server.version>5.15.0</mock.server.version>

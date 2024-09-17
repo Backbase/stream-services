@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-compositions</artifactId>
-        <version>5.7.0</version>
+        <version>5.10.0</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions</groupId>
@@ -73,20 +73,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-broker</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq.tooling</groupId>
-            <artifactId>activemq-junit</artifactId>
-            <version>${activemq.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-kahadb-store</artifactId>
-            <version>${activemq.version}</version>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>bb-activemq-broker</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
