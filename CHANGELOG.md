@@ -1,5 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [5.12.0](https://github.com/Backbase/stream-services/compare/5.11.0...5.12.0)
+### Added
+- Adding additional pmts mappings
+
 
 ## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
 ### Fixed
