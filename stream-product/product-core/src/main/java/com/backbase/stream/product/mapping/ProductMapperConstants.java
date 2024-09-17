@@ -12,6 +12,7 @@ class ProductMapperConstants {
     static final String DAILY = "DAILY";
     static final String WEEKLY = "WEEKLY";
     static final String MONTHLY = "MONTHLY";
+    static final String QUARTERLY = "QUARTERLY";
     static final String YEARLY = "YEARLY";
     static final String D = "D";
     static final String W = "W";
@@ -33,5 +34,9 @@ class ProductMapperConstants {
     static final String DEBIT_CARDS = "debitCards";
     static final String NUMBER = "number";
     static final String PAN_SUFFIX = "panSuffix";
+    static final String PRODUCT_ID = "productId";
+    static final String STATE_ID = "stateId";
+    static final String INTEREST_PAYMENT_FREQUENCY_UNIT = "interestPaymentFrequencyUnit";
+    static final String TERM_UNIT = "termUnit";
 
 }

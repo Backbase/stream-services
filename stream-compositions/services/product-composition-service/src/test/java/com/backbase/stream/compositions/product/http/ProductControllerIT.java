@@ -1,6 +1,12 @@
 package com.backbase.stream.compositions.product.http;
 
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderPostResponse;
 import com.backbase.stream.compositions.product.api.model.ArrangementPullIngestionRequest;
@@ -20,12 +26,16 @@ import com.backbase.streams.compositions.test.IntegrationTest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockserver.client.MockServerClient;
@@ -40,18 +50,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 @DirtiesContext
 @SpringBootTest
@@ -220,7 +218,7 @@ class ProductControllerIT extends IntegrationTest {
     @Test
     void pullIngestArrangement_Success() throws Exception {
         when(arrangementService.updateArrangement(any()))
-                .thenReturn(Mono.just(new AccountArrangementItemPut()));
+                .thenReturn(Mono.just(new ArrangementPutItem()));
 
         ArrangementPullIngestionRequest pullIngestionRequest =
                 new ArrangementPullIngestionRequest()
@@ -266,7 +264,7 @@ class ProductControllerIT extends IntegrationTest {
                 mapper.treeToValue(node, com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut.class);
 
         when(arrangementService.updateArrangement(any()))
-                .thenReturn(Mono.just(new AccountArrangementItemPut()));
+                .thenReturn(Mono.just(new ArrangementPutItem()));
 
         ArrangementPushIngestionRequest pushIngestionRequest =
                 new ArrangementPushIngestionRequest()
