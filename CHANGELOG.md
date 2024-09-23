@@ -47,6 +47,11 @@ All notable changes to this project will be documented in this file.
 - Fixed setting internal id for creatorLE before creating SA
 
 ## [6.3.0](https://github.com/Backbase/stream-services/compare/6.2.0...6.3.0)
+## [5.11.1](https://github.com/Backbase/stream-services/compare/5.11.0...5.11.1)
+### Changed
+- Updated plan-manager service api from 0.5.0 to 0.9.0
+
+## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
 ### Fixed
 - Fixed missing explicit state mappings for BaseProduct related classes
 
