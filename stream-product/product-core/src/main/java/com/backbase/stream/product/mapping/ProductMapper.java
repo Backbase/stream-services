@@ -21,6 +21,7 @@ import com.backbase.stream.legalentity.model.LegalEntityReference;
 import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.PrincipalAmount;
 import com.backbase.stream.legalentity.model.Product;
+import com.backbase.stream.legalentity.model.ReservedAmount;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.TermUnit;
@@ -211,6 +212,12 @@ public interface ProductMapper {
         return new BookedBalance().amount(bigDecimal);
     }
 
+    default ReservedAmount mapReservedAmount(BigDecimal bigDecimal) {
+        if (bigDecimal == null)
+            return null;
+        return new ReservedAmount().amount(bigDecimal);
+    }
+
     default AvailableBalance mapAvailable(BigDecimal bigDecimal) {
         if (bigDecimal == null)
             return null;
@@ -259,6 +266,20 @@ public interface ProductMapper {
      * @return BigDecimal
      */
     default BigDecimal map(BookedBalance value) {
+        if (value != null) {
+            return value.getAmount();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Convert Object to ReservedAmount.
+     *
+     * @param value wrapped value
+     * @return BigDecimal
+     */
+    default BigDecimal map(ReservedAmount value) {
         if (value != null) {
             return value.getAmount();
         } else {
