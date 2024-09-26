@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Plan Manager Service
-  version: 0.5.0
+  version: 0.9.0
   description: Manage plans and user plans
   x-icon: manage_accounts
   x-deprecated: false
@@ -51,7 +51,7 @@ paths:
                     dataGroupType: ARRANGEMENTS
                     description: The adult data entitlements on their own deposit account
         '404':
-          description: If entitlement permissions not found for the plan
+          description: If plan not found
           content:
             application/json:
               schema:
@@ -66,18 +66,11 @@ paths:
       description: Retrieve the default plan
       operationId: getDefaultPlan
       parameters:
-        - name: serviceAgreementType
+        - name: context
           in: query
-          description: The service agreement type
+          description: The user context which drives tailored value proposition
           example: Family
           required: true
-          schema:
-            type: string
-        - name: role
-          in: query
-          description: The role in service agreement type
-          example: Guardian
-          required: false
           schema:
             type: string
       responses:
@@ -91,7 +84,7 @@ paths:
                 id: 6d23eb83-ae2c-4c7a-b8f2-2941d67e3be6
                 name: Individual Context - Adult User Plan
                 description: The plan of the adult in the context of individual
-                serviceAgreementType: Individual
+                context: Individual
                 segment:
                   id: be6fac90-26f5-453e-9ff1-706ade2d5d17
                   externalId: retail_customers_segment
@@ -176,7 +169,7 @@ paths:
                   - id: 6d23eb83-ae2c-4c7a-b8f2-2941d67e3be6
                     name: Individual Context - Adult User Plan
                     description: The plan of the adult in the context of individual
-                    serviceAgreementType: Individual
+                    context: Individual
                     segment:
                       id: be6fac90-26f5-453e-9ff1-706ade2d5d17
                       externalId: retail_customers_segment
@@ -188,6 +181,42 @@ paths:
                       name: Young Professionals Bundle
                       description: Designed for recent graduates and young adults starting their careers.
   '/service-api/v0/users/{internalUserId}/plans':
+    get:
+      tags:
+        - user-plans
+      summary: Query the user plan
+      description: Query the user plan
+      operationId: queryUserPlan
+      parameters:
+        - name: internalUserId
+          in: path
+          description: The internal user identifier
+          example: 6d23eb83-ae2c-4c7a-b8f2-2941d67e3be6
+          required: true
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 36
+            pattern: '^[0-9a-f]{32}$|^[0-9a-f-]{36}$'
+        - name: serviceAgreementId
+          in: query
+          description: The internal service agreement identifier
+          example: 6d23eb83-ae2c-4c7a-b8f2-2941d67e3be6
+          required: false
+          schema:
+            type: string
+            minLength: 32
+            maxLength: 36
+            pattern: '^[0-9a-f]{32}$|^[0-9a-f-]{36}$'
+      responses:
+        '200':
+          description: Returns the user plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryUserPlanGetResponseBody'
+              example:
+                $ref: '#/paths/~1service-api~1v0~1plans/get/responses/200/content/application~1json/example'
     put:
       tags:
         - user-plans
@@ -337,6 +366,15 @@ components:
     UserPlanUpdateResponseBody:
       allOf:
         - $ref: '#/components/schemas/Plan'
+    QueryUserPlanGetResponseBody:
+      type: object
+      additionalProperties: false
+      properties:
+        plans:
+          type: array
+          description: The collection of plans
+          items:
+            $ref: '#/components/schemas/Plan'
     Plan:
       type: object
       additionalProperties: false
@@ -358,9 +396,9 @@ components:
           description: The description of the plan
           minLength: 1
           maxLength: 256
-        serviceAgreementType:
+        context:
           type: string
-          description: The service agreement type
+          description: The user context which drives tailored value proposition
           minLength: 1
           maxLength: 64
         segment:
@@ -375,6 +413,7 @@ components:
       required:
         - id
         - name
+        - context
     Segment:
       type: object
       additionalProperties: false
@@ -403,6 +442,7 @@ components:
             type: string
       required:
         - id
+        - externalId
         - name
     Bundle:
       type: object
@@ -432,6 +472,7 @@ components:
             type: string
       required:
         - id
+        - externalId
         - name
     Entitlement:
       type: object

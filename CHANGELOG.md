@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 - Adding additional pmts mappings
 
 
+## [5.11.1](https://github.com/Backbase/stream-services/compare/5.11.0...5.11.1)
+### Changed
+- Updated plan-manager service api from 0.5.0 to 0.9.0
+
 ## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
 ### Changed
 - feature - improved payment ingestion to allow for joint owner accounts to be shared.
