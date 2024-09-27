@@ -2,10 +2,10 @@ package com.backbase.stream.context.events;
 
 import static com.backbase.stream.context.config.ContextPropagationConfigurationProperties.TENANT_EVENT_HEADER_NAME;
 
-import com.backbase.buildingblocks.backend.communication.context.OriginatorContext;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.scs.EventMessageProcessor;
 import com.backbase.buildingblocks.backend.communication.event.scs.MessageFactoryProcessor;
+import com.backbase.buildingblocks.backend.internalrequest.UserRequestContext;
 import com.backbase.buildingblocks.persistence.model.Event;
 import com.backbase.stream.context.ForwardedHeadersHolder;
 import com.backbase.stream.context.config.ContextPropagationConfigurationProperties;
@@ -29,14 +29,14 @@ public class TenantEventMessageProcessor implements EventMessageProcessor, Messa
     public <T extends Event> void prepareEventMessage(MessageBuilder<T> messageBuilder,
         EnvelopedEvent<T> envelopedEvent) {
 
-        prepareEventMessage(messageBuilder, envelopedEvent.getOriginatorContext());
+        prepareEventMessage(messageBuilder, envelopedEvent.getUserRequestContext());
     }
 
     /**
      * Adds the currently-bound tenant ID to the TENANT_EVENT_HEADER_NAME header of the given {@link MessageBuilder}.
      */
     @Override
-    public <T> void prepareEventMessage(MessageBuilder<T> messageBuilder, OriginatorContext context) {
+    public <T> void prepareEventMessage(MessageBuilder<T> messageBuilder, UserRequestContext context) {
         var headers = ForwardedHeadersHolder.getValue();
         log.debug("prepareEventMessage {}", headers);
         if (headers != null) {
