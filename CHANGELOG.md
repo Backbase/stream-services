@@ -1,13 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+
+## [5.14.0](https://github.com/Backbase/stream-services/compare/5.13.0...5.14.0)
+### Changed
+- Updated arrangement-manager service-api from v2 to v3
+
 ## [5.13.0](https://github.com/Backbase/stream-services/compare/5.12.0...5.13.0)
 ### Changed
 - Bumping Backbase BOM to 2024.09-LTS
 - Upgraded SSDK to 17.1.0
-
-## [5.13](https://github.com/Backbase/stream-services/compare/5.12.0...5.13.0)
-### Changed
-- Updated arrangement-manager service-api from v2 to v3
 
 ## [5.12.0](https://github.com/Backbase/stream-services/compare/5.11.0...5.12.0)
 ### Added
