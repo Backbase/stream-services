@@ -25,7 +25,6 @@ import com.backbase.stream.legalentity.model.LegalEntityReference;
 import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.PrincipalAmount;
 import com.backbase.stream.legalentity.model.Product;
-import com.backbase.stream.legalentity.model.ReservedAmount;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.TermUnit;
@@ -49,7 +48,6 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings({"squid:S1710"})
 public interface ProductMapper {
 
-
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.LEGAL_ENTITY_IDS)
@@ -57,13 +55,11 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
     PostArrangement toPresentation(Product product);
 
-
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_PRODUCT_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITY_IDS)
     @Mapping(source = "state.externalStateId", target = ProductMapperConstants.EXTERNAL_STATE_ID)
     ArrangementItemPostRequest toPresentation(BaseProduct product);
-
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
@@ -74,7 +70,6 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     PostArrangement toPresentation(CurrentAccount currentAccount);
 
-
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.LEGAL_ENTITY_IDS)
@@ -83,7 +78,6 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @InheritConfiguration
     PostArrangement toPresentation(SavingsAccount savingsAccount);
-
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
@@ -214,12 +208,6 @@ public interface ProductMapper {
         return new BookedBalance().amount(bigDecimal);
     }
 
-    default ReservedAmount mapReservedAmount(BigDecimal bigDecimal) {
-        if (bigDecimal == null)
-            return null;
-        return new ReservedAmount().amount(bigDecimal);
-    }
-
     default AvailableBalance mapAvailable(BigDecimal bigDecimal) {
         if (bigDecimal == null)
             return null;
@@ -272,20 +260,6 @@ public interface ProductMapper {
             return null;
         }
         return value.getAmount();
-    }
-
-    /**
-     * Convert Object to ReservedAmount.
-     *
-     * @param value wrapped value
-     * @return BigDecimal
-     */
-    default BigDecimal map(ReservedAmount value) {
-        if (value != null) {
-            return value.getAmount();
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -383,7 +357,6 @@ public interface ProductMapper {
         }
         return value.stream().map(id -> new LegalEntityReference(null, id)).toList();
     }
-
 
     @ValueMappings({
         @ValueMapping(source = ProductMapperConstants.D, target = ProductMapperConstants.DAILY),
