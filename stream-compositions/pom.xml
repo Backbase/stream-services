@@ -27,14 +27,14 @@
     </modules>
 
     <properties>
-        <backbase-bom.version>2024.07</backbase-bom.version>
+        <backbase-bom.version>2024.09-LTS</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
         <testcontainers.version>1.12.5</testcontainers.version>
         <mock.server.version>5.15.0</mock.server.version>
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
         <spring-cloud.version>2023.0.1</spring-cloud.version>
-        <ssdk.version>17.0.0</ssdk.version>
+        <ssdk.version>17.1.0</ssdk.version>
         <jakarta-validation.version>3.0.2</jakarta-validation.version>
         <jib.container.volumes>/tmp</jib.container.volumes>
         <archuint.skip>true</archuint.skip>
