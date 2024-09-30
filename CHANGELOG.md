@@ -5,10 +5,13 @@ All notable changes to this project will be documented in this file.
 - Bumping Backbase BOM to 2024.09-LTS
 - Upgraded SSDK to 17.1.0
 
+## [5.13](https://github.com/Backbase/stream-services/compare/5.12.0...5.13.0)
+### Changed
+- Updated arrangement-manager service-api from v2 to v3
+
 ## [5.12.0](https://github.com/Backbase/stream-services/compare/5.11.0...5.12.0)
 ### Added
 - Adding additional pmts mappings
-
 
 ## [5.11.1](https://github.com/Backbase/stream-services/compare/5.11.0...5.11.1)
 ### Changed
@@ -79,9 +82,6 @@ All notable changes to this project will be documented in this file.
 ## [4.1.0](https://github.com/Backbase/stream-services/compare/4.1.0...4.0.0)
 ### Changed
 - Bumping Service SDK to **16.1.5**
-## [5.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
-### Changed
-- Bumping Service SDK to **17.0.0**
 
 ## [4.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
 ### Changed

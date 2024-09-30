@@ -69,7 +69,6 @@ public class ProductMapperTest {
                 .accountHolderName("John Doe")
                 .bookedBalance(new BookedBalance().amount(new BigDecimal("2500")))
                 .availableBalance(new AvailableBalance().amount(new BigDecimal("3000")))
-                .reservedAmount(new ReservedAmount().amount(new BigDecimal("3000")))
                 .creditLimit(new CreditLimit().amount(new BigDecimal("10000")))
                 .IBAN("iban")
                 .BBAN("bban")
@@ -345,7 +344,7 @@ public class ProductMapperTest {
     @Test
     public void mapReservedAmount() {
         BigDecimal source = new BigDecimal("130.79");
-        ReservedAmount target = productMapper.mapReservedAmount(source);
+        AvailableBalance target = productMapper.mapAvailable(source);
         Assertions.assertEquals(source, target.getAmount());
     }
 
