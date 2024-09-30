@@ -21,6 +21,7 @@ import com.backbase.stream.legalentity.model.LegalEntityReference;
 import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.PrincipalAmount;
 import com.backbase.stream.legalentity.model.Product;
+import com.backbase.stream.legalentity.model.ReservedAmount;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.TermUnit;
@@ -33,7 +34,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
-public class ProductMapperTest {
+class ProductMapperTest {
 
     private final ProductMapper productMapper = Mappers.getMapper(ProductMapper.class);
 
@@ -69,6 +70,7 @@ public class ProductMapperTest {
                 .accountHolderName("John Doe")
                 .bookedBalance(new BookedBalance().amount(new BigDecimal("2500")))
                 .availableBalance(new AvailableBalance().amount(new BigDecimal("3000")))
+                .reservedAmount(new ReservedAmount().amount(new BigDecimal("3000")))
                 .creditLimit(new CreditLimit().amount(new BigDecimal("10000")))
                 .IBAN("iban")
                 .BBAN("bban")
@@ -344,7 +346,7 @@ public class ProductMapperTest {
     @Test
     public void mapReservedAmount() {
         BigDecimal source = new BigDecimal("130.79");
-        AvailableBalance target = productMapper.mapAvailable(source);
+        ReservedAmount target = productMapper.mapReservedAmount(source);
         Assertions.assertEquals(source, target.getAmount());
     }
 
