@@ -38,7 +38,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <ssdk.version>17.0.0</ssdk.version>
+        <ssdk.version>17.1.0</ssdk.version>
         <japicmp.skip>true</japicmp.skip>
     </properties>
 
