@@ -1,11 +1,15 @@
 package com.backbase.stream.compositions.product.core.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import com.backbase.stream.compositions.product.core.mapper.ArrangementMapper;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ArrangementIngestResponse;
 import com.backbase.stream.compositions.product.integration.client.ArrangementIntegrationApi;
 import com.backbase.stream.compositions.product.integration.client.model.AccountArrangementItemPut;
 import com.backbase.stream.compositions.product.integration.client.model.PullArrangementResponse;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,9 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ArrangementIntegrationServiceImplTest {
@@ -44,14 +45,12 @@ class ArrangementIntegrationServiceImplTest {
                                         .name("name")
                         )));
         when(arrangementMapper.mapIntegrationToStream(any()))
-                .thenReturn(new com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPut());
+                .thenReturn(new com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem());
 
         Mono<ArrangementIngestResponse> responseMono = arrangementIntegrationService.pullArrangement(request);
 
         StepVerifier.create(responseMono)
-                .expectNextMatches(item -> {
-                    return item != null;
-                })
+                .expectNextMatches(Objects::nonNull)
                 .verifyComplete();
     }
 

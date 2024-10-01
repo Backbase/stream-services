@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>backbase-parent</artifactId>
-        <version>17.0.0</version>
+        <version>17.1.0</version>
         <relativePath/>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>5.13.0</version>
+    <version>5.14.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>

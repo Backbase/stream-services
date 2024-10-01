@@ -1,7 +1,7 @@
 package com.backbase.stream.productcatalog.configuration;
 
-import com.backbase.dbs.arrangement.api.service.v2.ProductKindsApi;
-import com.backbase.dbs.arrangement.api.service.v2.ProductsApi;
+import com.backbase.dbs.arrangement.api.service.v3.ProductKindsApi;
+import com.backbase.dbs.arrangement.api.service.v3.ProductsApi;
 import com.backbase.stream.productcatalog.ProductCatalogService;
 import com.backbase.stream.productcatalog.ReactiveProductCatalogService;
 import org.springframework.context.annotation.Bean;
