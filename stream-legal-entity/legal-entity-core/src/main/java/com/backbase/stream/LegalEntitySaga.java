@@ -484,7 +484,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
         return Flux.fromIterable(legalEntity.getProductGroups())
             .map(actual -> createProductGroupTask(streamTask, actual))
-            .concatMap(productGroupStreamTask -> batchProductIngestionSaga.process(productGroupStreamTask)
+            .concatMap(productGroupStreamTask -> batchProductIngestionSaga.process(productGroupStreamTask,streamTask.getIngestionMode())
                 .onErrorResume(throwable -> {
                     String message = throwable.getMessage();
                     if (throwable.getClass().isAssignableFrom(WebClientResponseException.class)) {
