@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-contacts</artifactId>
-        <version>4.1.7</version>
+        <version>4.1.8</version>
     </parent>
 
     <artifactId>contacts-core</artifactId>

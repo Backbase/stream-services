@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.1.8](https://github.com/Backbase/stream-services/compare/4.1.7...4.1.8)
+### Changed.
+- Adding ingestion mode support for batch product groups
+
 ## [4.1.7](https://github.com/Backbase/stream-services/compare/4.1.4...4.1.6)
 ### Changed.
 - Performance improvement on function groups setup for ProductIngestionSaga.
