@@ -23,6 +23,7 @@ import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementsFilt
 import com.backbase.dbs.paymentorder.api.service.v2.model.Status;
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDate;
 import com.backbase.dbs.paymentorder.api.service.v2.model.AccessFilter;
 import com.backbase.stream.config.PaymentOrderTypeConfiguration;
 import java.util.*;
@@ -236,20 +237,21 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
     }
 
     private Mono<List<GetPaymentOrderResponse>> pullFromDBS(final @NotNull List<String> arrangementIds) {
-        return defer(() -> retrieveNextPage(0, arrangementIds)
+        LocalDate startDate = paymentOrderTypeConfiguration.getStartOffsetInDays() != null ? LocalDate.now().minusDays(paymentOrderTypeConfiguration.getStartOffsetInDays()) : null;
+        return defer(() -> retrieveNextPage(0, arrangementIds, startDate)
             .expand(page -> {
                 // If there are no more pages, return an empty flux.
                 if (page.next >= page.total || page.requests.isEmpty()) {
                     return empty();
                 } else {
-                    return retrieveNextPage(page.next, arrangementIds);
+                    return retrieveNextPage(page.next, arrangementIds, startDate);
                 }
             }))
             .collectList()
             .map(pages -> pages.stream().flatMap(page -> page.requests.stream()).toList());
     }
 
-    private Mono<DBSPaymentOrderPageResult> retrieveNextPage(int currentCount, final @NotNull List<String> arrangementIds) {
+    private Mono<DBSPaymentOrderPageResult> retrieveNextPage(int currentCount, final @NotNull List<String> arrangementIds, LocalDate executionDateFrom) {
         List<String> paymentTypes = paymentOrderTypeConfiguration.getTypes();
         var paymentOrderPostFilterRequest = new PaymentOrderPostFilterRequest();
         List<AccessFilter> accessFilters = paymentTypes.stream()
@@ -260,7 +262,7 @@ public class PaymentOrderUnitOfWorkExecutor extends UnitOfWorkExecutor<PaymentOr
         paymentOrderPostFilterRequest.setAccessFilters(accessFilters);
         paymentOrderPostFilterRequest.setStatuses(FILTER);
 
-        return paymentOrdersApi.postFilterPaymentOrders(null, null, null, null, null, null, null, null,
+        return paymentOrdersApi.postFilterPaymentOrders(null, null, null, executionDateFrom, null, null, null, null,
                 null, null, null, null, null, null, currentCount / PAGE_SIZE, PAGE_SIZE, null,
                 null, paymentOrderPostFilterRequest)
             .retryWhen(fixedDelay(3, Duration.of(2000, MILLIS)).filter(

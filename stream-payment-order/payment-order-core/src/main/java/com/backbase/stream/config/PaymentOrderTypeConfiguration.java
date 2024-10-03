@@ -15,4 +15,6 @@ public class PaymentOrderTypeConfiguration {
 
     @NotNull
     private List<String> types;
+    
+    private Long startOffsetInDays;
 }

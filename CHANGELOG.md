@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.1.9](https://github.com/Backbase/stream-services/compare/4.1.9...4.1.9)
+### Changed.
+- Adding configuration to filter payments by ExecutionDateFrom based in offset period days
+
 ## [4.1.8](https://github.com/Backbase/stream-services/compare/4.1.7...4.1.8)
 ### Changed.
 - Adding ingestion mode support for batch product groups
@@ -12,11 +16,11 @@ All notable changes to this project will be documented in this file.
 ## [4.1.6](https://github.com/Backbase/stream-services/compare/4.1.4...4.1.6)
 ### Fix
 - Fix arrangements being retrieved per payment order instead of once per payment order ingestion request.
-- 
+
 ## [4.1.4](https://github.com/Backbase/stream-services/compare/4.1.3...4.1.4)
 ### Fix
 - Fixed deletion of non-repository custom data-group items on data-group update
-- 
+
 ## [4.1.3](https://github.com/Backbase/stream-services/compare/4.1.3...4.1.4)
 ### Changed
 - Query for existing payments by using arrangement IDs instead of user IDs. This will eliminate duplicate payments from being ingested when joint owners are added.
