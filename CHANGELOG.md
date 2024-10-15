@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.15.0](https://github.com/Backbase/stream-services/compare/5.15.0...5.15.0)
+### Changed
+- Updated legal entities specs for service agreement to include purpose field
+
 ## [5.14.0](https://github.com/Backbase/stream-services/compare/5.13.0...5.14.0)
 ### Changed
 - Updated arrangement-manager service-api from v2 to v3
