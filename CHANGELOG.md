@@ -1,5 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [5.16.0](https://github.com/Backbase/stream-services/compare/5.15.0...5.16.0)
+### Changed
+- Fixed version mismatch
 
 ## [5.15.0](https://github.com/Backbase/stream-services/compare/5.15.0...5.15.0)
 ### Changed
