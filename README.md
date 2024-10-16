@@ -25,7 +25,7 @@ All notable changes to this project are documented in the [CHANGELOG.md](CHANGEL
 
 ## Stream API Documentation
 
-You can find listed here the API specification containing the opinionated model of the supported Stream Services
+You can find listed here the API specification containing the opinionated model of the supported Stream Services:
 
 | Service                          | OpenAPI Spec                                            | [Redoc](https://github.com/Redocly/redoc)                                                                                                  |
 |----------------------------------|---------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
