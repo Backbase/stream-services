@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.17.0](https://github.com/Backbase/stream-services/compare/5.16.0...5.17.0)
+### Changed
+- Updated to 2024.10 bb bom, and plan-manager to v1
+
 ## [5.15.0](https://github.com/Backbase/stream-services/compare/5.15.0...5.15.0)
 ### Changed
 - Updated legal entities specs for service agreement to include purpose field
