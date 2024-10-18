@@ -55,7 +55,7 @@ import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.streams.tailoredvalue.PlansService;
-import com.backbase.tailoredvalue.planmanager.service.api.v0.model.UserPlanUpdateRequestBody;
+import com.backbase.tailoredvalue.planmanager.service.api.v1.model.UserPlanUpdateRequestBody;
 import io.micrometer.tracing.annotation.SpanTag;
 import java.util.ArrayList;
 import java.util.Collection;
