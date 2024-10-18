@@ -160,13 +160,13 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
         if (!plansService.isEnabled()) {
             streamTask.info(SERVICE_AGREEMENT, PROCESS_PLANS, SKIPPED, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
-                    "Plan Saga configured to skipped");
+                "Plan Saga configured to skipped");
             return Mono.just(streamTask);
         }
         log.info("Updating Plan for Service Agreement Id {}", serviceAgreement.getExternalId());
         serviceAgreement.getJobProfileUsers().stream()
-                .filter(jobProfileUser -> StringUtils.isNotEmpty(jobProfileUser.getPlanName()))
-                .forEach(jobProfileUser -> legalEntityService
+            .filter(jobProfileUser -> StringUtils.isNotEmpty(jobProfileUser.getPlanName()))
+            .forEach(jobProfileUser -> legalEntityService
                 .getLegalEntityByExternalId(jobProfileUser.getLegalEntityReference().getExternalId())
                 .map(LegalEntity::getInternalId)
                 .map(legalEntityInternalId -> {
@@ -176,7 +176,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     userPlanUpdateRequestBody.setLegalEntityId(legalEntityInternalId);
                     return userPlanUpdateRequestBody;
                 }).flatMap(reqBody -> plansService
-                        .updateUserPlan(jobProfileUser.getUser().getInternalId(), reqBody, jobProfileUser.getPlanName()))
+                    .updateUserPlan(jobProfileUser.getUser().getInternalId(), reqBody, jobProfileUser.getPlanName()))
                 .subscribe());
         return Mono.just(streamTask);
     }
@@ -401,7 +401,8 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                         "Assigned Business Function Group: %s with functions: %s to Service Agreement: %s",
                         bfg.getName(),
                         ofNullable(bfg.getFunctions())
-                            .orElse(Collections.singletonList(new BusinessFunction().name("<not loaded>"))).stream()
+                            .orElse(Collections.singletonList(
+                                new BusinessFunction("<not loaded>", null, null, null, null, Collections.emptyList()))).stream()
                             .map(BusinessFunction::getFunctionCode)
                             .collect(Collectors.joining(", ")),
                         serviceAgreement.getExternalId()));
@@ -644,9 +645,9 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     createdSa.getInternalId(),
                     "Created new Service Agreement: %s",
                     createdSa.getExternalId(),
-                        serviceAgreementV2.getParticipants().stream()
-                            .map(LegalEntityParticipant::getExternalId)
-                            .collect(Collectors.joining(", ")));
+                    serviceAgreementV2.getParticipants().stream()
+                        .map(LegalEntityParticipant::getExternalId)
+                        .collect(Collectors.joining(", ")));
                 setLECreator4SA(serviceAgreementV2);
 
                 return accessGroupService.updateServiceAgreementRegularUsers(streamTask,
