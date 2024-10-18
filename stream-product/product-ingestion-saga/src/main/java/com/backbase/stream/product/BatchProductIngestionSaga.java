@@ -3,9 +3,9 @@ package com.backbase.stream.product;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
+import static java.util.stream.Collectors.toMap;
 
-import com.backbase.dbs.arrangement.api.service.v2.model.AccountArrangementItemPost;
-import com.backbase.stream.legalentity.model.BaseProduct;
+import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -43,7 +43,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -110,7 +109,6 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
         BatchProductGroup data = batchProductGroupTask.getData();
         List<Loan> loans = Optional.ofNullable(data)
             .map(BatchProductGroup::getProductGroups).stream()
-            .filter(Objects::nonNull)
             .flatMap(Collection::stream)
             .map(BaseProductGroup::getLoans)
             .filter(Objects::nonNull)
@@ -162,13 +160,13 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
       return t -> {
         final List<?> keys = Arrays.stream(keyExtractors)
             .map(key -> key.apply(t))
-            .collect(Collectors.toList());
+            .toList();
         return seen.putIfAbsent(keys, Boolean.TRUE) == null;
       };
     }
 
     protected Mono<BatchProductGroupTask> upsertArrangementsBatch(BatchProductGroupTask batchProductGroupTask) {
-        List<AccountArrangementItemPost> batchArrangements = new ArrayList<>();
+        List<PostArrangement> batchArrangements = new ArrayList<>();
         batchProductGroupTask.getData().getProductGroups().forEach(pg -> batchArrangements.addAll(
                 Stream.of(
                         StreamUtils.nullableCollectionToStream(pg.getCurrentAccounts()).map(productMapper::toPresentation),
@@ -182,25 +180,24 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 )
                         .flatMap(i -> i)
                         .map(product -> ensureLegalEntityId(pg.getUsers(), product))
-                        .collect(Collectors.toList())
+                        .toList()
         ));
         // Insert  without duplicates.
         // TODO: Revert this change when either OpenAPI generated methods can call super in equals
         // or if the product spec is modified to mitigate the issue
-        List<AccountArrangementItemPost> itemsToUpsert = batchArrangements.stream()
+        List<PostArrangement> itemsToUpsert = batchArrangements.stream()
             .filter(distinctByKeys(
-                AccountArrangementItemPost::getExternalArrangementId,
-                AccountArrangementItemPost::getExternalLegalEntityIds,
-                AccountArrangementItemPost::getExternalProductId,
-                AccountArrangementItemPost::getExternalStateId,
-                AccountArrangementItemPost::getProductId,
+                PostArrangement::getId,
+                PostArrangement::getLegalEntityIds,
+                PostArrangement::getProductId,
+                PostArrangement::getStateId,
                /* AccountArrangementItemPost::getAlias,*/
-                AccountArrangementItemPost::getAdditions
-            )).collect(Collectors.toList());
+                PostArrangement::getAdditions
+            )).toList();
 
         Set<String> upsertedInternalIds = new HashSet<>();
         return Flux.fromIterable(itemsToUpsert)
-                .sort(comparing(AccountArrangementItemPost::getExternalParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
+                .sort(comparing(PostArrangement::getParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
                 .buffer(50) // hardcoded to match DBS limitation
                 .concatMap(batch -> arrangementService.upsertBatchArrangements(batch)
                         .doOnNext(r -> batchProductGroupTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, UPDATED, r.getResourceId(), r.getArrangementId(), "Updated Arrangements (in batch)"))
@@ -208,7 +205,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 ).map(batchResponses -> {
                     // Update products with internal IDs.
                     return batchProductGroupTask.getData().getProductGroups().stream()
-                        .flatMap(pg -> StreamUtils.getAllProducts(pg))
+                        .flatMap(StreamUtils::getAllProducts)
                         .map(product -> {
                             batchResponses.forEach(result -> {
                                 if (result.getResourceId().equalsIgnoreCase(product.getExternalId())) {
@@ -218,10 +215,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                             });
                             return product;
                         });
-                })
-                .flatMap(baseProductStream -> Flux.fromStream(baseProductStream)
-                    .filter(baseProduct -> !CollectionUtils.isEmpty(baseProduct.getUsersPreferences()))
-                    .flatMap(this::updateUsersPreferences))
+                }).flatMap(Flux::fromStream)
                 .collectList()
                 .thenReturn(batchProductGroupTask)
                 .flatMap(task -> {
@@ -239,27 +233,6 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                         return Mono.just(task);
                     }
                 });
-    }
-
-    protected Mono<BaseProduct> updateUsersPreferences(BaseProduct product) {
-        return Flux.fromIterable(product.getUsersPreferences())
-            .map(productMapper::mapUserPreference)
-            .flatMap(userPreferencesItem ->
-                userService.getUserByExternalId(userPreferencesItem.getUserId())
-                    .flatMap(user -> arrangementService.updateUserPreferences(
-                        userPreferencesItem
-                            .userId(user.getInternalId())
-                            .arrangementId(product.getInternalId())))
-                    .onErrorResume(WebClientResponseException.NotFound.class, throwable -> {
-                        log.info("User Id not found for: {}. Request:[{}] {}  Response: {}",
-                            userPreferencesItem.getUserId(), throwable.getRequest().getMethod(),
-                            throwable.getRequest().getURI(), throwable.getResponseBodyAsString());
-                        return Mono.empty();
-                    })
-                    .thenReturn(userPreferencesItem)
-            )
-            .collectList()
-            .thenReturn(product);
     }
 
     protected Mono<BatchProductGroupTask> setupProductGroupsBatch(BatchProductGroupTask task) {
@@ -286,7 +259,6 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .flatMap(existingGroups -> accessGroupService.updateExistingDataGroupsBatch(task, existingGroups, productGroups));
     }
 
-
     protected Mono<BatchProductGroupTask> setupBusinessFunctionsAndPermissionsBatch(BatchProductGroupTask task) {
         List<JobProfileUser> profileUsers = task.getData().getProductGroups().stream().flatMap(g -> g.getUsers().stream()).distinct().collect(Collectors.toList());
 
@@ -294,7 +266,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .flatMap(functionGroups -> {
                     Collection<JobProfileUser> uniqueUsers = profileUsers.stream()
                             .filter(jpu -> jpu.getUser().getExternalId() != null)
-                            .collect(Collectors.toMap(jpu -> jpu.getUser().getExternalId(), u -> u, (u, id) -> u)).values();
+                            .collect(toMap(jpu -> jpu.getUser().getExternalId(), u -> u, (u, id) -> u)).values();
                     return Flux.fromIterable(uniqueUsers)
                             .flatMap(user -> processUser(task, user))
                             .collectList()
@@ -332,7 +304,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .map(businessFunctionGroups -> {
                     // remove duplicates
                     return new ArrayList<>(businessFunctionGroups.stream()
-                            .collect(Collectors.toMap(BusinessFunctionGroup::getName, p -> p, (p, q) -> p)).values());
+                            .collect(toMap(BusinessFunctionGroup::getName, p -> p, (p, q) -> p)).values());
                 })
                 .flatMap(businessFunctionGroups -> accessGroupService.setupFunctionGroups(streamTask, serviceAgreement, businessFunctionGroups))
                 .map(businessFunctionGroups -> {
@@ -374,6 +346,6 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                                 .map(JobProfileUser::getBusinessFunctionGroups)
                                 .flatMap(Collection::stream)
                                 .anyMatch(bfg -> bfg.getName().equals(functionGroup.getName()))
-                ).collect(Collectors.toList());
+                ).toList();
     }
 }

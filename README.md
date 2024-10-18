@@ -25,7 +25,7 @@ All notable changes to this project are documented in the [CHANGELOG.md](CHANGEL
 
 ## Stream API Documentation
 
-You can find listed here the API specification containing the opinionated model of the supported Stream Services
+You can find listed here the API specification containing the opinionated model of the supported Stream Services:
 
 | Service                          | OpenAPI Spec                                            | [Redoc](https://github.com/Redocly/redoc)                                                                                                  |
 |----------------------------------|---------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
@@ -42,7 +42,7 @@ You can find listed here the API specification containing the opinionated model 
 
 | Stream [version](https://github.com/Backbase/stream-services/releases) | Banking Services   | Java | Spring Boot |
 |------------------------------------------------------------------------|--------------------|------|-------------|
-| 5.10.0 to latest                                                       | 2024.07            | 21   | 3.2         |
+| 5.10.0 to latest                                                       | 2024.09-LTS        | 21   | 3.2         |
 | 5.0.0 to 5.9.x                                                         | 2024.04            | 21   | 3.2         |
 | 4.1.1 to 4.x.x                                                         | 2024.03-LTS        | 17   | 3.1         |
 | 4.0.0 to 4.1.0                                                         | 2023.12            | 17   | 3.1         |

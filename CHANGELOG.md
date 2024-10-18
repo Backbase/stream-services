@@ -1,6 +1,23 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.15.0](https://github.com/Backbase/stream-services/compare/5.15.0...5.15.0)
+### Changed
+- Updated legal entities specs for service agreement to include purpose field
+
+## [5.14.0](https://github.com/Backbase/stream-services/compare/5.13.0...5.14.0)
+### Changed
+- Updated arrangement-manager service-api from v2 to v3
+
+## [5.13.0](https://github.com/Backbase/stream-services/compare/5.12.0...5.13.0)
+### Changed
+- Bumping Backbase BOM to 2024.09-LTS
+- Upgraded SSDK to 17.1.0
+
+## [5.12.0](https://github.com/Backbase/stream-services/compare/5.11.0...5.12.0)
+### Added
+- Adding additional pmts mappings
+
 ## [5.11.1](https://github.com/Backbase/stream-services/compare/5.11.0...5.11.1)
 ### Changed
 - Updated plan-manager service api from 0.5.0 to 0.9.0
@@ -128,6 +145,14 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Always check cursor and create if it does not exist.
 - If `DateRangeEnd` is passed in the composition request set that as lastTxnDate instead of system date.
+
+## [3.65.2](https://github.com/Backbase/stream-services/compare/3.65.1...3.65.2)
+### Changed
+- Adding additional mapping attributes, reservedAmount, to Credit card.
+
+## [3.65.1](https://github.com/Backbase/stream-services/compare/3.65.0...3.65.1)
+### Changed
+- Query for existing payments by using arrangement IDs instead of user IDs. This will eliminate duplicate payments from being ingested when joint owners are added.
 
 ## [3.65.0](https://github.com/Backbase/stream-services/compare/3.64.0...3.65.0)
 ### Changed

@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>5.11.1</version>
+    <version>5.16.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
@@ -40,7 +40,7 @@
     <properties>
         <java.version>21</java.version>
         <ssdk.version>18.0.1</ssdk.version>
-        <backbase-bom.version>2024.07</backbase-bom.version>
+        <backbase-bom.version>2024.09-LTS</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>

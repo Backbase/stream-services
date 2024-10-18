@@ -4,7 +4,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-sdk</artifactId>
-    <version>5.11.1</version>
+    <version>5.16.0</version>
     <packaging>pom</packaging>
 
     <name>Stream :: SDK</name>

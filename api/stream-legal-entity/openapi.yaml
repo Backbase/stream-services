@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Ingest Legal Entity API
   description: Ingestion Saga for Legal Entities and their products
-  version: 2.6.0
+  version: 2.7.0
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
     backgroundColor: "#FFFFFF"
@@ -397,6 +397,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
         creditLimit:
           $ref: '#/components/schemas/CreditLimit'
         IBAN:
@@ -561,6 +563,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
         BBAN:
           $ref: '#/components/schemas/BBAN'
         creditLimit:
@@ -849,6 +853,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
         creditLimit:
           $ref: '#/components/schemas/CreditLimit'
         IBAN:
@@ -1628,6 +1634,12 @@ components:
           pattern: ^(\S|\n)((.|\n)*(\S|\n))?$
           type: string
           description: Description
+        purpose:
+          maxLength: 32
+          minLength: 1
+          pattern: ^\\S(.*(\\S))?$
+          type: string
+          description: Purpose
         participants:
           type: array
           description: Participants of the service agreement
@@ -1700,6 +1712,12 @@ components:
           pattern: ^(\S|\n)((.|\n)*(\S|\n))?$
           type: string
           description: Description
+        purpose:
+          maxLength: 32
+          minLength: 1
+          pattern: ^\\S(.*(\\S))?$
+          type: string
+          description: Purpose
         jobProfileUsers:
           type: array
           items:
@@ -2026,6 +2044,15 @@ components:
     AvailableBalance:
       type: object
       description: "Available Balance"
+      properties:
+        amount:
+          type: number
+          format: double
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+    ReservedAmount:
+      type: object
+      description: "Reserved Amount"
       properties:
         amount:
           type: number

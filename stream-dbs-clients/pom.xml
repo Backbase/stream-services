@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>5.11.1</version>
+        <version>5.16.0</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -257,9 +257,22 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v2*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.arrangement.api.service.v2</apiPackage>
-                            <modelPackage>com.backbase.dbs.arrangement.api.service.v2.model</modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v3*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.arrangement.api.service.v3</apiPackage>
+                            <modelPackage>com.backbase.dbs.arrangement.api.service.v3.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-arrangement-manager-integration-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-integration-inbound-api-v2*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.arrangement.api.integration.v2</apiPackage>
+                            <modelPackage>com.backbase.dbs.arrangement.api.integration.v2.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
