@@ -89,6 +89,7 @@ import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
+import org.springframework.data.util.Pair;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -1030,7 +1031,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private Mono<LegalEntityTask> setupLimits(LegalEntityTask streamTask) {
         return Mono.just(streamTask)
             .flatMap(this::setupLegalEntityLimits)
-            .flatMap(this::setupLegalEntityLevelBusinessFunctionLimits)
+            .flatMap(this::setupLegalEntityLevelBusinessFunctionLimits) // Create Limit with combination of LE, BF AND PRV
+            .flatMap(this::setupUserLevelBusinessFunctionLimits) // Create Limit with combination of USER, BF AND PRV
             .flatMap(this::setupServiceAgreementLimits)
             .flatMap(this::setupServiceAgreementParticipantLimits)
             .flatMap(this::retrieveUsersInternalIds)
@@ -1060,6 +1062,43 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                         nonNull(limit.getYearly()));
     }
 
+    private Mono<LegalEntityTask> setupUserLevelBusinessFunctionLimits(LegalEntityTask streamTask) {
+        LegalEntity legalEntity = streamTask.getData();
+        var result = ofNullable(legalEntity.getUsers()).stream()
+            .flatMap(List::stream)
+            .map(JobProfileUser::getUser)
+            .filter(Objects::nonNull)
+            .map(User::getLimit)
+            .filter(Objects::nonNull)
+            .allMatch(user -> isEmpty(user.getBusinessFunctionLimits()));
+        if (isEmpty(legalEntity.getUsers()) || result) {
+            streamTask.info(LEGAL_ENTITY, PROCESS_LIMITS, FAILED, legalEntity.getInternalId(),
+                legalEntity.getExternalId(), "Legal Entity : %s does not have any User level limits defined",
+                legalEntity.getExternalId());
+            return Mono.just(streamTask);
+        }
+        return Flux.fromStream(legalEntity.getUsers().stream())
+            .map(JobProfileUser::getUser)
+            .filter(user -> nonNull(user) && nonNull(user.getLimit()) && !isEmpty(user.getLimit().getBusinessFunctionLimits()))
+            .map(user -> user.getLimit().getBusinessFunctionLimits().stream().map(bf -> Pair.of(user.getInternalId(), bf)))
+            .flatMap(Flux::fromStream)
+            .map(pair -> createLimitsTask(streamTask,null, pair.getFirst(),
+                    pair.getSecond()))
+            .flatMap(Flux::fromStream)
+            .concatMap(limitsSaga::executeTask)
+            .map(limitsTask -> streamTask.addHistory(limitsTask.getHistory()))
+            .collectList()
+            .map(tasks -> {
+                boolean failed = tasks.stream().anyMatch(StreamTask::isFailed);
+                if (failed) {
+                    streamTask.setState(StreamTask.State.FAILED);
+                } else {
+                    streamTask.setState(StreamTask.State.COMPLETED);
+                }
+                return streamTask;
+            });
+    }
+
     private Mono<LegalEntityTask> setupLegalEntityLevelBusinessFunctionLimits(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
         if (isNull(legalEntity.getLimit()) || isEmpty(legalEntity.getLimit().getBusinessFunctionLimits())) {
@@ -1070,7 +1109,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 .stream()
                 .filter(businessFunctionLimit -> nonNull(businessFunctionLimit)
                         && !CollectionUtils.isEmpty(businessFunctionLimit.getPrivileges()))
-                .flatMap(businessFunctionLimit -> createLimitsTask(streamTask, legalEntity.getInternalId(), businessFunctionLimit)))
+                .flatMap(businessFunctionLimit -> createLimitsTask(streamTask, legalEntity.getInternalId(), null, businessFunctionLimit)))
                 .concatMap(limitsSaga::executeTask)
                 .map(limitsTask -> streamTask.addHistory(limitsTask.getHistory()))
                 .collectList()
@@ -1097,7 +1136,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .then(Mono.just(streamTask));
     }
 
-    private Stream<LimitsTask> createLimitsTask(LegalEntityTask streamTask, String legalEntityId, BusinessFunctionLimit businessFunctionLimit) {
+    private Stream<LimitsTask> createLimitsTask(LegalEntityTask streamTask, String legalEntityId, String userInternalId, BusinessFunctionLimit businessFunctionLimit) {
 
         if(isNull(businessFunctionLimit) || CollectionUtils.isEmpty(businessFunctionLimit.getPrivileges())){
             return Stream.of();
@@ -1108,7 +1147,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .map(privilege -> {
                 var limitData = new CreateLimitRequestBody();
                 var entities = new ArrayList<Entity>();
-                ofNullable(legalEntityId).ifPresent(le -> entities.add(new Entity().etype(LEGAL_ENTITY_E_TYPE).eref(le)));
+                ofNullable(legalEntityId)
+                    .ifPresentOrElse(le -> entities.add(new Entity().etype(LEGAL_ENTITY_E_TYPE).eref(le)),
+                        () -> limitData.setUserBBID(userInternalId));
                 ofNullable(businessFunctionLimit.getFunctionId())
                         .ifPresent(functionId -> entities.add(new Entity().etype(FUNCTION_E_TYPE).eref(functionId)));
                 ofNullable(privilege.getPrivilege())

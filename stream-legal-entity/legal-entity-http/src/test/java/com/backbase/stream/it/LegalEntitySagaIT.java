@@ -120,6 +120,7 @@ class LegalEntitySagaIT {
                                     .locked(false)
                                     .emailAddress(new EmailAddress().address("test@example.com"))
                                     .mobileNumber(new PhoneNumber().number("+12345"))
+                                    .limit(legalEntityLimit())
                             )
                             .referenceJobRoleNames(Arrays.asList(
                                 "Private - Read only", "Private - Full access"
