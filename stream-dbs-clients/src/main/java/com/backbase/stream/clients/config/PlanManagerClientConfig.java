@@ -1,8 +1,8 @@
 package com.backbase.stream.clients.config;
 
 import com.backbase.tailoredvalue.planmanager.service.api.ApiClient;
-import com.backbase.tailoredvalue.planmanager.service.api.v0.PlansApi;
-import com.backbase.tailoredvalue.planmanager.service.api.v0.UserPlansApi;
+import com.backbase.tailoredvalue.planmanager.service.api.v1.PlansApi;
+import com.backbase.tailoredvalue.planmanager.service.api.v1.UserPlansApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>5.16.0</version>
+        <version>6.0.0</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -205,6 +205,14 @@
                                 <artifactItem>
                                     <groupId>com.backbase.loan</groupId>
                                     <artifactId>loan</artifactId>
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.tailoredvalue</groupId>
+                                    <artifactId>plan-manager</artifactId>
                                     <classifier>api</classifier>
                                     <type>zip</type>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
@@ -469,9 +477,9 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.basedir}/src/main/openapi/plan-manager-service-api-v0.9.0.yaml</inputSpec>
-                            <apiPackage>com.backbase.tailoredvalue.planmanager.service.api.v0</apiPackage>
-                            <modelPackage>com.backbase.tailoredvalue.planmanager.service.api.v0.model</modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/plan-manager/plan-manager-service-api-v1*.yaml</inputSpec>
+                            <apiPackage>com.backbase.tailoredvalue.planmanager.service.api.v1</apiPackage>
+                            <modelPackage>com.backbase.tailoredvalue.planmanager.service.api.v1.model</modelPackage>
                         </configuration>
                     </execution>
                 </executions>

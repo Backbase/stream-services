@@ -1,8 +1,8 @@
 package com.backbase.streams.tailoredvalue.configuration;
 
 import com.backbase.streams.tailoredvalue.PlansService;
-import com.backbase.tailoredvalue.planmanager.service.api.v0.PlansApi;
-import com.backbase.tailoredvalue.planmanager.service.api.v0.UserPlansApi;
+import com.backbase.tailoredvalue.planmanager.service.api.v1.PlansApi;
+import com.backbase.tailoredvalue.planmanager.service.api.v1.UserPlansApi;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
