@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.16.0](https://github.com/Backbase/stream-services/compare/5.15.0...5.15.0)
+### Changed
+- update ssdk version to 18.0.1
+- migrate Backbase BOM to 2024.10
+
 ## [5.15.0](https://github.com/Backbase/stream-services/compare/5.15.0...5.15.0)
 ### Changed
 - Updated legal entities specs for service agreement to include purpose field
