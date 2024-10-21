@@ -42,8 +42,9 @@ You can find listed here the API specification containing the opinionated model 
 
 | Stream [version](https://github.com/Backbase/stream-services/releases) | Banking Services   | Java | Spring Boot |
 |------------------------------------------------------------------------|--------------------|------|-------------|
-| 5.16.0 to latest                                                       | 2024.10            | 21   | 3.3         |
-| 5.10.0 to 5.15.0                                                       | 2024.09-LTS        | 21   | 3.2         |
+| 6.1.0 to latest                                                        | 2024.10            | 21   | 3.3         |
+| 6.0.0 to 6.0.0                                                         | 2024.10            | 21   | 3.2         |
+| 5.10.0 to 5.16.0                                                       | 2024.09-LTS        | 21   | 3.2         |
 | 5.0.0 to 5.9.x                                                         | 2024.04            | 21   | 3.2         |
 | 4.1.1 to 4.x.x                                                         | 2024.03-LTS        | 17   | 3.1         |
 | 4.0.0 to 4.1.0                                                         | 2023.12            | 17   | 3.1         |

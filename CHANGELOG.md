@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - update ssdk version to 18.0.1
 - migrate Backbase BOM to 2024.10
+## [6.0.0](https://github.com/Backbase/stream-services/compare/5.16.0...6.0.0)
+### Changed
+- Updated to 2024.10 bb bom, and plan-manager to v1
 
 ## [5.15.0](https://github.com/Backbase/stream-services/compare/5.15.0...5.15.0)
 ### Changed

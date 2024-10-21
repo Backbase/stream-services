@@ -2,10 +2,10 @@ package com.backbase.streams.tailoredvalue;
 
 import com.backbase.streams.tailoredvalue.configuration.PlansProperties;
 import com.backbase.streams.tailoredvalue.exceptions.PlanManagerException;
-import com.backbase.tailoredvalue.planmanager.service.api.v0.PlansApi;
-import com.backbase.tailoredvalue.planmanager.service.api.v0.UserPlansApi;
-import com.backbase.tailoredvalue.planmanager.service.api.v0.model.PlansGetResponseBody;
-import com.backbase.tailoredvalue.planmanager.service.api.v0.model.UserPlanUpdateRequestBody;
+import com.backbase.tailoredvalue.planmanager.service.api.v1.PlansApi;
+import com.backbase.tailoredvalue.planmanager.service.api.v1.UserPlansApi;
+import com.backbase.tailoredvalue.planmanager.service.api.v1.model.PlansGetResponseBody;
+import com.backbase.tailoredvalue.planmanager.service.api.v1.model.UserPlanUpdateRequestBody;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
