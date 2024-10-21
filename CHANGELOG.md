@@ -1,6 +1,6 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-## [4.1.10](https://github.com/Backbase/stream-services/compare/3.65.2...3.65.3)
+## [4.1.10](https://github.com/Backbase/stream-services/compare/4.1.9...4.1.10)
 ### Changed
 - Enhance Legal Entity level Limit Object to set Limit based on Privilege, Business Function and User.
 
