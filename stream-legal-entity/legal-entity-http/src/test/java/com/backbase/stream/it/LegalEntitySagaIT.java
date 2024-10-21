@@ -64,7 +64,7 @@ class LegalEntitySagaIT {
                     .parentExternalId("parent-100000")
                     .legalEntityType(LegalEntityType.CUSTOMER)
                     .realmName("customer-bank")
-                    .limit(legalEntityLimit())
+                    .limit(limitWithBussinessFunctionAndPrivileges())
                     .productGroups(Arrays.asList(
                         (ProductGroup) new ProductGroup()
                             .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
@@ -114,13 +114,14 @@ class LegalEntitySagaIT {
                         new JobProfileUser()
                             .user(
                                 new User()
+                                    .internalId("internal-id")
                                     .externalId("john.doe")
                                     .fullName("John Doe")
                                     .identityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY)
                                     .locked(false)
                                     .emailAddress(new EmailAddress().address("test@example.com"))
                                     .mobileNumber(new PhoneNumber().number("+12345"))
-                                    .limit(legalEntityLimit())
+                                    .limit(limitWithBussinessFunctionAndPrivileges())
                             )
                             .referenceJobRoleNames(Arrays.asList(
                                 "Private - Read only", "Private - Full access"
@@ -145,13 +146,11 @@ class LegalEntitySagaIT {
             );
     }
 
-    private static Limit legalEntityLimit(){
+    private static Limit limitWithBussinessFunctionAndPrivileges(){
         return new Limit()
-            .addBusinessFunctionLimitsItem(new BusinessFunctionLimit()
-                .functionId("1001")
-                    .shadow(true)
-                    .addPrivilegesItem(new Privilege().privilege("create").limit(new Limit().daily(BigDecimal.valueOf(2500d))))
-                    .addPrivilegesItem(new Privilege().privilege("execute").limit(new Limit().daily(BigDecimal.valueOf(2500d))))
+            .addBusinessFunctionLimitsItem(new BusinessFunctionLimit("1001", false)
+                    .addPrivilegesItem(new Privilege("create").limit(new Limit().transactional(BigDecimal.valueOf(2500d)).daily(BigDecimal.valueOf(2500d))))
+                    .addPrivilegesItem(new Privilege("approve").limit(new Limit().transactional(BigDecimal.valueOf(2500d)).daily(BigDecimal.valueOf(2500d))))
             );
     }
 

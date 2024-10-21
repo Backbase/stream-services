@@ -23,7 +23,30 @@
                 "number": "+31611193399"
               },
               "fullName": "TESS JACKQUELINE SHOOK",
-              "identityLinkStrategy": "CREATE_IN_IDENTITY"
+              "identityLinkStrategy": "CREATE_IN_IDENTITY",
+              "limit": {
+                "businessFunctionLimits": [{
+                  "functionId": "2000",
+                  "privileges": [
+                    {
+                      "privilege": "create",
+                      "limit": {
+                        "currencyCode": "USD",
+                        "transactional": "100",
+                        "daily": "100"
+                      }
+                    },
+                    {
+                      "privilege": "approve",
+                      "limit": {
+                        "currencyCode": "USD",
+                        "transactional": "100",
+                        "daily": "100"
+                      }
+                    }
+                  ]
+                }]
+              }
             },
             "referenceJobRoleNames": [
               "Retail User - USA"
