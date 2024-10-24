@@ -10,12 +10,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
-@EnableWebFluxSecurity
 @EnableConfigurationProperties(ProductCatalogConfigurationProperties.class)
 @ConfigurationProperties("backbase.communication.services.stream.product-catalog.integration")
 public class ProductCatalogConfiguration extends CompositeApiClientConfig {
