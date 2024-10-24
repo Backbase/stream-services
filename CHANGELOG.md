@@ -1,7 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [6.0.0](https://github.com/Backbase/stream-services/compare/5.16.0...6.0.0)
+## [6.2.0](https://github.com/Backbase/stream-services/compare/6.1.0...6.2.0)
+### Changed
+- update ssdk version to 18.0.1
+
+## [6.1.0](https://github.com/Backbase/stream-services/compare/5.16.0...6.1.0)
 ### Changed
 - Updated to 2024.10 bb bom, and plan-manager to v1
 
