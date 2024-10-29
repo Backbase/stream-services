@@ -218,7 +218,7 @@ public class ProductIngestionSaga {
     private Mono<User> upsertUser(StreamTask streamTask, JobProfileUser jobProfileUser) {
         User user = jobProfileUser.getUser();
         LegalEntityReference legalEntityReference = jobProfileUser.getLegalEntityReference();
-        Mono<User> getExistingUser = userService.getUserByExternalId(user.getExternalId())
+        Mono<User> getExistingUser = Objects.nonNull(user.getInternalId())? userService.getUserById(user.getInternalId()): userService.getUserByExternalId(user.getExternalId())
             .doOnNext(existingUser -> streamTask.info(USER, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId()));
         Mono<User> createNewUser = userService.createUser(user, legalEntityReference.getExternalId(), streamTask)
             .doOnNext(existingUser -> streamTask.info(USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId()));
@@ -229,7 +229,7 @@ public class ProductIngestionSaga {
     private Mono<User> upsertIdentityUser(StreamTask streamTask, JobProfileUser jobProfileUser) {
         User user = jobProfileUser.getUser();
         LegalEntityReference legalEntityReference = jobProfileUser.getLegalEntityReference();
-        Mono<User> getExistingIdentityUser = userService.getUserByExternalId(user.getExternalId())
+        Mono<User> getExistingIdentityUser = Objects.nonNull(user.getInternalId())? userService.getUserById(user.getInternalId()): userService.getUserByExternalId(user.getExternalId())
             .doOnNext(existingUser -> streamTask.info(IDENTITY_USER, EXISTS, user.getExternalId(), user.getInternalId(), "User %s already exists", existingUser.getExternalId()));
         Mono<User> createNewIdentityUser = userService.createOrImportIdentityUser(user, legalEntityReference.getInternalId(), streamTask)
             .doOnNext(existingUser -> streamTask.info(IDENTITY_USER, CREATED, user.getExternalId(), user.getInternalId(), "User %s created", existingUser.getExternalId()));

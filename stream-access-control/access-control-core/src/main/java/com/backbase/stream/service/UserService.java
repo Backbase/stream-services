@@ -76,21 +76,42 @@ public class UserService {
     private final UserManagementProperties userManagementProperties;
 
     /**
+     * Get User by internal ID.
+     *
+     * @param internalId Internal ID
+     * @return User if exists. Empty if not.
+     */
+    public Mono<User> getUserById(String internalId) {
+        return usersApi.getUserById(internalId, Boolean.TRUE)
+            .doOnNext(userItem -> log.info("Found user: {} for internalId: {}", userItem.getFullName(), userItem.getId()))
+            .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
+                handleUserNotFound(null, internalId, notFound.getResponseBodyAsString()))
+            .map(mapper::toStream);
+    }
+
+    /**
      * Get User by external ID.
      *
      * @param externalId External ID
      * @return User if exists. Empty if not.
      */
     public Mono<User> getUserByExternalId(String externalId) {
-        return usersApi.getUserByExternalId(externalId, true)
+        return usersApi.getUserByExternalId(externalId, Boolean.TRUE)
             .doOnNext(userItem -> log.info("Found user: {} for externalId: {}", userItem.getFullName(), userItem.getExternalId()))
             .onErrorResume(WebClientResponseException.NotFound.class, notFound ->
-                handleUserNotFound(externalId, notFound.getResponseBodyAsString()))
+                handleUserNotFound(externalId, null, notFound.getResponseBodyAsString()))
             .map(mapper::toStream);
     }
 
-    private Mono<? extends GetUser> handleUserNotFound(String externalId, String responseBodyAsString) {
-        log.info("User with externalId: {} does not exist: {}", externalId, responseBodyAsString);
+    private Mono<? extends GetUser> handleUserNotFound(String externalId, String internalId,
+        String responseBodyAsString) {
+        if (Objects.nonNull(externalId)) {
+            log.info("User with externalId: {} does not exist: {}", externalId,
+                responseBodyAsString);
+        } else {
+            log.info("User with internalId: {} does not exist: {}", internalId,
+                responseBodyAsString);
+        }
         return Mono.empty();
     }
 
@@ -123,7 +144,7 @@ public class UserService {
         request.addLegalEntityIdsItem(legalEntityInternalId);
         request.size(size);
         request.from(from);
-        return usersApi.getUsersByLegalEntityIds(request, true);
+        return usersApi.getUsersByLegalEntityIds(request, Boolean.TRUE);
     }
 
     /**

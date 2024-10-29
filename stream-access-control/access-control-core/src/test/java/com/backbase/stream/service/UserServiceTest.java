@@ -79,18 +79,18 @@ class UserServiceTest {
         String realm = "someRealm";
         String email = "some@email.com";
 
-        EnhancedUserRepresentation eur = new EnhancedUserRepresentation().id(internalId).email(email).enabled(true);
+        EnhancedUserRepresentation eur = new EnhancedUserRepresentation().id(internalId).email(email).enabled(Boolean.TRUE);
         when(identityIntegrationApi.getUserById(realm, internalId)).thenReturn(Mono.just(eur));
         when(identityIntegrationApi.updateUserById(eq(realm), eq(internalId), any())).thenReturn(Mono.empty().then());
 
 
-        User user = new User().internalId(internalId).locked(true);
+        User user = new User().internalId(internalId).locked(Boolean.TRUE);
         Mono<User> result = subject.updateUserState(user, realm);
 
 
         result.subscribe(assertEqualsTo(user));
         verify(identityIntegrationApi).getUserById(eq(realm), eq(internalId));
-        UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email).enabled(false)
+        UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email).enabled(Boolean.FALSE)
                 .credentials(Collections.emptyList());
         verify(identityIntegrationApi).updateUserById(eq(realm), eq(internalId), eq(expectedUser));
     }
@@ -101,18 +101,18 @@ class UserServiceTest {
         String realm = "someRealm";
         String email = "some@email.com";
 
-        EnhancedUserRepresentation eur = new EnhancedUserRepresentation().id(internalId).email(email).enabled(false);
+        EnhancedUserRepresentation eur = new EnhancedUserRepresentation().id(internalId).email(email).enabled(Boolean.FALSE);
         when(identityIntegrationApi.getUserById(realm, internalId)).thenReturn(Mono.just(eur));
         when(identityIntegrationApi.updateUserById(eq(realm), eq(internalId), any())).thenReturn(Mono.empty().then());
 
 
-        User user = new User().internalId(internalId).locked(false);
+        User user = new User().internalId(internalId).locked(Boolean.FALSE);
         Mono<User> result = subject.updateUserState(user, realm);
 
 
         result.subscribe(assertEqualsTo(user));
         verify(identityIntegrationApi).getUserById(eq(realm), eq(internalId));
-        UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email).enabled(true)
+        UserRequestBody expectedUser = new UserRequestBody().id(internalId).email(email).enabled(Boolean.TRUE)
                 .credentials(Collections.emptyList());
         verify(identityIntegrationApi).updateUserById(eq(realm), eq(internalId), eq(expectedUser));
     }
@@ -123,7 +123,7 @@ class UserServiceTest {
         String realm = "someRealm";
         String email = "some@email.com";
 
-        EnhancedUserRepresentation eur = new EnhancedUserRepresentation().id(internalId).email(email).enabled(false);
+        EnhancedUserRepresentation eur = new EnhancedUserRepresentation().id(internalId).email(email).enabled(Boolean.FALSE);
         when(identityIntegrationApi.getUserById(realm, internalId)).thenReturn(Mono.just(eur));
 
 
@@ -384,7 +384,7 @@ class UserServiceTest {
         GetUser getUser = new GetUser().externalId(externalId)
                 .fullName(fullName);
 
-        when(usersApi.getUserByExternalId(externalId, true)).thenReturn(Mono.just(getUser));
+        when(usersApi.getUserByExternalId(externalId, Boolean.TRUE)).thenReturn(Mono.just(getUser));
 
         Mono<User> userByExternalId = subject.getUserByExternalId(externalId);
         StepVerifier.create(userByExternalId)
@@ -397,12 +397,24 @@ class UserServiceTest {
     void getUserByExternalIdNotFound() {
         final String externalId = "someExternalId";
         final String fullName = "someName";
-        when(usersApi.getUserByExternalId(externalId, true)).thenReturn(Mono.error(WebClientResponseException.NotFound.create(404, "not found", new HttpHeaders(), new byte[0], null)));
+        when(usersApi.getUserByExternalId(externalId, Boolean.TRUE)).thenReturn(Mono.error(WebClientResponseException.NotFound.create(404, "not found", new HttpHeaders(), new byte[0], null)));
 
         Mono<User> userByExternalId = subject.getUserByExternalId(externalId);
         StepVerifier.create(userByExternalId)
                 .expectNextCount(0)
                 .verifyComplete();
+    }
+
+    @Test
+    void getUserByInternalIdNotFound() {
+        final String internalId = "someInternalId";
+        final String fullName = "someName";
+        when(usersApi.getUserById(internalId, Boolean.TRUE)).thenReturn(Mono.error(WebClientResponseException.NotFound.create(404, "not found", new HttpHeaders(), new byte[0], null)));
+
+        Mono<User> userByInternalId = subject.getUserById(internalId);
+        StepVerifier.create(userByInternalId)
+            .expectNextCount(0)
+            .verifyComplete();
     }
 
     @Test
@@ -449,7 +461,7 @@ class UserServiceTest {
         BatchResponseItem batchResponseItem = new BatchResponseItem().status(BatchResponseItem.StatusEnum._200);
 
         when(usersApi.updateUserInBatch(any())).thenReturn(Flux.just(batchResponseItem));
-        when(usersApi.getUserByExternalId(externalId, true)).thenReturn(Mono.just(getUser));
+        when(usersApi.getUserByExternalId(externalId, Boolean.TRUE)).thenReturn(Mono.just(getUser));
 
         User user = new User().externalId(externalId).fullName("oldName");
         Mono<User> result = subject.updateUser(user);
@@ -469,7 +481,7 @@ class UserServiceTest {
                 .fullName(fullName);
 
         when(usersApi.updateUserInBatch(any())).thenReturn(Flux.error(WebClientResponseException.create(500,"", new HttpHeaders(), "Error response".getBytes(StandardCharsets.UTF_8), null)));
-        when(usersApi.getUserByExternalId(externalId, true)).thenReturn(Mono.just(getUser));
+        when(usersApi.getUserByExternalId(externalId, Boolean.TRUE)).thenReturn(Mono.just(getUser));
 
         User user = new User().externalId(externalId).fullName("oldName");
         Mono<User> result = subject.updateUser(user);
@@ -488,7 +500,7 @@ class UserServiceTest {
         BatchResponseItem batchResponseItem = new BatchResponseItem().status(BatchResponseItem.StatusEnum._400);
 
         when(usersApi.updateUserInBatch(any())).thenReturn(Flux.just(batchResponseItem));
-        when(usersApi.getUserByExternalId(externalId, true)).thenReturn(Mono.just(getUser));
+        when(usersApi.getUserByExternalId(externalId, Boolean.TRUE)).thenReturn(Mono.just(getUser));
 
         User user = new User().externalId(externalId).fullName("oldName");
         Mono<User> result = subject.updateUser(user);
