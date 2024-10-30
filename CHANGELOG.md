@@ -94,6 +94,10 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - feature - improved payment ingestion to allow for joint owner accounts to be shared.
 
+## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
+### Fixed
+- Fixed missing explicit state mappings for BaseProduct related classes
+
 ## [5.10.0](https://github.com/Backbase/stream-services/compare/5.9.1...5.10.0)
 ### Added
 - Introducing Grand Central customer canonical model: Processing the `PartyUpsertEvent` using the Legal Entity Saga via the [legal-entity-composition-service](stream-compositions/services/legal-entity-composition-service)
