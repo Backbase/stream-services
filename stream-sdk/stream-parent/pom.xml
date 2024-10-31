@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-parent</artifactId>
-    <version>4.1.10</version>
+    <version>4.1.11</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Parent</name>
     <description>Parent for all Stream SDK modules</description>
