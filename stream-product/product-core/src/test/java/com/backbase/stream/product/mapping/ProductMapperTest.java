@@ -47,7 +47,10 @@ class ProductMapperTest {
                 .externalId("prod_ext_id")
                 .productTypeExternalId("prod_type_ext_id")
                 .legalEntities(List.of(buildLegalEntityReference("le_ext_id_1"), buildLegalEntityReference("le_ext_id_2")))
-                .state(new BaseProductState().state("prod_state"))
+                // Here externalStateId and state are set because in arrangement-pull-integration-service
+                // in the AccountStatusMapper, both fields are set with the same state value in the 3
+                // ACTIVE, INACTIVE and CLOSED enums
+                .state(new BaseProductState().externalStateId("prod_state").state("prod_state"))
                 .additions(Map.of("add_prop_1", "add_val_1", "add_prop_2", "add_val_2"))
                 .name("prod_name")
                 .currency("USD")
@@ -268,8 +271,8 @@ class ProductMapperTest {
     void map_Product_To_AccountArrangementItem() {
         Product source = buildProduct();
         ArrangementItem target = productMapper.toPresentationWithWeirdSpellingError(source);
-        Assertions.assertEquals(target.getExternalArrangementId(), source.getExternalId());
-        Assertions.assertEquals(target.getExternalStateId(), source.getState().getExternalStateId());
+        Assertions.assertEquals(source.getExternalId(), target.getExternalArrangementId());
+        Assertions.assertEquals(source.getState().getExternalStateId(), target.getExternalStateId());
     }
 
     @Test
