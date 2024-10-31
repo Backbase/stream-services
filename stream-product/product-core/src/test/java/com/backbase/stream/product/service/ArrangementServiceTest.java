@@ -221,7 +221,7 @@ public class ArrangementServiceTest {
         StepVerifier.create(arrangementService.upsertBatchArrangements(List.of(request)))
             .consumeErrorWith(e -> {
                 Assertions.assertTrue(e instanceof ArrangementUpdateException);
-                Assertions.assertEquals("Batch arrangement update failed: " + List.of(request), e.getMessage());
+                Assertions.assertEquals("Batch arrangement update failed", e.getMessage());
                 Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
             })
             .verify();

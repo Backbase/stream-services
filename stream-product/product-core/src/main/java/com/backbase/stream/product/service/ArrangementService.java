@@ -86,7 +86,7 @@ public class ArrangementService {
                     return r;
                 })
                 .onErrorResume(WebClientResponseException.class, throwable ->
-                        Mono.error(new ArrangementUpdateException(throwable, "Batch arrangement update failed: " + arrangementItems)));
+                        Mono.error(new ArrangementUpdateException(throwable, "Batch arrangement update failed")));
     }
 
     public Mono<Void> updateUserPreferences(AccountUserPreferencesItemPut userPreferencesItemPut){
