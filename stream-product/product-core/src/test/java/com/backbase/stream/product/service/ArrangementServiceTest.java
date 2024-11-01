@@ -217,11 +217,15 @@ public class ArrangementServiceTest {
             "Bad Request for upsert arrangement");
         when(arrangementsApi.postBatchUpsertArrangements(any()))
             .thenReturn(Flux.error(webClientResponseException));
-
-        StepVerifier.create(arrangementService.upsertBatchArrangements(List.of(request)))
+        List<AccountArrangementItemPost> arrangementItems = List.of(request);
+        List<String> last4ExtArrItemsList = arrangementItems.stream()
+            .map(arrangementItem -> arrangementItem.getExternalArrangementId()
+                .substring(arrangementItem.getExternalArrangementId().length() - 4))
+            .toList();
+        StepVerifier.create(arrangementService.upsertBatchArrangements(arrangementItems))
             .consumeErrorWith(e -> {
                 Assertions.assertTrue(e instanceof ArrangementUpdateException);
-                Assertions.assertEquals("Batch arrangement update failed", e.getMessage());
+                Assertions.assertEquals("Batch arrangement update failed for externalArrangementIds : " + last4ExtArrItemsList, e.getMessage());
                 Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
             })
             .verify();
