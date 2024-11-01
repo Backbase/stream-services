@@ -89,7 +89,7 @@ public class ArrangementService {
                 Mono.error(new ArrangementUpdateException(throwable,
                     "Batch arrangement update failed for externalArrangementIds : "
                         + arrangementItems.stream()
-                        .map(arrangementItem -> arrangementItem.getExternalArrangementId()
+                        .map(arrangementItem -> arrangementItem.getName() + " | " + arrangementItem.getExternalArrangementId()
                             .substring(arrangementItem.getExternalArrangementId().length() - 4))
                         .toList())));
     }
