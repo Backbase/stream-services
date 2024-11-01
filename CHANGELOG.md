@@ -1,5 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+
+## [4.1.12](https://github.com/Backbase/stream-services/compare/4.1.11..4.1.12)
+### Changed
+- Update ArrangementUpdateException Logger to handle PII data
+
 ## [4.1.11](https://github.com/Backbase/stream-services/compare/4.1.10...4.1.11)
 ### Changed
 - Performance improvement on retrieving the user information. getUserById (8 ms) Vs getUserByExternalId (50 ms)
