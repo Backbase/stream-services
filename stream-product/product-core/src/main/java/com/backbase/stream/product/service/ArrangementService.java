@@ -85,8 +85,13 @@ public class ArrangementService {
                     }
                     return r;
                 })
-                .onErrorResume(WebClientResponseException.class, throwable ->
-                        Mono.error(new ArrangementUpdateException(throwable, "Batch arrangement update failed")));
+            .onErrorResume(WebClientResponseException.class, throwable ->
+                Mono.error(new ArrangementUpdateException(throwable,
+                    "Batch arrangement update failed for externalArrangementIds : "
+                        + arrangementItems.stream()
+                        .map(arrangementItem -> arrangementItem.getName() + " | " + arrangementItem.getExternalArrangementId()
+                            .substring(arrangementItem.getExternalArrangementId().length() - 4))
+                        .toList())));
     }
 
     public Mono<Void> updateUserPreferences(AccountUserPreferencesItemPut userPreferencesItemPut){

@@ -55,13 +55,15 @@ public class ArrangementServiceTest {
     }
 
     private static AccountArrangementItemPost buildAccountArrangementItemPost() {
-        return new AccountArrangementItemPost()
+        AccountArrangementItemPost accountArrangementItemPost = new AccountArrangementItemPost()
             .externalArrangementId("ext_arr_id")
             .externalLegalEntityIds(Set.of("ext_leid_1", "ext_leid_2"))
             .legalEntityIds(Set.of("leid_1", "leid_2"))
             .externalProductId("ext_prod_id")
             .externalStateId("ext_state_id")
             .productId("prod_id");
+        accountArrangementItemPost.setName("arr_name");
+        return accountArrangementItemPost;
     }
 
     private static AccountArrangementItemPut buildAccountArrangementItemPut() {
@@ -217,11 +219,15 @@ public class ArrangementServiceTest {
             "Bad Request for upsert arrangement");
         when(arrangementsApi.postBatchUpsertArrangements(any()))
             .thenReturn(Flux.error(webClientResponseException));
-
-        StepVerifier.create(arrangementService.upsertBatchArrangements(List.of(request)))
+        List<AccountArrangementItemPost> arrangementItems = List.of(request);
+        List<String> last4ExtArrItemsList = arrangementItems.stream()
+            .map(arrangementItem -> arrangementItem.getName() + " | " + arrangementItem.getExternalArrangementId()
+                .substring(arrangementItem.getExternalArrangementId().length() - 4))
+            .toList();
+        StepVerifier.create(arrangementService.upsertBatchArrangements(arrangementItems))
             .consumeErrorWith(e -> {
                 Assertions.assertTrue(e instanceof ArrangementUpdateException);
-                Assertions.assertEquals("Batch arrangement update failed", e.getMessage());
+                Assertions.assertEquals("Batch arrangement update failed for externalArrangementIds : " + last4ExtArrItemsList, e.getMessage());
                 Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
             })
             .verify();
