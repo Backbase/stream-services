@@ -13,7 +13,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>4.1.11</version>
+    <version>4.1.12</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Compositions</name>
