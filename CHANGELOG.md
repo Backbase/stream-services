@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [6.4.0](https://github.com/Backbase/stream-services/compare/6.3.0...6.4.0)
+### Fixed
+- Fixed setting internal id for creatorLE before creating SA
+
 ## [6.3.0](https://github.com/Backbase/stream-services/compare/6.2.0...6.3.0)
 ### Fixed
 - Fixed missing explicit state mappings for BaseProduct related classes
