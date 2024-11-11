@@ -611,7 +611,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     serviceAgreementV2.getParticipants().stream()
                         .map(LegalEntityParticipant::getExternalId)
                         .collect(Collectors.joining(", ")));
-                setLECreator4SA(serviceAgreementV2);
                 if (legalEntitySagaConfigurationProperties.isServiceAgreementUpdateEnabled()) {
                     return accessGroupService.updateServiceAgreementItem(streamTask, saMapper.map(serviceAgreementV2))
                         .then(accessGroupService.updateServiceAgreementAssociations(streamTask,
@@ -631,6 +630,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private Mono<ServiceAgreementTaskV2> createServiceAgreementTaskV2(ServiceAgreementTaskV2 streamTask,
         ServiceAgreementV2 serviceAgreementV2, List<ServiceAgreementUserAction> userActions,
         Mono<ServiceAgreementTaskV2> existingServiceAgreement) {
+        setLECreator4SA(serviceAgreementV2);
         Mono<ServiceAgreementTaskV2> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask,
                 saMapper.map(serviceAgreementV2))
             .onErrorMap(AccessGroupException.class, accessGroupException -> {
@@ -648,7 +648,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     serviceAgreementV2.getParticipants().stream()
                         .map(LegalEntityParticipant::getExternalId)
                         .collect(Collectors.joining(", ")));
-                setLECreator4SA(serviceAgreementV2);
 
                 return accessGroupService.updateServiceAgreementRegularUsers(streamTask,
                         saMapper.map(serviceAgreementV2), userActions)
