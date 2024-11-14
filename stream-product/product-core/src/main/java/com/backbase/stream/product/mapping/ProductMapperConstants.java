@@ -1,7 +1,8 @@
 package com.backbase.stream.product.mapping;
 
-import java.time.format.DateTimeFormatter;
 import lombok.experimental.UtilityClass;
+
+import java.time.format.DateTimeFormatter;
 
 @UtilityClass
 class ProductMapperConstants {
@@ -36,6 +37,8 @@ class ProductMapperConstants {
     static final String PAN_SUFFIX = "panSuffix";
     static final String PRODUCT_ID = "productId";
     static final String STATE_ID = "stateId";
+    static final String PARENT_ID = "parentId";
+    static final String EXTERNAL_PARENT_ID = "externalParentId";
     static final String INTEREST_PAYMENT_FREQUENCY_UNIT = "interestPaymentFrequencyUnit";
     static final String TERM_UNIT = "termUnit";
 
