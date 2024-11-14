@@ -54,6 +54,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.LEGAL_ENTITY_IDS)
     @Mapping(source = "state.externalStateId", target = ProductMapperConstants.STATE_ID)
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
     PostArrangement toPresentation(Product product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
@@ -123,7 +124,6 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
     @InheritConfiguration
     PostArrangement toPresentation(InvestmentAccount investmentAccount);
-
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
