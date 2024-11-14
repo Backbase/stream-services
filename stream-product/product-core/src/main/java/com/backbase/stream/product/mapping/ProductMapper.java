@@ -1,49 +1,25 @@
 package com.backbase.stream.product.mapping;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
 import com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItemBase;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItemPostRequest;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
-import com.backbase.stream.legalentity.model.AvailableBalance;
-import com.backbase.stream.legalentity.model.BaseProduct;
-import com.backbase.stream.legalentity.model.BookedBalance;
-import com.backbase.stream.legalentity.model.CreditCard;
-import com.backbase.stream.legalentity.model.CreditLimit;
-import com.backbase.stream.legalentity.model.CurrentAccount;
-import com.backbase.stream.legalentity.model.CurrentInvestment;
-import com.backbase.stream.legalentity.model.DebitCard;
-import com.backbase.stream.legalentity.model.InterestPaymentFrequencyUnit;
-import com.backbase.stream.legalentity.model.InvestmentAccount;
-import com.backbase.stream.legalentity.model.LegalEntity;
-import com.backbase.stream.legalentity.model.LegalEntityReference;
-import com.backbase.stream.legalentity.model.Loan;
-import com.backbase.stream.legalentity.model.PrincipalAmount;
-import com.backbase.stream.legalentity.model.Product;
-import com.backbase.stream.legalentity.model.ReservedAmount;
-import com.backbase.stream.legalentity.model.SavingsAccount;
-import com.backbase.stream.legalentity.model.TermDeposit;
-import com.backbase.stream.legalentity.model.TermUnit;
+import com.backbase.stream.legalentity.model.*;
+import org.mapstruct.*;
+import org.springframework.util.StringUtils;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.mapstruct.InheritConfiguration;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.Named;
-import org.mapstruct.ReportingPolicy;
-import org.mapstruct.ValueMapping;
-import org.mapstruct.ValueMappings;
-import org.springframework.util.StringUtils;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
 @SuppressWarnings({"squid:S1710"})
@@ -70,6 +46,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
     PostArrangement toPresentation(CurrentAccount currentAccount);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
@@ -79,6 +56,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
     @InheritConfiguration
     PostArrangement toPresentation(SavingsAccount savingsAccount);
 
@@ -88,6 +66,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
     @Mapping(source = "debitCard", qualifiedByName = "mapDebitCardNumber", target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
     @InheritConfiguration
     PostArrangement toPresentation(DebitCard debitCard);
 
@@ -97,6 +76,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
     @Mapping(source = "creditCard", qualifiedByName = "mapCreditCardNumber", target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
     @InheritConfiguration
     PostArrangement toPresentation(CreditCard creditCard);
 
@@ -106,6 +86,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
     @InheritConfiguration
     PostArrangement toPresentation(TermDeposit termDeposit);
 
@@ -115,6 +96,7 @@ public interface ProductMapper {
     @Mapping(source = "currentInvestment.amount", target = "currentInvestmentValue")
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
     @InheritConfiguration
     PostArrangement toPresentation(InvestmentAccount investmentAccount);
 
@@ -125,6 +107,7 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
     @InheritConfiguration
     PostArrangement toPresentation(Loan loan);
 
