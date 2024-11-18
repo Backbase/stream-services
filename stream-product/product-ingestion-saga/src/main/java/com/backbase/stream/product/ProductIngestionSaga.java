@@ -297,8 +297,8 @@ public class ProductIngestionSaga {
                 String internalIds = String.join(",", internalIdList);
                 log.info("Arrangement already exists: {}", internalIdList);
                 streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, EXISTS, postArrangement.getId(), internalIds, "Arrangement %s already exists", postArrangement.getId());
-                ArrangementPutItem arrangemenItemBase = productMapper.toArrangementItemPut(postArrangement);
-                return arrangementService.updateArrangement(arrangemenItemBase)
+                ArrangementPutItem arrangementItemBase = productMapper.toArrangementItemPut(postArrangement);
+                return arrangementService.updateArrangement(postArrangement.getId(), arrangementItemBase)
                     .onErrorResume(ArrangementUpdateException.class, e -> {
                         streamTask.error(ARRANGEMENT, UPDATE_ARRANGEMENT, FAILED, postArrangement.getId(), internalIds, e, e.getHttpResponse(), "Failed to update arrangement: %s", postArrangement.getId());
                         return Mono.error(new StreamTaskException(streamTask, e.getCause(),
