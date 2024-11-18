@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 ## [6.5.0](https://github.com/Backbase/stream-services/compare/6.4.0...6.5.0)
 ### Fixed
 - Fixed productTypeName mapping when ingesting Product data into arrangement-manager
+## [6.4.2](https://github.com/Backbase/stream-services/compare/6.4.1...6.4.2)
+### Fixed
+- Fixed invocation of [putArrangementById](https://backbase.io/developers/apis/specs/arrangement-manager/arrangement-service-api/3.0.5/operations/Arrangements/putArrangementById/) in `ArrangementService` to pass in the arrangement's internalId. 
+The arrangement's externalId was erroneously being provided to this method.
 
 ## [6.4.0](https://github.com/Backbase/stream-services/compare/6.3.0...6.4.0)
 ### Fixed
