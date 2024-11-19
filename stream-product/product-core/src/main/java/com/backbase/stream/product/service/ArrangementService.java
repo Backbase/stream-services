@@ -61,12 +61,12 @@ public class ArrangementService {
 
     }
 
-    public Mono<ArrangementPutItem> updateArrangement(ArrangementPutItem arrangementPutItem) {
+    public Mono<ArrangementPutItem> updateArrangement(String arrangementId, ArrangementPutItem arrangementPutItem) {
         log.info("Updating Arrangement: {}", arrangementPutItem.getExternalArrangementId());
         if(arrangementPutItem.getDebitCards() == null) {
             arrangementPutItem.setDebitCards(emptyList());
         }
-        return arrangementsApi.putArrangementById(arrangementPutItem.getExternalArrangementId(), arrangementPutItem)
+        return arrangementsApi.putArrangementById(arrangementId, arrangementPutItem)
             .doOnEach(aVoid -> log.info("Updated Arrangement: {}", arrangementPutItem.getExternalArrangementId()))
             .thenReturn(fromCallable(() -> arrangementPutItem))
             .thenReturn(arrangementPutItem)

@@ -217,7 +217,7 @@ class ProductControllerIT extends IntegrationTest {
 
     @Test
     void pullIngestArrangement_Success() throws Exception {
-        when(arrangementService.updateArrangement(any()))
+        when(arrangementService.updateArrangement(any(), any()))
                 .thenReturn(Mono.just(new ArrangementPutItem()));
 
         ArrangementPullIngestionRequest pullIngestionRequest =
@@ -237,7 +237,7 @@ class ProductControllerIT extends IntegrationTest {
 
     @Test
     void pullIngestArrangement_Fail() throws Exception {
-        when(arrangementService.updateArrangement(any()))
+        when(arrangementService.updateArrangement(any(), any()))
                 .thenThrow(new RuntimeException());
 
         ArrangementPullIngestionRequest pullIngestionRequest =
@@ -263,7 +263,7 @@ class ProductControllerIT extends IntegrationTest {
         com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut arrangementItemPut =
                 mapper.treeToValue(node, com.backbase.stream.compositions.product.api.model.AccountArrangementItemPut.class);
 
-        when(arrangementService.updateArrangement(any()))
+        when(arrangementService.updateArrangement(any(), any()))
                 .thenReturn(Mono.just(new ArrangementPutItem()));
 
         ArrangementPushIngestionRequest pushIngestionRequest =
