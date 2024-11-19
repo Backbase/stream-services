@@ -63,25 +63,14 @@ public class ReactiveProductCatalogService {
      */
     public Mono<ProductCatalog> setupProductCatalog(ProductCatalog productCatalog) {
         return getProductCatalog().flatMap(existingProductCatalog -> {
-
-            List<ProductKind> newProductKinds = new ArrayList<>();
-            if (productCatalog.getProductKinds() != null) {
-                newProductKinds = productCatalog.getProductKinds().stream()
-                    .filter(newProductKind -> existingProductCatalog.getProductKinds().stream()
-                        .noneMatch(productKind ->
-                            productKind.getExternalKindId().equals(newProductKind.getExternalKindId())))
-                    .collect(Collectors.toList());
-            }
             List<ProductType> newProductTypes = new ArrayList<>();
             if (productCatalog.getProductTypes() != null) {
                 newProductTypes = productCatalog.getProductTypes().stream()
                     .filter(newProductType -> existingProductCatalog.getProductTypes().stream()
                         .noneMatch(productType ->
-                            productType.getExternalProductId().equals(newProductType.getExternalProductId())))
-                    .collect(Collectors.toList());
+                            productType.getExternalProductId().equals(newProductType.getExternalProductId()))).toList();
             }
 
-            // Ensure products kinds are created first
             List<ProductType> finalNewProductTypes = newProductTypes;
             return getProductKindFlux().collectList().flatMap(productKinds -> createProductTypes(finalNewProductTypes, productKinds).collectList().flatMap(productTypes -> {
                 productCatalog.setProductTypes(productTypes);
@@ -170,7 +159,7 @@ public class ReactiveProductCatalogService {
 
                 arrangementProductItemBase.setExternalProductKindId(productKind.getExternalKindId());
                 arrangementProductItemBase.setProductKindName(productKind.getKindName());
-                arrangementProductItemBase.setTypeName(productType.getTypeName());
+                arrangementProductItemBase.setProductTypeName(productType.getTypeName());
                 arrangementProductItemBase.setExternalTypeId(productType.getExternalTypeId());
 
                 return arrangementProductItemBase;
