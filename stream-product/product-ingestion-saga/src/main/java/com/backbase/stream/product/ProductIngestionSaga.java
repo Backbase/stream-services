@@ -293,22 +293,21 @@ public class ProductIngestionSaga {
         streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, "", postArrangement.getId(), null, "Inserting or updating arrangement: %s", postArrangement.getId());
         log.info("Upsert Arrangement: {} in Product Group: {}", postArrangement.getId(), streamTask.getData().getName());
         Mono<ArrangementItem> updateArrangement = arrangementService.getArrangementInternalId(postArrangement.getId())
-            .flatMap(internalIdList -> {
-                String internalIds = String.join(",", internalIdList);
-                log.info("Arrangement already exists: {}", internalIdList);
-                streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, EXISTS, postArrangement.getId(), internalIds, "Arrangement %s already exists", postArrangement.getId());
+            .flatMap(arrangementInternalId -> {
+                log.info("Arrangement already exists: {}", arrangementInternalId);
+                streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, EXISTS, postArrangement.getId(), arrangementInternalId, "Arrangement %s already exists", postArrangement.getId());
                 ArrangementPutItem arrangementItemBase = productMapper.toArrangementItemPut(postArrangement);
-                return arrangementService.updateArrangement(postArrangement.getId(), arrangementItemBase)
+                return arrangementService.updateArrangement(arrangementInternalId, arrangementItemBase)
                     .onErrorResume(ArrangementUpdateException.class, e -> {
-                        streamTask.error(ARRANGEMENT, UPDATE_ARRANGEMENT, FAILED, postArrangement.getId(), internalIds, e, e.getHttpResponse(), "Failed to update arrangement: %s", postArrangement.getId());
+                        streamTask.error(ARRANGEMENT, UPDATE_ARRANGEMENT, FAILED, postArrangement.getId(), arrangementInternalId, e, e.getHttpResponse(), "Failed to update arrangement: %s", postArrangement.getId());
                         return Mono.error(new StreamTaskException(streamTask, e.getCause(),
                             e.getMessage() + " " + e.getCause().getMessage()));
                     })
                     .map(actual -> {
                         log.info("Updated arrangement: {}", actual.getExternalArrangementId());
-                        streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, UPDATED, postArrangement.getId(), internalIdList, "Updated Arrangement");
+                        streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, UPDATED, postArrangement.getId(), arrangementInternalId, "Updated Arrangement");
                         ArrangementItem arrangementItem = productMapper.toArrangementItem(actual);
-                        arrangementItem.setId(internalIdList);
+                        arrangementItem.setId(arrangementInternalId);
                         return arrangementItem;
                     });
             });
