@@ -27,6 +27,7 @@ import com.backbase.stream.product.exception.ArrangementUpdateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -122,35 +123,37 @@ class ArrangementServiceTest {
 
     @Test
     void updateArrangement() {
+        String arrangementId = UUID.randomUUID().toString();
         ArrangementPutItem request = buildArrangementPutItem();
 
-        when(arrangementsApi.putArrangementById(request.getExternalArrangementId(), request)).thenReturn(Mono.empty());
+        when(arrangementsApi.putArrangementById(arrangementId, request)).thenReturn(Mono.empty());
 
-        StepVerifier.create(arrangementService.updateArrangement(request))
+        StepVerifier.create(arrangementService.updateArrangement(arrangementId, request))
             .assertNext(response -> {
                 Assertions.assertNotNull(response);
                 Assertions.assertEquals(request.getExternalArrangementId(), response.getExternalArrangementId());
                 Assertions.assertEquals(request.getProductId(), response.getProductId());
             }).verifyComplete();
 
-        verify(arrangementsApi).putArrangementById(request.getExternalArrangementId(), request);
+        verify(arrangementsApi).putArrangementById(arrangementId, request);
     }
 
     @Test
     void updateArrangement_Failure() {
+        String arrangementId = UUID.randomUUID().toString();
         ArrangementPutItem request = buildArrangementPutItem();
 
         WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.BAD_REQUEST, "Bad Request for update arrangement");
-        when(arrangementsApi.putArrangementById(request.getExternalArrangementId(), request)).thenReturn(Mono.error(webClientResponseException));
+        when(arrangementsApi.putArrangementById(arrangementId, request)).thenReturn(Mono.error(webClientResponseException));
 
-        StepVerifier.create(arrangementService.updateArrangement(request))
+        StepVerifier.create(arrangementService.updateArrangement(arrangementId, request))
             .consumeErrorWith(e -> {
                 Assertions.assertInstanceOf(ArrangementUpdateException.class, e);
                 Assertions.assertEquals("Failed to update Arrangement: %s".formatted(request.getExternalArrangementId()), e.getMessage());
                 Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
             }).verify();
 
-        verify(arrangementsApi).putArrangementById(request.getExternalArrangementId(), request);
+        verify(arrangementsApi).putArrangementById(arrangementId, request);
     }
 
     @Test
