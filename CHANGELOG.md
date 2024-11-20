@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [6.7.0](https://github.com/Backbase/stream-services/compare/6.6.0...6.7.0)
+### Fixed
+- Fixed setting internal id for creatorLE in reactive chain
+
 ## [6.6.0](https://github.com/Backbase/stream-services/compare/6.5.0...6.6.0)
 ### Fixed
 - Fixed invocation of [putArrangementById](https://backbase.io/developers/apis/specs/arrangement-manager/arrangement-service-api/3.0.5/operations/Arrangements/putArrangementById/) in `ArrangementService` to pass in the arrangement's internalId.
