@@ -8,7 +8,7 @@
     "productGroupType" : {
       "type" : "string",
       "default" : "ARRANGEMENTS",
-      "enum" : [ "ARRANGEMENTS", "JOURNEYS", "REPOSITORIES", "CUSTOMERS", "CUSTOM" ]
+      "enum" : [ "ARRANGEMENTS", "JOURNEYS", "REPOSITORIES", "CUSTOMERS", "CUSTOM","TASK_INSTANCE", "TASK_DEFINITION", "CASE_DEFINITION", "CASE_INSTANCE", "PROCESS_DEFINITION", "PROCESS_INSTANCE" ]
     },
     "name" : {
       "maxLength" : 128,
