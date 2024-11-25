@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.16.1](https://github.com/Backbase/stream-services/compare/5.16.0...5.16.1)
+### Fixed
+- Fixed missing explicit state mappings for BaseProduct related classes
+
 ## [5.15.0](https://github.com/Backbase/stream-services/compare/5.15.0...5.15.0)
 ### Changed
 - Updated legal entities specs for service agreement to include purpose field
@@ -25,9 +29,6 @@ All notable changes to this project will be documented in this file.
 ## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
 ### Changed
 - feature - improved payment ingestion to allow for joint owner accounts to be shared.
-## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
-### Fixed
-- Fixed missing explicit state mappings for BaseProduct related classes
 
 ## [5.10.0](https://github.com/Backbase/stream-services/compare/5.9.1...5.10.0)
 ### Added
