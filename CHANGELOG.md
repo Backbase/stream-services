@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [6.8.0](https://github.com/Backbase/stream-services/compare/6.7.0...6.8.0)
+### Changed
+- update ssdk version to 18.1.0 - see Maint 32324 for more details
+
 ## [6.7.0](https://github.com/Backbase/stream-services/compare/6.6.0...6.7.0)
 ### Fixed
 - Fixed setting internal id for creatorLE in reactive chain
