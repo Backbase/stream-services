@@ -638,7 +638,7 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
             ofNullable(l.getDaily()).ifPresent(periodicLimits::setDaily);
             ofNullable(l.getWeekly()).ifPresent(periodicLimits::setWeekly);
             ofNullable(l.getMonthly()).ifPresent(periodicLimits::setMonthly);
-            ofNullable(l.getQuarterly()).ifPresent(periodicLimits::setDaily);
+            ofNullable(l.getQuarterly()).ifPresent(periodicLimits::setQuarterly);
         });
 
         return periodicLimits;
