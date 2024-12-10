@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [6.9.0](https://github.com/Backbase/stream-services/compare/6.8.0...6.9.0)
+### Changed
+- fix the logic of setting the job role type for ingestion - see Maint 32629 for more details
+
 ## [6.8.0](https://github.com/Backbase/stream-services/compare/6.7.0...6.8.0)
 ### Changed
 - update ssdk version to 18.1.0 - see Maint 32324 for more details
