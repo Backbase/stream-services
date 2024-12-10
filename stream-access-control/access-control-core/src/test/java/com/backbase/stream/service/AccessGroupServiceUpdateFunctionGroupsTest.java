@@ -22,6 +22,7 @@ import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
+import com.backbase.stream.legalentity.model.BusinessFunctionGroup.TypeEnum;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
@@ -72,7 +73,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
     private BatchResponseUtils batchResponseUtils;
 
     @Test
-    void setupJobRole() {
+    void setupJobRoleNoType() {
         final String saInternalId = "someSaInternalId";
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
@@ -117,6 +118,91 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 )
             )
             .addFunctionGroupsItem(new BusinessFunctionGroup().name("fg2")
+                .addFunctionsItem(new BusinessFunction()
+                    .name("name2")
+                    .functionId("102")
+                    .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
+                    .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
+                ))
+            .metadata(Map.of("key1","value1"));
+
+        Mockito.when(functionGroupsApi.postPresentationIngestFunctionGroup(any()))
+            .thenReturn(Mono.just(new IdItem().id("1")));
+
+        Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
+        JobRole setupJobRole = listMono.block();
+
+        Assertions.assertNotNull(setupJobRole);
+
+        Mockito.verify(functionGroupsApi)
+            .postPresentationIngestFunctionGroup(new PresentationIngestFunctionGroup()
+                .externalServiceAgreementId(saExternalId)
+                .apsId(1L)
+                .name("jobRoleNew")
+                .description("jobRoleNew")
+                .type(PresentationIngestFunctionGroup.TypeEnum.REGULAR)
+                .metadata(Map.of("key1","value1"))
+                .addPermissionsItem(new PresentationPermission()
+                    .functionId("101")
+                    .addPrivilegesItem("view")
+                )
+                .addPermissionsItem(new PresentationPermission()
+                    .functionId("102")
+                    .addPrivilegesItem("view")
+                    .addPrivilegesItem("edit")
+                ));
+
+    }
+
+    @Test
+    void setupJobRoleReferenceType() {
+        final String saInternalId = "someSaInternalId";
+        final String saExternalId = "someSaExternalId";
+        final String description = "someDescription";
+        final String name = "someName";
+        final String validFromDate = "2021-03-08";
+        final String validFromTime = "00:00:00";
+        final String validUntilDate = "2022-03-08";
+        final String validUntilTime = "23:59:59";
+
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
+            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+
+        // participants
+        serviceAgreement
+            .addParticipantsItem(new LegalEntityParticipant().externalId("p1").sharingAccounts(true)
+                .sharingUsers(true).action(LegalEntityParticipant.ActionEnum.ADD))
+            .addParticipantsItem(new LegalEntityParticipant().externalId("p2").sharingAccounts(false)
+                .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.REMOVE))
+            .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
+                .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
+
+        serviceAgreement.setIsMaster(true);
+
+        Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
+            .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
+                .name("jobRoleOld").id("2")
+                .addPermissionsItem(new Permission().functionId("102")
+                    .addAssignedPrivilegesItem(new Privilege().privilege("view"))
+                    .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
+            )));
+
+        JobRole jobRole = new JobRole()
+            .name("jobRoleNew")
+            .addFunctionGroupsItem(new BusinessFunctionGroup()
+                .name("fg1")
+                .type(TypeEnum.TEMPLATE)
+                .addFunctionsItem(new BusinessFunction()
+                    .name("name1")
+                    .functionId("101")
+                    .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
+                )
+            )
+            .addFunctionGroupsItem(new BusinessFunctionGroup()
+                .name("fg2")
+                .type(TypeEnum.TEMPLATE)
                 .addFunctionsItem(new BusinessFunction()
                     .name("name2")
                     .functionId("102")
