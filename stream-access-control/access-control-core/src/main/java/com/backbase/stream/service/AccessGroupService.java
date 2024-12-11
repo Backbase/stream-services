@@ -1226,6 +1226,10 @@ public class AccessGroupService {
         presentationIngestFunctionGroup.setMetadata(jobRole.getMetadata());
 
         //Logic to map the job roles types
+        if (CollectionUtils.isEmpty(jobRole.getFunctionGroups())) {
+            throw new IllegalArgumentException(
+                String.format("Unexpected no function groups for job role: %s", jobRole.getName()));
+        }
         final var jobRoleType = jobRole.getFunctionGroups().getFirst().getType();
         if (!ObjectUtils.isEmpty(jobRoleType)) {
             switch (jobRoleType) {
