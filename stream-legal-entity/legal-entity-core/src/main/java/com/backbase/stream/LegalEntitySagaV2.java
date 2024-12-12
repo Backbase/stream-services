@@ -474,14 +474,14 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
 
         Mono<User> createNewIdentityUser =
             userService.createOrImportIdentityUser(user, legalEntity.getInternalId(), streamTask)
-                .flatMap(currentUser -> userService.updateUserState(currentUser, legalEntity.getRealmName()))
                 .map(existingUser -> {
                     user.setInternalId(existingUser.getInternalId());
                     streamTask.info(IDENTITY_USER, UPSERT, CREATED, user.getExternalId(), user.getInternalId(),
                         "User %s created", existingUser.getExternalId());
                     return user;
                 });
-        return getExistingIdentityUser.switchIfEmpty(createNewIdentityUser);
+        return getExistingIdentityUser.switchIfEmpty(createNewIdentityUser)
+                .flatMap(upsertUser -> userService.updateUserState(upsertUser, legalEntity.getRealmName()));
     }
 
     private Mono<LegalEntityTaskV2> processSubsidiaries(LegalEntityTaskV2 streamTask) {
