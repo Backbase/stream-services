@@ -24,6 +24,7 @@ import com.backbase.stream.legalentity.model.Product;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.Subscription;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.loan.LoansSaga;
@@ -100,6 +101,7 @@ public class ProductIngestionSaga {
             })
             .flatMap(this::upsertArrangements)
             .flatMap(accessGroupService::setupProductGroups)
+            .flatMap(this::setupSubscriptions)
             .flatMap(this::setupBusinessFunctionsAndPermissions);
     }
 
@@ -112,6 +114,18 @@ public class ProductIngestionSaga {
             .map(productGroup::users)
             .cast(ProductGroup.class)
             .map(streamTask::data);
+    }
+
+    private Mono<ProductGroupTask> setupSubscriptions(ProductGroupTask streamTask) {
+        ProductGroup productGroup = streamTask.getData();
+        return getCurrentAccountFlux(productGroup)
+            .flatMap(currentAccount -> {
+                var identifiers = currentAccount.getSubscriptions().stream()
+                    .map(Subscription::getIdentifier)
+                    .toList();
+                return arrangementService.addSubscriptionForArrangement(currentAccount.getExternalId(), identifiers);
+            })
+            .then(Mono.just(streamTask));
     }
 
     private Mono<ProductGroupTask> validateProductGroup(ProductGroupTask streamTask) {
