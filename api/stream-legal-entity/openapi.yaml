@@ -451,6 +451,10 @@ components:
           $ref: '#/components/schemas/DebitAccount'
         accountHolderCountry:
           $ref: '#/components/schemas/AccountHolderCountry'
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
     SavingsAccount:
@@ -3072,6 +3076,17 @@ components:
       enum:
         - RETAIL
         - BUSINESS
+    Subscription:
+      type: object
+      description: Arrangement subscription
+      properties:
+        identifier:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Subscription identifier
+      required:
+        - identifier
 
   examples:
     RootLegalEntityHierarchyExample:
