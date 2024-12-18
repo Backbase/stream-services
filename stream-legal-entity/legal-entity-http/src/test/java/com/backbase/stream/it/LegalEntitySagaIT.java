@@ -73,6 +73,7 @@ class LegalEntitySagaIT {
                                 new JobProfileUser()
                                     .user(
                                         new User()
+                                            .internalId("9ac44fca")
                                             .externalId("john.doe")
                                             .fullName("John Doe")
                                             .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
@@ -94,6 +95,7 @@ class LegalEntitySagaIT {
                                 new JobProfileUser()
                                     .user(
                                         new User()
+                                            .internalId("9ac44fca")
                                             .externalId("john.doe")
                                             .fullName("John Doe")
                                             .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
@@ -114,6 +116,7 @@ class LegalEntitySagaIT {
                         new JobProfileUser()
                             .user(
                                 new User()
+                                    .internalId("9ac44fca")
                                     .externalId("john.doe")
                                     .fullName("John Doe")
                                     .identityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY)
@@ -316,6 +319,13 @@ class LegalEntitySagaIT {
                         .willReturn(WireMock.aResponse().withStatus(HttpStatus.CREATED.value())
                                 .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                                 .withBody(""))
+        );
+
+        stubFor(
+            WireMock.get("/user-manager/service-api/v2/users/9ac44fca?skipHierarchyCheck=true")
+                .willReturn(WireMock.aResponse()
+                    .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("{\"id\":\"9ac44fca\",\"externalId\":\"john.doe\",\"legalEntityId\":\"500000\",\"fullName\":\"John Doe\"}"))
         );
     }
 

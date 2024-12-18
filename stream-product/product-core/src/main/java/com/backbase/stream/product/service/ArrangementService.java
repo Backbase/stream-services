@@ -24,6 +24,7 @@ import com.backbase.stream.product.exception.ArrangementUpdateException;
 import com.backbase.stream.product.mapping.ProductMapper;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
@@ -86,7 +87,14 @@ public class ArrangementService {
                 }
                 sink.next(r);
             }).onErrorResume(WebClientResponseException.class, throwable ->
-                error(new ArrangementUpdateException(throwable, "Batch arrangement update failed: " + arrangementItems)));
+                Mono.error(new ArrangementUpdateException(throwable,
+                    "Batch arrangement update failed for arrangements : "
+                        + arrangementItems.stream()
+                        .map(arrangementItem -> {
+                            String uniqueIdentifier = Objects.nonNull(arrangementItem.getBBAN())? arrangementItem.getBBAN(): arrangementItem.getId();
+                            return arrangementItem.getName() + " | "
+                                + uniqueIdentifier.substring(uniqueIdentifier.length() - 4);
+                        }).toList())));
     }
 
     /**
