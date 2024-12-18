@@ -210,16 +210,31 @@ public class ArrangementService {
             new ExternalLegalEntityIds().ids(new HashSet<>(legalEntityExternalIds)));
     }
 
+    /**
+     * Create Subscriptions for specified Arrangement and list of subscription identifiers.
+     *
+     * @param arrangementExternalId arrangement external identifier.
+     * @param subscriptionIdentifiers List of identifiers.
+     * @return Mono<Void>
+     */
     public Mono<Void> addSubscriptionForArrangement(
         String arrangementExternalId, List<String> subscriptionIdentifiers) {
 
         return Flux.fromIterable(subscriptionIdentifiers)
             .flatMap(identifier -> {
-                    log.debug("Subscribe '{}' arrangement to '{}' subscription", arrangementExternalId, identifier);
+                    log.debug("Subscribe arrangement [{}] to subscription '{}'", arrangementExternalId, identifier);
                     return arrangementsIntegrationApi
-                        .postSubscription(arrangementExternalId, new Subscription().identifier(identifier));
+                        .postSubscription(arrangementExternalId, new Subscription().identifier(identifier))
+                        .onErrorResume(WebClientResponseException.class, e -> {
+                            log.warn("Failed to create subscription '{}' for arrangement [{}]: {}",
+                                identifier,
+                                arrangementExternalId,
+                                e.getMessage()
+                            );
+                            return Mono.empty();
+                        });
                 }
-            ).last();
+            ).then();
     }
 
 }

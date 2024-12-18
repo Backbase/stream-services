@@ -13,6 +13,7 @@ import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseStatus
 import com.backbase.dbs.arrangement.api.integration.v2.model.ErrorItem;
 import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntityIds;
 import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
+import com.backbase.dbs.arrangement.api.integration.v2.model.Subscription;
 import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
@@ -494,6 +495,45 @@ class ArrangementServiceTest {
             }).verify();
 
         verify(arrangementsApi).getApiClient();
+    }
+
+    @Test
+    void addSubscriptionForArrangement() {
+        // given
+        var arrangementExternalId = "arr_ext_id";
+        var identifiers = List.of("subsc_1", "subsc_2");
+        when(arrangementsIntegrationApi.postSubscription(any(), any())).thenReturn(Mono.empty());
+
+        // when
+        var monoResult = arrangementService
+            .addSubscriptionForArrangement(arrangementExternalId, identifiers);
+
+        // then
+        StepVerifier.create(monoResult).verifyComplete();
+        verify(arrangementsIntegrationApi)
+            .postSubscription(arrangementExternalId, new Subscription().identifier("subsc_1"));
+        verify(arrangementsIntegrationApi)
+            .postSubscription(arrangementExternalId, new Subscription().identifier("subsc_2"));
+    }
+
+    @Test
+    void addSubscriptionForArrangement_Failure() {
+        // given
+        var arrangementExternalId = "arr_ext_id";
+        var identifiers = List.of("subsc_1", "subsc_2");
+        var exception = buildWebClientResponseException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error occurred");
+        when(arrangementsIntegrationApi.postSubscription(any(), any())).thenReturn(Mono.error(exception));
+
+        // when
+        var monoResult = arrangementService
+            .addSubscriptionForArrangement(arrangementExternalId, identifiers);
+
+        // then
+        StepVerifier.create(monoResult).verifyComplete();
+        verify(arrangementsIntegrationApi)
+            .postSubscription(arrangementExternalId, new Subscription().identifier("subsc_1"));
+        verify(arrangementsIntegrationApi)
+            .postSubscription(arrangementExternalId, new Subscription().identifier("subsc_2"));
     }
 
 }
