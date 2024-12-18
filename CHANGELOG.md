@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [6.10.0](https://github.com/Backbase/stream-services/compare/6.9.0...6.10.0)
+### Fixed
+- Performance improvement on retrieving the user information by calling getUserById (8 ms) Vs getUserByExternalId (50 ms)
+- Update ArrangementUpdateException Logger to handle PII data
+
 ## [6.9.0](https://github.com/Backbase/stream-services/compare/6.8.0...6.9.0)
 ### Changed
 - fix the logic of setting the job role type for ingestion - see Maint 32629 for more details
