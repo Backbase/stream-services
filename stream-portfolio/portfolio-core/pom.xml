@@ -13,9 +13,7 @@
     <packaging>jar</packaging>
     <name>Stream :: Portfolio Core</name>
 
-    <properties>
-
-    </properties>
+    <properties/>
 
     <dependencies>
         <dependency>

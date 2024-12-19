@@ -17,37 +17,44 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class LoansSaga implements StreamTaskExecutor<LoansTask> {
 
-    private final LoanMapper loanMapper = Mappers.getMapper(LoanMapper.class);
+  private final LoanMapper loanMapper = Mappers.getMapper(LoanMapper.class);
 
-    private final LoansApi loansApi;
+  private final LoansApi loansApi;
 
-    @Override
-    public Mono<LoansTask> executeTask(@SpanTag(value = "streamTask") LoansTask streamTask) {
-        List<InboundIntegrationLoan> inboundLoans =
-            streamTask.getData().stream()
-                .map(loanMapper::map)
-                .toList();
-        List<String> externalIds = inboundLoans.stream()
+  @Override
+  public Mono<LoansTask> executeTask(@SpanTag(value = "streamTask") LoansTask streamTask) {
+    List<InboundIntegrationLoan> inboundLoans =
+        streamTask.getData().stream().map(loanMapper::map).toList();
+    List<String> externalIds =
+        inboundLoans.stream()
             .map(InboundIntegrationLoan::getArrangementAttributes)
             .map(InboundIntegrationArrangementAttributes::getExternalId)
             .toList();
-        log.info("Started ingestion of loans with external arrangement ids {}", externalIds);
-        return Flux.fromIterable(inboundLoans)
-            .buffer(50)
-            .concatMap(batch ->
-                loansApi.postBatchUpsertLoans(new BatchUpsertLoans().loans(batch))
-                    .doOnNext(upsertLoanResponse -> {
-                        streamTask.setResponse(upsertLoanResponse);
-                        streamTask.info("loan", "upsert", "success", upsertLoanResponse.getResourceId(),
-                            upsertLoanResponse.getArrangementId(), "upsert is successful");
-                    })
+    log.info("Started ingestion of loans with external arrangement ids {}", externalIds);
+    return Flux.fromIterable(inboundLoans)
+        .buffer(50)
+        .concatMap(
+            batch ->
+                loansApi
+                    .postBatchUpsertLoans(new BatchUpsertLoans().loans(batch))
+                    .doOnNext(
+                        upsertLoanResponse -> {
+                          streamTask.setResponse(upsertLoanResponse);
+                          streamTask.info(
+                              "loan",
+                              "upsert",
+                              "success",
+                              upsertLoanResponse.getResourceId(),
+                              upsertLoanResponse.getArrangementId(),
+                              "upsert is successful");
+                        })
                     .collectList())
-            .collectList()
-            .thenReturn(streamTask);
-    }
+        .collectList()
+        .thenReturn(streamTask);
+  }
 
-    @Override
-    public Mono<LoansTask> rollBack(LoansTask streamTask) {
-        return null;
-    }
+  @Override
+  public Mono<LoansTask> rollBack(LoansTask streamTask) {
+    return null;
+  }
 }

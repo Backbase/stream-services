@@ -13,8 +13,7 @@
     <name>Stream :: Contacts Core</name>
 
     <properties>
-
-    </properties>
+</properties>
 
     <dependencies>
         <dependency>

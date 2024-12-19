@@ -11,33 +11,33 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LoansTask extends StreamTask {
 
-    public LoansTask(String unitOfWorkId, List<Loan> data) {
-        super(unitOfWorkId);
-        this.data = data;
-    }
+  public LoansTask(String unitOfWorkId, List<Loan> data) {
+    super(unitOfWorkId);
+    this.data = data;
+  }
 
-    private List<Loan> data;
+  private List<Loan> data;
 
-    public List<Loan> getData() {
-        return data;
-    }
+  public List<Loan> getData() {
+    return data;
+  }
 
-    public void setData(List<Loan> data) {
-        this.data = data;
-    }
+  public void setData(List<Loan> data) {
+    this.data = data;
+  }
 
-    public BatchResponseItemExtended getResponse() {
-        return response;
-    }
+  public BatchResponseItemExtended getResponse() {
+    return response;
+  }
 
-    public void setResponse(BatchResponseItemExtended response) {
-        this.response = response;
-    }
+  public void setResponse(BatchResponseItemExtended response) {
+    this.response = response;
+  }
 
-    private BatchResponseItemExtended response;
+  private BatchResponseItemExtended response;
 
-    @Override
-    public String getName() {
-        return "loan";
-    }
+  @Override
+  public String getName() {
+    return "loan";
+  }
 }

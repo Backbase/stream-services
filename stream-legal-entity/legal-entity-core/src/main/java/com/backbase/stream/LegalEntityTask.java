@@ -12,32 +12,32 @@ import lombok.NoArgsConstructor;
 @Data
 public class LegalEntityTask extends StreamTask {
 
-    private LegalEntity legalEntity;
-    private BatchProductIngestionMode ingestionMode;
+  private LegalEntity legalEntity;
+  private BatchProductIngestionMode ingestionMode;
 
-    public LegalEntityTask(LegalEntity data) {
-        super(data.getExternalId());
-        this.legalEntity = data;
-        this.ingestionMode = BatchProductIngestionMode.UPSERT;
-    }
+  public LegalEntityTask(LegalEntity data) {
+    super(data.getExternalId());
+    this.legalEntity = data;
+    this.ingestionMode = BatchProductIngestionMode.UPSERT;
+  }
 
-    public LegalEntityTask(LegalEntity data, BatchProductIngestionMode ingestionMode) {
-        super(data.getExternalId());
-        this.legalEntity = data;
-        this.ingestionMode = ingestionMode;
-    }
+  public LegalEntityTask(LegalEntity data, BatchProductIngestionMode ingestionMode) {
+    super(data.getExternalId());
+    this.legalEntity = data;
+    this.ingestionMode = ingestionMode;
+  }
 
-    public LegalEntity getData() {
-        return legalEntity;
-    }
+  public LegalEntity getData() {
+    return legalEntity;
+  }
 
-    public LegalEntityTask data(LegalEntity legalEntity) {
-        this.legalEntity = legalEntity;
-        return this;
-    }
+  public LegalEntityTask data(LegalEntity legalEntity) {
+    this.legalEntity = legalEntity;
+    return this;
+  }
 
-    @Override
-    public String getName() {
-        return legalEntity.getExternalId();
-    }
+  @Override
+  public String getName() {
+    return legalEntity.getExternalId();
+  }
 }

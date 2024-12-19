@@ -13,23 +13,21 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("backbase.communication.services.user-segments-collector")
 public class AudiencesCollectorClientConfig extends CompositeApiClientConfig {
 
-    public static final String USER_SEGMENT_COLLECTOR_SERVICE_ID = "user-segments-collector";
+  public static final String USER_SEGMENT_COLLECTOR_SERVICE_ID = "user-segments-collector";
 
-    public AudiencesCollectorClientConfig() {
-        super(USER_SEGMENT_COLLECTOR_SERVICE_ID);
-    }
+  public AudiencesCollectorClientConfig() {
+    super(USER_SEGMENT_COLLECTOR_SERVICE_ID);
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public ApiClient userSegmentCollectorApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new ApiClient(getWebClient(), objectMapper, dateFormat)
-            .setBasePath(createBasePath());
-    }
+  @Bean
+  @ConditionalOnMissingBean
+  public ApiClient userSegmentCollectorApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    return new ApiClient(getWebClient(), objectMapper, dateFormat).setBasePath(createBasePath());
+  }
 
-    @Bean
-    @ConditionalOnMissingBean
-    public HandlersServiceApi userSegmentCollectorServiceApi(ApiClient apiClient) {
-        return new HandlersServiceApi(apiClient);
-    }
-
+  @Bean
+  @ConditionalOnMissingBean
+  public HandlersServiceApi userSegmentCollectorServiceApi(ApiClient apiClient) {
+    return new HandlersServiceApi(apiClient);
+  }
 }

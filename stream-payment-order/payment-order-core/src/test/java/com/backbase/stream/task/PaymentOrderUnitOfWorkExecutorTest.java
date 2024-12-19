@@ -1,9 +1,7 @@
 package com.backbase.stream.task;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.lenient;
 
 import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
@@ -25,8 +23,8 @@ import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import java.math.BigDecimal;
-
 import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,147 +37,185 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.List;
-
 @ExtendWith(MockitoExtension.class)
 public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
-    @Mock
-    private PaymentOrdersApi paymentOrdersApi;
+  @Mock private PaymentOrdersApi paymentOrdersApi;
 
-    @Mock
-    private ArrangementsApi arrangementsApi;
+  @Mock private ArrangementsApi arrangementsApi;
 
-    @Mock
-    private UnitOfWorkRepository<PaymentOrderTask, String> repository;
+  @Mock private UnitOfWorkRepository<PaymentOrderTask, String> repository;
 
-    private PaymentOrderTypeConfiguration paymentOrderTypeConfiguration = new PaymentOrderTypeConfiguration();
+  private PaymentOrderTypeConfiguration paymentOrderTypeConfiguration =
+      new PaymentOrderTypeConfiguration();
 
-    private final PaymentOrderTaskExecutor streamTaskExecutor = new PaymentOrderTaskExecutor(paymentOrdersApi);
+  private final PaymentOrderTaskExecutor streamTaskExecutor =
+      new PaymentOrderTaskExecutor(paymentOrdersApi);
 
-    private final PaymentOrderWorkerConfigurationProperties streamWorkerConfiguration = new PaymentOrderWorkerConfigurationProperties();
+  private final PaymentOrderWorkerConfigurationProperties streamWorkerConfiguration =
+      new PaymentOrderWorkerConfigurationProperties();
 
-//    @InjectMocks
-    private PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor;
+  //    @InjectMocks
+  private PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor;
 
-    @BeforeEach
-    void setup() {
-        List<String> pmtTypes = new ArrayList<>();
-        pmtTypes.add("INTRA_PMT");
-        paymentOrderTypeConfiguration.setTypes(pmtTypes);
-        paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
-                repository, streamTaskExecutor, streamWorkerConfiguration,
-                paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper,
-                paymentOrderTypeConfiguration);
-    }
+  @BeforeEach
+  void setup() {
+    List<String> pmtTypes = new ArrayList<>();
+    pmtTypes.add("INTRA_PMT");
+    paymentOrderTypeConfiguration.setTypes(pmtTypes);
+    paymentOrderUnitOfWorkExecutor =
+        new PaymentOrderUnitOfWorkExecutor(
+            repository,
+            streamTaskExecutor,
+            streamWorkerConfiguration,
+            paymentOrdersApi,
+            arrangementsApi,
+            paymentOrderTypeMapper,
+            paymentOrderTypeConfiguration);
+  }
 
-    @Test
-    void test_prepareUnitOfWork_paymentOrderIngestRequestList() {
-        List<PaymentOrderIngestRequest> paymentOrderIngestRequestList = List.of(
-                new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(0)),
-                new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(1))
-        );
+  @Test
+  void test_prepareUnitOfWork_paymentOrderIngestRequestList() {
+    List<PaymentOrderIngestRequest> paymentOrderIngestRequestList =
+        List.of(
+            new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(0)),
+            new NewPaymentOrderIngestRequest(paymentOrderPostRequest.get(1)));
 
-        PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse()
-                .id("po_post_resp_id");
+    PaymentOrderPostResponse paymentOrderPostResponse =
+        new PaymentOrderPostResponse().id("po_post_resp_id");
 
-        lenient().when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
-                .thenReturn(Mono.just(paymentOrderPostResponse));
+    lenient()
+        .when(paymentOrdersApi.postPaymentOrder(Mockito.any()))
+        .thenReturn(Mono.just(paymentOrderPostResponse));
 
-        ArrangementItem arrangementItem = new ArrangementItem()
-                .id("arrangementId_1")
-                .externalArrangementId("externalArrangementId_1");
-
-        ArrangementSearchesListResponse arrangementSearchesListResponse = new ArrangementSearchesListResponse()
-                .addArrangementElementsItem(arrangementItem);
-
-        Mockito.lenient().when(arrangementsApi.postSearchArrangements(Mockito.any()))
-            .thenReturn(Mono.just(arrangementSearchesListResponse));
-
-        StepVerifier.create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderIngestRequestList))
-                .assertNext(unitOfWork -> {
-                    Assertions.assertTrue(unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
-                    Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
-                    Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
-                    Assertions.assertEquals(paymentOrderIngestRequestList.size(), unitOfWork.getStreamTasks().getFirst().getData().size());
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void test_prepareUnitOfWork_paymentOrderPostRequestFlux() {
-        Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux = Flux.fromIterable(paymentOrderPostRequest);
-
-        PaymentOrderPostResponse paymentOrderPostResponse = new PaymentOrderPostResponse()
-                .id("po_post_resp_id");
-
-        lenient().when(paymentOrdersApi.postPaymentOrder(any()))
-                .thenReturn(Mono.just(paymentOrderPostResponse));
-
-        GetPaymentOrderResponse getPaymentOrderResponse = new GetPaymentOrderResponse()
-                .id("arrangementId_1")
-                .bankReferenceId("bankReferenceId_1");
-        PaymentOrderPostFilterResponse paymentOrderPostFilterResponse = new PaymentOrderPostFilterResponse()
-                .addPaymentOrdersItem(getPaymentOrderResponse)
-                .totalElements(new BigDecimal(1));
-
-        doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
-
-        ArrangementItem arrangementItem = new ArrangementItem()
+    ArrangementItem arrangementItem =
+        new ArrangementItem()
             .id("arrangementId_1")
             .externalArrangementId("externalArrangementId_1");
 
-        ArrangementSearchesListResponse arrangementSearchesListResponse = new ArrangementSearchesListResponse()
-            .addArrangementElementsItem(arrangementItem);
+    ArrangementSearchesListResponse arrangementSearchesListResponse =
+        new ArrangementSearchesListResponse().addArrangementElementsItem(arrangementItem);
 
-        Mockito.lenient().when(arrangementsApi.postSearchArrangements(Mockito.any()))
-            .thenReturn(Mono.just(arrangementSearchesListResponse));
+    Mockito.lenient()
+        .when(arrangementsApi.postSearchArrangements(Mockito.any()))
+        .thenReturn(Mono.just(arrangementSearchesListResponse));
 
-        StepVerifier.create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
-            .assertNext(unitOfWork -> {
-                Assertions.assertTrue(unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
-                Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
-                Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
-                Assertions.assertEquals(paymentOrderPostRequest.size(), unitOfWork.getStreamTasks().getFirst().getData().size());
+    StepVerifier.create(
+            paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderIngestRequestList))
+        .assertNext(
+            unitOfWork -> {
+              Assertions.assertTrue(
+                  unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
+              Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
+              Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
+              Assertions.assertEquals(
+                  paymentOrderIngestRequestList.size(),
+                  unitOfWork.getStreamTasks().getFirst().getData().size());
             })
-            .verifyComplete();
-    }
+        .verifyComplete();
+  }
 
-    @Test
-    void test_prepareunitofwork_blankuserid() {
+  @Test
+  void test_prepareUnitOfWork_paymentOrderPostRequestFlux() {
+    Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux =
+        Flux.fromIterable(paymentOrderPostRequest);
 
-        paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
-                repository, streamTaskExecutor, streamWorkerConfiguration,
-                paymentOrdersApi, arrangementsApi, null, paymentOrderTypeConfiguration);
+    PaymentOrderPostResponse paymentOrderPostResponse =
+        new PaymentOrderPostResponse().id("po_post_resp_id");
 
-        paymentOrderPostRequest.getFirst().setInternalUserId(StringUtils.EMPTY);
-        paymentOrderPostRequest.get(1).setInternalUserId(null);
+    lenient()
+        .when(paymentOrdersApi.postPaymentOrder(any()))
+        .thenReturn(Mono.just(paymentOrderPostResponse));
 
-        Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux = Flux.fromIterable(paymentOrderPostRequest);
+    GetPaymentOrderResponse getPaymentOrderResponse =
+        new GetPaymentOrderResponse().id("arrangementId_1").bankReferenceId("bankReferenceId_1");
+    PaymentOrderPostFilterResponse paymentOrderPostFilterResponse =
+        new PaymentOrderPostFilterResponse()
+            .addPaymentOrdersItem(getPaymentOrderResponse)
+            .totalElements(new BigDecimal(1));
 
-        ArrangementItem arrangementItem = new ArrangementItem()
-                .id("arrangementId_1")
-                .externalArrangementId("externalArrangementId_1");
+    doReturn(Mono.just(paymentOrderPostFilterResponse))
+        .when(paymentOrdersApi)
+        .postFilterPaymentOrders(
+            any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+            any(), any(), any(), any(), any(), any(), any(), any());
 
-        ArrangementSearchesListResponse arrangementSearchesListResponse = new ArrangementSearchesListResponse()
-            .addArrangementElementsItem(arrangementItem);
+    ArrangementItem arrangementItem =
+        new ArrangementItem()
+            .id("arrangementId_1")
+            .externalArrangementId("externalArrangementId_1");
 
-        lenient().when(arrangementsApi.postSearchArrangements(Mockito.any()))
-                .thenReturn(Mono.just(arrangementSearchesListResponse));
+    ArrangementSearchesListResponse arrangementSearchesListResponse =
+        new ArrangementSearchesListResponse().addArrangementElementsItem(arrangementItem);
 
-        GetPaymentOrderResponse getPaymentOrderResponseWithEmptyUserId = new GetPaymentOrderResponse()
-                .id("arrangementId_1");
+    Mockito.lenient()
+        .when(arrangementsApi.postSearchArrangements(Mockito.any()))
+        .thenReturn(Mono.just(arrangementSearchesListResponse));
 
-        PaymentOrderPostFilterResponse paymentOrderPostFilterResponse = new PaymentOrderPostFilterResponse()
-                .addPaymentOrdersItem(getPaymentOrderResponseWithEmptyUserId)
-                .totalElements(new BigDecimal(1));
+    StepVerifier.create(
+            paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
+        .assertNext(
+            unitOfWork -> {
+              Assertions.assertTrue(
+                  unitOfWork.getUnitOfOWorkId().startsWith("payment-orders-mixed-"));
+              Assertions.assertEquals(UnitOfWork.State.NEW, unitOfWork.getState());
+              Assertions.assertEquals(1, unitOfWork.getStreamTasks().size());
+              Assertions.assertEquals(
+                  paymentOrderPostRequest.size(),
+                  unitOfWork.getStreamTasks().getFirst().getData().size());
+            })
+        .verifyComplete();
+  }
 
-        lenient().doReturn(Mono.just(paymentOrderPostFilterResponse)).when(paymentOrdersApi).postFilterPaymentOrders(any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any());
+  @Test
+  void test_prepareunitofwork_blankuserid() {
 
-        StepVerifier
-                .create(paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
-                .expectNextCount(0)
-                .verifyComplete();
-    }
+    paymentOrderUnitOfWorkExecutor =
+        new PaymentOrderUnitOfWorkExecutor(
+            repository,
+            streamTaskExecutor,
+            streamWorkerConfiguration,
+            paymentOrdersApi,
+            arrangementsApi,
+            null,
+            paymentOrderTypeConfiguration);
 
+    paymentOrderPostRequest.getFirst().setInternalUserId(StringUtils.EMPTY);
+    paymentOrderPostRequest.get(1).setInternalUserId(null);
+
+    Flux<PaymentOrderPostRequest> paymentOrderPostRequestFlux =
+        Flux.fromIterable(paymentOrderPostRequest);
+
+    ArrangementItem arrangementItem =
+        new ArrangementItem()
+            .id("arrangementId_1")
+            .externalArrangementId("externalArrangementId_1");
+
+    ArrangementSearchesListResponse arrangementSearchesListResponse =
+        new ArrangementSearchesListResponse().addArrangementElementsItem(arrangementItem);
+
+    lenient()
+        .when(arrangementsApi.postSearchArrangements(Mockito.any()))
+        .thenReturn(Mono.just(arrangementSearchesListResponse));
+
+    GetPaymentOrderResponse getPaymentOrderResponseWithEmptyUserId =
+        new GetPaymentOrderResponse().id("arrangementId_1");
+
+    PaymentOrderPostFilterResponse paymentOrderPostFilterResponse =
+        new PaymentOrderPostFilterResponse()
+            .addPaymentOrdersItem(getPaymentOrderResponseWithEmptyUserId)
+            .totalElements(new BigDecimal(1));
+
+    lenient()
+        .doReturn(Mono.just(paymentOrderPostFilterResponse))
+        .when(paymentOrdersApi)
+        .postFilterPaymentOrders(
+            any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(),
+            any(), any(), any(), any(), any(), any(), any(), any());
+
+    StepVerifier.create(
+            paymentOrderUnitOfWorkExecutor.prepareUnitOfWork(paymentOrderPostRequestFlux))
+        .expectNextCount(0)
+        .verifyComplete();
+  }
 }

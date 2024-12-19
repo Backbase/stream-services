@@ -1,10 +1,5 @@
 package com.backbase.stream.portfolio.mapper;
 
-import java.util.List;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ValueMapping;
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPostRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AggregatePortfoliosPutRequest;
 import com.backbase.portfolio.api.service.integration.v1.model.AllocationType;
@@ -35,67 +30,73 @@ import com.backbase.stream.portfolio.model.Position;
 import com.backbase.stream.portfolio.model.PositionTransaction;
 import com.backbase.stream.portfolio.model.SubPortfolio;
 import com.backbase.stream.portfolio.model.TransactionCategory;
+import java.util.List;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.ValueMapping;
 
 @Mapper
 public interface PortfolioMapper {
 
-    PortfoliosPostRequest mapPortfolio(Portfolio portfolio);
+  PortfoliosPostRequest mapPortfolio(Portfolio portfolio);
 
-    PortfoliosPutRequest mapPutPortfolio(Portfolio portfolio);
+  PortfoliosPutRequest mapPutPortfolio(Portfolio portfolio);
 
-    SubPortfoliosPostRequest mapSubPortfolio(SubPortfolio subPortfolio);
+  SubPortfoliosPostRequest mapSubPortfolio(SubPortfolio subPortfolio);
 
-    SubPortfoliosPutRequest mapPutSubPortfolio(SubPortfolio subPortfolio);
+  SubPortfoliosPutRequest mapPutSubPortfolio(SubPortfolio subPortfolio);
 
-    List<PortfolioAllocationsParentItem> mapAllocations(List<Allocation> allocations);
+  List<PortfolioAllocationsParentItem> mapAllocations(List<Allocation> allocations);
 
-    @ValueMapping(source = "BY_CURRENCY", target = "CURRENCY")
-    @ValueMapping(source = "BY_ASSET_CLASS", target = "ASSET_CLASS")
-    @ValueMapping(source = "BY_REGION", target = "REGION")
-    @ValueMapping(source = "BY_COUNTRY", target = "COUNTRY")
-    @ValueMapping(source = MappingConstants.ANY_UNMAPPED, target = MappingConstants.NULL)
-    AllocationType map(String allocationTypeEnum);
+  @ValueMapping(source = "BY_CURRENCY", target = "CURRENCY")
+  @ValueMapping(source = "BY_ASSET_CLASS", target = "ASSET_CLASS")
+  @ValueMapping(source = "BY_REGION", target = "REGION")
+  @ValueMapping(source = "BY_COUNTRY", target = "COUNTRY")
+  @ValueMapping(source = MappingConstants.ANY_UNMAPPED, target = MappingConstants.NULL)
+  AllocationType map(String allocationTypeEnum);
 
-    List<PortfolioPositionsHierarchyItem> mapHierarchies(List<PortfolioPositionsHierarchy> hierarchies);
+  List<PortfolioPositionsHierarchyItem> mapHierarchies(
+      List<PortfolioPositionsHierarchy> hierarchies);
 
-    List<PortfolioCumulativePerformancesItem>
-            mapCumulativePerformances(List<PortfolioCumulativePerformances> cumulativePerformances);
+  List<PortfolioCumulativePerformancesItem> mapCumulativePerformances(
+      List<PortfolioCumulativePerformances> cumulativePerformances);
 
-    @Mapping(target = "name", source = "benchmarkName")
-    PortfolioBenchmarkPutRequest mapBenchmark(String benchmarkName);
+  @Mapping(target = "name", source = "benchmarkName")
+  PortfolioBenchmarkPutRequest mapBenchmark(String benchmarkName);
 
-    @Mapping(target = "id", source = "portfolioId")
-    @Mapping(target = "name", source = "benchmarkName")
-    PortfolioBenchmarkPostRequest mapBenchmark(String portfolioId, String benchmarkName);
+  @Mapping(target = "id", source = "portfolioId")
+  @Mapping(target = "name", source = "benchmarkName")
+  PortfolioBenchmarkPostRequest mapBenchmark(String portfolioId, String benchmarkName);
 
-    List<PortfolioValuationsItem> mapValuations(List<PortfolioValuation> valuations);
+  List<PortfolioValuationsItem> mapValuations(List<PortfolioValuation> valuations);
 
-    AggregatePortfoliosPostRequest mapAggregate(AggregatePortfolio aggregatePortfolios);
+  AggregatePortfoliosPostRequest mapAggregate(AggregatePortfolio aggregatePortfolios);
 
-    AggregatePortfoliosPutRequest mapPutAggregate(AggregatePortfolio aggregatePortfolios);
+  AggregatePortfoliosPutRequest mapPutAggregate(AggregatePortfolio aggregatePortfolios);
 
-    @Mapping(target = "portfolioCode", source = "portfolioId")
-    @Mapping(target = "subPortfolioCode", source = "subPortfolioId")
-    @Mapping(target = ".", source = "position")
-    PositionsPostRequest mapPosition(String portfolioId, String subPortfolioId, Position position);
+  @Mapping(target = "portfolioCode", source = "portfolioId")
+  @Mapping(target = "subPortfolioCode", source = "subPortfolioId")
+  @Mapping(target = ".", source = "position")
+  PositionsPostRequest mapPosition(String portfolioId, String subPortfolioId, Position position);
 
-    PositionsPostRequest mapPostPosition(Position position);
+  PositionsPostRequest mapPostPosition(Position position);
 
-    PositionsPutRequest mapPutPosition(Position position);
+  PositionsPutRequest mapPutPosition(Position position);
 
-    @Mapping(target = "positionId", source = "positionId")
-    @Mapping(target = "transactions", source = "transactions")
-    PortfolioTransactionsPostItem mapPortfolioTransactionsPostItem(String positionId,
-            List<PositionTransaction> transactions);
-    
-    PositionTransactionPutRequest mapPositionTransactionPutRequest(PositionTransaction transaction);
+  @Mapping(target = "positionId", source = "positionId")
+  @Mapping(target = "transactions", source = "transactions")
+  PortfolioTransactionsPostItem mapPortfolioTransactionsPostItem(
+      String positionId, List<PositionTransaction> transactions);
 
-    PortfolioPositionTransactionsPostItem mapTransactionPostItem(PositionTransaction transaction);
+  PositionTransactionPutRequest mapPositionTransactionPutRequest(PositionTransaction transaction);
 
-    List<PortfolioPositionTransactionsPostItem> mapTransactionPostItems(List<PositionTransaction> transactions);
+  PortfolioPositionTransactionsPostItem mapTransactionPostItem(PositionTransaction transaction);
 
-    TransactionCategoryPostRequest mapTransactionCategory(TransactionCategory tc);
+  List<PortfolioPositionTransactionsPostItem> mapTransactionPostItems(
+      List<PositionTransaction> transactions);
 
-    TransactionCategoryPutRequest mapPutTransactionCategory(TransactionCategory tc);
+  TransactionCategoryPostRequest mapTransactionCategory(TransactionCategory tc);
 
+  TransactionCategoryPutRequest mapPutTransactionCategory(TransactionCategory tc);
 }

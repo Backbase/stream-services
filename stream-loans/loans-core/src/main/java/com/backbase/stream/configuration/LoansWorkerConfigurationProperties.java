@@ -9,5 +9,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Slf4j
 @Data
 public class LoansWorkerConfigurationProperties extends StreamWorkerConfiguration {
-    private boolean continueOnError;
+  private boolean continueOnError;
 }

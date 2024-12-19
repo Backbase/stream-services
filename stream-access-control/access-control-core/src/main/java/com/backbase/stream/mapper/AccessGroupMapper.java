@@ -27,78 +27,82 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface AccessGroupMapper {
 
-    @Mapping(source = "id", target = "internalId")
-    ServiceAgreement toStream(ServiceAgreementItemQuery getServiceAgreement);
+  @Mapping(source = "id", target = "internalId")
+  ServiceAgreement toStream(ServiceAgreementItemQuery getServiceAgreement);
 
-    @Mapping(source = "id", target = "internalId")
-    ServiceAgreementV2 toStreamV2(ServiceAgreementItemQuery getServiceAgreement);
+  @Mapping(source = "id", target = "internalId")
+  ServiceAgreementV2 toStreamV2(ServiceAgreementItemQuery getServiceAgreement);
 
-    @Mapping(source = "id", target = "internalId")
-    ServiceAgreement toStream(ServiceAgreementItem serviceAgreementItem);
+  @Mapping(source = "id", target = "internalId")
+  ServiceAgreement toStream(ServiceAgreementItem serviceAgreementItem);
 
-    BusinessFunction toStream(FunctionGroupItem functionsGetResponseBody);
+  BusinessFunction toStream(FunctionGroupItem functionsGetResponseBody);
 
-    @Mapping(source = "participants", target = "participantsToIngest")
-    ServicesAgreementIngest toPresentation(ServiceAgreement serviceAgreement);
+  @Mapping(source = "participants", target = "participantsToIngest")
+  ServicesAgreementIngest toPresentation(ServiceAgreement serviceAgreement);
 
-    @Mapping(source = "participants", target = "participantsToIngest")
-    ServicesAgreementIngest toPresentation(ServiceAgreementV2 serviceAgreement);
+  @Mapping(source = "participants", target = "participantsToIngest")
+  ServicesAgreementIngest toPresentation(ServiceAgreementV2 serviceAgreement);
 
-    ServiceAgreementPut toPresentationPut(ServiceAgreement serviceAgreement);
+  ServiceAgreementPut toPresentationPut(ServiceAgreement serviceAgreement);
 
-    // Initialize users list to workaround https://backbase.atlassian.net/browse/MAINT-10442
-    @Mapping(defaultExpression = "java( new ArrayList<>() )", source = "users", target = "users")
-    ParticipantIngest toPresentation(LegalEntityParticipant legalEntityParticipant);
+  // Initialize users list to workaround https://backbase.atlassian.net/browse/MAINT-10442
+  @Mapping(defaultExpression = "java( new ArrayList<>() )", source = "users", target = "users")
+  ParticipantIngest toPresentation(LegalEntityParticipant legalEntityParticipant);
 
-    PresentationIngestFunctionGroup toPresentation(JobRole referenceJobRole);
+  PresentationIngestFunctionGroup toPresentation(JobRole referenceJobRole);
 
-    /**
-     * Map {@link BusinessFunctionGroup} with privileges to {@link PresentationPermission}.
-     *
-     * @param functionGroups defined function groups
-     * @return mapped object
-     */
-    default List<PresentationPermission> toPresentation(List<BusinessFunctionGroup> functionGroups) {
-        if (Objects.isNull(functionGroups)) {
-            return Collections.emptyList();
-        }
-
-        return functionGroups.stream()
-            .filter(Objects::nonNull)
-            .map(BusinessFunctionGroup::getFunctions)
-            .flatMap(Collection::stream)
-            .map(f -> {
-                PresentationPermission presentationPermission = new PresentationPermission();
-                presentationPermission.setFunctionId(f.getFunctionId());
-                f.getPrivileges().stream()
-                    .filter(Objects::nonNull)
-                    .map(Privilege::getPrivilege)
-                    .forEach(presentationPermission::addPrivilegesItem);
-
-                return presentationPermission;
-            }).collect(Collectors.toList());
+  /**
+   * Map {@link BusinessFunctionGroup} with privileges to {@link PresentationPermission}.
+   *
+   * @param functionGroups defined function groups
+   * @return mapped object
+   */
+  default List<PresentationPermission> toPresentation(List<BusinessFunctionGroup> functionGroups) {
+    if (Objects.isNull(functionGroups)) {
+      return Collections.emptyList();
     }
 
-    default List<PresentationPermissionFunctionGroupUpdate> toUpdate(List<BusinessFunctionGroup> functionGroups) {
-        if (Objects.isNull(functionGroups)) {
-            return Collections.emptyList();
-        }
+    return functionGroups.stream()
+        .filter(Objects::nonNull)
+        .map(BusinessFunctionGroup::getFunctions)
+        .flatMap(Collection::stream)
+        .map(
+            f -> {
+              PresentationPermission presentationPermission = new PresentationPermission();
+              presentationPermission.setFunctionId(f.getFunctionId());
+              f.getPrivileges().stream()
+                  .filter(Objects::nonNull)
+                  .map(Privilege::getPrivilege)
+                  .forEach(presentationPermission::addPrivilegesItem);
 
-        return functionGroups.stream()
-            .filter(Objects::nonNull)
-            .map(BusinessFunctionGroup::getFunctions)
-            .flatMap(Collection::stream)
-            .map(f -> {
-                PresentationPermissionFunctionGroupUpdate presentationPermission
-                    = new PresentationPermissionFunctionGroupUpdate();
-                presentationPermission.functionName(f.getName());
-                f.getPrivileges().stream()
-                    .filter(Objects::nonNull)
-                    .map(Privilege::getPrivilege)
-                    .forEach(presentationPermission::addPrivilegesItem);
+              return presentationPermission;
+            })
+        .collect(Collectors.toList());
+  }
 
-                return presentationPermission;
-            }).collect(Collectors.toList());
+  default List<PresentationPermissionFunctionGroupUpdate> toUpdate(
+      List<BusinessFunctionGroup> functionGroups) {
+    if (Objects.isNull(functionGroups)) {
+      return Collections.emptyList();
     }
 
+    return functionGroups.stream()
+        .filter(Objects::nonNull)
+        .map(BusinessFunctionGroup::getFunctions)
+        .flatMap(Collection::stream)
+        .map(
+            f -> {
+              PresentationPermissionFunctionGroupUpdate presentationPermission =
+                  new PresentationPermissionFunctionGroupUpdate();
+              presentationPermission.functionName(f.getName());
+              f.getPrivileges().stream()
+                  .filter(Objects::nonNull)
+                  .map(Privilege::getPrivilege)
+                  .forEach(presentationPermission::addPrivilegesItem);
+
+              return presentationPermission;
+            })
+        .collect(Collectors.toList());
+  }
 }

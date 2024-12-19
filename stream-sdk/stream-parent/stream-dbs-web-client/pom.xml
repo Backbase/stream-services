@@ -12,9 +12,7 @@
 
     <name>Stream :: SDK :: Web Client</name>
 
-    <properties>
-
-    </properties>
+    <properties/>
 
     <dependencies>
 

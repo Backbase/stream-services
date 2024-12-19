@@ -16,33 +16,25 @@ import org.springframework.context.annotation.Import;
 @EnableConfigurationProperties(ProductIngestionSagaConfigurationProperties.class)
 public class ProductIngestionSagaConfiguration {
 
-    @Bean
-    public ProductIngestionSaga productIngestionSaga(ArrangementService arrangementService,
-                                                     AccessGroupService accessGroupService,
-                                                     UserService userService,
-                                                     ProductIngestionSagaConfigurationProperties configurationProperties,
-                                                     LoansSaga loansSaga) {
-        return new ProductIngestionSaga(
-            arrangementService,
-            accessGroupService,
-            userService,
-            configurationProperties,
-            loansSaga
-        );
-    }
+  @Bean
+  public ProductIngestionSaga productIngestionSaga(
+      ArrangementService arrangementService,
+      AccessGroupService accessGroupService,
+      UserService userService,
+      ProductIngestionSagaConfigurationProperties configurationProperties,
+      LoansSaga loansSaga) {
+    return new ProductIngestionSaga(
+        arrangementService, accessGroupService, userService, configurationProperties, loansSaga);
+  }
 
-    @Bean
-    public BatchProductIngestionSaga batchProductIngestionSaga(ArrangementService arrangementService,
-                                                     AccessGroupService accessGroupService,
-                                                     UserService userService,
-                                                     ProductIngestionSagaConfigurationProperties configurationProperties,
-                                                     LoansSaga loansSaga) {
-        return new BatchProductIngestionSaga(
-            arrangementService,
-            accessGroupService,
-            userService,
-            configurationProperties,
-            loansSaga
-        );
-    }
+  @Bean
+  public BatchProductIngestionSaga batchProductIngestionSaga(
+      ArrangementService arrangementService,
+      AccessGroupService accessGroupService,
+      UserService userService,
+      ProductIngestionSagaConfigurationProperties configurationProperties,
+      LoansSaga loansSaga) {
+    return new BatchProductIngestionSaga(
+        arrangementService, accessGroupService, userService, configurationProperties, loansSaga);
+  }
 }

@@ -17,8 +17,8 @@ import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
-import com.backbase.streams.tailoredvalue.configuration.PlanServiceConfiguration;
 import com.backbase.streams.tailoredvalue.PlansService;
+import com.backbase.streams.tailoredvalue.configuration.PlanServiceConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -27,105 +27,101 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import({
-    ProductConfiguration.class,
-    AccessControlConfiguration.class,
-    ProductIngestionSagaConfiguration.class,
-    LimitsServiceConfiguration.class,
-    ContactsServiceConfiguration.class,
-    LoansServiceConfiguration.class,
-    AudiencesSegmentationConfiguration.class,
-    PlanServiceConfiguration.class
-
+  ProductConfiguration.class,
+  AccessControlConfiguration.class,
+  ProductIngestionSagaConfiguration.class,
+  LimitsServiceConfiguration.class,
+  ContactsServiceConfiguration.class,
+  LoansServiceConfiguration.class,
+  AudiencesSegmentationConfiguration.class,
+  PlanServiceConfiguration.class
 })
-@EnableConfigurationProperties(
-    {LegalEntitySagaConfigurationProperties.class}
-)
+@EnableConfigurationProperties({LegalEntitySagaConfigurationProperties.class})
 public class LegalEntitySagaConfiguration {
 
-    @Bean
-    public LegalEntitySaga reactiveLegalEntitySaga(LegalEntityService legalEntityService,
-        UserService userService,
-        UserProfileService userProfileService,
-        AccessGroupService accessGroupService,
-        BatchProductIngestionSaga batchProductIngestionSaga,
-        LimitsSaga limitsSaga,
-        ContactsSaga contactsSaga,
-        LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
-        UserKindSegmentationSaga userKindSegmentationSaga
-    ) {
-        return new LegalEntitySaga(
-            legalEntityService,
-            userService,
-            userProfileService,
-            accessGroupService,
-            batchProductIngestionSaga,
-            limitsSaga,
-            contactsSaga,
-            sinkConfigurationProperties,
-            userKindSegmentationSaga
-        );
-    }
+  @Bean
+  public LegalEntitySaga reactiveLegalEntitySaga(
+      LegalEntityService legalEntityService,
+      UserService userService,
+      UserProfileService userProfileService,
+      AccessGroupService accessGroupService,
+      BatchProductIngestionSaga batchProductIngestionSaga,
+      LimitsSaga limitsSaga,
+      ContactsSaga contactsSaga,
+      LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
+      UserKindSegmentationSaga userKindSegmentationSaga) {
+    return new LegalEntitySaga(
+        legalEntityService,
+        userService,
+        userProfileService,
+        accessGroupService,
+        batchProductIngestionSaga,
+        limitsSaga,
+        contactsSaga,
+        sinkConfigurationProperties,
+        userKindSegmentationSaga);
+  }
 
-    @Bean
-    public LegalEntitySagaV2 reactiveLegalEntitySagaV2(LegalEntityService legalEntityService,
-        UserService userService,
-        UserProfileService userProfileService,
-        AccessGroupService accessGroupService,
-        LimitsSaga limitsSaga,
-        ContactsSaga contactsSaga,
-        LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
-        UserKindSegmentationSaga userKindSegmentationSaga
-    ) {
-        return new LegalEntitySagaV2(
-            legalEntityService,
-            userService,
-            userProfileService,
-            accessGroupService,
-            limitsSaga,
-            contactsSaga,
-            sinkConfigurationProperties,
-            userKindSegmentationSaga
-        );
-    }
+  @Bean
+  public LegalEntitySagaV2 reactiveLegalEntitySagaV2(
+      LegalEntityService legalEntityService,
+      UserService userService,
+      UserProfileService userProfileService,
+      AccessGroupService accessGroupService,
+      LimitsSaga limitsSaga,
+      ContactsSaga contactsSaga,
+      LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
+      UserKindSegmentationSaga userKindSegmentationSaga) {
+    return new LegalEntitySagaV2(
+        legalEntityService,
+        userService,
+        userProfileService,
+        accessGroupService,
+        limitsSaga,
+        contactsSaga,
+        sinkConfigurationProperties,
+        userKindSegmentationSaga);
+  }
 
-    @Bean
-    public ServiceAgreementSagaV2 reactiveServiceAgreementV2Saga(LegalEntityService legalEntityService,
-        AccessGroupService accessGroupService,
-        BatchProductIngestionSaga batchProductIngestionSaga,
-        LimitsSaga limitsSaga,
-        ContactsSaga contactsSaga,
-        PlansService plansService,
-        LegalEntitySagaConfigurationProperties sinkConfigurationProperties
-    ) {
-        return new ServiceAgreementSagaV2(
-            legalEntityService,
-            accessGroupService,
-            batchProductIngestionSaga,
-            limitsSaga,
-            contactsSaga,
-                plansService,
-            sinkConfigurationProperties
-        );
-    }
+  @Bean
+  public ServiceAgreementSagaV2 reactiveServiceAgreementV2Saga(
+      LegalEntityService legalEntityService,
+      AccessGroupService accessGroupService,
+      BatchProductIngestionSaga batchProductIngestionSaga,
+      LimitsSaga limitsSaga,
+      ContactsSaga contactsSaga,
+      PlansService plansService,
+      LegalEntitySagaConfigurationProperties sinkConfigurationProperties) {
+    return new ServiceAgreementSagaV2(
+        legalEntityService,
+        accessGroupService,
+        batchProductIngestionSaga,
+        limitsSaga,
+        contactsSaga,
+        plansService,
+        sinkConfigurationProperties);
+  }
 
-    @Bean
-    @ConditionalOnProperty(name = "backbase.stream.persistence", havingValue = "memory", matchIfMissing = true)
-    public LegalEntityUnitOfWorkRepository legalEntityInMemoryUnitOfWorkRepository() {
-        return new LegalEntityInMemoryUnitOfWorkRepository();
-    }
+  @Bean
+  @ConditionalOnProperty(
+      name = "backbase.stream.persistence",
+      havingValue = "memory",
+      matchIfMissing = true)
+  public LegalEntityUnitOfWorkRepository legalEntityInMemoryUnitOfWorkRepository() {
+    return new LegalEntityInMemoryUnitOfWorkRepository();
+  }
 
-    @Bean
-    public LegalEntityUnitOfWorkExecutor legalEntityUnitOfWorkExecutor(
-        LegalEntityUnitOfWorkRepository legalEntityUnitOfWorkRepository,
-        LegalEntitySaga legalEntitySaga,
-        LegalEntitySagaConfigurationProperties configProperties) {
+  @Bean
+  public LegalEntityUnitOfWorkExecutor legalEntityUnitOfWorkExecutor(
+      LegalEntityUnitOfWorkRepository legalEntityUnitOfWorkRepository,
+      LegalEntitySaga legalEntitySaga,
+      LegalEntitySagaConfigurationProperties configProperties) {
 
-        return new LegalEntityUnitOfWorkExecutor(legalEntityUnitOfWorkRepository, legalEntitySaga, configProperties);
-    }
+    return new LegalEntityUnitOfWorkExecutor(
+        legalEntityUnitOfWorkRepository, legalEntitySaga, configProperties);
+  }
 
-    public static class LegalEntityInMemoryUnitOfWorkRepository extends
-        InMemoryReactiveUnitOfWorkRepository<LegalEntityTask> implements LegalEntityUnitOfWorkRepository {
-
-    }
-
+  public static class LegalEntityInMemoryUnitOfWorkRepository
+      extends InMemoryReactiveUnitOfWorkRepository<LegalEntityTask>
+      implements LegalEntityUnitOfWorkRepository {}
 }

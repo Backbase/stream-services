@@ -9,8 +9,6 @@ import io.micrometer.tracing.annotation.ContinueSpan;
 import io.micrometer.tracing.annotation.SpanTag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.sleuth.annotation.ContinueSpan;
-import org.springframework.cloud.sleuth.annotation.SpanTag;
 import reactor.core.publisher.Mono;
 
 @Slf4j

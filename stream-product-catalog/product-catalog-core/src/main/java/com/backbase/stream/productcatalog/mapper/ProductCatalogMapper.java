@@ -1,6 +1,5 @@
 package com.backbase.stream.productcatalog.mapper;
 
-
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementProductItemBase;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementProductsListElement;
 import com.backbase.dbs.arrangement.api.service.v3.model.ExternalProductKindItemExtended;
@@ -12,14 +11,13 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface ProductCatalogMapper {
 
-    ArrangementProductItemBase toPresentation(ProductType productType);
+  ArrangementProductItemBase toPresentation(ProductType productType);
 
-    ExternalProductKindItemExtended toPresentation(ProductKind productKind);
+  ExternalProductKindItemExtended toPresentation(ProductKind productKind);
 
-    ProductKind toStream(ProductKindItem productKindItem);
+  ProductKind toStream(ProductKindItem productKindItem);
 
-    ProductKind toStream(ExternalProductKindItemExtended presentationProductKindItemGet);
+  ProductKind toStream(ExternalProductKindItemExtended presentationProductKindItemGet);
 
-    ProductType toStream(ArrangementProductsListElement arrangementProductsListElement);
-
+  ProductType toStream(ArrangementProductsListElement arrangementProductsListElement);
 }

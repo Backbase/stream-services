@@ -7,9 +7,10 @@ import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 
 public class LoansUnitOfWorkExecutor extends UnitOfWorkExecutor<LoansTask> {
 
-    public LoansUnitOfWorkExecutor(UnitOfWorkRepository<LoansTask, String> repository,
-        StreamTaskExecutor<LoansTask> streamTaskExecutor, StreamWorkerConfiguration streamWorkerConfiguration) {
-        super(repository, streamTaskExecutor, streamWorkerConfiguration);
-    }
-
+  public LoansUnitOfWorkExecutor(
+      UnitOfWorkRepository<LoansTask, String> repository,
+      StreamTaskExecutor<LoansTask> streamTaskExecutor,
+      StreamWorkerConfiguration streamWorkerConfiguration) {
+    super(repository, streamTaskExecutor, streamWorkerConfiguration);
+  }
 }

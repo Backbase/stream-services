@@ -1,7 +1,7 @@
 package com.backbase.stream.config;
 
-import java.util.List;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -13,6 +13,5 @@ import org.springframework.validation.annotation.Validated;
 @Data
 public class PaymentOrderTypeConfiguration {
 
-    @NotNull
-    private List<String> types;
+  @NotNull private List<String> types;
 }

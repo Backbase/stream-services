@@ -7,11 +7,12 @@ import org.junit.jupiter.api.Test;
 
 class UserKindSegmentationPropertiesTest {
 
-    @Test
-    void testProperties() {
-        UserKindSegmentationProperties properties = new UserKindSegmentationProperties(true, "testCategory");
+  @Test
+  void testProperties() {
+    UserKindSegmentationProperties properties =
+        new UserKindSegmentationProperties(true, "testCategory");
 
-        assertTrue(properties.enabled());
-        assertEquals("testCategory", properties.defaultCustomerCategory());
-    }
+    assertTrue(properties.enabled());
+    assertEquals("testCategory", properties.defaultCustomerCategory());
+  }
 }

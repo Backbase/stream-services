@@ -13,7 +13,7 @@
     <packaging>jar</packaging>
     <name>Stream :: Cursor Publishers</name>
 
-    <properties />
+    <properties/>
 
     <dependencies>
 

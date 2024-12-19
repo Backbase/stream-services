@@ -54,7 +54,7 @@
         <japicmp.skip>true</japicmp.skip>
 
         <checkstyle.config.location>backbase_checks.xml</checkstyle.config.location>
-<!--        <checkstyle.config.location>google_checks_javadocs.xml</checkstyle.config.location>-->
+        <!--        <checkstyle.config.location>google_checks_javadocs.xml</checkstyle.config.location>-->
     </properties>
 
     <dependencyManagement>
@@ -113,13 +113,20 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>2.17</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.backbase.buildingblocks</groupId>
+                            <artifactId>ssdk-checkstyle-config</artifactId>
+                            <version>1.0.28</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
                             <id>validate</id>
-                            <phase>validate</phase>
                             <goals>
                                 <goal>check</goal>
                             </goals>
+                            <phase>validate</phase>
                             <configuration>
                                 <configLocation>${checkstyle.config.location}</configLocation>
                                 <consoleOutput>true</consoleOutput>
@@ -129,13 +136,6 @@
                             </configuration>
                         </execution>
                     </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.backbase.buildingblocks</groupId>
-                            <artifactId>ssdk-checkstyle-config</artifactId>
-                            <version>1.0.28</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -171,15 +171,7 @@
             <plugin>
                 <groupId>com.spotify.fmt</groupId>
                 <artifactId>fmt-maven-plugin</artifactId>
-                <version>2.20</version>
-                <executions>
-                    <execution>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>format</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <version>2.25</version>
                 <configuration>
                     <skip>false</skip>
                     <skipSourceDirectory>false</skipSourceDirectory>
@@ -187,6 +179,14 @@
                     <skipSortingImports>false</skipSortingImports>
                     <style>google</style>
                 </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

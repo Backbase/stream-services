@@ -14,23 +14,21 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 @SpringJUnitConfig
 class PaymentOrderServiceConfigurationTest {
 
-    ApplicationContextRunner contextRunner = new ApplicationContextRunner();
+  ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 
-    @Test
-    void configurationTest() {
-        contextRunner
-            .withBean(PaymentOrderTypeMapperImpl.class)
-            .withBean(WebClientAutoConfiguration.class)
-            .withBean(DbsApiClientsAutoConfiguration.class)
-            .withBean(InterServiceWebClientConfiguration.class)
-            .withUserConfiguration(PaymentOrderServiceConfiguration.class)
-            .withUserConfiguration(PaymentOrderTypeConfiguration.class)
-            .withPropertyValues(
-                    "backbase.stream.paymentorder.types=type1,type2,type3"
-            )
-            .run(context -> {
-                assertThat(context).hasSingleBean(PaymentOrderTaskExecutor.class);
+  @Test
+  void configurationTest() {
+    contextRunner
+        .withBean(PaymentOrderTypeMapperImpl.class)
+        .withBean(WebClientAutoConfiguration.class)
+        .withBean(DbsApiClientsAutoConfiguration.class)
+        .withBean(InterServiceWebClientConfiguration.class)
+        .withUserConfiguration(PaymentOrderServiceConfiguration.class)
+        .withUserConfiguration(PaymentOrderTypeConfiguration.class)
+        .withPropertyValues("backbase.stream.paymentorder.types=type1,type2,type3")
+        .run(
+            context -> {
+              assertThat(context).hasSingleBean(PaymentOrderTaskExecutor.class);
             });
-    }
-
+  }
 }

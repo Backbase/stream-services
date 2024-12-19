@@ -20,7 +20,7 @@ public class TransactionsItemWriter implements ItemWriter<TransactionsPostReques
     private final TransactionUnitOfWorkExecutor transactionTaskUnitOfWorkExecutor;
 
     /**
-     * Process thousands of transactions by grouping them on arrangement id and register a Unit Of Work per arrangement
+     * Process thousands of transactions by grouping them on arrangement id and register a Unit Of Work per arrangement.
      * Executes jobs directly Synchronously, as Item Writers are used synchronously
      */
     @SuppressWarnings("unchecked")

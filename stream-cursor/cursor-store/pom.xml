@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
     <name>Stream :: Cursor Store</name>
 
-    <properties />
+    <properties/>
     <dependencies>
         <dependency>
             <groupId>com.backbase.stream</groupId>

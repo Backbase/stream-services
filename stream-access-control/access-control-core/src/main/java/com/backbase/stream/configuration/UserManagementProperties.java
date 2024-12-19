@@ -9,6 +9,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("backbase.stream.user.management")
 public class UserManagementProperties {
 
-    private boolean updateIdentity = true;
-
+  private boolean updateIdentity = true;
 }

@@ -12,15 +12,15 @@ import org.springframework.context.annotation.Import;
  * PortfolioSaga Configuration.
  *
  * @author Vladimir Kirchev
- *
  */
 @Configuration
 @Import(DbsApiClientsAutoConfiguration.class)
 public class PortfolioSagaConfiguration {
 
-    @Bean
-    PortfolioSaga portfolioSaga(PortfolioIntegrationService portfolioIntegrationService,
-            InstrumentIntegrationService instrumentIntegrationService) {
-        return new PortfolioSaga(portfolioIntegrationService, instrumentIntegrationService);
-    }
+  @Bean
+  PortfolioSaga portfolioSaga(
+      PortfolioIntegrationService portfolioIntegrationService,
+      InstrumentIntegrationService instrumentIntegrationService) {
+    return new PortfolioSaga(portfolioIntegrationService, instrumentIntegrationService);
+  }
 }

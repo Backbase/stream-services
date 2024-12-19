@@ -8,16 +8,14 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@EnableConfigurationProperties({
-    PlansProperties.class
-})
+@EnableConfigurationProperties({PlansProperties.class})
 @AllArgsConstructor
 @Configuration
 public class PlanServiceConfiguration {
 
-    @Bean
-    public PlansService plansService(PlansApi plansApi, UserPlansApi userPlansApi, PlansProperties plansProperties) {
-        return new PlansService(plansApi, userPlansApi, plansProperties);
-    }
-
+  @Bean
+  public PlansService plansService(
+      PlansApi plansApi, UserPlansApi userPlansApi, PlansProperties plansProperties) {
+    return new PlansService(plansApi, userPlansApi, plansProperties);
+  }
 }
