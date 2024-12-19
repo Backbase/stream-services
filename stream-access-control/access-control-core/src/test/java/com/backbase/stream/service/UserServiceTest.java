@@ -589,4 +589,32 @@ class UserServiceTest {
             .expectError(WebClientResponseException.class)
             .verify();
     }
+
+    @Test
+    void getUserByInternalId() {
+        final String userInternalId = UUID.randomUUID().toString();
+        final String externalId = "someExternalId";
+        final String fullName = "someName";
+        GetUser getUser = new GetUser().externalId(externalId)
+            .fullName(fullName).id(userInternalId);
+
+        when(usersApi.getUserById(userInternalId, true)).thenReturn(Mono.just(getUser));
+
+        Mono<User> userById = subject.getUserById(userInternalId);
+        StepVerifier.create(userById)
+            .assertNext(Assertions::assertNotNull)
+            .verifyComplete();
+
+    }
+
+    @Test
+    void getUserByInternalIdNotFound() {
+        final String userInternalId = UUID.randomUUID().toString();
+        when(usersApi.getUserById(userInternalId, true)).thenReturn(Mono.error(WebClientResponseException.NotFound.create(404, "not found", new HttpHeaders(), new byte[0], null)));
+
+        Mono<User> userById = subject.getUserById(userInternalId);
+        StepVerifier.create(userById)
+            .expectNextCount(0)
+            .verifyComplete();
+    }
 }

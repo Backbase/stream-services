@@ -63,6 +63,7 @@ class ArrangementServiceTest {
         postArrangement.setLegalEntityIds(Set.of("ext_leid_1", "ext_leid_2"));
         postArrangement.setProductId("ext_prod_id");
         postArrangement.setStateId("ext_state_id");
+        postArrangement.setName("arr_name");
         return postArrangement;
     }
 
@@ -205,13 +206,19 @@ class ArrangementServiceTest {
     void upsertBatchArrangements_Failure() {
         PostArrangement request = buildPostArrangement();
 
+        List<PostArrangement> postArrangementList = List.of(request);
+        List<String> last4ExtArrList = postArrangementList.stream()
+            .map(arrangementItem -> arrangementItem.getName() + " | " + arrangementItem.getId()
+                .substring(arrangementItem.getId().length() - 4))
+            .toList();
+
         WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.BAD_REQUEST, "Bad Request for upsert arrangement");
         when(arrangementsIntegrationApi.postBatchUpsertArrangements(any())).thenReturn(Flux.error(webClientResponseException));
 
-        StepVerifier.create(arrangementService.upsertBatchArrangements(List.of(request)))
+        StepVerifier.create(arrangementService.upsertBatchArrangements(postArrangementList))
             .consumeErrorWith(e -> {
                 Assertions.assertInstanceOf(ArrangementUpdateException.class, e);
-                Assertions.assertEquals("Batch arrangement update failed: " + List.of(request), e.getMessage());
+                Assertions.assertEquals("Batch arrangement update failed for arrangements : " + last4ExtArrList, e.getMessage());
                 Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
             }).verify();
 
