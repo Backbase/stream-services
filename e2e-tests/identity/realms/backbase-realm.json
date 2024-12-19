@@ -3,9 +3,13 @@
   "realm": "backbase",
   "enabled": true,
   "eventsListeners": [
-    "audit",
+    "ext-event-http",
+    "backbase-attribute",
     "jboss-logging"
   ],
+  "attributes": {
+    "_providerConfig.ext-event-http": "{ \"targetUri\": \"http://wiremock:8080\" }"
+  },
   "users": [
     {
       "username": "provisioner",

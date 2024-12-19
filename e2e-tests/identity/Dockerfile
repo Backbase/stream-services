@@ -1,5 +1,9 @@
 ARG IDENTITY_BUILDER=repo.backbase.com/backbase-docker-releases/auth-server-builder
 
+FROM maven:3-eclipse-temurin-21 AS maven-builder
+
+RUN mvn dependency:copy -Dartifact=io.phasetwo.keycloak:keycloak-events:0.29 -DoutputDirectory=/usr/src/app
+
 FROM $IDENTITY_BUILDER AS auth-server-builder
 
 # In this first build-stage we are configuring build-time settings and including project-specific artifacts
@@ -23,6 +27,9 @@ ENV KC_METRICS_ENABLED "false"
 #
 # ...and when running the container, specify the following environment variable at runtime
 #     KC_EXIT_AFTER_DB_MIGRATION: "true"
+
+# Copying providers
+COPY --from=maven-builder /usr/src/app/* /opt/keycloak/providers
 
 # Include custom realm configuration JSON files in `${kc.home.dir}/data/import/`.  These files will be imported once on first run of
 # Auth Server.
