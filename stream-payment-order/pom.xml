@@ -10,8 +10,8 @@
     </parent>
 
     <artifactId>stream-payment-order</artifactId>
-
     <packaging>pom</packaging>
+
     <name>Stream :: Payment Orders</name>
 
     <modules>

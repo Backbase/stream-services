@@ -12,9 +12,7 @@
 
     <name>Stream :: SDK :: Web Client</name>
 
-    <properties>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
-    </properties>
+    <properties/>
 
     <dependencies>
 

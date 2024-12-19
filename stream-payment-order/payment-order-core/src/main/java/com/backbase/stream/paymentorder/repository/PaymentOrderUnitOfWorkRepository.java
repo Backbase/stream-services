@@ -5,5 +5,5 @@ import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PaymentOrderUnitOfWorkRepository extends UnitOfWorkRepository<PaymentOrderTask, String> {
-}
+public interface PaymentOrderUnitOfWorkRepository
+    extends UnitOfWorkRepository<PaymentOrderTask, String> {}

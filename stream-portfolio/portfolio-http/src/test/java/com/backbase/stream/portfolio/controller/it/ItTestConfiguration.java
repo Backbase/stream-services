@@ -6,14 +6,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * IT Test Configuration.
- * 
- * @author Vladimir Kirchev
  *
+ * @author Vladimir Kirchev
  */
 @TestConfiguration
 class ItTestConfiguration {
-    @Bean
-    public WebClient.Builder webClientBuilder() {
-        return WebClient.builder();
-    }
+
+  @Bean
+  public WebClient.Builder webClientBuilder() {
+    return WebClient.builder();
+  }
 }

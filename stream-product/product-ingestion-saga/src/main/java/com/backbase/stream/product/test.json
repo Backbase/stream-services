@@ -1,233 +1,304 @@
-[{
-  "additions": {},
-  "id": "40280528788f63d101788f655437000c",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "RDC Manager",
-  "description": "Allows users view only access",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "7",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "view"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f655435000a",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "Checks Manager",
-  "description": "Allows users manager access",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "3",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "view"
-    }, {
-      "additions": {},
-      "privilege": "execute"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f6554310005",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "Edit Accounts Manager",
-  "description": "Allows users to manage accounts that are editable",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "8",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "execute"
-    }, {
-      "additions": {},
-      "privilege": "view"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f6554350009",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "Routing Viewer",
-  "description": "Allows users view only access",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "2",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "view"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f65543c000d",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "Fee Withdrawal Manager",
-  "description": "Allows users view only access",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "6",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "execute"
-    }, {
-      "additions": {},
-      "privilege": "view"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f6554350007",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "Budgets Manager",
-  "description": "Allows users view only access",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "5",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "view"
-    }, {
-      "additions": {},
-      "privilege": "execute"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f655437000b",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "BillPay Viewer",
-  "description": "Allows users view only access",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "1023",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "view"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f65543e000e",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "Mortgage Viewer",
-  "description": "Allows users view only access",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "4",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "view"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f6554350008",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "
-  ",
-  "description": "This allows users to perform all business functions",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "1006",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "view"
-    }]
-  }, {
-    "functionId": "1003",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "view"
-    }, {
-      "additions": {},
-      "privilege": "edit"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f6554340006",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "Overdrafts Manager",
-  "description": "Allows users to setup account's overdraft",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "1",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "view"
-    }, {
-      "additions": {},
-      "privilege": "execute"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f6554c7000f",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "Credit Card Viewer",
-  "description": "Allows users to view the current credit cards",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "10",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "view"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}, {
-  "additions": {},
-  "id": "40280528788f63d101788f6554c90010",
-  "serviceAgreementId": "40280528788f63d101788f6551bf0001",
-  "name": "Edit Alerts Manager",
-  "description": "Allows users to manage accounts alerts",
-  "type": "TEMPLATE",
-  "permissions": [{
-    "functionId": "9",
-    "assignedPrivileges": [{
-      "additions": {},
-      "privilege": "execute"
-    }, {
-      "additions": {},
-      "privilege": "view"
-    }]
-  }],
-  "validFrom": null,
-  "validUntil": null,
-  "approvalId": null
-}]
+[
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f655437000c",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "RDC Manager",
+    "description": "Allows users view only access",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "7",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "view"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f655435000a",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "Checks Manager",
+    "description": "Allows users manager access",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "3",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "view"
+          },
+          {
+            "additions": {},
+            "privilege": "execute"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f6554310005",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "Edit Accounts Manager",
+    "description": "Allows users to manage accounts that are editable",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "8",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "execute"
+          },
+          {
+            "additions": {},
+            "privilege": "view"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f6554350009",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "Routing Viewer",
+    "description": "Allows users view only access",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "2",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "view"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f65543c000d",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "Fee Withdrawal Manager",
+    "description": "Allows users view only access",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "6",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "execute"
+          },
+          {
+            "additions": {},
+            "privilege": "view"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f6554350007",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "Budgets Manager",
+    "description": "Allows users view only access",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "5",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "view"
+          },
+          {
+            "additions": {},
+            "privilege": "execute"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f655437000b",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "BillPay Viewer",
+    "description": "Allows users view only access",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "1023",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "view"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f65543e000e",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "Mortgage Viewer",
+    "description": "Allows users view only access",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "4",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "view"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f6554350008",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "
+    ",
+    "description": "This allows users to perform all business functions",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "1006",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "view"
+          }
+        ]
+      },
+      {
+        "functionId": "1003",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "view"
+          },
+          {
+            "additions": {},
+            "privilege": "edit"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f6554340006",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "Overdrafts Manager",
+    "description": "Allows users to setup account's overdraft",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "1",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "view"
+          },
+          {
+            "additions": {},
+            "privilege": "execute"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f6554c7000f",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "Credit Card Viewer",
+    "description": "Allows users to view the current credit cards",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "10",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "view"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  },
+  {
+    "additions": {},
+    "id": "40280528788f63d101788f6554c90010",
+    "serviceAgreementId": "40280528788f63d101788f6551bf0001",
+    "name": "Edit Alerts Manager",
+    "description": "Allows users to manage accounts alerts",
+    "type": "TEMPLATE",
+    "permissions": [
+      {
+        "functionId": "9",
+        "assignedPrivileges": [
+          {
+            "additions": {},
+            "privilege": "execute"
+          },
+          {
+            "additions": {},
+            "privilege": "view"
+          }
+        ]
+      }
+    ],
+    "validFrom": null,
+    "validUntil": null,
+    "approvalId": null
+  }
+]

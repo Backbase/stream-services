@@ -7,10 +7,10 @@ import lombok.Data;
 @Data
 public class UserKindSegmentationTask extends StreamTask {
 
-    private CustomerOnboardedRequest customerOnboardedRequest;
+  private CustomerOnboardedRequest customerOnboardedRequest;
 
-    @Override
-    public String getName() {
-        return "customersSegment";
-    }
+  @Override
+  public String getName() {
+    return "customersSegment";
+  }
 }

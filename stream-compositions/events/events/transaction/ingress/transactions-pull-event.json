@@ -22,6 +22,5 @@
     "billingCycles": {
       "type": "integer"
     }
-
   }
 }

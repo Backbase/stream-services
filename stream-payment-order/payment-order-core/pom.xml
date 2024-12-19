@@ -10,13 +10,12 @@
     </parent>
 
     <artifactId>payment-order-core</artifactId>
-
     <packaging>jar</packaging>
+
     <name>Stream :: Payment Order Core</name>
 
     <properties>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
-    </properties>
+</properties>
 
     <dependencies>
 

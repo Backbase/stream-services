@@ -52,6 +52,7 @@ import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
+import com.backbase.streams.tailoredvalue.PlansService;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Arrays;
@@ -59,8 +60,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import com.backbase.streams.tailoredvalue.PlansService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,532 +77,640 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ServiceAgreementV2SagaTest {
-    private static final ServiceAgreementV2ToV1Mapper saMapper = ServiceAgreementV2ToV1Mapper.INSTANCE;
+  private static final ServiceAgreementV2ToV1Mapper saMapper =
+      ServiceAgreementV2ToV1Mapper.INSTANCE;
 
-    @InjectMocks
-    private ServiceAgreementSagaV2 serviceAgreementSaga;
+  @InjectMocks private ServiceAgreementSagaV2 serviceAgreementSaga;
 
-    @Mock
-    private LegalEntityService legalEntityService;
+  @Mock private LegalEntityService legalEntityService;
 
-    @Mock
-    private AccessGroupService accessGroupService;
+  @Mock private AccessGroupService accessGroupService;
 
-    @Mock
-    private BatchProductIngestionSaga batchProductIngestionSaga;
+  @Mock private BatchProductIngestionSaga batchProductIngestionSaga;
 
-    @Mock
-    private LimitsSaga limitsSaga;
+  @Mock private LimitsSaga limitsSaga;
 
-    @Mock
-    private ContactsSaga contactsSaga;
+  @Mock private ContactsSaga contactsSaga;
 
-    @Mock
-    private PlansService plansService;
+  @Mock private PlansService plansService;
 
-    @Spy
-    private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
-        getLegalEntitySagaConfigurationProperties();
+  @Spy
+  private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
+      getLegalEntitySagaConfigurationProperties();
 
-    String leExternalId = "someLeExternalId";
-    String leParentExternalId = "someParentLeExternalId";
-    String leInternalId = "someLeInternalId";
-    String adminExId = "someAdminExId";
-    String regularUserExId = "someRegularUserExId";
-    String customSaExId = "someCustomSaExId";
-    LegalEntity legalEntity;
-    ServiceAgreementV2 customSa;
-    JobProfileUser regularUser;
+  String leExternalId = "someLeExternalId";
+  String leParentExternalId = "someParentLeExternalId";
+  String leInternalId = "someLeInternalId";
+  String adminExId = "someAdminExId";
+  String regularUserExId = "someRegularUserExId";
+  String customSaExId = "someCustomSaExId";
+  LegalEntity legalEntity;
+  ServiceAgreementV2 customSa;
+  JobProfileUser regularUser;
 
-    @Test
-    void customServiceAgreementCreation() {
-        regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
-            .externalId(regularUserExId)).legalEntityReference(new LegalEntityReference().externalId(leExternalId));
-        SavingsAccount account = new SavingsAccount();
-        account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP")
-            .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId).internalId(leExternalId)));
-        ProductGroup productGroup = new ProductGroup();
-        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-            .description("somePgDescription").savingAccounts(singletonList(account)).users(List.of(regularUser));
+  @Test
+  void customServiceAgreementCreation() {
+    regularUser =
+        new JobProfileUser()
+            .user(new User().internalId("someRegularUserInId").externalId(regularUserExId))
+            .legalEntityReference(new LegalEntityReference().externalId(leExternalId));
+    SavingsAccount account = new SavingsAccount();
+    account
+        .externalId("someAccountExId")
+        .productTypeExternalId("Account")
+        .currency("GBP")
+        .legalEntities(
+            List.of(new LegalEntityReference().externalId(leExternalId).internalId(leExternalId)));
+    ProductGroup productGroup = new ProductGroup();
+    productGroup
+        .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+        .name("somePgName")
+        .description("somePgDescription")
+        .savingAccounts(singletonList(account))
+        .users(List.of(regularUser));
 
-        ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
-        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
+    ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
+    Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-        BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
-        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
-        User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
-        legalEntity = new LegalEntity().internalId(leInternalId)
+    BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
+    JobRole jobRole =
+        new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
+    User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
+    legalEntity =
+        new LegalEntity()
+            .internalId(leInternalId)
             .externalId(leExternalId)
             .addAdministratorsItem(adminUser)
             .parentExternalId(leParentExternalId);
-        customSa = new ServiceAgreementV2()
+    customSa =
+        new ServiceAgreementV2()
             .externalId(customSaExId)
             .isMaster(false)
             .addJobRolesItem(jobRole)
             .creatorLegalEntity(leExternalId)
             .addJobProfileUsersItem(regularUser)
-            .participants(singletonList(new LegalEntityParticipant()
-                .externalId(leExternalId)
-                .sharingUsers(true)
-                .sharingAccounts(true)))
+            .participants(
+                singletonList(
+                    new LegalEntityParticipant()
+                        .externalId(leExternalId)
+                        .sharingUsers(true)
+                        .sharingAccounts(true)))
             .productGroups(singletonList(productGroup));
 
-        ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
+    ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
 
-        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId))).thenReturn(Mono.just(legalEntity));
-        when(accessGroupService.getServiceAgreementByExternalId(any())).thenReturn(Mono.empty());
-        when(accessGroupService.createServiceAgreement(any(), any()))
-            .thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
-        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
-            any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.getUserByExternalId(any(), anyBoolean())).thenReturn(Mono.just(new GetUser()
-            .externalId(regularUser.getUser().getExternalId())
-            .id(regularUser.getUser().getInternalId())));
-        when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
+    when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId))).thenReturn(Mono.empty());
+    when(legalEntityService.getLegalEntityByInternalId(eq(leInternalId)))
+        .thenReturn(Mono.just(legalEntity));
+    when(accessGroupService.getServiceAgreementByExternalId(any())).thenReturn(Mono.empty());
+    when(accessGroupService.createServiceAgreement(any(), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
+    when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    when(accessGroupService.getUserByExternalId(any(), anyBoolean()))
+        .thenReturn(
+            Mono.just(
+                new GetUser()
+                    .externalId(regularUser.getUser().getExternalId())
+                    .id(regularUser.getUser().getInternalId())));
+    when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+        .thenReturn(productGroupTaskMono);
 
-        ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task)
-            .block();
+    ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task).block();
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(customSaExId, result.getServiceAgreement().getExternalId());
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(customSaExId, result.getServiceAgreement().getExternalId());
 
-        verify(accessGroupService).createServiceAgreement(eq(task), eq(transformServiceAgreement(customSa)));
-        verify(accessGroupService).updateServiceAgreementRegularUsers(eq(task), eq(transformServiceAgreement(customSa)), any());
-        verify(accessGroupService).setupJobRole(eq(task), eq(transformServiceAgreement(customSa)), eq(jobRole));
+    verify(accessGroupService)
+        .createServiceAgreement(eq(task), eq(transformServiceAgreement(customSa)));
+    verify(accessGroupService)
+        .updateServiceAgreementRegularUsers(
+            eq(task), eq(transformServiceAgreement(customSa)), any());
+    verify(accessGroupService)
+        .setupJobRole(eq(task), eq(transformServiceAgreement(customSa)), eq(jobRole));
+  }
 
-    }
+  @Test
+  void customServiceAgreementCreationNoUsersOrAdministrators() {
+    regularUser =
+        new JobProfileUser()
+            .user(new User().internalId("someRegularUserInId").externalId(regularUserExId))
+            .legalEntityReference(new LegalEntityReference().externalId(leExternalId));
+    SavingsAccount account = new SavingsAccount();
+    account
+        .externalId("someAccountExId")
+        .productTypeExternalId("Account")
+        .currency("GBP")
+        .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)));
+    ProductGroup productGroup = new ProductGroup();
+    productGroup
+        .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+        .name("somePgName")
+        .description("somePgDescription")
+        .savingAccounts(singletonList(account))
+        .users(List.of(regularUser));
+    ;
 
-    @Test
-    void customServiceAgreementCreationNoUsersOrAdministrators() {
-        regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
-            .externalId(regularUserExId)).legalEntityReference(new LegalEntityReference().externalId(leExternalId));
-        SavingsAccount account = new SavingsAccount();
-        account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP")
-            .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)));
-        ProductGroup productGroup = new ProductGroup();
-        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-            .description("somePgDescription").savingAccounts(singletonList(account)).users(List.of(regularUser));;
+    ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
+    Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-        ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
-        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
+    BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
+    JobRole jobRole =
+        new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
+    User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
 
-        BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
-        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
-        User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
-
-        legalEntity = new LegalEntity().internalId(leInternalId)
+    legalEntity =
+        new LegalEntity()
+            .internalId(leInternalId)
             .externalId(leExternalId)
             .addAdministratorsItem(adminUser)
             .parentExternalId(leParentExternalId);
-        customSa = new ServiceAgreementV2()
+    customSa =
+        new ServiceAgreementV2()
             .externalId(customSaExId)
             .addJobRolesItem(jobRole)
             .isMaster(false)
             .addJobProfileUsersItem(regularUser)
             .creatorLegalEntity(leExternalId)
-            .participants(singletonList(new LegalEntityParticipant()
-                .externalId(leExternalId)
-                .sharingUsers(true)
-                .sharingAccounts(true)))
+            .participants(
+                singletonList(
+                    new LegalEntityParticipant()
+                        .externalId(leExternalId)
+                        .sharingUsers(true)
+                        .sharingAccounts(true)))
             .productGroups(singletonList(productGroup));
 
-        ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
+    ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
 
-        when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
-        when(accessGroupService.createServiceAgreement(any(), eq(transformServiceAgreement(customSa))))
-            .thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
-        when(accessGroupService.createServiceAgreement(any(), any()))
-            .thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
-            .thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.getServiceAgreementParticipants(any(), any()))
-            .thenReturn(Flux.just(new ServiceAgreementParticipantsGetResponseBody().externalId(customSaExId)));
-        when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
-            .thenReturn(productGroupTaskMono);
-        when(accessGroupService.getUserByExternalId(any(), anyBoolean())).thenReturn(Mono.just(new GetUser()
-            .externalId(regularUser.getUser().getExternalId())
-            .id(regularUser.getUser().getInternalId())));
-        when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId)))
-            .thenReturn(Mono.just(new LegalEntity().internalId("id")));
-        when(limitsSaga.executeTask(any(LimitsTask.class)))
-            .thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
+    when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId)))
+        .thenReturn(Mono.empty());
+    when(accessGroupService.createServiceAgreement(any(), eq(transformServiceAgreement(customSa))))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
+    when(accessGroupService.createServiceAgreement(any(), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    when(accessGroupService.getServiceAgreementParticipants(any(), any()))
+        .thenReturn(
+            Flux.just(new ServiceAgreementParticipantsGetResponseBody().externalId(customSaExId)));
+    when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+        .thenReturn(productGroupTaskMono);
+    when(accessGroupService.getUserByExternalId(any(), anyBoolean()))
+        .thenReturn(
+            Mono.just(
+                new GetUser()
+                    .externalId(regularUser.getUser().getExternalId())
+                    .id(regularUser.getUser().getInternalId())));
+    when(legalEntityService.getLegalEntityByExternalId(eq(leExternalId)))
+        .thenReturn(Mono.just(new LegalEntity().internalId("id")));
+    when(limitsSaga.executeTask(any(LimitsTask.class)))
+        .thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
 
-        Mono<ServiceAgreementTaskV2> result = serviceAgreementSaga.executeTask(task);
-        result.block();
+    Mono<ServiceAgreementTaskV2> result = serviceAgreementSaga.executeTask(task);
+    result.block();
 
-        Assertions.assertNotNull(result);
-    }
+    Assertions.assertNotNull(result);
+  }
 
-    /**
-     * Intention of this test is to verify that {@link ProductGroupTask} are processed in order at
-     *  (in short that .concatMap is used instead of .flatMap).
-     * Otherwise it may happen that during permission assignment at
-     * {@link AccessGroupService#assignPermissionsBatch(BatchProductGroupTask, Map)} there will be stale set of
-     * permissions which will lead to state when not all of desired applied
-     */
-    @Test
-    void productGroupsProcessedSequentially() {
-        // Given
-        Limit limit = new Limit().currencyCode("GBP").transactional(BigDecimal.valueOf(10000));
-        customSa = new ServiceAgreementV2()
+  /**
+   * Intention of this test is to verify that {@link ProductGroupTask} are processed in order at (in
+   * short that .concatMap is used instead of .flatMap). Otherwise it may happen that during
+   * permission assignment at {@link
+   * AccessGroupService#assignPermissionsBatch(BatchProductGroupTask, Map)} there will be stale set
+   * of permissions which will lead to state when not all of desired applied
+   */
+  @Test
+  void productGroupsProcessedSequentially() {
+    // Given
+    Limit limit = new Limit().currencyCode("GBP").transactional(BigDecimal.valueOf(10000));
+    customSa =
+        new ServiceAgreementV2()
             .name("Custom SA")
             .externalId("100000")
             .isMaster(false)
-            .referenceJobRoles(Collections.singletonList((JobRole) new JobRole()
-                .name("Job Role with Limits").functionGroups(Collections.singletonList(new BusinessFunctionGroup()
-                    .name("someFunctionGroup")
-                .addFunctionsItem(new BusinessFunction().functionId("1071").name("US Domestic Wire")
-                    .addPrivilegesItem(new Privilege().privilege("create").limit(limit)))))))
-            .productGroups(Arrays.asList(
-                (ProductGroup) new ProductGroup()
-                    .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
-                    .name("Default PG")
-                    .users(singletonList(
-                        new JobProfileUser()
-                            .user(
-                                new User()
-                                    .externalId("john.doe")
-                                    .fullName("John Doe")
-                                    .supportsLimit(true)
-                                    .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
-                            )
-                            .referenceJobRoleNames(List.of("Private - Read only", "Job Role with Limits"))
-                            .legalEntityReference(new LegalEntityReference().externalId(leExternalId))
-                    ))
-                    .currentAccounts(singletonList(
-                        (CurrentAccount) new CurrentAccount()
-                            .BBAN("01318000")
-                            .externalId("7155000")
-                            .productTypeExternalId("privateCurrentAccount")
-                            .name("Account 1")
-                            .currency("GBP")
-                            .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)))
-                    )),
-                (ProductGroup) new ProductGroup()
-                    .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
-                    .name("Mixed PG")
-                    .users(singletonList(
-                        new JobProfileUser()
-                            .user(
-                                new User()
-                                    .externalId("john.doe")
-                                    .fullName("John Doe")
-                                    .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC)
-                            )
-                            .referenceJobRoleNames(singletonList("Private - Full access"))
-                            .legalEntityReference(new LegalEntityReference().externalId(leExternalId))
-                    ))
-                    .currentAccounts(singletonList(
-                        (CurrentAccount) new CurrentAccount()
-                            .BBAN("01318001")
-                            .externalId("7155001")
-                            .productTypeExternalId("privateCurrentAccount")
-                            .name("Account 2")
-                            .currency("GBP")
-                            .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)))
-                    ))
-                    .loans(singletonList((Loan) new Loan()
-                        .IBAN("IBAN123321")
-                        .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)))
-            ))))
-                .addJobProfileUsersItem(new JobProfileUser()
-                .user(
-                    new User()
-                        .externalId("john.doe")
-                        .fullName("John Doe")
-                        .identityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY)
-                        .locked(false)
-                        .emailAddress(new EmailAddress().address("test@example.com"))
-                        .mobileNumber(new PhoneNumber().number("+12345"))
-                )
-                .referenceJobRoleNames(Arrays.asList(
-                    "Private - Read only", "Private - Full access"
-                ))
-                .legalEntityReference(new LegalEntityReference().externalId(leExternalId))
-            )
-            .addParticipantsItem(new LegalEntityParticipant()
-                .externalId(leExternalId)
-                .sharingAccounts(true)
-                .sharingUsers(true)
-            );
+            .referenceJobRoles(
+                Collections.singletonList(
+                    (JobRole)
+                        new JobRole()
+                            .name("Job Role with Limits")
+                            .functionGroups(
+                                Collections.singletonList(
+                                    new BusinessFunctionGroup()
+                                        .name("someFunctionGroup")
+                                        .addFunctionsItem(
+                                            new BusinessFunction()
+                                                .functionId("1071")
+                                                .name("US Domestic Wire")
+                                                .addPrivilegesItem(
+                                                    new Privilege()
+                                                        .privilege("create")
+                                                        .limit(limit)))))))
+            .productGroups(
+                Arrays.asList(
+                    (ProductGroup)
+                        new ProductGroup()
+                            .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+                            .name("Default PG")
+                            .users(
+                                singletonList(
+                                    new JobProfileUser()
+                                        .user(
+                                            new User()
+                                                .externalId("john.doe")
+                                                .fullName("John Doe")
+                                                .supportsLimit(true)
+                                                .identityLinkStrategy(
+                                                    IdentityUserLinkStrategy.IDENTITY_AGNOSTIC))
+                                        .referenceJobRoleNames(
+                                            List.of("Private - Read only", "Job Role with Limits"))
+                                        .legalEntityReference(
+                                            new LegalEntityReference().externalId(leExternalId))))
+                            .currentAccounts(
+                                singletonList(
+                                    (CurrentAccount)
+                                        new CurrentAccount()
+                                            .BBAN("01318000")
+                                            .externalId("7155000")
+                                            .productTypeExternalId("privateCurrentAccount")
+                                            .name("Account 1")
+                                            .currency("GBP")
+                                            .legalEntities(
+                                                List.of(
+                                                    new LegalEntityReference()
+                                                        .externalId(leExternalId))))),
+                    (ProductGroup)
+                        new ProductGroup()
+                            .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+                            .name("Mixed PG")
+                            .users(
+                                singletonList(
+                                    new JobProfileUser()
+                                        .user(
+                                            new User()
+                                                .externalId("john.doe")
+                                                .fullName("John Doe")
+                                                .identityLinkStrategy(
+                                                    IdentityUserLinkStrategy.IDENTITY_AGNOSTIC))
+                                        .referenceJobRoleNames(
+                                            singletonList("Private - Full access"))
+                                        .legalEntityReference(
+                                            new LegalEntityReference().externalId(leExternalId))))
+                            .currentAccounts(
+                                singletonList(
+                                    (CurrentAccount)
+                                        new CurrentAccount()
+                                            .BBAN("01318001")
+                                            .externalId("7155001")
+                                            .productTypeExternalId("privateCurrentAccount")
+                                            .name("Account 2")
+                                            .currency("GBP")
+                                            .legalEntities(
+                                                List.of(
+                                                    new LegalEntityReference()
+                                                        .externalId(leExternalId)))))
+                            .loans(
+                                singletonList(
+                                    (Loan)
+                                        new Loan()
+                                            .IBAN("IBAN123321")
+                                            .legalEntities(
+                                                List.of(
+                                                    new LegalEntityReference()
+                                                        .externalId(leExternalId)))))))
+            .addJobProfileUsersItem(
+                new JobProfileUser()
+                    .user(
+                        new User()
+                            .externalId("john.doe")
+                            .fullName("John Doe")
+                            .identityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY)
+                            .locked(false)
+                            .emailAddress(new EmailAddress().address("test@example.com"))
+                            .mobileNumber(new PhoneNumber().number("+12345")))
+                    .referenceJobRoleNames(
+                        Arrays.asList("Private - Read only", "Private - Full access"))
+                    .legalEntityReference(new LegalEntityReference().externalId(leExternalId)))
+            .addParticipantsItem(
+                new LegalEntityParticipant()
+                    .externalId(leExternalId)
+                    .sharingAccounts(true)
+                    .sharingUsers(true));
 
-        ServiceAgreementTaskV2 serviceAgreementTaskV2 = new ServiceAgreementTaskV2(customSa);
+    ServiceAgreementTaskV2 serviceAgreementTaskV2 = new ServiceAgreementTaskV2(customSa);
 
-        List<String> productGroupTaskProcessingOrder = new CopyOnWriteArrayList<>();
+    List<String> productGroupTaskProcessingOrder = new CopyOnWriteArrayList<>();
 
-        when(accessGroupService.getServiceAgreementByExternalId("100000"))
-            .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
-        lenient().when(accessGroupService.updateServiceAgreementItem(any(), any()))
-                .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
-        when(accessGroupService.updateServiceAgreementAssociations(any(), any(), any()))
-            .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
-        when(accessGroupService.createServiceAgreement(any(), any()))
-            .thenReturn(Mono.empty());
-        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
-            .thenReturn(Mono.empty());
-        when(accessGroupService.getFunctionGroupsForServiceAgreement("101"))
-            .thenReturn(Mono.empty());
-        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(new JobRole()));
-        when(accessGroupService.getUserByExternalId("john.doe", true))
-            .thenReturn(Mono.just(new GetUser().externalId("john.doe").id("internalId")));
-        when(limitsSaga.executeTask(any())).thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
- //       when(contactsSaga.executeTask(any())).thenReturn(Mono.just(new ContactsTask("1", new ContactsBulkPostRequestBody())));
-        when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
-            .thenAnswer((Answer<Mono<ProductGroupTask>>) invocationOnMock -> {
-                ProductGroupTask productGroupTask = invocationOnMock.getArgument(0);
-                Duration delay = productGroupTask.getName().contains("100000-Default PG")
-                    ? Duration.ofMillis(500) // First product group will be processed with delay
-                    : Duration.ofMillis(1);
+    when(accessGroupService.getServiceAgreementByExternalId("100000"))
+        .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
+    lenient()
+        .when(accessGroupService.updateServiceAgreementItem(any(), any()))
+        .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
+    when(accessGroupService.updateServiceAgreementAssociations(any(), any(), any()))
+        .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
+    when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.empty());
+    when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
+        .thenReturn(Mono.empty());
+    when(accessGroupService.getFunctionGroupsForServiceAgreement("101")).thenReturn(Mono.empty());
+    when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(new JobRole()));
+    when(accessGroupService.getUserByExternalId("john.doe", true))
+        .thenReturn(Mono.just(new GetUser().externalId("john.doe").id("internalId")));
+    when(limitsSaga.executeTask(any()))
+        .thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
+    //       when(contactsSaga.executeTask(any())).thenReturn(Mono.just(new ContactsTask("1", new
+    // ContactsBulkPostRequestBody())));
+    when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+        .thenAnswer(
+            (Answer<Mono<ProductGroupTask>>)
+                invocationOnMock -> {
+                  ProductGroupTask productGroupTask = invocationOnMock.getArgument(0);
+                  Duration delay =
+                      productGroupTask.getName().contains("100000-Default PG")
+                          ? Duration.ofMillis(
+                              500) // First product group will be processed with delay
+                          : Duration.ofMillis(1);
 
-                return Mono.delay(delay)
-                    .then(Mono.just(productGroupTask))
-                    .map(productGroup -> {
-                        productGroupTaskProcessingOrder.add(productGroup.getName());
-                        return productGroup;
-                    });
-            });
+                  return Mono.delay(delay)
+                      .then(Mono.just(productGroupTask))
+                      .map(
+                          productGroup -> {
+                            productGroupTaskProcessingOrder.add(productGroup.getName());
+                            return productGroup;
+                          });
+                });
 
+    // When
+    serviceAgreementSaga.executeTask(serviceAgreementTaskV2).block(Duration.ofSeconds(20));
 
-        // When
-        serviceAgreementSaga.executeTask(serviceAgreementTaskV2)
-            .block(Duration.ofSeconds(20));
+    // Then
+    Assertions.assertEquals(
+        Arrays.asList("100000-Default PG", "100000-Mixed PG"), productGroupTaskProcessingOrder);
+  }
 
-        // Then
-        Assertions.assertEquals(
-            Arrays.asList("100000-Default PG", "100000-Mixed PG"),
-            productGroupTaskProcessingOrder
-        );
-    }
+  @Test
+  void test_PostSAContacts() {
+    getMockServiceAgreement();
+    customSa.setIsMaster(true);
+    ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
+    when(contactsSaga.executeTask(any(ContactsTask.class)))
+        .thenReturn(getContactsTask(AccessContextScope.SA));
+    when(accessGroupService.createServiceAgreement(any(), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    when(legalEntityService.getLegalEntityByExternalId(any()))
+        .thenReturn(Mono.just(new LegalEntity().internalId("id")));
+    when(legalEntityService.getLegalEntityByExternalId(any())).thenReturn(Mono.empty());
+    when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(any()))
+        .thenReturn(Mono.just(saMapper.map(customSa)));
 
-    @Test
-    void test_PostSAContacts() {
-        getMockServiceAgreement();
-        customSa.setIsMaster(true);
-        ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
-        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.SA));
-        when(accessGroupService.createServiceAgreement(any(), any()))
-            .thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
-            any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(legalEntityService.getLegalEntityByExternalId(any()))
-            .thenReturn(Mono.just(new LegalEntity().internalId("id")));
-        when(legalEntityService.getLegalEntityByExternalId(any())).thenReturn(Mono.empty());
-        when(legalEntityService.getMasterServiceAgreementForExternalLegalEntityId(any())).thenReturn(
-            Mono.just(saMapper.map(customSa)));
+    ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task).block();
 
-        ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task).block();
+    Assertions.assertNotNull(result);
 
-        Assertions.assertNotNull(result);
+    ExternalContact contact = getMockExternalContact();
+    customSa.setContacts(Collections.singletonList(contact));
+    result = serviceAgreementSaga.executeTask(task).block();
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(
+        leExternalId, result.getServiceAgreement().getContacts().get(0).getExternalId());
 
-        ExternalContact contact = getMockExternalContact();
-        customSa.setContacts(Collections.singletonList(contact));
-        result = serviceAgreementSaga.executeTask(task).block();
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(leExternalId, result.getServiceAgreement().getContacts().get(0).getExternalId());
+    LegalEntityParticipant participant =
+        new LegalEntityParticipant()
+            .externalId(leExternalId)
+            .sharingUsers(true)
+            .users(singletonList("USER1"));
+    customSa.setParticipants(singletonList(participant));
+    result = serviceAgreementSaga.executeTask(task).block();
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(
+        "USER1", result.getServiceAgreement().getParticipants().get(0).getUsers().get(0));
 
-        LegalEntityParticipant participant = new LegalEntityParticipant()
-                .externalId(leExternalId)
-                .sharingUsers(true)
-                .users(singletonList("USER1"));
-        customSa.setParticipants(singletonList(participant));
-        result = serviceAgreementSaga.executeTask(task).block();
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals("USER1", result.getServiceAgreement().getParticipants().get(0).getUsers().get(0));
+    participant = participant.users(null).admins(singletonList("ADMIN1"));
+    customSa.setParticipants(singletonList(participant));
+    result = serviceAgreementSaga.executeTask(task).block();
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(
+        "ADMIN1", result.getServiceAgreement().getParticipants().get(0).getAdmins().get(0));
+  }
 
-        participant = participant.users(null).admins(singletonList("ADMIN1"));
-        customSa.setParticipants(singletonList(participant));
-        result = serviceAgreementSaga.executeTask(task).block();
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals("ADMIN1", result.getServiceAgreement().getParticipants().get(0).getAdmins().get(0));
-    }
+  @Test
+  void test_PostUserContacts() {
+    getMockServiceAgreement();
+    ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
 
+    when(contactsSaga.executeTask(any(ContactsTask.class)))
+        .thenReturn(getContactsTask(AccessContextScope.USER));
+    when(legalEntityService.getLegalEntityByExternalId(any()))
+        .thenReturn(Mono.just(new LegalEntity().internalId("id")));
+    when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
 
-    @Test
-    void test_PostUserContacts() {
-        getMockServiceAgreement();
-        ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
+    ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task).block();
 
-        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
-        when(legalEntityService.getLegalEntityByExternalId(any()))
-            .thenReturn(Mono.just(new LegalEntity().internalId("id")));
-        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
-            any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    Assertions.assertNotNull(result);
 
-        ServiceAgreementTaskV2 result = serviceAgreementSaga.executeTask(task).block();
+    ExternalContact contact = getMockExternalContact();
+    regularUser.setContacts(Collections.singletonList(contact));
+    result = serviceAgreementSaga.executeTask(task).block();
+    Assertions.assertNotNull(result);
+    Assertions.assertEquals(
+        leExternalId,
+        result
+            .getServiceAgreement()
+            .getJobProfileUsers()
+            .get(0)
+            .getContacts()
+            .get(0)
+            .getExternalId());
+  }
 
-        Assertions.assertNotNull(result);
+  @Test
+  void test_updatePlans_whenDisabled() {
+    getMockServiceAgreement();
+    ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
 
-        ExternalContact contact = getMockExternalContact();
-        regularUser.setContacts(Collections.singletonList(contact));
-        result = serviceAgreementSaga.executeTask(task).block();
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(leExternalId,
-            result.getServiceAgreement().getJobProfileUsers().get(0).getContacts().get(0).getExternalId());
-    }
+    when(plansService.isEnabled()).thenReturn(false);
+    when(contactsSaga.executeTask(any(ContactsTask.class)))
+        .thenReturn(getContactsTask(AccessContextScope.USER));
+    when(legalEntityService.getLegalEntityByExternalId(any()))
+        .thenReturn(
+            Mono.just(
+                new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
+    when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
 
-    @Test
-    void test_updatePlans_whenDisabled() {
-        getMockServiceAgreement();
-        ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
+    serviceAgreementSaga.executeTask(task).block();
 
-        when(plansService.isEnabled()).thenReturn(false);
-        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
-        when(legalEntityService.getLegalEntityByExternalId(any()))
-                .thenReturn(Mono.just(new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
-        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
-                any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    verify(plansService, never()).updateUserPlan(any(), any(), any());
+  }
 
-        serviceAgreementSaga.executeTask(task).block();
+  @Test
+  void test_updatePlans_whenIsEnabled() {
+    getMockServiceAgreement();
+    ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
 
-        verify(plansService, never()).updateUserPlan(any(), any(), any());
-    }
+    when(contactsSaga.executeTask(any(ContactsTask.class)))
+        .thenReturn(getContactsTask(AccessContextScope.USER));
+    when(legalEntityService.getLegalEntityByExternalId(any()))
+        .thenReturn(
+            Mono.just(
+                new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
+    when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
 
-    @Test
-    void test_updatePlans_whenIsEnabled() {
-        getMockServiceAgreement();
-        ServiceAgreementTaskV2 task = mockServiceAgreementTask(customSa);
+    // Plans mocks
+    when(plansService.isEnabled()).thenReturn(true);
+    when(plansService.updateUserPlan(any(), any(), any())).thenReturn(Mono.empty());
 
-        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
-        when(legalEntityService.getLegalEntityByExternalId(any()))
-                .thenReturn(Mono.just(new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
-        when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
-                any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    serviceAgreementSaga.executeTask(task).block();
 
-        //Plans mocks
-        when(plansService.isEnabled()).thenReturn(true);
-        when(plansService.updateUserPlan(any(), any(), any())).thenReturn(Mono.empty());
+    verify(plansService, times(1)).updateUserPlan(any(), any(), any());
+  }
 
-        serviceAgreementSaga.executeTask(task).block();
+  private ServiceAgreementTaskV2 mockServiceAgreementTask(ServiceAgreementV2 serviceAgreement) {
+    ServiceAgreementTaskV2 task = Mockito.mock(ServiceAgreementTaskV2.class);
+    when(task.getServiceAgreement()).thenReturn(serviceAgreement);
+    when(task.addHistory(any())).thenReturn(task);
+    return task;
+  }
 
-        verify(plansService, times(1)).updateUserPlan(any(), any(), any());
-    }
-
-    private ServiceAgreementTaskV2 mockServiceAgreementTask(ServiceAgreementV2 serviceAgreement) {
-        ServiceAgreementTaskV2 task = Mockito.mock(ServiceAgreementTaskV2.class);
-        when(task.getServiceAgreement()).thenReturn(serviceAgreement);
-        when(task.addHistory(any())).thenReturn(task);
-        return task;
-    }
-
-    void getMockServiceAgreement() {
-        regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
-            .externalId(regularUserExId))
+  void getMockServiceAgreement() {
+    regularUser =
+        new JobProfileUser()
+            .user(new User().internalId("someRegularUserInId").externalId(regularUserExId))
             .legalEntityReference(new LegalEntityReference(leInternalId, leExternalId))
             .planName("somPlanName");
 
-        SavingsAccount account = new SavingsAccount();
-        account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP")
+    SavingsAccount account = new SavingsAccount();
+    account
+        .externalId("someAccountExId")
+        .productTypeExternalId("Account")
+        .currency("GBP")
         .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)));
-        ProductGroup productGroup = new ProductGroup();
-        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-            .description("somePgDescription").savingAccounts(singletonList(account)).users(List.of(regularUser));;
+    ProductGroup productGroup = new ProductGroup();
+    productGroup
+        .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
+        .name("somePgName")
+        .description("somePgDescription")
+        .savingAccounts(singletonList(account))
+        .users(List.of(regularUser));
+    ;
 
-        ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
-        Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
+    ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
+    Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
 
-        BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
-        JobRole jobRole = new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
-        customSa = new ServiceAgreementV2()
+    BusinessFunctionGroup functionGroup = new BusinessFunctionGroup().name("someFunctionGroup");
+    JobRole jobRole =
+        new JobRole().functionGroups(singletonList(functionGroup)).name("someJobRole");
+    customSa =
+        new ServiceAgreementV2()
             .externalId(customSaExId)
             .addJobProfileUsersItem(regularUser)
             .addJobRolesItem(jobRole)
-            .participants(singletonList(new LegalEntityParticipant()
-                .externalId(leExternalId)
-                .sharingUsers(true)
-                .sharingAccounts(true)))
+            .participants(
+                singletonList(
+                    new LegalEntityParticipant()
+                        .externalId(leExternalId)
+                        .sharingUsers(true)
+                        .sharingAccounts(true)))
             .creatorLegalEntity(leExternalId);
-        User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
+    User adminUser = new User().internalId("someAdminInId").externalId(adminExId);
 
-        when(accessGroupService.getServiceAgreementByExternalId(customSaExId)).thenReturn(Mono.empty());
-        when(accessGroupService.createServiceAgreement(any(), any()))
-            .thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
-        when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(transformServiceAgreement(customSa)),
-            any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
-        when(accessGroupService.getUserByExternalId(any(), anyBoolean())).thenReturn(Mono.just(new GetUser()
-            .externalId(regularUser.getUser().getExternalId())
-            .id(regularUser.getUser().getInternalId())));
-    }
+    when(accessGroupService.getServiceAgreementByExternalId(customSaExId)).thenReturn(Mono.empty());
+    when(accessGroupService.createServiceAgreement(any(), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
+    when(accessGroupService.updateServiceAgreementRegularUsers(
+            any(), eq(transformServiceAgreement(customSa)), any()))
+        .thenReturn(Mono.just(transformServiceAgreement(customSa)));
+    when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
+        .thenReturn(productGroupTaskMono);
+    when(accessGroupService.getUserByExternalId(any(), anyBoolean()))
+        .thenReturn(
+            Mono.just(
+                new GetUser()
+                    .externalId(regularUser.getUser().getExternalId())
+                    .id(regularUser.getUser().getInternalId())));
+  }
 
-    private ExternalContact getMockExternalContact() {
-        ExternalAccountInformation externalAccount = new ExternalAccountInformation()
-                .name("ACC1")
-                .externalId("ACCEXT1")
-                .accountNumber("12345");
-        return new ExternalContact()
-                .name("Sam")
-                .externalId(leExternalId)
-                .accounts(Collections.singletonList(externalAccount));
-    }
+  private ExternalContact getMockExternalContact() {
+    ExternalAccountInformation externalAccount =
+        new ExternalAccountInformation().name("ACC1").externalId("ACCEXT1").accountNumber("12345");
+    return new ExternalContact()
+        .name("Sam")
+        .externalId(leExternalId)
+        .accounts(Collections.singletonList(externalAccount));
+  }
 
-    private ContactsBulkPostRequestBody getMockContactsBulkRequest(AccessContextScope accessContextScope) {
-        var request = new ContactsBulkPostRequestBody();
-        request.setIngestMode(IngestMode.UPSERT);
+  private ContactsBulkPostRequestBody getMockContactsBulkRequest(
+      AccessContextScope accessContextScope) {
+    var request = new ContactsBulkPostRequestBody();
+    request.setIngestMode(IngestMode.UPSERT);
 
-        ExternalAccessContext accessContext = new ExternalAccessContext();
-        accessContext.setScope(accessContextScope);
-        accessContext.setExternalUserId("USER1");
-        request.setAccessContext(accessContext);
+    ExternalAccessContext accessContext = new ExternalAccessContext();
+    accessContext.setScope(accessContextScope);
+    accessContext.setExternalUserId("USER1");
+    request.setAccessContext(accessContext);
 
-        com.backbase.dbs.contact.api.service.v2.model.ExternalContact contact = new com.backbase.dbs.contact.api.service.v2.model.ExternalContact();
-        contact.setName("TEST1");
-        contact.setExternalId("TEST101");
+    com.backbase.dbs.contact.api.service.v2.model.ExternalContact contact =
+        new com.backbase.dbs.contact.api.service.v2.model.ExternalContact();
+    contact.setName("TEST1");
+    contact.setExternalId("TEST101");
 
-        com.backbase.dbs.contact.api.service.v2.model.ExternalAccountInformation account = new com.backbase.dbs.contact.api.service.v2.model.ExternalAccountInformation();
-        account.setName("TESTACC1");
-        account.setExternalId("TESTACC101");
-        contact.setAccounts(Collections.singletonList(account));
-        request.setContacts(Collections.singletonList(contact));
+    com.backbase.dbs.contact.api.service.v2.model.ExternalAccountInformation account =
+        new com.backbase.dbs.contact.api.service.v2.model.ExternalAccountInformation();
+    account.setName("TESTACC1");
+    account.setExternalId("TESTACC101");
+    contact.setAccounts(Collections.singletonList(account));
+    request.setContacts(Collections.singletonList(contact));
 
-        return request;
-    }
+    return request;
+  }
 
-    private Mono<ContactsTask> getContactsTask(AccessContextScope accessContextScope) {
-        ContactsTask task = new ContactsTask("TEST1", getMockContactsBulkRequest(accessContextScope));
-        task.setResponse(getMockResponse());
-        return Mono.just(task);
-    }
+  private Mono<ContactsTask> getContactsTask(AccessContextScope accessContextScope) {
+    ContactsTask task = new ContactsTask("TEST1", getMockContactsBulkRequest(accessContextScope));
+    task.setResponse(getMockResponse());
+    return Mono.just(task);
+  }
 
-    private ContactsBulkPostResponseBody getMockResponse() {
-        ContactsBulkPostResponseBody responseBody = new ContactsBulkPostResponseBody();
-        responseBody.setSuccessCount(2);
-        return responseBody;
-    }
+  private ContactsBulkPostResponseBody getMockResponse() {
+    ContactsBulkPostResponseBody responseBody = new ContactsBulkPostResponseBody();
+    responseBody.setSuccessCount(2);
+    return responseBody;
+  }
 
-    private ServiceAgreement transformServiceAgreement(ServiceAgreementV2 serviceAgreementV2) {
-        ServiceAgreement serviceAgreement = new ServiceAgreement();
-        // Copy common fields
-        serviceAgreement.setInternalId(serviceAgreementV2.getInternalId());
-        serviceAgreement.setExternalId(serviceAgreementV2.getExternalId());
-        serviceAgreement.setName(serviceAgreementV2.getName());
-        serviceAgreement.setDescription(serviceAgreementV2.getDescription());
-        serviceAgreement.setParticipants(serviceAgreementV2.getParticipants());
-        serviceAgreement.setValidFromDate(serviceAgreementV2.getValidFromDate());
-        serviceAgreement.setValidFromTime(serviceAgreementV2.getValidFromTime());
-        serviceAgreement.setValidUntilDate(serviceAgreementV2.getValidUntilDate());
-        serviceAgreement.setValidUntilTime(serviceAgreementV2.getValidUntilTime());
-        serviceAgreement.setStatus(serviceAgreementV2.getStatus());
-        serviceAgreement.setIsMaster(serviceAgreementV2.getIsMaster());
-        serviceAgreement.setRegularUserAps(serviceAgreementV2.getRegularUserAps());
-        serviceAgreement.setAdminUserAps(serviceAgreementV2.getAdminUserAps());
-        serviceAgreement.setJobRoles(serviceAgreementV2.getJobRoles());
-        serviceAgreement.setCreatorLegalEntity(serviceAgreementV2.getCreatorLegalEntity());
-        serviceAgreement.setLimit(serviceAgreementV2.getLimit());
-        serviceAgreement.setContacts(serviceAgreementV2.getContacts());
-        serviceAgreement.setAdditions(serviceAgreementV2.getAdditions());
+  private ServiceAgreement transformServiceAgreement(ServiceAgreementV2 serviceAgreementV2) {
+    ServiceAgreement serviceAgreement = new ServiceAgreement();
+    // Copy common fields
+    serviceAgreement.setInternalId(serviceAgreementV2.getInternalId());
+    serviceAgreement.setExternalId(serviceAgreementV2.getExternalId());
+    serviceAgreement.setName(serviceAgreementV2.getName());
+    serviceAgreement.setDescription(serviceAgreementV2.getDescription());
+    serviceAgreement.setParticipants(serviceAgreementV2.getParticipants());
+    serviceAgreement.setValidFromDate(serviceAgreementV2.getValidFromDate());
+    serviceAgreement.setValidFromTime(serviceAgreementV2.getValidFromTime());
+    serviceAgreement.setValidUntilDate(serviceAgreementV2.getValidUntilDate());
+    serviceAgreement.setValidUntilTime(serviceAgreementV2.getValidUntilTime());
+    serviceAgreement.setStatus(serviceAgreementV2.getStatus());
+    serviceAgreement.setIsMaster(serviceAgreementV2.getIsMaster());
+    serviceAgreement.setRegularUserAps(serviceAgreementV2.getRegularUserAps());
+    serviceAgreement.setAdminUserAps(serviceAgreementV2.getAdminUserAps());
+    serviceAgreement.setJobRoles(serviceAgreementV2.getJobRoles());
+    serviceAgreement.setCreatorLegalEntity(serviceAgreementV2.getCreatorLegalEntity());
+    serviceAgreement.setLimit(serviceAgreementV2.getLimit());
+    serviceAgreement.setContacts(serviceAgreementV2.getContacts());
+    serviceAgreement.setAdditions(serviceAgreementV2.getAdditions());
 
-        return serviceAgreement;
-    }
+    return serviceAgreement;
+  }
 
-    private LegalEntitySagaConfigurationProperties getLegalEntitySagaConfigurationProperties() {
-        LegalEntitySagaConfigurationProperties sagaConfiguration =  new LegalEntitySagaConfigurationProperties();
-        sagaConfiguration.setUseIdentityIntegration(true);
-        sagaConfiguration.setUserProfileEnabled(true);
-        return sagaConfiguration;
-    }
-
+  private LegalEntitySagaConfigurationProperties getLegalEntitySagaConfigurationProperties() {
+    LegalEntitySagaConfigurationProperties sagaConfiguration =
+        new LegalEntitySagaConfigurationProperties();
+    sagaConfiguration.setUseIdentityIntegration(true);
+    sagaConfiguration.setUserProfileEnabled(true);
+    return sagaConfiguration;
+  }
 }

@@ -67,8 +67,8 @@ bootstrap:
   product-catalog:
     productKinds:
       - externalKindId: kind20
-        kindName: 'Special Account'
-        kinduri: 'special-account'
+        kindName: Special Account
+        kinduri: special-account
 
     productTypes:
       - externalProductId: Money Market

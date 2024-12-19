@@ -5,18 +5,18 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 public class PolicyException extends RuntimeException {
 
-    private final Policy policy;
-    private final String message;
-    private final String httpResponse;
+  private final Policy policy;
+  private final String message;
+  private final String httpResponse;
 
-    public PolicyException(Policy policy, String message, WebClientResponseException exception) {
-        super(exception);
-        httpResponse = exception.getResponseBodyAsString();
-        this.policy = policy;
-        this.message = message;
-    }
+  public PolicyException(Policy policy, String message, WebClientResponseException exception) {
+    super(exception);
+    httpResponse = exception.getResponseBodyAsString();
+    this.policy = policy;
+    this.message = message;
+  }
 
-    public String getHttpResponse() {
-        return httpResponse;
-    }
+  public String getHttpResponse() {
+    return httpResponse;
+  }
 }

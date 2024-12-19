@@ -13,9 +13,7 @@
     <packaging>jar</packaging>
     <name>Stream :: Portfolio Core</name>
 
-    <properties>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
-    </properties>
+    <properties/>
 
     <dependencies>
         <dependency>

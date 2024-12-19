@@ -4,11 +4,24 @@ on:
     branches:
       - master
       - develop
-      - 'support/**'
+      - support/**
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
 jobs:
+  checkstyle:
+    runs-on: ubuntu-latest
+    name: Checkstyle job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run check style
+        uses: nikitasavinov/checkstyle-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: 'github-pr-check'
+          tool_name: 'testtool'
   main:
+    needs: [ checkstyle ]
     if: "!contains(github.event.head_commit.message, '[skip bump]') && !contains(github.event.head_commit.message, 'nobump/')"
     runs-on: ubuntu-latest
     steps:
@@ -23,6 +36,8 @@ jobs:
           java-version: 21
           distribution: temurin
           cache: maven
+
+      - uses: pre-commit/action@v3.0.0
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
@@ -54,13 +69,13 @@ jobs:
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
       - name: Setup release version from a snapshot
-        if: "contains(github.ref, 'master') && contains(env.PATCH, 'SNAPSHOT')"
+        if: contains(github.ref, 'master') && contains(env.PATCH, 'SNAPSHOT')
         run: |
           NEW_VERSION="${MAJOR}.${MINOR}.$(echo $PATCH | awk 'BEGIN { FS = "-" } ; { print $1 }')"
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
       - name: Setup patch version
-        if: "(contains(github.ref, 'master') || contains(github.ref, 'support/')) && contains(github.event.head_commit.message, 'hotfix/')"
+        if: (contains(github.ref, 'master') || contains(github.ref, 'support/')) && contains(github.event.head_commit.message, 'hotfix/')
         run: |
           NEW_VERSION="$((MAJOR)).$((MINOR)).$((PATCH+1))"
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
@@ -72,12 +87,12 @@ jobs:
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
       - name: Setup docker tag version
-        if: "env.NEW_VERSION != null"
+        if: env.NEW_VERSION != null
         run: |
           echo "DOCKER_TAG_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
       - name: Setup snapshot docker tag with execution number
-        if: "env.NEW_VERSION == null && contains(env.PATCH, 'SNAPSHOT')"
+        if: env.NEW_VERSION == null && contains(env.PATCH, 'SNAPSHOT')
         run: |
           DOCKER_TAG_VERSION="${MAJOR}.${MINOR}.$(echo $PATCH | awk 'BEGIN { FS = "-" } ; { print $1 }')-rc${GITHUB_RUN_NUMBER}"
           echo "DOCKER_TAG_VERSION=${DOCKER_TAG_VERSION}" >> $GITHUB_ENV
@@ -90,12 +105,12 @@ jobs:
 
       - name: Build Stream Services
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
       - name: Commit files
-        if: "contains(github.ref, 'master') || contains(github.ref, 'support/')"
+        if: contains(github.ref, 'master') || contains(github.ref, 'support/')
         run: |
          git config --local user.email "oss@backbase.com"
          git config --local user.name "backbaseoss"
@@ -103,7 +118,7 @@ jobs:
          git tag -a $NEW_VERSION -m "[version bump]"
 
       - name: Push changes
-        if: "contains(github.ref, 'master') || contains(github.ref, 'support/')"
+        if: contains(github.ref, 'master') || contains(github.ref, 'support/')
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.STREAM_BOT_TOKEN }}

@@ -46,4 +46,3 @@ logging:
   level:
     com.backbase.dbs: DEBUG
     com.backbase.buildingblocks: DEBUG
-

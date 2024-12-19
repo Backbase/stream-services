@@ -10,4 +10,3 @@ properties:
     description: The alpha-3 code (complying with ISO 4217) of the currency that qualifies the amount
     type: string
     pattern: ^[A-Z]{3}$
-

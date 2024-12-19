@@ -52,6 +52,9 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <japicmp.skip>true</japicmp.skip>
+
+        <checkstyle.config.location>backbase_checks.xml</checkstyle.config.location>
+        <!--        <checkstyle.config.location>google_checks_javadocs.xml</checkstyle.config.location>-->
     </properties>
 
     <dependencyManagement>
@@ -106,6 +109,34 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>2.17</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.backbase.buildingblocks</groupId>
+                            <artifactId>ssdk-checkstyle-config</artifactId>
+                            <version>1.0.28</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <phase>validate</phase>
+                            <configuration>
+                                <configLocation>${checkstyle.config.location}</configLocation>
+                                <consoleOutput>true</consoleOutput>
+                                <encoding>UTF-8</encoding>
+                                <failsOnError>true</failsOnError>
+                                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -134,6 +165,26 @@
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify.fmt</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>2.25</version>
+                <configuration>
+                    <skip>false</skip>
+                    <skipSourceDirectory>false</skipSourceDirectory>
+                    <skipTestSourceDirectory>false</skipTestSourceDirectory>
+                    <skipSortingImports>false</skipSortingImports>
+                    <style>google</style>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                        <phase>process-sources</phase>
                     </execution>
                 </executions>
             </plugin>

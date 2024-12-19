@@ -1,61 +1,61 @@
 [
   {
-    "id":"729190df-a421-4937-94fd-5e1a3da132cc",
-    "internalUserId":"d5ba7e3b-b1e4-42ee-989f-860e97386dc1",
-    "originator":{
-      "name":"John Doe"
+    "id": "729190df-a421-4937-94fd-5e1a3da132cc",
+    "internalUserId": "d5ba7e3b-b1e4-42ee-989f-860e97386dc1",
+    "originator": {
+      "name": "John Doe"
     },
-    "originatorAccount":{
-      "identification":{
-        "identification":"56bf7f66-4417-4cc6-8aa2-a467227d3067",
-        "schemeName":"ID"
+    "originatorAccount": {
+      "identification": {
+        "identification": "56bf7f66-4417-4cc6-8aa2-a467227d3067",
+        "schemeName": "ID"
       },
-      "arrangementId":"56bf7f66-4417-4cc6-8aa2-a467227d3067",
-      "externalArrangementId":"0000099188-S10"
+      "arrangementId": "56bf7f66-4417-4cc6-8aa2-a467227d3067",
+      "externalArrangementId": "0000099188-S10"
     },
-    "totalAmount":{
-      "amount":"10.29",
-      "currencyCode":"USD"
+    "totalAmount": {
+      "amount": "10.29",
+      "currencyCode": "USD"
     },
-    "batchBooking":false,
-    "instructionPriority":"HIGH",
-    "status":"ENTERED",
-    "requestedExecutionDate":"2021-01-20",
-    "paymentMode":"RECURRING",
-    "paymentType":"SEPA_CREDIT_TRANSFER",
-    "schedule":{
-      "transferFrequency":"MONTHLY",
-      "on":1,
-      "startDate":"2021-02-01",
-      "endDate":"2021-05-01",
-      "nextExecutionDate":"2021-03-01",
-      "every":"1"
+    "batchBooking": false,
+    "instructionPriority": "HIGH",
+    "status": "ENTERED",
+    "requestedExecutionDate": "2021-01-20",
+    "paymentMode": "RECURRING",
+    "paymentType": "SEPA_CREDIT_TRANSFER",
+    "schedule": {
+      "transferFrequency": "MONTHLY",
+      "on": 1,
+      "startDate": "2021-02-01",
+      "endDate": "2021-05-01",
+      "nextExecutionDate": "2021-03-01",
+      "every": "1"
     },
-    "transferTransactionInformation":{
-      "instructedAmount":{
-        "amount":"10.29",
-        "currencyCode":"EUR"
+    "transferTransactionInformation": {
+      "instructedAmount": {
+        "amount": "10.29",
+        "currencyCode": "EUR"
       },
-      "counterparty":{
-        "name":"Dagobert Danford"
+      "counterparty": {
+        "name": "Dagobert Danford"
       },
-      "counterpartyAccount":{
-        "identification":{
-          "identification":"41638cee-b494-41f0-a1e3-27405e90da7d",
-          "schemeName":"ID"
+      "counterpartyAccount": {
+        "identification": {
+          "identification": "41638cee-b494-41f0-a1e3-27405e90da7d",
+          "schemeName": "ID"
         }
       },
-      "remittanceInformation":{
-        "type":"UNSTRUCTURED",
-        "content":"Return a debt"
+      "remittanceInformation": {
+        "type": "UNSTRUCTURED",
+        "content": "Return a debt"
       }
     },
-    "audit":{
-      "timestamp":"2021-01-20T14:33:13Z",
-      "user":"bbuser"
+    "audit": {
+      "timestamp": "2021-01-20T14:33:13Z",
+      "user": "bbuser"
     },
-    "intraLegalEntity":false,
-    "serviceAgreementId":"4028809b8190b88a018190c9269b0009",
-    "originatorAccountCurrency":"USD"
+    "intraLegalEntity": false,
+    "serviceAgreementId": "4028809b8190b88a018190c9269b0009",
+    "originatorAccountCurrency": "USD"
   }
 ]

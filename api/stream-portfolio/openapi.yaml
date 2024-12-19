@@ -4,15 +4,15 @@ info:
   description: Ingestion Saga for Portfolio
   version: 0.0.1
   x-logo:
-    url: "https://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
-    backgroundColor: "#FFFFFF"
-    altText: "Backbase logo"
+    url: https://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png
+    backgroundColor: '#FFFFFF'
+    altText: Backbase logo
 servers:
   - url: https://portfolio-http.proto.backbasecloud.com/
     description: The server
 tags:
-- name: portfolios
-  description: Portfolios API
+  - name: portfolios
+    description: Portfolios API
 paths:
   ###############################################
   ## Portfolio
@@ -627,9 +627,7 @@ components:
                 description: Default Message. Any further information.
               key:
                 type: string
-                description: '{capability-name}.api.{api-key-name}. For generated
-                      validation errors this is the path in the document the error resolves
-                      to. e.g. object name + ''.'' + field'
+                description: "{capability-name}.api.{api-key-name}. For generated validation errors this is the path in the document the error resolves to. e.g. object name + '.' + field"
               context:
                 type: object
                 description: Context can be anything used to construct localised messages.

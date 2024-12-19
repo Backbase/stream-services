@@ -10,12 +10,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AudiencesSegmentationConfiguration {
 
-    @Bean
-    public UserKindSegmentationSaga userKindSegmentationSaga(
-        HandlersServiceApi handlersServiceApi,
-        UserKindSegmentationProperties userKindSegmentationProperties
-    ) {
-        return new UserKindSegmentationSaga(handlersServiceApi, userKindSegmentationProperties);
-    }
-
+  @Bean
+  public UserKindSegmentationSaga userKindSegmentationSaga(
+      HandlersServiceApi handlersServiceApi,
+      UserKindSegmentationProperties userKindSegmentationProperties) {
+    return new UserKindSegmentationSaga(handlersServiceApi, userKindSegmentationProperties);
+  }
 }

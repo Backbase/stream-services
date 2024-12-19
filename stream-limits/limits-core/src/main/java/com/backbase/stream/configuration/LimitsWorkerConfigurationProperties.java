@@ -9,6 +9,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Slf4j
 @Data
 public class LimitsWorkerConfigurationProperties extends StreamWorkerConfiguration {
-    private boolean continueOnError;
-    private boolean enabled = true;
+  private boolean continueOnError;
+  private boolean enabled = true;
 }

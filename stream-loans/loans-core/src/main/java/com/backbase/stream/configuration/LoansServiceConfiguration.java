@@ -12,35 +12,34 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@EnableConfigurationProperties({
-    LoansWorkerConfigurationProperties.class
-})
+@EnableConfigurationProperties({LoansWorkerConfigurationProperties.class})
 @RequiredArgsConstructor
 @Configuration
 public class LoansServiceConfiguration {
 
-    @Bean
-    public LoansSaga loansSaga(LoansApi loansApi) {
-        return new LoansSaga(loansApi);
-    }
+  @Bean
+  public LoansSaga loansSaga(LoansApi loansApi) {
+    return new LoansSaga(loansApi);
+  }
 
-    public static class InMemoryLoansUnitOfWorkRepository extends
-        InMemoryReactiveUnitOfWorkRepository<LoansTask> implements LoansUnitOfWorkRepository {
+  public static class InMemoryLoansUnitOfWorkRepository
+      extends InMemoryReactiveUnitOfWorkRepository<LoansTask>
+      implements LoansUnitOfWorkRepository {}
 
-    }
+  @Bean
+  @ConditionalOnProperty(
+      name = "backbase.stream.persistence",
+      havingValue = "memory",
+      matchIfMissing = true)
+  public LoansUnitOfWorkRepository loansUnitOfWorkRepository() {
+    return new InMemoryLoansUnitOfWorkRepository();
+  }
 
-    @Bean
-    @ConditionalOnProperty(name = "backbase.stream.persistence", havingValue = "memory", matchIfMissing = true)
-    public LoansUnitOfWorkRepository loansUnitOfWorkRepository() {
-        return new InMemoryLoansUnitOfWorkRepository();
-    }
-
-    @Bean
-    public LoansUnitOfWorkExecutor loansUnitOfWorkExecutor(
-        LoansUnitOfWorkRepository repository, LoansSaga saga,
-        LoansWorkerConfigurationProperties configurationProperties
-    ) {
-        return new LoansUnitOfWorkExecutor(repository, saga, configurationProperties);
-    }
-
+  @Bean
+  public LoansUnitOfWorkExecutor loansUnitOfWorkExecutor(
+      LoansUnitOfWorkRepository repository,
+      LoansSaga saga,
+      LoansWorkerConfigurationProperties configurationProperties) {
+    return new LoansUnitOfWorkExecutor(repository, saga, configurationProperties);
+  }
 }

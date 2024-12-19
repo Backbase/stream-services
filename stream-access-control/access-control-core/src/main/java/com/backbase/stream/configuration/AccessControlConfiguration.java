@@ -24,60 +24,71 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
-/**
- * Access Control Configuration.
- */
+/** Access Control Configuration. */
 @Configuration
 @Import(ProductConfiguration.class)
 @Slf4j
-@EnableConfigurationProperties({DeletionProperties.class,UserManagementProperties.class})
+@EnableConfigurationProperties({DeletionProperties.class, UserManagementProperties.class})
 public class AccessControlConfiguration {
 
-    @Bean
-    public BatchResponseUtils batchResponseUtils() {
-        return new BatchResponseUtils();
-    }
+  @Bean
+  public BatchResponseUtils batchResponseUtils() {
+    return new BatchResponseUtils();
+  }
 
-    @Bean
-    public EntitlementsService entitlementsService(ArrangementService arrangementService,
-        AccessGroupService accessGroupService,
-        LegalEntityService legalEntityService,
-        UserService userService) {
+  @Bean
+  public EntitlementsService entitlementsService(
+      ArrangementService arrangementService,
+      AccessGroupService accessGroupService,
+      LegalEntityService legalEntityService,
+      UserService userService) {
 
-        return new EntitlementsService(arrangementService, userService, accessGroupService, legalEntityService);
-    }
+    return new EntitlementsService(
+        arrangementService, userService, accessGroupService, legalEntityService);
+  }
 
-    @Bean
-    public LegalEntityService legalEntityService(LegalEntitiesApi legalEntitiesApi,
-        BatchResponseUtils batchResponseUtils) {
-        return new LegalEntityService(legalEntitiesApi, batchResponseUtils);
-    }
+  @Bean
+  public LegalEntityService legalEntityService(
+      LegalEntitiesApi legalEntitiesApi, BatchResponseUtils batchResponseUtils) {
+    return new LegalEntityService(legalEntitiesApi, batchResponseUtils);
+  }
 
-    @Bean
-    public UserService userService(Optional<IdentityIntegrationServiceApi> identityApi,
-        UserManagementApi usersApi,
-        IdentityManagementApi identityManagementApi,
-        com.backbase.dbs.user.api.service.v2.UserProfileManagementApi userProfileManagementApi,
-                                   UserManagementProperties userManagementProperties) {
-        return new UserService(usersApi, identityManagementApi, identityApi,
-            userProfileManagementApi, userManagementProperties);
-    }
+  @Bean
+  public UserService userService(
+      Optional<IdentityIntegrationServiceApi> identityApi,
+      UserManagementApi usersApi,
+      IdentityManagementApi identityManagementApi,
+      com.backbase.dbs.user.api.service.v2.UserProfileManagementApi userProfileManagementApi,
+      UserManagementProperties userManagementProperties) {
+    return new UserService(
+        usersApi,
+        identityManagementApi,
+        identityApi,
+        userProfileManagementApi,
+        userManagementProperties);
+  }
 
-    @Bean
-    public UserProfileService userProfileService(UserProfileManagementApi userProfileManagementApi) {
-        return new UserProfileService(userProfileManagementApi);
-    }
+  @Bean
+  public UserProfileService userProfileService(UserProfileManagementApi userProfileManagementApi) {
+    return new UserProfileService(userProfileManagementApi);
+  }
 
-    @Bean
-    public AccessGroupService accessGroupService(
-        UserManagementApi usersApi,
-        DeletionProperties configurationProperties,
-        UsersApi accessControlUsersApi,
-        DataGroupsApi dataGroupsApi, ServiceAgreementsApi serviceAgreementsApi,
-        FunctionGroupsApi functionGroupsApi, BatchResponseUtils batchResponseUtils) {
-        return new AccessGroupService(usersApi, accessControlUsersApi, dataGroupsApi,
-            functionGroupsApi, serviceAgreementsApi,
-            configurationProperties, batchResponseUtils);
-    }
-
+  @Bean
+  public AccessGroupService accessGroupService(
+      UserManagementApi usersApi,
+      DeletionProperties configurationProperties,
+      UsersApi accessControlUsersApi,
+      DataGroupsApi dataGroupsApi,
+      ServiceAgreementsApi serviceAgreementsApi,
+      FunctionGroupsApi functionGroupsApi,
+      BatchResponseUtils batchResponseUtils) {
+    return new AccessGroupService(
+        usersApi,
+        accessControlUsersApi,
+        dataGroupsApi,
+        functionGroupsApi,
+        serviceAgreementsApi,
+        configurationProperties,
+        batchResponseUtils);
+  }
 }

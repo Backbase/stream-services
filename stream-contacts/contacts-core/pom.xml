@@ -13,8 +13,7 @@
     <name>Stream :: Contacts Core</name>
 
     <properties>
-        <checkstyle.disable.checks>true</checkstyle.disable.checks>
-    </properties>
+</properties>
 
     <dependencies>
         <dependency>

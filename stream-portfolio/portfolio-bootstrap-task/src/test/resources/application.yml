@@ -1,8 +1,8 @@
 spring:
-#  autoconfigure:
-#    exclude:
-#      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
-#      - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
+  #  autoconfigure:
+  #    exclude:
+  #      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+  #      - org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration
   cloud:
     config:
       enabled: false
@@ -309,88 +309,88 @@ bootstrap:
                             currencyCode: EUR
                             amount: 50
           cumulative-performances:
-            - dateFrom: 2021-02-02T01:35:00.000-05:00
-              dateTo: 2021-02-02T01:40:00.000-05:00
+            - dateFrom: 2021-02-02T01:35:00-05:00
+              dateTo: 2021-02-02T01:40:00-05:00
               valuePct: 121
-            - dateFrom: 2021-03-01T01:30:00.000-05:00
-              dateTo: 2021-03-02T01:30:00.000-05:00
+            - dateFrom: 2021-03-01T01:30:00-05:00
+              dateTo: 2021-03-02T01:30:00-05:00
               valuePct: 6
-            - dateFrom: 2021-04-02T01:30:00.000-05:00
-              dateTo: 2021-04-02T01:30:00.000-05:00
+            - dateFrom: 2021-04-02T01:30:00-05:00
+              dateTo: 2021-04-02T01:30:00-05:00
               valuePct: 3
-            - dateFrom: 2021-08-02T01:30:00.000-05:00
-              dateTo: 2021-08-02T01:30:00.000-05:00
+            - dateFrom: 2021-08-02T01:30:00-05:00
+              dateTo: 2021-08-02T01:30:00-05:00
               valuePct: 9
-            - dateFrom: 2021-07-02T01:30:00.000-05:00
-              dateTo: 2021-07-02T01:30:00.000-05:00
+            - dateFrom: 2021-07-02T01:30:00-05:00
+              dateTo: 2021-07-02T01:30:00-05:00
               valuePct: 33
-            - dateFrom: 2021-01-02T01:30:00.000-05:00
-              dateTo: 2021-01-02T01:30:00.000-05:00
+            - dateFrom: 2021-01-02T01:30:00-05:00
+              dateTo: 2021-01-02T01:30:00-05:00
               valuePct: 1
-            - dateFrom: 2021-05-02T01:30:00.000-05:00
-              dateTo: 2021-05-02T01:30:00.000-05:00
+            - dateFrom: 2021-05-02T01:30:00-05:00
+              dateTo: 2021-05-02T01:30:00-05:00
               valuePct: 50
           benchmark:
             name: Dow Jones .DJI
           valuations:
-            - dateFrom: 2021-07-01T01:30:00.000-05:00
-              dateTo: 2021-07-01T01:30:00.000-05:00
+            - dateFrom: 2021-07-01T01:30:00-05:00
+              dateTo: 2021-07-01T01:30:00-05:00
               granularity: DAILY
               valuation:
                 amount: 30.06
                 currencyCode: EUR
               valuePct: 12
-            - dateFrom: 2021-07-02T01:30:00.000-05:00
-              dateTo: 2021-07-02T01:35:00.000-05:00
+            - dateFrom: 2021-07-02T01:30:00-05:00
+              dateTo: 2021-07-02T01:35:00-05:00
               granularity: DAILY
               valuation:
                 amount: 90.06
                 currencyCode: EUR
               valuePct: 9
-            - dateFrom: 2021-07-05T01:30:00.000-05:00
-              dateTo: 2021-07-05T01:40:00.000-05:00
+            - dateFrom: 2021-07-05T01:30:00-05:00
+              dateTo: 2021-07-05T01:40:00-05:00
               granularity: DAILY
               valuation:
                 amount: 90.06
                 currencyCode: EUR
               valuePct: 9
-            - dateFrom: 2021-07-02T01:30:00.000-05:00
-              dateTo: 2021-07-02T01:30:00.000-05:00
+            - dateFrom: 2021-07-02T01:30:00-05:00
+              dateTo: 2021-07-02T01:30:00-05:00
               granularity: MONTHLY
               valuation:
                 amount: 7.06
                 currencyCode: EUR
               valuePct: 7
-            - dateFrom: 2021-07-02T01:30:00.000-05:00
-              dateTo: 2021-07-02T01:30:00.000-05:00
+            - dateFrom: 2021-07-02T01:30:00-05:00
+              dateTo: 2021-07-02T01:30:00-05:00
               granularity: WEEKLY
               valuation:
                 amount: 20.06
                 currencyCode: EUR
               valuePct: 2
-            - dateFrom: 2021-07-02T01:30:00.000-05:00
-              dateTo: 2021-07-02T01:30:00.000-05:00
+            - dateFrom: 2021-07-02T01:30:00-05:00
+              dateTo: 2021-07-02T01:30:00-05:00
               granularity: QUARTERLY
               valuation:
                 amount: 50.06
                 currencyCode: EUR
               valuePct: 5
-            - dateFrom: 2021-06-02T01:30:00.000-05:00
-              dateTo: 2021-06-02T01:30:00.000-05:00
+            - dateFrom: 2021-06-02T01:30:00-05:00
+              dateTo: 2021-06-02T01:30:00-05:00
               granularity: QUARTERLY
               valuation:
                 amount: 78.03
                 currencyCode: EUR
               valuePct: 5
-            - dateFrom: 2021-06-02T01:30:00.000-05:00
-              dateTo: 2021-06-02T01:30:00.000-05:00
+            - dateFrom: 2021-06-02T01:30:00-05:00
+              dateTo: 2021-06-02T01:30:00-05:00
               granularity: MONTHLY
               valuation:
                 amount: 70.06
                 currencyCode: EUR
               valuePct: 75
-            - dateFrom: 2021-03-02T01:30:00.000-05:00
-              dateTo: 2021-03-02T01:30:00.000-05:00
+            - dateFrom: 2021-03-02T01:30:00-05:00
+              dateTo: 2021-03-02T01:30:00-05:00
               granularity: MONTHLY
               valuation:
                 amount: 40.06
@@ -438,8 +438,8 @@ bootstrap:
               description: Description of Purchase
           transactions:
             - transactionId: transactionId
-              transactionDate: 2021-03-24T19:22:00.000-01:00
-              valueDate: 2021-03-29T11:46:00.000-01:00
+              transactionDate: 2021-03-24T19:22:00-01:00
+              valueDate: 2021-03-29T11:46:00-01:00
               transactionCategory: purchase
               exchange: NASDAQ
               orderType: Market Order

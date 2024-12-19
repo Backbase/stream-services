@@ -1,11 +1,10 @@
-
 LOG_NAME: test
 
 spring:
   application:
     name: test
   main:
-    banner-mode: 'off'
+    banner-mode: off
   liquibase:
     enabled: false
   jpa:

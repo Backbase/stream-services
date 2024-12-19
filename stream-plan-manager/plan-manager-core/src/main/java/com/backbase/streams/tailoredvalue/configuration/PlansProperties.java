@@ -8,5 +8,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 @Setter
 public class PlansProperties {
-    private boolean enabled;
+  private boolean enabled;
 }
