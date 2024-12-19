@@ -6,7 +6,7 @@
     <parent>
         <artifactId>integrations-api</artifactId>
         <groupId>com.backbase.stream.compositions</groupId>
-        <version>3.43.0</version>
+        <version>6.10.0</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions.api</groupId>
@@ -68,34 +68,6 @@
                             <includes>*api*.yaml</includes>
                         </configuration>
                     </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <!-- RELEASE_VERSION -->
-                <version>5.3.0</version>
-                <!-- /RELEASE_VERSION -->
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/service-api-v2.yaml</inputSpec>
-                            <apiPackage>com.backbase.stream.compositions.integration.product.api</apiPackage>
-                            <modelPackage>com.backbase.stream.compositions.integration.product.model</modelPackage>
-                            <generatorName>java</generatorName>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelTests>false</generateModelTests>
-                            <configOptions>
-                                <library>webclient</library>
-                                <dateLibrary>java8</dateLibrary>
-                                <sourceFolder>src/gen/java/main</sourceFolder>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-
                 </executions>
             </plugin>
         </plugins>

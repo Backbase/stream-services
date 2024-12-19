@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-task-starter-parent</artifactId>
-        <version>3.43.0</version>
+        <version>6.10.0</version>
         <relativePath>../../stream-sdk/stream-starter-parents/stream-task-starter-parent</relativePath>
     </parent>
 
@@ -15,8 +15,9 @@
     <name>Stream :: Legal Entity Bootstrap Task</name>
 
     <properties>
-        <wiremock-jre8.version>2.33.2</wiremock-jre8.version>
+        <wiremock-jre8.version>2.35.1</wiremock-jre8.version>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
+        <archunit.backbase.LoggingRules.skip>true</archunit.backbase.LoggingRules.skip>
     </properties>
 
     <dependencies>
@@ -46,7 +47,7 @@
 
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8</artifactId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
             <version>${wiremock-jre8.version}</version>
             <scope>test</scope>
         </dependency>

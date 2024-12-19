@@ -15,6 +15,10 @@ import com.backbase.stream.portfolio.model.Instrument;
 import com.backbase.stream.portfolio.model.InstrumentHistoryPrice;
 import com.backbase.stream.portfolio.model.Region;
 import com.backbase.stream.portfolio.model.SubAssetClass;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,24 +26,28 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface InstrumentMapper {
 
-  RegionsPostRequest mapRegion(Region region);
+    RegionsPostRequest mapRegion(Region region);
 
-  @Mapping(target = ".", source = "country")
-  @Mapping(target = "region", source = "regionCode")
-  CountriesPostRequest mapCountry(String regionCode, Country country);
+    @Mapping(target = ".", source = "country")
+    @Mapping(target = "region", source = "regionCode")
+    CountriesPostRequest mapCountry(String regionCode, Country country);
 
-  InstrumentsPostRequest mapInstrument(Instrument instrument);
+    InstrumentsPostRequest mapInstrument(Instrument instrument);
 
-  InstrumentPutRequest mapPutInstrument(Instrument instrument);
+    InstrumentPutRequest mapPutInstrument(Instrument instrument);
 
-  AssetClassesPostRequest mapAssetClass(AssetClass assetClass);
+    AssetClassesPostRequest mapAssetClass(AssetClass assetClass);
 
-  AssetClassesPutRequest mapPutAssetClass(AssetClass assetClass);
+    AssetClassesPutRequest mapPutAssetClass(AssetClass assetClass);
 
-  SubAssetClassesPostRequest mapSubAssetClass(SubAssetClass assetClass);
+    SubAssetClassesPostRequest mapSubAssetClass(SubAssetClass assetClass);
 
-  SubAssetClassPutRequest mapPutSubAssetClass(SubAssetClass assetClass);
+    SubAssetClassPutRequest mapPutSubAssetClass(SubAssetClass assetClass);
 
-  List<InstrumentHistoryPricesRequestItem> mapHistoryPrices(
-      List<InstrumentHistoryPrice> historyPrices);
+    List<InstrumentHistoryPricesRequestItem> mapHistoryPrices(List<InstrumentHistoryPrice> historyPrices);
+
+    default OffsetDateTime map(LocalDate value) {
+        return OffsetDateTime.of(value, LocalTime.NOON, ZoneOffset.UTC);
+    }
+
 }

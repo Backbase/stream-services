@@ -1,6 +1,6 @@
 spring:
-  zipkin:
-    enabled: false
+  application:
+    name: payment-order-composition
   main:
     allow-bean-definition-overriding: true
   codec:
@@ -19,9 +19,6 @@ backbase:
   communication:
     http:
       default-service-port: 8080
-      client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: http://token-converter:8080/oauth/token
   mtls:
     enabled: false
   security:
@@ -32,8 +29,7 @@ backbase:
         required-scope: api:service
   stream:
     paymentorder:
+      types:
+        - INT_TRANS_CLOSED
       worker:
         deletePaymentOrder: false
-    compositions:
-      paymentorder:
-        integration-base-url: http://payment-order-integration:8080

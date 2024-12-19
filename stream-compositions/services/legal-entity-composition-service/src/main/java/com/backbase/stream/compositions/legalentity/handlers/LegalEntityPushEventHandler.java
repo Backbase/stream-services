@@ -13,24 +13,25 @@ import org.springframework.stereotype.Component;
 @AllArgsConstructor
 public class LegalEntityPushEventHandler implements EventHandler<LegalEntityPushEvent> {
 
-  private final LegalEntityIngestionService legalEntityIngestionService;
-  private final LegalEntityMapper mapper;
+    private final LegalEntityIngestionService legalEntityIngestionService;
+    private final LegalEntityMapper mapper;
 
-  @Override
-  public void handle(EnvelopedEvent<LegalEntityPushEvent> envelopedEvent) {
-    // TODO: TBD implementation of Push events
-    legalEntityIngestionService.ingestPush(buildRequest(envelopedEvent));
-  }
+    @Override
+    public void handle(EnvelopedEvent<LegalEntityPushEvent> envelopedEvent) {
+        //TODO: TBD implementation of Push events
+        legalEntityIngestionService.ingestPush(buildRequest(envelopedEvent))
+            .block();
+    }
 
-  /**
-   * Builds ingestion request for downstream service.
-   *
-   * @param envelopedEvent EnvelopedEvent<LegalEntityIngestPushEvent>
-   * @return LegalEntityIngestPullRequest
-   */
-  private LegalEntityPushRequest buildRequest(EnvelopedEvent<LegalEntityPushEvent> envelopedEvent) {
-    return LegalEntityPushRequest.builder()
-        .legalEntity(mapper.mapEventToStream(envelopedEvent.getEvent().getLegalEntity()))
-        .build();
-  }
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param envelopedEvent EnvelopedEvent<LegalEntityIngestPushEvent>
+     * @return LegalEntityIngestPullRequest
+     */
+    private LegalEntityPushRequest buildRequest(EnvelopedEvent<LegalEntityPushEvent> envelopedEvent) {
+        return LegalEntityPushRequest.builder()
+                .legalEntity(mapper.mapEventToStream(envelopedEvent.getEvent().getLegalEntity()))
+                .build();
+    }
 }

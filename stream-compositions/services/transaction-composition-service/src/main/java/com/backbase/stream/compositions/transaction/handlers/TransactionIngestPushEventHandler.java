@@ -15,28 +15,28 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class TransactionIngestPushEventHandler implements EventHandler<TransactionsPushEvent> {
 
-  private final TransactionIngestionService transactionIngestionService;
-  private final TransactionMapper mapper;
+    private final TransactionIngestionService transactionIngestionService;
+    private final TransactionMapper mapper;
 
-  @Override
-  public void handle(EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
-    buildRequest(envelopedEvent).flatMap(transactionIngestionService::ingestPush).subscribe();
-  }
+    @Override
+    public void handle(EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
+        buildRequest(envelopedEvent)
+            .flatMap(transactionIngestionService::ingestPush)
+            .block();
+    }
 
-  /**
-   * Builds ingestion request for downstream service.
-   *
-   * @param envelopedEvent EnvelopedEvent<TransactionsIngestPushEvent>
-   * @return TransactionsIngestPushEvent
-   */
-  private Mono<TransactionIngestPushRequest> buildRequest(
-      EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
-    return Mono.just(
-        TransactionIngestPushRequest.builder()
-            .transactions(
-                Collections.singletonList(
-                    mapper.mapPushEventToStream(
-                        envelopedEvent.getEvent().getTransactionsPostRequestBody())))
-            .build());
-  }
+    /**
+     * Builds ingestion request for downstream service.
+     *
+     * @param envelopedEvent EnvelopedEvent<TransactionsIngestPushEvent>
+     * @return TransactionsIngestPushEvent
+     */
+    private Mono<TransactionIngestPushRequest> buildRequest(EnvelopedEvent<TransactionsPushEvent> envelopedEvent) {
+        return Mono.just(
+                TransactionIngestPushRequest.builder()
+                        .transactions(Collections.singletonList(
+                                mapper.mapPushEventToStream(
+                                        envelopedEvent.getEvent().getTransactionsPostRequestBody())))
+                        .build());
+    }
 }

@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Ingest Legal Entity API
   description: Ingestion Saga for Legal Entities and their products
-  version: 2.3.0
+  version: 2.7.0
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
     backgroundColor: "#FFFFFF"
@@ -252,6 +252,7 @@ components:
             - ARRANGEMENTS
             - JOURNEYS
             - REPOSITORIES
+            - CUSTOMERS
             - CUSTOM
         name:
           maxLength: 128
@@ -396,6 +397,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
         creditLimit:
           $ref: '#/components/schemas/CreditLimit'
         IBAN:
@@ -560,6 +563,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
         BBAN:
           $ref: '#/components/schemas/BBAN'
         creditLimit:
@@ -666,6 +671,97 @@ components:
           $ref: '#/components/schemas/BBAN'
         bankBranchCode:
           $ref: '#/components/schemas/BankBranchCode'
+        type:
+          $ref: '#/components/schemas/LoanType'
+        status:
+          $ref: '#/components/schemas/LoanStatus'
+        nextRepaymentDateTime:
+          $ref: '#/components/schemas/NextRepaymentDateTime'
+        nextRepaymentAmount:
+          $ref: '#/components/schemas/NextRepaymentAmount'
+        isOverdue:
+          $ref: '#/components/schemas/IsOverdue'
+        overduePaymentsCount:
+          $ref: '#/components/schemas/OverduePaymentsCount'
+        borrowers:
+          $ref: '#/components/schemas/Borrowers'
+        defaultSettlementAccountNumber:
+          $ref: '#/components/schemas/DefaultSettlementAccountNumber'
+        defaultSettlementAccountInternalId:
+          $ref: '#/components/schemas/DefaultSettlementAccountInternalId'
+        defaultSettlementAccountExternalId:
+          $ref: '#/components/schemas/DefaultSettlementAccountExternalId'
+        isFullyRepaid:
+          $ref: '#/components/schemas/IsFullyRepaid'
+        feesDueAmount:
+          $ref: '#/components/schemas/FeesDueAmount'
+        paidAmount:
+          $ref: '#/components/schemas/PaidAmount'
+        termCount:
+          $ref: '#/components/schemas/TermCount'
+        paymentFrequency:
+          $ref: '#/components/schemas/FrequencyUnit'
+        collaterals:
+          $ref: '#/components/schemas/Collaterals'
+        escrowAttributes:
+          $ref: '#/components/schemas/EscrowAttributes'
+        revolving:
+          $ref: '#/components/schemas/Revolving'
+        renewDateTime:
+          $ref: '#/components/schemas/RenewDateTime'
+        totalDirectAmortization:
+          $ref: '#/components/schemas/TotalDirectAmortization'
+        totalIndirectAmortization:
+          $ref: '#/components/schemas/TotalIndirectAmortization'
+        totalDirectAmortizationUnit:
+          $ref: '#/components/schemas/TermUnit'
+        totalIndirectAmortizationUnit:
+          $ref: '#/components/schemas/TermUnit'
+        remainingTermUnit:
+          $ref: '#/components/schemas/TermUnit'
+        remainingTermCount:
+          $ref: '#/components/schemas/TermCount'
+        approvalDateTime:
+          $ref: '#/components/schemas/DateTime'
+        numberOfPaymentsMade:
+          $ref: '#/components/schemas/NumberOfPaymentsMade'
+        totalNumberOfPayments:
+          $ref: '#/components/schemas/TotalNumberOfPayments'
+        taxesOnInterestAmount:
+          $ref: '#/components/schemas/TaxesOnInterestAmount'
+        contractLatePaymentCommissionAmount:
+          $ref: '#/components/schemas/ContractLatePaymentCommissionAmount'
+        calculationPeriodStartDateTime:
+          $ref: '#/components/schemas/CalculationPeriodStartDateTime'
+        calculationPeriodEndDateTime:
+          $ref: '#/components/schemas/CalculationPeriodEndDateTime'
+        actualLatePaymentCommissionAmount:
+          $ref: '#/components/schemas/ActualLatePaymentCommissionAmount'
+        latePaymentCommissionTaxesAmount:
+          $ref: '#/components/schemas/LatePaymentCommissionTaxesAmount'
+        overdueInterestAmount:
+          $ref: '#/components/schemas/OverdueInterestAmount'
+        overdueTaxesOnInterestAmount:
+          $ref: '#/components/schemas/OverdueTaxesOnInterestAmount'
+        overdueEscrowPaymentAmount:
+          $ref: '#/components/schemas/OverdueEscrowPaymentAmount'
+        overduePrincipalPaymentAmount:
+          $ref: '#/components/schemas/OverduePrincipalPaymentAmount'
+        overduePenaltyAmount:
+          $ref: '#/components/schemas/PenaltyAmount'
+        totalAnnualCostPercentage:
+          $ref: '#/components/schemas/TotalAnnualCostPercentage'
+        minimumDueAmount:
+          $ref: '#/components/schemas/MinimumDueAmount'
+        lastPaymentAmount:
+          $ref: '#/components/schemas/LastPaymentAmount'
+        lastPaymentDateTime:
+          $ref: '#/components/schemas/LastPaymentDateTime'
+        interestPaymentFrequency:
+          $ref: '#/components/schemas/FrequencyUnit'
+        documentMetadatas:
+          $ref: '#/components/schemas/DocumentMetadataArray'
+
     TermDeposit:
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
@@ -757,6 +853,8 @@ components:
           $ref: '#/components/schemas/BookedBalance'
         availableBalance:
           $ref: '#/components/schemas/AvailableBalance'
+        reservedAmount:
+          $ref: '#/components/schemas/ReservedAmount'
         creditLimit:
           $ref: '#/components/schemas/CreditLimit'
         IBAN:
@@ -956,6 +1054,19 @@ components:
       required:
         - internalId
         - externalId
+    CardsReference:
+      title: Cards (debit and credit) reference
+      type: object
+      properties:
+        debitCardNames:
+          type: array
+          items:
+            type: string
+        creditCardNames:
+          type: array
+          items:
+            type: string
+
     LegalEntity:
       title: Legal Entity
       description: |
@@ -1005,7 +1116,7 @@ components:
         referenceJobRoles:
           type: array
           items:
-            $ref: '#/components/schemas/ReferenceJobRole'
+            $ref: '#/components/schemas/JobRole'
         administrators:
           type: array
           items:
@@ -1028,6 +1139,69 @@ components:
         - legalEntityType
         - administrators
         - jobProfile
+
+    LegalEntityV2:
+      title: Legal Entity v2
+      description: |
+        (This Legal Entity is the restructured one)
+        A Legal Entity is any personal or non-personal entity that is involved in a transaction or an product with the bank. Both the bank and its customers are legal entities
+        
+        A Legal Entity:
+        * Has one or more users that act on its behalf.
+        * A legal entity hierarchy is a collection of parent-child relationships. For example, within the same deployment, this allows you to:
+        * Set up a holding structure for a corporate customer of the bank.
+        * Set up a structure within the bank to support country and regional offices.
+      type: object
+      properties:
+        name:
+          type: string
+        activateSingleServiceAgreement:
+          type: boolean
+        internalId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        externalId:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        legalEntityType:
+          $ref: '#/components/schemas/LegalEntityType'
+        customerCategory:
+          $ref: '#/components/schemas/CustomerCategory'
+        realmName:
+          type: string
+          description: Realm to which the Legal Entity should be mapped.
+        parentExternalId:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        parentInternalId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        subsidiaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegalEntityV2'
+        limit:
+          $ref: '#/components/schemas/Limit'
+        administrators:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        masterServiceAgreement:
+          $ref: '#/components/schemas/ServiceAgreementV2'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContact'
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - name
+        - external
+        - legalEntityType
+        - administrators
+
     JobProfileUser:
       type: object
       properties:
@@ -1039,6 +1213,11 @@ components:
           type: array
           items:
             type: string
+        planName:
+          type: string
+          description: Plan name
+        cards:
+          $ref: '#/components/schemas/CardsReference'
         businessFunctionGroups:
           type: array
           description: Business Function Groups
@@ -1244,6 +1423,35 @@ components:
           $ref: '#/components/schemas/QuarterlyLimit'
         yearly:
           $ref: '#/components/schemas/YearlyLimit'
+        businessFunctionLimits:
+          type: array
+          items:
+            $ref: '#/components/schemas/BusinessFunctionLimit'
+    BusinessFunctionLimit:
+      title: BusinessFunctionLimit
+      type: object
+      required:
+        - functionId
+        - shadow
+        - privilege
+      properties:
+        functionId:
+          description: |-
+            Unique ID in the system
+            Guidelines: <project_prefix>.<1xxx>
+          maxLength: 36
+          minLength: 1
+          type: string
+          example: "bankA.1000"
+        shadow:
+          description: shadow limit or not
+          type: boolean
+          default: false
+          example: true
+        privileges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Privilege'
     UserProfile:
       title: UserProfile
       description: |
@@ -1426,6 +1634,12 @@ components:
           pattern: ^(\S|\n)((.|\n)*(\S|\n))?$
           type: string
           description: Description
+        purpose:
+          maxLength: 32
+          minLength: 1
+          pattern: ^\\S(.*(\\S))?$
+          type: string
+          description: Purpose
         participants:
           type: array
           description: Participants of the service agreement
@@ -1447,6 +1661,8 @@ components:
           description: End time of the service agreement.
         status:
           $ref: '#/components/schemas/LegalEntityStatus'
+        customerCategory:
+          $ref: '#/components/schemas/CustomerCategory'
         isMaster:
           type: boolean
           description: Master flag
@@ -1470,6 +1686,97 @@ components:
           type: object
           additionalProperties:
             type: string
+
+    ServiceAgreementV2:
+      title: Service Agreement
+      description: |
+        The formal vehicle that allows users of one entity to access products of that or other entities
+        A Service agreement is:
+        - A contract that includes one or more legal entities. A legal entity that is participating in a service agreement can allow a subset of its users to act through that service agreement and/or allow a subset of its products to be accessed through the service agreement. Within each service agreement, permissions to perform specific tasks are granted to users, including access to products shared by one or more legal entities (participating in that service agreement). As such, a service agreement is a way to give third party users specific access to your products.
+        - A special kind of service agreement is called the master service agreement. This service agreement has one legal entity participant and once configured, the participant cannot be changed. Important to know is that once the user is granted with administrative permissions (e.g. manage account groups), he or she has the power to execute the task in any service agreement lower in the hierarchy. For example, if the user of the bank is assigned with manage account groups permission in the master service agreement of the bank, the user can manage account groups in any service agreement lower in the hierarchy.
+        - A service agreement may be restricted in time, by setting a time bound. Permissions granted to users in the time-restricted service agreement, are active and may be consumed, only while the time bound is valid.
+      properties:
+        internalId:
+          $ref: '#/components/schemas/InternalIdentifier'
+        externalId:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        name:
+          maxLength: 128
+          minLength: 1
+          pattern: ^\S(.*(\S))?$
+          type: string
+          description: The service agreement name
+        description:
+          maxLength: 255
+          minLength: 1
+          pattern: ^(\S|\n)((.|\n)*(\S|\n))?$
+          type: string
+          description: Description
+        purpose:
+          maxLength: 32
+          minLength: 1
+          pattern: ^\\S(.*(\\S))?$
+          type: string
+          description: Purpose
+        jobProfileUsers:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobProfileUser'
+        participants:
+          type: array
+          description: Participants of the service agreement
+          items:
+            $ref: '#/components/schemas/LegalEntityParticipant'
+        validFromDate:
+          type: string
+          format: date
+          description: Start date of the service agreement.
+        validFromTime:
+          type: string
+          description: Start time of the service agreement.
+        validUntilDate:
+          type: string
+          format: date
+          description: End date of the service agreement.
+        validUntilTime:
+          type: string
+          description: End time of the service agreement.
+        status:
+          $ref: '#/components/schemas/LegalEntityStatus'
+        customerCategory:
+          $ref: '#/components/schemas/CustomerCategory'
+        isMaster:
+          type: boolean
+          description: Master flag
+        regularUserAps:
+          $ref: '#/components/schemas/ApsIdentifiers'
+        adminUserAps:
+          $ref: '#/components/schemas/ApsIdentifiers'
+        jobRoles:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobRole'
+        referenceJobRoles:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobRole'
+        creatorLegalEntity:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        limit:
+          $ref: '#/components/schemas/Limit'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalContact'
+        productGroups:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductGroup"
+        additions:
+          type: object
+          additionalProperties:
+            type: string
+
     ApsIdentifiers:
       type: object
       properties:
@@ -1515,6 +1822,7 @@ components:
             - "REMOVE"
         limit:
           $ref: '#/components/schemas/Limit'
+
     LegalEntityStatus:
       type: string
       description: Status of the entity
@@ -1533,7 +1841,7 @@ components:
       title: External Identifier
       maxLength: 64
       minLength: 1
-      pattern: ^[^\r\n]{1,64}$
+#      pattern: ^{1,64}$
       type: string
       description: External legal entity identifier.
     UrgentTransfer:
@@ -1736,6 +2044,15 @@ components:
     AvailableBalance:
       type: object
       description: "Available Balance"
+      properties:
+        amount:
+          type: number
+          format: double
+        currencyCode:
+          $ref: '#/components/schemas/CurrencyCode'
+    ReservedAmount:
+      type: object
+      description: "Reserved Amount"
       properties:
         amount:
           type: number
@@ -2056,7 +2373,7 @@ components:
           maxLength: 255
           type: string
           description: Email-id of the contact
-          format: email
+#          format: email
         addressLine1:
           maxLength: 70
           type: string
@@ -2224,13 +2541,230 @@ components:
       type: string
       description: "An email account identifier. At least one of the account identifiers\
         \ (accountNumber, IBAN, phoneNumber or email) is mandatory."
-      format: email
+#      format: email
     Additions:
       title: Additions
       type: object
       additionalProperties:
         type: string
       description: Additional properties
+
+    ###############################################
+    ## Loan fields
+    ###############################################
+    LoanType:
+      type: string
+      description: Type of a loan.
+    LoanStatus:
+      type: string
+      description: Status of a loan.
+      enum:
+        - Active
+        - Inactive
+        - Pending
+    NextRepaymentDateTime:
+      type: string
+      format: date-time
+      description: Datetime of a next payment.
+    NextRepaymentAmount:
+      type: number
+      format: double
+      description: Amount of a next payment.
+    IsOverdue:
+      type: boolean
+    OverduePaymentsCount:
+      type: integer
+    Borrowers:
+      type: array
+      items:
+        type: string
+      description: Borrower(s)
+    DefaultSettlementAccountNumber:
+      type: string
+      description: |
+        Default settlement account number. If defaultSettlementAccountId is specified and the account is
+        from dbs then account number will be taken from it and this field will be ignored.
+    DefaultSettlementAccountInternalId:
+      type: string
+    DefaultSettlementAccountExternalId:
+      type: string
+    IsFullyRepaid:
+      type: boolean
+    FeesDueAmount:
+      type: number
+      format: double
+    PaidAmount:
+      type: number
+      format: double
+    TermCount:
+      type: integer
+    PaymentFrequency:
+      type: integer
+    Revolving:
+      type: boolean
+      description: Shows if a loan is revolving
+    RenewDateTime:
+      type: string
+      description: Shows if loan is fully repaid
+      format: date-time
+    TotalDirectAmortization:
+      type: number
+      format: double
+    TotalIndirectAmortization:
+      type: number
+      format: double
+    NumberOfPaymentsMade:
+      type: integer
+    TotalNumberOfPayments:
+      type: integer
+    DateTime:
+      type: string
+      format: date-time
+    TaxesOnInterestAmount:
+      type: number
+      format: double
+    ContractLatePaymentCommissionAmount:
+      type: number
+      description: Late payment commission amount (contract condition)
+      format: double
+    CalculationPeriodStartDateTime:
+      type: string
+      format: date-time
+    CalculationPeriodEndDateTime:
+      type: string
+      format: date-time
+    ActualLatePaymentCommissionAmount:
+      type: number
+      description: Late payment commission (actual accrual condition)
+      format: double
+    LatePaymentCommissionTaxesAmount:
+      type: number
+      format: double
+    OverdueInterestAmount:
+      type: number
+      format: double
+    OverdueTaxesOnInterestAmount:
+      type: number
+      format: double
+    OverdueEscrowPaymentAmount:
+      type: number
+      format: double
+    OverduePrincipalPaymentAmount:
+      type: number
+      format: double
+    PenaltyAmount:
+      type: number
+      format: double
+    TotalAnnualCostPercentage:
+      type: number
+      format: double
+    MinimumDueAmount:
+      type: number
+      format: double
+    LastPaymentAmount:
+      type: number
+      description: Specifies the last payment amount that was posted as a transaction
+      format: double
+    LastPaymentDateTime:
+      type: string
+      format: date-time
+    StartDateTime:
+      type: string
+      format: date-time
+    EndDateTime:
+      type: string
+      format: date-time
+    FrequencyUnit:
+      type: string
+      description: Frequencu units.
+      enum:
+        - "Weekly"
+        - "Biweekly"
+        - "Twicemonthly"
+        - "Monthly"
+        - "Fourweeks"
+        - "Bimonthly"
+        - "Quarterly"
+        - "Semiannually"
+        - "Annually"
+        - "Maturity"
+    DocumentMetadata:
+      type: object
+      description: A loan document metadata.
+      properties:
+        id:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Identifier of the document.
+        name:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Name of the document.
+        contentType:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Content type of document.
+    DocumentMetadataArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/DocumentMetadata'
+
+    Collaterals:
+      type: array
+      items:
+        $ref: '#/components/schemas/Collateral'
+    Collateral:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of a collateral
+        currentValue:
+          type: number
+          format: double
+          description: Current evaluetion of a collateral
+        currencyCode:
+          type: string
+          description: The alpha-3 code (complying with ISO 4217) of the currency that qualifies the amount
+        specification:
+          type: string
+          description: Specification of a collateral (e.g. Serial numbers, Address data, etc)
+        nextRevaluationDateTime:
+          type: string
+          format: date-time
+          description: Next revaluation date
+    EscrowAttributes:
+      type: object
+      properties:
+        totalAmount:
+          type: number
+          format: double
+          description: A total amount set aside for Escrow
+        insurance:
+          type: number
+          format: double
+          description: Insurance amount set aside for Escrow
+        fees:
+          type: number
+          format: double
+          description: Fee amount set aside for Escrow
+        tax:
+          type: number
+          format: double
+          description: Tax amount set aside for Escrow
+        pmi:
+          type: number
+          format: double
+          description: PMI amount set aside for Escrow
+        other:
+          type: number
+          format: double
+          description: Other amount set aside for Escrow
+
+
 
     ###############################################
     ## Additional Data Group Items
@@ -2502,12 +3036,8 @@ components:
       required:
         - name
         - description
-    ReferenceJobRole:
-      title: "Reference Job Role"
-      allOf:
-        - $ref: '#/components/schemas/JobRole'
     UpdatedServiceAgreement:
-      title: "Updated Service Agreement"
+      description: "Updated Service Agreement"
       allOf:
         - $ref: '#/components/schemas/ServiceAgreement'
       properties:
@@ -2525,10 +3055,10 @@ components:
             $ref: '#/components/schemas/ServiceAgreementUserAction'
     ServiceAgreementUserAction:
       title: "Service Agreement user update action"
+      description: User and job roles to associate under service agreement
       properties:
         userProfile:
           $ref: '#/components/schemas/JobProfileUser'
-          description: User and job roles to associate under service agreement
         action:
           type: string
           description: add or remove user from service agreement

@@ -1,27 +1,18 @@
 spring:
-  jpa:
-    database-platform: org.hibernate.dialect.MySQL5Dialect
-  datasource:
-    username: ${DB_USER:root}
-    password: ${DB_PASSWORD:root}
-    url: jdbc:mysql://localhost:3306/transaction_cursor?createDatabaseIfNotExist=true&useSSL=false
-    driver-class-name: com.mysql.jdbc.Driver
-  zipkin:
-    enabled: false
+  application:
+    name: transaction-cursor
   main:
     allow-bean-definition-overriding: true
   liquibase:
     enabled: true
     change-log: db/changelog/db.changelog-persistence.xml
 
-
 backbase:
+  activemq:
+    enabled: true
   communication:
     http:
       default-service-port: 8080
-      client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: http://token-converter:8080/oauth/token
   stream:
     legalentity:
       sink:
@@ -30,18 +21,6 @@ backbase:
 logging:
   level:
     com.backbase.stream.compositions: DEBUG
-
-backbase.activemq.enabled: true
-spring.activemq.broker-url: tcp://localhost:61616
-
-eureka:
-  instance:
-    metadata-map:
-      public: true
-      role: live
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8080/registry/eureka/
 
 sso:
   jwt:

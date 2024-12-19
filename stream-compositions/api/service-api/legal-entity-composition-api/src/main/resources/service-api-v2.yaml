@@ -22,19 +22,19 @@ paths:
             schema:
               $ref: '#/components/schemas/LegalEntityPullIngestionRequest'
       responses:
-        '201':
+        "201":
           description: Legal Entity ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LegalEntityIngestionResponse'
-        '400':
+        "400":
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        '500':
+        "500":
           description: InternalServerError
           content:
             application/json:
@@ -55,19 +55,19 @@ paths:
             schema:
               $ref: '#/components/schemas/LegalEntityPushIngestionRequest'
       responses:
-        '201':
+        "201":
           description: Legal Entity ingested.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LegalEntityIngestionResponse'
-        '400':
+        "400":
           description: BadRequest
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequest'
-        '500':
+        "500":
           description: InternalServerError
           content:
             application/json:
@@ -88,28 +88,23 @@ components:
       type: object
       properties:
         legalEntityExternalId:
-          $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/externalId
-          description: The Legal Entity External Identifier. This is usually the pivot for the entity (a person or a company) in the Bank's core
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/LegalEntity/properties/externalId'
         taxId:
           type: string
           description: The Tax ID associated with the legal entity
         userExternalId:
-          $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/User/properties/externalId
-          description: The external identifier for the user. In most cases, this will be the username
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/User/properties/externalId'
         parentLegalEntityExternalId:
-          $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/parentExternalId
-          description: The parent Legal Entity's External Identifier
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/LegalEntity/properties/parentExternalId'
         realmName:
-          $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity/properties/realmName
-          description: The Identity realm name that the legal entity belongs to.
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/LegalEntity/properties/realmName'
         referenceJobRoleNames:
-          $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames
-          description: The reference job roles that should get assigned to the user
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/JobProfileUser/properties/referenceJobRoleNames'
         isAdmin:
           type: boolean
           description: Indicates if the user is an administrator on the Legal Entity
         identityUserLinkStrategy:
-          $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/IdentityUserLinkStrategy
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/IdentityUserLinkStrategy'
         productChainEnabled:
           type: boolean
           description: Flag to indicate if Product Ingestion should follow Legal Entity Ingestion
@@ -122,13 +117,13 @@ components:
       type: object
       properties:
         legalEntity:
-          $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/LegalEntity'
 
     LegalEntityIngestionResponse:
       type: object
       properties:
         legalEntity:
-          $ref: ../../../../../../../api/stream-legal-entity/openapi.yaml#/components/schemas/LegalEntity
+          $ref: '../../../target/copy/openapi.yaml#/components/schemas/LegalEntity'
         membershipAccounts:
           type: array
           items:
@@ -141,3 +136,7 @@ components:
       properties:
         message:
           type: string
+
+
+
+

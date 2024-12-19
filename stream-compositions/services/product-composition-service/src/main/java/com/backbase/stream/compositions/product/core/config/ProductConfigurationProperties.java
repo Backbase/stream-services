@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.product.core.config;
 
+import com.backbase.audit.rest.spec.v3.model.AuditMessage;
 import com.backbase.stream.compositions.product.core.model.RequestConfig;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import java.util.ArrayList;
@@ -11,120 +12,165 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.springframework.beans.InvalidPropertyException;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Setter
 @Getter
 @NoArgsConstructor
 @ConfigurationProperties("backbase.stream.compositions.product")
-public class ProductConfigurationProperties {
+public class ProductConfigurationProperties implements InitializingBean {
 
-  private String integrationBaseUrl = "http://product-ingestion-integration:8080";
-  private Chains chains;
-  private Events events;
-  private Cursor cursor;
-  private IngestionMode ingestionMode = new IngestionMode();
+    private LoginEvent loginEvent = new LoginEvent();
+    private Chains chains = new Chains();
+    private Events events = new Events();
+    private Cursor cursor = new Cursor();
+    private IngestionMode ingestionMode = new IngestionMode();
 
-  public boolean isCompletedEventEnabled() {
-    return Boolean.TRUE.equals(events.getEnableCompleted());
-  }
+    public boolean isCompletedEventEnabled() {
+        return Boolean.TRUE.equals(events.getEnableCompleted());
+    }
 
-  public boolean isFailedEventEnabled() {
-    return Boolean.TRUE.equals(events.getEnableFailed());
-  }
+    public boolean isFailedEventEnabled() {
+        return Boolean.TRUE.equals(events.getEnableFailed());
+    }
 
-  public boolean isTransactionChainEnabled() {
-    return Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled());
-  }
+    public boolean isTransactionChainEnabled() {
+        return Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
+            || Boolean.TRUE.equals(chains.getTransactionManager().getEnabled());
+    }
 
-  public boolean isTransactionChainEnabled(RequestConfig requestConfig) {
-    return requestConfig == null || requestConfig.isTransactionChainEnabled().isEmpty()
-        ? Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
-        : requestConfig.isTransactionChainEnabled().orElse(false);
-  }
+    public boolean isTransactionChainEnabled(RequestConfig requestConfig) {
+        return requestConfig == null || requestConfig.isTransactionChainEnabled().isEmpty()
+            ? isTransactionChainEnabled()
+            : requestConfig.isTransactionChainEnabled().orElse(false);
+    }
 
-  public boolean isTransactionChainAsync(RequestConfig requestConfig) {
-    return requestConfig == null || requestConfig.isTransactionChainAsync().isEmpty()
-        ? Boolean.TRUE.equals(chains.getTransactionComposition().getAsync())
-        : requestConfig.isTransactionChainAsync().orElse(false);
-  }
+    public boolean isTransactionChainAsync(RequestConfig requestConfig) {
+        return requestConfig == null || requestConfig.isTransactionChainAsync().isEmpty()
+            ? isTransactionChainAsync()
+            : requestConfig.isTransactionChainAsync().orElse(false);
+    }
 
-  public boolean isTransactionChainAsync() {
-    return Boolean.TRUE.equals(chains.getTransactionComposition().getAsync());
-  }
+    public boolean isTransactionChainAsync() {
+        return Boolean.TRUE.equals(chains.getTransactionComposition().getAsync())
+            || Boolean.TRUE.equals(chains.getTransactionManager().getAsync());
+    }
 
-  public boolean isPaymentOrderChainEnabled() {
-    return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getEnabled());
-  }
+    public boolean isPaymentOrderChainEnabled() {
+        return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getEnabled());
+    }
 
-  public boolean isPaymentOrderChainAsync() {
-    return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getAsync());
-  }
+    public boolean isPaymentOrderChainAsync() {
+        return Boolean.TRUE.equals(chains.getPaymentOrderComposition().getAsync());
+    }
 
-  @Data
-  @NoArgsConstructor
-  public static class Events {
+    public BatchProductIngestionMode ingestionMode() {
+        return BatchProductIngestionMode.builder()
+            .functionGroupsMode(ingestionMode.getFunctionGroups())
+            .dataGroupIngestionMode(ingestionMode.getDataGroups())
+            .arrangementsMode(ingestionMode.getArrangements())
+            .build();
+    }
 
-    private Boolean enableCompleted = Boolean.FALSE;
-    private Boolean enableFailed = Boolean.FALSE;
-  }
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (Boolean.TRUE.equals(chains.getTransactionComposition().getEnabled())
+            && Boolean.TRUE.equals(chains.getTransactionManager().getEnabled())) {
+            throw new InvalidPropertyException(this.getClass(), "backbase.stream.compositions.product.chains",
+                "Either Transaction Composition or Transaction Manager should be enabled, never both");
+        }
+    }
 
-  @Data
-  @NoArgsConstructor
-  public static class Cursor {
+    @Data
+    @NoArgsConstructor
+    public static class LoginEvent {
 
-    private Boolean enabled = Boolean.FALSE;
-    private String baseUrl = "http://product-cursor:9000";
-  }
+        private Boolean enabled = Boolean.FALSE;
+        private List<String> realms = List.of("customer");
+        private String eventCategory = "Identity and Access";
+        private String eventAction = "Attempt Login";
+        private String objectType = "Authentication";
+        private AuditMessage.Status status = AuditMessage.Status.SUCCESSFUL;
 
-  @Data
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class Chains {
+    }
 
-    private TransactionComposition transactionComposition;
-    private PaymentOrderComposition paymentOrderComposition;
-  }
+    @Data
+    @NoArgsConstructor
+    public static class Events {
 
-  @Data
-  @NoArgsConstructor
-  public static class IngestionMode {
+        private Boolean enableCompleted = Boolean.FALSE;
+        private Boolean enableFailed = Boolean.FALSE;
+    }
 
-    private BatchProductIngestionMode.FunctionGroupsMode functionGroups =
-        BatchProductIngestionMode.FunctionGroupsMode.UPSERT;
-    private BatchProductIngestionMode.DataGroupsMode dataGroups =
-        BatchProductIngestionMode.DataGroupsMode.UPSERT;
-    private BatchProductIngestionMode.ArrangementsMode arrangements =
-        BatchProductIngestionMode.ArrangementsMode.UPSERT;
-  }
+    @Data
+    @NoArgsConstructor
+    public static class Cursor {
 
-  @Data
-  @SuperBuilder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public abstract static class BaseComposition {
+        private Boolean enabled = Boolean.FALSE;
+    }
 
-    private Boolean enabled = Boolean.FALSE;
-    private String baseUrl = "http://localhost:9003/";
-    private Boolean async = Boolean.FALSE;
-  }
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Chains {
 
-  @Data
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @SuperBuilder
-  public static class TransactionComposition extends BaseComposition {
+        private TransactionManager transactionManager = new TransactionManager();
+        private TransactionComposition transactionComposition = new TransactionComposition();
+        private PaymentOrderComposition paymentOrderComposition = new PaymentOrderComposition();
+    }
 
-    private List<String> excludeProductTypeExternalIds = new ArrayList<>();
-  }
+    @Data
+    @NoArgsConstructor
+    public static class IngestionMode {
 
-  @Data
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @SuperBuilder
-  public static class PaymentOrderComposition extends BaseComposition {
+        private BatchProductIngestionMode.FunctionGroupsMode functionGroups = BatchProductIngestionMode.FunctionGroupsMode.UPSERT;
+        private BatchProductIngestionMode.DataGroupsMode dataGroups = BatchProductIngestionMode.DataGroupsMode.UPSERT;
+        private BatchProductIngestionMode.ArrangementsMode arrangements = BatchProductIngestionMode.ArrangementsMode.UPSERT;
+    }
 
-    private List<String> excludeProductTypeExternalIds = new ArrayList<>();
-  }
+    @Data
+    @SuperBuilder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static abstract class BaseComposition {
+
+        private Boolean enabled = Boolean.FALSE;
+        private Boolean async = Boolean.FALSE;
+    }
+
+    @Getter
+    @Setter
+    public static class TransactionManager extends TransactionComposition {
+
+        /**
+         * The transaction manager supports a refresh call for all accounts at a single time;
+         * however, some systems can't handle the throughput, so we enable one request per arrangement.
+         */
+        private Boolean splitPerArrangement = Boolean.TRUE;
+        /**
+         * In case a split per arrangement is made, and in sync mode, it limits the number of concurrent calls.
+         */
+        private Integer concurrency = 1;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @SuperBuilder
+    public static class TransactionComposition extends BaseComposition {
+
+        private List<String> excludeProductTypeExternalIds = new ArrayList<>();
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @SuperBuilder
+    public static class PaymentOrderComposition extends BaseComposition {
+
+        private List<String> excludeProductTypeExternalIds = new ArrayList<>();
+    }
 }

@@ -89,4 +89,4 @@ components:
         paymentOrder:
           type: array
           items:
-            $ref: '../../../target/yaml/payment/payment-order-service-api-v2.12.3.yaml#/components/schemas/PaymentOrderPostRequest'
+            $ref: '../../../target/yaml/payment/payment-order-service-api-v3.8.0.yaml#/components/schemas/PaymentOrderPostRequest'

@@ -2,53 +2,62 @@ server:
   port: 9003
 
 spring:
+  cloud:
+    config:
+      enabled: false
+    loadbalancer:
+      enabled: false
   activemq:
     broker-url: tcp://localhost:61616
-  zipkin:
-    enabled: false
-  main:
-    allow-bean-definition-overriding: true
-sso:
-  jwt:
-    internal:
-      type: signed
-      signature:
-        algorithm: HS256
-        key:
-          type: ENV
-          value: SIG_SECRET_KEY
 eureka:
+  instance:
+    hostname: host.docker.internal
   client:
-    enabled: true
-    serviceUrl.defaultZone: http://localhost:8080/registry/eureka
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
 
 backbase:
   communication:
     services:
       usermanager:
-        direct-uri: http://localhost:8086/user-manager
+        direct-uri: http://localhost:8060
       access-control:
-        direct-uri: http://localhost:8086/access-control
+        direct-uri: http://localhost:8040
       arrangement:
         manager:
-          direct-uri: http://localhost:8082/arrangement-manager
+          direct-uri: http://localhost:8050
+      transaction:
+        manager:
+          direct-uri: http://localhost:8087
+      stream:
+        product:
+          integration:
+            direct-uri: http://localhost:7003
+        transaction:
+          composition:
+            direct-uri: http://localhost:9004
+        payment-order:
+          composition:
+            direct-uri: http://localhost:9004
     http:
       client-secret: bb-secret
       client-id: bb-client
-      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+      access-token-uri: "http://localhost:7779/oauth/token"
   stream:
     compositions:
       product:
-        integration-base-url: http://localhost:7003
         chains:
+          transaction-manager:
+            enabled: false
+            async: false
+            splitPerArrangement: false
+            concurrency: 1
           transaction-composition:
-            enabled: true
-            base-url: http://localhost:9004
+            enabled: false
             async: false
             excludeProductTypeExternalIds:
           payment-order-composition:
             enabled: false
-            base-url: http://localhost:9004
             async: false
             excludeProductTypeExternalIds:
         events:
@@ -56,8 +65,9 @@ backbase:
           enableFailed: true
         cursor:
           enabled: false
-          base-url: http://localhost:9005
 
 logging:
   level:
-    com.backbase.stream.compositions: DEBUG
+    com.backbase: DEBUG
+    reactor.netty.http.client: DEBUG
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG

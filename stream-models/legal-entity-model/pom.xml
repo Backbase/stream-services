@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-models</artifactId>
-        <version>3.43.0</version>
+        <version>6.10.0</version>
     </parent>
 
     <artifactId>legal-entity-model</artifactId>
@@ -15,10 +14,11 @@
     <name>Stream :: Legal Entity Model</name>
 
     <properties>
+        <sonar.skip>true</sonar.skip>
         <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
-        <sonar.skip>true</sonar.skip>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -54,32 +54,26 @@
                 <executions>
                     <execution>
                         <id>cursor</id>
-                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>generate-spring-boot-embedded</goal>
                         </goals>
+                        <phase>generate-sources</phase>
                         <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
+                            <output>${openapi-generator-maven-plugin.output}</output>
+                            <modelPackage>com.backbase.stream.legalentity.model</modelPackage>
+                            <apiPackage>com.backbase.stream.legalentity</apiPackage>
                             <configOptions>
-                                <dateLibrary>java8</dateLibrary>
-                                <java8>true</java8>
-                                <library>spring-boot</library>
-                                <modelPackage>com.backbase.stream.legalentity.model</modelPackage>
                                 <reactive>true</reactive>
                                 <useBeanValidation>false</useBeanValidation>
                                 <useReflectionEqualsHashCode>false</useReflectionEqualsHashCode>
                             </configOptions>
-                            <generateApiTests>false</generateApiTests>
-                            <generateApis>false</generateApis>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
-                            <output>${openapi-generator-maven-plugin.output}</output>
                             <typeMappings>
                                 <typeMapping>Double=java.math.BigDecimal</typeMapping>
                             </typeMappings>
                         </configuration>
                     </execution>
-
                 </executions>
             </plugin>
 

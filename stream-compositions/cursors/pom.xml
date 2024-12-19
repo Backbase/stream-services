@@ -5,7 +5,7 @@
   <parent>
     <artifactId>stream-compositions</artifactId>
     <groupId>com.backbase.stream</groupId>
-    <version>3.43.0</version>
+    <version>6.10.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -40,7 +40,7 @@
                   <goal>execute</goal>
                 </goals>
                 <configuration>
-                  <driver>com.mysql.jdbc.Driver</driver>
+                  <driver>com.mysql.cj.jdbc.Driver</driver>
                   <url>jdbc:mysql://localhost:3306?useSSL=false</url>
                   <username>root</username>
                   <password>root</password>
@@ -58,7 +58,7 @@
                   <goal>execute</goal>
                 </goals>
                 <configuration>
-                  <driver>com.mysql.jdbc.Driver</driver>
+                  <driver>com.mysql.cj.jdbc.Driver</driver>
                   <url>jdbc:mysql://localhost:3306/transaction_cursor?useSSL=false&amp;createDatabaseIfNotExist=true</url>
                   <username>root</username>
                   <password>root</password>
@@ -74,9 +74,9 @@
             </executions>
             <dependencies>
               <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>5.1.41</version>
+                  <groupId>com.mysql</groupId>
+                  <artifactId>mysql-connector-j</artifactId>
+                  <version>${mysql.version}</version>
               </dependency>
             </dependencies>
           </plugin>

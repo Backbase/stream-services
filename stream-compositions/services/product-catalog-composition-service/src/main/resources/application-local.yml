@@ -2,42 +2,44 @@ server:
   port: 9002
 
 spring:
-  zipkin:
-    enabled: false
-  main:
-    allow-bean-definition-overriding: true
+  activemq:
+    broker-url: tcp://localhost:61616
+  cloud:
+    config:
+      enabled: false
+    loadbalancer:
+      enabled: false
 backbase:
+  activemq:
+    enabled: true
   communication:
     services:
       usermanager:
-        direct-uri: http://localhost:8086/user-manager
+        direct-uri: http://localhost:8060
       access-control:
-        direct-uri: http://localhost:8086/access-control
+        direct-uri: http://localhost:8040
       arrangement:
         manager:
-          direct-uri: http://localhost:8082/arrangement-manager
+          direct-uri: http://localhost:8050
+      stream:
+        product-catalog:
+          integration:
+            direct-uri: http://localhost:7002
     http:
       client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+      access-token-uri: "http://localhost:7779/oauth/token"
   stream:
     compositions:
       product-catalog:
         enable-completed-events: false
         enable-failed-events: false
-        product-catalog-integration-url: http://localhost:7002
-
-backbase.activemq.enabled: true
-spring.activemq.broker-url: tcp://localhost:61616
 
 eureka:
   instance:
-    metadata-map:
-      public: true
-      role: live
+    hostname: host.docker.internal
   client:
     serviceUrl:
-      defaultZone: http://localhost:8080/registry/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 bootstrap:
   enabled: true

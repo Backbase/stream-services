@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-legal-entity</artifactId>
-        <version>3.43.0</version>
+        <version>6.10.0</version>
     </parent>
+
     <artifactId>legal-entity-core</artifactId>
 
     <packaging>jar</packaging>
@@ -16,7 +16,7 @@
     <properties>
         <raml2openapi-maven-plugin.input>${project.basedir}/../../api/stream-legal-entity/openapi.yaml</raml2openapi-maven-plugin.input>
         <raml2openapi-maven-plugin.output>${project.build.directory}/openapi.yaml</raml2openapi-maven-plugin.output>
-
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
     </properties>
 
     <dependencies>
@@ -25,6 +25,13 @@
             <groupId>com.backbase.stream</groupId>
             <artifactId>access-control-core</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>audiences-core</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -42,6 +49,28 @@
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>limits-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>loans-core</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.backbase</groupId>
+                    <artifactId>backbase-bom</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.backbase</groupId>
+                    <artifactId>backbase-bom</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>plan-manager-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -91,47 +120,11 @@
 
     <build>
         <plugins>
+
             <plugin>
-                <groupId>com.backbase.oss</groupId>
-                <artifactId>boat-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <configOptions>
-                                <apiPackage>com.backbase.stream.legalentity.api</apiPackage>
-                                <apis />
-                                <dateLibrary>java8</dateLibrary>
-                                <interfaceOnly>true</interfaceOnly>
-                                <java8>true</java8>
-                                <library>spring-boot</library>
-                                <modelPackage>com.backbase.stream.legalentity.model</modelPackage>
-                                <models />
-                                <openapiDocketConfig>true</openapiDocketConfig>
-                                <reactive>true</reactive>
-                                <skipDefaultInterface>true</skipDefaultInterface>
-                            </configOptions>
-                            <generateApiTests>false</generateApiTests>
-                            <generateApis>true</generateApis>
-                            <generateModels>false</generateModels>
-                            <generateSupportingFiles>false</generateSupportingFiles>
-                            <generatorName>spring</generatorName>
-                            <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
-                            <output>${openapi-generator-maven-plugin.output}</output>
-                            <typeMappings>
-                                <typeMapping>Double=java.math.BigDecimal</typeMapping>
-                            </typeMappings>
-                        </configuration>
-                    </execution>
-
-                </executions>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
-
         </plugins>
     </build>
-
 </project>

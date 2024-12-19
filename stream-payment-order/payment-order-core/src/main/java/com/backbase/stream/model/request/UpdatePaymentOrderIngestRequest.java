@@ -1,6 +1,7 @@
 package com.backbase.stream.model.request;
 
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPutRequest;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPutRequest;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,10 +9,11 @@ import lombok.Getter;
 @Getter
 public class UpdatePaymentOrderIngestRequest implements PaymentOrderIngestRequest {
 
-  private final PaymentOrderPutRequest paymentOrderPutRequest;
+    private final PaymentOrderPutRequest paymentOrderPutRequest;
 
-  @Override
-  public String getBankReferenceId() {
-    return paymentOrderPutRequest.getBankReferenceId();
-  }
+    @Override
+    public String getBankReferenceId() {
+        return paymentOrderPutRequest.getBankReferenceId();
+    }
+
 }

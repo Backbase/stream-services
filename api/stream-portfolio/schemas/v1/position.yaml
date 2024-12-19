@@ -31,6 +31,12 @@ properties:
   unrealizedPL:
     $ref: money.yaml
     description: Unrealized current profit or loss on an open position, expressed as an absolute number.
+  unrealizedPLLocalPct:
+    type: number
+    description: Unrealized local current profit or loss on an open position, expressed as a percentage.
+  unrealizedPLLocal:
+    $ref: money.yaml
+    description: Unrealized local current profit or loss on an open position, expressed as an absolute number.
   todayPLPct:
     type: number
     description: Today profit or loss on an open position, expressed as a percentage.

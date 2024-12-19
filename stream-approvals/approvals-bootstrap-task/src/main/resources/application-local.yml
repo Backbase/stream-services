@@ -5,8 +5,6 @@ spring:
     task:
       events:
         enabled: false
-  zipkin:
-    enabled: false
 
 ---
 spring:
@@ -18,8 +16,6 @@ spring:
       discovery:
         # Set to false if using Eureka for service discovery
         enabled: true
-  zipkin:
-    enabled: false
 
 eureka:
   instance:

@@ -4,7 +4,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-sdk</artifactId>
-    <version>3.43.0</version>
+    <version>6.10.0</version>
     <packaging>pom</packaging>
 
     <name>Stream :: SDK</name>
@@ -12,6 +12,7 @@
     <modules>
         <module>stream-parent</module>
         <module>stream-starter-parents</module>
+        <module>stream-starter</module>
     </modules>
 
 </project>

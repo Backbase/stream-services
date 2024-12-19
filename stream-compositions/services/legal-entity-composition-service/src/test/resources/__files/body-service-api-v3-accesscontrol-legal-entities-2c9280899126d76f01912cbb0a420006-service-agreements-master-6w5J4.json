@@ -1,0 +1,9 @@
+{
+  "message": "Not Found",
+  "errors": [
+    {
+      "message": "Service agreement does not exist",
+      "key": "serviceAgreements.get.error.message.E_NOT_EXISTS"
+    }
+  ]
+}

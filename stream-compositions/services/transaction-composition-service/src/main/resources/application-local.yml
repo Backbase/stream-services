@@ -2,63 +2,56 @@ server:
   port: 9004
 
 spring:
+  cloud:
+    config:
+      enabled: false
+    loadbalancer:
+      enabled: false
   activemq:
     broker-url: tcp://localhost:61616
-  zipkin:
-    enabled: false
-  main:
-    allow-bean-definition-overriding: true
-  codec:
-    max-in-memory-size: 10MB
-sso:
-  jwt:
-    internal:
-      type: signed
-      signature:
-        algorithm: HS256
-        key:
-          type: ENV
-          value: SIG_SECRET_KEY
+
 backbase:
   communication:
     services:
       usermanager:
-        direct-uri: http://localhost:8086/user-manager
+        direct-uri: http://localhost:8060
       access-control:
-        direct-uri: http://localhost:8086/access-control
+        direct-uri: http://localhost:8040
       arrangement:
         manager:
-          direct-uri: http://localhost:8082/arrangement-manager
+          direct-uri: http://localhost:8050
       transaction:
         manager:
-          direct-uri: http://localhost:8083/transaction-manager
+          direct-uri: http://localhost:8083
+      stream:
+        transaction:
+          cursor:
+            direct-uri: http://localhost:9005
+          integration:
+            direct-uri: http://localhost:7004
     http:
       client-secret: bb-secret
       client-id: bb-client
-      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+      access-token-uri: "http://localhost:7779/oauth/token"
   activemq:
     enabled: true
   stream:
     compositions:
       transaction:
         defaultStartOffsetInDays: 30
-        integration-base-url: http://localhost:7004
         events:
           enableCompleted: true
           enableFailed: true
         cursor:
           enabled: true
           transactionIdsFilterEnabled: true
-          base-url: http://localhost:9005
 
 eureka:
   instance:
-    metadata-map:
-      public: true
-      role: live
+    hostname: host.docker.internal
   client:
     serviceUrl:
-      defaultZone: http://localhost:8080/registry/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 logging:
   level:

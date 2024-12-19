@@ -1,8 +1,8 @@
 package com.backbase.stream.clients.config;
 
 import com.backbase.buildingblocks.webclient.client.ApiClientConfig;
+import jakarta.validation.constraints.Positive;
 import java.util.Optional;
-import javax.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
@@ -17,7 +17,7 @@ import org.springframework.validation.annotation.Validated;
  * needs to be set to false in services with support to client-side load balancing.
  */
 @Validated
-class CompositeApiClientConfig extends ApiClientConfig {
+public class CompositeApiClientConfig extends ApiClientConfig {
 
   /** Direct uri used as base path when load balancing is not available. */
   private String directUri;

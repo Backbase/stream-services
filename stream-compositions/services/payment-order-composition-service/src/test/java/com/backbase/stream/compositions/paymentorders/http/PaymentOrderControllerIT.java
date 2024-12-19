@@ -1,16 +1,11 @@
 package com.backbase.stream.compositions.paymentorders.http;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-
-import com.backbase.dbs.paymentorder.api.service.v2.model.PaymentOrderPostResponse;
+import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostResponse;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPostRequest;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPullIngestionRequest;
 import com.backbase.stream.compositions.paymentorder.api.model.PaymentOrderPushIngestionRequest;
+import com.backbase.stream.model.PaymentOrderIngestContext;
 import com.backbase.stream.model.response.PaymentOrderIngestDbsResponse;
 import com.backbase.stream.paymentorder.PaymentOrderTask;
 import com.backbase.stream.worker.model.UnitOfWork;
@@ -18,11 +13,6 @@ import com.backbase.streams.compositions.test.IntegrationTest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.broker.BrokerService;
 import org.junit.jupiter.api.AfterEach;
@@ -43,118 +33,130 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
 @DirtiesContext
-@SpringBootTest
+@SpringBootTest(properties = {
+        "backbase.stream.paymentorder.types=type1,type2,type3"
+})
 @AutoConfigureWebTestClient
 @ExtendWith({SpringExtension.class})
 @Slf4j
 class PaymentOrderControllerIT extends IntegrationTest {
 
-  private static final int INTEGRATION_SERVICE_PORT = 18000;
-  private static BrokerService broker;
-  @Autowired PaymentOrderController paymentOrderController;
-  @MockBean PaymentOrderService paymentOrderService;
-  private ClientAndServer integrationServer;
-  private MockServerClient integrationServerClient;
+    private static final int INTEGRATION_SERVICE_PORT = 18000;
+    private ClientAndServer integrationServer;
+    private MockServerClient integrationServerClient;
+    private static BrokerService broker;
 
-  @BeforeAll
-  static void initActiveMqBroker() throws Exception {
-    broker = new BrokerService();
-    broker.setBrokerName("activemq");
-    broker.setPersistent(false);
-    broker.start();
-    broker.waitUntilStarted();
-  }
+    @Autowired
+    PaymentOrderController paymentOrderController;
 
-  @BeforeEach
-  void initializeIntegrationServer() throws IOException {
-    integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
-    integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
-    integrationServerClient
-        .when(request().withMethod("POST").withPath("/integration-api/v2/payment-order"))
-        .respond(
-            response()
-                .withStatusCode(200)
-                .withContentType(MediaType.APPLICATION_JSON)
-                .withBody(readContentFromClasspath("integration-data/response.json")));
-  }
+    @MockBean
+    PaymentOrderService paymentOrderService;
 
-  @AfterEach
-  void stopMockServer() {
-    integrationServer.stop();
-    while (!integrationServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {}
-  }
+    @BeforeAll
+    static void initActiveMqBroker() throws Exception {
+        broker = new BrokerService();
+        broker.setBrokerName("activemq");
+        broker.setPersistent(false);
+        broker.start();
+        broker.waitUntilStarted();
+    }
 
-  @Test
-  void pullIngestPaymentOrder_Success() throws Exception {
+    @BeforeEach
+    void initializeIntegrationServer() throws IOException {
+        integrationServer = startClientAndServer(INTEGRATION_SERVICE_PORT);
+        integrationServerClient = new MockServerClient("localhost", INTEGRATION_SERVICE_PORT);
+        integrationServerClient.when(
+                request()
+                    .withMethod("POST")
+                    .withPath("/integration-api/v2/payment-order"))
+            .respond(
+                response()
+                    .withStatusCode(200)
+                    .withContentType(MediaType.APPLICATION_JSON)
+                    .withBody(readContentFromClasspath("integration-data/response.json"))
+            );
+    }
 
-    URI uri = URI.create("/service-api/v2/ingest/pull");
-    WebTestClient webTestClient = WebTestClient.bindToController(paymentOrderController).build();
+    @AfterEach
+    void stopMockServer() {
+        integrationServer.stop();
+        while (!integrationServer.hasStopped(3, 100L, TimeUnit.MILLISECONDS)) {
+        }
+    }
 
-    List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
+    @Test
+    void pullIngestPaymentOrder_Success() throws Exception {
 
-    PaymentOrderTask dbsResTask = new PaymentOrderTask("id", null);
-    dbsResTask.setResponses(responses);
+        URI uri = URI.create("/service-api/v2/ingest/pull");
+        WebTestClient webTestClient = WebTestClient.bindToController(paymentOrderController).build();
 
-    when(paymentOrderService.processPaymentOrder(any()))
-        .thenReturn(Flux.just(UnitOfWork.from("id", dbsResTask)));
+        List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
 
-    PaymentOrderPullIngestionRequest pullIngestionRequest =
-        new PaymentOrderPullIngestionRequest()
-            .withInternalUserId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
-            .withMemberNumber("memberId")
-            .withServiceAgreementInternalId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
-            .withLegalEntityExternalId("leExternalId")
-            .withLegalEntityInternalId("leInternalId");
-    webTestClient
-        .post()
-        .uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pullIngestionRequest), PaymentOrderPullIngestionRequest.class)
-        .exchange()
-        .expectStatus()
-        .isCreated();
-  }
+        PaymentOrderTask dbsResTask = new PaymentOrderTask("id", null);
+        dbsResTask.setResponses(responses);
 
-  @Test
-  void pushIngestPaymentOrder_Success() throws Exception {
+        when(paymentOrderService.processPaymentOrder(any())).thenReturn(
+                Flux.just(UnitOfWork.from("id", dbsResTask)));
 
-    URI uri = URI.create("/service-api/v2/ingest/push");
-    WebTestClient webTestClient = WebTestClient.bindToController(paymentOrderController).build();
+        PaymentOrderPullIngestionRequest pullIngestionRequest =
+                new PaymentOrderPullIngestionRequest()
+                        .internalUserId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
+                        .memberNumber("memberId")
+                        .serviceAgreementInternalId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
+                        .legalEntityExternalId("leExternalId")
+                        .legalEntityInternalId("leInternalId");
+        webTestClient.post().uri(uri)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Mono.just(pullIngestionRequest), PaymentOrderPullIngestionRequest.class).exchange()
+                .expectStatus().isCreated();
 
-    List<PaymentOrderPostResponse> paymentOrderPostResponses =
-        new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .readValue(
-                readContentFromClasspath("integration-data/response.json"),
-                new TypeReference<>() {});
+    }
 
-    List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
+    @Test
+    void pushIngestPaymentOrder_Success() throws Exception {
 
-    PaymentOrderTask dbsResTask = new PaymentOrderTask("id", null);
-    dbsResTask.setResponses(responses);
+        URI uri = URI.create("/service-api/v2/ingest/push");
+        WebTestClient webTestClient = WebTestClient.bindToController(paymentOrderController).build();
 
-    when(paymentOrderService.processPaymentOrder(any()))
-        .thenReturn(Flux.just(UnitOfWork.from("id", dbsResTask)));
+        List<PaymentOrderPostResponse> paymentOrderPostResponses = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .readValue(readContentFromClasspath("integration-data/response.json"), new TypeReference<>() {
+                });
 
-    PaymentOrderPushIngestionRequest pushIngestionRequest =
-        new PaymentOrderPushIngestionRequest()
-            .withPaymentOrders(
-                List.of(
-                    new PaymentOrderPostRequest()
-                        .withInternalUserId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
-                        .withBankReferenceId("bankRefId")
-                        .withServiceAgreementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
-                        .withPaymentSetupId("paymentSetupId")
-                        .withPaymentSubmissionId("paymentSubmissionId")));
+        List<PaymentOrderIngestDbsResponse> responses = new ArrayList<>();
 
-    webTestClient
-        .post()
-        .uri(uri)
-        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-        .body(Mono.just(pushIngestionRequest), PaymentOrderPullIngestionRequest.class)
-        .exchange()
-        .expectStatus()
-        .is4xxClientError();
-  }
+        PaymentOrderTask dbsResTask = new PaymentOrderTask("id", null);
+        dbsResTask.setResponses(responses);
+
+        when(paymentOrderService.processPaymentOrder(any())).thenReturn(
+                Flux.just(UnitOfWork.from("id", dbsResTask)));
+
+        PaymentOrderPushIngestionRequest pushIngestionRequest =
+                new PaymentOrderPushIngestionRequest()
+                        .paymentOrders(List.of(new PaymentOrderPostRequest()
+                                .internalUserId("4337f8cc-d66d-41b3-a00e-f71ff15d93cg")
+                                .bankReferenceId("bankRefId")
+                                .serviceAgreementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cf")
+                                .paymentSetupId("paymentSetupId")
+                                .paymentSubmissionId("paymentSubmissionId")));
+
+        webTestClient.post().uri(uri)
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Mono.just(pushIngestionRequest), PaymentOrderPullIngestionRequest.class).exchange()
+                .expectStatus().is4xxClientError();
+
+    }
 }

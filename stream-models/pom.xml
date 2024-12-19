@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>3.43.0</version>
+        <version>6.10.0</version>
     </parent>
 
     <artifactId>stream-models</artifactId>
@@ -25,13 +25,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <inherited>false</inherited>
                 <executions>
                     <execution>
                         <id>assembly-specs-package</id>
-                        <phase>package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
+                        <phase>package</phase>
                         <configuration>
                             <descriptors>
                                 <descriptor>assembly/specs.xml</descriptor>
@@ -39,7 +40,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <inherited>false</inherited>
             </plugin>
         </plugins>
     </build>

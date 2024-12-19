@@ -21,43 +21,49 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 class LegalEntityControllerTest {
 
-  LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
 
-  @Mock LegalEntityIngestionService legalEntityIngestionService;
+    LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
 
-  LegalEntityController controller;
+    @Mock
+    LegalEntityIngestionService legalEntityIngestionService;
 
-  @BeforeEach
-  void setUp() {
-    controller = new LegalEntityController(legalEntityIngestionService, mapper);
-  }
+    LegalEntityController controller;
 
-  @Test
-  void testPullIngestion_Success() {
-    Mono<LegalEntityPullIngestionRequest> requestMono =
-        Mono.just(new LegalEntityPullIngestionRequest().withLegalEntityExternalId("externalId"));
 
-    when(legalEntityIngestionService.ingestPull(any()))
-        .thenReturn(
-            Mono.just(LegalEntityResponse.builder().legalEntity(new LegalEntity()).build()));
+    @BeforeEach
+    void setUp() {
+        controller = new LegalEntityController(
+                legalEntityIngestionService,
+                mapper
+        );
+    }
 
-    controller.pullLegalEntity(requestMono, null).block();
-    verify(legalEntityIngestionService).ingestPull(any());
-  }
+    @Test
+    void testPullIngestion_Success() {
+        Mono<LegalEntityPullIngestionRequest> requestMono = Mono.just(
+                new LegalEntityPullIngestionRequest().legalEntityExternalId("externalId"));
 
-  @Test
-  void testPushIngestion_Success() {
-    Mono<LegalEntityPushIngestionRequest> requestMono =
-        Mono.just(
-            new LegalEntityPushIngestionRequest()
-                .withLegalEntity(
-                    new com.backbase.stream.compositions.legalentity.api.model.LegalEntity()));
+        when(legalEntityIngestionService.ingestPull(any())).thenReturn(
+                Mono.just(LegalEntityResponse.builder()
+                        .legalEntity(new LegalEntity())
+                        .build()));
 
-    when(legalEntityIngestionService.ingestPush(any()))
-        .thenReturn(
-            Mono.just(LegalEntityResponse.builder().legalEntity(new LegalEntity()).build()));
+        controller.pullLegalEntity(requestMono, null).block();
+        verify(legalEntityIngestionService).ingestPull(any());
+    }
 
-    controller.pushLegalEntity(requestMono, null).block();
-    verify(legalEntityIngestionService).ingestPush(any());
-  }
+    @Test
+    void testPushIngestion_Success() {
+        Mono<LegalEntityPushIngestionRequest> requestMono = Mono.just(
+                new LegalEntityPushIngestionRequest().legalEntity(
+                        new com.backbase.stream.compositions.legalentity.api.model.LegalEntity()));
+
+        when(legalEntityIngestionService.ingestPush(any())).thenReturn(
+                Mono.just(LegalEntityResponse.builder()
+                        .legalEntity(new LegalEntity())
+                        .build()));
+
+        controller.pushLegalEntity(requestMono, null).block();
+        verify(legalEntityIngestionService).ingestPush(any());
+    }
 }

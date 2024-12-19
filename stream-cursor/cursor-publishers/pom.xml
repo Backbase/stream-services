@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-cursor</artifactId>
-        <version>3.43.0</version>
+        <version>6.10.0</version>
     </parent>
 
     <artifactId>cursor-publishers</artifactId>
@@ -33,11 +33,6 @@
             <groupId>com.backbase.stream</groupId>
             <artifactId>cursor-core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.jms</groupId>
-            <artifactId>javax.jms-api</artifactId>
         </dependency>
 
         <dependency>

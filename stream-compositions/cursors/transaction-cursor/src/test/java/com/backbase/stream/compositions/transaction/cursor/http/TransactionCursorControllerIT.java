@@ -13,8 +13,10 @@ import com.backbase.stream.compositions.transaction.cursor.model.TransactionCurs
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorFilterRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorPatchRequest;
 import com.backbase.stream.compositions.transaction.cursor.model.TransactionCursorUpsertRequest;
+
+import jakarta.persistence.EntityManager;
 import java.util.Optional;
-import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -36,144 +38,128 @@ import reactor.test.StepVerifier;
 @DirtiesContext
 @ExtendWith({SpringExtension.class})
 @ActiveProfiles("local")
-@WebFluxTest(
-    controllers = TransactionCursorController.class,
-    excludeAutoConfiguration = {TransactionCursorConfiguration.class})
+@WebFluxTest(controllers = TransactionCursorController.class,
+        excludeAutoConfiguration = {TransactionCursorConfiguration.class})
 public class TransactionCursorControllerIT {
 
-  @Autowired TransactionCursorController transactionCursorController;
+    @Autowired
+    TransactionCursorController transactionCursorController;
 
-  @MockBean TransactionCursorRepository transactionCursorRepository;
+    @MockBean
+    TransactionCursorRepository transactionCursorRepository;
 
-  @MockBean TransactionCursorRepositoryImpl transactionCursorRepositoryImpl;
+    @MockBean
+    TransactionCursorRepositoryImpl transactionCursorRepositoryImpl;
 
-  @MockBean WebClient webClient;
-  @Autowired TransactionCursorMapper mapper;
-  @MockBean EntityManager entityManager;
-  @Autowired private WebTestClient webTestClient;
+    @MockBean
+    WebClient webClient;
 
-  @Test
-  void deleteCursor_Success() {
-    String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
+    @Autowired
+    private WebTestClient webTestClient;
 
-    webTestClient
-        .method(HttpMethod.DELETE)
-        .uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
-        .exchange()
-        .expectStatus()
-        .isOk();
-    Mockito.verify(transactionCursorRepository, Mockito.times(1))
-        .deleteByArrangementId(arrangementId);
-  }
+    @Autowired
+    TransactionCursorMapper mapper;
 
-  @Test
-  void getByArrangementId_Success() {
-    String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
+    @MockBean
+    EntityManager entityManager;
 
-    TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
-    transactionCursorEntity.setArrangementId(arrangementId);
-    transactionCursorEntity.setId("123");
-    when(transactionCursorRepository.findByArrangementId(arrangementId))
-        .thenReturn(Optional.of(transactionCursorEntity));
 
-    webTestClient
-        .get()
-        .uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$.cursor.id")
-        .isNotEmpty();
-    Mockito.verify(transactionCursorRepository, Mockito.times(1))
-        .findByArrangementId(arrangementId);
-  }
+    @Test
+    void deleteCursor_Success() {
+        String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
 
-  @Test
-  void getById_Success() {
-    String id = "f2c7dcd7-2ed9-45af-8813-a5d630c5d804";
+        webTestClient
+                .method(HttpMethod.DELETE)
+                .uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
+                .exchange()
+                .expectStatus().isOk();
+        Mockito.verify(transactionCursorRepository, Mockito.times(1))
+                .deleteByArrangementId(arrangementId);
+    }
 
-    TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
-    transactionCursorEntity.setArrangementId("123");
-    transactionCursorEntity.setId(id);
-    when(transactionCursorRepository.findById(id)).thenReturn(Optional.of(transactionCursorEntity));
+    @Test
+    void getByArrangementId_Success() {
+        String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
 
-    webTestClient
-        .get()
-        .uri("/service-api/v2/cursor/{id}", id)
-        .exchange()
-        .expectStatus()
-        .isOk()
-        .expectBody()
-        .jsonPath("$.cursor.id")
-        .isNotEmpty();
-    Mockito.verify(transactionCursorRepository, Mockito.times(1)).findById(id);
-  }
+        TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
+        transactionCursorEntity.setArrangementId(arrangementId);
+        transactionCursorEntity.setId("123");
+        when(transactionCursorRepository.findByArrangementId(arrangementId))
+                .thenReturn(Optional.of(transactionCursorEntity));
 
-  @Test
-  void patchByArrangementId_Success() {
-    String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
+        webTestClient.get().uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
+                .exchange().expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.cursor.id").isNotEmpty();
+        Mockito.verify(transactionCursorRepository, Mockito.times(1))
+                .findByArrangementId(arrangementId);
+    }
 
-    TransactionCursorPatchRequest transactionCursorPatchRequest =
-        new TransactionCursorPatchRequest()
-            .withLastTxnDate("2022-05-24 03:18:19")
-            .withStatus(StatusEnum.SUCCESS.getValue())
-            .withLastTxnIds("11,12,13,14");
+    @Test
+    void getById_Success() {
+        String id = "f2c7dcd7-2ed9-45af-8813-a5d630c5d804";
 
-    webTestClient
-        .patch()
-        .uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
-        .body(Mono.just(transactionCursorPatchRequest), TransactionCursorPatchRequest.class)
-        .exchange()
-        .expectStatus()
-        .isOk();
-    Mockito.verify(transactionCursorRepository, Mockito.times(1))
-        .patchByArrangementId(arrangementId, transactionCursorPatchRequest);
-  }
+        TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
+        transactionCursorEntity.setArrangementId("123");
+        transactionCursorEntity.setId(id);
+        when(transactionCursorRepository.findById(id))
+                .thenReturn(Optional.of(transactionCursorEntity));
 
-  @Test
-  void filterCursor_Success() {
-    TransactionCursorFilterRequest transactionCursorFilterRequest =
-        new TransactionCursorFilterRequest()
-            .withLastTxnDate("2022-05-24 03:18:59")
-            .withStatus(StatusEnum.SUCCESS.getValue());
-    webTestClient
-        .post()
-        .uri("/service-api/v2/cursor/filter")
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(Mono.just(transactionCursorFilterRequest), TransactionCursorFilterRequest.class)
-        .exchange()
-        .expectStatus()
-        .isOk();
-  }
+        webTestClient.get().uri("/service-api/v2/cursor/{id}", id)
+                .exchange().expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.cursor.id").isNotEmpty();
+        Mockito.verify(transactionCursorRepository, Mockito.times(1))
+                .findById(id);
+    }
 
-  // @Test
-  void upsertCursor_Success() {
-    TransactionCursorUpsertRequest transactionCursorUpsertRequest =
-        new TransactionCursorUpsertRequest()
-            .withCursor(
-                new TransactionCursor()
-                    .withArrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-                    .withExtArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq")
-                    .withLegalEntityId("beta-emp-ext")
-                    .withStatus(StatusEnum.IN_PROGRESS));
-    TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
-    transactionCursorEntity.setId("3337f8cc-d66d-41b3-a00e-f71ff15d93cq");
+    @Test
+    void patchByArrangementId_Success() {
+        String arrangementId = "4337f8cc-d66d-41b3-a00e-f71ff15d93cq";
 
-    // when(transactionCursorRepository.save(transactionCursorEntity)).thenReturn(transactionCursorEntity);
-    webTestClient
-        .post()
-        .uri("/service-api/v2/cursor/upsert")
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(Mono.just(transactionCursorUpsertRequest), TransactionCursorUpsertRequest.class)
-        .exchange()
-        .expectStatus()
-        .isOk();
+        TransactionCursorPatchRequest transactionCursorPatchRequest = new TransactionCursorPatchRequest()
+                .lastTxnDate("2022-05-24 03:18:19")
+                .status(StatusEnum.SUCCESS.getValue())
+                .lastTxnIds("11,12,13,14");
 
-    StepVerifier.create(transactionCursorRepository.save(any()))
-        .expectNext(new ResponseEntity<>(HttpStatus.OK))
-        .verifyComplete();
-    // Mockito.verify(transactionCursorRepository,
-    // Mockito.times(1)).save(transactionCursorEntity);
-  }
+        webTestClient
+                .patch().uri("/service-api/v2/cursor/arrangement/{arrangementId}", arrangementId)
+                .body(Mono.just(transactionCursorPatchRequest), TransactionCursorPatchRequest.class)
+                .exchange().expectStatus().isOk();
+        Mockito.verify(transactionCursorRepository, Mockito.times(1))
+                .patchByArrangementId(arrangementId, transactionCursorPatchRequest);
+    }
+
+    @Test
+    void filterCursor_Success() {
+        TransactionCursorFilterRequest transactionCursorFilterRequest = new TransactionCursorFilterRequest()
+                .lastTxnDate("2022-05-24 03:18:59").status(StatusEnum.SUCCESS.getValue());
+        webTestClient.post().uri("/service-api/v2/cursor/filter")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(transactionCursorFilterRequest), TransactionCursorFilterRequest.class)
+                .exchange().expectStatus().isOk();
+    }
+
+    // @Test
+    void upsertCursor_Success() {
+        TransactionCursorUpsertRequest transactionCursorUpsertRequest =
+                new TransactionCursorUpsertRequest().cursor(new TransactionCursor()
+                        .arrangementId("4337f8cc-d66d-41b3-a00e-f71ff15d93cq")
+                        .extArrangementId("5337f8cc-d66d-41b3-a00e-f71ff15d93cq")
+                        .legalEntityId("beta-emp-ext")
+                        .status(StatusEnum.IN_PROGRESS));
+        TransactionCursorEntity transactionCursorEntity = new TransactionCursorEntity();
+        transactionCursorEntity.setId("3337f8cc-d66d-41b3-a00e-f71ff15d93cq");
+
+        //when(transactionCursorRepository.save(transactionCursorEntity)).thenReturn(transactionCursorEntity);
+        webTestClient.post().uri("/service-api/v2/cursor/upsert")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(transactionCursorUpsertRequest), TransactionCursorUpsertRequest.class)
+                .exchange().expectStatus().isOk();
+
+        StepVerifier.create(transactionCursorRepository.save(any()))
+                .expectNext(new ResponseEntity<>(HttpStatus.OK)).verifyComplete();
+        //Mockito.verify(transactionCursorRepository, Mockito.times(1)).save(transactionCursorEntity);
+    }
+
 }

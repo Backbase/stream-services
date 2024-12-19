@@ -3,7 +3,7 @@ package com.backbase.stream.controller;
 import com.backbase.stream.cursor.CursorStreamService;
 import com.backbase.stream.cursor.api.CursorStreamApi;
 import com.backbase.stream.cursor.model.IngestionCursor;
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

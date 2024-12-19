@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "legalEntityExternalId": {
+      "description": "Legal entity external id",
+      "type": "string"
+    },
+    "legalEntityInternalId": {
+      "description": "Legal entity internal id",
+      "type": "string"
+    },
+    "serviceAgreementExternalId": {
+      "type": "string"
+    },
+    "serviceAgreementInternalId": {
+      "type": "string"
+    },
+    "userExternalId": {
+      "type": "string"
+    },
+    "userInternalId": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "transactionChainEnabled": {
+      "type": "boolean"
+    },
+    "paymentOrderChainEnabled": {
+      "type": "boolean"
+    },
+    "referenceJobRoleNames": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "membershipAccounts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

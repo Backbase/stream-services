@@ -6,8 +6,6 @@ spring:
   cloud:
     config:
       enabled: false
-  zipkin:
-    enabled: false
 
 backbase:
   stream:

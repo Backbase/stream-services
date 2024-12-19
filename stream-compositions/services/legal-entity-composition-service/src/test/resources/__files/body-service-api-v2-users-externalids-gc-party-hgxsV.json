@@ -1,0 +1,10 @@
+{
+  "message": "User does not exist.",
+  "errors": [
+    {
+      "message": "User does not exist.",
+      "key": "user.save.error.message.USER_DOES_NOT_EXIST",
+      "context": {}
+    }
+  ]
+}

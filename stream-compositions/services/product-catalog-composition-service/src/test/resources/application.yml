@@ -1,13 +1,15 @@
 spring:
-  zipkin:
-    enabled: false
   cloud:
+    config:
+      enabled: false
     kubernetes:
       config:
         enabled: false
       enabled: false
       discovery:
-        enabled: true
+        enabled: false
+    loadbalancer:
+      enabled: false
   activemq:
     broker-url: vm://activemq
   main:
@@ -35,6 +37,10 @@ backbase:
       identity:
         integration:
           service-port: 8080
+      stream:
+        product-catalog:
+          integration:
+            direct-uri: http://localhost:18000
     http:
       client-secret: bb-secret
       client-id: bb-client
@@ -55,7 +61,6 @@ backbase:
       product-catalog:
         enable-completed-events: false
         enable-failed-events: true
-        productCatalogIntegrationUrl: http://localhost:18000
 
 bootstrap:
   enabled: false

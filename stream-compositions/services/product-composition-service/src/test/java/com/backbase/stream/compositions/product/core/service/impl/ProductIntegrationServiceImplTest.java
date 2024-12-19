@@ -4,13 +4,13 @@ import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.backbase.stream.compositions.integration.product.api.ProductIntegrationApi;
-import com.backbase.stream.compositions.integration.product.model.ProductGroup;
-import com.backbase.stream.compositions.integration.product.model.PullProductGroupResponse;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapper;
 import com.backbase.stream.compositions.product.core.mapper.ProductGroupMapperImpl;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
+import com.backbase.stream.compositions.product.integration.client.ProductIntegrationApi;
+import com.backbase.stream.compositions.product.integration.client.model.ProductGroup;
+import com.backbase.stream.compositions.product.integration.client.model.PullProductGroupResponse;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,75 +23,68 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class ProductIntegrationServiceImplTest {
 
-  private final ProductGroupMapper productGroupMapper = new ProductGroupMapperImpl();
-  @Mock private ProductIntegrationApi productIntegrationApi;
-  private ProductIntegrationServiceImpl productIntegrationService;
+    @Mock
+    private ProductIntegrationApi productIntegrationApi;
 
-  @BeforeEach
-  void setUp() {
-    productIntegrationService =
-        new ProductIntegrationServiceImpl(productIntegrationApi, productGroupMapper);
-  }
+    private final ProductGroupMapper productGroupMapper = new ProductGroupMapperImpl();
 
-  @Test
-  void callIntegrationService_Success() throws UnsupportedOperationException {
-    PullProductGroupResponse getProductGroupResponse =
-        new PullProductGroupResponse().productGroups(singletonList(new ProductGroup()));
-    when(productIntegrationApi.pullProductGroup(any()))
-        .thenReturn(Mono.just(getProductGroupResponse));
-    Map<String, String> additions = Map.of("addition", "addition1");
+    private ProductIntegrationServiceImpl productIntegrationService;
 
-    ProductIngestPullRequest request =
-        ProductIngestPullRequest.builder()
-            .serviceAgreementExternalId("sa_externalId")
-            .serviceAgreementInternalId("sa_internalId")
-            .legalEntityExternalId("sa_externalId")
-            .legalEntityInternalId("le_internalId")
-            .userExternalId("user_externalId")
-            .userInternalId("user_internalId")
-            .source("source_of_ingestion_process")
-            .additions(additions)
-            .build();
+    @BeforeEach
+    void setUp() {
+        productIntegrationService = new ProductIntegrationServiceImpl(productIntegrationApi,
+                productGroupMapper);
+    }
 
-    com.backbase.stream.legalentity.model.ProductGroup productGroup1 =
-        new com.backbase.stream.legalentity.model.ProductGroup();
-    ProductIngestResponse expectedResponse =
-        new ProductIngestResponse("id1", "id2", singletonList(productGroup1), additions);
-    expectedResponse.setServiceAgreementInternalId("sa_internalId");
-    expectedResponse.setServiceAgreementExternalId("sa_externalId");
-    expectedResponse.setLegalEntityInternalId("le_internalId");
-    expectedResponse.setLegalEntityExternalId("sa_externalId");
-    expectedResponse.setUserInternalId("user_internalId");
-    expectedResponse.setUserExternalId("user_externalId");
-    expectedResponse.setSource("source_of_ingestion_process");
-    StepVerifier.create(productIntegrationService.pullProductGroup(request))
-        .expectNextMatches(
-            response ->
-                response
-                        .getLegalEntityInternalId()
-                        .equals(expectedResponse.getLegalEntityInternalId())
-                    && response
-                        .getLegalEntityExternalId()
-                        .equals(expectedResponse.getLegalEntityExternalId())
-                    && response
-                        .getServiceAgreementInternalId()
-                        .equals(expectedResponse.getServiceAgreementInternalId())
-                    && response
-                        .getServiceAgreementExternalId()
-                        .equals(expectedResponse.getServiceAgreementExternalId())
-                    && response.getUserInternalId().equals(expectedResponse.getUserInternalId())
-                    && response.getUserExternalId().equals(expectedResponse.getUserExternalId())
-                    && response.getSource().equals(expectedResponse.getSource()))
-        .verifyComplete();
-  }
+    @Test
+    void callIntegrationService_Success() throws UnsupportedOperationException {
+        PullProductGroupResponse getProductGroupResponse = new PullProductGroupResponse().
+                productGroups(singletonList(new ProductGroup()));
+        when(productIntegrationApi.pullProductGroup(any()))
+                .thenReturn(Mono.just(getProductGroupResponse));
+        Map<String, String> additions = Map.of("addition", "addition1");
 
-  @Test
-  void callIntegrationService_Failure() throws UnsupportedOperationException {
-    when(productIntegrationApi.pullProductGroup(any()))
-        .thenReturn(Mono.error(new RuntimeException("error")));
 
-    ProductIngestPullRequest request =
-        ProductIngestPullRequest.builder().legalEntityExternalId("externalId").build();
-    StepVerifier.create(productIntegrationService.pullProductGroup(request)).expectError().verify();
-  }
+        ProductIngestPullRequest request = ProductIngestPullRequest.builder()
+                .serviceAgreementExternalId("sa_externalId")
+                .serviceAgreementInternalId("sa_internalId")
+                .legalEntityExternalId("sa_externalId")
+                .legalEntityInternalId("le_internalId")
+                .userExternalId("user_externalId")
+                .userInternalId("user_internalId")
+                .source("source_of_ingestion_process")
+                .additions(additions)
+                .build();
+
+        com.backbase.stream.legalentity.model.ProductGroup productGroup1 = new com.backbase.stream.legalentity.model.ProductGroup();
+        ProductIngestResponse expectedResponse = new ProductIngestResponse("id1", "id2",
+                singletonList(productGroup1), additions);
+        expectedResponse.setServiceAgreementInternalId("sa_internalId");
+        expectedResponse.setServiceAgreementExternalId("sa_externalId");
+        expectedResponse.setLegalEntityInternalId("le_internalId");
+        expectedResponse.setLegalEntityExternalId("sa_externalId");
+        expectedResponse.setUserInternalId("user_internalId");
+        expectedResponse.setUserExternalId("user_externalId");
+        expectedResponse.setSource("source_of_ingestion_process");
+        StepVerifier.create(productIntegrationService.pullProductGroup(request))
+                .expectNextMatches(response -> response.getLegalEntityInternalId().equals(expectedResponse.getLegalEntityInternalId()) &&
+                        response.getLegalEntityExternalId().equals(expectedResponse.getLegalEntityExternalId()) &&
+                        response.getServiceAgreementInternalId().equals(expectedResponse.getServiceAgreementInternalId()) &&
+                        response.getServiceAgreementExternalId().equals(expectedResponse.getServiceAgreementExternalId()) &&
+                        response.getUserInternalId().equals(expectedResponse.getUserInternalId()) &&
+                        response.getUserExternalId().equals(expectedResponse.getUserExternalId()) &&
+                        response.getSource().equals(expectedResponse.getSource())
+                        )
+                .verifyComplete();
+    }
+
+    @Test
+    void callIntegrationService_Failure() throws UnsupportedOperationException {
+        when(productIntegrationApi.pullProductGroup(any()))
+                .thenReturn(Mono.error(new RuntimeException("error")));
+
+        ProductIngestPullRequest request = ProductIngestPullRequest.builder()
+                .legalEntityExternalId("externalId").build();
+        StepVerifier.create(productIntegrationService.pullProductGroup(request)).expectError().verify();
+    }
 }

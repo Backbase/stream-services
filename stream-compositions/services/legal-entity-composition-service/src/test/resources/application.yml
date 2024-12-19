@@ -1,17 +1,17 @@
 spring:
-  zipkin:
-    enabled: false
-  main:
-    allow-bean-definition-overriding: true
-  activemq:
-    broker-url: vm://activemq
   cloud:
+    config:
+      enabled: false
     kubernetes:
       config:
         enabled: false
       enabled: false
       discovery:
-        enabled: true
+        enabled: false
+    loadbalancer:
+      enabled: false
+  main:
+    allow-bean-definition-overriding: true
 
 eureka:
   client:
@@ -44,8 +44,14 @@ backbase:
       identity:
         integration:
           direct-uri: http://localhost:8181/identity-integration-service
+      stream:
+        legal-entity:
+          integration:
+            direct-uri: http://localhost:18000
+        product:
+          composition:
+            direct-uri: http://localhost:9003
     http:
-      client-secret: bb-secret
       client-id: bb-client
       access-token-uri: http://localhost:17000/oauth/token
   stream:
@@ -55,19 +61,16 @@ backbase:
         userProfileEnabled: true
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:18000
         chains:
           product-composition:
             enableOnComplete: true
             enableOnFailure: false
-            base-url: http://localhost:9003
             async: false
         events:
           enableCompleted: false
           enableFailed: false
         cursor:
           enabled: false
-          base-url: http://localhost:9005
 bootstrap:
   enabled: false
   # This is just an example. Replace it with data corresponding to your bank

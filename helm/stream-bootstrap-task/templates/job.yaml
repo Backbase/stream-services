@@ -1,33 +1,46 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: { { template "stream-bootstrap-task.fullname" . } }
+  name: {{ template "stream-bootstrap-task.fullname" . }}
   labels:
-  { { include "stream-bootstrap-task.labels" . | indent 4 } }
-
+{{ include "stream-bootstrap-task.labels" . | indent 4 }}
 spec:
   template:
     spec:
-      restartPolicy: { { .Values.image.restartPolicy } }
-      { { with .Values.imagePullSecrets } }
+      restartPolicy: {{ .Values.image.restartPolicy }}
+      {{ with .Values.imagePullSecrets }}
       imagePullSecrets:
-        { { - toYaml . | nindent 8 } }
-      { { end } }
-      { { - include "stream-bootstrap-task.init-containers" . | nindent 6 } }
+        {{- toYaml . | nindent 8 }}
+      {{ end }}
+      {{- if .Values.customFiles }}
+      volumes:
+        - name: customfiles
+          configMap:
+            name: {{ template "stream-bootstrap-task.fullname" . }}-customfiles
+      {{- end }}
+      {{- include "stream-bootstrap-task.init-containers" . | nindent 6 }}
       containers:
         - name: stream-bootstrap-task-job
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: { { .Values.image.pullPolicy } }
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-          { { - range $key, $value := .Values.env } }
-          - name: { { $key | quote } }
-            value: { { $value | quote } }
-          { { - end } }
+          {{- range $key, $value := .Values.env }}
+          - name: {{ $key | quote }}
+            value: {{ $value | quote }}
+          {{- end }}
+          {{- if .Values.customFiles }}
+          volumeMounts:
+            {{- range $key, $val := .Values.customFiles }}
+            - name: customfiles
+              mountPath: {{ $.Values.customFilesPath }}{{ $key }}
+              subPath: {{ $key }}
+            {{- end }}
+          {{- end }}
           resources:
             limits:
-              cpu: { { .Values.resources.limits.cpu } }
-              memory: { { .Values.resources.limits.memory } }
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
             requests:
-              cpu: { { .Values.resources.requests.cpu } }
-              memory: { { .Values.resources.requests.memory } }
-  backoffLimit: { { .Values.backoffLimit } }
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+  backoffLimit: {{ .Values.backoffLimit}}

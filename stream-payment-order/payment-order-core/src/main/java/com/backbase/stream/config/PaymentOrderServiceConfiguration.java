@@ -1,6 +1,7 @@
 package com.backbase.stream.config;
 
-import com.backbase.dbs.paymentorder.api.service.v2.PaymentOrdersApi;
+import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
+import com.backbase.dbs.paymentorder.api.service.v3.PaymentOrdersApi;
 import com.backbase.stream.PaymentOrderService;
 import com.backbase.stream.PaymentOrderServiceImpl;
 import com.backbase.stream.mappers.PaymentOrderTypeMapper;
@@ -15,49 +16,48 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@EnableConfigurationProperties({PaymentOrderWorkerConfigurationProperties.class})
+@EnableConfigurationProperties({
+    PaymentOrderWorkerConfigurationProperties.class,
+    PaymentOrderTypeConfiguration.class
+})
 @AllArgsConstructor
 @Configuration
 public class PaymentOrderServiceConfiguration {
 
-  private final PaymentOrderTypeMapper paymentOrderTypeMapper;
+    private final PaymentOrderTypeMapper paymentOrderTypeMapper;
+    private final PaymentOrderTypeConfiguration paymentOrderTypeConfiguration;
 
-  @Bean
-  public PaymentOrderTaskExecutor paymentOrderTaskExecutor(PaymentOrdersApi paymentOrdersApi) {
-    return new PaymentOrderTaskExecutor(paymentOrdersApi);
-  }
+    @Bean
+    public PaymentOrderTaskExecutor paymentOrderTaskExecutor(PaymentOrdersApi paymentOrdersApi) {
+        return new PaymentOrderTaskExecutor(paymentOrdersApi);
+    }
 
-  @Bean
-  public PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor(
-      PaymentOrderTaskExecutor paymentOrderTaskExecutor,
-      PaymentOrderUnitOfWorkRepository paymentOrderUnitOfWorkRepository,
-      PaymentOrderWorkerConfigurationProperties paymentOrderWorkerConfigurationProperties,
-      PaymentOrdersApi paymentOrdersApi) {
+    @Bean
+    public PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor(
+        PaymentOrderTaskExecutor paymentOrderTaskExecutor,
+        PaymentOrderUnitOfWorkRepository paymentOrderUnitOfWorkRepository,
+        PaymentOrderWorkerConfigurationProperties paymentOrderWorkerConfigurationProperties,
+        PaymentOrdersApi paymentOrdersApi,
+            ArrangementsApi arrangementsApi) {
 
-    return new PaymentOrderUnitOfWorkExecutor(
-        paymentOrderUnitOfWorkRepository,
-        paymentOrderTaskExecutor,
-        paymentOrderWorkerConfigurationProperties,
-        paymentOrdersApi,
-        paymentOrderTypeMapper);
-  }
+        return new PaymentOrderUnitOfWorkExecutor(paymentOrderUnitOfWorkRepository, paymentOrderTaskExecutor,
+                paymentOrderWorkerConfigurationProperties, paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper,
+                paymentOrderTypeConfiguration);
+    }
 
-  @Bean
-  @ConditionalOnProperty(
-      name = "backbase.stream.persistence",
-      havingValue = "memory",
-      matchIfMissing = true)
-  public PaymentOrderUnitOfWorkRepository paymentOrderUnitOfWorkRepository() {
-    return new InMemoryPaymentOrderUnitOfWorkRepository();
-  }
+    @Bean
+    @ConditionalOnProperty(name = "backbase.stream.persistence", havingValue = "memory", matchIfMissing = true)
+    public PaymentOrderUnitOfWorkRepository paymentOrderUnitOfWorkRepository() {
+        return new InMemoryPaymentOrderUnitOfWorkRepository();
+    }
 
-  @Bean
-  public PaymentOrderService paymentOrderService(
-      PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
-    return new PaymentOrderServiceImpl(paymentOrderUnitOfWorkExecutor);
-  }
+    public static class InMemoryPaymentOrderUnitOfWorkRepository extends
+        InMemoryReactiveUnitOfWorkRepository<PaymentOrderTask> implements PaymentOrderUnitOfWorkRepository {
 
-  public static class InMemoryPaymentOrderUnitOfWorkRepository
-      extends InMemoryReactiveUnitOfWorkRepository<PaymentOrderTask>
-      implements PaymentOrderUnitOfWorkRepository {}
+    }
+
+    @Bean
+    public PaymentOrderService paymentOrderService(PaymentOrderUnitOfWorkExecutor paymentOrderUnitOfWorkExecutor) {
+        return new PaymentOrderServiceImpl(paymentOrderUnitOfWorkExecutor);
+    }
 }

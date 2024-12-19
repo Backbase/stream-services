@@ -4,57 +4,82 @@ server:
 spring:
   activemq:
     broker-url: tcp://localhost:61616
-  zipkin:
+  cloud:
+    config:
+      enabled: false
+    loadbalancer:
+      enabled: false
+
+management:
+  tracing:
     enabled: false
-  main:
-    allow-bean-definition-overriding: true
+
 eureka:
+  instance:
+    hostname: host.docker.internal
   client:
-    enabled: true
-    serviceUrl.defaultZone: http://localhost:8080/registry/eureka
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
 
 backbase:
   communication:
-    services:
-      usermanager:
-        direct-uri: http://localhost:8086/user-manager
-      access-control:
-        direct-uri: http://localhost:8086/access-control
-      arrangement:
-        manager:
-          direct-uri: http://localhost:8082/arrangement-manager
-      user:
-        profile:
-          direct-uri: http://localhost:8086/user-profile-manager
-      identity:
-        integration:
-          direct-uri: http://localhost:8181/identity-integration-service
     http:
       client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+      access-token-uri: http://localhost:7779/oauth/token
+    services:
+      usermanager:
+        direct-uri: http://localhost:8060
+      access-control:
+        direct-uri: http://localhost:8040
+      arrangement:
+        manager:
+          direct-uri: http://localhost:8050
+      user:
+        profile:
+          direct-uri: http://localhost:8061
+      identity:
+        integration:
+          direct-uri: http://localhost:8070
+      stream:
+        legal-entity:
+          integration:
+            direct-uri: http://localhost:7001
+        product:
+          composition:
+            direct-uri: http://localhost:9003
+
   stream:
+    client:
+      additional-headers:
+        x-tid: t1
     legalentity:
       sink:
         useIdentityIntegration: true
         userProfileEnabled: true
+        serviceAgreementUpdateEnabled: false
     compositions:
       legal-entity:
-        integration-base-url: http://localhost:7001
         chains:
           product-composition:
-            enabled: true
-            base-url: http://localhost:9003
+            enabled: false
             async: false
         events:
           enableCompleted: false
           enableFailed: false
         cursor:
           enabled: false
-          base-url: http://localhost:9005
+        gc-defaults:
+          party:
+            realmName: backbase
+            parentExternalId: BANK
+            identityUserLinkStrategy: CREATE_IN_IDENTITY
+            referenceJobRoleNames: "Retail User - USA"
+    user:
+      management:
+        update-identity: true
 
 bootstrap:
-  enabled: true
+  enabled: false
   # This is an Backbase OOTB Configuration. Please update as per project requirements
   legalEntity:
     name: Bank
@@ -444,4 +469,6 @@ bootstrap:
 
 logging:
   level:
-    com.backbase.stream.compositions: DEBUG
+    com.backbase: DEBUG
+    reactor.netty.http.client: DEBUG
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG

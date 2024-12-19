@@ -1,8 +1,8 @@
 package com.backbase.stream.config;
 
 import com.backbase.stream.approval.model.Approval;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
-import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;

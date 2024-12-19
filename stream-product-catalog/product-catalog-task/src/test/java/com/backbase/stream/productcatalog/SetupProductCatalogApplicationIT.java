@@ -17,30 +17,27 @@ import org.springframework.util.Assert;
 @ActiveProfiles({"it", "moustache-bank"})
 public class SetupProductCatalogApplicationIT {
 
-  @RegisterExtension
-  static WireMockExtension wiremock =
-      WireMockExtension.newInstance().options(wireMockConfig().dynamicPort()).build();
+    @Autowired
+    ProductCatalogConfigurationProperties configuration;
 
-  @Autowired ProductCatalogConfigurationProperties configuration;
+    @RegisterExtension
+    static WireMockExtension wiremock = WireMockExtension.newInstance()
+        .options(wireMockConfig().dynamicPort())
+        .build();
 
-  @DynamicPropertySource
-  static void registerDynamicProperties(DynamicPropertyRegistry registry) {
-    String wiremockUrl = String.format("http://localhost:%d", wiremock.getPort());
-    registry.add("spring.zipkin.base-url", () -> wiremockUrl);
-    registry.add(
-        "spring.cloud.discovery.client.simple.instances.token-converter[0].uri", () -> wiremockUrl);
-    registry.add(
-        "spring.cloud.discovery.client.simple.instances.arrangement-manager[0].uri",
-        () -> wiremockUrl);
-  }
+    @DynamicPropertySource
+    static void registerDynamicProperties(DynamicPropertyRegistry registry) {
+        String wiremockUrl = String.format("http://localhost:%d", wiremock.getPort());
+        registry.add("management.zipkin.tracing.endpoint", () -> wiremockUrl + "/api/v2/spans");
+        registry.add("spring.cloud.discovery.client.simple.instances.token-converter[0].uri", () -> wiremockUrl);
+        registry.add("spring.cloud.discovery.client.simple.instances.arrangement-manager[0].uri", () -> wiremockUrl);
+    }
 
-  @Test
-  void contextLoads() {
-    // Triggers the CommandLineRunner which will run the boostrap task to be validated by the
-    // WireMock assertions.
-    Assert.notNull(configuration.getProductCatalog(), "Product catalog should be present.");
-    Assert.notEmpty(
-        configuration.getProductCatalog().getProductTypes(),
-        "At least one type should be present.");
-  }
+    @Test
+    void contextLoads() {
+        // Triggers the CommandLineRunner which will run the boostrap task to be validated by the WireMock assertions.
+        Assert.notNull(configuration.getProductCatalog(), "Product catalog should be present.");
+        Assert.notEmpty(configuration.getProductCatalog().getProductTypes(), "At least one type should be present.");
+    }
+
 }

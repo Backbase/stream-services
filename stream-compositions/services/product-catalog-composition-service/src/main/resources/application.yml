@@ -1,15 +1,12 @@
 spring:
-  zipkin:
-    enabled: false
+  application:
+    name: product-catalog-composition
   main:
     allow-bean-definition-overriding: true
 backbase:
   communication:
     http:
       default-service-port: 8080
-      client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: http://token-converter:8080/oauth/token
   mtls:
     enabled: false
   security:
@@ -26,7 +23,6 @@ backbase:
       product-catalog:
         enable-completed-events: false
         enable-failed-events: true
-        product-catalog-integration-url: http://product-catalog-ingestion-integration:8080
 
 bootstrap:
   enabled: false

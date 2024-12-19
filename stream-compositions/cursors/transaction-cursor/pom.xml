@@ -5,12 +5,11 @@
   <parent>
     <groupId>com.backbase.stream.compositions</groupId>
     <artifactId>cursors</artifactId>
-    <version>3.43.0</version>
+    <version>6.10.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>transaction-cursor</artifactId>
-  <version>3.43.0</version>
 
   <packaging>jar</packaging>
 
@@ -18,10 +17,18 @@
 
   <properties>
     <enforce-banned-dependencies.skip>true</enforce-banned-dependencies.skip>
-    <mysql-connector.version>5.1.41</mysql-connector.version>
+    <archunit.backbase.GeneralCodingRules.skip>true</archunit.backbase.GeneralCodingRules.skip>
+    <archunit.backbase.RelationalPersistenceRules.skip>true</archunit.backbase.RelationalPersistenceRules.skip>
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <artifactId>lombok</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Service SDK dependencies -->
     <dependency>
       <groupId>com.backbase.buildingblocks</groupId>
@@ -34,9 +41,13 @@
     </dependency>
 
     <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>${mysql-connector.version}</version>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.backbase.buildingblocks</groupId>
+      <artifactId>service-sdk-starter-mapping</artifactId>
     </dependency>
 
     <!-- Spring dependencies -->
@@ -47,6 +58,22 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-logging</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.backbase.buildingblocks</groupId>
+      <artifactId>service-sdk-starter-eureka-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-kubernetes-fabric8</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-kubernetes-fabric8-loadbalancer</artifactId>
     </dependency>
     <dependency>
       <groupId>com.backbase.stream.compositions.api</groupId>
@@ -143,38 +170,44 @@
         <executions>
           <execution>
             <id>generate-transaction-cursor-api-code</id>
-            <goals>
-              <goal>generate</goal>
-            </goals>
             <phase>generate-sources</phase>
+            <goals>
+              <goal>generate-spring-boot-embedded</goal>
+            </goals>
             <configuration>
-              <generatorName>spring</generatorName>
               <inputSpec>
                 ${project.build.directory}/yaml/transaction-cursor-api/service-api-v2.0.0.yaml
               </inputSpec>
-              <additionalProperties>useWithModifiers=true</additionalProperties>
+              <apiPackage>com.backbase.stream.compositions.transaction.cursor.api</apiPackage>
+              <modelPackage>com.backbase.stream.compositions.transaction.cursor.model
+              </modelPackage>
               <configOptions>
-                <library>spring-boot</library>
                 <reactive>true</reactive>
-                <java8>true</java8>
-                <dateLibrary>java8</dateLibrary>
-                <openapiDocketConfig>true</openapiDocketConfig>
-                <interfaceOnly>true</interfaceOnly>
-                <apiPackage>com.backbase.stream.compositions.transaction.cursor.api</apiPackage>
-                <modelPackage>com.backbase.stream.compositions.transaction.cursor.model
-                </modelPackage>
-                <additionalProperties>useWithModifiers=true</additionalProperties>
-                <skipDefaultInterface>true</skipDefaultInterface>
-                <performBeanValidation>true</performBeanValidation>
-                <apis/>
-                <models/>
-                <useTags>true</useTags>
               </configOptions>
             </configuration>
           </execution>
         </executions>
       </plugin>
 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/annotations</source>
+                                <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
     </plugins>
   </build>
 

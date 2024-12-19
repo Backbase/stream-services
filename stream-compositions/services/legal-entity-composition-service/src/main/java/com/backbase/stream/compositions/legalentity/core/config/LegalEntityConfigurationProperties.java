@@ -1,5 +1,6 @@
 package com.backbase.stream.compositions.legalentity.core.config;
 
+import com.backbase.stream.product.task.BatchProductIngestionMode;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,60 +13,76 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("backbase.stream.compositions.legal-entity")
 public class LegalEntityConfigurationProperties {
 
-  private String integrationBaseUrl = "http://legal-entity-integration:9000";
-  private Chains chains = new Chains();
-  private Events events = new Events();
-  private Cursor cursor = new Cursor();
+    private Chains chains = new Chains();
+    private Events events = new Events();
+    private Cursor cursor = new Cursor();
+    private IngestionMode ingestionMode = new IngestionMode();
 
-  public Boolean isCompletedEventEnabled() {
-    return Boolean.TRUE.equals(events.getEnableCompleted());
-  }
+    @Data
+    @NoArgsConstructor
+    public static class Events {
 
-  public Boolean isFailedEventEnabled() {
-    return Boolean.TRUE.equals(events.getEnableFailed());
-  }
+        private Boolean enableCompleted = Boolean.FALSE;
+        private Boolean enableFailed = Boolean.FALSE;
+    }
 
-  public boolean isProductChainEnabled() {
-    return Boolean.TRUE.equals(chains.getProductComposition().getEnabled());
-  }
+    @Data
+    @NoArgsConstructor
+    public static class Cursor {
 
-  public boolean isProductChainAsync() {
-    return Boolean.TRUE.equals(chains.getProductComposition().getAsync());
-  }
+        private Boolean enabled = Boolean.FALSE;
+    }
 
-  @Data
-  @NoArgsConstructor
-  public static class Events {
+    @Data
+    @NoArgsConstructor
+    public static class Chains {
 
-    private Boolean enableCompleted = Boolean.FALSE;
-    private Boolean enableFailed = Boolean.FALSE;
-  }
+        private Boolean includeSubsidiaries = Boolean.FALSE;
+        private ProductComposition productComposition = new ProductComposition();
+    }
 
-  @Data
-  @NoArgsConstructor
-  public static class Cursor {
+    @Data
+    public static abstract class BaseComposition {
 
-    private Boolean enabled = Boolean.FALSE;
-    private String baseUrl = "http://legal-entity-cursor:9000";
-  }
+        private Boolean enabled = Boolean.FALSE;
+        private Boolean async = Boolean.FALSE;
+    }
 
-  @Data
-  @NoArgsConstructor
-  public static class Chains {
+    @NoArgsConstructor
+    public static class ProductComposition extends BaseComposition {
 
-    private Boolean includeSubsidiaries = Boolean.FALSE;
+    }
 
-    private ProductComposition productComposition = new ProductComposition();
-  }
+    @Data
+    @NoArgsConstructor
+    public static class IngestionMode {
 
-  @Data
-  public abstract static class BaseComposition {
+        private BatchProductIngestionMode.FunctionGroupsMode functionGroups = BatchProductIngestionMode.FunctionGroupsMode.UPSERT;
+        private BatchProductIngestionMode.DataGroupsMode dataGroups = BatchProductIngestionMode.DataGroupsMode.UPSERT;
+        private BatchProductIngestionMode.ArrangementsMode arrangements = BatchProductIngestionMode.ArrangementsMode.UPSERT;
+    }
 
-    private Boolean enabled = Boolean.FALSE;
-    private String baseUrl = "http://localhost:9002/";
-    private Boolean async = Boolean.FALSE;
-  }
+    public Boolean isCompletedEventEnabled() {
+        return Boolean.TRUE.equals(events.getEnableCompleted());
+    }
 
-  @NoArgsConstructor
-  public static class ProductComposition extends BaseComposition {}
+    public Boolean isFailedEventEnabled() {
+        return Boolean.TRUE.equals(events.getEnableFailed());
+    }
+
+    public boolean isProductChainEnabled() {
+        return Boolean.TRUE.equals(chains.getProductComposition().getEnabled());
+    }
+
+    public boolean isProductChainAsync() {
+        return Boolean.TRUE.equals(chains.getProductComposition().getAsync());
+    }
+
+    public BatchProductIngestionMode ingestionMode() {
+        return BatchProductIngestionMode.builder()
+            .functionGroupsMode(ingestionMode.getFunctionGroups())
+            .dataGroupIngestionMode(ingestionMode.getDataGroups())
+            .arrangementsMode(ingestionMode.getArrangements())
+            .build();
+    }
 }

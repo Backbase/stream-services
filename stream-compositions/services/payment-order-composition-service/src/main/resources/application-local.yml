@@ -2,14 +2,13 @@ server:
   port: 9005
 
 spring:
+  cloud:
+    config:
+      enabled: false
+    loadbalancer:
+      enabled: false
   activemq:
     broker-url: tcp://localhost:61616
-  zipkin:
-    enabled: false
-  main:
-    allow-bean-definition-overriding: true
-  codec:
-    max-in-memory-size: 10MB
 sso.jwt.internal.signature.key:
   type: VALUE
   value: JWTSecretKeyDontUseInProduction!
@@ -17,40 +16,40 @@ backbase:
   communication:
     services:
       usermanager:
-        direct-uri: http://localhost:8086/user-manager
+        direct-uri: http://localhost:8060
       access-control:
-        direct-uri: http://localhost:8086/access-control
+        direct-uri: http://localhost:8040
       arrangement:
         manager:
-          direct-uri: http://localhost:8082/arrangement-manager
+          direct-uri: http://localhost:8050
       payment:
         order:
-          direct-uri: http://localhost:8090/payment-order-service
+          direct-uri: http://localhost:8090
       transaction:
         manager:
-          direct-uri: http://localhost:8083/transaction-manager
+          direct-uri: http://localhost:8083
+      stream:
+        payment-order:
+          integration:
+            direct-uri: http://localhost:7004
     http:
       client-secret: bb-secret
-      client-id: bb-client
-      access-token-uri: http://localhost:8181/oidc-token-converter-service/oauth/token
+      access-token-uri: "http://localhost:7779/oauth/token"
   activemq:
     enabled: true
   stream:
     paymentorder:
+      types:
+        - INT_TRANS_CLOSED
       worker:
         deletePaymentOrder: false
-    compositions:
-      paymentorder:
-        integration-base-url: http://localhost:7004
 
 eureka:
   instance:
-    metadata-map:
-      public: true
-      role: live
+    hostname: host.docker.internal
   client:
     serviceUrl:
-      defaultZone: http://localhost:8080/registry/eureka/
+      defaultZone: http://localhost:8761/eureka/
 
 logging:
   level:

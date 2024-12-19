@@ -1,0 +1,24 @@
+{
+  "id": "3601f251-7f65-37eb-bc76-c1d7f6cbc792",
+  "request": {
+    "url": "/service-api/v3/accesscontrol/legal-entities/2c9280899126d76f01912cbb0a420006",
+    "method": "GET"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "body-service-api-v3-accesscontrol-legal-entities-2c9280899126d76f01912cbb0a420006-MCaLJ.json",
+    "headers": {
+      "Vary": "origin,access-control-request-method,access-control-request-headers,accept-encoding",
+      "X-Content-Type-Options": "nosniff",
+      "X-XSS-Protection": "0",
+      "Cache-Control": "no-cache, no-store, max-age=0, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0",
+      "X-Frame-Options": "DENY",
+      "Content-Type": "application/json",
+      "Date": "Wed, 07 Aug 2024 12:05:40 GMT",
+      "Keep-Alive": "timeout=60"
+    }
+  },
+  "uuid": "3601f251-7f65-37eb-bc76-c1d7f6cbc792"
+}

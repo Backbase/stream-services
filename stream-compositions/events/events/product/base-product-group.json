@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "internalId": {
+      "$ref": "base-schema.json#/schemas/InternalIdentifier"
+    },
+    "productGroupType" : {
+      "type" : "string",
+      "default" : "ARRANGEMENTS",
+      "enum" : [ "ARRANGEMENTS", "JOURNEYS", "REPOSITORIES", "CUSTOMERS", "CUSTOM" ]
+    },
+    "name": {
+      "maxLength": 128,
+      "minLength": 1,
+      "pattern": "^\\S(.*(\\S))?$",
+      "type": "string",
+      "description": "Product group name"
+    },
+    "description": {
+      "maxLength": 255,
+      "minLength": 1,
+      "pattern": "^\\S(.*(\\S))?$",
+      "type": "string",
+      "description": "Product group description"
+    },
+    "users": {
+      "type": "array",
+      "items": {
+        "$ref": "base-schema.json#/schemas/JobProfileUser"
+      }
+    },
+    "currentAccounts": {
+      "type": "array",
+      "items": {
+        "$ref": "current-account.json"
+      }
+    },
+    "savingAccounts": {
+      "type": "array",
+      "items": {
+        "$ref": "savings-account.json"
+      }
+    },
+    "creditCards": {
+      "type": "array",
+      "items": {
+        "$ref": "credit-card.json"
+      }
+    },
+    "loans": {
+      "type": "array",
+      "items": {
+        "$ref": "loan.json"
+      }
+    },
+    "termDeposits": {
+      "type": "array",
+      "items": {
+        "$ref": "term-deposits.json"
+      }
+    }
+  },
+  "description": "Product groups assigned to the users within same legal entity"
+}
