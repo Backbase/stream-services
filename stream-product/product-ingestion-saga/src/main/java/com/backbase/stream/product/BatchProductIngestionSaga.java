@@ -14,6 +14,7 @@ import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.Subscription;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.loan.LoansSaga;
 import com.backbase.stream.loan.LoansTask;
@@ -71,7 +72,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
         return process(batchProductGroupTask)
             .map(batchProductGroup -> {
                 streamTask.addHistory(batchProductGroup.getHistory());
-               return streamTask;
+                return streamTask;
             });
     }
 
@@ -101,7 +102,8 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .flatMap(this::upsertArrangementsBatch)
                 .flatMap(this::setupProductGroupsBatch)
                 .flatMap(this::setupBusinessFunctionsAndPermissionsBatch)
-                .flatMap(this::setupLoans);
+                .flatMap(this::setupLoans)
+                .flatMap(this::setupSubscriptions);
     }
 
     @SuppressWarnings("java:S2259")
@@ -123,6 +125,27 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .thenReturn(batchProductGroupTask);
         }
         return Mono.just(batchProductGroupTask);
+    }
+
+    private Mono<BatchProductGroupTask> setupSubscriptions(BatchProductGroupTask batchProductGroupTask) {
+        BatchProductGroup data = batchProductGroupTask.getData();
+        var currentAccountStream = Optional.ofNullable(data)
+            .map(BatchProductGroup::getProductGroups)
+            .stream()
+            .flatMap(Collection::stream)
+            .map(BaseProductGroup::getCurrentAccounts)
+            .filter(Objects::nonNull)
+            .flatMap(Collection::stream);
+        var resultFlux = Flux.fromStream(currentAccountStream)
+            .flatMap(currentAccount -> {
+                var identifiers = currentAccount.getSubscriptions()
+                    .stream()
+                    .map(Subscription::getIdentifier)
+                    .toList();
+                return arrangementService.addSubscriptionForArrangement(currentAccount.getExternalId(), identifiers);
+            });
+
+        return resultFlux.then(Mono.just(batchProductGroupTask));
     }
 
 
