@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.16.2](https://github.com/Backbase/stream-services/compare/5.16.1...5.16.2)
+### Fixed
+- Fixed respecting the value provided for a job role type in functionGroup
+
 ## [5.16.1](https://github.com/Backbase/stream-services/compare/5.16.0...5.16.1)
 ### Fixed
 - Fixed missing explicit state mappings for BaseProduct related classes
