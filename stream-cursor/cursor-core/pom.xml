@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-cursor</artifactId>
-        <version>5.16.1</version>
+        <version>5.16.2</version>
     </parent>
 
     <artifactId>cursor-core</artifactId>
