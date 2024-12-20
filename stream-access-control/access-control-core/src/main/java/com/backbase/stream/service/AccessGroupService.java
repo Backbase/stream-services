@@ -93,6 +93,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -1228,11 +1229,26 @@ public class AccessGroupService {
         presentationIngestFunctionGroup.setExternalServiceAgreementId(serviceAgreement.getExternalId());
         presentationIngestFunctionGroup.setMetadata(jobRole.getMetadata());
 
-        //since ReferenceJobRole class was removed, now all job roles have the same class, and
-        //reference job role can be created only for MSA, for CSA it failed
-        if(BooleanUtils.isTrue(serviceAgreement.getIsMaster())) {
-            log.debug("Creating a Reference Job Role.");
-            presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
+        if (CollectionUtils.isEmpty(jobRole.getFunctionGroups())) {
+            throw new IllegalArgumentException(
+                String.format("Unexpected no function groups for job role: %s", jobRole.getName()));
+        }
+        final var jobRoleType = jobRole.getFunctionGroups().getFirst().getType();
+        if (!ObjectUtils.isEmpty(jobRoleType)) {
+            switch (jobRoleType) {
+                case TEMPLATE:
+                    presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
+                    break;
+                case DEFAULT:
+                    presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.REGULAR);
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                        String.format("Unexpected enum constant: %s for job role: %s", jobRoleType, jobRole.getName()));
+            }
+        } else {
+            log.debug("No function group job role type is provided, creating a Local Job Role");
+            presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.REGULAR);
         }
 
         // Removing constant from mapper and adding default APS here to avoid issues with apsName.
