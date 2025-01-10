@@ -2,6 +2,8 @@ package com.backbase.stream.product;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseItemExtended;
@@ -160,6 +162,19 @@ class BatchProductIngestionSagaTest {
             .expectNext(batchProductGroupTask)
             .expectComplete()
             .verify();
+    }
+
+    @Test
+    void test_processProductBatch_subscriptionAdding() {
+        when(userService.getUserById("someRegularUserInId")).thenReturn(
+            Mono.just(MockUtil.buildUser()));
+        when(userService.createUser(any(), any(), any()))
+            .thenReturn(Mono.just(MockUtil.buildUser()));
+        StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
+            .expectNext(batchProductGroupTask)
+            .expectComplete()
+            .verify();
+        verify(arrangementService, times(5)).addSubscriptionForArrangement(any(), anyList());
     }
 
     BatchProductGroupTask mockBatchProductGroupTask() {
