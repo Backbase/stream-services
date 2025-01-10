@@ -387,6 +387,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserPreferences'
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
         additions:
           type: object
           additionalProperties:
@@ -451,10 +455,6 @@ components:
           $ref: '#/components/schemas/DebitAccount'
         accountHolderCountry:
           $ref: '#/components/schemas/AccountHolderCountry'
-        subscriptions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Subscription'
       allOf:
         - $ref: '#/components/schemas/BaseProduct'
     SavingsAccount:
