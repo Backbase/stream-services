@@ -6,6 +6,7 @@ import static java.util.Comparator.nullsFirst;
 import static java.util.stream.Collectors.toMap;
 
 import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
+import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -128,21 +129,31 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
     }
 
     private Mono<BatchProductGroupTask> setupSubscriptions(BatchProductGroupTask batchProductGroupTask) {
-        BatchProductGroup data = batchProductGroupTask.getData();
-        var currentAccountStream = Optional.ofNullable(data)
+        var data = batchProductGroupTask.getData();
+        Function<BaseProductGroup, Stream<BaseProduct>> productStreamFunction =
+            (BaseProductGroup pg) -> Stream.of(
+                pg.getCurrentAccounts().stream().map(BaseProduct.class::cast),
+                pg.getCreditCards().stream().map(BaseProduct.class::cast),
+                pg.getDebitCards().stream().map(BaseProduct.class::cast),
+                pg.getInvestmentAccounts().stream().map(BaseProduct.class::cast),
+                pg.getLoans().stream().map(BaseProduct.class::cast),
+                pg.getCustomProducts().stream().map(BaseProduct.class::cast),
+                pg.getSavingAccounts().stream().map(BaseProduct.class::cast),
+                pg.getTermDeposits().stream().map(BaseProduct.class::cast)
+            ).flatMap(Function.identity());
+        var productStream = Optional.ofNullable(data)
             .map(BatchProductGroup::getProductGroups)
             .stream()
             .flatMap(Collection::stream)
-            .map(BaseProductGroup::getCurrentAccounts)
-            .filter(Objects::nonNull)
-            .flatMap(Collection::stream);
-        var resultFlux = Flux.fromStream(currentAccountStream)
-            .flatMap(currentAccount -> {
-                var identifiers = currentAccount.getSubscriptions()
+            .flatMap(productStreamFunction)
+            .filter(Objects::nonNull);
+        var resultFlux = Flux.fromStream(productStream)
+            .flatMap(product -> {
+                var identifiers = product.getSubscriptions()
                     .stream()
                     .map(Subscription::getIdentifier)
                     .toList();
-                return arrangementService.addSubscriptionForArrangement(currentAccount.getExternalId(), identifiers);
+                return arrangementService.addSubscriptionForArrangement(product.getExternalId(), identifiers);
             });
 
         return resultFlux.then(Mono.just(batchProductGroupTask));

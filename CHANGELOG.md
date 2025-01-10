@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## [6.12.0](https://github.com/Backbase/stream-services/compare/6.11.0...6.12.0)
 ### Fixed
 - Adds LoB header to user kind segmentation saga in stream audiences
+### Added
+- add subscriptions for products when it's specified
 
 ## [6.11.0](https://github.com/Backbase/stream-services/compare/6.10.0...6.11.0)
 ### Fixed
