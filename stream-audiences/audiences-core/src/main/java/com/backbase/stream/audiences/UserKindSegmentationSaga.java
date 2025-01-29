@@ -2,6 +2,7 @@ package com.backbase.stream.audiences;
 
 import com.backbase.audiences.collector.api.service.ApiClient;
 import com.backbase.audiences.collector.api.service.v1.HandlersServiceApi;
+import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest;
 import com.backbase.buildingblocks.common.HttpCommunicationConstants;
 import com.backbase.stream.configuration.UserKindSegmentationProperties;
 import com.backbase.stream.worker.StreamTaskExecutor;
@@ -35,11 +36,7 @@ public class UserKindSegmentationSaga implements StreamTaskExecutor<UserKindSegm
         var request = streamTask.getCustomerOnboardedRequest();
 
         ApiClient apiClient = handlersServiceApi.getApiClient();
-        if (request.getUserKind().getValue().equals("RetailCustomer")) {
-            apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, "RETAIL");
-        } else if (request.getUserKind().getValue().equals("SME")) {
-            apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, "BUSINESS");
-        }
+        addLobHeader(apiClient, request);
         return handlersServiceApi.customerOnboarded(request)
             .then(Mono.fromCallable(() -> {
                 streamTask.info(ENTITY, INGEST, SUCCESS, null, request.getInternalUserId(), INGESTED_SUCCESSFULLY);
@@ -49,6 +46,16 @@ public class UserKindSegmentationSaga implements StreamTaskExecutor<UserKindSegm
                 streamTask.error(ENTITY, INGEST, ERROR, null, request.getInternalUserId(), FAILED_TO_INGEST);
                 return Mono.error(new StreamTaskException(streamTask, throwable, FAILED_TO_INGEST));
             });
+    }
+
+    private static void addLobHeader(ApiClient apiClient, CustomerOnboardedRequest request) {
+        if (apiClient != null) {
+        if (request.getUserKind().getValue().equals("RetailCustomer")) {
+            apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, "RETAIL");
+        } else if (request.getUserKind().getValue().equals("SME")) {
+            apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, "BUSINESS");
+        }
+        }
     }
 
     @Override
