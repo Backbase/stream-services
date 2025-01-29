@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>6.11.0</version>
+        <version>6.12.0</version>
     </parent>
 
     <artifactId>stream-plan-manager</artifactId>
