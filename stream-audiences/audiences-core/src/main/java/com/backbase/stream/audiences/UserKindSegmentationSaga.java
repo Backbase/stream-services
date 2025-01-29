@@ -1,6 +1,8 @@
 package com.backbase.stream.audiences;
 
+import com.backbase.audiences.collector.api.service.ApiClient;
 import com.backbase.audiences.collector.api.service.v1.HandlersServiceApi;
+import com.backbase.buildingblocks.common.HttpCommunicationConstants;
 import com.backbase.stream.configuration.UserKindSegmentationProperties;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
@@ -31,6 +33,12 @@ public class UserKindSegmentationSaga implements StreamTaskExecutor<UserKindSegm
     @Override
     public Mono<UserKindSegmentationTask> executeTask(UserKindSegmentationTask streamTask) {
         var request = streamTask.getCustomerOnboardedRequest();
+        ApiClient apiClient = handlersServiceApi.getApiClient();
+        if (request.getUserKind().getValue().equals("RetailCustomer")) {
+            apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, "RETAIL");
+        } else if (request.getUserKind().getValue().equals("SME")) {
+            apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, "BUSINESS");
+        }
 
         return handlersServiceApi.customerOnboarded(request)
             .then(Mono.fromCallable(() -> {
