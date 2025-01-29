@@ -3,10 +3,12 @@ package com.backbase.stream.audiences;
 import com.backbase.audiences.collector.api.service.ApiClient;
 import com.backbase.audiences.collector.api.service.v1.HandlersServiceApi;
 import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest;
+import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest.UserKindEnum;
 import com.backbase.buildingblocks.common.HttpCommunicationConstants;
 import com.backbase.stream.configuration.UserKindSegmentationProperties;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -35,8 +37,7 @@ public class UserKindSegmentationSaga implements StreamTaskExecutor<UserKindSegm
     public Mono<UserKindSegmentationTask> executeTask(UserKindSegmentationTask streamTask) {
         var request = streamTask.getCustomerOnboardedRequest();
 
-        ApiClient apiClient = handlersServiceApi.getApiClient();
-        addLobHeader(apiClient, request);
+        addLobHeader(handlersServiceApi.getApiClient(), request);
         return handlersServiceApi.customerOnboarded(request)
             .then(Mono.fromCallable(() -> {
                 streamTask.info(ENTITY, INGEST, SUCCESS, null, request.getInternalUserId(), INGESTED_SUCCESSFULLY);
@@ -49,12 +50,17 @@ public class UserKindSegmentationSaga implements StreamTaskExecutor<UserKindSegm
     }
 
     private static void addLobHeader(ApiClient apiClient, CustomerOnboardedRequest request) {
-        if (apiClient != null) {
-        if (request.getUserKind().getValue().equals("RetailCustomer")) {
-            apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, "RETAIL");
-        } else if (request.getUserKind().getValue().equals("SME")) {
-            apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, "BUSINESS");
+        if (apiClient == null) {
+            return;
         }
+        if (request.getUserKind() == UserKindEnum.RETAILCUSTOMER) {
+            log.debug("adding header for retail customer");
+            apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, LineOfBusiness.RETAIL.getValue());
+        } else if (request.getUserKind() == UserKindEnum.SME) {
+            log.debug("adding header for business customer");
+            apiClient.addDefaultHeader(HttpCommunicationConstants.LINE_OF_BUSINESS, LineOfBusiness.BUSINESS.getValue());
+        } else {
+            log.debug("user kind {} is ignored", request.getUserKind());
         }
     }
 
@@ -79,4 +85,15 @@ public class UserKindSegmentationSaga implements StreamTaskExecutor<UserKindSegm
         return userKindSegmentationProperties.defaultCustomerCategory();
     }
 
+    @Getter
+    public enum LineOfBusiness {
+        RETAIL("RETAIL"),
+        BUSINESS("BUSINESS");
+
+        private final String value;
+
+        LineOfBusiness(String lineOfBusiness) {
+            this.value = lineOfBusiness;
+        }
+    }
 }
