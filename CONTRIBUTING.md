@@ -7,6 +7,7 @@ You are welcome to provide bug fixes and new features in the form of pull reques
 - Please make one change/feature per pull request.
 - Use descriptive PR description and commit messages.
 - Together with your changes, submit updated [CHANGELOG.md](CHANGELOG.md) in your PR using the next desired version as reference.
+- Get appropriate permissions to push to the repository by updating your **public** github username (not the EMU one) on [BambooHR](https://backbase.bamboohr.com/) (My Info -> Personal -> Contact -> GitHub Username)
 - After your pull request gets approved and integrated, then **GitHub actions will bump** the `MINOR` version and deploy it to Backbase maven repository. *(e.g. 2.45.0 -> 2.46.0)*
     * For small fixes and patches utilize the `hotfix/` branch prefix, so once it is integrated the pipelines will automatically bump the `PATCH` version instead of the `MINOR`. *(e.g. 2.46.0 -> 2.46.1)*
     * Always use `hotfix/` branches for creating PRs to [`support/` branches](https://gitversion.net/docs/learn/branching-strategies/gitflow/examples#support-branches).
