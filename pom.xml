@@ -39,7 +39,7 @@
     <properties>
         <java.version>17</java.version>
         <ssdk.version>16.1.11</ssdk.version>
-        <backbase-bom.version>2024.03-68-LTS</backbase-bom.version>
+        <backbase-bom.version>2024.03.68-LTS</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
