@@ -130,23 +130,11 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
 
     private Mono<BatchProductGroupTask> setupSubscriptions(BatchProductGroupTask batchProductGroupTask) {
         var data = batchProductGroupTask.getData();
-        Function<BaseProductGroup, Stream<BaseProduct>> productStreamFunction =
-            (BaseProductGroup pg) -> Stream.of(
-                pg.getCurrentAccounts().stream().map(BaseProduct.class::cast),
-                pg.getCreditCards().stream().map(BaseProduct.class::cast),
-                pg.getDebitCards().stream().map(BaseProduct.class::cast),
-                pg.getInvestmentAccounts().stream().map(BaseProduct.class::cast),
-                pg.getLoans().stream().map(BaseProduct.class::cast),
-                pg.getCustomProducts().stream().map(BaseProduct.class::cast),
-                pg.getSavingAccounts().stream().map(BaseProduct.class::cast),
-                pg.getTermDeposits().stream().map(BaseProduct.class::cast)
-            ).flatMap(Function.identity());
         var productStream = Optional.ofNullable(data)
             .map(BatchProductGroup::getProductGroups)
             .stream()
             .flatMap(Collection::stream)
-            .flatMap(productStreamFunction)
-            .filter(Objects::nonNull);
+            .flatMap(StreamUtils::getAllProducts);
         var resultFlux = Flux.fromStream(productStream)
             .flatMap(product -> {
                 var identifiers = product.getSubscriptions()
