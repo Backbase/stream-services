@@ -1,5 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [6.13.0](https://github.com/Backbase/stream-services/compare/6.12.0...6.13.0)
+### Added
+- add subscriptions for products when it's specified
 
 ## [6.12.0](https://github.com/Backbase/stream-services/compare/6.11.0...6.12.0)
 ### Fixed

@@ -387,6 +387,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserPreferences'
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
         additions:
           type: object
           additionalProperties:
@@ -3072,6 +3076,17 @@ components:
       enum:
         - RETAIL
         - BUSINESS
+    Subscription:
+      type: object
+      description: Arrangement subscription
+      properties:
+        identifier:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Subscription identifier
+      required:
+        - identifier
 
   examples:
     RootLegalEntityHierarchyExample:

@@ -2,6 +2,8 @@ package com.backbase.stream.product;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseItemExtended;
@@ -33,137 +35,153 @@ import reactor.test.StepVerifier;
 @ExtendWith(MockitoExtension.class)
 class BatchProductIngestionSagaTest {
 
-  @InjectMocks
-  BatchProductIngestionSaga batchProductIngestionSaga;
-  @Mock
-  ArrangementService arrangementService;
-  @Mock
-  AccessGroupService accessGroupService;
-  @Mock
-  UserService userService;
-  @Mock
-  ProductIngestionSagaConfigurationProperties configurationProperties;
-  @Mock
-  LoansSaga loansSaga;
-  @Mock
-  LoansApi loansApi;
+    @InjectMocks
+    BatchProductIngestionSaga batchProductIngestionSaga;
+    @Mock
+    ArrangementService arrangementService;
+    @Mock
+    AccessGroupService accessGroupService;
+    @Mock
+    UserService userService;
+    @Mock
+    ProductIngestionSagaConfigurationProperties configurationProperties;
+    @Mock
+    LoansSaga loansSaga;
+    @Mock
+    LoansApi loansApi;
 
-  BatchProductGroupTask batchProductGroupTask;
+    BatchProductGroupTask batchProductGroupTask;
 
-  @BeforeEach
-  void setUp() {
-    batchProductGroupTask = mockBatchProductGroupTask();
-    BatchResponseItemExtended batchResponseItemExtended = new BatchResponseItemExtended();
-    batchResponseItemExtended.setResourceId("resource_id");
-    batchResponseItemExtended.setStatus(BatchResponseStatusCode.HTTP_STATUS_OK);
-    when(arrangementService.upsertBatchArrangements(anyList()))
-        .thenReturn(Flux.just(batchResponseItemExtended
-            .arrangementId("arr_id")));
-    when(accessGroupService.getExistingDataGroups(
-        batchProductGroupTask.getData().getServiceAgreement()
-            .getInternalId(), null))
-        .thenReturn(Flux.just(MockUtil.buildDataGroupItem()));
-    when(accessGroupService.createArrangementDataAccessGroup(any(), any(), any()))
-        .thenReturn(Mono.just(new BaseProductGroup()));
-    when(accessGroupService.updateExistingDataGroupsBatch(batchProductGroupTask,
-        List.of(MockUtil.buildDataGroupItem()),
-        batchProductGroupTask.getData().getProductGroups()))
-        .thenReturn(Mono.just(batchProductGroupTask));
-    when(accessGroupService.getFunctionGroupsForServiceAgreement("sa_internalId"))
-        .thenReturn(Mono.just(List.of(MockUtil.buildFunctionGroupItem())));
-    when(accessGroupService.setupFunctionGroups(batchProductGroupTask,
-        batchProductGroupTask.getData().getServiceAgreement(),
-        MockUtil.buildBusinessFunctionGroupList()))
-        .thenReturn(Mono.just(MockUtil.buildBusinessFunctionGroupList()));
-    when(accessGroupService.assignPermissionsBatch(any(), any())).thenReturn(
-        Mono.just(batchProductGroupTask));
-    LoansTask loansTask = new LoansTask(
-        String.format(batchProductGroupTask.getData().getServiceAgreement().getExternalId(),
-            batchProductGroupTask.getId()), List.of(MockUtil.buildLoanAccount()));
-    when(loansSaga.executeTask(loansTask)).thenReturn(Mono.just(loansTask));
-  }
+    @BeforeEach
+    void setUp() {
+        batchProductGroupTask = mockBatchProductGroupTask();
+        BatchResponseItemExtended batchResponseItemExtended = new BatchResponseItemExtended();
+        batchResponseItemExtended.setResourceId("resource_id");
+        batchResponseItemExtended.setStatus(BatchResponseStatusCode.HTTP_STATUS_OK);
+        when(arrangementService.upsertBatchArrangements(anyList()))
+            .thenReturn(Flux.just(batchResponseItemExtended
+                .arrangementId("arr_id")));
+        when(accessGroupService.getExistingDataGroups(
+            batchProductGroupTask.getData().getServiceAgreement()
+                .getInternalId(), null))
+            .thenReturn(Flux.just(MockUtil.buildDataGroupItem()));
+        when(accessGroupService.createArrangementDataAccessGroup(any(), any(), any()))
+            .thenReturn(Mono.just(new BaseProductGroup()));
+        when(accessGroupService.updateExistingDataGroupsBatch(batchProductGroupTask,
+            List.of(MockUtil.buildDataGroupItem()),
+            batchProductGroupTask.getData().getProductGroups()))
+            .thenReturn(Mono.just(batchProductGroupTask));
+        when(accessGroupService.getFunctionGroupsForServiceAgreement("sa_internalId"))
+            .thenReturn(Mono.just(List.of(MockUtil.buildFunctionGroupItem())));
+        when(accessGroupService.setupFunctionGroups(batchProductGroupTask,
+            batchProductGroupTask.getData().getServiceAgreement(),
+            MockUtil.buildBusinessFunctionGroupList()))
+            .thenReturn(Mono.just(MockUtil.buildBusinessFunctionGroupList()));
+        when(accessGroupService.assignPermissionsBatch(any(), any())).thenReturn(
+            Mono.just(batchProductGroupTask));
+        when(arrangementService.addSubscriptionForArrangement(any(), any())).thenReturn(
+            Mono.empty()
+        );
+        LoansTask loansTask = new LoansTask(
+            String.format(batchProductGroupTask.getData().getServiceAgreement().getExternalId(),
+                batchProductGroupTask.getId()), List.of(MockUtil.buildLoanAccount()));
+        when(loansSaga.executeTask(loansTask)).thenReturn(Mono.just(loansTask));
+    }
 
-  @Test
-  void test_processProductBatchUsers_withUserInternalId() {
-    when(userService.getUserById("someRegularUserInId")).thenReturn(
-        Mono.just(MockUtil.buildUser()));
-    when(userService.createUser(any(), any(), any()))
-        .thenReturn(Mono.just(MockUtil.buildUser()));
-    StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
-        .expectNext(batchProductGroupTask)
-        .expectComplete()
-        .verify();
-  }
+    @Test
+    void test_processProductBatchUsers_withUserInternalId() {
+        when(userService.getUserById("someRegularUserInId")).thenReturn(
+            Mono.just(MockUtil.buildUser()));
+        when(userService.createUser(any(), any(), any()))
+            .thenReturn(Mono.just(MockUtil.buildUser()));
+        StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
+            .expectNext(batchProductGroupTask)
+            .expectComplete()
+            .verify();
+    }
 
-  @Test
-  void test_processProductBatchUsers_withUserExternalId() {
-    batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers().get(0)
-        .getUser().setInternalId(null);
-    when(userService.getUserByExternalId("someRegularUserExId")).thenReturn(
-        Mono.just(MockUtil.buildUser()));
-    when(userService.createUser(any(), any(), any()))
-        .thenReturn(Mono.just(MockUtil.buildUser()));
-    StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
-        .expectNext(batchProductGroupTask)
-        .expectComplete()
-        .verify();
-  }
+    @Test
+    void test_processProductBatchUsers_withUserExternalId() {
+        batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers().get(0)
+            .getUser().setInternalId(null);
+        when(userService.getUserByExternalId("someRegularUserExId")).thenReturn(
+            Mono.just(MockUtil.buildUser()));
+        when(userService.createUser(any(), any(), any()))
+            .thenReturn(Mono.just(MockUtil.buildUser()));
+        StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
+            .expectNext(batchProductGroupTask)
+            .expectComplete()
+            .verify();
+    }
 
-  @Test
-  void test_processProductBatchExistingIdentityUser_withUserInternalId() {
-    when(configurationProperties.isIdentityEnabled()).thenReturn(true);
-    User user = MockUtil.buildUser();
-    batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers()
-        .get(0).getUser().setIdentityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY);
-    batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers()
-        .get(0).getUser().setInternalId("someRegularUserInId");
-    when(userService.getUserById("someRegularUserInId")).thenReturn(
-        Mono.just(user));
-    when(userService.createOrImportIdentityUser(any(), any(), any()))
-        .thenReturn(Mono.empty());
-    StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
-        .expectNext(batchProductGroupTask)
-        .expectComplete()
-        .verify();
-  }
+    @Test
+    void test_processProductBatchExistingIdentityUser_withUserInternalId() {
+        when(configurationProperties.isIdentityEnabled()).thenReturn(true);
+        User user = MockUtil.buildUser();
+        batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers()
+            .get(0).getUser().setIdentityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY);
+        batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers()
+            .get(0).getUser().setInternalId("someRegularUserInId");
+        when(userService.getUserById("someRegularUserInId")).thenReturn(
+            Mono.just(user));
+        when(userService.createOrImportIdentityUser(any(), any(), any()))
+            .thenReturn(Mono.empty());
+        StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
+            .expectNext(batchProductGroupTask)
+            .expectComplete()
+            .verify();
+    }
 
-  @Test
-  void test_processProductBatchNewIdentityUser_withUserInternalId() {
-    when(configurationProperties.isIdentityEnabled()).thenReturn(true);
-    User user = MockUtil.buildUser();
-    batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers()
-        .get(0).getUser().setIdentityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY);
-    batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers()
-        .get(0).getUser().setInternalId("someRegularUserInId");
-    when(userService.getUserById("someRegularUserInId")).thenReturn(
-        Mono.just(user));
-    when(userService.createOrImportIdentityUser(any(), any(), any()))
-        .thenReturn(Mono.just(user));
-    StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
-        .expectNext(batchProductGroupTask)
-        .expectComplete()
-        .verify();
-  }
+    @Test
+    void test_processProductBatchNewIdentityUser_withUserInternalId() {
+        when(configurationProperties.isIdentityEnabled()).thenReturn(true);
+        User user = MockUtil.buildUser();
+        batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers()
+            .get(0).getUser().setIdentityLinkStrategy(IdentityUserLinkStrategy.CREATE_IN_IDENTITY);
+        batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers()
+            .get(0).getUser().setInternalId("someRegularUserInId");
+        when(userService.getUserById("someRegularUserInId")).thenReturn(
+            Mono.just(user));
+        when(userService.createOrImportIdentityUser(any(), any(), any()))
+            .thenReturn(Mono.just(user));
+        StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
+            .expectNext(batchProductGroupTask)
+            .expectComplete()
+            .verify();
+    }
 
-  @Test
-  void test_processProductBatchIdentityUsers_withUserExternalId() {
-    batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers().get(0)
-        .getUser().setInternalId(null);
-    when(userService.getUserByExternalId("someRegularUserExId")).thenReturn(
-        Mono.just(MockUtil.buildUser()));
-    when(userService.createUser(any(), any(), any()))
-        .thenReturn(Mono.just(MockUtil.buildUser()));
-    StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
-        .expectNext(batchProductGroupTask)
-        .expectComplete()
-        .verify();
-  }
+    @Test
+    void test_processProductBatchIdentityUsers_withUserExternalId() {
+        batchProductGroupTask.getBatchProductGroup().getProductGroups().get(0).getUsers().get(0)
+            .getUser().setInternalId(null);
+        when(userService.getUserByExternalId("someRegularUserExId")).thenReturn(
+            Mono.just(MockUtil.buildUser()));
+        when(userService.createUser(any(), any(), any()))
+            .thenReturn(Mono.just(MockUtil.buildUser()));
+        StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
+            .expectNext(batchProductGroupTask)
+            .expectComplete()
+            .verify();
+    }
 
-  BatchProductGroupTask mockBatchProductGroupTask() {
-    ProductGroup productGroup = MockUtil.createProductGroup();
-    return new BatchProductGroupTask()
-        .data(new BatchProductGroup().productGroups(List.of(productGroup))
-            .serviceAgreement(productGroup.getServiceAgreement()));
+    @Test
+    void test_processProductBatch_subscriptionAdding() {
+        when(userService.getUserById("someRegularUserInId")).thenReturn(
+            Mono.just(MockUtil.buildUser()));
+        when(userService.createUser(any(), any(), any()))
+            .thenReturn(Mono.just(MockUtil.buildUser()));
+        StepVerifier.create(batchProductIngestionSaga.process(batchProductGroupTask))
+            .expectNext(batchProductGroupTask)
+            .expectComplete()
+            .verify();
+        verify(arrangementService, times(5)).addSubscriptionForArrangement(any(), anyList());
+    }
 
-  }
+    BatchProductGroupTask mockBatchProductGroupTask() {
+        ProductGroup productGroup = MockUtil.createProductGroup();
+        return new BatchProductGroupTask()
+            .data(new BatchProductGroup().productGroups(List.of(productGroup))
+                .serviceAgreement(productGroup.getServiceAgreement()));
+
+    }
 }

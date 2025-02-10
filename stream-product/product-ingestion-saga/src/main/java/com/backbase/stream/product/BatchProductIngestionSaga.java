@@ -6,6 +6,7 @@ import static java.util.Comparator.nullsFirst;
 import static java.util.stream.Collectors.toMap;
 
 import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
+import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -14,6 +15,7 @@ import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.legalentity.model.Subscription;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.loan.LoansSaga;
 import com.backbase.stream.loan.LoansTask;
@@ -71,7 +73,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
         return process(batchProductGroupTask)
             .map(batchProductGroup -> {
                 streamTask.addHistory(batchProductGroup.getHistory());
-               return streamTask;
+                return streamTask;
             });
     }
 
@@ -101,7 +103,8 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .flatMap(this::upsertArrangementsBatch)
                 .flatMap(this::setupProductGroupsBatch)
                 .flatMap(this::setupBusinessFunctionsAndPermissionsBatch)
-                .flatMap(this::setupLoans);
+                .flatMap(this::setupLoans)
+                .flatMap(this::setupSubscriptions);
     }
 
     @SuppressWarnings("java:S2259")
@@ -123,6 +126,25 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 .thenReturn(batchProductGroupTask);
         }
         return Mono.just(batchProductGroupTask);
+    }
+
+    private Mono<BatchProductGroupTask> setupSubscriptions(BatchProductGroupTask batchProductGroupTask) {
+        var data = batchProductGroupTask.getData();
+        var productStream = Optional.ofNullable(data)
+            .map(BatchProductGroup::getProductGroups)
+            .stream()
+            .flatMap(Collection::stream)
+            .flatMap(StreamUtils::getAllProducts);
+        var resultFlux = Flux.fromStream(productStream)
+            .flatMap(product -> {
+                var identifiers = product.getSubscriptions()
+                    .stream()
+                    .map(Subscription::getIdentifier)
+                    .toList();
+                return arrangementService.addSubscriptionForArrangement(product.getExternalId(), identifiers);
+            });
+
+        return resultFlux.then(Mono.just(batchProductGroupTask));
     }
 
 
