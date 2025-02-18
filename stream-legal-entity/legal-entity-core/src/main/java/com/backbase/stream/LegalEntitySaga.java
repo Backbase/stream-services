@@ -870,6 +870,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     return Mono.just(streamTask);
                 });
 
+
                 // Master Service Agreement can be created only if activateSingleServiceAgreement property is missing or it has the value: true
                 if (streamTask.getLegalEntity() != null &&
                     (streamTask.getLegalEntity().getActivateSingleServiceAgreement() == null || streamTask.getLegalEntity().getActivateSingleServiceAgreement())) {
