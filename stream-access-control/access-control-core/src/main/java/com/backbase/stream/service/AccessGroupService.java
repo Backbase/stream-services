@@ -84,6 +84,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -1502,23 +1503,40 @@ public class AccessGroupService {
             .collect(Collectors.toList());
     }
 
-
     /**
      * Retrieves the list of Service Agreements associated with a user by their internal ID.
      *
      * @param userInternalId the internal ID of the user
      * @return a Mono emitting a list of Service Agreements
      */
-    public Mono<List<ServiceAgreement>> getUserContextsByUserId(String userInternalId) {
-        log.info("Getting Service Agreement for: {}", userInternalId);
-        return userContextApi.getUserContexts(userInternalId, null, null, null)
-            .doOnNext(serviceAgreementItem -> log.info("{} Service Agreements found for legal entity: {}",
-                serviceAgreementItem.getTotalElements(), userInternalId))
-            .map(GetContexts::getElements)
+    public Mono<List<ServiceAgreement>> getUserContextsByUserId(String userInternalId, String query,
+        Integer from, Integer pageSize) {
+        log.debug("Getting Service Agreement for: {}", userInternalId);
+        return fetchUserContexts(userInternalId, query, from, pageSize)
+            .flatMapIterable(GetContexts::getElements)
+            .map(accessGroupMapper::toStream)
+            .collectList()
+            .doOnNext(serviceAgreements ->
+                log.debug("[{}] Service Agreements found for user: {}", serviceAgreements.size(), userInternalId)
+            )
             .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Failed to fetch service agreement by legal entity id: {}", e.getResponseBodyAsString(), e);
+                log.error("Failed to fetch service agreement by user internal id: {}", e.getResponseBodyAsString(), e);
                 return Mono.error(e);
-            }).map(accessGroupMapper::toStream);
+            });
+    }
+
+    private Flux<GetContexts> fetchUserContexts(String userInternalId, String query, Integer from,
+        Integer pageSize) {
+        var currentPage = new AtomicInteger(from != null ? from : 0);
+        return userContextApi.getUserContexts(userInternalId, query, currentPage.get(), pageSize)
+            .expand(response -> {
+                var totalPagesCalculated = response.getTotalElements().intValue() / pageSize;
+                currentPage.getAndIncrement();
+                if (currentPage.get() >= totalPagesCalculated) {
+                    return Mono.empty();
+                }
+                return userContextApi.getUserContexts(userInternalId, query, currentPage.get(), pageSize);
+            });
     }
 
     @NotNull

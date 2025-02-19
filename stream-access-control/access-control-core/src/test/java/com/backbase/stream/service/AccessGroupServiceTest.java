@@ -1,6 +1,5 @@
 package com.backbase.stream.service;
 
-import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_BAD_REQUEST;
 import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_INTERNAL_SERVER_ERROR;
 import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_OK;
 import static com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction.ADD;
@@ -33,6 +32,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItemSystemBase;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem.TypeEnum;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.GetContexts;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
@@ -53,6 +53,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.UserContextItem;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -91,6 +92,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -129,6 +131,7 @@ class AccessGroupServiceTest {
     @Captor
     private ArgumentCaptor<List<PresentationDataGroupItemPutRequestBody>> presentationDataGroupItemPutRequestBodyCaptor;
 
+    String userInternalId = "userInternalId";
 
     @Test
     void shouldCreateServiceAgreement() {
@@ -1202,6 +1205,79 @@ class AccessGroupServiceTest {
         String exId;
         boolean sharingAccounts;
         boolean sharingUsers;
+    }
+
+    @Test
+    void testGetUserContextsByUserId_success() {
+        var getContexts = new GetContexts().elements(
+            Collections.singletonList(new UserContextItem().serviceAgreementId("sa_id"))).totalElements(1L);
+
+        when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
+            .thenReturn(Mono.just(getContexts));
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 10))
+            .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 1)
+            .verifyComplete();
+
+        verify(userContextApi, times(1)).getUserContexts(userInternalId, null, 0, 10);
+    }
+
+    @Test
+    void testGetUserContextsByUserId_emptyResult() {
+        when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
+            .thenReturn(Mono.just(getEmptyContext()));
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 10))
+            .expectNext(Collections.emptyList())
+            .verifyComplete();
+    }
+
+    private GetContexts getEmptyContext() {
+        return new GetContexts().elements(Collections.emptyList()).totalElements(0L);
+    }
+
+    @Test
+    void testGetUserContextsByUserId_webClientResponseException4xx() {
+        when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
+            .thenReturn(Mono.error(new WebClientResponseException("Not Found", 404, "Not Found", null, null, null)));
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 10))
+            .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException
+                && HttpStatus.NOT_FOUND.equals(((WebClientResponseException) throwable).getStatusCode()))
+            .verify();
+    }
+
+    @Test
+    void testGetUserContextsByUserId_nullFrom() {
+        when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
+            .thenReturn(Mono.just(getEmptyContext()));
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, null, 10))
+            .expectNextMatches(List::isEmpty)
+            .verifyComplete();
+    }
+
+    @Test
+    void testGetUserContextsByUserId_pagination() {
+        // Mock responses for multiple pages
+        var page1 = new GetContexts().elements(List.of(new UserContextItem().serviceAgreementId("sa_1")))
+            .totalElements(2L);
+        var page2 = new GetContexts().elements(List.of(new UserContextItem().serviceAgreementId("sa_2")))
+            .totalElements(2L);
+
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(0), any()))
+            .thenReturn(Mono.just(page1));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(1), any()))
+            .thenReturn(Mono.just(page2));
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 1))
+            .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 2
+                && serviceAgreements.stream().anyMatch(sa -> sa.getInternalId().equals("sa_1"))
+                && serviceAgreements.stream().anyMatch(sa -> sa.getInternalId().equals("sa_2")))
+            .verifyComplete();
+
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(0), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(1), any());
     }
 
 }
