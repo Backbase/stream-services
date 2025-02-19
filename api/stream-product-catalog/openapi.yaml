@@ -125,6 +125,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TranslationItem'
+        insuredStatus:
+          type: string
+          description: |
+            Indicate whether the arrangement is covered by deposit insurance
+            Possible values: 'yes', 'no', or 'n/a' (not applicable)
+          enum:
+            - "yes"
+            - "no"
+            - "n/a"
         additions:
           type: object
           additionalProperties:
