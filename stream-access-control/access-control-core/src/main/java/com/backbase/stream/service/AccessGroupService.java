@@ -1502,7 +1502,6 @@ public class AccessGroupService {
             .collect(Collectors.toList());
     }
 
-
     /**
      * Retrieves the list of Service Agreements associated with a user by their internal ID.
      *
@@ -1512,13 +1511,14 @@ public class AccessGroupService {
     public Mono<List<ServiceAgreement>> getUserContextsByUserId(String userInternalId) {
         log.info("Getting Service Agreement for: {}", userInternalId);
         return userContextApi.getUserContexts(userInternalId, null, null, null)
-            .doOnNext(serviceAgreementItem -> log.info("{} Service Agreements found for legal entity: {}",
+            .doOnNext(serviceAgreementItem -> log.info("{} Service Agreements found for user: {}",
                 serviceAgreementItem.getTotalElements(), userInternalId))
             .map(GetContexts::getElements)
+            .map(accessGroupMapper::toStream)
             .onErrorResume(WebClientResponseException.class, e -> {
-                log.error("Failed to fetch service agreement by legal entity id: {}", e.getResponseBodyAsString(), e);
+                log.error("Failed to fetch service agreement by user internal id: {}", e.getResponseBodyAsString(), e);
                 return Mono.error(e);
-            }).map(accessGroupMapper::toStream);
+            });
     }
 
     @NotNull

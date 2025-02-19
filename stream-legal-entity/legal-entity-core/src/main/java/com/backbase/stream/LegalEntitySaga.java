@@ -859,30 +859,19 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
             // Fetch existing master service agreement or create a new one
             return fetchExistingMasterServiceAgreement(legalEntity, streamTask)
+                // If no existing master service agreement is found, check for custom service agreements
                 .switchIfEmpty(Mono.defer(() -> {
-
-                    if (CollectionUtils.isEmpty(legalEntitySagaConfigurationProperties.getServiceAgreementPurposes())) {
-                        // No custom agreement configured - create a new master service agreement
-                        return createNewMasterServiceAgreementIfNeeded(legalEntity, streamTask);
+                    //if purpose is configured, check for custom service agreements
+                    if (!CollectionUtils.isEmpty(legalEntitySagaConfigurationProperties.getServiceAgreementPurposes())) {
+                        return fetchCustomServiceAgreementIfExists(legalEntity, streamTask);
                     }
-                    // Fetch existing custom service agreement or create a new master service agreement
-                    return fetchOrCreateServiceAgreement(legalEntity, streamTask);
-
-                }));
-
+                    return Mono.empty();
+                }))
+                // If no master or custom service agreements are found, create a new master service agreement
+                .switchIfEmpty(Mono.defer(() -> createNewMasterServiceAgreementIfNeeded(legalEntity, streamTask)));
         } else {
             return Mono.just(streamTask);
         }
-    }
-
-    private Mono<LegalEntityTask> fetchOrCreateServiceAgreement(LegalEntity legalEntity, LegalEntityTask streamTask) {
-        return fetchCustomServiceAgreementIfExists(legalEntity, streamTask)
-            .flatMap(fetchedCustomAgreement -> {
-                if (fetchedCustomAgreement == null) {
-                    return createNewMasterServiceAgreementIfNeeded(legalEntity, streamTask);
-                }
-                return Mono.just(fetchedCustomAgreement);
-            });
     }
 
     private Mono<? extends LegalEntityTask> createNewMasterServiceAgreementIfNeeded(LegalEntity legalEntity,
@@ -938,9 +927,9 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private Mono<LegalEntityTask> fetchCustomServiceAgreementIfExists(LegalEntity legalEntity,
         LegalEntityTask streamTask) {
         log.debug("Fetching custom service agreement for legal entity: {}", legalEntity.getExternalId());
-        return userService.getUsersByLegalEntity(legalEntity.getInternalId(), 1, 0)
+        return userService.getUsersByLegalEntity(legalEntity.getInternalId(), Integer.MAX_VALUE, 0)
             .flatMap(usersList -> {
-                if (usersList == null || usersList.getUsers().isEmpty()) {
+                if (usersList == null || CollectionUtils.isEmpty(usersList.getUsers())) {
                     String errorMessage = "No users found for Legal Entity: " + legalEntity.getExternalId();
                     log.error(errorMessage);
                     return Mono.error(new StreamTaskException(streamTask, errorMessage));
