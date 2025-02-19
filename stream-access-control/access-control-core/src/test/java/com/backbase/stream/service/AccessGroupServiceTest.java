@@ -26,6 +26,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
@@ -121,6 +122,9 @@ class AccessGroupServiceTest {
 
     @Spy
     private BatchResponseUtils batchResponseUtils;
+
+    @Mock
+    private UserContextApi userContextApi;
 
     @Captor
     private ArgumentCaptor<List<PresentationDataGroupItemPutRequestBody>> presentationDataGroupItemPutRequestBodyCaptor;
