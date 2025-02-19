@@ -8,6 +8,7 @@ import static org.springframework.util.StringUtils.isEmpty;
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ArrangementPrivilegesGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
@@ -15,6 +16,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItemSystemBase;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.GetContexts;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ListOfFunctionGroupsWithDataGroups;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
@@ -130,6 +132,8 @@ public class AccessGroupService {
     private final DeletionProperties deletionProperties;
     @NonNull
     private final BatchResponseUtils batchResponseUtils;
+    @NonNull
+    private final UserContextApi userContextApi;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
@@ -1496,6 +1500,25 @@ public class AccessGroupService {
         return functions.stream()
             .map(this::mapUpdateBusinessFunction)
             .collect(Collectors.toList());
+    }
+
+
+    /**
+     * Retrieves the list of Service Agreements associated with a user by their internal ID.
+     *
+     * @param userInternalId the internal ID of the user
+     * @return a Mono emitting a list of Service Agreements
+     */
+    public Mono<List<ServiceAgreement>> getUserContextsByUserId(String userInternalId) {
+        log.info("Getting Service Agreement for: {}", userInternalId);
+        return userContextApi.getUserContexts(userInternalId, null, null, null)
+            .doOnNext(serviceAgreementItem -> log.info("{} Service Agreements found for legal entity: {}",
+                serviceAgreementItem.getTotalElements(), userInternalId))
+            .map(GetContexts::getElements)
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Failed to fetch service agreement by legal entity id: {}", e.getResponseBodyAsString(), e);
+                return Mono.error(e);
+            }).map(accessGroupMapper::toStream);
     }
 
     @NotNull
