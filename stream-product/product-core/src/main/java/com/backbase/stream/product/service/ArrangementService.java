@@ -189,11 +189,9 @@ public class ArrangementService {
      * @param legalEntitiesExternalIds list of Legal Entities external identifiers.
      * @return Mono<Void>
      */
-    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId,
-        List<String> legalEntitiesExternalIds) {
+    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, List<String> legalEntitiesExternalIds) {
         log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, legalEntitiesExternalIds);
-        return arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, new ExternalLegalEntityIds()
-            .ids(new HashSet<>(legalEntitiesExternalIds)));
+        return arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, new ExternalLegalEntityIds().ids(new HashSet<>(legalEntitiesExternalIds)));
     }
 
     /**
