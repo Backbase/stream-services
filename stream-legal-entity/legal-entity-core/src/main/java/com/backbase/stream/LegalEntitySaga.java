@@ -854,44 +854,133 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         if (legalEntity.getCustomServiceAgreement() != null) {
 
             return setupCustomServiceAgreement(streamTask, legalEntity);
-        } else if (legalEntity.getMasterServiceAgreement() == null || StringUtils.isEmpty(legalEntity.getMasterServiceAgreement().getInternalId())) {
+        } else if (legalEntity.getMasterServiceAgreement() == null || StringUtils.isEmpty(
+            legalEntity.getMasterServiceAgreement().getInternalId())) {
 
-            Mono<LegalEntityTask> existingServiceAgreement = legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(legalEntity.getInternalId())
-                .flatMap(serviceAgreement -> {
-                    if (legalEntity.getMasterServiceAgreement() != null ) {
-                        serviceAgreement.setLimit(legalEntity.getMasterServiceAgreement().getLimit());
-                        serviceAgreement.setParticipants(legalEntity.getMasterServiceAgreement().getParticipants());
-                        if(legalEntity.getMasterServiceAgreement().getJobRoles() != null) {
-                            serviceAgreement.setJobRoles(legalEntity.getMasterServiceAgreement().getJobRoles());
-                        }
+            // Fetch existing master service agreement or create a new one
+            return fetchExistingMasterServiceAgreement(legalEntity, streamTask)
+                .switchIfEmpty(Mono.defer(() -> {
+
+                    if (CollectionUtils.isEmpty(legalEntitySagaConfigurationProperties.getServiceAgreementPurposes())) {
+                        // No custom agreement configured - create a new master service agreement
+                        return createNewMasterServiceAgreementIfNeeded(legalEntity, streamTask);
                     }
-                    streamTask.getData().setMasterServiceAgreement(serviceAgreement);
-                    streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Existing Service Agreement: %s found for Legal Entity: %s", serviceAgreement.getExternalId(), legalEntity.getExternalId());
-                    return Mono.just(streamTask);
-                });
+                    // Fetch existing custom service agreement or create a new master service agreement
+                    return fetchOrCreateServiceAgreement(legalEntity, streamTask);
 
-
-                // Master Service Agreement can be created only if activateSingleServiceAgreement property is missing or it has the value: true
-                if (streamTask.getLegalEntity() != null &&
-                    (streamTask.getLegalEntity().getActivateSingleServiceAgreement() == null || streamTask.getLegalEntity().getActivateSingleServiceAgreement())) {
-                    ServiceAgreement newServiceAgreement = createMasterServiceAgreement(legalEntity, legalEntity.getAdministrators());
-                    Mono<LegalEntityTask> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask, newServiceAgreement)
-                        .onErrorMap(AccessGroupException.class, accessGroupException -> {
-                            streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, newServiceAgreement.getExternalId(), null, accessGroupException, accessGroupException.getMessage(), accessGroupException.getHttpResponse());
-                            return new StreamTaskException(streamTask, accessGroupException);
-                        })
-                        .flatMap(serviceAgreement -> {
-                            streamTask.getData().setMasterServiceAgreement(serviceAgreement);
-                            streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s", serviceAgreement.getExternalId(), legalEntity.getAdministrators().stream().map(User::getExternalId).collect(Collectors.joining(", ")), legalEntity.getExternalId());
-                            return Mono.just(streamTask);
-                        });
-                    return existingServiceAgreement.switchIfEmpty(createServiceAgreement);
-                }
-            return existingServiceAgreement;
+                }));
 
         } else {
             return Mono.just(streamTask);
         }
+    }
+
+    private Mono<LegalEntityTask> fetchOrCreateServiceAgreement(LegalEntity legalEntity, LegalEntityTask streamTask) {
+        return fetchCustomServiceAgreementIfExists(legalEntity, streamTask)
+            .flatMap(fetchedCustomAgreement -> {
+                if (fetchedCustomAgreement == null) {
+                    return createNewMasterServiceAgreementIfNeeded(legalEntity, streamTask);
+                }
+                return Mono.just(fetchedCustomAgreement);
+            });
+    }
+
+    private Mono<? extends LegalEntityTask> createNewMasterServiceAgreementIfNeeded(LegalEntity legalEntity,
+        LegalEntityTask streamTask) {
+        //  Master Service Agreement can be created only if activateSingleServiceAgreement property is missing or it has the value: true
+        if (streamTask.getLegalEntity() != null &&
+            (streamTask.getLegalEntity().getActivateSingleServiceAgreement() == null || streamTask.getLegalEntity()
+                .getActivateSingleServiceAgreement())) {
+            ServiceAgreement newServiceAgreement = createMasterServiceAgreement(legalEntity,
+                legalEntity.getAdministrators());
+            return accessGroupService.createServiceAgreement(streamTask, newServiceAgreement)
+                .onErrorMap(AccessGroupException.class, accessGroupException -> {
+                    streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED,
+                        newServiceAgreement.getExternalId(), null, accessGroupException,
+                        accessGroupException.getMessage(), accessGroupException.getHttpResponse());
+                    return new StreamTaskException(streamTask, accessGroupException);
+                })
+                .flatMap(serviceAgreement -> {
+                    streamTask.getData().setMasterServiceAgreement(serviceAgreement);
+                    streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED,
+                        serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
+                        "Created new Service Agreement: %s with Administrators: %s for Legal Entity: %s",
+                        serviceAgreement.getExternalId(),
+                        legalEntity.getAdministrators().stream().map(User::getExternalId)
+                            .collect(Collectors.joining(", ")), legalEntity.getExternalId());
+                    return Mono.just(streamTask);
+                });
+        }
+        return Mono.empty();
+    }
+
+    private Mono<LegalEntityTask> fetchExistingMasterServiceAgreement(LegalEntity legalEntity,
+        LegalEntityTask streamTask) {
+        return legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(
+                legalEntity.getInternalId())
+            .flatMap(serviceAgreement -> {
+                if (legalEntity.getMasterServiceAgreement() != null) {
+                    serviceAgreement.setLimit(legalEntity.getMasterServiceAgreement().getLimit());
+                    serviceAgreement.setParticipants(legalEntity.getMasterServiceAgreement().getParticipants());
+                    if (legalEntity.getMasterServiceAgreement().getJobRoles() != null) {
+                        serviceAgreement.setJobRoles(legalEntity.getMasterServiceAgreement().getJobRoles());
+                    }
+                }
+                streamTask.getData().setMasterServiceAgreement(serviceAgreement);
+                streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS,
+                    serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
+                    "Existing Service Agreement: %s found for Legal Entity: %s", serviceAgreement.getExternalId(),
+                    legalEntity.getExternalId());
+                return Mono.just(streamTask);
+            });
+    }
+
+    private Mono<LegalEntityTask> fetchCustomServiceAgreementIfExists(LegalEntity legalEntity,
+        LegalEntityTask streamTask) {
+        log.debug("Fetching custom service agreement for legal entity: {}", legalEntity.getExternalId());
+        return userService.getUsersByLegalEntity(legalEntity.getInternalId(), 1, 0)
+            .flatMap(usersList -> {
+                if (usersList == null || usersList.getUsers().isEmpty()) {
+                    String errorMessage = "No users found for Legal Entity: " + legalEntity.getExternalId();
+                    log.error(errorMessage);
+                    return Mono.error(new StreamTaskException(streamTask, errorMessage));
+                }
+                String userId = usersList.getUsers().getFirst().getId();
+                log.debug("Found user with ID {} for legal entity: {}", userId, legalEntity.getExternalId());
+                return fetchAndFilterServiceAgreementByUserId(userId, legalEntity, streamTask);
+            });
+    }
+
+    private Mono<LegalEntityTask> fetchAndFilterServiceAgreementByUserId(String userId, LegalEntity legalEntity,
+        LegalEntityTask streamTask) {
+        log.debug("Fetching and filtering service agreement by user ID: {} for legal entity: {}", userId, legalEntity.getInternalId());
+        return accessGroupService.getUserContextsByUserId(userId)
+            .flatMapMany(Flux::fromIterable)
+            .filter(this::isConfigSpecificServiceAgreement)
+            .next()
+            .flatMap(
+                customServiceAgreement -> handleFoundServiceAgreement(customServiceAgreement, legalEntity, streamTask));
+    }
+
+    private boolean isConfigSpecificServiceAgreement(ServiceAgreement serviceAgreement) {
+        // Check if the service agreement purpose matches the configured purposes
+        String purpose = serviceAgreement.getPurpose();
+        return purpose != null && legalEntitySagaConfigurationProperties.getServiceAgreementPurposes()
+            .contains(purpose);
+    }
+
+    private Mono<? extends LegalEntityTask> handleFoundServiceAgreement(ServiceAgreement customServiceAgreement,
+        LegalEntity legalEntity, LegalEntityTask streamTask) {
+        // Set the found custom service agreement in the stream task data
+        streamTask.getData().setCustomServiceAgreement(customServiceAgreement);
+
+        streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, EXISTS,
+            customServiceAgreement.getExternalId(), customServiceAgreement.getInternalId(),
+            "Existing Custom Service Agreement: %s found for Legal Entity: %s",
+            customServiceAgreement.getExternalId(), legalEntity.getExternalId());
+        log.info("Custom Service Agreement: {} found for Legal Entity: {}",
+            customServiceAgreement.getExternalId(), legalEntity.getExternalId());
+        return Mono.just(streamTask);
     }
 
     private Mono<LegalEntityTask> setupCustomServiceAgreement(LegalEntityTask streamTask, LegalEntity legalEntity) {
