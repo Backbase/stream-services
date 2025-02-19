@@ -1,5 +1,6 @@
 package com.backbase.stream.mapper;
 
+import com.backbase.dbs.accesscontrol.api.service.v3.model.CustomerCategory;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIngestFunctionGroup;
@@ -9,6 +10,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItemQuery;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.UserContextItem;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobRole;
@@ -23,6 +25,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 @Mapper
 public interface AccessGroupMapper {
@@ -51,6 +54,26 @@ public interface AccessGroupMapper {
     ParticipantIngest toPresentation(LegalEntityParticipant legalEntityParticipant);
 
     PresentationIngestFunctionGroup toPresentation(JobRole referenceJobRole);
+
+    @Mapping(source = "serviceAgreementId", target = "internalId")
+    @Mapping(source = "externalId", target = "externalId")
+    @Mapping(source = "serviceAgreementName", target = "name")
+    @Mapping(source = "description", target = "description")
+    @Mapping(source = "purpose", target = "purpose")
+    @Mapping(source = "serviceAgreementMaster", target = "isMaster")
+    @Mapping(source = "customerCategory", target = "customerCategory", qualifiedByName = "mapCustomerCategory")
+    ServiceAgreement toStream(UserContextItem userContext);
+
+    List<ServiceAgreement> toStream(List<UserContextItem> userContextItems);
+
+    @Named("mapCustomerCategory")
+    default com.backbase.stream.legalentity.model.CustomerCategory mapCustomerCategory(
+        CustomerCategory customerCategory) {
+        if (customerCategory != null) {
+            return com.backbase.stream.legalentity.model.CustomerCategory.valueOf(customerCategory.name());
+        }
+        return null;
+    }
 
     /**
      * Map {@link BusinessFunctionGroup} with privileges to {@link PresentationPermission}.

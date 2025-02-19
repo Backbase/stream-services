@@ -26,12 +26,14 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItemSystemBase;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem.TypeEnum;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.GetContexts;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
@@ -52,6 +54,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.UserContextItem;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -90,6 +93,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -121,6 +125,9 @@ class AccessGroupServiceTest {
 
     @Spy
     private BatchResponseUtils batchResponseUtils;
+
+    @Mock
+    private UserContextApi userContextApi;
 
     @Captor
     private ArgumentCaptor<List<PresentationDataGroupItemPutRequestBody>> presentationDataGroupItemPutRequestBodyCaptor;
@@ -1198,6 +1205,48 @@ class AccessGroupServiceTest {
         String exId;
         boolean sharingAccounts;
         boolean sharingUsers;
+    }
+
+    @Test
+    void testGetUserContextsByUserId_success() {
+        String userInternalId = "testUserId";
+        GetContexts getContexts = new GetContexts();
+        getContexts.setElements(Collections.singletonList(new UserContextItem().serviceAgreementId("sa_id")));
+        when(userContextApi.getUserContexts(eq(userInternalId), isNull(), isNull(), isNull()))
+            .thenReturn(Mono.just(getContexts));
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
+            .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 1)
+            .verifyComplete();
+
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), isNull(), isNull(), isNull());
+    }
+
+    @Test
+    void testGetUserContextsByUserId_emptyResult() {
+        String userInternalId = "testUser789";
+        GetContexts getContexts = new GetContexts();
+        getContexts.setElements(Collections.emptyList());
+        getContexts.setTotalElements(0L);
+
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), any(), any()))
+            .thenReturn(Mono.just(getContexts));
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
+            .expectNext(Collections.emptyList())
+            .verifyComplete();
+    }
+
+    @Test
+    void testGetUserContextsByUserId_webClientResponseException4xx() {
+        String userInternalId = "testUser404";
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), any(), any()))
+            .thenReturn(Mono.error(new WebClientResponseException("Not Found", 404, "Not Found", null, null, null)));
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
+            .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException &&
+                ((WebClientResponseException) throwable).getStatusCode() == HttpStatus.NOT_FOUND)
+            .verify();
     }
 
 }
