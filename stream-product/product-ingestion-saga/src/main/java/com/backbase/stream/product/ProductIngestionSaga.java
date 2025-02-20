@@ -95,9 +95,7 @@ public class ProductIngestionSaga {
     @ContinueSpan(log = "processProducts")
     public Mono<ProductGroupTask> process(ProductGroupTask streamTask) {
         return validateProductGroup(streamTask)
-            .doOnNext(productGroupTask -> {
-                streamTask.info(PRODUCT_GROUP, PROCESS, null, streamTask.getProductGroup().getName(), null, "Process Product Group Task: %s", productGroupTask.getId());
-            })
+            .doOnNext(productGroupTask -> streamTask.info(PRODUCT_GROUP, PROCESS, null, streamTask.getProductGroup().getName(), null, "Process Product Group Task: %s", productGroupTask.getId()))
             .flatMap(this::upsertArrangements)
             .flatMap(accessGroupService::setupProductGroups)
             .flatMap(this::setupBusinessFunctionsAndPermissions);
