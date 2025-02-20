@@ -1,8 +1,7 @@
 package com.backbase.stream.product.mapping;
 
-import lombok.experimental.UtilityClass;
-
 import java.time.format.DateTimeFormatter;
+import lombok.experimental.UtilityClass;
 
 @UtilityClass
 class ProductMapperConstants {
@@ -23,7 +22,7 @@ class ProductMapperConstants {
     static final String ACCOUNT_HOLDER_NAMES = "accountHolderNames";
     static final String EXTERNAL_ARRANGEMENT_ID = "externalArrangementId";
     static final String EXTERNAL_PRODUCT_ID = "externalProductId";
-    static final String EXTERNAL_LEGAL_ENTITY_IDS = "externalLegalEntityIds";
+    static final String EXTERNAL_LEGAL_ENTITIES = "externalLegalEntities";
     static final String EXTERNAL_ID = "externalId";
     static final String PRODUCT_TYPE_EXTERNAL_ID = "productTypeExternalId";
     static final String LEGAL_ENTITIES = "legalEntities";

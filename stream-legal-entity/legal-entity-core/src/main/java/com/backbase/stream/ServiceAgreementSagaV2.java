@@ -1,5 +1,6 @@
 package com.backbase.stream;
 
+import static com.backbase.stream.LegalEntitySaga.noLimitsInJobRole;
 import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -757,8 +758,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
 
         ServiceAgreementV2 saV2 = streamTask.getServiceAgreement();
         ServiceAgreement serviceAgreement = saMapper.map(saV2);
-        if (noLimitsInJobRole(saV2.getJobRoles())
-            && noLimitsInJobRole(saV2.getReferenceJobRoles())) {
+        if (noLimitsInJobRole(saV2.getJobRoles()) && noLimitsInJobRole(saV2.getReferenceJobRoles())) {
             streamTask.info(SERVICE_AGREEMENT, PROCESS_LIMITS, FAILED, serviceAgreement.getInternalId(),
                 serviceAgreement.getExternalId(), "SA: %s does not have any Job Role limits defined",
                 serviceAgreement.getExternalId());
@@ -911,17 +911,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             .stream()
             .flatMap(businessFunction -> businessFunction.getPrivileges().stream())
             .anyMatch(privilege -> nonNull(privilege.getLimit()));
-    }
-
-    private boolean noLimitsInJobRole(List<? extends JobRole> jobRoles) {
-        return CollectionUtils.isEmpty(jobRoles) || jobRoles.stream()
-            .filter(jobRole -> nonNull(jobRole.getFunctionGroups()))
-            .flatMap(jobRole -> jobRole.getFunctionGroups().stream())
-            .filter(businessFunctionGroup -> nonNull(businessFunctionGroup.getFunctions()))
-            .flatMap(businessFunctionGroup -> businessFunctionGroup.getFunctions().stream())
-            .filter(businessFunction -> nonNull(businessFunction.getPrivileges()))
-            .flatMap(businessFunction -> businessFunction.getPrivileges().stream())
-            .noneMatch(privilege -> nonNull(privilege.getLimit()));
     }
 
     private Mono<ServiceAgreementTaskV2> retrieveUsersInternalIdsForJobProfile(ServiceAgreementTaskV2 streamTask) {
