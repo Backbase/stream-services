@@ -1,5 +1,6 @@
 package com.backbase.stream.product.service;
 
+import static java.util.stream.Collectors.toSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.mock;
@@ -11,6 +12,7 @@ import com.backbase.dbs.arrangement.api.integration.v2.model.ArrangementAddedRes
 import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseItemExtended;
 import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseStatusCode;
 import com.backbase.dbs.arrangement.api.integration.v2.model.ErrorItem;
+import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntity;
 import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntityIds;
 import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
 import com.backbase.dbs.arrangement.api.integration.v2.model.Subscription;
@@ -27,6 +29,7 @@ import com.backbase.stream.product.exception.ArrangementCreationException;
 import com.backbase.stream.product.exception.ArrangementUpdateException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
@@ -418,12 +421,18 @@ class ArrangementServiceTest {
 
         ExternalLegalEntityIds externalLegalEntityIds = new ExternalLegalEntityIds();
         externalLegalEntityIds.ids(legalEntitiesExternalIds);
+        externalLegalEntityIds.setExternalLegalEntities(legalEntitiesExternalIds.stream().map(legalEntityExternalId -> {
+            ExternalLegalEntity externalLegalEntity = new ExternalLegalEntity();
+            externalLegalEntity.setExternalId(legalEntityExternalId);
+            externalLegalEntity.setRelation("fake-relation");
+            externalLegalEntity.setAdditions(Map.of("fake-key", "fake-value"));
+            return externalLegalEntity;
+        }).collect(toSet()));
 
         when(arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds))
             .thenReturn(Mono.empty());
 
-        StepVerifier.create(arrangementService.addLegalEntitiesForArrangement(arrangementExternalId, new ArrayList<>(legalEntitiesExternalIds)))
-            .verifyComplete();
+        StepVerifier.create(arrangementService.addLegalEntitiesForArrangement(arrangementExternalId, externalLegalEntityIds)).verifyComplete();
 
         verify(arrangementsIntegrationApi).postArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds);
     }
@@ -437,12 +446,19 @@ class ArrangementServiceTest {
 
         ExternalLegalEntityIds externalLegalEntityIds = new ExternalLegalEntityIds();
         externalLegalEntityIds.ids(legalEntitiesExternalIds);
+        externalLegalEntityIds.setExternalLegalEntities(legalEntitiesExternalIds.stream().map(legalEntityExternalId -> {
+            ExternalLegalEntity externalLegalEntity = new ExternalLegalEntity();
+            externalLegalEntity.setExternalId(legalEntityExternalId);
+            externalLegalEntity.setRelation("fake-relation");
+            externalLegalEntity.setAdditions(Map.of("fake-key", "fake-value"));
+            return externalLegalEntity;
+        }).collect(toSet()));
+
 
         when(arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds))
             .thenReturn(Mono.error(webClientResponseException));
 
-        StepVerifier.create(arrangementService.addLegalEntitiesForArrangement(arrangementExternalId,
-            new ArrayList<>(legalEntitiesExternalIds))).consumeErrorWith(e -> {
+        StepVerifier.create(arrangementService.addLegalEntitiesForArrangement(arrangementExternalId, externalLegalEntityIds)).consumeErrorWith(e -> {
             Assertions.assertInstanceOf(WebClientResponseException.class, e);
             Assertions.assertEquals("500 Some error", e.getMessage());
         }).verify();
