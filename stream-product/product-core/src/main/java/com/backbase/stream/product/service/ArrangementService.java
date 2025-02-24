@@ -3,6 +3,7 @@ package com.backbase.stream.product.service;
 import static com.backbase.dbs.arrangement.api.service.v3.model.ArrangementsDeleteItem.SelectorEnum.EXTERNAL_ID;
 import static java.lang.String.join;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.fromCallable;
@@ -10,6 +11,7 @@ import static reactor.core.publisher.Mono.fromCallable;
 import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseItemExtended;
 import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseStatusCode;
 import com.backbase.dbs.arrangement.api.integration.v2.model.ErrorItem;
+import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntity;
 import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntityIds;
 import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
 import com.backbase.dbs.arrangement.api.integration.v2.model.Subscription;
@@ -29,6 +31,7 @@ import java.util.Objects;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import org.springframework.lang.NonNull;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -186,12 +189,17 @@ public class ArrangementService {
      * Assign Arrangement with specified Legal Entities.
      *
      * @param arrangementExternalId external id of Arrangement.
-     * @param legalEntitiesExternalIds list of Legal Entities external identifiers.
+     * @param externalLegalEntityIds list of Legal Entities external identifiers.
      * @return Mono<Void>
      */
-    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, List<String> legalEntitiesExternalIds) {
-        log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, legalEntitiesExternalIds);
-        return arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, new ExternalLegalEntityIds().ids(new HashSet<>(legalEntitiesExternalIds)));
+    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, @NonNull ExternalLegalEntityIds externalLegalEntityIds) {
+        Set<ExternalLegalEntity> externalLegalEntitySet = externalLegalEntityIds.getExternalLegalEntities();
+        // Being defensive here to avoid NPE during the logging below
+        if (externalLegalEntitySet == null) {
+            externalLegalEntitySet = emptySet();
+        }
+        log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, externalLegalEntitySet.stream().map(ExternalLegalEntity::getExternalId).toList());
+        return arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds);
     }
 
     /**

@@ -76,7 +76,7 @@ public class LegalEntityService {
             .flux()
             .flatMap(legalEntity ->
                 legalEntitiesApi.getSubEntities(legalEntity.getInternalId(),
-                    Math.toIntExact(pageable.getOffset()), pageable.getPageSize(), null, null)
+                    Math.toIntExact(pageable.getOffset()), pageable.getPageSize(), null)
                     .map(mapper::toStream));
     }
 
