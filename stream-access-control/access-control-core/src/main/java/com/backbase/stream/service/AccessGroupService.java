@@ -133,7 +133,7 @@ public class AccessGroupService {
     private final DeletionProperties deletionProperties;
     @NonNull
     private final BatchResponseUtils batchResponseUtils;
-    @NonNull
+
     private final UserContextApi userContextApi;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
@@ -1530,17 +1530,13 @@ public class AccessGroupService {
         var currentPage = new AtomicInteger(from != null ? from : 0);
         return userContextApi.getUserContexts(userInternalId, query, currentPage.get(), pageSize)
             .expand(response -> {
-                var totalPagesCalculated = calculateTotalPages(response.getTotalElements(), pageSize);
+                var totalPagesCalculated = (int) Math.ceil((double) response.getTotalElements() / pageSize);
                 currentPage.getAndIncrement();
                 if (currentPage.get() >= totalPagesCalculated) {
                     return Mono.empty();
                 }
                 return userContextApi.getUserContexts(userInternalId, query, currentPage.get(), pageSize);
             });
-    }
-
-    private int calculateTotalPages(Long totalElements, Integer pageSize) {
-        return (int) Math.ceil((double) totalElements / pageSize);
     }
 
     @NotNull

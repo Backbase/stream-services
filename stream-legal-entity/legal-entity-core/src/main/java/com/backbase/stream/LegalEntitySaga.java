@@ -933,12 +933,15 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private Mono<LegalEntityTask> fetchCustomServiceAgreementIfExists(LegalEntity legalEntity,
         LegalEntityTask streamTask) {
         log.debug("Fetching custom service agreement for legal entity: {}", legalEntity.getInternalId());
-        return userService.getUsersByLegalEntity(legalEntity.getInternalId(), 1, 0)
+        return userService.getUsersByLegalEntity(legalEntity.getInternalId(), 10, 0)
             .flatMap(usersList -> {
                 if (usersList == null || CollectionUtils.isEmpty(usersList.getUsers())) {
                     String errorMessage = "No users found for Legal Entity: " + legalEntity.getInternalId();
                     log.error(errorMessage);
                     return Mono.error(new StreamTaskException(streamTask, errorMessage));
+                }
+                if (usersList.getTotalElements() > 1) {
+                    return Mono.empty();
                 }
                 var userId = usersList.getUsers().getFirst().getId();
                 log.debug("Found user with ID {} for legal entity: {}", userId, legalEntity.getInternalId());

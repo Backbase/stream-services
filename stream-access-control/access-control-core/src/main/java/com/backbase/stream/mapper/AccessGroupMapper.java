@@ -56,24 +56,11 @@ public interface AccessGroupMapper {
     PresentationIngestFunctionGroup toPresentation(JobRole referenceJobRole);
 
     @Mapping(source = "serviceAgreementId", target = "internalId")
-    @Mapping(source = "externalId", target = "externalId")
     @Mapping(source = "serviceAgreementName", target = "name")
-    @Mapping(source = "description", target = "description")
-    @Mapping(source = "purpose", target = "purpose")
     @Mapping(source = "serviceAgreementMaster", target = "isMaster")
-    @Mapping(source = "customerCategory", target = "customerCategory", qualifiedByName = "mapCustomerCategory")
     ServiceAgreement toStream(UserContextItem userContext);
 
     List<ServiceAgreement> toStream(List<UserContextItem> userContextItems);
-
-    @Named("mapCustomerCategory")
-    default com.backbase.stream.legalentity.model.CustomerCategory mapCustomerCategory(
-        CustomerCategory customerCategory) {
-        if (customerCategory != null) {
-            return com.backbase.stream.legalentity.model.CustomerCategory.valueOf(customerCategory.name());
-        }
-        return null;
-    }
 
     /**
      * Map {@link BusinessFunctionGroup} with privileges to {@link PresentationPermission}.
