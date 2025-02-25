@@ -1280,4 +1280,61 @@ class AccessGroupServiceTest {
         verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(1), any());
     }
 
+    @Test
+    void testGetUserContextsByUserId_paginationLargeNumber() {
+        var page1 = new GetContexts().elements(
+            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_1"))).totalElements(120L);
+        var page2 = new GetContexts().elements(
+            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_2"))).totalElements(120L);
+        var page3 = new GetContexts().elements(
+            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_3"))).totalElements(120L);
+        var page4 = new GetContexts().elements(
+            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_4"))).totalElements(120L);
+        var page5 = new GetContexts().elements(
+            Collections.nCopies(20, new UserContextItem().serviceAgreementId("sa_5"))).totalElements(120L);
+
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(0), any()))
+            .thenReturn(Mono.just(page1));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(1), any()))
+            .thenReturn(Mono.just(page2));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(2), any()))
+            .thenReturn(Mono.just(page3));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(3), any()))
+            .thenReturn(Mono.just(page4));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(4), any()))
+            .thenReturn(Mono.just(page5));
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 25))
+            .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 120)
+            .verifyComplete();
+
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(0), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(1), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(2), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(3), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(4), any());
+    }
+
+    @Test
+    void testGetUserContextsByUserId_paginationEdgeCases() {
+        var page1 = new GetContexts().elements(
+            Collections.nCopies(10, new UserContextItem().serviceAgreementId("sa_1"))).totalElements(11L);
+        var page2 = new GetContexts().elements(
+            Collections.nCopies(1, new UserContextItem().serviceAgreementId("sa_2"))).totalElements(11L);
+
+
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(0), any()))
+            .thenReturn(Mono.just(page1));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(1), any()))
+            .thenReturn(Mono.just(page2));
+
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 10))
+            .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 11)
+            .verifyComplete();
+
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(0), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(1), any());
+    }
+
 }

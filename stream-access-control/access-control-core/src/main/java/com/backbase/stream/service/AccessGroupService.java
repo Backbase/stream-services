@@ -1530,13 +1530,17 @@ public class AccessGroupService {
         var currentPage = new AtomicInteger(from != null ? from : 0);
         return userContextApi.getUserContexts(userInternalId, query, currentPage.get(), pageSize)
             .expand(response -> {
-                var totalPagesCalculated = response.getTotalElements().intValue() / pageSize;
+                var totalPagesCalculated = calculateTotalPages(response.getTotalElements(), pageSize);
                 currentPage.getAndIncrement();
                 if (currentPage.get() >= totalPagesCalculated) {
                     return Mono.empty();
                 }
                 return userContextApi.getUserContexts(userInternalId, query, currentPage.get(), pageSize);
             });
+    }
+
+    private int calculateTotalPages(Long totalElements, Integer pageSize) {
+        return (int) Math.ceil((double) totalElements / pageSize);
     }
 
     @NotNull
