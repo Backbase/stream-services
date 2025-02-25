@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
@@ -72,9 +71,6 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
     @Spy
     private BatchResponseUtils batchResponseUtils;
-
-    @Mock
-    private UserContextApi userContextApi;
 
     @Test
     void setupJobRoleNoType() {
