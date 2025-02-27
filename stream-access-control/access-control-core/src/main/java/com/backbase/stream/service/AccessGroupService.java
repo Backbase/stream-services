@@ -1533,8 +1533,7 @@ public class AccessGroupService {
         return userContextApi.getUserContexts(userInternalId, null, currentPage.get(), pageSize)
             .expand(response -> {
                 var totalPagesCalculated = (int) Math.ceil((double) response.getTotalElements() / pageSize);
-                currentPage.getAndIncrement();
-                if (currentPage.get() >= totalPagesCalculated) {
+                if (currentPage.incrementAndGet() >= totalPagesCalculated) {
                     return Mono.empty();
                 }
                 return userContextApi.getUserContexts(userInternalId, null, currentPage.get(), pageSize);
