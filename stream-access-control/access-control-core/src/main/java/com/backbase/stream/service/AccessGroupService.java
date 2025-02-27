@@ -45,6 +45,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementInge
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.configuration.DeletionProperties.FunctionGroupItemType;
 import com.backbase.stream.legalentity.model.AssignedPermission;
@@ -135,6 +136,8 @@ public class AccessGroupService {
     private final BatchResponseUtils batchResponseUtils;
 
     private final UserContextApi userContextApi;
+
+    private final AccessControlConfigurationProperties accessControlProperties;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
@@ -1509,10 +1512,9 @@ public class AccessGroupService {
      * @param userInternalId the internal ID of the user
      * @return a Mono emitting a list of Service Agreements
      */
-    public Mono<List<ServiceAgreement>> getUserContextsByUserId(String userInternalId, String query,
-        Integer from, Integer pageSize) {
+    public Mono<List<ServiceAgreement>> getUserContextsByUserId(String userInternalId) {
         log.debug("Getting Service Agreement for: {}", userInternalId);
-        return fetchUserContexts(userInternalId, query, from, pageSize)
+        return fetchUserContexts(userInternalId)
             .flatMapIterable(GetContexts::getElements)
             .map(accessGroupMapper::toStream)
             .collectList()
@@ -1525,17 +1527,17 @@ public class AccessGroupService {
             });
     }
 
-    private Flux<GetContexts> fetchUserContexts(String userInternalId, String query, Integer from,
-        Integer pageSize) {
-        var currentPage = new AtomicInteger(from != null ? from : 0);
-        return userContextApi.getUserContexts(userInternalId, query, currentPage.get(), pageSize)
+    private Flux<GetContexts> fetchUserContexts(String userInternalId) {
+        var currentPage = new AtomicInteger(0);
+        var pageSize = accessControlProperties.getUserContextPageSize();
+        return userContextApi.getUserContexts(userInternalId, null, currentPage.get(), pageSize)
             .expand(response -> {
                 var totalPagesCalculated = (int) Math.ceil((double) response.getTotalElements() / pageSize);
                 currentPage.getAndIncrement();
                 if (currentPage.get() >= totalPagesCalculated) {
                     return Mono.empty();
                 }
-                return userContextApi.getUserContexts(userInternalId, query, currentPage.get(), pageSize);
+                return userContextApi.getUserContexts(userInternalId, null, currentPage.get(), pageSize);
             });
     }
 
