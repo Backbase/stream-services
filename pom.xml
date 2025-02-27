@@ -40,7 +40,7 @@
     <properties>
         <java.version>21</java.version>
         <ssdk.version>18.1.0</ssdk.version>
-        <backbase-bom.version>2025.03-LTS-rc.7</backbase-bom.version>
+        <backbase-bom.version>2025.01.9</backbase-bom.version>
         <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
@@ -67,6 +67,13 @@
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
                 <version>22.0.0</version>
+            </dependency>
+            <!-- This API spec version here just to be able to test stream-services -->
+            <!-- with insuredStatus field -->
+            <dependency>
+                <groupId>com.backbase.products</groupId>
+                <artifactId>arrangement-manager-api</artifactId>
+                <version>2.4.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
