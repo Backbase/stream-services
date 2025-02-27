@@ -1,8 +1,7 @@
 package com.backbase.stream.configuration;
 
 import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
-import jakarta.validation.constraints.Min;
-import java.util.List;
+import java.util.Set;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -30,8 +29,6 @@ public class LegalEntitySagaConfigurationProperties extends StreamWorkerConfigur
     /**
      * List of service agreement purposes
      */
-    private List<String> serviceAgreementPurposes;
+    private Set<String> serviceAgreementPurposes;
 
-    @Min(1)
-    private Integer userContextsResponseSize = 100;
 }

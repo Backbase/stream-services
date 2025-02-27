@@ -13,12 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -29,7 +26,6 @@ import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItemSystemBase;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem.TypeEnum;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.GetContexts;
@@ -55,6 +51,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementUsers
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.UserContextItem;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
+import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BaseProductGroup.ProductGroupTypeEnum;
@@ -73,7 +70,6 @@ import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
-import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -127,6 +123,9 @@ class AccessGroupServiceTest {
 
     @Mock
     private UserContextApi userContextApi;
+
+    @Mock
+    private AccessControlConfigurationProperties accessControlProperties;
 
     @Captor
     private ArgumentCaptor<List<PresentationDataGroupItemPutRequestBody>> presentationDataGroupItemPutRequestBodyCaptor;
@@ -1214,22 +1213,28 @@ class AccessGroupServiceTest {
 
         when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
             .thenReturn(Mono.just(getContexts));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(10);
 
-        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 10))
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
             .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 1)
             .verifyComplete();
 
-        verify(userContextApi, times(1)).getUserContexts(userInternalId, null, 0, 10);
+        verify(userContextApi).getUserContexts(userInternalId, null, 0, 10);
+        verify(accessControlProperties).getUserContextPageSize();
     }
 
     @Test
     void testGetUserContextsByUserId_emptyResult() {
         when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
             .thenReturn(Mono.just(getEmptyContext()));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(10);
 
-        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 10))
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
             .expectNext(Collections.emptyList())
             .verifyComplete();
+
+        verify(userContextApi).getUserContexts(userInternalId, null, 0, 10);
+        verify(accessControlProperties).getUserContextPageSize();
     }
 
     private GetContexts getEmptyContext() {
@@ -1240,26 +1245,32 @@ class AccessGroupServiceTest {
     void testGetUserContextsByUserId_webClientResponseException4xx() {
         when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
             .thenReturn(Mono.error(new WebClientResponseException("Not Found", 404, "Not Found", null, null, null)));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(10);
 
-        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 10))
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
             .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException
                 && HttpStatus.NOT_FOUND.equals(((WebClientResponseException) throwable).getStatusCode()))
             .verify();
+        verify(userContextApi).getUserContexts(userInternalId, null, 0, 10);
+        verify(accessControlProperties).getUserContextPageSize();
     }
 
     @Test
     void testGetUserContextsByUserId_nullFrom() {
         when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
             .thenReturn(Mono.just(getEmptyContext()));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(10);
 
-        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, null, 10))
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
             .expectNextMatches(List::isEmpty)
             .verifyComplete();
+
+        verify(userContextApi).getUserContexts(userInternalId, null, 0, 10);
+        verify(accessControlProperties).getUserContextPageSize();
     }
 
     @Test
     void testGetUserContextsByUserId_pagination() {
-        // Mock responses for multiple pages
         var page1 = new GetContexts().elements(List.of(new UserContextItem().serviceAgreementId("sa_1")))
             .totalElements(2L);
         var page2 = new GetContexts().elements(List.of(new UserContextItem().serviceAgreementId("sa_2")))
@@ -1269,8 +1280,9 @@ class AccessGroupServiceTest {
             .thenReturn(Mono.just(page1));
         when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(1), any()))
             .thenReturn(Mono.just(page2));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(1);
 
-        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 1))
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
             .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 2
                 && serviceAgreements.stream().anyMatch(sa -> sa.getInternalId().equals("sa_1"))
                 && serviceAgreements.stream().anyMatch(sa -> sa.getInternalId().equals("sa_2")))
@@ -1278,6 +1290,7 @@ class AccessGroupServiceTest {
 
         verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(0), any());
         verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(1), any());
+        verify(accessControlProperties).getUserContextPageSize();
     }
 
     @Test
@@ -1303,8 +1316,9 @@ class AccessGroupServiceTest {
             .thenReturn(Mono.just(page4));
         when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(4), any()))
             .thenReturn(Mono.just(page5));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(25);
 
-        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 25))
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
             .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 120)
             .verifyComplete();
 
@@ -1313,6 +1327,7 @@ class AccessGroupServiceTest {
         verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(2), any());
         verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(3), any());
         verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(4), any());
+        verify(accessControlProperties).getUserContextPageSize();
     }
 
     @Test
@@ -1327,14 +1342,15 @@ class AccessGroupServiceTest {
             .thenReturn(Mono.just(page1));
         when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(1), any()))
             .thenReturn(Mono.just(page2));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(10);
 
-
-        StepVerifier.create(subject.getUserContextsByUserId(userInternalId, null, 0, 10))
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
             .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 11)
             .verifyComplete();
 
         verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(0), any());
         verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(1), any());
+        verify(accessControlProperties).getUserContextPageSize();
     }
 
 }
