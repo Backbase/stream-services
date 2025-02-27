@@ -70,6 +70,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
@@ -350,7 +351,7 @@ class LegalEntitySagaTest {
     void testCustomServiceAgreement_IfNoCustomServiceAgreementExists_ThenCreateMaster() {
         var task = setupLegalEntityTask();
 
-        when(accessGroupService.getUserContextsByUserId(userId, null, 0, 100)).thenReturn(Mono.empty());
+        when(accessGroupService.getUserContextsByUserId(userId)).thenReturn(Mono.empty());
         mockUserService(userId);
 
         executeAndVerifyTask(task, 1);
@@ -363,7 +364,7 @@ class LegalEntitySagaTest {
     void testCustomServiceAgreement_IfNoMatchingCustomServiceAgreementExists_ThenCreateMaster() {
         LegalEntityTask task = setupLegalEntityTask();
 
-        when(accessGroupService.getUserContextsByUserId(userId, null, 0, 100))
+        when(accessGroupService.getUserContextsByUserId(userId))
             .thenReturn(
                 Mono.just(List.of(new ServiceAgreement().internalId("sa_id").externalId("sa_ext_id").purpose("TEST"))));
         mockUserService(userId);
@@ -394,13 +395,13 @@ class LegalEntitySagaTest {
     }
 
     private void mockAccessGroupService(String userId) {
-        when(accessGroupService.getUserContextsByUserId(userId, null, 0, 100))
+        when(accessGroupService.getUserContextsByUserId(userId))
             .thenReturn(Mono.just(List.of(new ServiceAgreement().internalId("sa_id")
                 .externalId("sa_ext_id").purpose("FAMILY_BANKING"))));
     }
 
     private void verifyAccessGroupService() {
-        verify(accessGroupService).getUserContextsByUserId(userId, null, 0, 100);
+        verify(accessGroupService).getUserContextsByUserId(userId);
     }
 
     private void verifyUserService() {
@@ -441,7 +442,7 @@ class LegalEntitySagaTest {
         when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
         when(legalEntitySagaConfigurationProperties.getServiceAgreementPurposes()).thenReturn(
-            List.of("FAMILY_BANKING"));
+            Set.of("FAMILY_BANKING"));
         when(userService.setupRealm(task.getLegalEntity())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(task.getLegalEntity())).thenReturn(Mono.just(legalEntity));
         when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
@@ -456,7 +457,7 @@ class LegalEntitySagaTest {
 
         verify(userService).setupRealm(task.getLegalEntity());
         verify(userService).linkLegalEntityToRealm(task.getLegalEntity());
-        verify(accessGroupService).getUserContextsByUserId(userId, null, 0, 100);
+        verify(accessGroupService).getUserContextsByUserId(userId);
         verify(userService).getUsersByLegalEntity(any(), anyInt(), anyInt());
         verify(accessGroupService, times(createServiceAgreementTimes)).createServiceAgreement(any(), any());
     }

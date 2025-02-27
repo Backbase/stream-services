@@ -31,7 +31,8 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(ProductConfiguration.class)
 @Slf4j
-@EnableConfigurationProperties({DeletionProperties.class,UserManagementProperties.class})
+@EnableConfigurationProperties({DeletionProperties.class,UserManagementProperties.class,
+    AccessControlConfigurationProperties.class})
 public class AccessControlConfiguration {
 
     @Bean
@@ -75,10 +76,11 @@ public class AccessControlConfiguration {
         DeletionProperties configurationProperties,
         UsersApi accessControlUsersApi,
         DataGroupsApi dataGroupsApi, ServiceAgreementsApi serviceAgreementsApi,
-        FunctionGroupsApi functionGroupsApi, BatchResponseUtils batchResponseUtils, UserContextApi userContextApi) {
+        FunctionGroupsApi functionGroupsApi, BatchResponseUtils batchResponseUtils, UserContextApi userContextApi,
+        AccessControlConfigurationProperties accessControlConfigurationProperties) {
         return new AccessGroupService(usersApi, accessControlUsersApi, dataGroupsApi,
             functionGroupsApi, serviceAgreementsApi,
-            configurationProperties, batchResponseUtils, userContextApi);
+            configurationProperties, batchResponseUtils, userContextApi, accessControlConfigurationProperties);
     }
 
 }

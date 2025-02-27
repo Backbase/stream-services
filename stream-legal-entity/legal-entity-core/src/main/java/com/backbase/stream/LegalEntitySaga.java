@@ -953,8 +953,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         LegalEntityTask streamTask) {
         log.debug("Fetching and filtering service agreement by user ID: {} for legal entity: {}", userId,
             legalEntity.getInternalId());
-        return accessGroupService.getUserContextsByUserId(userId, null, 0,
-                legalEntitySagaConfigurationProperties.getUserContextsResponseSize())
+        return accessGroupService.getUserContextsByUserId(userId)
             .flatMapMany(Flux::fromIterable)
             .filter(this::isConfigSpecificServiceAgreement)
             .next()
