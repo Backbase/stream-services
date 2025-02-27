@@ -1,6 +1,5 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.CustomerCategory;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIngestFunctionGroup;
@@ -25,7 +24,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 @Mapper
 public interface AccessGroupMapper {
