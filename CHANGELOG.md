@@ -8,10 +8,6 @@ All notable changes to this project will be documented in this file.
 ## [6.13.0](https://github.com/Backbase/stream-services/compare/6.12.0...6.13.0)
 ### Added
 - add subscriptions for products when it's specified
-## [5.12.0](https://github.com/Backbase/stream-services/compare/5.11.0...5.12.0)
-### Added
-- Adding additional pmts mappings
-
 
 ## [6.12.0](https://github.com/Backbase/stream-services/compare/6.11.0...6.12.0)
 ### Fixed
@@ -50,15 +46,6 @@ All notable changes to this project will be documented in this file.
 ## [6.4.0](https://github.com/Backbase/stream-services/compare/6.3.0...6.4.0)
 ### Fixed
 - Fixed setting internal id for creatorLE before creating SA
-
-## [6.3.0](https://github.com/Backbase/stream-services/compare/6.2.0...6.3.0)
-## [5.11.1](https://github.com/Backbase/stream-services/compare/5.11.0...5.11.1)
-### Changed
-- Updated plan-manager service api from 0.5.0 to 0.9.0
-
-## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
-### Fixed
-- Fixed missing explicit state mappings for BaseProduct related classes
 
 ## [6.3.0](https://github.com/Backbase/stream-services/compare/6.2.0...6.3.0)
 ### Fixed
@@ -114,9 +101,6 @@ All notable changes to this project will be documented in this file.
 ## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
 ### Changed
 - make ContactsSaga use continueOnError flag
-## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
-### Changed
-- feature - improved payment ingestion to allow for joint owner accounts to be shared.
 
 ## [5.7.0](https://github.com/Backbase/stream-services/compare/5.6.0...5.7.0)
 ### Changed
