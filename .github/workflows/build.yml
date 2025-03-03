@@ -36,17 +36,16 @@ jobs:
         with:
           repositories: '[{ "id": "backbase", "url": "https://repo.backbase.com/repo" }]'
           plugin_repositories: '[{ "id": "backbase-plugins", "url": "https://repo.backbase.com/repo" }]'
-          servers: '[{ "id": "backbase", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" },{ "id": "backbase-plugins", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" }]'
+          servers: '[{ "id": "backbase", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" }, { "id": "backbase-plugins", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" }]'
 
       - name: Get version from POM
         run: |
-          VERSION=$(mvn -X -B help:evaluate -Dexpression=project.version -q -DforceStdout)
-          VERSION_PARTS=($(echo $VERSION | tr "." "\n"))
+          export VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
+          export VERSION_PARTS=($(echo $VERSION | tr "." "\n"))
           echo "MAJOR=${VERSION_PARTS[0]}" >> $GITHUB_ENV
           echo "MINOR=${VERSION_PARTS[1]}" >> $GITHUB_ENV
           echo "PATCH=${VERSION_PARTS[2]}" >> $GITHUB_ENV
           echo "DOCKER_TAG_VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "GITHUB_ENV VALUE: ${GITHUB_ENV}"
 
       - name: Setup release version
         if: contains(github.ref, 'master')
