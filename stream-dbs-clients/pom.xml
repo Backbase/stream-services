@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>6.14.0-SNAPSHOT</version>
+        <version>6.14.0</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -258,7 +258,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-arrangement-manager-service-api-code</id>
+                        <id>generate-arrangement-manager-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
@@ -330,7 +330,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v2*.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.transaction.api.service.v2.model</modelPackage>
                         </configuration>
