@@ -8,6 +8,7 @@ import static org.springframework.util.StringUtils.isEmpty;
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ArrangementPrivilegesGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
@@ -15,6 +16,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItemSystemBase;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.GetContexts;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ListOfFunctionGroupsWithDataGroups;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
@@ -43,6 +45,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementInge
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.configuration.DeletionProperties.FunctionGroupItemType;
 import com.backbase.stream.legalentity.model.AssignedPermission;
@@ -82,6 +85,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -130,6 +134,10 @@ public class AccessGroupService {
     private final DeletionProperties deletionProperties;
     @NonNull
     private final BatchResponseUtils batchResponseUtils;
+
+    private final UserContextApi userContextApi;
+
+    private final AccessControlConfigurationProperties accessControlProperties;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
@@ -1496,6 +1504,40 @@ public class AccessGroupService {
         return functions.stream()
             .map(this::mapUpdateBusinessFunction)
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves the list of Service Agreements associated with a user by their internal ID.
+     *
+     * @param userInternalId the internal ID of the user
+     * @return a Mono emitting a list of Service Agreements
+     */
+    public Mono<List<ServiceAgreement>> getUserContextsByUserId(String userInternalId) {
+        log.debug("Getting Service Agreement for: {}", userInternalId);
+        return fetchUserContexts(userInternalId)
+            .flatMapIterable(GetContexts::getElements)
+            .map(accessGroupMapper::toStream)
+            .collectList()
+            .doOnNext(serviceAgreements ->
+                log.debug("[{}] Service Agreements found for user: {}", serviceAgreements.size(), userInternalId)
+            )
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Failed to fetch service agreement by user internal id: {}", e.getResponseBodyAsString(), e);
+                return Mono.error(e);
+            });
+    }
+
+    private Flux<GetContexts> fetchUserContexts(String userInternalId) {
+        var currentPage = new AtomicInteger(0);
+        var pageSize = accessControlProperties.getUserContextPageSize();
+        return userContextApi.getUserContexts(userInternalId, null, currentPage.get(), pageSize)
+            .expand(response -> {
+                var totalPagesCalculated = (int) Math.ceil((double) response.getTotalElements() / pageSize);
+                if (currentPage.incrementAndGet() >= totalPagesCalculated) {
+                    return Mono.empty();
+                }
+                return userContextApi.getUserContexts(userInternalId, null, currentPage.get(), pageSize);
+            });
     }
 
     @NotNull

@@ -3,17 +3,21 @@ package com.backbase.stream.mapper;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.backbase.dbs.accesscontrol.api.service.v3.model.CreateStatus;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.CustomerCategory;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationUserApsIdentifiers;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.Status;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.UserContextItem;
 import com.backbase.stream.legalentity.model.ApsIdentifiers;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -145,6 +149,64 @@ class AccessGroupMapperTest {
             .status(Status.ENABLED);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void toStreamMapsUserContextItemToServiceAgreement() {
+        var userContextItem = createUserContextItem("someServiceAgreementId", "someExternalId",
+            "someServiceAgreementName",
+            "someDescription", "somePurpose", true);
+
+        var actualServiceAgreement = subject.toStream(userContextItem);
+
+        var expectedServiceAgreement = createServiceAgreementFromUserContextItem(userContextItem);
+
+        assertEquals(expectedServiceAgreement, actualServiceAgreement);
+    }
+
+    @Test
+    void toStreamMapsListOfUserContextItemsToListOfServiceAgreements() {
+        var userContextItem1 = createUserContextItem("someServiceAgreementId1", "someExternalId1",
+            "someServiceAgreementName1",
+            "someDescription1", "somePurpose1", true);
+        var userContextItem2 = createUserContextItem("someServiceAgreementId2", "someExternalId2",
+            "someServiceAgreementName2",
+            "someDescription2", "somePurpose2", false);
+
+        var userContexts = List.of(userContextItem1, userContextItem2);
+
+        var actualServiceAgreements = subject.toStream(userContexts);
+
+        var expectedServiceAgreements = Arrays.asList(
+            createServiceAgreementFromUserContextItem(userContextItem1),
+            createServiceAgreementFromUserContextItem(userContextItem2)
+        );
+
+        assertEquals(expectedServiceAgreements, actualServiceAgreements);
+    }
+
+    private UserContextItem createUserContextItem(String serviceAgreementId, String externalId,
+        String serviceAgreementName,
+        String description, String purpose, Boolean serviceAgreementMaster) {
+        return new UserContextItem()
+            .serviceAgreementId(serviceAgreementId)
+            .externalId(externalId)
+            .serviceAgreementName(serviceAgreementName)
+            .description(description)
+            .purpose(purpose)
+            .serviceAgreementMaster(serviceAgreementMaster)
+            .customerCategory(CustomerCategory.RETAIL);
+    }
+
+    private ServiceAgreement createServiceAgreementFromUserContextItem(UserContextItem item) {
+        return new ServiceAgreement()
+            .internalId(item.getServiceAgreementId())
+            .externalId(item.getExternalId())
+            .name(item.getServiceAgreementName())
+            .description(item.getDescription())
+            .purpose(item.getPurpose())
+            .isMaster(item.getServiceAgreementMaster())
+            .customerCategory(com.backbase.stream.legalentity.model.CustomerCategory.RETAIL);
     }
 
 }
