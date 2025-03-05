@@ -1,5 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [6.15.0](https://github.com/Backbase/stream-services/compare/6.14.0...6.15.0)
+### Added
+- Debit insurance status support (insuredStatus field)
+- Legal Entities now support relations and additions
+
 ## [6.14.0](https://github.com/Backbase/stream-services/compare/6.13.0...6.14.0)
 ### Fixed
 - LegalEntitySaga: Fixed duplicate service agreements from being created for child accounts during login in Family Banking.
@@ -80,14 +85,8 @@ All notable changes to this project will be documented in this file.
 - Updated plan-manager service api from 0.5.0 to 0.9.0
 
 ## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
-### Fixed
-- Fixed missing explicit state mappings for BaseProduct related classes
 ### Changed
 - feature - improved payment ingestion to allow for joint owner accounts to be shared.
-
-## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
-### Fixed
-- Fixed missing explicit state mappings for BaseProduct related classes
 
 ## [5.10.0](https://github.com/Backbase/stream-services/compare/5.9.1...5.10.0)
 ### Added
@@ -104,9 +103,6 @@ All notable changes to this project will be documented in this file.
 ## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
 ### Changed
 - make ContactsSaga use continueOnError flag
-## [5.8.0](https://github.com/Backbase/stream-services/compare/5.7.0...5.8.0)
-### Changed
-- feature - improved payment ingestion to allow for joint owner accounts to be shared.
 
 ## [5.7.0](https://github.com/Backbase/stream-services/compare/5.6.0...5.7.0)
 ### Changed
@@ -150,10 +146,6 @@ All notable changes to this project will be documented in this file.
 ## [4.1.0](https://github.com/Backbase/stream-services/compare/4.1.0...4.0.0)
 ### Changed
 - Bumping Service SDK to **16.1.5**
-
-## [5.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
-### Changed
-- Bumping Service SDK to **17.0.0**
 
 ## [4.0.0](https://github.com/Backbase/stream-services/compare/4.0.0...3.70.0)
 ### Changed
