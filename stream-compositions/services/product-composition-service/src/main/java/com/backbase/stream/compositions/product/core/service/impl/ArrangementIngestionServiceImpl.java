@@ -81,7 +81,7 @@ public class ArrangementIngestionServiceImpl implements ArrangementIngestionServ
     }
 
     private Mono<ArrangementIngestResponse> sendToDbs(ArrangementIngestResponse res) {
-        return arrangementService.updateArrangement(res.getArrangement())
+        return arrangementService.updateArrangement(res.getArrangementInternalId(), res.getArrangement())
                 .map(item -> ArrangementIngestResponse.builder()
                         .arrangement(res.getArrangement())
                         .arrangementInternalId(res.getArrangementInternalId())

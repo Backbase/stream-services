@@ -1,9 +1,92 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [6.15.0](https://github.com/Backbase/stream-services/compare/6.14.0...6.15.0)
+### Added
+- Debit insurance status support (insuredStatus field)
+- Legal Entities now support relations and additions
 
-## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
+## [6.14.0](https://github.com/Backbase/stream-services/compare/6.13.0...6.14.0)
+### Fixed
+- LegalEntitySaga: Fixed duplicate service agreements from being created for child accounts during login in Family Banking.
+
+## [6.13.0](https://github.com/Backbase/stream-services/compare/6.12.0...6.13.0)
+### Added
+- add subscriptions for products when it's specified
+
+## [6.12.0](https://github.com/Backbase/stream-services/compare/6.11.0...6.12.0)
+### Fixed
+- Adds LoB header to user kind segmentation saga in stream audiences
+
+## [6.11.0](https://github.com/Backbase/stream-services/compare/6.10.0...6.11.0)
+### Fixed
+- Performance improvement on retrieving the user information by calling getUserById (8 ms) Vs getUserByExternalId (50 ms)
+- Update ArrangementUpdateException Logger to handle PII data
+
+## [6.10.0](https://github.com/Backbase/stream-services/compare/6.9.0...6.10.0)
+### Fixed
+- LegalEntitySaga: Fix periodic limits bounds setQuarterly
+
+## [6.9.0](https://github.com/Backbase/stream-services/compare/6.8.0...6.9.0)
+### Changed
+- fix the logic of setting the job role type for ingestion - see Maint 32629 for more details
+
+## [6.8.0](https://github.com/Backbase/stream-services/compare/6.7.0...6.8.0)
+### Changed
+- update ssdk version to 18.1.0 - see Maint 32324 for more details
+
+## [6.7.0](https://github.com/Backbase/stream-services/compare/6.6.0...6.7.0)
+### Fixed
+- Fixed setting internal id for creatorLE in reactive chain
+
+## [6.6.0](https://github.com/Backbase/stream-services/compare/6.5.0...6.6.0)
+### Fixed
+- Fixed invocation of [putArrangementById](https://backbase.io/developers/apis/specs/arrangement-manager/arrangement-service-api/3.0.5/operations/Arrangements/putArrangementById/) in `ArrangementService` to pass in the arrangement's internalId.
+  The arrangement's externalId was erroneously being provided to this method.
+- 
+## [6.5.0](https://github.com/Backbase/stream-services/compare/6.4.0...6.5.0)
+### Fixed
+- Fixed productTypeName mapping when ingesting Product data into arrangement-manager
+
+## [6.4.0](https://github.com/Backbase/stream-services/compare/6.3.0...6.4.0)
+### Fixed
+- Fixed setting internal id for creatorLE before creating SA
+
+## [6.3.0](https://github.com/Backbase/stream-services/compare/6.2.0...6.3.0)
 ### Fixed
 - Fixed missing explicit state mappings for BaseProduct related classes
+
+## [6.2.0](https://github.com/Backbase/stream-services/compare/6.1.0...6.2.0)
+### Changed
+- update ssdk version to 18.0.1
+
+## [6.1.0](https://github.com/Backbase/stream-services/compare/5.16.0...6.1.0)
+### Changed
+- Updated to 2024.10 bb bom, and plan-manager to v1
+
+## [5.15.0](https://github.com/Backbase/stream-services/compare/5.15.0...5.15.0)
+### Changed
+- Updated legal entities specs for service agreement to include purpose field
+
+## [5.14.0](https://github.com/Backbase/stream-services/compare/5.13.0...5.14.0)
+### Changed
+- Updated arrangement-manager service-api from v2 to v3
+
+## [5.13.0](https://github.com/Backbase/stream-services/compare/5.12.0...5.13.0)
+### Changed
+- Bumping Backbase BOM to 2024.09-LTS
+- Upgraded SSDK to 17.1.0
+
+## [5.12.0](https://github.com/Backbase/stream-services/compare/5.11.0...5.12.0)
+### Added
+- Adding additional pmts mappings
+
+## [5.11.1](https://github.com/Backbase/stream-services/compare/5.11.0...5.11.1)
+### Changed
+- Updated plan-manager service api from 0.5.0 to 0.9.0
+
+## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
+### Changed
+- feature - improved payment ingestion to allow for joint owner accounts to be shared.
 
 ## [5.10.0](https://github.com/Backbase/stream-services/compare/5.9.1...5.10.0)
 ### Added
@@ -125,6 +208,14 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Always check cursor and create if it does not exist.
 - If `DateRangeEnd` is passed in the composition request set that as lastTxnDate instead of system date.
+
+## [3.65.2](https://github.com/Backbase/stream-services/compare/3.65.1...3.65.2)
+### Changed
+- Adding additional mapping attributes, reservedAmount, to Credit card.
+
+## [3.65.1](https://github.com/Backbase/stream-services/compare/3.65.0...3.65.1)
+### Changed
+- Query for existing payments by using arrangement IDs instead of user IDs. This will eliminate duplicate payments from being ingested when joint owners are added.
 
 ## [3.65.0](https://github.com/Backbase/stream-services/compare/3.64.0...3.65.0)
 ### Changed

@@ -25,7 +25,7 @@ jobs:
           cache: maven
 
       - name: Cache SonarCloud packages
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
@@ -40,8 +40,8 @@ jobs:
 
       - name: Get version from POM
         run: |
-          VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
-          VERSION_PARTS=($(echo $VERSION | tr "." "\n"))
+          export VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
+          export VERSION_PARTS=($(echo $VERSION | tr "." "\n"))
           echo "MAJOR=${VERSION_PARTS[0]}" >> $GITHUB_ENV
           echo "MINOR=${VERSION_PARTS[1]}" >> $GITHUB_ENV
           echo "PATCH=${VERSION_PARTS[2]}" >> $GITHUB_ENV

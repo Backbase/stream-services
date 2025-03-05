@@ -4,13 +4,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.3</version>
+        <version>3.3.3</version>
         <relativePath/>
     </parent>
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-starter</artifactId>
     <name>Stream :: SDK :: stream-starter</name>
-    <version>5.11.0-SNAPSHOT</version>
+    <version>6.14.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -114,14 +114,14 @@
             <dependency>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>backbase-building-blocks-release</artifactId>
-                <version>17.0.0</version>
+                <version>18.1.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.azure</groupId>
                 <artifactId>azure-messaging-servicebus</artifactId>
-                <version>7.15.0</version>
+                <version>7.17.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -156,7 +156,21 @@
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+            <artifactId>micrometer-tracing-bridge-otel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-zipkin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk-testing</artifactId>
+            <scope>test</scope>
         </dependency>
         <!-- Use Backbase SDK Logging rules, ensure no dependency is added thouhgh -->
         <dependency>
@@ -221,8 +235,8 @@
             <artifactId>swagger-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.zipkin.reporter2</groupId>
-            <artifactId>zipkin-reporter-brave</artifactId>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -348,12 +362,12 @@
                         <dependency>
                             <groupId>com.backbase.buildingblocks</groupId>
                             <artifactId>jib-dependencies-extension</artifactId>
-                            <version>17.0.0</version>
+                            <version>18.1.0</version>
                         </dependency>
                         <dependency>
                             <groupId>com.backbase.buildingblocks</groupId>
                             <artifactId>jib-entrypoint-extension</artifactId>
-                            <version>17.0.0</version>
+                            <version>18.1.0</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -401,7 +415,7 @@
             <plugin>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
-                <version>17.0.0</version>
+                <version>18.1.0</version>
                 <executions>
                     <execution>
                         <id>find-main-package-for-archunit-maven</id>
@@ -502,7 +516,7 @@
                     <dependency>
                         <groupId>com.backbase.buildingblocks</groupId>
                         <artifactId>service-sdk-archunit</artifactId>
-                        <version>17.0.0</version>
+                        <version>18.1.0</version>
                     </dependency>
                 </dependencies>
                 <executions>

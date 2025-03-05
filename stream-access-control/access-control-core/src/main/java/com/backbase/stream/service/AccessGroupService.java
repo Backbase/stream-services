@@ -8,6 +8,7 @@ import static org.springframework.util.StringUtils.isEmpty;
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ArrangementPrivilegesGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
@@ -15,6 +16,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItemSystemBase;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupUpdate;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.GetContexts;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ListOfFunctionGroupsWithDataGroups;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
@@ -43,9 +45,9 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementInge
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.configuration.DeletionProperties.FunctionGroupItemType;
-import com.backbase.stream.legalentity.model.ApprovalStatus;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
@@ -58,7 +60,6 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
@@ -84,6 +85,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -92,11 +94,10 @@ import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.mapstruct.factory.Mappers;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -133,6 +134,10 @@ public class AccessGroupService {
     private final DeletionProperties deletionProperties;
     @NonNull
     private final BatchResponseUtils batchResponseUtils;
+
+    private final UserContextApi userContextApi;
+
+    private final AccessControlConfigurationProperties accessControlProperties;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
@@ -1228,11 +1233,27 @@ public class AccessGroupService {
         presentationIngestFunctionGroup.setExternalServiceAgreementId(serviceAgreement.getExternalId());
         presentationIngestFunctionGroup.setMetadata(jobRole.getMetadata());
 
-        //since ReferenceJobRole class was removed, now all job roles have the same class, and
-        //reference job role can be created only for MSA, for CSA it failed
-        if(BooleanUtils.isTrue(serviceAgreement.getIsMaster())) {
-            log.debug("Creating a Reference Job Role.");
-            presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
+        //Logic to map the job roles types
+        if (CollectionUtils.isEmpty(jobRole.getFunctionGroups())) {
+            throw new IllegalArgumentException(
+                String.format("Unexpected no function groups for job role: %s", jobRole.getName()));
+        }
+        final var jobRoleType = jobRole.getFunctionGroups().getFirst().getType();
+        if (!ObjectUtils.isEmpty(jobRoleType)) {
+            switch (jobRoleType) {
+                case TEMPLATE:
+                    presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE);
+                    break;
+                case DEFAULT:
+                    presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.REGULAR);
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                        String.format("Unexpected enum constant: %s for job role: %s", jobRoleType, jobRole.getName()));
+            }
+        } else {
+            log.debug("No function group job role type is provided, creating a Local Job Role");
+            presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.REGULAR);
         }
 
         // Removing constant from mapper and adding default APS here to avoid issues with apsName.
@@ -1483,6 +1504,40 @@ public class AccessGroupService {
         return functions.stream()
             .map(this::mapUpdateBusinessFunction)
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves the list of Service Agreements associated with a user by their internal ID.
+     *
+     * @param userInternalId the internal ID of the user
+     * @return a Mono emitting a list of Service Agreements
+     */
+    public Mono<List<ServiceAgreement>> getUserContextsByUserId(String userInternalId) {
+        log.debug("Getting Service Agreement for: {}", userInternalId);
+        return fetchUserContexts(userInternalId)
+            .flatMapIterable(GetContexts::getElements)
+            .map(accessGroupMapper::toStream)
+            .collectList()
+            .doOnNext(serviceAgreements ->
+                log.debug("[{}] Service Agreements found for user: {}", serviceAgreements.size(), userInternalId)
+            )
+            .onErrorResume(WebClientResponseException.class, e -> {
+                log.error("Failed to fetch service agreement by user internal id: {}", e.getResponseBodyAsString(), e);
+                return Mono.error(e);
+            });
+    }
+
+    private Flux<GetContexts> fetchUserContexts(String userInternalId) {
+        var currentPage = new AtomicInteger(0);
+        var pageSize = accessControlProperties.getUserContextPageSize();
+        return userContextApi.getUserContexts(userInternalId, null, currentPage.get(), pageSize)
+            .expand(response -> {
+                var totalPagesCalculated = (int) Math.ceil((double) response.getTotalElements() / pageSize);
+                if (currentPage.incrementAndGet() >= totalPagesCalculated) {
+                    return Mono.empty();
+                }
+                return userContextApi.getUserContexts(userInternalId, null, currentPage.get(), pageSize);
+            });
     }
 
     @NotNull

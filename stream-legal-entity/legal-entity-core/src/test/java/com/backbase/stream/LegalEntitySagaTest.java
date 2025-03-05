@@ -62,7 +62,6 @@ import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
-import com.backbase.stream.worker.model.StreamTask;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.time.Duration;
@@ -71,6 +70,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
@@ -131,6 +131,7 @@ class LegalEntitySagaTest {
     String leInternalId = "someLeInternalId";
     String adminExId = "someAdminExId";
     String regularUserExId = "someRegularUserExId";
+    String userId = "user_id";
     String customSaExId = "someCustomSaExId";
     LegalEntity legalEntity;
     ServiceAgreement customSa;
@@ -331,6 +332,134 @@ class LegalEntitySagaTest {
 
         verify(userService, times(2)).setupRealm(task.getLegalEntity());
         verify(userService, times(2)).linkLegalEntityToRealm(task.getLegalEntity());
+    }
+
+    @Test
+    void testCustomServiceAgreement_IfFetchedServiceAgreementExists_ThenSettingUp() {
+        var task = setupLegalEntityTask();
+
+        mockAccessGroupService(userId);
+        mockUserService(userId);
+
+        executeAndVerifyTask(task, 0);
+
+        verifyAccessGroupService();
+        verifyUserService();
+    }
+
+    @Test
+    void testCustomServiceAgreement_IfNoCustomServiceAgreementExists_ThenCreateMaster() {
+        var task = setupLegalEntityTask();
+
+        when(accessGroupService.getUserContextsByUserId(userId)).thenReturn(Mono.empty());
+        mockUserService(userId);
+
+        executeAndVerifyTask(task, 1);
+
+        verifyAccessGroupService();
+        verifyUserService();
+    }
+
+    @Test
+    void testCustomServiceAgreement_IfNoMatchingCustomServiceAgreementExists_ThenCreateMaster() {
+        LegalEntityTask task = setupLegalEntityTask();
+
+        when(accessGroupService.getUserContextsByUserId(userId))
+            .thenReturn(
+                Mono.just(List.of(new ServiceAgreement().internalId("sa_id").externalId("sa_ext_id").purpose("TEST"))));
+        mockUserService(userId);
+
+        executeAndVerifyTask(task, 1);
+
+        verifyAccessGroupService();
+        verifyUserService();
+    }
+
+    @Test
+    void testCustomServiceAgreement_IfNoUserDataFoundWhileServiceAgreementFetch_throwError() {
+        LegalEntityTask task = setupLegalEntityTask();
+        when(userService.getUsersByLegalEntity(any(), anyInt(), anyInt()))
+            .thenReturn(Mono.just(new GetUsersList().totalElements(0L).users(null)));
+        Assertions.assertThrows(
+            StreamTaskException.class,
+            () -> executeLegalEntityTaskAndBlock(task),
+            "No users found for Legal Entity"
+        );
+        verifyUserService();
+    }
+
+    private void mockUserService(String userId) {
+        when(userService.getUsersByLegalEntity(any(), anyInt(), anyInt()))
+            .thenReturn(Mono.just(new GetUsersList().totalElements(1L)
+                .users(List.of(new GetUser().externalId("external_id").id(userId)))));
+    }
+
+    private void mockAccessGroupService(String userId) {
+        when(accessGroupService.getUserContextsByUserId(userId))
+            .thenReturn(Mono.just(List.of(new ServiceAgreement().internalId("sa_id")
+                .externalId("sa_ext_id").purpose("FAMILY_BANKING"))));
+    }
+
+    private void verifyAccessGroupService() {
+        verify(accessGroupService).getUserContextsByUserId(userId);
+    }
+
+    private void verifyUserService() {
+        verify(userService).getUsersByLegalEntity(any(), anyInt(), anyInt());
+    }
+
+    private LegalEntityTask setupLegalEntityTask() {
+        var account = new SavingsAccount();
+        account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP");
+        var productGroup = new ProductGroup();
+        productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
+            .description("somePgDescription").savingAccounts(singletonList(account));
+
+        var productGroupTask = new ProductGroupTask(productGroup);
+        var productGroupTaskMono = Mono.justOrEmpty(productGroupTask);
+
+        var functionGroup = new BusinessFunctionGroup("someFunctionGroup");
+        var jobRole = new JobRole("someJobRole", "someJobRole");
+        jobRole.setFunctionGroups(singletonList(functionGroup));
+
+        legalEntity = new LegalEntity("le_name", null, null);
+        legalEntity.setInternalId(leInternalId);
+        legalEntity.setExternalId(leExternalId);
+        legalEntity.setParentExternalId(leExternalId);
+        legalEntity.setProductGroups(singletonList(productGroup));
+        var sa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole)
+            .creatorLegalEntity(leExternalId);
+
+        var task = mockLegalEntityTask(legalEntity);
+
+        when(task.getLegalEntity()).thenReturn(legalEntity);
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(leInternalId)).thenReturn(
+            Mono.empty());
+        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
+        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
+        when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
+        when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
+        when(legalEntitySagaConfigurationProperties.getServiceAgreementPurposes()).thenReturn(
+            Set.of("FAMILY_BANKING"));
+        when(userService.setupRealm(task.getLegalEntity())).thenReturn(Mono.just(new Realm()));
+        when(userService.linkLegalEntityToRealm(task.getLegalEntity())).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntity));
+
+        return task;
+    }
+
+    private void executeAndVerifyTask(LegalEntityTask task, int createServiceAgreementTimes) {
+        var result = legalEntitySaga.executeTask(task);
+        result.block();
+
+        verify(userService).setupRealm(task.getLegalEntity());
+        verify(userService).linkLegalEntityToRealm(task.getLegalEntity());
+        verify(accessGroupService).getUserContextsByUserId(userId);
+        verify(userService).getUsersByLegalEntity(any(), anyInt(), anyInt());
+        verify(accessGroupService, times(createServiceAgreementTimes)).createServiceAgreement(any(), any());
     }
 
     /**

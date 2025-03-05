@@ -43,9 +43,9 @@ eureka:
 
 bootstrap:
   enabled: true
-  # This is just na example. Replace it with data corresponding to your project
-  product-catalog:
 
+  # This is just an example. Replace it with data corresponding to your project
+  product-catalog:
     productTypes:
       - productTypeName: Certificate of Deposit
         typeName: Certificate of Deposit

@@ -1,7 +1,9 @@
 package com.backbase.stream.task;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.lenient;
 
 import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
@@ -13,6 +15,7 @@ import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostFilter
 import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostRequest;
 import com.backbase.dbs.paymentorder.api.service.v3.model.PaymentOrderPostResponse;
 import com.backbase.stream.common.PaymentOrderBaseTest;
+import com.backbase.stream.config.PaymentOrderTypeConfiguration;
 import com.backbase.stream.config.PaymentOrderWorkerConfigurationProperties;
 import com.backbase.stream.model.request.NewPaymentOrderIngestRequest;
 import com.backbase.stream.model.request.PaymentOrderIngestRequest;
@@ -22,7 +25,8 @@ import com.backbase.stream.paymentorder.PaymentOrderUnitOfWorkExecutor;
 import com.backbase.stream.worker.model.UnitOfWork;
 import com.backbase.stream.worker.repository.UnitOfWorkRepository;
 import java.math.BigDecimal;
-import java.util.List;
+
+import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +38,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
@@ -47,6 +53,8 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
     @Mock
     private UnitOfWorkRepository<PaymentOrderTask, String> repository;
 
+    private PaymentOrderTypeConfiguration paymentOrderTypeConfiguration = new PaymentOrderTypeConfiguration();
+
     private final PaymentOrderTaskExecutor streamTaskExecutor = new PaymentOrderTaskExecutor(paymentOrdersApi);
 
     private final PaymentOrderWorkerConfigurationProperties streamWorkerConfiguration = new PaymentOrderWorkerConfigurationProperties();
@@ -56,9 +64,13 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
     @BeforeEach
     void setup() {
+        List<String> pmtTypes = new ArrayList<>();
+        pmtTypes.add("INTRA_PMT");
+        paymentOrderTypeConfiguration.setTypes(pmtTypes);
         paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
                 repository, streamTaskExecutor, streamWorkerConfiguration,
-                paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper);
+                paymentOrdersApi, arrangementsApi, paymentOrderTypeMapper,
+                paymentOrderTypeConfiguration);
     }
 
     @Test
@@ -138,7 +150,7 @@ public class PaymentOrderUnitOfWorkExecutorTest extends PaymentOrderBaseTest {
 
         paymentOrderUnitOfWorkExecutor = new PaymentOrderUnitOfWorkExecutor(
                 repository, streamTaskExecutor, streamWorkerConfiguration,
-                paymentOrdersApi, arrangementsApi, null);
+                paymentOrdersApi, arrangementsApi, null, paymentOrderTypeConfiguration);
 
         paymentOrderPostRequest.getFirst().setInternalUserId(StringUtils.EMPTY);
         paymentOrderPostRequest.get(1).setInternalUserId(null);

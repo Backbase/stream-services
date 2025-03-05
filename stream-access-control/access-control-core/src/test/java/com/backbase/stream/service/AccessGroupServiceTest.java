@@ -1,6 +1,5 @@
 package com.backbase.stream.service;
 
-import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_BAD_REQUEST;
 import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_INTERNAL_SERVER_ERROR;
 import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_OK;
 import static com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction.ADD;
@@ -14,24 +13,22 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItemSystemBase;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem.TypeEnum;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.GetContexts;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
@@ -52,7 +49,9 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementUsersQuery;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
+import com.backbase.dbs.accesscontrol.api.service.v3.model.UserContextItem;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
+import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BaseProductGroup.ProductGroupTypeEnum;
@@ -71,7 +70,6 @@ import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
-import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -90,6 +88,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -122,9 +121,16 @@ class AccessGroupServiceTest {
     @Spy
     private BatchResponseUtils batchResponseUtils;
 
+    @Mock
+    private UserContextApi userContextApi;
+
+    @Mock
+    private AccessControlConfigurationProperties accessControlProperties;
+
     @Captor
     private ArgumentCaptor<List<PresentationDataGroupItemPutRequestBody>> presentationDataGroupItemPutRequestBodyCaptor;
 
+    String userInternalId = "userInternalId";
 
     @Test
     void shouldCreateServiceAgreement() {
@@ -1198,6 +1204,153 @@ class AccessGroupServiceTest {
         String exId;
         boolean sharingAccounts;
         boolean sharingUsers;
+    }
+
+    @Test
+    void testGetUserContextsByUserId_success() {
+        var getContexts = new GetContexts().elements(
+            Collections.singletonList(new UserContextItem().serviceAgreementId("sa_id"))).totalElements(1L);
+
+        when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
+            .thenReturn(Mono.just(getContexts));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(10);
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
+            .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 1)
+            .verifyComplete();
+
+        verify(userContextApi).getUserContexts(userInternalId, null, 0, 10);
+        verify(accessControlProperties).getUserContextPageSize();
+    }
+
+    @Test
+    void testGetUserContextsByUserId_emptyResult() {
+        when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
+            .thenReturn(Mono.just(getEmptyContext()));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(10);
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
+            .expectNext(Collections.emptyList())
+            .verifyComplete();
+
+        verify(userContextApi).getUserContexts(userInternalId, null, 0, 10);
+        verify(accessControlProperties).getUserContextPageSize();
+    }
+
+    private GetContexts getEmptyContext() {
+        return new GetContexts().elements(Collections.emptyList()).totalElements(0L);
+    }
+
+    @Test
+    void testGetUserContextsByUserId_webClientResponseException4xx() {
+        when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
+            .thenReturn(Mono.error(new WebClientResponseException("Not Found", 404, "Not Found", null, null, null)));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(10);
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
+            .expectErrorMatches(throwable -> throwable instanceof WebClientResponseException
+                && HttpStatus.NOT_FOUND.equals(((WebClientResponseException) throwable).getStatusCode()))
+            .verify();
+        verify(userContextApi).getUserContexts(userInternalId, null, 0, 10);
+        verify(accessControlProperties).getUserContextPageSize();
+    }
+
+    @Test
+    void testGetUserContextsByUserId_nullFrom() {
+        when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
+            .thenReturn(Mono.just(getEmptyContext()));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(10);
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
+            .expectNextMatches(List::isEmpty)
+            .verifyComplete();
+
+        verify(userContextApi).getUserContexts(userInternalId, null, 0, 10);
+        verify(accessControlProperties).getUserContextPageSize();
+    }
+
+    @Test
+    void testGetUserContextsByUserId_pagination() {
+        var page1 = new GetContexts().elements(List.of(new UserContextItem().serviceAgreementId("sa_1")))
+            .totalElements(2L);
+        var page2 = new GetContexts().elements(List.of(new UserContextItem().serviceAgreementId("sa_2")))
+            .totalElements(2L);
+
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(0), any()))
+            .thenReturn(Mono.just(page1));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(1), any()))
+            .thenReturn(Mono.just(page2));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(1);
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
+            .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 2
+                && serviceAgreements.stream().anyMatch(sa -> sa.getInternalId().equals("sa_1"))
+                && serviceAgreements.stream().anyMatch(sa -> sa.getInternalId().equals("sa_2")))
+            .verifyComplete();
+
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(0), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(1), any());
+        verify(accessControlProperties).getUserContextPageSize();
+    }
+
+    @Test
+    void testGetUserContextsByUserId_paginationLargeNumber() {
+        var page1 = new GetContexts().elements(
+            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_1"))).totalElements(120L);
+        var page2 = new GetContexts().elements(
+            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_2"))).totalElements(120L);
+        var page3 = new GetContexts().elements(
+            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_3"))).totalElements(120L);
+        var page4 = new GetContexts().elements(
+            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_4"))).totalElements(120L);
+        var page5 = new GetContexts().elements(
+            Collections.nCopies(20, new UserContextItem().serviceAgreementId("sa_5"))).totalElements(120L);
+
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(0), any()))
+            .thenReturn(Mono.just(page1));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(1), any()))
+            .thenReturn(Mono.just(page2));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(2), any()))
+            .thenReturn(Mono.just(page3));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(3), any()))
+            .thenReturn(Mono.just(page4));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(4), any()))
+            .thenReturn(Mono.just(page5));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(25);
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
+            .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 120)
+            .verifyComplete();
+
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(0), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(1), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(2), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(3), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(4), any());
+        verify(accessControlProperties).getUserContextPageSize();
+    }
+
+    @Test
+    void testGetUserContextsByUserId_paginationEdgeCases() {
+        var page1 = new GetContexts().elements(
+            Collections.nCopies(10, new UserContextItem().serviceAgreementId("sa_1"))).totalElements(11L);
+        var page2 = new GetContexts().elements(
+            Collections.nCopies(1, new UserContextItem().serviceAgreementId("sa_2"))).totalElements(11L);
+
+
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(0), any()))
+            .thenReturn(Mono.just(page1));
+        when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(1), any()))
+            .thenReturn(Mono.just(page2));
+        when(accessControlProperties.getUserContextPageSize()).thenReturn(10);
+
+        StepVerifier.create(subject.getUserContextsByUserId(userInternalId))
+            .expectNextMatches(serviceAgreements -> serviceAgreements.size() == 11)
+            .verifyComplete();
+
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(0), any());
+        verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(1), any());
+        verify(accessControlProperties).getUserContextPageSize();
     }
 
 }

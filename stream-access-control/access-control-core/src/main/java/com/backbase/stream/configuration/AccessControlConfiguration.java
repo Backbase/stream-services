@@ -4,6 +4,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
@@ -30,7 +31,8 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(ProductConfiguration.class)
 @Slf4j
-@EnableConfigurationProperties({DeletionProperties.class,UserManagementProperties.class})
+@EnableConfigurationProperties({DeletionProperties.class,UserManagementProperties.class,
+    AccessControlConfigurationProperties.class})
 public class AccessControlConfiguration {
 
     @Bean
@@ -74,10 +76,11 @@ public class AccessControlConfiguration {
         DeletionProperties configurationProperties,
         UsersApi accessControlUsersApi,
         DataGroupsApi dataGroupsApi, ServiceAgreementsApi serviceAgreementsApi,
-        FunctionGroupsApi functionGroupsApi, BatchResponseUtils batchResponseUtils) {
+        FunctionGroupsApi functionGroupsApi, BatchResponseUtils batchResponseUtils, UserContextApi userContextApi,
+        AccessControlConfigurationProperties accessControlConfigurationProperties) {
         return new AccessGroupService(usersApi, accessControlUsersApi, dataGroupsApi,
             functionGroupsApi, serviceAgreementsApi,
-            configurationProperties, batchResponseUtils);
+            configurationProperties, batchResponseUtils, userContextApi, accessControlConfigurationProperties);
     }
 
 }

@@ -3,6 +3,7 @@ package com.backbase.stream.product.service;
 import static com.backbase.dbs.arrangement.api.service.v3.model.ArrangementsDeleteItem.SelectorEnum.EXTERNAL_ID;
 import static java.lang.String.join;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.fromCallable;
@@ -10,8 +11,10 @@ import static reactor.core.publisher.Mono.fromCallable;
 import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseItemExtended;
 import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseStatusCode;
 import com.backbase.dbs.arrangement.api.integration.v2.model.ErrorItem;
+import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntity;
 import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntityIds;
 import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
+import com.backbase.dbs.arrangement.api.integration.v2.model.Subscription;
 import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
@@ -24,9 +27,11 @@ import com.backbase.stream.product.exception.ArrangementUpdateException;
 import com.backbase.stream.product.mapping.ProductMapper;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
+import org.springframework.lang.NonNull;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -61,12 +66,12 @@ public class ArrangementService {
 
     }
 
-    public Mono<ArrangementPutItem> updateArrangement(ArrangementPutItem arrangementPutItem) {
+    public Mono<ArrangementPutItem> updateArrangement(String arrangementId, ArrangementPutItem arrangementPutItem) {
         log.info("Updating Arrangement: {}", arrangementPutItem.getExternalArrangementId());
         if(arrangementPutItem.getDebitCards() == null) {
             arrangementPutItem.setDebitCards(emptyList());
         }
-        return arrangementsApi.putArrangementById(arrangementPutItem.getExternalArrangementId(), arrangementPutItem)
+        return arrangementsApi.putArrangementById(arrangementId, arrangementPutItem)
             .doOnEach(aVoid -> log.info("Updated Arrangement: {}", arrangementPutItem.getExternalArrangementId()))
             .thenReturn(fromCallable(() -> arrangementPutItem))
             .thenReturn(arrangementPutItem)
@@ -86,7 +91,14 @@ public class ArrangementService {
                 }
                 sink.next(r);
             }).onErrorResume(WebClientResponseException.class, throwable ->
-                error(new ArrangementUpdateException(throwable, "Batch arrangement update failed: " + arrangementItems)));
+                Mono.error(new ArrangementUpdateException(throwable,
+                    "Batch arrangement update failed for arrangements : "
+                        + arrangementItems.stream()
+                        .map(arrangementItem -> {
+                            String uniqueIdentifier = Objects.nonNull(arrangementItem.getBBAN())? arrangementItem.getBBAN(): arrangementItem.getId();
+                            return arrangementItem.getName() + " | "
+                                + uniqueIdentifier.substring(uniqueIdentifier.length() - 4);
+                        }).toList())));
     }
 
     /**
@@ -177,14 +189,17 @@ public class ArrangementService {
      * Assign Arrangement with specified Legal Entities.
      *
      * @param arrangementExternalId external id of Arrangement.
-     * @param legalEntitiesExternalIds list of Legal Entities external identifiers.
+     * @param externalLegalEntityIds list of Legal Entities external identifiers.
      * @return Mono<Void>
      */
-    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId,
-        List<String> legalEntitiesExternalIds) {
-        log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, legalEntitiesExternalIds);
-        return arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, new ExternalLegalEntityIds()
-            .ids(new HashSet<>(legalEntitiesExternalIds)));
+    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, @NonNull ExternalLegalEntityIds externalLegalEntityIds) {
+        Set<ExternalLegalEntity> externalLegalEntitySet = externalLegalEntityIds.getExternalLegalEntities();
+        // Being defensive here to avoid NPE during the logging below
+        if (externalLegalEntitySet == null) {
+            externalLegalEntitySet = emptySet();
+        }
+        log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, externalLegalEntitySet.stream().map(ExternalLegalEntity::getExternalId).toList());
+        return arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds);
     }
 
     /**
@@ -199,6 +214,33 @@ public class ArrangementService {
         log.debug("Removing Arrangement {} from Legal Entities {}", arrangementExternalId, legalEntityExternalIds);
         return arrangementsIntegrationApi.deleteArrangementLegalEntities(arrangementExternalId,
             new ExternalLegalEntityIds().ids(new HashSet<>(legalEntityExternalIds)));
+    }
+
+    /**
+     * Create Subscriptions for specified Arrangement and list of subscription identifiers.
+     *
+     * @param arrangementExternalId arrangement external identifier.
+     * @param subscriptionIdentifiers List of identifiers.
+     * @return Mono<Void>
+     */
+    public Mono<Void> addSubscriptionForArrangement(
+        String arrangementExternalId, List<String> subscriptionIdentifiers) {
+
+        return Flux.fromIterable(subscriptionIdentifiers)
+            .flatMap(identifier -> {
+                    log.debug("Subscribe arrangement [{}] to subscription '{}'", arrangementExternalId, identifier);
+                    return arrangementsIntegrationApi
+                        .postSubscription(arrangementExternalId, new Subscription().identifier(identifier))
+                        .onErrorResume(WebClientResponseException.class, e -> {
+                            log.warn("Failed to create subscription '{}' for arrangement [{}]: {}",
+                                identifier,
+                                arrangementExternalId,
+                                e.getMessage()
+                            );
+                            return Mono.empty();
+                        });
+                }
+            ).then();
     }
 
 }

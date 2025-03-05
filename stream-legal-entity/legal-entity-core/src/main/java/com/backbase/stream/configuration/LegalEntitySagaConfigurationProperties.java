@@ -1,6 +1,7 @@
 package com.backbase.stream.configuration;
 
 import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
+import java.util.Set;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -24,4 +25,10 @@ public class LegalEntitySagaConfigurationProperties extends StreamWorkerConfigur
      * Enable service agreement update
      */
     private boolean serviceAgreementUpdateEnabled = false;
+
+    /**
+     * List of service agreement purposes
+     */
+    private Set<String> serviceAgreementPurposes;
+
 }

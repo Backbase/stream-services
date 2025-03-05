@@ -79,6 +79,7 @@ bootstrap:
         externalId: Money Market
         externalTypeId: Money Market
         typeName: Money Market
+        insuredStatus: yes
       - externalProductId: Checking
         externalProductKindId: kind1
         productKindName: Checking
@@ -87,6 +88,7 @@ bootstrap:
         externalId: Checking
         externalTypeId: Checking
         typeName: Checking
+        insuredStatus: no
       - externalProductId: Savings
         externalProductKindId: kind2
         productKindName: Savings
@@ -95,6 +97,7 @@ bootstrap:
         externalId: Savings
         externalTypeId: Savings
         typeName: Savings
+        insuredStatus: n/a
       - externalProductId: Savings
         externalProductKindId: kind2
         productKindName: Savings
@@ -103,6 +106,7 @@ bootstrap:
         externalId: Savings
         externalTypeId: Savings
         typeName: Savings
+        insuredStatus: yes
 
 logging:
   level:

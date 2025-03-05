@@ -21,6 +21,7 @@ import com.backbase.stream.legalentity.model.LegalEntityReference;
 import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.PrincipalAmount;
 import com.backbase.stream.legalentity.model.Product;
+import com.backbase.stream.legalentity.model.ReservedAmount;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.TermUnit;
@@ -33,7 +34,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
-public class ProductMapperTest {
+class ProductMapperTest {
 
     private final ProductMapper productMapper = Mappers.getMapper(ProductMapper.class);
 
@@ -72,6 +73,7 @@ public class ProductMapperTest {
                 .accountHolderName("John Doe")
                 .bookedBalance(new BookedBalance().amount(new BigDecimal("2500")))
                 .availableBalance(new AvailableBalance().amount(new BigDecimal("3000")))
+                .reservedAmount(new ReservedAmount().amount(new BigDecimal("3000")))
                 .creditLimit(new CreditLimit().amount(new BigDecimal("10000")))
                 .IBAN("iban")
                 .BBAN("bban")
@@ -142,8 +144,8 @@ public class ProductMapperTest {
         PostArrangement target = productMapper.toPresentation(source);
         Assertions.assertEquals(source.getExternalId(), target.getId());
         Assertions.assertEquals(source.getProductTypeExternalId(), target.getProductId());
-        Assertions.assertNotNull(target.getLegalEntityIds());
-        Assertions.assertEquals(source.getLegalEntities().size(), target.getLegalEntityIds().size());
+        Assertions.assertNotNull(target.getExternalLegalEntities());
+        Assertions.assertEquals(source.getLegalEntities().size(), target.getExternalLegalEntities().size());
         Assertions.assertEquals(source.getState().getExternalStateId(), target.getStateId());
         Assertions.assertEquals(source.getAccountHolderName(), target.getAccountHolderNames());
     }
@@ -154,10 +156,11 @@ public class ProductMapperTest {
         PostArrangement target = productMapper.toPresentation(source);
         Assertions.assertEquals(source.getExternalId(), target.getId());
         Assertions.assertEquals(source.getProductTypeExternalId(), target.getProductId());
-        Assertions.assertNotNull(target.getLegalEntityIds());
-        Assertions.assertEquals(source.getLegalEntities().size(), target.getLegalEntityIds().size());
+        Assertions.assertNotNull(target.getExternalLegalEntities());
+        Assertions.assertEquals(source.getLegalEntities().size(), target.getExternalLegalEntities().size());
         Assertions.assertEquals(source.getState().getExternalStateId(), target.getStateId());
         Assertions.assertEquals(source.getAccountHolderName(), target.getAccountHolderNames());
+        Assertions.assertEquals(source.getExternalParentId(), target.getParentId());
     }
 
     @Test
@@ -166,12 +169,13 @@ public class ProductMapperTest {
         PostArrangement target = productMapper.toPresentation(source);
         Assertions.assertEquals(source.getExternalId(), target.getId());
         Assertions.assertEquals(source.getProductTypeExternalId(), target.getProductId());
-        Assertions.assertNotNull(target.getLegalEntityIds());
-        Assertions.assertEquals(source.getLegalEntities().size(), target.getLegalEntityIds().size());
+        Assertions.assertNotNull(target.getExternalLegalEntities());
+        Assertions.assertEquals(source.getLegalEntities().size(), target.getExternalLegalEntities().size());
         Assertions.assertNotNull(target.getDebitCards());
         Assertions.assertEquals(source.getDebitCardsItems().size(), target.getDebitCards().size());
         Assertions.assertEquals(source.getState().getExternalStateId(), target.getStateId());
         Assertions.assertEquals(source.getAccountHolderName(), target.getAccountHolderNames());
+        Assertions.assertEquals(source.getExternalParentId(), target.getParentId());
     }
 
     @Test
@@ -180,10 +184,11 @@ public class ProductMapperTest {
         PostArrangement target = productMapper.toPresentation(source);
         Assertions.assertEquals(source.getExternalId(), target.getId());
         Assertions.assertEquals(source.getProductTypeExternalId(), target.getProductId());
-        Assertions.assertNotNull(target.getLegalEntityIds());
-        Assertions.assertEquals(source.getLegalEntities().size(), target.getLegalEntityIds().size());
+        Assertions.assertNotNull(target.getExternalLegalEntities());
+        Assertions.assertEquals(source.getLegalEntities().size(), target.getExternalLegalEntities().size());
         Assertions.assertEquals(source.getState().getExternalStateId(), target.getStateId());
         Assertions.assertEquals(source.getAccountHolderName(), target.getAccountHolderNames());
+        Assertions.assertEquals(source.getExternalParentId(), target.getParentId());
     }
 
     @Test
@@ -192,10 +197,11 @@ public class ProductMapperTest {
         PostArrangement target = productMapper.toPresentation(source);
         Assertions.assertEquals(source.getExternalId(), target.getId());
         Assertions.assertEquals(source.getProductTypeExternalId(), target.getProductId());
-        Assertions.assertNotNull(target.getLegalEntityIds());
-        Assertions.assertEquals(source.getLegalEntities().size(), target.getLegalEntityIds().size());
+        Assertions.assertNotNull(target.getExternalLegalEntities());
+        Assertions.assertEquals(source.getLegalEntities().size(), target.getExternalLegalEntities().size());
         Assertions.assertEquals(source.getState().getExternalStateId(), target.getStateId());
         Assertions.assertEquals(source.getAccountHolderName(), target.getAccountHolderNames());
+        Assertions.assertEquals(source.getExternalParentId(), target.getParentId());
     }
 
     @Test
@@ -204,10 +210,11 @@ public class ProductMapperTest {
         PostArrangement target = productMapper.toPresentation(source);
         Assertions.assertEquals(source.getExternalId(), target.getId());
         Assertions.assertEquals(source.getProductTypeExternalId(), target.getProductId());
-        Assertions.assertNotNull(target.getLegalEntityIds());
-        Assertions.assertEquals(source.getLegalEntities().size(), target.getLegalEntityIds().size());
+        Assertions.assertNotNull(target.getExternalLegalEntities());
+        Assertions.assertEquals(source.getLegalEntities().size(), target.getExternalLegalEntities().size());
         Assertions.assertEquals(source.getState().getExternalStateId(), target.getStateId());
         Assertions.assertEquals(source.getAccountHolderName(), target.getAccountHolderNames());
+        Assertions.assertEquals(source.getExternalParentId(), target.getParentId());
     }
 
     @Test
@@ -216,9 +223,10 @@ public class ProductMapperTest {
         PostArrangement target = productMapper.toPresentation(source);
         Assertions.assertEquals(source.getExternalId(), target.getId());
         Assertions.assertEquals(source.getProductTypeExternalId(), target.getProductId());
-        Assertions.assertNotNull(target.getLegalEntityIds());
-        Assertions.assertEquals(source.getLegalEntities().size(), target.getLegalEntityIds().size());
+        Assertions.assertNotNull(target.getExternalLegalEntities());
+        Assertions.assertEquals(source.getLegalEntities().size(), target.getExternalLegalEntities().size());
         Assertions.assertEquals(source.getState().getExternalStateId(), target.getStateId());
+        Assertions.assertEquals(source.getExternalParentId(), target.getParentId());
     }
 
     @Test
@@ -227,10 +235,11 @@ public class ProductMapperTest {
         PostArrangement target = productMapper.toPresentation(source);
         Assertions.assertEquals(source.getExternalId(), target.getId());
         Assertions.assertEquals(source.getProductTypeExternalId(), target.getProductId());
-        Assertions.assertNotNull(target.getLegalEntityIds());
-        Assertions.assertEquals(source.getLegalEntities().size(), target.getLegalEntityIds().size());
+        Assertions.assertNotNull(target.getExternalLegalEntities());
+        Assertions.assertEquals(source.getLegalEntities().size(), target.getExternalLegalEntities().size());
         Assertions.assertEquals(source.getState().getExternalStateId(), target.getStateId());
         Assertions.assertEquals(source.getAccountHolderName(), target.getAccountHolderNames());
+        Assertions.assertEquals(source.getExternalParentId(), target.getParentId());
     }
 
     @Test
@@ -341,6 +350,13 @@ public class ProductMapperTest {
     void mapBookedBalance() {
         BigDecimal source = new BigDecimal("130.79");
         BookedBalance target = productMapper.mapBookedBalance(source);
+        Assertions.assertEquals(source, target.getAmount());
+    }
+
+    @Test
+    public void mapReservedAmount() {
+        BigDecimal source = new BigDecimal("130.79");
+        ReservedAmount target = productMapper.mapReservedAmount(source);
         Assertions.assertEquals(source, target.getAmount());
     }
 

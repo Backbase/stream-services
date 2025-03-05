@@ -55,7 +55,7 @@ import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.streams.tailoredvalue.PlansService;
-import com.backbase.tailoredvalue.planmanager.service.api.v0.model.UserPlanUpdateRequestBody;
+import com.backbase.tailoredvalue.planmanager.service.api.v1.model.UserPlanUpdateRequestBody;
 import io.micrometer.tracing.annotation.SpanTag;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -160,13 +160,13 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
         if (!plansService.isEnabled()) {
             streamTask.info(SERVICE_AGREEMENT, PROCESS_PLANS, SKIPPED, serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
-                    "Plan Saga configured to skipped");
+                "Plan Saga configured to skipped");
             return Mono.just(streamTask);
         }
         log.info("Updating Plan for Service Agreement Id {}", serviceAgreement.getExternalId());
         serviceAgreement.getJobProfileUsers().stream()
-                .filter(jobProfileUser -> StringUtils.isNotEmpty(jobProfileUser.getPlanName()))
-                .forEach(jobProfileUser -> legalEntityService
+            .filter(jobProfileUser -> StringUtils.isNotEmpty(jobProfileUser.getPlanName()))
+            .forEach(jobProfileUser -> legalEntityService
                 .getLegalEntityByExternalId(jobProfileUser.getLegalEntityReference().getExternalId())
                 .map(LegalEntity::getInternalId)
                 .map(legalEntityInternalId -> {
@@ -176,7 +176,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     userPlanUpdateRequestBody.setLegalEntityId(legalEntityInternalId);
                     return userPlanUpdateRequestBody;
                 }).flatMap(reqBody -> plansService
-                        .updateUserPlan(jobProfileUser.getUser().getInternalId(), reqBody, jobProfileUser.getPlanName()))
+                    .updateUserPlan(jobProfileUser.getUser().getInternalId(), reqBody, jobProfileUser.getPlanName()))
                 .subscribe());
         return Mono.just(streamTask);
     }
@@ -401,7 +401,8 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                         "Assigned Business Function Group: %s with functions: %s to Service Agreement: %s",
                         bfg.getName(),
                         ofNullable(bfg.getFunctions())
-                            .orElse(Collections.singletonList(new BusinessFunction().name("<not loaded>"))).stream()
+                            .orElse(Collections.singletonList(
+                                new BusinessFunction("<not loaded>", null, null, null, null, Collections.emptyList()))).stream()
                             .map(BusinessFunction::getFunctionCode)
                             .collect(Collectors.joining(", ")),
                         serviceAgreement.getExternalId()));
@@ -610,7 +611,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                     serviceAgreementV2.getParticipants().stream()
                         .map(LegalEntityParticipant::getExternalId)
                         .collect(Collectors.joining(", ")));
-                setLECreator4SA(serviceAgreementV2);
                 if (legalEntitySagaConfigurationProperties.isServiceAgreementUpdateEnabled()) {
                     return accessGroupService.updateServiceAgreementItem(streamTask, saMapper.map(serviceAgreementV2))
                         .then(accessGroupService.updateServiceAgreementAssociations(streamTask,
@@ -627,45 +627,52 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     @NotNull
-    private Mono<ServiceAgreementTaskV2> createServiceAgreementTaskV2(ServiceAgreementTaskV2 streamTask,
-        ServiceAgreementV2 serviceAgreementV2, List<ServiceAgreementUserAction> userActions,
+    private Mono<ServiceAgreementTaskV2> createServiceAgreementTaskV2(
+        ServiceAgreementTaskV2 streamTask,
+        ServiceAgreementV2 serviceAgreementV2,
+        List<ServiceAgreementUserAction> userActions,
         Mono<ServiceAgreementTaskV2> existingServiceAgreement) {
-        Mono<ServiceAgreementTaskV2> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask,
-                saMapper.map(serviceAgreementV2))
-            .onErrorMap(AccessGroupException.class, accessGroupException -> {
-                streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, serviceAgreementV2.getExternalId(), null,
-                    accessGroupException, accessGroupException.getMessage(),
-                    accessGroupException.getHttpResponse());
-                return new StreamTaskException(streamTask, accessGroupException);
-            })
-            .flatMap(createdSa -> {
-                serviceAgreementV2.setInternalId(createdSa.getInternalId());
-                streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, createdSa.getExternalId(),
-                    createdSa.getInternalId(),
-                    "Created new Service Agreement: %s",
-                    createdSa.getExternalId(),
-                        serviceAgreementV2.getParticipants().stream()
+
+        Mono<ServiceAgreementV2> updatedServiceAgreement = setLECreator4SA(serviceAgreementV2);
+
+        Mono<ServiceAgreementTaskV2> createServiceAgreement = updatedServiceAgreement.flatMap(updatedSa ->
+            accessGroupService.createServiceAgreement(streamTask, saMapper.map(updatedSa))
+                .onErrorMap(AccessGroupException.class, accessGroupException -> {
+                    streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, updatedSa.getExternalId(), null,
+                        accessGroupException, accessGroupException.getMessage(),
+                        accessGroupException.getHttpResponse());
+                    return new StreamTaskException(streamTask, accessGroupException);
+                })
+                .flatMap(createdSa -> {
+                    updatedSa.setInternalId(createdSa.getInternalId());
+                    streamTask.info(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, CREATED, createdSa.getExternalId(),
+                        createdSa.getInternalId(),
+                        "Created new Service Agreement: %s",
+                        createdSa.getExternalId(),
+                        updatedSa.getParticipants().stream()
                             .map(LegalEntityParticipant::getExternalId)
                             .collect(Collectors.joining(", ")));
-                setLECreator4SA(serviceAgreementV2);
 
-                return accessGroupService.updateServiceAgreementRegularUsers(streamTask,
-                        saMapper.map(serviceAgreementV2), userActions)
-                    .doOnError(throwable -> log.error("error updating service agreement regular users {}", throwable.getMessage()))
-                    .thenReturn(streamTask);
-            });
+                    return accessGroupService.updateServiceAgreementRegularUsers(streamTask,
+                            saMapper.map(updatedSa), userActions)
+                        .doOnError(throwable -> log.error("Error updating service agreement regular users: {}", throwable.getMessage()))
+                        .thenReturn(streamTask);
+                })
+        );
 
         return existingServiceAgreement.switchIfEmpty(createServiceAgreement);
     }
 
 
-    private void setLECreator4SA(ServiceAgreementV2 serviceAgreementV2) {
+    private Mono<ServiceAgreementV2> setLECreator4SA(ServiceAgreementV2 serviceAgreementV2) {
         //unlike LegalEntitySaga, we simply check if there is a creatorLegalEntity specified, and if it is
-        //external Id, we change it to relevant internal id
+        //external id, we change it to relevant internal id
         if (StringUtils.isNotEmpty(serviceAgreementV2.getCreatorLegalEntity())) {
-            legalEntityService.getLegalEntityByExternalId(serviceAgreementV2.getCreatorLegalEntity())
-                .subscribe(le -> serviceAgreementV2.setCreatorLegalEntity(le.getInternalId()));
+            return legalEntityService.getLegalEntityByExternalId(serviceAgreementV2.getCreatorLegalEntity())
+                .doOnNext(le -> serviceAgreementV2.setCreatorLegalEntity(le.getInternalId()))
+                .thenReturn(serviceAgreementV2);
         }
+        return Mono.just(serviceAgreementV2);
     }
 
     private ServiceAgreement createMasterServiceAgreement(ServiceAgreement serviceAgreement) {

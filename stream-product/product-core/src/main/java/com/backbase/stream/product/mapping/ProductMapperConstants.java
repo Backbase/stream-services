@@ -22,7 +22,7 @@ class ProductMapperConstants {
     static final String ACCOUNT_HOLDER_NAMES = "accountHolderNames";
     static final String EXTERNAL_ARRANGEMENT_ID = "externalArrangementId";
     static final String EXTERNAL_PRODUCT_ID = "externalProductId";
-    static final String EXTERNAL_LEGAL_ENTITY_IDS = "externalLegalEntityIds";
+    static final String EXTERNAL_LEGAL_ENTITIES = "externalLegalEntities";
     static final String EXTERNAL_ID = "externalId";
     static final String PRODUCT_TYPE_EXTERNAL_ID = "productTypeExternalId";
     static final String LEGAL_ENTITIES = "legalEntities";
@@ -36,6 +36,8 @@ class ProductMapperConstants {
     static final String PAN_SUFFIX = "panSuffix";
     static final String PRODUCT_ID = "productId";
     static final String STATE_ID = "stateId";
+    static final String PARENT_ID = "parentId";
+    static final String EXTERNAL_PARENT_ID = "externalParentId";
     static final String INTEREST_PAYMENT_FREQUENCY_UNIT = "interestPaymentFrequencyUnit";
     static final String TERM_UNIT = "termUnit";
 
