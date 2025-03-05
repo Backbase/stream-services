@@ -258,7 +258,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-arrangement-manager-client-api-code</id>
+                        <id>generate-arrangement-manager-service-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
