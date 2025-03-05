@@ -1055,6 +1055,15 @@ components:
           $ref: '#/components/schemas/InternalIdentifier'
         externalId:
           $ref: '#/components/schemas/ExternalIdentifier'
+        relation:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: The relationship and/or ownership between Legal Entity and the Arrangement
+        additions:
+          type: object
+          additionalProperties:
+            type: string
       required:
         - internalId
         - externalId
