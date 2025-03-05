@@ -36,7 +36,7 @@ jobs:
         with:
           repositories: '[{ "id": "backbase", "url": "https://repo.backbase.com/repo" }]'
           plugin_repositories: '[{ "id": "backbase-plugins", "url": "https://repo.backbase.com/repo" }]'
-          servers: '[{ "id": "backbase", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" }, { "id": "backbase-plugins", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" }]'
+          servers: '[{ "id": "backbase", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" },{ "id": "backbase-plugins", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" }]'
 
       - name: Get version from POM
         run: |

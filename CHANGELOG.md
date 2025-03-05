@@ -1,9 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-
-## [6.14.0](https://github.com/Backbase/stream-services/compare/6.13.0...6.14.0)
+## [6.15.0](https://github.com/Backbase/stream-services/compare/6.14.0...6.15.0)
 ### Added
 - Debit insurance status support (insuredStatus field)
+- Legal Entities now support relations and additions
+
 ## [6.14.0](https://github.com/Backbase/stream-services/compare/6.13.0...6.14.0)
 ### Fixed
 - LegalEntitySaga: Fixed duplicate service agreements from being created for child accounts during login in Family Banking.
@@ -54,10 +55,6 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Fixed missing explicit state mappings for BaseProduct related classes
 
-## [6.3.0](https://github.com/Backbase/stream-services/compare/6.2.0...6.3.0)
-### Fixed
-- Fixed missing explicit state mappings for BaseProduct related classes
-
 ## [6.2.0](https://github.com/Backbase/stream-services/compare/6.1.0...6.2.0)
 ### Changed
 - update ssdk version to 18.0.1
@@ -88,18 +85,6 @@ All notable changes to this project will be documented in this file.
 - Updated plan-manager service api from 0.5.0 to 0.9.0
 
 ## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
-### Fixed
-- Fixed missing explicit state mappings for BaseProduct related classes
-### Changed
-- feature - improved payment ingestion to allow for joint owner accounts to be shared.
-
-## [5.11.1](https://github.com/Backbase/stream-services/compare/5.11.0...5.11.1)
-### Changed
-- Updated plan-manager service api from 0.5.0 to 0.9.0
-
-## [5.11.0](https://github.com/Backbase/stream-services/compare/5.10.0...5.11.0)
-### Fixed
-- Fixed missing explicit state mappings for BaseProduct related classes
 ### Changed
 - feature - improved payment ingestion to allow for joint owner accounts to be shared.
 
