@@ -137,7 +137,6 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         Mockito.verify(functionGroupsApi)
             .postPresentationIngestFunctionGroup(new PresentationIngestFunctionGroup()
                 .externalServiceAgreementId(saExternalId)
-                .apsId(1L)
                 .name("jobRoleNew")
                 .description("jobRoleNew")
                 .type(PresentationIngestFunctionGroup.TypeEnum.REGULAR)
