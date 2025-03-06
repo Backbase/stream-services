@@ -1256,12 +1256,6 @@ public class AccessGroupService {
             presentationIngestFunctionGroup.setType(PresentationIngestFunctionGroup.TypeEnum.REGULAR);
         }
 
-        // Removing constant from mapper and adding default APS here to avoid issues with apsName.
-        if(jobRole.getApsId() == null && isEmpty(jobRole.getApsName())){
-            log.warn("Adding default APS '1 - User APS' to job role since it wasn't previously set.");
-            presentationIngestFunctionGroup.setApsId(1L);
-        }
-
         return functionGroupsApi.postPresentationIngestFunctionGroup(presentationIngestFunctionGroup)
             .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
                 handleError(jobRole, badRequest))

@@ -1,5 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+
+## [6.15.0](https://github.com/Backbase/stream-services/compare/6.14.0...6.15.0)
+### Fixed
+- APS should be assigned only to TEMPLATE job roles.
+
 ## [6.14.0](https://github.com/Backbase/stream-services/compare/6.13.0...6.14.0)
 ### Fixed
 - LegalEntitySaga: Fixed duplicate service agreements from being created for child accounts during login in Family Banking.
