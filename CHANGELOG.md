@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [6.16.0](https://github.com/Backbase/stream-services/compare/6.15.0...6.16.0)
+### Added
+- Debit insurance status support (insuredStatus field)
+- Arrangement and Legal Entities relationship now support relations and additions fields
+
 ## [6.15.0](https://github.com/Backbase/stream-services/compare/6.14.0...6.15.0)
 ### Fixed
 - APS should be assigned only to TEMPLATE job roles.
