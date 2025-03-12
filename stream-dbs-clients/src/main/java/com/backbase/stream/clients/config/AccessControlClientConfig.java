@@ -1,5 +1,6 @@
 package com.backbase.stream.clients.config;
 
+import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.CustomerAccessGroupApi;
 import com.backbase.dbs.accesscontrol.api.service.ApiClient;
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
@@ -72,6 +73,12 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public PermissionSetApi permissionSetApi(ApiClient accessControlApiClient) {
         return new PermissionSetApi(accessControlApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CustomerAccessGroupApi customerAccessGroupApi(com.backbase.accesscontrol.customeraccessgroup.api.service.ApiClient accessControlApiClient) {
+        return new CustomerAccessGroupApi(accessControlApiClient);
     }
 
 }

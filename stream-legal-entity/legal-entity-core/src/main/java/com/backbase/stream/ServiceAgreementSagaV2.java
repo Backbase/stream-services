@@ -123,6 +123,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private final LimitsSaga limitsSaga;
     private final ContactsSaga contactsSaga;
     private final PlansService plansService;
+    private final CustomerAccessGroupSaga customerAccessGroupSaga;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
     private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
     private static final ServiceAgreementV2ToV1Mapper saMapper = ServiceAgreementV2ToV1Mapper.INSTANCE;
@@ -133,6 +134,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         PlansService plansService,
+        CustomerAccessGroupSaga customerAccessGroupSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties) {
         this.legalEntityService = legalEntityService;
         this.accessGroupService = accessGroupService;
@@ -140,6 +142,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         this.limitsSaga = limitsSaga;
         this.contactsSaga = contactsSaga;
         this.plansService = plansService;
+        this.customerAccessGroupSaga = customerAccessGroupSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
     }
 
@@ -494,11 +497,18 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             return Mono.just(serviceAgreementTaskV2);
         }
 
-        return accessGroupService.assignPermissionsBatch(
+        accessGroupService.assignPermissionsBatch(
                 new BatchProductGroupTask(BATCH_PRODUCT_GROUP_ID + System.currentTimeMillis(), new BatchProductGroup()
                     .serviceAgreement(saMapper.map(serviceAgreement)),
-                    serviceAgreementTaskV2.getIngestionMode()), request)
-            .thenReturn(serviceAgreementTaskV2);
+                    serviceAgreementTaskV2.getIngestionMode()), request);
+
+
+        if (customerAccessGroupSaga.isEnabled()) {
+            customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(serviceAgreementTaskV2, request);
+        } else {
+            log.info("Skipping assigning Customer Access Groups to Job Roles - feature is disabled");
+        }
+        return Mono.just(serviceAgreementTaskV2);
     }
 
     public Mono<ServiceAgreementTaskV2> setupAdministratorPermissions(ServiceAgreementTaskV2 streamTask) {
