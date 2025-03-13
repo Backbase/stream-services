@@ -476,7 +476,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         return existingLegalEntity.switchIfEmpty(createNewLegalEntity);
     }
 
-    private Mono<LegalEntityTask> processProducts(LegalEntityTask streamTask) {
+    Mono<LegalEntityTask> processProducts(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
         if (legalEntity.getProductGroups() == null || legalEntity.getProductGroups().isEmpty()) {
             streamTask.info(LEGAL_ENTITY, PROCESS_PRODUCTS, FAILED, legalEntity.getInternalId(), legalEntity.getExternalId(), "Legal Entity: %s does not have any products defied", legalEntity.getExternalId());
