@@ -595,7 +595,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                     .flatMap(existingJobProfiles -> {
                         Set<String> newReferenceJobRoleNames = new HashSet<>(jobProfileUser.getReferenceJobRoleNames());
                         Set<String> existingReferenceJobRolesNames = existingJobProfiles.stream().map(FunctionGroupItem::getName).collect(Collectors.toSet());
-                        if (newReferenceJobRoleNames.equals(existingReferenceJobRolesNames)) {
+                        if (newReferenceJobRoleNames.equals(existingReferenceJobRolesNames) && legalEntitySagaConfigurationProperties.isSkipJobProfilesUpdateEnabled()) {
                             log.info("Job Profile User: {} already has all Business Function Groups assigned. Skipping assigning them again.", jobProfileUser.getUser().getExternalId());
                             log.debug("Job Profile User information: {}", jobProfileUser);
                             return Mono.just(jobProfileUser);

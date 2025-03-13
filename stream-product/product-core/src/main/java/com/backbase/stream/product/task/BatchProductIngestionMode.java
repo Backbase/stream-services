@@ -2,8 +2,6 @@ package com.backbase.stream.product.task;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Batch product ingestion mode. Keeps settings for three main resources involved in the process:
