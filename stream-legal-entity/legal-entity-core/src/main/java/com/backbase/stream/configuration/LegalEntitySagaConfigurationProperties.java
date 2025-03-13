@@ -24,4 +24,9 @@ public class LegalEntitySagaConfigurationProperties extends StreamWorkerConfigur
      * Enable service agreement update
      */
     private boolean serviceAgreementUpdateEnabled = false;
+
+    /**
+     * Flag to switch off the job profile update if there are no changes
+     */
+    private boolean skipJobProfilesUpdateEnabled = false;
 }

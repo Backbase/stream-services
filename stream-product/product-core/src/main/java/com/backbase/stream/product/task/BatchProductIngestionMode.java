@@ -2,8 +2,6 @@ package com.backbase.stream.product.task;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * Batch product ingestion mode. Keeps settings for three main resources involved in the process:
@@ -55,10 +53,10 @@ public class BatchProductIngestionMode {
      */
     private static BatchProductIngestionMode upsert() {
         return BatchProductIngestionMode.builder()
-                .functionGroupsMode(FunctionGroupsMode.UPSERT)
-                .dataGroupIngestionMode(DataGroupsMode.UPSERT)
-                .arrangementsMode(ArrangementsMode.UPSERT)
-                .build();
+            .functionGroupsMode(FunctionGroupsMode.UPSERT)
+            .dataGroupIngestionMode(DataGroupsMode.UPSERT)
+            .arrangementsMode(ArrangementsMode.UPSERT)
+            .build();
     }
 
     /**
@@ -68,10 +66,10 @@ public class BatchProductIngestionMode {
      */
     private static BatchProductIngestionMode replace() {
         return BatchProductIngestionMode.builder()
-                .functionGroupsMode(FunctionGroupsMode.REPLACE)
-                .dataGroupIngestionMode(DataGroupsMode.REPLACE)
-                .arrangementsMode(ArrangementsMode.REPLACE)
-                .build();
+            .functionGroupsMode(FunctionGroupsMode.REPLACE)
+            .dataGroupIngestionMode(DataGroupsMode.REPLACE)
+            .arrangementsMode(ArrangementsMode.REPLACE)
+            .build();
     }
 
     /**
