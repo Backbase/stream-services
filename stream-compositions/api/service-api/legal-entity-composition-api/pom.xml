@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>service-api</artifactId>
-        <version>4.1.13</version>
+        <version>4.1.14</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions.api</groupId>

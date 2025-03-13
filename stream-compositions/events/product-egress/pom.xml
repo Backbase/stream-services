@@ -5,7 +5,7 @@
     <parent>
         <artifactId>events</artifactId>
         <groupId>com.backbase.stream.compositions</groupId>
-        <version>4.1.13</version>
+        <version>4.1.14</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions.events</groupId>
