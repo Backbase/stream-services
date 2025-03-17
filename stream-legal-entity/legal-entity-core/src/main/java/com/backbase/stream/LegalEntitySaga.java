@@ -1,5 +1,13 @@
 package com.backbase.stream;
 
+import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
+import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.ofNullable;
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest;
 import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest.UserKindEnum;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
@@ -55,12 +63,10 @@ import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
-import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
-import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
@@ -74,11 +80,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Objects.requireNonNull;
 import java.util.Optional;
-import static java.util.Optional.ofNullable;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -89,12 +91,10 @@ import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.util.Pair;
 import org.springframework.util.CollectionUtils;
-import static org.springframework.util.CollectionUtils.isEmpty;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuples;
 
 /**
@@ -476,7 +476,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         return existingLegalEntity.switchIfEmpty(createNewLegalEntity);
     }
 
-    Mono<LegalEntityTask> processProducts(LegalEntityTask streamTask) {
+    private Mono<LegalEntityTask> processProducts(LegalEntityTask streamTask) {
         LegalEntity legalEntity = streamTask.getData();
         if (legalEntity.getProductGroups() == null || legalEntity.getProductGroups().isEmpty()) {
             streamTask.info(LEGAL_ENTITY, PROCESS_PRODUCTS, FAILED, legalEntity.getInternalId(), legalEntity.getExternalId(), "Legal Entity: %s does not have any products defied", legalEntity.getExternalId());
@@ -583,39 +583,19 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             streamTask.warn(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, REJECTED, legalEntity.getExternalId(), legalEntity.getInternalId(), "No Users defined in Job Profiles");
             return Mono.just(streamTask);
         }
-
         return Flux.fromStream(nullableCollectionToStream(legalEntity.getUsers()))
-            .publishOn(Schedulers.boundedElastic())
             .flatMap(jobProfileUser -> {
                 ServiceAgreement serviceAgreement = retrieveServiceAgreement(legalEntity);
-
-                return accessGroupService.getFunctionGroupsForServiceAgreement(serviceAgreement.getInternalId())
-                    .flatMapMany(Flux::fromIterable)
-                    .collectList()
-                    .flatMap(existingJobProfiles -> {
-                        Set<String> newReferenceJobRoleNames = new HashSet<>(jobProfileUser.getReferenceJobRoleNames());
-                        Set<String> existingReferenceJobRolesNames = existingJobProfiles.stream().map(FunctionGroupItem::getName).collect(Collectors.toSet());
-                        if (newReferenceJobRoleNames.equals(existingReferenceJobRolesNames) && legalEntitySagaConfigurationProperties.isSkipJobProfilesUpdateEnabled()) {
-                            log.info("Job Profile User: {} already has all Business Function Groups assigned. Skipping assigning them again.", jobProfileUser.getUser().getExternalId());
-                            log.debug("Job Profile User information: {}", jobProfileUser);
-                            return Mono.just(jobProfileUser);
-                        }
-                        return getBusinessFunctionGroupTemplates(streamTask, jobProfileUser)
-                            .flatMap(businessFunctionGroups -> accessGroupService.setupFunctionGroups(streamTask, serviceAgreement, businessFunctionGroups))
-                            .flatMap(list -> {
-                                log.info("Assigning {} Business Function Groups to Job Profile User: {}", list.size(), jobProfileUser.getUser().getExternalId());
-                                jobProfileUser.setBusinessFunctionGroups(list);
-                                list.forEach(
-                                    bfg -> streamTask.info(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, "assigned", legalEntity.getExternalId(),
-                                        legalEntity.getInternalId(),
-                                        "Assigned Business Function Group: %s with functions: %s to Service Agreement: %s", bfg.getName(),
-                                        ofNullable(bfg.getFunctions()).orElse(Collections.singletonList(new BusinessFunction().name("<not loaded>")))
-                                            .stream().map(BusinessFunction::getFunctionCode).collect(Collectors.joining(", ")),
-                                        serviceAgreement.getExternalId()));
-                                return setupUserPermissions(streamTask, jobProfileUser);
-                            })
-                            .map(actual -> jobProfileUser);
-                    });
+                return getBusinessFunctionGroupTemplates(streamTask, jobProfileUser)
+                    .flatMap(businessFunctionGroups -> accessGroupService.setupFunctionGroups(streamTask, serviceAgreement, businessFunctionGroups))
+                    .flatMap(list -> {
+                        log.info("Assigning {} Business Function Groups to Job Profile User: {}", list.size(), jobProfileUser.getUser().getExternalId());
+                        jobProfileUser.setBusinessFunctionGroups(list);
+                        list.forEach(bfg -> streamTask.info(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, "assigned", legalEntity.getExternalId(), legalEntity.getInternalId(), "Assigned Business Function Group: %s with functions: %s to Service Agreement: %s", bfg.getName(),
+                            ofNullable(bfg.getFunctions()).orElse(Collections.singletonList(new BusinessFunction().name("<not loaded>"))).stream().map(BusinessFunction::getFunctionCode).collect(Collectors.joining(", ")), serviceAgreement.getExternalId()));
+                        return setupUserPermissions(streamTask, jobProfileUser);
+                    })
+                    .map(actual -> jobProfileUser);
             })
             .collectList()
             .map(jobProfileUsers -> {
