@@ -1,10 +1,6 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [4.1.14](https://github.com/Backbase/stream-services/compare/4.1.13..4.1.14)
-### Changed
-- Legal Entity Saga: performance improvement on function groups setup.
-
 ## [4.1.13](https://github.com/Backbase/stream-services/compare/4.1.12..4.1.13)
 ### Changed
 - Upgrade to Backbase version `2024.03.68-LTS` and Service SDK to `16.1.11`

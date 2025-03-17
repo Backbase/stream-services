@@ -1,6 +1,16 @@
 package com.backbase.stream;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
+import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
+
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
@@ -52,39 +62,27 @@ import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
-import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
 import com.backbase.stream.worker.exception.StreamTaskException;
+import com.backbase.stream.worker.model.StreamTask;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -178,7 +176,6 @@ class LegalEntitySagaTest {
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
         when(userService.updateUser(any())).thenReturn(Mono.just(regularUser.getUser()));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
 
         LegalEntityTask result = legalEntitySaga.executeTask(task)
             .block();
@@ -630,7 +627,6 @@ class LegalEntitySagaTest {
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
         when(userService.updateUser(any())).thenReturn(Mono.empty());
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
 
         LegalEntityTask result = legalEntitySaga.executeTask(task)
                 .block();
@@ -689,7 +685,6 @@ class LegalEntitySagaTest {
         when(userService.setupRealm(any())).thenReturn(Mono.just(new Realm()));
         when(userService.linkLegalEntityToRealm(any())).thenReturn(Mono.just(new LegalEntity()));
         when(userService.updateUser(any())).thenReturn(Mono.just(newRegularUser.getUser()));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
 
         LegalEntityTask result = legalEntitySaga.executeTask(task)
                 .block();
@@ -756,8 +751,6 @@ class LegalEntitySagaTest {
         getMockLegalEntity();
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.LE));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
 
         LegalEntityTask result = legalEntitySaga.executeTask(task).block();
 
@@ -828,7 +821,6 @@ class LegalEntitySagaTest {
         getMockLegalEntity();
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.SA));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
 
         LegalEntityTask result = legalEntitySaga.executeTask(task).block();
 
@@ -863,7 +855,6 @@ class LegalEntitySagaTest {
         LegalEntityTask task = mockLegalEntityTask(legalEntity);
 
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
 
         LegalEntityTask result = legalEntitySaga.executeTask(task).block();
 
@@ -881,7 +872,6 @@ class LegalEntitySagaTest {
         getMockLegalEntity();
 
         when(userKindSegmentationSaga.isEnabled()).thenReturn(false);
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
 
         legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
 
@@ -894,7 +884,6 @@ class LegalEntitySagaTest {
         legalEntity.setCustomerCategory(CustomerCategory.RETAIL);
 
         when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
 
         legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
 
@@ -910,7 +899,6 @@ class LegalEntitySagaTest {
         when(userKindSegmentationSaga.getDefaultCustomerCategory()).thenReturn(CustomerCategory.RETAIL.getValue());
         when(userKindSegmentationSaga.executeTask(any())).thenReturn(
             Mono.just(Mockito.mock(UserKindSegmentationTask.class)));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
 
         legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
 
@@ -979,100 +967,10 @@ class LegalEntitySagaTest {
         when(userProfileService.upsertUserProfile(any())).thenReturn(Mono.just(getUserProfile));
         when(userService.getUserProfile(user.getInternalId())).thenReturn(
             Mono.just(new com.backbase.dbs.user.api.service.v2.model.UserProfile().fullName("User With Profile")));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
 
         legalEntitySaga.executeTask(mockLegalEntityTask(legalEntity)).block();
 
         verify(userService).getUserProfile(user.getInternalId());
-    }
-
-    @Test
-    void test_processProducts_verifyNoUpdateIfJobProfileIsEmpty() {
-        getMockLegalEntity();
-        LegalEntity legalEntitySpy = spy(legalEntity);
-        when(legalEntitySpy.getUsers()).thenReturn(emptyList());
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(emptyList()));
-        when(legalEntitySagaConfigurationProperties.isSkipJobProfilesUpdateEnabled()).thenReturn(true);
-
-        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntitySpy)).block();
-
-        verify(accessGroupService, times(0)).setupFunctionGroups(any(), any(), any());
-        assertTrue(legalEntitySpy.getReferenceJobRoles().isEmpty());
-    }
-
-    @Test
-    void test_processProducts_verifyNoUpdateIfThereAreNoJobProfileChanges() {
-        getMockLegalEntity();
-        LegalEntity legalEntitySpy = spy(legalEntity);
-        List<JobProfileUser> jobProfileUsers = singletonList(new JobProfileUser().user(new User()
-                    .externalId(regularUserExId)
-                    .fullName("John Doe")
-                    .supportsLimit(true)
-                    .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC))
-            .referenceJobRoleNames(List.of("Private - Read only", "Job Role with Limits")));
-        when(legalEntitySpy.getUsers()).thenReturn(jobProfileUsers);
-        List<FunctionGroupItem> functionGroupItems = List.of(
-            new FunctionGroupItem().name("Private - Read only"),
-            new FunctionGroupItem().name("Job Role with Limits")
-        );
-        when(userService.getUserByExternalId(any())).thenReturn(Mono.just(regularUser.getUser()));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(functionGroupItems));
-        when(legalEntitySagaConfigurationProperties.isSkipJobProfilesUpdateEnabled()).thenReturn(true);
-
-        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntitySpy)).block();
-
-        verify(accessGroupService, times(0)).setupFunctionGroups(any(), any(), any());
-    }
-
-    @Test
-    void test_processProducts_verifyUpdateBecauseThereAreJobProfileChanges() {
-        getMockLegalEntity();
-        LegalEntity legalEntitySpy = spy(legalEntity);
-        List<JobProfileUser> jobProfileUsers = singletonList(new JobProfileUser().user(new User()
-                .externalId(regularUserExId)
-                .fullName("John Doe")
-                .supportsLimit(true)
-                .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC))
-            .referenceJobRoleNames(List.of("Private - Read only", "Job Role with Limits")));
-        when(legalEntitySpy.getUsers()).thenReturn(jobProfileUsers);
-        List<FunctionGroupItem> functionGroupItems = List.of(
-            new FunctionGroupItem().name("Private - Read only")
-        );
-        when(userService.getUserByExternalId(any())).thenReturn(Mono.just(regularUser.getUser()));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(functionGroupItems));
-        when(accessGroupService.setupFunctionGroups(any(), any(), any())).thenReturn(Mono.just(List.of(new BusinessFunctionGroup().name("someFunctionGroup"))));
-        when(accessGroupService.assignPermissionsBatch(any(), any())).thenReturn(Mono.empty());
-        when(legalEntitySagaConfigurationProperties.isSkipJobProfilesUpdateEnabled()).thenReturn(false);
-
-        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntitySpy)).block();
-
-        verify(accessGroupService, times(1)).setupFunctionGroups(any(), any(), any());
-    }
-
-    @Test
-    void test_processProducts_verifyUpdateIfFlagIsSetToFalse() {
-        getMockLegalEntity();
-        LegalEntity legalEntitySpy = spy(legalEntity);
-        List<JobProfileUser> jobProfileUsers = singletonList(new JobProfileUser().user(new User()
-                .externalId(regularUserExId)
-                .fullName("John Doe")
-                .supportsLimit(true)
-                .identityLinkStrategy(IdentityUserLinkStrategy.IDENTITY_AGNOSTIC))
-            .referenceJobRoleNames(List.of("Private - Read only", "Job Role with Limits")));
-        when(legalEntitySpy.getUsers()).thenReturn(jobProfileUsers);
-        List<FunctionGroupItem> functionGroupItems = List.of(
-            new FunctionGroupItem().name("Private - Read only"),
-            new FunctionGroupItem().name("Job Role with Limits")
-        );
-        when(userService.getUserByExternalId(any())).thenReturn(Mono.just(regularUser.getUser()));
-        when(accessGroupService.getFunctionGroupsForServiceAgreement(any())).thenReturn(Mono.just(functionGroupItems));
-        when(accessGroupService.setupFunctionGroups(any(), any(), any())).thenReturn(Mono.just(List.of(new BusinessFunctionGroup().name("someFunctionGroup"))));
-        when(accessGroupService.assignPermissionsBatch(any(), any())).thenReturn(Mono.empty());
-        when(legalEntitySagaConfigurationProperties.isSkipJobProfilesUpdateEnabled()).thenReturn(false);
-
-        legalEntitySaga.executeTask(mockLegalEntityTask(legalEntitySpy)).block();
-
-        verify(accessGroupService, times(1)).setupFunctionGroups(any(), any(), any());
     }
 
     private static Stream<Arguments> parameters_upster_error() {
@@ -1160,5 +1058,4 @@ class LegalEntitySagaTest {
         return responseBody;
 
     }
-
 }
