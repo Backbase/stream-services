@@ -763,7 +763,8 @@ public class AccessGroupService {
         return getExistingDataGroups(serviceAgreement.getInternalId(), productGroup.getProductGroupType().name())
             .doOnNext(dataGroupItem -> streamTask.info(ACCESS_GROUP, "setup-product-group", "exists", productGroup.getProductGroupType().name(), dataGroupItem.getId(), "Data Group already exists"))
             .onErrorResume(WebClientResponseException.BadRequest.class, e -> {
-                streamTask.error(ACCESS_GROUP, "setup-product-group", "failed", serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), "Failed to setup Access Group groups for Service Agreement: " + serviceAgreement.getInternalId());
+                streamTask.error(ACCESS_GROUP, "setup-product-group", "failed", serviceAgreement.getExternalId(), serviceAgreement.getInternalId(),
+                    "Failed to setup Access Group groups for Service Agreement: " + serviceAgreement.getInternalId());
                 return Mono.error(new StreamTaskException(streamTask, e, "Failed to setup Access Group for Service Agreement: " + serviceAgreement.getInternalId()));
 
             })
@@ -1208,8 +1209,11 @@ public class AccessGroupService {
             .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
                 handleError(businessFunctionGroup, badRequest))
             .onErrorResume(WebClientResponseException.class, badRequest -> {
-                streamTask.error(FUNCTION_GROUP, "ingest-function-groups", FAILED, streamTask.getName(), null, badRequest, badRequest.getResponseBodyAsString(), "Failed to setup Business Function Group");
-                return Mono.error(new StreamTaskException(streamTask, badRequest, "Failed to setup Business Function Group: " + badRequest.getResponseBodyAsString()));
+                streamTask.error(FUNCTION_GROUP, "ingest-function-groups", FAILED, streamTask.getName(), null, badRequest, badRequest.getResponseBodyAsString(),
+                    "Failed to setup Business Function Group: " + businessFunctionGroup.getName());
+                return Mono.error(new StreamTaskException(streamTask, badRequest,
+                    "Failed to setup Business Function Group: " + businessFunctionGroup.getName()
+                        + " " + badRequest.getResponseBodyAsString()));
             })
             .doOnNext(idItem -> log.info("Created Business Function Group: {} with id: {}",
                 businessFunctionGroup.getName(), idItem.getId()))
@@ -1260,8 +1264,11 @@ public class AccessGroupService {
             .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
                 handleError(jobRole, badRequest))
             .onErrorResume(WebClientResponseException.class, badRequest -> {
-                streamTask.error(JOB_ROLE, "ingest-reference-job-role", FAILED, streamTask.getName(), null, badRequest, badRequest.getResponseBodyAsString(), "Failed to setup Job Role");
-                return Mono.error(new StreamTaskException(streamTask, badRequest, "Failed to setup Job Role: " + badRequest.getResponseBodyAsString()));
+                streamTask.error(JOB_ROLE, "ingest-reference-job-role", FAILED, streamTask.getName(), null, badRequest, badRequest.getResponseBodyAsString(),
+                    "Failed to setup Job Role" + jobRole.getName());
+                return Mono.error(new StreamTaskException(streamTask, badRequest,
+                    "Failed to setup Job Role: " + jobRole.getName()
+                    + " Response: " + badRequest.getResponseBodyAsString()));
             })
             .doOnNext(idItem -> log.info("Created Business Function Group: {} with id: {}",
                 jobRole.getName(), idItem.getId()))
@@ -1415,9 +1422,9 @@ public class AccessGroupService {
             .doOnError(WebClientResponseException.BadRequest.class, badRequest -> handleError(jobRole, badRequest))
             .onErrorResume(WebClientResponseException.class, badRequest -> {
                 streamTask.error(JOB_ROLE, "ingest-reference-job-role", FAILED, streamTask.getName(), null, badRequest,
-                    badRequest.getResponseBodyAsString(), "Failed to setup Job Role");
+                    badRequest.getResponseBodyAsString(), "Failed to setup Job Role" + jobRole.getName());
                 return Mono.error(new StreamTaskException(streamTask, badRequest,
-                    "Failed to setup Job Role: " + badRequest.getResponseBodyAsString()));
+                    "Failed to setup Job Role: " + jobRole.getName() + " Response: " + badRequest.getResponseBodyAsString()));
             })
             .collectList()
             .flatMap(idItems -> {
@@ -1426,8 +1433,10 @@ public class AccessGroupService {
                     if (!item.getStatus().equals(HTTP_STATUS_OK)) {
                         streamTask.error(JOB_ROLE, "ingest-reference-job-role", FAILED,
                                 item.getExternalServiceAgreementId(), item.getResourceId(),
-                                "Failed setting up Job Role - status: %s, errors: %s", item.getStatus(), item.getErrors());
-                        return Mono.error(new StreamTaskException(streamTask, "Failed to setup Job Role - status: " + item.getStatus() + ", errors: " + item.getErrors()));
+                                "Failed setting up Job Role: %s - status: %s, errors: %s",
+                            jobRole.getName(), item.getStatus(), item.getErrors());
+                        return Mono.error(new StreamTaskException(streamTask, "Failed to setup Job Role: " + jobRole.getName()
+                            + " - status: " + item.getStatus() + ", errors: " + item.getErrors()));
                     }
                     jobRole.setId(idItems.get(0).getResourceId());
                 }
