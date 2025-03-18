@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [6.17.0](https://github.com/Backbase/stream-services/compare/6.16.0...6.17.0)
+### Added
+- Improved logging for Job Roles ingestion
+
 ## [6.16.0](https://github.com/Backbase/stream-services/compare/6.15.0...6.16.0)
 ### Added
 - Debit insurance status support (insuredStatus field)
