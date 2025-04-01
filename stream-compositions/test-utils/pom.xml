@@ -6,7 +6,7 @@
     <parent>
         <artifactId>stream-compositions</artifactId>
         <groupId>com.backbase.stream</groupId>
-        <version>5.16.2</version>
+        <version>5.16.3</version>
     </parent>
 
     <groupId>com.backbase.stream.compositions</groupId>
