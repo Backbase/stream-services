@@ -254,12 +254,6 @@ components:
             - REPOSITORIES
             - CUSTOMERS
             - CUSTOM
-            - TASK_INSTANCE
-            - TASK_DEFINITION
-            - CASE_DEFINITION
-            - CASE_INSTANCE
-            - PROCESS_DEFINITION
-            - PROCESS_INSTANCE
         name:
           maxLength: 128
           minLength: 1
