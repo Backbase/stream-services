@@ -218,6 +218,16 @@
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.backbase.flow.customer-profile.api</groupId>
+                                    <artifactId>customer-profile</artifactId>
+                                    <version>1.17.1</version>
+                                    <!--TODO delete version when april released finished-->
+                                    <classifier>api</classifier>
+                                    <type>zip</type>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
+                                    <overWrite>true</overWrite>
+                                </artifactItem>
                             </artifactItems>
                             <includes>**/*.yaml, **/*.json</includes>
                         </configuration>
@@ -480,6 +490,32 @@
                             <inputSpec>${project.build.directory}/yaml/plan-manager/plan-manager-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.tailoredvalue.planmanager.service.api.v1</apiPackage>
                             <modelPackage>com.backbase.tailoredvalue.planmanager.service.api.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-customer-profile-integration-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/customer-profile/customer-profile-integration-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.customerprofile.api.integration.v1</apiPackage>
+                            <modelPackage>com.backbase.customerprofile.api.integration.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-customer-profile-service-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/customer-profile/customer-profile-service-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.customerprofile.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.customerprofile.api.service.v1.model</modelPackage>
                         </configuration>
                     </execution>
                 </executions>
