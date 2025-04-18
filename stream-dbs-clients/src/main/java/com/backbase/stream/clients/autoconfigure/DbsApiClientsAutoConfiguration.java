@@ -4,6 +4,7 @@ import com.backbase.stream.clients.config.AccessControlClientConfig;
 import com.backbase.stream.clients.config.ApprovalClientConfig;
 import com.backbase.stream.clients.config.ArrangementManagerClientConfig;
 import com.backbase.stream.clients.config.ContactManagerClientConfig;
+import com.backbase.stream.clients.config.CustomerProfileClientConfig;
 import com.backbase.stream.clients.config.IdentityIntegrationClientConfig;
 import com.backbase.stream.clients.config.InstrumentApiConfiguration;
 import com.backbase.stream.clients.config.LimitsClientConfig;
@@ -42,7 +43,8 @@ import org.springframework.context.annotation.Import;
     UserProfileManagerClientConfig.class,
     InstrumentApiConfiguration.class,
     PortfolioApiConfiguration.class,
-    PlanManagerClientConfig.class
+    PlanManagerClientConfig.class,
+    CustomerProfileClientConfig.class
 })
 @EnableConfigurationProperties
 public class DbsApiClientsAutoConfiguration {
