@@ -98,5 +98,72 @@ class CompositeApiClientConfigTest {
                 assertEquals("http://user-profile-manager:8181", config.createBasePath());
             });
     }
+    @Test
+    void shouldReturnServiceIdWhenCustomerProfileWithLoadBalancerTest() {
+        contextRunner
+            .withBean(Factory.class, () -> loadBalancerFactory)
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(CustomerProfileClientConfig.class)
+            .run(context -> {
+                var config = context.getBean(CustomerProfileClientConfig.class);
+                assertEquals("http://customer-profile", config.createBasePath());
+            });
+    }
+
+    @Test
+    void shouldReturnDirectUriWhenCustomerProfileWithoutLoadBalancerAndWithDirectUriTest() {
+        contextRunner
+            .withPropertyValues("backbase.communication.services.customer-profile.direct-uri=http://custom-profile-uri/api")
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withBean(CustomerProfileClientConfig.class)
+            .run(context -> {
+                var config = context.getBean(CustomerProfileClientConfig.class);
+                assertEquals("http://custom-profile-uri/api", config.createBasePath());
+            });
+    }
+
+    @Test
+    void shouldReturnServiceIdWhenCustomerProfileWithLoadBalancerAndWithDirectUriTest() {
+        contextRunner
+            .withPropertyValues("backbase.communication.services.customer-profile.direct-uri=http://custom-profile-uri/api")
+            .withBean(Factory.class, () -> loadBalancerFactory)
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(CustomerProfileClientConfig.class)
+            .run(context -> {
+                var config = context.getBean(CustomerProfileClientConfig.class);
+                assertEquals("http://customer-profile", config.createBasePath());
+            });
+    }
+
+    @Test
+    void shouldNotReturnDefaultServicePortWhenCustomerProfileServicePortIsSetTest() {
+        contextRunner
+            .withPropertyValues("backbase.communication.http.default-service-port=8181",
+                "backbase.communication.services.customer-profile.service-port=8080")
+            .withBean(Factory.class, () -> loadBalancerFactory)
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(CustomerProfileClientConfig.class)
+            .run(context -> {
+                var config = context.getBean(CustomerProfileClientConfig.class);
+                assertEquals("http://customer-profile:8080", config.createBasePath());
+            });
+    }
+
+    @Test
+    void shouldReturnDefaultServicePortWhenCustomerProfileServicePortIsEmptyTest() {
+        contextRunner
+            .withPropertyValues("backbase.communication.http.default-service-port=8080")
+            .withBean(WebClientAutoConfiguration.class)
+            .withBean(InterServiceWebClientConfiguration.class)
+            .withUserConfiguration(CustomerProfileClientConfig.class)
+            .run(context -> {
+                var config = context.getBean(CustomerProfileClientConfig.class);
+                assertEquals("http://customer-profile:8080", config.createBasePath());
+            });
+    }
 
 }
