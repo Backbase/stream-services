@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.backbase.customerprofile.api.service.v1.CustomerManagementServiceApi;
-import com.backbase.customerprofile.api.service.v1.model.CustomerCreationRequestDto;
-import com.backbase.customerprofile.api.service.v1.model.CustomerResponseDto;
+import com.backbase.customerprofile.api.integration.v1.CustomerManagementIntegrationApi;
+import com.backbase.customerprofile.api.integration.v1.model.CustomerPartyDto;
+import com.backbase.customerprofile.api.integration.v1.model.CustomerResponseDto;
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
 import java.nio.charset.StandardCharsets;
@@ -31,25 +31,25 @@ class CustomerProfileServiceTest {
         .objectIntrospector(FieldReflectionArbitraryIntrospector.INSTANCE)
         .build();
     @Mock
-    private CustomerManagementServiceApi customerManagementServiceApiMock;
+    private CustomerManagementIntegrationApi customerManagementIntegrationApiMock;
 
 
     @BeforeEach
     void setup() {
-        customerProfileService = new CustomerProfileService(customerManagementServiceApiMock);
+        customerProfileService = new CustomerProfileService(customerManagementIntegrationApiMock);
     }
 
     @Test
     @DisplayName("createCustomer should return CustomerResponseDto when API call is successful")
     void createCustomer_success() {
         var legalEntityId = UUID.randomUUID().toString();
-        var requestDto = fixtureMonkey.giveMeBuilder(CustomerCreationRequestDto.class)
+        var requestDto = fixtureMonkey.giveMeBuilder(CustomerPartyDto.class)
             .set("legalEntityId", legalEntityId)
             .sample();
         var expectedResponseDto = fixtureMonkey.giveMeBuilder(CustomerResponseDto.class)
             .set("legalEntityId", legalEntityId).sample();
 
-        when(customerManagementServiceApiMock.createCustomer(any(CustomerCreationRequestDto.class)))
+        when(customerManagementIntegrationApiMock.createCustomer(any(CustomerPartyDto.class)))
             .thenReturn(Mono.just(expectedResponseDto));
 
         var result = customerProfileService.createCustomer(requestDto);
@@ -64,14 +64,14 @@ class CustomerProfileServiceTest {
     @Test
     @DisplayName("createCustomer should propagate WebClientResponseException when API call fails")
     void createCustomer_apiError() {
-        var requestDto = fixtureMonkey.giveMeOne(CustomerCreationRequestDto.class);
+        var requestDto = fixtureMonkey.giveMeOne(CustomerPartyDto.class);
         var expectedException = new WebClientResponseException(
             HttpStatus.BAD_REQUEST.value(),
             "Bad Request from API",
             null,
             null,
             StandardCharsets.UTF_8);
-        when(customerManagementServiceApiMock.createCustomer(any(CustomerCreationRequestDto.class)))
+        when(customerManagementIntegrationApiMock.createCustomer(any(CustomerPartyDto.class)))
             .thenReturn(Mono.error(expectedException));
         var result = customerProfileService.createCustomer(requestDto);
         StepVerifier.create(result)
@@ -86,9 +86,9 @@ class CustomerProfileServiceTest {
     @Test
     @DisplayName("createCustomer should propagate other RuntimeExceptions when API call fails unexpectedly")
     void createCustomer_otherError() {
-        var requestDto = fixtureMonkey.giveMeOne(CustomerCreationRequestDto.class);
+        var requestDto = fixtureMonkey.giveMeOne(CustomerPartyDto.class);
         var expectedException = new RuntimeException("Unexpected error");
-        when(customerManagementServiceApiMock.createCustomer(any(CustomerCreationRequestDto.class)))
+        when(customerManagementIntegrationApiMock.createCustomer(any(CustomerPartyDto.class)))
             .thenReturn(Mono.error(expectedException));
         var result = customerProfileService.createCustomer(requestDto);
         StepVerifier.create(result)
