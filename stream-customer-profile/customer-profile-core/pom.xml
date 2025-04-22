@@ -20,6 +20,33 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>com.backbase.stream</groupId>
+            <artifactId>stream-dbs-clients</artifactId>
+            <version>6.17.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.navercorp.fixturemonkey</groupId>
+            <artifactId>fixture-monkey-starter</artifactId>
+            <version>1.1.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>
