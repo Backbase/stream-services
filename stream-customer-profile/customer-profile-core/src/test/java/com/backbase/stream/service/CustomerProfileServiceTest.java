@@ -9,8 +9,12 @@ import com.backbase.customerprofile.api.integration.v1.model.CustomerPartyDto;
 import com.backbase.customerprofile.api.integration.v1.model.CustomerResponseDto;
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
+import com.navercorp.fixturemonkey.api.jqwik.JavaTypeArbitraryGenerator;
+import com.navercorp.fixturemonkey.api.jqwik.JqwikPlugin;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+import net.jqwik.api.Arbitraries;
+import net.jqwik.api.arbitraries.StringArbitrary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +33,12 @@ class CustomerProfileServiceTest {
 
     private final FixtureMonkey fixtureMonkey = FixtureMonkey.builder()
         .objectIntrospector(FieldReflectionArbitraryIntrospector.INSTANCE)
+        .plugin(new JqwikPlugin().javaTypeArbitraryGenerator(new JavaTypeArbitraryGenerator() {
+            @Override
+            public StringArbitrary strings() {
+                return Arbitraries.strings().alpha();
+            }
+        }))
         .build();
     @Mock
     private CustomerManagementIntegrationApi customerManagementIntegrationApiMock;
@@ -76,9 +86,9 @@ class CustomerProfileServiceTest {
         var result = customerProfileService.createCustomer(requestDto);
         StepVerifier.create(result)
             .expectErrorMatches(throwable ->
-                    throwable instanceof WebClientResponseException &&
-                        ((WebClientResponseException) throwable).getStatusCode() == HttpStatus.BAD_REQUEST &&
-                        throwable.getMessage().contains("Bad Request from API")
+                throwable instanceof WebClientResponseException &&
+                    ((WebClientResponseException) throwable).getStatusCode() == HttpStatus.BAD_REQUEST &&
+                    throwable.getMessage().contains("Bad Request from API")
             )
             .verify();
     }

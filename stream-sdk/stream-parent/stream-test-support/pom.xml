@@ -82,6 +82,11 @@
             <artifactId>wiremock-jre8-standalone</artifactId>
             <version>2.35.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.navercorp.fixturemonkey</groupId>
+            <artifactId>fixture-monkey-starter</artifactId>
+            <version>1.1.11</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -1126,6 +1126,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/JobProfileUser'
+        parties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Party'
         referenceJobRoles:
           type: array
           items:
@@ -1244,6 +1248,160 @@ components:
             $ref: '#/components/schemas/ExternalContact'
       required:
         - user
+    Party:
+      type: object
+      properties:
+        partyId:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        isDigital:
+          type: boolean
+        isCustomer:
+          type: boolean
+        partyType:
+          type: string
+        person:
+          $ref: '#/components/schemas/Person'
+        organisation:
+          $ref: '#/components/schemas/Organisation'
+        partyPartyRelationships:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartyRelationship'
+        organisationName:
+          type: string
+        closingDateTime:
+          type: string
+          format: date
+        approvedDateTime:
+          type: string
+          format: date
+        lastUpdatedDateTime:
+          type: string
+          format: date
+        openingDateTime:
+          type: string
+          format: date
+        status:
+          type: string
+        postalAddresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartyPostalAddress'
+        phoneAddresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneAddress'
+        electronicAddress:
+          type: array
+          items:
+            $ref: '#/components/schemas/ElectronicAddress'
+        preferredLanguage:
+          type: string
+          description: Language code, e.g. en, de, fr, nl
+        notes:
+          type: array
+          items:
+            type: string
+        customFields:
+          type: object
+          additionalProperties:
+            type: string
+    Person:
+      type: object
+      properties:
+        identifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identification'
+        personName:
+          $ref: '#/components/schemas/PersonName'
+        gender:
+          type: string
+        birthDate:
+          type: string
+          format: date
+        demographics:
+          type: object
+          properties:
+            occupation:
+              type: object
+              properties:
+                employer:
+                  type: string
+                employment:
+                  type: string
+            education:
+              type: object
+              properties:
+                yearOfPassing:
+                  type: string
+                educationLevel:
+                  type: string
+    Organisation:
+      type: object
+      properties:
+        legalStructureType:
+          type: string
+        establishmentDate:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        sector:
+          type: string
+        liveDateTime:
+          type: string
+          format: date
+        identifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Identification'
+    Identification:
+      type: object
+      properties:
+        expiryDate:
+          type: string
+          format: date
+        issuingCountry:
+          type: string
+        issuingAuthority:
+          type: string
+        identificationNumber:
+          type: string
+        identificationType:
+          type: string
+        issueDate:
+          type: string
+          format: date
+    PartyRelationship:
+      type: object
+      properties:
+        partyRole:
+          type: string
+        ownershipPercent:
+          type: number
+          format: double
+        roleEndDate:
+          type: string
+          format: date
+        partyId:
+          $ref: '#/components/schemas/ExternalIdentifier'
+        roleStartDate:
+          type: string
+          format: date
+    PersonName:
+      type: object
+      properties:
+        firstName:
+          type: string
+        middleName:
+          type: string
+        familyName:
+          type: string
+        salutation:
+          type: string
+
     LegalEntityType:
       type: string
       title: Legal Entity Type
@@ -1338,6 +1496,16 @@ components:
           minLength: 1
           type: string
           description: Address.
+    Url:
+      type: object
+      properties:
+        primary:
+          type: boolean
+        address:
+          maxLength: 255
+          minLength: 1
+          type: string
+
     PhoneNumber:
       required:
         - key
@@ -1418,6 +1586,57 @@ components:
           maxLength: 3
           type: string
           description: Country code - ISO 3166.
+    PartyPostalAddress:
+      type: object
+      properties:
+        country:
+          type: string
+        streetName:
+          type: string
+        townName:
+          type: string
+        countrySubDivision:
+          type: string
+        postalCode:
+          type: string
+        buildingNumber:
+          type: string
+        subDepartment:
+          type: string
+        type:
+          type: string
+        department:
+          type: string
+        addressLine:
+          type: string
+        primary:
+          type: boolean
+
+    PhoneAddress:
+      type: object
+      properties:
+        number:
+          type: string
+        countryIsoCode:
+          type: string
+        countryCode:
+          type: string
+        type:
+          type: string
+        primary:
+          type: boolean
+    ElectronicAddress:
+      type: object
+      properties:
+        emails:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmailAddress'
+        urls:
+          type: array
+          items:
+            $ref: '#/components/schemas/Url'
+
     Limit:
       title: Limit
       type: object
@@ -1623,7 +1842,7 @@ components:
           type: boolean
 
     ServiceAgreement:
-      title:  Service Agreement
+      title: Service Agreement
       description: |
         The formal vehicle that allows users of one entity to access products of that or other entities
         A Service agreement is:
@@ -1854,7 +2073,7 @@ components:
       title: External Identifier
       maxLength: 64
       minLength: 1
-#      pattern: ^{1,64}$
+      #      pattern: ^{1,64}$
       type: string
       description: External legal entity identifier.
     UrgentTransfer:
@@ -2386,7 +2605,7 @@ components:
           maxLength: 255
           type: string
           description: Email-id of the contact
-#          format: email
+        #          format: email
         addressLine1:
           maxLength: 70
           type: string
@@ -2554,7 +2773,7 @@ components:
       type: string
       description: "An email account identifier. At least one of the account identifiers\
         \ (accountNumber, IBAN, phoneNumber or email) is mandatory."
-#      format: email
+    #      format: email
     Additions:
       title: Additions
       type: object
