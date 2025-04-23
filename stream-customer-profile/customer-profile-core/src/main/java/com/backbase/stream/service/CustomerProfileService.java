@@ -26,7 +26,10 @@ public class CustomerProfileService {
                 log.info("Customer profile created successfully: {}", customerResponseDto));
     }
 
-    public Mono<Void> upsertParty(Party party) {
-        return Mono.firstWithSignal();
+    public Mono<PartyResponseUpsertDto> upsertParty(Party party) {
+
+        // TODO: Implement the conversion from Party to PartyUpsertDto
+
+        return upsertParty(new PartyUpsertDto());
     }
 }
