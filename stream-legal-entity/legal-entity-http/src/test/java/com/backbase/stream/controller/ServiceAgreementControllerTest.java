@@ -19,6 +19,7 @@ import com.backbase.dbs.user.api.service.v2.UserProfileManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.loan.inbound.api.service.v1.LoansApi;
 import com.backbase.stream.audiences.UserKindSegmentationSaga;
+import com.backbase.stream.clients.config.CustomerProfileClientConfig;
 import com.backbase.stream.config.LegalEntityHttpConfiguration;
 import com.backbase.stream.configuration.LegalEntitySagaConfiguration;
 import com.backbase.stream.configuration.UpdatedServiceAgreementSagaConfiguration;
@@ -36,7 +37,6 @@ import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
-import com.backbase.stream.service.CustomerProfileService;
 import com.backbase.streams.tailoredvalue.PlansService;
 import java.net.URI;
 import java.util.List;
@@ -130,7 +130,7 @@ class ServiceAgreementControllerTest {
     private PlansService plansService;
 
     @MockBean
-    private CustomerProfileService customerProfileService;
+    private CustomerProfileClientConfig customerProfileClientConfig;
 
     @Autowired
     private WebTestClient webTestClient;

@@ -1,4 +1,4 @@
-package com.backbase.configuration;
+package com.backbase.stream.configuration;
 
 import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
 import com.backbase.stream.clients.config.CustomerProfileClientConfig;

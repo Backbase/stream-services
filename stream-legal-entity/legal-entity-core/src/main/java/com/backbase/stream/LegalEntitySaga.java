@@ -47,7 +47,6 @@ import com.backbase.stream.legalentity.model.LegalEntityReference;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.Limit;
-import com.backbase.stream.legalentity.model.Party;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
@@ -137,7 +136,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private static final String JOB_ROLE_LIMITS = "job-role-limits";
     private static final String USER_JOB_ROLE_LIMITS = "user-job-role-limits";
     private static final String LEGAL_ENTITY_LIMITS = "legal-entity-limits";
-    // private static final String PROCESS_CUSTOMER_PROFILE = "process-customer-profile";
+    private static final String PROCESS_CUSTOMER_PROFILE = "process-customer-profile";
 
 
     private final BusinessFunctionGroupMapper businessFunctionGroupMapper = Mappers.getMapper(
@@ -153,7 +152,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private final ContactsSaga contactsSaga;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
     private final UserKindSegmentationSaga userKindSegmentationSaga;
-    // private final CustomerProfileService customerProfileService;
+    private final CustomerProfileService customerProfileService;
     private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
 
     public LegalEntitySaga(
@@ -165,8 +164,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties,
-        UserKindSegmentationSaga userKindSegmentationSaga
-       /* CustomerProfileService customerProfileService*/) {
+        UserKindSegmentationSaga userKindSegmentationSaga,
+        CustomerProfileService customerProfileService) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
         this.userProfileService = userProfileService;
@@ -176,7 +175,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         this.contactsSaga = contactsSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
         this.userKindSegmentationSaga = userKindSegmentationSaga;
-       // this.customerProfileService = customerProfileService;
+        this.customerProfileService = customerProfileService;
     }
 
     @Override
@@ -590,7 +589,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         log.info("Creating Job Roles...");
 
         return Flux.fromStream(Stream.of(serviceAgreement.getJobRoles(), legalEntity.getReferenceJobRoles())
-                    .filter(Objects::nonNull)
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream))
             .flatMap(jobRole -> accessGroupService.setupJobRole(streamTask, serviceAgreement, jobRole))
             .flatMap(jobRole -> {
