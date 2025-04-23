@@ -1602,40 +1602,45 @@ components:
         - externalId
         - fullName
     EmailAddress:
-      title: "The email addresses the user can be reached by."
-      required:
-        - address
-        - key
-        - type
       type: object
       properties:
-        key:
-          maxLength: 70
-          minLength: 1
-          type: string
-          description: Unique key identifying the email address.
         type:
-          maxLength: 36
-          minLength: 1
           type: string
-          description: Key identifying the type of electronic address, e.g. work or personal.
+          enum:
+            - WORK
+            - PERSONAL
+            - HOME
+            - OTHERS
+          description: Identifies the type of email. Possible values - WORK, PERSONAL, HOME, OTHERS.
         primary:
           type: boolean
-          description: Flag denoting whether this is the main electronic address.
+          description: Flag denoting whether this is the primary email address of the party.
         address:
-          maxLength: 255
-          minLength: 1
           type: string
-          description: Address.
+          maxLength: 100
+          description: Address for electronic mail (e-mail) (ISO20022).
+      required:
+        - type
+        - address
     Url:
       type: object
       properties:
+        type:
+          type: string
+          enum:
+            - WORK
+            - PERSONAL
+          description: Identifies the type of URL. Possible Values - WORK, PERSONAL.
         primary:
           type: boolean
+          description: Flag denoting whether this is the primary url address of the party.
         address:
-          maxLength: 255
-          minLength: 1
           type: string
+          maxLength: 255
+          description: Address for the Universal Resource Locator (URL), used over the www (HTTP) service.
+      required:
+        - address
+        - type
 
     PhoneNumber:
       required:
@@ -1720,42 +1725,89 @@ components:
     PartyPostalAddress:
       type: object
       properties:
-        country:
-          type: string
-        streetName:
-          type: string
-        townName:
-          type: string
-        countrySubDivision:
-          type: string
-        postalCode:
-          type: string
-        buildingNumber:
-          type: string
-        subDepartment:
-          type: string
         type:
           type: string
-        department:
-          type: string
-        addressLine:
-          type: string
+          enum:
+            - Business
+            - Correspondence
+            - DeliveryTo
+            - MailTo
+            - POBox
+            - Postal
+            - Residential
+            - Statement
+          description: Identifies the type of postal address.
         primary:
           type: boolean
+          description: Flag denoting whether this is the primary postal address of the party.
+        department:
+          type: string
+          maxLength: 100
+          description: Identification of a division of a large organisation or building (ISO20022).
+        subDepartment:
+          type: string
+          maxLength: 100
+          description: Identification of a sub-division of a large organisation or building (ISO20022).
+        addressLine:
+          type: string
+          maxLength: 100
+          description: Information that locates and identifies a specific address, as defined by postal services, presented in free format text (ISO20022).
+        buildingNumber:
+          type: string
+          maxLength: 50
+          description: Number that identifies the position of a building on a street (ISO20022).
+        streetName:
+          type: string
+          maxLength: 100
+          description: Name of a street or thoroughfare (ISO20022).
+        townName:
+          type: string
+          maxLength: 100
+          description: Name of a built-up area, with defined boundaries, and a local government (ISO20022).
+        postalCode:
+          type: string
+          maxLength: 12
+          description: Identifier consisting of a group of letters and/or numbers that is added to a postal address to assist the sorting of mail (ISO20022).
+        countrySubDivision:
+          type: string
+          maxLength: 100
+          description: Identifies name of a country subdivision such as state, region, county. For example - Oregon.
+        country:
+          type: string
+          maxLength: 100
+          description: Country name.
+      required:
+        - type
 
     PhoneAddress:
       type: object
       properties:
-        number:
-          type: string
-        countryIsoCode:
-          type: string
-        countryCode:
-          type: string
         type:
           type: string
+          enum:
+            - MOBILE
+            - HOME
+            - WORK
+            - OTHER
+          description: Identifies the type of the phone address. For example - MOBILE, LANDLINE, HOME, WORK, FAX.
         primary:
           type: boolean
+          description: Flag denoting if its the primary phone address of the party.
+        number:
+          type: string
+          maxLength: 50
+          description: Collection of information that identifies a phone address, as defined by telecom services (ISO20022).
+        countryCode:
+          type: string
+          maxLength: 3
+          description: Phone’s country calling code. Country calling code can be obtained from https://countrycode.org/.
+        countryIsoCode:
+          type: string
+          maxLength: 3
+          description: Phone’s ISO country code. Country code can be obtained from the United Nations (ISO 3166, Alpha-2 code)- https://www.iban.com/country-codes.
+      required:
+        - type
+        - number
     ElectronicAddress:
       type: object
       properties:
