@@ -2,6 +2,9 @@ package com.backbase.stream.clients.config;
 
 
 import com.backbase.customerprofile.api.integration.ApiClient;
+import com.backbase.customerprofile.api.integration.v1.CustomerLifeCycleManagementIntegrationApi;
+import com.backbase.customerprofile.api.integration.v1.CustomerManagementIntegrationApi;
+import com.backbase.customerprofile.api.integration.v1.CustomerProfileManagementIntegrationApi;
 import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
@@ -25,15 +28,36 @@ public class CustomerProfileClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public ApiClient customerProfileApiIntegrationClient(
         ObjectMapper objectMapper, DateFormat dateFormat) {
-        return new com.backbase.customerprofile.api.integration.ApiClient(getWebClient(), objectMapper, dateFormat)
+        return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PartyManagementIntegrationApi partyManagementIntegrationApi(
-        com.backbase.customerprofile.api.integration.ApiClient customerProfileApiIntegrationClient) {
+        ApiClient customerProfileApiIntegrationClient) {
         return new PartyManagementIntegrationApi(customerProfileApiIntegrationClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CustomerManagementIntegrationApi createCustomerManagementIntegrationApi(
+        ApiClient customerProfileClientConfig) {
+        return new CustomerManagementIntegrationApi(customerProfileClientConfig);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CustomerProfileManagementIntegrationApi createCustomerProfileManagementIntegrationApi(
+        ApiClient customerProfileClientConfig) {
+        return new CustomerProfileManagementIntegrationApi(customerProfileClientConfig);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CustomerLifeCycleManagementIntegrationApi createCustomerLifeCycleManagementIntegrationApi(
+        ApiClient customerProfileClientConfig) {
+        return new CustomerLifeCycleManagementIntegrationApi(customerProfileClientConfig);
     }
 
 }

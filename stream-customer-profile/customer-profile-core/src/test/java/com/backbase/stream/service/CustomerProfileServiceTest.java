@@ -1,12 +1,12 @@
 package com.backbase.stream.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.backbase.customerprofile.api.integration.v1.CustomerManagementIntegrationApi;
-import com.backbase.customerprofile.api.integration.v1.model.CustomerPartyDto;
-import com.backbase.customerprofile.api.integration.v1.model.CustomerResponseDto;
+import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
+import com.backbase.customerprofile.api.integration.v1.model.PartyResponseUpsertDto;
+import com.backbase.customerprofile.api.integration.v1.model.PartyUpsertDto;
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.jqwik.JavaTypeArbitraryGenerator;
@@ -41,49 +41,51 @@ class CustomerProfileServiceTest {
         }))
         .build();
     @Mock
-    private CustomerManagementIntegrationApi customerManagementIntegrationApiMock;
+    private PartyManagementIntegrationApi partyManagementIntegrationApiMock;
 
 
     @BeforeEach
     void setup() {
-        customerProfileService = new CustomerProfileService(customerManagementIntegrationApiMock);
+        customerProfileService = new CustomerProfileService(partyManagementIntegrationApiMock);
     }
 
     @Test
-    @DisplayName("createCustomer should return CustomerResponseDto when API call is successful")
+    @DisplayName("Upsert party should return PartyResponseUpsertDto when API call is successful")
     void createCustomer_success() {
         var legalEntityId = UUID.randomUUID().toString();
-        var requestDto = fixtureMonkey.giveMeBuilder(CustomerPartyDto.class)
+        var requestDto = fixtureMonkey.giveMeBuilder(PartyUpsertDto.class)
             .set("legalEntityId", legalEntityId)
             .sample();
-        var expectedResponseDto = fixtureMonkey.giveMeBuilder(CustomerResponseDto.class)
-            .set("legalEntityId", legalEntityId).sample();
+        var expectedResponseDto = fixtureMonkey.giveMeBuilder(PartyResponseUpsertDto.class)
+            .set("partyReferenceId", legalEntityId).sample();
 
-        when(customerManagementIntegrationApiMock.createCustomer(any(CustomerPartyDto.class)))
+        when(partyManagementIntegrationApiMock.upsertParty(any(PartyUpsertDto.class)))
             .thenReturn(Mono.just(expectedResponseDto));
 
-        var result = customerProfileService.createCustomer(requestDto);
+        var result = customerProfileService.upsertParty(requestDto);
 
         StepVerifier.create(result)
             .assertNext(response -> {
-                assertEquals(expectedResponseDto.getLegalEntityId(), response.getLegalEntityId());
+                assertNotNull(response);
+                assertNotNull(response.getCustomerReferenceId());
+                assertNotNull(response.getPartyReferenceId());
             })
             .verifyComplete();
     }
 
     @Test
-    @DisplayName("createCustomer should propagate WebClientResponseException when API call fails")
-    void createCustomer_apiError() {
-        var requestDto = fixtureMonkey.giveMeOne(CustomerPartyDto.class);
+    @DisplayName("Upsert party should propagate WebClientResponseException when API call fails")
+    void upsertParty_apiError() {
+        var requestDto = fixtureMonkey.giveMeOne(PartyUpsertDto.class);
         var expectedException = new WebClientResponseException(
             HttpStatus.BAD_REQUEST.value(),
             "Bad Request from API",
             null,
             null,
             StandardCharsets.UTF_8);
-        when(customerManagementIntegrationApiMock.createCustomer(any(CustomerPartyDto.class)))
+        when(partyManagementIntegrationApiMock.upsertParty(any(PartyUpsertDto.class)))
             .thenReturn(Mono.error(expectedException));
-        var result = customerProfileService.createCustomer(requestDto);
+        var result = customerProfileService.upsertParty(requestDto);
         StepVerifier.create(result)
             .expectErrorMatches(throwable ->
                 throwable instanceof WebClientResponseException &&
@@ -94,13 +96,13 @@ class CustomerProfileServiceTest {
     }
 
     @Test
-    @DisplayName("createCustomer should propagate other RuntimeExceptions when API call fails unexpectedly")
-    void createCustomer_otherError() {
-        var requestDto = fixtureMonkey.giveMeOne(CustomerPartyDto.class);
+    @DisplayName("Upsert party should propagate other RuntimeExceptions when API call fails unexpectedly")
+    void upsertParty_otherError() {
+        var requestDto = fixtureMonkey.giveMeOne(PartyUpsertDto.class);
         var expectedException = new RuntimeException("Unexpected error");
-        when(customerManagementIntegrationApiMock.createCustomer(any(CustomerPartyDto.class)))
+        when(partyManagementIntegrationApiMock.upsertParty(any(PartyUpsertDto.class)))
             .thenReturn(Mono.error(expectedException));
-        var result = customerProfileService.createCustomer(requestDto);
+        var result = customerProfileService.upsertParty(requestDto);
         StepVerifier.create(result)
             .expectErrorMatches(throwable -> throwable == expectedException)
             .verify();

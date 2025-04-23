@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
@@ -35,6 +36,7 @@ import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.stream.service.CustomerProfileService;
 import com.backbase.streams.tailoredvalue.PlansService;
 import java.net.URI;
 import java.util.List;
@@ -83,6 +85,9 @@ class ServiceAgreementControllerTest {
     private com.backbase.identity.integration.api.service.ApiClient identityApiClient;
 
     @MockBean
+    private com.backbase.customerprofile.api.integration.ApiClient customerProfileApiClient;
+
+    @MockBean
     private LimitsServiceApi limitsApi;
 
     @MockBean
@@ -107,6 +112,9 @@ class ServiceAgreementControllerTest {
     private UserProfileManagementApi userProfileManagementApi;
 
     @MockBean
+    private PartyManagementIntegrationApi partyManagementIntegrationApi;
+
+    @MockBean
     private com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi userProfileManagement;
 
     @MockBean
@@ -120,6 +128,9 @@ class ServiceAgreementControllerTest {
 
     @MockBean
     private PlansService plansService;
+
+    @MockBean
+    private CustomerProfileService customerProfileService;
 
     @Autowired
     private WebTestClient webTestClient;

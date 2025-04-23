@@ -1,8 +1,9 @@
 package com.backbase.stream.service;
 
-import com.backbase.customerprofile.api.integration.v1.CustomerManagementIntegrationApi;
-import com.backbase.customerprofile.api.integration.v1.model.CustomerPartyDto;
-import com.backbase.customerprofile.api.integration.v1.model.CustomerResponseDto;
+import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
+import com.backbase.customerprofile.api.integration.v1.model.PartyResponseUpsertDto;
+import com.backbase.customerprofile.api.integration.v1.model.PartyUpsertDto;
+import com.backbase.stream.legalentity.model.Party;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -12,17 +13,20 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class CustomerProfileService {
 
-    private final CustomerManagementIntegrationApi customerManagementIntegrationApi;
+    private final PartyManagementIntegrationApi partyManagementIntegrationApi;
 
-    public Mono<CustomerResponseDto> createCustomer(
-        CustomerPartyDto customerPartyDto)
+    public Mono<PartyResponseUpsertDto> upsertParty(PartyUpsertDto partyUpsertDto)
         throws WebClientResponseException {
-        return customerManagementIntegrationApi.createCustomer(customerPartyDto)
+        return partyManagementIntegrationApi.upsertParty(partyUpsertDto)
             .doOnError(WebClientResponseException.class, e -> {
                 log.error("Error creating customer profile: {}", e.getMessage());
                 throw e;
             })
             .doOnSuccess(customerResponseDto ->
                 log.info("Customer profile created successfully: {}", customerResponseDto));
+    }
+
+    public Mono<Void> upsertParty(Party party) {
+        return Mono.firstWithSignal();
     }
 }

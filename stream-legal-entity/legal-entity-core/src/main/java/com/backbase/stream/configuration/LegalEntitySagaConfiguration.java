@@ -1,5 +1,6 @@
 package com.backbase.stream.configuration;
 
+import com.backbase.configuration.CustomerProfileConfiguration;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntitySagaV2;
 import com.backbase.stream.LegalEntityTask;
@@ -13,6 +14,7 @@ import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.ProductIngestionSagaConfiguration;
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.stream.service.CustomerProfileService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
@@ -34,8 +36,8 @@ import org.springframework.context.annotation.Import;
     ContactsServiceConfiguration.class,
     LoansServiceConfiguration.class,
     AudiencesSegmentationConfiguration.class,
-    PlanServiceConfiguration.class
-
+    PlanServiceConfiguration.class/*,
+    CustomerProfileConfiguration.class*/
 })
 @EnableConfigurationProperties(
     {LegalEntitySagaConfigurationProperties.class}
@@ -51,7 +53,8 @@ public class LegalEntitySagaConfiguration {
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
-        UserKindSegmentationSaga userKindSegmentationSaga
+        UserKindSegmentationSaga userKindSegmentationSaga/*,
+        CustomerProfileService customerProfileService*/
     ) {
         return new LegalEntitySaga(
             legalEntityService,
@@ -62,7 +65,8 @@ public class LegalEntitySagaConfiguration {
             limitsSaga,
             contactsSaga,
             sinkConfigurationProperties,
-            userKindSegmentationSaga
+            userKindSegmentationSaga/*,
+            customerProfileService*/
         );
     }
 
