@@ -362,6 +362,9 @@ class LegalEntitySagaTest {
     void testCustomServiceAgreement_IfFetchedServiceAgreementExists_ThenSettingUp() {
         var task = setupLegalEntityTask();
 
+        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
+
         mockAccessGroupService(userId);
         mockUserService(userId);
 
@@ -375,6 +378,8 @@ class LegalEntitySagaTest {
     void testCustomServiceAgreement_IfNoCustomServiceAgreementExists_ThenCreateMaster() {
         var task = setupLegalEntityTask();
 
+        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
         when(accessGroupService.getUserContextsByUserId(userId)).thenReturn(Mono.empty());
         mockUserService(userId);
 
@@ -387,6 +392,9 @@ class LegalEntitySagaTest {
     @Test
     void testCustomServiceAgreement_IfNoMatchingCustomServiceAgreementExists_ThenCreateMaster() {
         LegalEntityTask task = setupLegalEntityTask();
+
+        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
 
         when(accessGroupService.getUserContextsByUserId(userId))
             .thenReturn(
@@ -457,7 +465,7 @@ class LegalEntitySagaTest {
         var jobRole = new JobRole("someJobRole", "someJobRole");
         jobRole.setFunctionGroups(singletonList(functionGroup));
 
-        legalEntity = new LegalEntity("le_name", null, null);
+        var legalEntity = new LegalEntity("le_name", null, null);
         legalEntity.setInternalId(leInternalId);
         legalEntity.setExternalId(leExternalId);
         legalEntity.setParentExternalId(leExternalId);
