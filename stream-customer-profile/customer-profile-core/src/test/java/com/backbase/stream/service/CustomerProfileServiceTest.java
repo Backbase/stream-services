@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
 import com.backbase.customerprofile.api.integration.v1.model.PartyResponseUpsertDto;
 import com.backbase.customerprofile.api.integration.v1.model.PartyUpsertDto;
+import com.backbase.stream.mapper.PartyMapper;
 import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
 import com.navercorp.fixturemonkey.api.jqwik.JavaTypeArbitraryGenerator;
@@ -46,7 +47,7 @@ class CustomerProfileServiceTest {
 
     @BeforeEach
     void setup() {
-        customerProfileService = new CustomerProfileService(partyManagementIntegrationApiMock);
+        customerProfileService = new CustomerProfileService(partyManagementIntegrationApiMock, PartyMapper.INSTANCE);
     }
 
     @Test

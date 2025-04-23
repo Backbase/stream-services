@@ -1306,9 +1306,7 @@ components:
           items:
             $ref: '#/components/schemas/PhoneAddress'
         electronicAddress:
-          type: array
-          items:
-            $ref: '#/components/schemas/ElectronicAddress'
+          $ref: '#/components/schemas/ElectronicAddress'
         preferredLanguage:
           type: string
           maxLength: 50

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import com.backbase.buildingblocks.webclient.InterServiceWebClientConfiguration;
 import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
 import com.backbase.stream.clients.config.CustomerProfileClientConfig;
+import com.backbase.stream.mapper.PartyMapper;
 import com.backbase.stream.service.CustomerProfileService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration;
@@ -30,6 +31,7 @@ class CustomerProfileConfigurationTest {
                 assertThat(context).hasSingleBean(PartyManagementIntegrationApi.class);
                 assertThat(context).hasSingleBean(WebClient.class);
                 assertThat(context).hasSingleBean(CustomerProfileClientConfig.class);
+                assertThat(context).hasSingleBean(PartyMapper.class);
             });
     }
 }
