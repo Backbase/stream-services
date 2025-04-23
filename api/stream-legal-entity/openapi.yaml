@@ -1257,8 +1257,13 @@ components:
           type: boolean
         isCustomer:
           type: boolean
+          description: Indicates if it is a customer or not.
         partyType:
           type: string
+          enum:
+            - PERSON
+            - ORGANISATION
+          description: Type of party in different business contexts.
         person:
           $ref: '#/components/schemas/Person'
         organisation:
@@ -1267,22 +1272,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PartyRelationship'
-        organisationName:
-          type: string
         closingDateTime:
           type: string
-          format: date
+          format: date-time
+          description: Date on which the party and related services cease effectively to be operational for the party.
         approvedDateTime:
           type: string
-          format: date
+          format: date-time
+          description: Date on which the party and related basic services are approved.
         lastUpdatedDateTime:
           type: string
-          format: date
+          format: date-time
+          description: Date on which there was any update to the party and related basic services.
         openingDateTime:
           type: string
-          format: date
-        status:
+          format: date-time
+          description: Date on which the party and related basic services are effectively operational for the party.
+        liveDateTime:
           type: string
+          format: date-time
+          description: Date of the first movement on the party.
+        state:
+          type: string
+          enum:
+            - ENROLLED
+            - EXITED
         postalAddresses:
           type: array
           items:
@@ -1297,110 +1311,227 @@ components:
             $ref: '#/components/schemas/ElectronicAddress'
         preferredLanguage:
           type: string
-          description: Language code, e.g. en, de, fr, nl
+          maxLength: 50
+          description: Language preferred by party.
         notes:
-          type: array
-          items:
-            type: string
+          type: string
+          maxLength: 100
+          description: Notes on the party.
         customFields:
           type: object
           additionalProperties:
             type: string
+      required:
+        - partyId
+        - isCustomer
+        - partyType
     Person:
       type: object
       properties:
         identifications:
           type: array
+          description: List of specific identification assigned to a party.
+          minItems: 1
           items:
             $ref: '#/components/schemas/Identification'
         personName:
           $ref: '#/components/schemas/PersonName'
         gender:
           type: string
+          enum:
+            - MALE
+            - FEMALE
+            - NON_BINARY
+          description: Person's gender
         birthDate:
           type: string
           format: date
+          description: Indicates person birthdate
         demographics:
           type: object
           properties:
             occupation:
               type: object
               properties:
-                employer:
-                  type: string
                 employment:
                   type: string
+                  description: Type of employment of the party.
+                  maxLength: 100
+                employer:
+                  type: string
+                  description: Details of the party's employment.
+                  maxLength: 100
             education:
               type: object
               properties:
-                yearOfPassing:
-                  type: string
                 educationLevel:
                   type: string
+                  description: Party's education level, such as qualifications and certifications.
+                  maxLength: 100
+                yearOfPassing:
+                  type: string
+                  maxLength: 20
+                  description: Year of completing the qualification.
+      required:
+        - personName
+        - identifications
     Organisation:
       type: object
       properties:
-        legalStructureType:
-          type: string
-        establishmentDate:
-          type: string
         name:
           type: string
+          description: Organisation Name
+          maxLength: 64
         type:
           type: string
+          maxLength: 64
+          description: Specifies a type of organisation.
         sector:
           type: string
-        liveDateTime:
+          maxLength: 255
+          description: Sector of business of the organisation, for example, pharmaceutical. (ISO20022)
+        establishmentDate:
           type: string
           format: date
+          description: Date when the organisation was established.
+        legalStructure:
+          type: object
+          properties:
+            type:
+              type: string
+              maxLength: 64
+              description: Individual, Partnership and Corporation
+          required:
+            - type
         identifications:
           type: array
+          description: List of specific identification assigned to a party.
+          minItems: 1
           items:
             $ref: '#/components/schemas/Identification'
+      required:
+        - name
+        - identifications
     Identification:
       type: object
       properties:
-        expiryDate:
-          type: string
-          format: date
-        issuingCountry:
-          type: string
-        issuingAuthority:
-          type: string
-        identificationNumber:
-          type: string
         identificationType:
           type: string
+          enum:
+            - TaxIdentificationNumber
+            - NationalRegistrationNumber
+            - RegistrationAuthorityIdentification
+            - LegalEntityIdentifier
+            - AlienRegistrationNumber
+            - PassportNumber
+            - TaxExemptionIdentificationNumber
+            - CorporateIdentification
+            - DriverLicenseNumber
+            - ForeignInvestmentIdentityNumber
+            - SocialSecurityNumber
+            - IdentityCardNumber
+            - Concat
+            - NationalRegistrationIdentificationNumber
+            - CustomerIdentificationNumber
+            - EmployeeIdentificationNumber
+            - NationalIdentityNumber
+            - TelephoneNumber
+            - EmployerIdentificationNumber
+            - CentralBankIdentificationNumber
+            - ClearingIdentificationNumber
+            - BankPartyIdentification
+            - CertificateOfIncorporationNumber
+            - CountryIdentificationCode
+            - CustomerNumber
+            - DataUniversalNumberingSystem
+            - GS1GLNIdentifier
+            - ELF
+            - SIREN
+            - SIRET
+            - MIC
+            - BICFI
+            - DUNS
+            - EANGLN
+          description: Identification Type of the identity document.
+        identificationNumber:
+          type: string
+          maxLength: 100
+          description: Number or code assigned by the government authority to an entity
+        issuingCountry:
+          type: string
+          maxLength: 100
+          description: Identifies issuing country of the identity document.
+        issuingAuthority:
+          type: string
+          maxLength: 100
+          description: Identifies issuing authority of the identity document.
         issueDate:
           type: string
           format: date
+          description: Identifies issue date of the identity document.
+        expiryDate:
+          type: string
+          format: date
+          description: Identifies expiry date of the identity document.
+      required:
+        - identificationType
+        - identificationNumber
     PartyRelationship:
       type: object
       properties:
-        partyRole:
-          type: string
-        ownershipPercent:
-          type: number
-          format: double
-        roleEndDate:
-          type: string
-          format: date
         partyId:
           $ref: '#/components/schemas/ExternalIdentifier'
+        partyType:
+          type: string
+          enum:
+            - PERSON
+            - ORGANISATION
+          description: Specifies the type of party in different business contexts.
+        partyRole:
+          type: string
+          description: Identifies role of a party
+          enum:
+            - COMPANY_ROLE
+            - COMPANY_OWNERSHIP
+            - COMPANY_CONTROL_PERSON
+            - COMPANY_SIGNATORY
+            - GUARDIAN
         roleStartDate:
           type: string
           format: date
+          description: Identifies start date of the party role
+        roleEndDate:
+          type: string
+          format: date
+          description: Identifies end date of the party role
+        ownershipPercent:
+          type: integer
+          description: Identifies the percentage of stake/ownership for a related person/organisation in this organisation. Total ownership percent must not exceed 100%
+          minimum: 0
+          maximum: 100
+      required:
+        - partyId
+        - partyRole
     PersonName:
       type: object
       properties:
-        firstName:
-          type: string
-        middleName:
-          type: string
-        familyName:
-          type: string
         salutation:
           type: string
+          maxLength: 20
+        firstName:
+          type: string
+          description: First name of the person.
+          maxLength: 64
+        middleName:
+          type: string
+          description: Middle name of the person.
+          maxLength: 64
+        familyName:
+          type: string
+          description: Family name of the person.
+          maxLength: 64
+      required:
+        - firstName
 
     LegalEntityType:
       type: string
