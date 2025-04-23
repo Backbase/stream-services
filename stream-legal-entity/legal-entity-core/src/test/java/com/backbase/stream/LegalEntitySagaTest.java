@@ -4,7 +4,9 @@ import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -430,6 +432,38 @@ class LegalEntitySagaTest {
         legalEntitySaga.executeTask(task).block();
         verify(customerProfileService, times(PARTY_SIZE)).upsertParty(any(Party.class));
     }
+
+    @Test
+    void testProcessCustomerProfile_IfUpsertPartyError_ThenTrowException() {
+        var task = setupLegalEntityTask();
+        var mockException = new WebClientResponseException(
+            "CPS Error",
+            400,
+            "Bad Request",
+            null,
+            null,
+            null
+        );
+        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(Mono.error(mockException));
+
+        mockAccessGroupService(userId);
+        mockUserService(userId);
+        legalEntitySaga.executeTask(task).block();
+        verify(customerProfileService, times(PARTY_SIZE)).upsertParty(any(Party.class));
+        verify(task, times(PARTY_SIZE)).error(
+            eq(LegalEntitySaga.PARTY),
+            eq(LegalEntitySaga.PROCESS_CUSTOMER_PROFILE),
+            eq("failed"),
+            anyString(),
+            isNull(),
+            any(Throwable.class),
+            anyString(),
+            eq("Error upserting party: %s for LE: %s"),
+            anyString(),
+            anyString()
+        );
+    }
+
 
     private void mockUserService(String userId) {
         when(userService.getUsersByLegalEntity(any(), anyInt(), anyInt()))
