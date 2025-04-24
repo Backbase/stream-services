@@ -2,7 +2,6 @@ package com.backbase.stream.service;
 
 import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
 import com.backbase.customerprofile.api.integration.v1.model.PartyResponseUpsertDto;
-import com.backbase.customerprofile.api.integration.v1.model.PartyUpsertDto;
 import com.backbase.stream.legalentity.model.Party;
 import com.backbase.stream.mapper.PartyMapper;
 import lombok.RequiredArgsConstructor;

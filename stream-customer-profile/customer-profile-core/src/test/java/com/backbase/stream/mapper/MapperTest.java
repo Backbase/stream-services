@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest(classes = PartyMapperImpl.class)
-public class MapperTest {
+class MapperTest {
 
     @Autowired
     private PartyMapper partyMapper;

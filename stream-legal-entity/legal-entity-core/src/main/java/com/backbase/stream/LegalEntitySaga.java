@@ -1125,7 +1125,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                         log.error("Failed to upsert party {}: {}", party.getPartyId(), throwable.getMessage(),
                             throwable);
                         processingErrors.add(throwable);
-                        legalEntityTask.error(PARTY, PROCESS_CUSTOMER_PROFILE, "failed", party.getPartyId(), null,
+                        legalEntityTask.error(PARTY, PROCESS_CUSTOMER_PROFILE, FAILED, party.getPartyId(), null,
                             throwable,
                             throwable.getMessage(), "Error upserting party: %s for LE: %s", party.getPartyId(),
                             legalEntity.getExternalId());
