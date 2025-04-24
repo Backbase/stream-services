@@ -63,7 +63,6 @@ public class MapperTest {
         } else {
             assertNull(resultDto.getPartyType());
         }
-        // Compara el valor del Enum State
         if (party.getState() != null) {
             assertNotNull(resultDto.getState());
             assertEquals(party.getState().getValue(), resultDto.getState().getValue()); //
@@ -149,7 +148,7 @@ public class MapperTest {
         }
 
         if (party.getOrganisation() != null) {
-            assertNotNull(resultDto.getOrganisation()); //
+            assertNotNull(resultDto.getOrganisation());
             assertEquals(party.getOrganisation().getName(), resultDto.getOrganisation().getName());
             if (party.getOrganisation().getIdentifications() != null) {
                 assertNotNull(resultDto.getOrganisation().getIdentifications());
@@ -160,7 +159,6 @@ public class MapperTest {
             }
             if (party.getOrganisation().getLegalStructure() != null) {
                 assertNotNull(resultDto.getOrganisation().getLegalStructure());
-                // Añade más aserciones para legal structure aquí
             } else {
                 assertNull(resultDto.getOrganisation().getLegalStructure());
             }
@@ -173,15 +171,15 @@ public class MapperTest {
         }
 
         if (party.getPostalAddresses() != null) {
-            assertNotNull(resultDto.getPostalAddresses()); //
-            assertEquals(party.getPostalAddresses().size(), resultDto.getPostalAddresses().size()); //
+            assertNotNull(resultDto.getPostalAddresses());
+            assertEquals(party.getPostalAddresses().size(), resultDto.getPostalAddresses().size());
         } else {
             assertNull(resultDto.getPostalAddresses());
         }
 
         if (party.getPartyPartyRelationships() != null) {
-            assertNotNull(resultDto.getPartyPartyRelationships()); //
-            assertEquals(party.getPartyPartyRelationships().size(), resultDto.getPartyPartyRelationships().size()); //
+            assertNotNull(resultDto.getPartyPartyRelationships());
+            assertEquals(party.getPartyPartyRelationships().size(), resultDto.getPartyPartyRelationships().size());
         } else {
             assertNull(resultDto.getPartyPartyRelationships());
         }
