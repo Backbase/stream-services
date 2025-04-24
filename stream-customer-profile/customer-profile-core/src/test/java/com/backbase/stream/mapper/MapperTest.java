@@ -8,25 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.backbase.stream.legalentity.model.Party;
 import com.navercorp.fixturemonkey.FixtureMonkey;
-import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
-import com.navercorp.fixturemonkey.api.jqwik.JavaTypeArbitraryGenerator;
-import com.navercorp.fixturemonkey.api.jqwik.JqwikPlugin;
-import net.jqwik.api.Arbitraries;
-import net.jqwik.api.arbitraries.StringArbitrary;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = {
-    PartyMapperImpl.class,
-    PersonMapperImpl.class,
-    OrganisationMapperImpl.class,
-    PartyRelationshipMapperImpl.class,
-    AddressMapperImpl.class,
-    ElectronicAddressMapperImpl.class,
-    IdentificationMapperImpl.class,
-    DemographicsMapperImpl.class
-})
+@SpringBootTest(classes = PartyMapperImpl.class)
 public class MapperTest {
 
     @Autowired
@@ -51,26 +37,27 @@ public class MapperTest {
 
         if (party.getPartyType() != null) {
             assertNotNull(resultDto.getPartyType());
-            assertEquals(party.getPartyType().getValue(), resultDto.getPartyType().getValue()); 
+            assertEquals(party.getPartyType().getValue(), resultDto.getPartyType().getValue());
         } else {
             assertNull(resultDto.getPartyType());
         }
         if (party.getState() != null) {
             assertNotNull(resultDto.getState());
-            assertEquals(party.getState().getValue(), resultDto.getState().getValue()); 
+            assertEquals(party.getState().getValue(), resultDto.getState().getValue());
         } else {
             assertNull(resultDto.getState());
         }
-        assertEquals(party.getClosingDateTime(), resultDto.getClosingDateTime()); 
-        assertEquals(party.getApprovedDateTime(), resultDto.getApprovedDateTime()); 
-        assertEquals(party.getLastUpdatedDateTime(), resultDto.getLastUpdatedDateTime()); 
-        assertEquals(party.getOpeningDateTime(), resultDto.getOpeningDateTime()); 
-        assertEquals(party.getLiveDateTime(), resultDto.getLiveDateTime()); 
-        assertEquals(party.getPreferredLanguage(), resultDto.getPreferredLanguage()); 
-        assertEquals(party.getNotes(), resultDto.getNotes()); 
+        assertEquals(party.getClosingDateTime(), resultDto.getClosingDateTime());
+        assertEquals(party.getApprovedDateTime(), resultDto.getApprovedDateTime());
+        assertEquals(party.getLastUpdatedDateTime(), resultDto.getLastUpdatedDateTime());
+        assertEquals(party.getOpeningDateTime(), resultDto.getOpeningDateTime());
+        assertEquals(party.getLiveDateTime(), resultDto.getLiveDateTime());
+        assertEquals(party.getPreferredLanguage(), resultDto.getPreferredLanguage());
+        assertEquals(party.getNotes(), resultDto.getNotes());
 
-        assertNull(resultDto.getLegalEntityId(), "legalEntityId ignored by mapper");
-        assertNull(resultDto.getSubState(), "subState  ignored by mapper");
+        assertEquals(party.getLegalEntityId(), resultDto.getLegalEntityId());
+        assertNotNull(resultDto.getSubState());
+        assertEquals(party.getSubState().getValue(), resultDto.getSubState().getValue());
 
         if (party.getCustomFields() != null) {
             assertNotNull(resultDto.getAdditions());
@@ -78,30 +65,30 @@ public class MapperTest {
             assertEquals(party.getCustomFields(), resultDto.getAdditions());
         }
 
-        if (party.getPhoneAddresses() != null) {
+        if (party.getPhoneNumbers() != null) {
             assertNotNull(resultDto.getPhoneNumbers());
-            assertEquals(party.getPhoneAddresses().size(), resultDto.getPhoneNumbers().size());
+            assertEquals(party.getPhoneNumbers().size(), resultDto.getPhoneNumbers().size());
 
-            if (!party.getPhoneAddresses().isEmpty()) {
-                assertEquals(party.getPhoneAddresses().get(0).getNumber(),
+            if (!party.getPhoneNumbers().isEmpty()) {
+                assertEquals(party.getPhoneNumbers().get(0).getNumber(),
                     resultDto.getPhoneNumbers().get(0).getNumber());
             }
         } else {
             assertNull(resultDto.getPhoneNumbers());
         }
 
-        if (party.getElectronicAddress() != null) {
+        if (party.getElectronicAddresses() != null) {
             assertNotNull(resultDto.getElectronicAddresses());
-            if (party.getElectronicAddress().getEmails() != null) {
+            if (party.getElectronicAddresses().getEmails() != null) {
                 assertNotNull(resultDto.getElectronicAddresses().getEmails());
-                assertEquals(party.getElectronicAddress().getEmails().size(),
+                assertEquals(party.getElectronicAddresses().getEmails().size(),
                     resultDto.getElectronicAddresses().getEmails().size());
             } else {
                 assertNull(resultDto.getElectronicAddresses().getEmails());
             }
-            if (party.getElectronicAddress().getUrls() != null) {
+            if (party.getElectronicAddresses().getUrls() != null) {
                 assertNotNull(resultDto.getElectronicAddresses().getUrls());
-                assertEquals(party.getElectronicAddress().getUrls().size(),
+                assertEquals(party.getElectronicAddresses().getUrls().size(),
                     resultDto.getElectronicAddresses().getUrls().size());
             } else {
                 assertNull(resultDto.getElectronicAddresses().getUrls());

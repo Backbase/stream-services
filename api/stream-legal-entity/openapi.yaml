@@ -1248,289 +1248,6 @@ components:
             $ref: '#/components/schemas/ExternalContact'
       required:
         - user
-    Party:
-      type: object
-      properties:
-        partyId:
-          $ref: '#/components/schemas/ExternalIdentifier'
-        isDigital:
-          type: boolean
-        isCustomer:
-          type: boolean
-          description: Indicates if it is a customer or not.
-        partyType:
-          type: string
-          enum:
-            - PERSON
-            - ORGANISATION
-          description: Type of party in different business contexts.
-        person:
-          $ref: '#/components/schemas/Person'
-        organisation:
-          $ref: '#/components/schemas/Organisation'
-        partyPartyRelationships:
-          type: array
-          items:
-            $ref: '#/components/schemas/PartyRelationship'
-        closingDateTime:
-          type: string
-          format: date-time
-          description: Date on which the party and related services cease effectively to be operational for the party.
-        approvedDateTime:
-          type: string
-          format: date-time
-          description: Date on which the party and related basic services are approved.
-        lastUpdatedDateTime:
-          type: string
-          format: date-time
-          description: Date on which there was any update to the party and related basic services.
-        openingDateTime:
-          type: string
-          format: date-time
-          description: Date on which the party and related basic services are effectively operational for the party.
-        liveDateTime:
-          type: string
-          format: date-time
-          description: Date of the first movement on the party.
-        state:
-          type: string
-          enum:
-            - ENROLLED
-            - EXITED
-        postalAddresses:
-          type: array
-          items:
-            $ref: '#/components/schemas/PartyPostalAddress'
-        phoneAddresses:
-          type: array
-          items:
-            $ref: '#/components/schemas/PhoneAddress'
-        electronicAddress:
-          $ref: '#/components/schemas/ElectronicAddress'
-        preferredLanguage:
-          type: string
-          maxLength: 50
-          description: Language preferred by party.
-        notes:
-          type: string
-          maxLength: 100
-          description: Notes on the party.
-        customFields:
-          type: object
-          additionalProperties:
-            type: string
-      required:
-        - partyId
-        - isCustomer
-        - partyType
-    Person:
-      type: object
-      properties:
-        identifications:
-          type: array
-          description: List of specific identification assigned to a party.
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/Identification'
-        personName:
-          $ref: '#/components/schemas/PersonName'
-        gender:
-          type: string
-          enum:
-            - MALE
-            - FEMALE
-            - NON_BINARY
-          description: Person's gender
-        birthDate:
-          type: string
-          format: date
-          description: Indicates person birthdate
-        demographics:
-          type: object
-          properties:
-            occupation:
-              type: object
-              properties:
-                employment:
-                  type: string
-                  description: Type of employment of the party.
-                  maxLength: 100
-                employer:
-                  type: string
-                  description: Details of the party's employment.
-                  maxLength: 100
-            education:
-              type: object
-              properties:
-                educationLevel:
-                  type: string
-                  description: Party's education level, such as qualifications and certifications.
-                  maxLength: 100
-                yearOfPassing:
-                  type: string
-                  maxLength: 20
-                  description: Year of completing the qualification.
-      required:
-        - personName
-        - identifications
-    Organisation:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Organisation Name
-          maxLength: 64
-        type:
-          type: string
-          maxLength: 64
-          description: Specifies a type of organisation.
-        sector:
-          type: string
-          maxLength: 255
-          description: Sector of business of the organisation, for example, pharmaceutical. (ISO20022)
-        establishmentDate:
-          type: string
-          format: date
-          description: Date when the organisation was established.
-        legalStructure:
-          type: object
-          properties:
-            type:
-              type: string
-              maxLength: 64
-              description: Individual, Partnership and Corporation
-          required:
-            - type
-        identifications:
-          type: array
-          description: List of specific identification assigned to a party.
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/Identification'
-      required:
-        - name
-        - identifications
-    Identification:
-      type: object
-      properties:
-        identificationType:
-          type: string
-          enum:
-            - TaxIdentificationNumber
-            - NationalRegistrationNumber
-            - RegistrationAuthorityIdentification
-            - LegalEntityIdentifier
-            - AlienRegistrationNumber
-            - PassportNumber
-            - TaxExemptionIdentificationNumber
-            - CorporateIdentification
-            - DriverLicenseNumber
-            - ForeignInvestmentIdentityNumber
-            - SocialSecurityNumber
-            - IdentityCardNumber
-            - Concat
-            - NationalRegistrationIdentificationNumber
-            - CustomerIdentificationNumber
-            - EmployeeIdentificationNumber
-            - NationalIdentityNumber
-            - TelephoneNumber
-            - EmployerIdentificationNumber
-            - CentralBankIdentificationNumber
-            - ClearingIdentificationNumber
-            - BankPartyIdentification
-            - CertificateOfIncorporationNumber
-            - CountryIdentificationCode
-            - CustomerNumber
-            - DataUniversalNumberingSystem
-            - GS1GLNIdentifier
-            - ELF
-            - SIREN
-            - SIRET
-            - MIC
-            - BICFI
-            - DUNS
-            - EANGLN
-          description: Identification Type of the identity document.
-        identificationNumber:
-          type: string
-          maxLength: 100
-          description: Number or code assigned by the government authority to an entity
-        issuingCountry:
-          type: string
-          maxLength: 100
-          description: Identifies issuing country of the identity document.
-        issuingAuthority:
-          type: string
-          maxLength: 100
-          description: Identifies issuing authority of the identity document.
-        issueDate:
-          type: string
-          format: date
-          description: Identifies issue date of the identity document.
-        expiryDate:
-          type: string
-          format: date
-          description: Identifies expiry date of the identity document.
-      required:
-        - identificationType
-        - identificationNumber
-    PartyRelationship:
-      type: object
-      properties:
-        partyId:
-          $ref: '#/components/schemas/ExternalIdentifier'
-        partyType:
-          type: string
-          enum:
-            - PERSON
-            - ORGANISATION
-          description: Specifies the type of party in different business contexts.
-        partyRole:
-          type: string
-          description: Identifies role of a party
-          enum:
-            - COMPANY_ROLE
-            - COMPANY_OWNERSHIP
-            - COMPANY_CONTROL_PERSON
-            - COMPANY_SIGNATORY
-            - GUARDIAN
-        roleStartDate:
-          type: string
-          format: date
-          description: Identifies start date of the party role
-        roleEndDate:
-          type: string
-          format: date
-          description: Identifies end date of the party role
-        ownershipPercent:
-          type: integer
-          description: Identifies the percentage of stake/ownership for a related person/organisation in this organisation. Total ownership percent must not exceed 100%
-          minimum: 0
-          maximum: 100
-      required:
-        - partyId
-        - partyRole
-    PersonName:
-      type: object
-      properties:
-        salutation:
-          type: string
-          maxLength: 20
-        firstName:
-          type: string
-          description: First name of the person.
-          maxLength: 64
-        middleName:
-          type: string
-          description: Middle name of the person.
-          maxLength: 64
-        familyName:
-          type: string
-          description: Family name of the person.
-          maxLength: 64
-      required:
-        - firstName
-
     LegalEntityType:
       type: string
       title: Legal Entity Type
@@ -1600,46 +1317,31 @@ components:
         - externalId
         - fullName
     EmailAddress:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - WORK
-            - PERSONAL
-            - HOME
-            - OTHERS
-          description: Identifies the type of email. Possible values - WORK, PERSONAL, HOME, OTHERS.
-        primary:
-          type: boolean
-          description: Flag denoting whether this is the primary email address of the party.
-        address:
-          type: string
-          maxLength: 100
-          description: Address for electronic mail (e-mail) (ISO20022).
+      title: "The email addresses the user can be reached by."
       required:
-        - type
         - address
-    Url:
+        - key
+        - type
       type: object
       properties:
-        type:
+        key:
+          maxLength: 70
+          minLength: 1
           type: string
-          enum:
-            - WORK
-            - PERSONAL
-          description: Identifies the type of URL. Possible Values - WORK, PERSONAL.
+          description: Unique key identifying the email address.
+        type:
+          maxLength: 36
+          minLength: 1
+          type: string
+          description: Key identifying the type of electronic address, e.g. work or personal.
         primary:
           type: boolean
-          description: Flag denoting whether this is the primary url address of the party.
+          description: Flag denoting whether this is the main electronic address.
         address:
-          type: string
           maxLength: 255
-          description: Address for the Universal Resource Locator (URL), used over the www (HTTP) service.
-      required:
-        - address
-        - type
-
+          minLength: 1
+          type: string
+          description: Address.
     PhoneNumber:
       required:
         - key
@@ -1720,104 +1422,6 @@ components:
           maxLength: 3
           type: string
           description: Country code - ISO 3166.
-    PartyPostalAddress:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - Business
-            - Correspondence
-            - DeliveryTo
-            - MailTo
-            - POBox
-            - Postal
-            - Residential
-            - Statement
-          description: Identifies the type of postal address.
-        primary:
-          type: boolean
-          description: Flag denoting whether this is the primary postal address of the party.
-        department:
-          type: string
-          maxLength: 100
-          description: Identification of a division of a large organisation or building (ISO20022).
-        subDepartment:
-          type: string
-          maxLength: 100
-          description: Identification of a sub-division of a large organisation or building (ISO20022).
-        addressLine:
-          type: string
-          maxLength: 100
-          description: Information that locates and identifies a specific address, as defined by postal services, presented in free format text (ISO20022).
-        buildingNumber:
-          type: string
-          maxLength: 50
-          description: Number that identifies the position of a building on a street (ISO20022).
-        streetName:
-          type: string
-          maxLength: 100
-          description: Name of a street or thoroughfare (ISO20022).
-        townName:
-          type: string
-          maxLength: 100
-          description: Name of a built-up area, with defined boundaries, and a local government (ISO20022).
-        postalCode:
-          type: string
-          maxLength: 12
-          description: Identifier consisting of a group of letters and/or numbers that is added to a postal address to assist the sorting of mail (ISO20022).
-        countrySubDivision:
-          type: string
-          maxLength: 100
-          description: Identifies name of a country subdivision such as state, region, county. For example - Oregon.
-        country:
-          type: string
-          maxLength: 100
-          description: Country name.
-      required:
-        - type
-
-    PhoneAddress:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - MOBILE
-            - HOME
-            - WORK
-            - OTHER
-          description: Identifies the type of the phone address. For example - MOBILE, LANDLINE, HOME, WORK, FAX.
-        primary:
-          type: boolean
-          description: Flag denoting if its the primary phone address of the party.
-        number:
-          type: string
-          maxLength: 50
-          description: Collection of information that identifies a phone address, as defined by telecom services (ISO20022).
-        countryCode:
-          type: string
-          maxLength: 3
-          description: Phone’s country calling code. Country calling code can be obtained from https://countrycode.org/.
-        countryIsoCode:
-          type: string
-          maxLength: 3
-          description: Phone’s ISO country code. Country code can be obtained from the United Nations (ISO 3166, Alpha-2 code)- https://www.iban.com/country-codes.
-      required:
-        - type
-        - number
-    ElectronicAddress:
-      type: object
-      properties:
-        emails:
-          type: array
-          items:
-            $ref: '#/components/schemas/EmailAddress'
-        urls:
-          type: array
-          items:
-            $ref: '#/components/schemas/Url'
-
     Limit:
       title: Limit
       type: object
@@ -2023,7 +1627,7 @@ components:
           type: boolean
 
     ServiceAgreement:
-      title: Service Agreement
+      title:  Service Agreement
       description: |
         The formal vehicle that allows users of one entity to access products of that or other entities
         A Service agreement is:
@@ -2254,7 +1858,7 @@ components:
       title: External Identifier
       maxLength: 64
       minLength: 1
-      #      pattern: ^{1,64}$
+#      pattern: ^{1,64}$
       type: string
       description: External legal entity identifier.
     UrgentTransfer:
@@ -2786,7 +2390,7 @@ components:
           maxLength: 255
           type: string
           description: Email-id of the contact
-        #          format: email
+#          format: email
         addressLine1:
           maxLength: 70
           type: string
@@ -2954,7 +2558,7 @@ components:
       type: string
       description: "An email account identifier. At least one of the account identifiers\
         \ (accountNumber, IBAN, phoneNumber or email) is mandatory."
-    #      format: email
+#      format: email
     Additions:
       title: Additions
       type: object
@@ -3496,7 +3100,444 @@ components:
           description: Subscription identifier
       required:
         - identifier
-
+    Party:
+      type: object
+      properties:
+        partyId:
+          type: string
+          description: Core System Identifier
+          maxLength: 100
+        legalEntityId:
+          type: string
+          description: Legal Entity Id from Access Control.
+          pattern: ^[0-9a-f]{32}$|^[0-9a-f-]{36}$
+        isCustomer:
+          type: boolean
+          description: Indicates if it is a customer or not.
+        partyType:
+          type: string
+          enum:
+            - PERSON
+            - ORGANISATION
+          description: Type of party in different business contexts.
+        state:
+          type: string
+          enum:
+            - ENROLLED
+            - EXITED
+        subState:
+          type: string
+          enum:
+            - OPENED
+            - APPROVED
+            - ACTIVE
+            - DORMANT
+            - CLOSED
+          description: Status of the party.
+        openingDateTime:
+          type: string
+          format: date-time
+          description: Date on which the party and related basic services are effectively operational for the party.
+        closingDateTime:
+          type: string
+          format: date-time
+          description: Date on which the party and related services cease effectively to be operational for the party.
+        liveDateTime:
+          type: string
+          format: date-time
+          description: Date of the first movement on the party.
+        approvedDateTime:
+          type: string
+          format: date-time
+          description: Date on which the party and related basic services are approved.
+        lastUpdatedDateTime:
+          type: string
+          format: date-time
+          description: Date on which there was any update to the party and related basic services.
+        preferredLanguage:
+          type: string
+          maxLength: 50
+          description: Language preferred by party.
+        notes:
+          type: string
+          maxLength: 100
+          description: Notes on the party.
+        organisation:
+          $ref: '#/components/schemas/Organization'
+        person:
+          $ref: '#/components/schemas/Person'
+        partyPartyRelationships:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartyPartyRelationship'
+        electronicAddresses:
+          $ref: '#/components/schemas/ElectronicAddress'
+        postalAddresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartyPostalAddress'
+        phoneNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartyPhoneNumber'
+        customFields:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - partyId
+        - isCustomer
+        - partyType
+    Organization:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Organisation Name
+          maxLength: 64
+        type:
+          type: string
+          maxLength: 64
+          description: Specifies a type of organisation.
+        sector:
+          type: string
+          maxLength: 255
+          description: Sector of business of the organisation, for example, pharmaceutical. (ISO20022)
+        establishmentDate:
+          type: string
+          format: date
+          description: Date when the organisation was established.
+        legalStructure:
+          type: object
+          properties:
+            type:
+              type: string
+              maxLength: 64
+              description: Individual, Partnership and Corporation
+          required:
+            - type
+        identifications:
+          type: array
+          description: List of specific identification assigned to a party.
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Identification'
+      required:
+        - name
+        - identifications
+    Identification:
+      type: object
+      properties:
+        identificationType:
+          type: string
+          enum:
+            - TaxIdentificationNumber
+            - NationalRegistrationNumber
+            - RegistrationAuthorityIdentification
+            - LegalEntityIdentifier
+            - AlienRegistrationNumber
+            - PassportNumber
+            - TaxExemptionIdentificationNumber
+            - CorporateIdentification
+            - DriverLicenseNumber
+            - ForeignInvestmentIdentityNumber
+            - SocialSecurityNumber
+            - IdentityCardNumber
+            - Concat
+            - NationalRegistrationIdentificationNumber
+            - CustomerIdentificationNumber
+            - EmployeeIdentificationNumber
+            - NationalIdentityNumber
+            - TelephoneNumber
+            - EmployerIdentificationNumber
+            - CentralBankIdentificationNumber
+            - ClearingIdentificationNumber
+            - BankPartyIdentification
+            - CertificateOfIncorporationNumber
+            - CountryIdentificationCode
+            - CustomerNumber
+            - DataUniversalNumberingSystem
+            - GS1GLNIdentifier
+            - ELF
+            - SIREN
+            - SIRET
+            - MIC
+            - BICFI
+            - DUNS
+            - EANGLN
+          description: Identification Type of the identity document.
+        identificationNumber:
+          type: string
+          maxLength: 100
+          description: Number or code assigned by the government authority to an entity
+        issuingCountry:
+          type: string
+          maxLength: 100
+          description: Identifies issuing country of the identity document.
+        issuingAuthority:
+          type: string
+          maxLength: 100
+          description: Identifies issuing authority of the identity document.
+        issueDate:
+          type: string
+          format: date
+          description: Identifies issue date of the identity document.
+        expiryDate:
+          type: string
+          format: date
+          description: Identifies expiry date of the identity document.
+      required:
+        - identificationType
+        - identificationNumber
+    Person:
+      type: object
+      properties:
+        birthDate:
+          type: string
+          format: date
+          description: Indicates person birthdate
+        gender:
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+            - NON_BINARY
+          description: Person's gender
+        personName:
+          $ref: '#/components/schemas/PersonName'
+        demographics:
+          $ref: '#/components/schemas/Demographics'
+        identifications:
+          type: array
+          description: List of specific identification assigned to a party.
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Identification'
+      required:
+        - personName
+        - identifications
+    PersonName:
+      type: object
+      properties:
+        salutation:
+          type: string
+          maxLength: 20
+        firstName:
+          type: string
+          description: First name of the person.
+          maxLength: 64
+        middleName:
+          type: string
+          description: Middle name of the person.
+          maxLength: 64
+        familyName:
+          type: string
+          description: Family name of the person.
+          maxLength: 64
+      required:
+        - firstName
+    Demographics:
+      type: object
+      properties:
+        occupation:
+          type: object
+          properties:
+            employment:
+              type: string
+              description: Type of employment of the party.
+              maxLength: 100
+            employer:
+              type: string
+              description: Details of the party's employment.
+              maxLength: 100
+        education:
+          type: object
+          properties:
+            educationLevel:
+              type: string
+              description: Party's education level, such as qualifications and certifications.
+              maxLength: 100
+            yearOfPassing:
+              type: string
+              maxLength: 20
+              description: Year of completing the qualification.
+    PartyPartyRelationship:
+      type: object
+      properties:
+        partyId:
+          type: string
+          maxLength: 100
+          description: Core System Id
+        partyType:
+          type: string
+          enum:
+            - PERSON
+            - ORGANISATION
+          description: Specifies the type of party in different business contexts.
+        partyRole:
+          type: string
+          description: Identifies role of a party
+          enum:
+            - COMPANY_ROLE
+            - COMPANY_OWNERSHIP
+            - COMPANY_CONTROL_PERSON
+            - COMPANY_SIGNATORY
+            - GUARDIAN
+        roleStartDate:
+          type: string
+          format: date
+          description: Identifies start date of the party role
+        roleEndDate:
+          type: string
+          format: date
+          description: Identifies end date of the party role
+        ownershipPercent:
+          type: integer
+          description: Identifies the percentage of stake/ownership for a related person/organisation in this organisation. Total ownership percent must not exceed 100%
+          minimum: 0
+          maximum: 100
+      required:
+        - partyId
+        - partyRole
+    ElectronicAddress:
+      type: object
+      description: Address which is accessed by electronic means.
+      properties:
+        emails:
+          type: array
+          description: Email(s) of the party.
+          items:
+            $ref: '#/components/schemas/Email'
+        urls:
+          type: array
+          description: Address for the Universal Resource Locator (URL), used over the www (HTTP) service.
+          items:
+            $ref: '#/components/schemas/Url'
+    Email:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - WORK
+            - PERSONAL
+            - HOME
+            - OTHERS
+          description: Identifies the type of email. Possible values - WORK, PERSONAL, HOME, OTHERS.
+        primary:
+          type: boolean
+          description: Flag denoting whether this is the primary email address of the party.
+        address:
+          type: string
+          maxLength: 100
+          description: Address for electronic mail (e-mail) (ISO20022).
+      required:
+        - type
+        - address
+    Url:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - WORK
+            - PERSONAL
+          description: Identifies the type of URL. Possible Values - WORK, PERSONAL.
+        primary:
+          type: boolean
+          description: Flag denoting whether this is the primary url address of the party.
+        address:
+          type: string
+          maxLength: 255
+          description: Address for the Universal Resource Locator (URL), used over the www (HTTP) service.
+      required:
+        - address
+        - type
+    PartyPostalAddress:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Business
+            - Correspondence
+            - DeliveryTo
+            - MailTo
+            - POBox
+            - Postal
+            - Residential
+            - Statement
+          description: Identifies the type of postal address.
+        primary:
+          type: boolean
+          description: Flag denoting whether this is the primary postal address of the party.
+        department:
+          type: string
+          maxLength: 100
+          description: Identification of a division of a large organisation or building (ISO20022).
+        subDepartment:
+          type: string
+          maxLength: 100
+          description: Identification of a sub-division of a large organisation or building (ISO20022).
+        addressLine:
+          type: string
+          maxLength: 100
+          description: Information that locates and identifies a specific address, as defined by postal services, presented in free format text (ISO20022).
+        buildingNumber:
+          type: string
+          maxLength: 50
+          description: Number that identifies the position of a building on a street (ISO20022).
+        streetName:
+          type: string
+          maxLength: 100
+          description: Name of a street or thoroughfare (ISO20022).
+        townName:
+          type: string
+          maxLength: 100
+          description: Name of a built-up area, with defined boundaries, and a local government (ISO20022).
+        postalCode:
+          type: string
+          maxLength: 12
+          description: Identifier consisting of a group of letters and/or numbers that is added to a postal address to assist the sorting of mail (ISO20022).
+        countrySubDivision:
+          type: string
+          maxLength: 100
+          description: Identifies name of a country subdivision such as state, region, county. For example - Oregon.
+        country:
+          type: string
+          maxLength: 100
+          description: Country name.
+      required:
+        - type
+    PartyPhoneNumber:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - MOBILE
+            - HOME
+            - WORK
+            - OTHER
+          description: Identifies the type of the phone address. For example - MOBILE, LANDLINE, HOME, WORK, FAX.
+        primary:
+          type: boolean
+          description: Flag denoting if its the primary phone address of the party.
+        number:
+          type: string
+          maxLength: 50
+          description: Collection of information that identifies a phone address, as defined by telecom services (ISO20022).
+        countryCode:
+          type: string
+          maxLength: 3
+          description: Phone’s country calling code. Country calling code can be obtained from https://countrycode.org/.
+        countryIsoCode:
+          type: string
+          maxLength: 3
+          description: Phone’s ISO country code. Country code can be obtained from the United Nations (ISO 3166, Alpha-2 code)- https://www.iban.com/country-codes.
+      required:
+        - type
+        - number
   examples:
     RootLegalEntityHierarchyExample:
       description: "Example Request for setting up Root Legal Entity Structure as described on Backbase Community"

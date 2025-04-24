@@ -10,24 +10,13 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper(
     componentModel = MappingConstants.ComponentModel.SPRING,
-    unmappedTargetPolicy = ReportingPolicy.IGNORE,
-    uses = {
-        PersonMapper.class,
-        OrganisationMapper.class,
-        PartyRelationshipMapper.class,
-        AddressMapper.class,
-        ElectronicAddressMapper.class
-    }
+    unmappedTargetPolicy = ReportingPolicy.IGNORE
 )
 public interface PartyMapper {
 
     PartyMapper INSTANCE = Mappers.getMapper(PartyMapper.class);
 
     @Mapping(target = "additions", source = "customFields")
-    @Mapping(target = "phoneNumbers", source = "phoneAddresses")
-    @Mapping(target = "electronicAddresses", source = "electronicAddress")
-    @Mapping(target = "legalEntityId", ignore = true)
-    @Mapping(target = "subState", ignore = true)
     PartyUpsertDto partyToPartyUpsertDto(Party party);
 
 }
