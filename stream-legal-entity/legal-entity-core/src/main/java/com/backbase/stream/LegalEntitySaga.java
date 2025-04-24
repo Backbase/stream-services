@@ -182,6 +182,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     public Mono<LegalEntityTask> executeTask(@SpanTag(value = "streamTask") LegalEntityTask streamTask) {
         return upsertLegalEntity(streamTask)
             .flatMap(this::linkLegalEntityToRealm)
+            .flatMap(this::setupParties)
             .flatMap(this::setupAdministrators)
             .flatMap(this::setupUsers)
             .flatMap(this::processAudiencesSegmentation)
@@ -192,8 +193,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .flatMap(this::setupLimits)
             .flatMap(this::processProducts)
             .flatMap(this::postContacts)
-            .flatMap(this::processSubsidiaries)
-            .flatMap(this::processCustomerProfile);
+            .flatMap(this::processSubsidiaries);
     }
 
     private Mono<LegalEntityTask> processAudiencesSegmentation(LegalEntityTask streamTask) {
@@ -1099,7 +1099,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             });
     }
 
-    private Mono<LegalEntityTask> processCustomerProfile(LegalEntityTask legalEntityTask) {
+    private Mono<LegalEntityTask> setupParties(LegalEntityTask legalEntityTask) {
 
         log.info("Processing Customer Profile Parties for: {}", legalEntityTask.getName());
         var legalEntity = legalEntityTask.getData();

@@ -407,6 +407,8 @@ class LegalEntitySagaTest {
         LegalEntityTask task = setupLegalEntityTask();
         when(userService.getUsersByLegalEntity(any(), anyInt(), anyInt()))
             .thenReturn(Mono.just(new GetUsersList().totalElements(0L).users(null)));
+        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
         Assertions.assertThrows(
             StreamTaskException.class,
             () -> executeLegalEntityTaskAndBlock(task),
@@ -416,7 +418,7 @@ class LegalEntitySagaTest {
     }
 
     @Test
-    void testProcessCustomerProfile_IfPartyFound_ThenUpsertParty() {
+    void testSetupParties_IfPartyFound_ThenUpsertParty() {
         var task = setupLegalEntityTask();
         when(customerProfileService.upsertParty(any(Party.class))).thenReturn(
             Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
