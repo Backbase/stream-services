@@ -1,6 +1,7 @@
 package com.backbase.stream.mapper;
 
 
+import static com.backbase.stream.FixtureUtils.reflectiveAlphaFixtureMonkey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -30,16 +31,7 @@ public class MapperTest {
 
     @Autowired
     private PartyMapper partyMapper;
-    private final FixtureMonkey fixtureMonkey = FixtureMonkey.builder()
-        .objectIntrospector(FieldReflectionArbitraryIntrospector.INSTANCE)
-        .defaultNotNull(true)
-        .plugin(new JqwikPlugin().javaTypeArbitraryGenerator(new JavaTypeArbitraryGenerator() {
-            @Override
-            public StringArbitrary strings() {
-                return Arbitraries.strings().alpha();
-            }
-        }))
-        .build();
+    private final FixtureMonkey fixtureMonkey = reflectiveAlphaFixtureMonkey;
 
     @Test
     void testPartyToPartyUpsertDtoMapping() {

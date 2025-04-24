@@ -1,5 +1,6 @@
 package com.backbase.stream.service;
 
+import static com.backbase.stream.FixtureUtils.reflectiveAlphaFixtureMonkey;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -32,15 +33,7 @@ class CustomerProfileServiceTest {
 
     private CustomerProfileService customerProfileService;
 
-    private final FixtureMonkey fixtureMonkey = FixtureMonkey.builder()
-        .objectIntrospector(FieldReflectionArbitraryIntrospector.INSTANCE)
-        .plugin(new JqwikPlugin().javaTypeArbitraryGenerator(new JavaTypeArbitraryGenerator() {
-            @Override
-            public StringArbitrary strings() {
-                return Arbitraries.strings().alpha();
-            }
-        }))
-        .build();
+    private final FixtureMonkey fixtureMonkey = reflectiveAlphaFixtureMonkey;
     @Mock
     private PartyManagementIntegrationApi partyManagementIntegrationApiMock;
 

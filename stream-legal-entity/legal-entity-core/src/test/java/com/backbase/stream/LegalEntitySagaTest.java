@@ -1,5 +1,6 @@
 package com.backbase.stream;
 
+import static com.backbase.stream.FixtureUtils.reflectiveAlphaFixtureMonkey;
 import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
@@ -140,15 +141,7 @@ class LegalEntitySagaTest {
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
         getLegalEntitySagaConfigurationProperties();
 
-    private final FixtureMonkey fixtureMonkey = FixtureMonkey.builder()
-        .objectIntrospector(FieldReflectionArbitraryIntrospector.INSTANCE)
-        .plugin(new JqwikPlugin().javaTypeArbitraryGenerator(new JavaTypeArbitraryGenerator() {
-            @Override
-            public StringArbitrary strings() {
-                return Arbitraries.strings().alpha();
-            }
-        }))
-        .build();
+    private final FixtureMonkey fixtureMonkey = reflectiveAlphaFixtureMonkey;
 
     private static final int PARTY_SIZE = 10;
 
