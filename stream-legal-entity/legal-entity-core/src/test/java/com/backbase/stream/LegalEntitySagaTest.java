@@ -357,7 +357,7 @@ class LegalEntitySagaTest {
     void testCustomServiceAgreement_IfFetchedServiceAgreementExists_ThenSettingUp() {
         var task = setupLegalEntityTask();
 
-        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
             Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
 
         mockAccessGroupService(userId);
@@ -373,7 +373,7 @@ class LegalEntitySagaTest {
     void testCustomServiceAgreement_IfNoCustomServiceAgreementExists_ThenCreateMaster() {
         var task = setupLegalEntityTask();
 
-        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
             Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
         when(accessGroupService.getUserContextsByUserId(userId)).thenReturn(Mono.empty());
         mockUserService(userId);
@@ -388,7 +388,7 @@ class LegalEntitySagaTest {
     void testCustomServiceAgreement_IfNoMatchingCustomServiceAgreementExists_ThenCreateMaster() {
         LegalEntityTask task = setupLegalEntityTask();
 
-        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
             Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
 
         when(accessGroupService.getUserContextsByUserId(userId))
@@ -407,7 +407,7 @@ class LegalEntitySagaTest {
         LegalEntityTask task = setupLegalEntityTask();
         when(userService.getUsersByLegalEntity(any(), anyInt(), anyInt()))
             .thenReturn(Mono.just(new GetUsersList().totalElements(0L).users(null)));
-        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
             Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
         Assertions.assertThrows(
             StreamTaskException.class,
@@ -420,12 +420,12 @@ class LegalEntitySagaTest {
     @Test
     void testSetupParties_IfPartyFound_ThenUpsertParty() {
         var task = setupLegalEntityTask();
-        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
             Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
         mockAccessGroupService(userId);
         mockUserService(userId);
         legalEntitySaga.executeTask(task).block();
-        verify(customerProfileService, times(PARTY_SIZE)).upsertParty(any(Party.class));
+        verify(customerProfileService, times(PARTY_SIZE)).upsertParty(any(Party.class), anyString());
     }
 
     @Test
@@ -439,12 +439,12 @@ class LegalEntitySagaTest {
             null,
             null
         );
-        when(customerProfileService.upsertParty(any(Party.class))).thenReturn(Mono.error(mockException));
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(Mono.error(mockException));
 
         mockAccessGroupService(userId);
         mockUserService(userId);
         legalEntitySaga.executeTask(task).block();
-        verify(customerProfileService, times(PARTY_SIZE)).upsertParty(any(Party.class));
+        verify(customerProfileService, times(PARTY_SIZE)).upsertParty(any(Party.class), anyString());
         verify(task, times(PARTY_SIZE)).error(
             eq(LegalEntitySaga.PARTY),
             eq(LegalEntitySaga.PROCESS_CUSTOMER_PROFILE),

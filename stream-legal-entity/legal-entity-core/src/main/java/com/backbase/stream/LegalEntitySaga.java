@@ -1115,7 +1115,7 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
             .filter(Objects::nonNull)
             .concatMap(party -> {
                 log.debug("Attempting to upsert party with partyId: {}", party.getPartyId());
-                return customerProfileService.upsertParty(party)
+                return customerProfileService.upsertParty(party, legalEntity.getExternalId())
                     .doOnSuccess(result -> {
                         legalEntityTask.info(PARTY, PROCESS_CUSTOMER_PROFILE, "upserted", party.getPartyId(), null,
                             "Successfully upserted party: %s for LE: %s", party.getPartyId(),

@@ -8,15 +8,11 @@ import static org.mockito.Mockito.when;
 import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
 import com.backbase.customerprofile.api.integration.v1.model.PartyResponseUpsertDto;
 import com.backbase.customerprofile.api.integration.v1.model.PartyUpsertDto;
+import com.backbase.stream.legalentity.model.Party;
 import com.backbase.stream.mapper.PartyMapper;
 import com.navercorp.fixturemonkey.FixtureMonkey;
-import com.navercorp.fixturemonkey.api.introspector.FieldReflectionArbitraryIntrospector;
-import com.navercorp.fixturemonkey.api.jqwik.JavaTypeArbitraryGenerator;
-import com.navercorp.fixturemonkey.api.jqwik.JqwikPlugin;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import net.jqwik.api.Arbitraries;
-import net.jqwik.api.arbitraries.StringArbitrary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,7 +43,7 @@ class CustomerProfileServiceTest {
     @DisplayName("Upsert party should return PartyResponseUpsertDto when API call is successful")
     void createCustomer_success() {
         var legalEntityId = UUID.randomUUID().toString();
-        var requestDto = fixtureMonkey.giveMeBuilder(PartyUpsertDto.class)
+        var requestDto = fixtureMonkey.giveMeBuilder(Party.class)
             .set("legalEntityId", legalEntityId)
             .sample();
         var expectedResponseDto = fixtureMonkey.giveMeBuilder(PartyResponseUpsertDto.class)
@@ -56,7 +52,7 @@ class CustomerProfileServiceTest {
         when(partyManagementIntegrationApiMock.upsertParty(any(PartyUpsertDto.class)))
             .thenReturn(Mono.just(expectedResponseDto));
 
-        var result = customerProfileService.upsertParty(requestDto);
+        var result = customerProfileService.upsertParty(requestDto, legalEntityId);
 
         StepVerifier.create(result)
             .assertNext(response -> {
@@ -70,7 +66,7 @@ class CustomerProfileServiceTest {
     @Test
     @DisplayName("Upsert party should propagate WebClientResponseException when API call fails")
     void upsertParty_apiError() {
-        var requestDto = fixtureMonkey.giveMeOne(PartyUpsertDto.class);
+        var requestDto = fixtureMonkey.giveMeOne(Party.class);
         var expectedException = new WebClientResponseException(
             HttpStatus.BAD_REQUEST.value(),
             "Bad Request from API",
@@ -79,7 +75,7 @@ class CustomerProfileServiceTest {
             StandardCharsets.UTF_8);
         when(partyManagementIntegrationApiMock.upsertParty(any(PartyUpsertDto.class)))
             .thenReturn(Mono.error(expectedException));
-        var result = customerProfileService.upsertParty(requestDto);
+        var result = customerProfileService.upsertParty(requestDto, null);
         StepVerifier.create(result)
             .expectErrorMatches(throwable ->
                 throwable instanceof WebClientResponseException &&
@@ -92,11 +88,11 @@ class CustomerProfileServiceTest {
     @Test
     @DisplayName("Upsert party should propagate other RuntimeExceptions when API call fails unexpectedly")
     void upsertParty_otherError() {
-        var requestDto = fixtureMonkey.giveMeOne(PartyUpsertDto.class);
+        var requestDto = fixtureMonkey.giveMeOne(Party.class);
         var expectedException = new RuntimeException("Unexpected error");
         when(partyManagementIntegrationApiMock.upsertParty(any(PartyUpsertDto.class)))
             .thenReturn(Mono.error(expectedException));
-        var result = customerProfileService.upsertParty(requestDto);
+        var result = customerProfileService.upsertParty(requestDto, null);
         StepVerifier.create(result)
             .expectErrorMatches(throwable -> throwable == expectedException)
             .verify();
