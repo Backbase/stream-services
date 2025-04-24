@@ -1203,6 +1203,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/User'
+        parties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Party'
         masterServiceAgreement:
           $ref: '#/components/schemas/ServiceAgreementV2'
         contacts:
