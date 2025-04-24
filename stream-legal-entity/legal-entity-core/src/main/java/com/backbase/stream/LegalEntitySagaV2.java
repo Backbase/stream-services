@@ -590,56 +590,56 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
             });
     }
 
-    private Mono<LegalEntityTaskV2> setupParties(LegalEntityTaskV2 legalEntityTask) {
+    private Mono<LegalEntityTaskV2> setupParties(LegalEntityTaskV2 legalEntityTaskV2) {
 
-        log.info("Processing Customer Profile Parties for: {}", legalEntityTask.getName());
-        var legalEntity = legalEntityTask.getData();
+        log.info("Processing Parties for: {}", legalEntityTaskV2.getName());
 
-        if (isEmpty(legalEntity.getParties())) {
-            legalEntityTask.info(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "skipped", legalEntity.getExternalId(),
-                legalEntity.getInternalId(), "No parties found in Legal Entity to process.");
-            return Mono.just(legalEntityTask);
+        LegalEntityV2 legalEntityV2 = legalEntityTaskV2.getData();
+
+        if (isEmpty(legalEntityV2.getParties())) {
+            legalEntityTaskV2.info(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "skipped", legalEntityV2.getExternalId(),
+                legalEntityV2.getInternalId(), "No parties found in Legal Entity to process.");
+            return Mono.just(legalEntityTaskV2);
         }
-        var processingErrors = new CopyOnWriteArrayList<>();
+        var processingErrors = new CopyOnWriteArrayList<Throwable>();
 
-        return Flux.fromStream(nullableCollectionToStream(legalEntity.getParties()))
+        return Flux.fromStream(nullableCollectionToStream(legalEntityV2.getParties()))
             .filter(Objects::nonNull)
             .concatMap(party -> {
-                log.debug("Attempting to upsert party with partyId: {}", party.getPartyId());
-                return customerProfileService.upsertParty(party, legalEntity.getExternalId())
-                    .doOnSuccess(result -> {
-                        legalEntityTask.info(PARTY, PROCESS_CUSTOMER_PROFILE, "upserted", party.getPartyId(), null,
-                            "Successfully upserted party: %s for LE: %s", party.getPartyId(),
-                            legalEntity.getExternalId());
-                    })
+                log.debug("Processing party with partyId: {}", party.getPartyId());
+                return customerProfileService.upsertParty(party, legalEntityV2.getExternalId())
+                    .doOnSuccess(result -> legalEntityTaskV2
+                        .info(PARTY, PROCESS_CUSTOMER_PROFILE, "upserted", party.getPartyId(), null,
+                        "Successfully processed party: %s for LE: %s", party.getPartyId(),
+                        legalEntityV2.getExternalId()))
                     .onErrorResume(throwable -> {
                         log.error("Failed to upsert party {}: {}", party.getPartyId(), throwable.getMessage(),
                             throwable);
                         processingErrors.add(throwable);
-                        legalEntityTask.error(PARTY, PROCESS_CUSTOMER_PROFILE, "failed", party.getPartyId(), null,
+                        legalEntityTaskV2.error(PARTY, PROCESS_CUSTOMER_PROFILE, "failed", party.getPartyId(), null,
                             throwable,
-                            throwable.getMessage(), "Error upserting party: %s for LE: %s", party.getPartyId(),
-                            legalEntity.getExternalId());
+                            throwable.getMessage(), "Error processing party: %s for LE: %s", party.getPartyId(),
+                            legalEntityV2.getExternalId());
                         return Mono.empty();
                     })
                     .then(Mono.just(true));
             })
             .then(Mono.fromRunnable(() -> {
                 if (!processingErrors.isEmpty()) {
-                    log.warn("Completed processing parties for LE {} with {} errors.", legalEntity.getExternalId(),
+                    log.warn("Processed parties for LE {} with {} errors.", legalEntityV2.getExternalId(),
                         processingErrors.size());
-                    legalEntityTask.warn(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "completed_with_errors",
-                        legalEntity.getExternalId(),
-                        legalEntity.getInternalId(), "Party processing completed with %d errors.",
+                    legalEntityTaskV2.warn(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "completed_with_errors",
+                        legalEntityV2.getExternalId(),
+                        legalEntityV2.getInternalId(), "Party processing completed with %d errors.",
                         processingErrors.size());
                 } else {
-                    log.info("Successfully processed all parties for LE {}.", legalEntity.getExternalId());
-                    legalEntityTask.info(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "completed_successfully",
-                        legalEntity.getExternalId(),
-                        legalEntity.getInternalId(), "Party processing completed successfully.");
+                    log.info("Successfully processed all parties for LE {}.", legalEntityV2.getExternalId());
+                    legalEntityTaskV2.info(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "completed_successfully",
+                        legalEntityV2.getExternalId(),
+                        legalEntityV2.getInternalId(), "Party processing completed successfully.");
                 }
             }))
-            .thenReturn(legalEntityTask);
+            .thenReturn(legalEntityTaskV2);
     }
 
     private Stream<LimitsTask> createLimitsTask(LegalEntityTaskV2 streamTask, String legalEntityId,
