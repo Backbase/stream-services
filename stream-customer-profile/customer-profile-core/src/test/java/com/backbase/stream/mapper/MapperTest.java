@@ -59,26 +59,26 @@ public class MapperTest {
 
         if (party.getPartyType() != null) {
             assertNotNull(resultDto.getPartyType());
-            assertEquals(party.getPartyType().getValue(), resultDto.getPartyType().getValue()); //
+            assertEquals(party.getPartyType().getValue(), resultDto.getPartyType().getValue()); 
         } else {
             assertNull(resultDto.getPartyType());
         }
         if (party.getState() != null) {
             assertNotNull(resultDto.getState());
-            assertEquals(party.getState().getValue(), resultDto.getState().getValue()); //
+            assertEquals(party.getState().getValue(), resultDto.getState().getValue()); 
         } else {
             assertNull(resultDto.getState());
         }
-        assertEquals(party.getClosingDateTime(), resultDto.getClosingDateTime()); //
-        assertEquals(party.getApprovedDateTime(), resultDto.getApprovedDateTime()); //
-        assertEquals(party.getLastUpdatedDateTime(), resultDto.getLastUpdatedDateTime()); //
-        assertEquals(party.getOpeningDateTime(), resultDto.getOpeningDateTime()); //
-        assertEquals(party.getLiveDateTime(), resultDto.getLiveDateTime()); //
-        assertEquals(party.getPreferredLanguage(), resultDto.getPreferredLanguage()); //
-        assertEquals(party.getNotes(), resultDto.getNotes()); //
+        assertEquals(party.getClosingDateTime(), resultDto.getClosingDateTime()); 
+        assertEquals(party.getApprovedDateTime(), resultDto.getApprovedDateTime()); 
+        assertEquals(party.getLastUpdatedDateTime(), resultDto.getLastUpdatedDateTime()); 
+        assertEquals(party.getOpeningDateTime(), resultDto.getOpeningDateTime()); 
+        assertEquals(party.getLiveDateTime(), resultDto.getLiveDateTime()); 
+        assertEquals(party.getPreferredLanguage(), resultDto.getPreferredLanguage()); 
+        assertEquals(party.getNotes(), resultDto.getNotes()); 
 
-        assertNull(resultDto.getLegalEntityId(), "legalEntityId debe ser ignorado por el mapper");
-        assertNull(resultDto.getSubState(), "subState debe ser ignorado por el mapper");
+        assertNull(resultDto.getLegalEntityId(), "legalEntityId ignored by mapper");
+        assertNull(resultDto.getSubState(), "subState  ignored by mapper");
 
         if (party.getCustomFields() != null) {
             assertNotNull(resultDto.getAdditions());
