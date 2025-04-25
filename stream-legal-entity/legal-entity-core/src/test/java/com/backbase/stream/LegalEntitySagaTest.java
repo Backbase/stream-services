@@ -489,32 +489,32 @@ class LegalEntitySagaTest {
         var jobRole = new JobRole("someJobRole", "someJobRole");
         jobRole.setFunctionGroups(singletonList(functionGroup));
 
-        var legalEntity = new LegalEntity("le_name", null, null);
-        legalEntity.setInternalId(leInternalId);
-        legalEntity.setExternalId(leExternalId);
-        legalEntity.setParentExternalId(leExternalId);
-        legalEntity.setProductGroups(singletonList(productGroup));
-        legalEntity.setParties(fixtureMonkey.giveMe(Party.class, PARTY_SIZE));
+        var setuplegalEntity = new LegalEntity("le_name", null, null);
+        setuplegalEntity.setInternalId(leInternalId);
+        setuplegalEntity.setExternalId(leExternalId);
+        setuplegalEntity.setParentExternalId(leExternalId);
+        setuplegalEntity.setProductGroups(singletonList(productGroup));
+        setuplegalEntity.setParties(fixtureMonkey.giveMe(Party.class, PARTY_SIZE));
         var sa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole)
             .creatorLegalEntity(leExternalId);
 
-        var task = mockLegalEntityTask(legalEntity);
+        var task = mockLegalEntityTask(setuplegalEntity);
 
-        when(task.getLegalEntity()).thenReturn(legalEntity);
+        when(task.getLegalEntity()).thenReturn(setuplegalEntity);
         when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(setuplegalEntity));
         when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(leInternalId)).thenReturn(
             Mono.empty());
-        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(setuplegalEntity));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
         when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
         when(legalEntitySagaConfigurationProperties.getServiceAgreementPurposes()).thenReturn(
             Set.of("FAMILY_BANKING"));
         when(userService.setupRealm(task.getLegalEntity())).thenReturn(Mono.just(new Realm()));
-        when(userService.linkLegalEntityToRealm(task.getLegalEntity())).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntity));
+        when(userService.linkLegalEntityToRealm(task.getLegalEntity())).thenReturn(Mono.just(setuplegalEntity));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(setuplegalEntity));
+        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(setuplegalEntity));
 
         return task;
     }

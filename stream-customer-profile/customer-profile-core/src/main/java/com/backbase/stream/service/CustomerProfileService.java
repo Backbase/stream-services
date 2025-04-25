@@ -16,13 +16,11 @@ public class CustomerProfileService {
 
     private final PartyMapper partyMapper;
 
-    public Mono<PartyResponseUpsertDto> upsertParty(Party party, String legalEntityExternalId) {
-
-        if (legalEntityExternalId != null && !legalEntityExternalId.trim().isEmpty() && party.getIsCustomer()) {
-            party.partyId(legalEntityExternalId);
-        }
+    public Mono<PartyResponseUpsertDto> upsertParty(Party party, String legalEntityInternalId) {
         var partyUpsertDto = partyMapper.partyToPartyUpsertDto(party);
-
+        if (legalEntityInternalId != null && !legalEntityInternalId.trim().isEmpty() && party.getIsCustomer()) {
+            partyUpsertDto.setLegalEntityId(legalEntityInternalId);
+        }
         return partyManagementIntegrationApi.upsertParty(partyUpsertDto);
     }
 }

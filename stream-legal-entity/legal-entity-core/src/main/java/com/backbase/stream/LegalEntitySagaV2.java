@@ -607,7 +607,7 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
             .filter(Objects::nonNull)
             .concatMap(party -> {
                 log.debug("Processing party with partyId: {}", party.getPartyId());
-                return customerProfileService.upsertParty(party, legalEntityV2.getExternalId())
+                return customerProfileService.upsertParty(party, legalEntityV2.getInternalId())
                     .doOnSuccess(result -> legalEntityTaskV2
                         .info(PARTY, PROCESS_CUSTOMER_PROFILE, "upserted", party.getPartyId(), null,
                         "Successfully processed party: %s for LE: %s", party.getPartyId(),
@@ -616,7 +616,7 @@ public class LegalEntitySagaV2 implements StreamTaskExecutor<LegalEntityTaskV2> 
                         log.error("Failed to upsert party {}: {}", party.getPartyId(), throwable.getMessage(),
                             throwable);
                         processingErrors.add(throwable);
-                        legalEntityTaskV2.error(PARTY, PROCESS_CUSTOMER_PROFILE, "failed", party.getPartyId(), null,
+                        legalEntityTaskV2.error(PARTY, PROCESS_CUSTOMER_PROFILE, FAILED, party.getPartyId(), null,
                             throwable,
                             throwable.getMessage(), "Error processing party: %s for LE: %s", party.getPartyId(),
                             legalEntityV2.getExternalId());

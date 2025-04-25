@@ -3111,10 +3111,6 @@ components:
           type: string
           description: Core System Identifier
           maxLength: 100
-        legalEntityId:
-          type: string
-          description: Legal Entity Id from Access Control.
-          pattern: ^[0-9a-f]{32}$|^[0-9a-f-]{36}$
         isCustomer:
           type: boolean
           description: Indicates if it is a customer or not.
