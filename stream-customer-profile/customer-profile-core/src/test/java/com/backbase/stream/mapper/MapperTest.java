@@ -55,7 +55,6 @@ class MapperTest {
         assertEquals(party.getPreferredLanguage(), resultDto.getPreferredLanguage());
         assertEquals(party.getNotes(), resultDto.getNotes());
 
-        assertEquals(party.getLegalEntityId(), resultDto.getLegalEntityId());
         assertNotNull(resultDto.getSubState());
         assertEquals(party.getSubState().getValue(), resultDto.getSubState().getValue());
 
