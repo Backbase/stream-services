@@ -38,26 +38,4 @@ public class CustomerProfileClientConfig extends CompositeApiClientConfig {
         ApiClient customerProfileApiIntegrationClient) {
         return new PartyManagementIntegrationApi(customerProfileApiIntegrationClient);
     }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public CustomerManagementIntegrationApi createCustomerManagementIntegrationApi(
-        ApiClient customerProfileClientConfig) {
-        return new CustomerManagementIntegrationApi(customerProfileClientConfig);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public CustomerProfileManagementIntegrationApi createCustomerProfileManagementIntegrationApi(
-        ApiClient customerProfileClientConfig) {
-        return new CustomerProfileManagementIntegrationApi(customerProfileClientConfig);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public CustomerLifeCycleManagementIntegrationApi createCustomerLifeCycleManagementIntegrationApi(
-        ApiClient customerProfileClientConfig) {
-        return new CustomerLifeCycleManagementIntegrationApi(customerProfileClientConfig);
-    }
-
 }
