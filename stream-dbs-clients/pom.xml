@@ -222,7 +222,6 @@
                                     <groupId>com.backbase.flow.customer-profile.api</groupId>
                                     <artifactId>customer-profile</artifactId>
                                     <version>1.17.1</version>
-                                    <!--TODO delete version when april released finished-->
                                     <classifier>api</classifier>
                                     <type>zip</type>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
