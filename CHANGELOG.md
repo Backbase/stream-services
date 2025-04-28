@@ -1,7 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-## [6.18.0] (https://github.com/Backbase/stream-services/compare/6.17.0...6.18.0)
+## [6.19.0] (https://github.com/Backbase/stream-services/compare/6.18.0...6.19.0)
 - Integrate Customer Profile Service into Legal Entity Saga and Legal Entity Saga V2 ingestion
+
+## [6.18.0](https://github.com/Backbase/stream-services/compare/6.17.0...6.18.0)
+### Added
+- Extended the data group types to include; `CASE_DEFINITION`, `CASE_INSTANCE`, `PROCESS_DEFINITION`, `PROCESS_INSTANCE`, `TASK_DEFINITION`, `TASK_INSTANCE`. 
 
 ## [6.17.0](https://github.com/Backbase/stream-services/compare/6.16.0...6.17.0)
 ### Added
