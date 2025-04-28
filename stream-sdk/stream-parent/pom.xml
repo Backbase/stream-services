@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>backbase-parent</artifactId>
-        <version>18.1.0</version>
+        <version>19.0.0</version>
         <relativePath/>
     </parent>
 
@@ -38,7 +38,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <ssdk.version>18.1.0</ssdk.version>
+        <ssdk.version>19.0.0</ssdk.version>
         <japicmp.skip>true</japicmp.skip>
     </properties>
 
