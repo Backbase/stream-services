@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>6.17.0</version>
+    <version>6.18.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
