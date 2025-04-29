@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -36,7 +37,7 @@ class CustomerProfileServiceTest {
 
     @BeforeEach
     void setup() {
-        customerProfileService = new CustomerProfileService(partyManagementIntegrationApiMock, PartyMapper.INSTANCE);
+        customerProfileService = new CustomerProfileService(partyManagementIntegrationApiMock, Mappers.getMapper(PartyMapper.class));
     }
 
     @Test

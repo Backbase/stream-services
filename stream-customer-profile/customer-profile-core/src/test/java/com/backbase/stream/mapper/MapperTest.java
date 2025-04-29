@@ -5,9 +5,13 @@ import static com.backbase.stream.FixtureUtils.reflectiveAlphaFixtureMonkey;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.backbase.stream.legalentity.model.Party;
 import com.navercorp.fixturemonkey.FixtureMonkey;
+import java.util.ArrayList;
+import java.util.HashMap;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,147 +24,179 @@ class MapperTest {
     private final FixtureMonkey fixtureMonkey = reflectiveAlphaFixtureMonkey;
 
     @Test
-    void testPartyToPartyUpsertDtoMapping() {
-
+    @DisplayName("Should map basic fields correctly when not null")
+    void shouldMapBasicFields() {
         var party = fixtureMonkey.giveMeOne(Party.class);
-
-        assertNotNull(party.getPartyId(), "FixtureMonkey should generate a partyId");
-        assertNotNull(party.getIsCustomer(), "FixtureMonkey should generate isCustomer");
-        assertNotNull(party.getPartyType(), "FixtureMonkey should generate partyType");
 
         var resultDto = partyMapper.partyToPartyUpsertDto(party);
 
         assertNotNull(resultDto);
-
         assertEquals(party.getPartyId(), resultDto.getPartyId());
         assertEquals(party.getIsCustomer(), resultDto.getIsCustomer());
-
-        if (party.getPartyType() != null) {
-            assertNotNull(resultDto.getPartyType());
-            assertEquals(party.getPartyType().getValue(), resultDto.getPartyType().getValue());
-        } else {
-            assertNull(resultDto.getPartyType());
-        }
-        if (party.getState() != null) {
-            assertNotNull(resultDto.getState());
-            assertEquals(party.getState().getValue(), resultDto.getState().getValue());
-        } else {
-            assertNull(resultDto.getState());
-        }
+        assertEquals(party.getPreferredLanguage(), resultDto.getPreferredLanguage());
+        assertEquals(party.getNotes(), resultDto.getNotes());
         assertEquals(party.getClosingDateTime(), resultDto.getClosingDateTime());
         assertEquals(party.getApprovedDateTime(), resultDto.getApprovedDateTime());
         assertEquals(party.getLastUpdatedDateTime(), resultDto.getLastUpdatedDateTime());
         assertEquals(party.getOpeningDateTime(), resultDto.getOpeningDateTime());
         assertEquals(party.getLiveDateTime(), resultDto.getLiveDateTime());
-        assertEquals(party.getPreferredLanguage(), resultDto.getPreferredLanguage());
-        assertEquals(party.getNotes(), resultDto.getNotes());
 
+        assertNotNull(resultDto.getPartyType());
+        assertEquals(party.getPartyType().getValue(), resultDto.getPartyType().getValue());
+        assertNotNull(resultDto.getState());
+        assertEquals(party.getState().getValue(), resultDto.getState().getValue());
         assertNotNull(resultDto.getSubState());
         assertEquals(party.getSubState().getValue(), resultDto.getSubState().getValue());
-
-        if (party.getCustomFields() != null) {
-            assertNotNull(resultDto.getAdditions());
-            assertEquals(party.getCustomFields().size(), resultDto.getAdditions().size());
-            assertEquals(party.getCustomFields(), resultDto.getAdditions());
-        }
-
-        if (party.getPhoneNumbers() != null) {
-            assertNotNull(resultDto.getPhoneNumbers());
-            assertEquals(party.getPhoneNumbers().size(), resultDto.getPhoneNumbers().size());
-
-            if (!party.getPhoneNumbers().isEmpty()) {
-                assertEquals(party.getPhoneNumbers().get(0).getNumber(),
-                    resultDto.getPhoneNumbers().get(0).getNumber());
-            }
-        } else {
-            assertNull(resultDto.getPhoneNumbers());
-        }
-
-        if (party.getElectronicAddresses() != null) {
-            assertNotNull(resultDto.getElectronicAddresses());
-            if (party.getElectronicAddresses().getEmails() != null) {
-                assertNotNull(resultDto.getElectronicAddresses().getEmails());
-                assertEquals(party.getElectronicAddresses().getEmails().size(),
-                    resultDto.getElectronicAddresses().getEmails().size());
-            } else {
-                assertNull(resultDto.getElectronicAddresses().getEmails());
-            }
-            if (party.getElectronicAddresses().getUrls() != null) {
-                assertNotNull(resultDto.getElectronicAddresses().getUrls());
-                assertEquals(party.getElectronicAddresses().getUrls().size(),
-                    resultDto.getElectronicAddresses().getUrls().size());
-            } else {
-                assertNull(resultDto.getElectronicAddresses().getUrls());
-            }
-        } else {
-            assertNull(resultDto.getElectronicAddresses());
-        }
-
-        if (party.getPerson() != null) {
-            assertNotNull(resultDto.getPerson());
-
-            assertEquals(party.getPerson().getPersonName().getFirstName(),
-                resultDto.getPerson().getPersonName().getFirstName());
-
-            assertEquals(party.getPerson().getPersonName().getFamilyName(),
-                resultDto.getPerson().getPersonName().getFamilyName());
-            if (party.getPerson().getIdentifications() != null) {
-                assertNotNull(resultDto.getPerson().getIdentifications());
-                assertEquals(party.getPerson().getIdentifications().size(),
-                    resultDto.getPerson().getIdentifications().size());
-            } else {
-                assertNull(resultDto.getPerson().getIdentifications());
-            }
-            if (party.getPerson().getDemographics() != null) {
-                assertNotNull(resultDto.getPerson().getDemographics());
-            } else {
-                assertNull(resultDto.getPerson().getDemographics());
-            }
-
-        } else {
-            if (party.getPartyType() != Party.PartyTypeEnum.PERSON) {
-                assertNull(resultDto.getPerson());
-            } else {
-                assertNull(resultDto.getPerson());
-            }
-        }
-
-        if (party.getOrganisation() != null) {
-            assertNotNull(resultDto.getOrganisation());
-            assertEquals(party.getOrganisation().getName(), resultDto.getOrganisation().getName());
-            if (party.getOrganisation().getIdentifications() != null) {
-                assertNotNull(resultDto.getOrganisation().getIdentifications());
-                assertEquals(party.getOrganisation().getIdentifications().size(),
-                    resultDto.getOrganisation().getIdentifications().size());
-            } else {
-                assertNull(resultDto.getOrganisation().getIdentifications());
-            }
-            if (party.getOrganisation().getLegalStructure() != null) {
-                assertNotNull(resultDto.getOrganisation().getLegalStructure());
-            } else {
-                assertNull(resultDto.getOrganisation().getLegalStructure());
-            }
-        } else {
-            if (party.getPartyType() != Party.PartyTypeEnum.ORGANISATION) {
-                assertNull(resultDto.getOrganisation());
-            } else {
-                assertNull(resultDto.getOrganisation());
-            }
-        }
-
-        if (party.getPostalAddresses() != null) {
-            assertNotNull(resultDto.getPostalAddresses());
-            assertEquals(party.getPostalAddresses().size(), resultDto.getPostalAddresses().size());
-        } else {
-            assertNull(resultDto.getPostalAddresses());
-        }
-
-        if (party.getPartyPartyRelationships() != null) {
-            assertNotNull(resultDto.getPartyPartyRelationships());
-            assertEquals(party.getPartyPartyRelationships().size(), resultDto.getPartyPartyRelationships().size());
-        } else {
-            assertNull(resultDto.getPartyPartyRelationships());
-        }
-
     }
+
+    @Test
+    @DisplayName("Should map Person when PartyType is PERSON and Person is not null")
+    void shouldMapPersonWhenPartyTypeIsPerson() {
+        var party = fixtureMonkey.giveMeBuilder(Party.class)
+            .set("partyType", Party.PartyTypeEnum.PERSON)
+            .setNotNull("person")
+            .setNotNull("person.personName")
+            .set("person.personName.firstName", "John")
+            .set("person.personName.familyName", "Doe")
+            .setNull("organisation")
+            .sample();
+
+        var resultDto = partyMapper.partyToPartyUpsertDto(party);
+
+        assertNotNull(resultDto.getPerson());
+        assertEquals("John", resultDto.getPerson().getPersonName().getFirstName());
+        assertEquals("Doe", resultDto.getPerson().getPersonName().getFamilyName());
+        if (party.getPerson().getIdentifications() != null) {
+            assertNotNull(resultDto.getPerson().getIdentifications());
+            assertEquals(party.getPerson().getIdentifications().size(),
+                resultDto.getPerson().getIdentifications().size());
+        }
+        assertNull(resultDto.getOrganisation(), "Organisation should be null if PartyType is PERSON");
+    }
+
+    @Test
+    @DisplayName("Should handle null Person from source")
+    void shouldHandleNullPerson() {
+        var party = fixtureMonkey.giveMeBuilder(Party.class)
+            .setNull("person")
+            .sample();
+
+        var resultDto = partyMapper.partyToPartyUpsertDto(party);
+
+        assertNull(resultDto.getPerson());
+    }
+
+    @Test
+    @DisplayName("Should map Organisation when PartyType is ORGANISATION and Organisation is not null")
+    void shouldMapOrganisationWhenPartyTypeIsOrganisation() {
+        var party = fixtureMonkey.giveMeBuilder(Party.class)
+            .set("partyType", Party.PartyTypeEnum.ORGANISATION)
+            .setNotNull("organisation")
+            .set("organisation.name", "My Company")
+            .setNull("person")
+            .sample();
+        var resultDto = partyMapper.partyToPartyUpsertDto(party);
+        assertNotNull(resultDto.getOrganisation());
+        assertEquals("My Company", resultDto.getOrganisation().getName());
+        assertNull(resultDto.getPerson());
+    }
+
+    @Test
+    @DisplayName("Should handle null Organisation from source")
+    void shouldHandleNullOrganisation() {
+        Party party = fixtureMonkey.giveMeBuilder(Party.class)
+            .setNull("organisation")
+            .sample();
+        var resultDto = partyMapper.partyToPartyUpsertDto(party);
+        assertNull(resultDto.getOrganisation());
+    }
+
+    @Test
+    @DisplayName("Should map populated collections correctly")
+    void shouldMapPopulatedCollections() {
+
+        var party = fixtureMonkey.giveMeBuilder(Party.class)
+            .size("phoneNumbers", 2)
+            .size("postalAddresses", 1)
+            .size("customFields", 3)
+            .size("partyPartyRelationships", 1)
+            .sample();
+
+        var resultDto = partyMapper.partyToPartyUpsertDto(party);
+
+        assertNotNull(resultDto.getPhoneNumbers());
+        assertEquals(2, resultDto.getPhoneNumbers().size());
+
+        assertNotNull(resultDto.getPostalAddresses());
+        assertEquals(1, resultDto.getPostalAddresses().size());
+
+        assertNotNull(resultDto.getAdditions());
+        assertEquals(3, resultDto.getAdditions().size());
+
+        assertNotNull(resultDto.getPartyPartyRelationships());
+        assertEquals(1, resultDto.getPartyPartyRelationships().size());
+    }
+
+    @Test
+    @DisplayName("Should map empty collections correctly")
+    void shouldMapEmptyCollections() {
+        var party = fixtureMonkey.giveMeBuilder(Party.class)
+            .set("phoneNumbers", new ArrayList<>())
+            .set("postalAddresses", new ArrayList<>())
+            .set("customFields", new HashMap<>())
+            .set("partyPartyRelationships", new ArrayList<>())
+            .sample();
+
+        var resultDto = partyMapper.partyToPartyUpsertDto(party);
+
+        assertNotNull(resultDto.getPhoneNumbers());
+        assertTrue(resultDto.getPhoneNumbers().isEmpty());
+
+        assertNotNull(resultDto.getPostalAddresses());
+        assertTrue(resultDto.getPostalAddresses().isEmpty());
+
+        assertNotNull(resultDto.getAdditions());
+        assertTrue(resultDto.getAdditions().isEmpty());
+
+        assertNotNull(resultDto.getPartyPartyRelationships());
+        assertTrue(resultDto.getPartyPartyRelationships().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should map empty collections correctly")
+    void shouldMapNullCollections() {
+
+        var party = fixtureMonkey.giveMeBuilder(Party.class)
+            .setNull("phoneNumbers")
+            .setNull("postalAddresses")
+            .setNull("customFields")
+            .setNull("partyPartyRelationships")
+            .setNull("electronicAddresses.emails")
+            .setNull("electronicAddresses.urls")
+            .setNull("person.identifications")
+            .setNull("organisation.identifications")
+            .sample();
+
+        var resultDto = partyMapper.partyToPartyUpsertDto(party);
+
+        assertNotNull(resultDto.getPhoneNumbers());
+        assertTrue(resultDto.getPhoneNumbers().isEmpty());
+
+        assertNotNull(resultDto.getPostalAddresses());
+        assertTrue(resultDto.getPostalAddresses().isEmpty());
+
+        assertNotNull(resultDto.getAdditions());
+        assertTrue(resultDto.getAdditions().isEmpty());
+
+        assertNotNull(resultDto.getPartyPartyRelationships());
+        assertTrue(resultDto.getPartyPartyRelationships().isEmpty());
+
+        assertNotNull(resultDto.getElectronicAddresses());
+        assertNotNull(resultDto.getElectronicAddresses().getEmails());
+        assertTrue(resultDto.getElectronicAddresses().getEmails().isEmpty());
+
+        assertNotNull(resultDto.getElectronicAddresses().getUrls());
+        assertTrue(resultDto.getElectronicAddresses().getUrls().isEmpty());
+    }
+
 }

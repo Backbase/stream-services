@@ -5,6 +5,7 @@ import com.backbase.stream.clients.config.CustomerProfileClientConfig;
 import com.backbase.stream.mapper.PartyMapper;
 import com.backbase.stream.service.CustomerProfileService;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +18,7 @@ public class CustomerProfileConfiguration {
 
     @Bean
     public PartyMapper partyMapper() {
-        return PartyMapper.INSTANCE;
+        return Mappers.getMapper(PartyMapper.class);
     }
 
     @Bean
