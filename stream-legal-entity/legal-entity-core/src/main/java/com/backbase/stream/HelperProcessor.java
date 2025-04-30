@@ -74,7 +74,7 @@ class HelperProcessor {
         log.info("Processing Customer Profile Parties for LE: {}", legalEntityExternalId);
 
         if (!isValidParty(legalEntityTask, parties, legalEntityInternalId, legalEntityExternalId)) {
-            return Mono.just(legalEntityTask); // Salida temprana si no hay parties
+            return Mono.just(legalEntityTask);
         }
 
         var processingErrors = new CopyOnWriteArrayList<Throwable>();
