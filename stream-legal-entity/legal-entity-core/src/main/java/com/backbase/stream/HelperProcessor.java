@@ -63,57 +63,84 @@ class HelperProcessor {
         return true;
     }
 
+
     public <T extends StreamTask> Mono<T> processParties(
         T legalEntityTask,
         List<Party> parties,
         String legalEntityInternalId,
         String legalEntityExternalId,
-        CustomerProfileService customerProfileService) {
-
-        log.info("Processing Customer Profile Parties for: {}", legalEntityExternalId);
+        CustomerProfileService customerProfileService
+    ) {
+        log.info("Processing Customer Profile Parties for LE: {}", legalEntityExternalId);
 
         if (!isValidParty(legalEntityTask, parties, legalEntityInternalId, legalEntityExternalId)) {
-            return Mono.just(legalEntityTask);
+            return Mono.just(legalEntityTask); // Salida temprana si no hay parties
         }
 
-        var processingErrors = new CopyOnWriteArrayList<>();
+        var processingErrors = new CopyOnWriteArrayList<Throwable>();
 
         return Flux.fromStream(nullableCollectionToStream(parties))
             .filter(Objects::nonNull)
-            .concatMap(party -> {
-                log.debug("Attempting to upsert party with partyId: {}", party.getPartyId());
-                return customerProfileService.upsertParty(party, legalEntityInternalId)
-                    .doOnSuccess(result -> legalEntityTask
-                        .info(PARTY, PROCESS_CUSTOMER_PROFILE, "upserted", party.getPartyId(), null,
-                            "Successfully upserted party: %s for LE: %s", party.getPartyId(),
-                            legalEntityExternalId))
-                    .onErrorResume(throwable -> {
-                        log.error("Failed to upsert party {}: {}", party.getPartyId(), throwable.getMessage(),
-                            throwable);
-                        processingErrors.add(throwable);
-                        legalEntityTask.error(PARTY, PROCESS_CUSTOMER_PROFILE, FAILED, party.getPartyId(), null,
-                            throwable,
-                            throwable.getMessage(), "Error upserting party: %s for LE: %s", party.getPartyId(),
-                            legalEntityExternalId);
-                        return Mono.empty();
-                    })
-                    .then(Mono.just(true));
-            })
-            .then(Mono.fromRunnable(() -> {
-                if (!processingErrors.isEmpty()) {
-                    log.warn("Completed processing parties for LE {} with {} errors.", legalEntityExternalId,
-                        processingErrors.size());
-                    legalEntityTask.warn(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "completed_with_errors",
-                        legalEntityExternalId,
-                        legalEntityInternalId, "Party processing completed with %d errors.",
-                        processingErrors.size());
-                } else {
-                    log.info("Successfully processed all parties for LE {}.", legalEntityInternalId);
-                    legalEntityTask.info(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "completed_successfully",
-                        legalEntityExternalId,
-                        legalEntityInternalId, "Party processing completed successfully.");
-                }
-            }))
+            .concatMap(party -> handlePartyUpsert(
+                party,
+                legalEntityInternalId,
+                legalEntityExternalId,
+                customerProfileService,
+                processingErrors,
+                legalEntityTask
+            ))
+            .then(Mono.fromRunnable(() -> logFinalProcessingStatus(
+                processingErrors,
+                legalEntityInternalId,
+                legalEntityExternalId,
+                legalEntityTask
+            )))
             .thenReturn(legalEntityTask);
+    }
+
+    private <T extends StreamTask> void logFinalProcessingStatus(
+        List<Throwable> processingErrors,
+        String legalEntityInternalId,
+        String legalEntityExternalId,
+        T legalEntityTask
+    ) {
+        if (!processingErrors.isEmpty()) {
+            int errorCount = processingErrors.size();
+            log.warn("Completed processing parties for LE {} with {} error(s).", legalEntityExternalId, errorCount);
+            legalEntityTask.warn(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "completed_with_errors",
+                legalEntityExternalId, legalEntityInternalId,
+                "Party processing completed with %d error(s).", errorCount);
+        } else {
+            log.info("Successfully processed all parties for LE {}.", legalEntityExternalId);
+            legalEntityTask.info(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "completed_successfully",
+                legalEntityExternalId, legalEntityInternalId,
+                "Party processing completed successfully.");
+        }
+    }
+
+    private <T extends StreamTask> Mono<Void> handlePartyUpsert(
+        Party party,
+        String legalEntityInternalId,
+        String legalEntityExternalId,
+        CustomerProfileService customerProfileService,
+        List<Throwable> processingErrors,
+        T legalEntityTask
+    ) {
+        String partyId = party.getPartyId();
+        log.debug("Attempting to upsert party with partyId: {}", partyId);
+
+        return customerProfileService.upsertParty(party, legalEntityInternalId)
+            .doOnSuccess(result ->
+                legalEntityTask.info(PARTY, PROCESS_CUSTOMER_PROFILE, "upserted", partyId, null,
+                    "Successfully upserted party: %s for LE: %s", partyId, legalEntityExternalId)
+            )
+            .doOnError(throwable -> {
+                log.error("Failed to upsert party {}: {}", partyId, throwable.getMessage(), throwable);
+                processingErrors.add(throwable);
+                legalEntityTask.error(PARTY, PROCESS_CUSTOMER_PROFILE, FAILED, partyId, null, throwable,
+                    throwable.getMessage(), "Error upserting party: %s for LE: %s", partyId, legalEntityExternalId);
+            })
+            .onErrorResume(throwable -> Mono.empty())
+            .then();
     }
 }
