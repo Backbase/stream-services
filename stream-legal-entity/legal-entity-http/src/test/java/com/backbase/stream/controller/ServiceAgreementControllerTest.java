@@ -34,6 +34,7 @@ import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.UpdatedServiceAgreement;
 import com.backbase.stream.legalentity.model.UpdatedServiceAgreementResponse;
 import com.backbase.stream.legalentity.model.User;
+import com.backbase.stream.mapper.PartyMapper;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
@@ -128,6 +129,9 @@ class ServiceAgreementControllerTest {
 
     @MockBean
     private PlansService plansService;
+
+    @MockBean
+    private PartyMapper partyMapper;
 
     @MockBean
     private CustomerProfileClientConfig customerProfileClientConfig;
