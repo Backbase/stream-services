@@ -83,7 +83,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -105,40 +104,8 @@ import reactor.util.function.Tuples;
  * After the users are created / retrieved and enriched with their internal Ids we can setup the Master Service
  */
 @Slf4j
-public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
+public class LegalEntitySaga extends HelperProcessor implements StreamTaskExecutor<LegalEntityTask> {
 
-    public static final String LEGAL_ENTITY = "LEGAL_ENTITY";
-    public static final String IDENTITY_USER = "IDENTITY_USER";
-    public static final String SERVICE_AGREEMENT = "SERVICE_AGREEMENT";
-    public static final String BUSINESS_FUNCTION_GROUP = "BUSINESS_FUNCTION_GROUP";
-    public static final String USER = "USER";
-    private static final String DEFAULT_DATA_GROUP = "Default data group";
-    private static final String DEFAULT_DATA_DESCRIPTION = "Default data group description";
-    public static final String UPSERT_LEGAL_ENTITY = "upsert-legal-entity";
-    public static final String FAILED = "failed";
-    public static final String EXISTS = "exists";
-    public static final String CREATED = "created";
-
-    public static final String UPDATED = "updated";
-    public static final String PROCESS_PRODUCTS = "process-products";
-    public static final String PROCESS_JOB_PROFILES = "process-job-profiles";
-    public static final String PROCESS_LIMITS = "process-limits";
-    public static final String PROCESS_CONTACTS = "process-contacts";
-    public static final String REJECTED = "rejected";
-    public static final String UPSERT = "upsert";
-    public static final String SETUP_SERVICE_AGREEMENT = "setup-service-agreement";
-    private static final String BATCH_PRODUCT_GROUP_ID = "batch_product_group_task-";
-    public static final String PARTY = "party";
-    public static final String PROCESS_CUSTOMER_PROFILE = "process-customer-profile";
-
-    private static final String LEGAL_ENTITY_E_TYPE = "LE";
-    private static final String SERVICE_AGREEMENT_E_TYPE = "SA";
-    private static final String FUNCTION_GROUP_E_TYPE = "FAG";
-    private static final String FUNCTION_E_TYPE = "FUN";
-    private static final String PRIVILEGE_E_TYPE = "PRV";
-    private static final String JOB_ROLE_LIMITS = "job-role-limits";
-    private static final String USER_JOB_ROLE_LIMITS = "user-job-role-limits";
-    private static final String LEGAL_ENTITY_LIMITS = "legal-entity-limits";
 
     private final BusinessFunctionGroupMapper businessFunctionGroupMapper = Mappers.getMapper(BusinessFunctionGroupMapper.class);
     private final UserProfileMapper userProfileMapper = Mappers.getMapper(UserProfileMapper.class);
@@ -1101,53 +1068,12 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
 
     private Mono<LegalEntityTask> setupParties(LegalEntityTask legalEntityTask) {
 
-        log.info("Processing Customer Profile Parties for: {}", legalEntityTask.getName());
         var legalEntity = legalEntityTask.getData();
 
-        if (isEmpty(legalEntity.getParties())) {
-            legalEntityTask.info(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "skipped", legalEntity.getExternalId(),
-                legalEntity.getInternalId(), "No parties found in Legal Entity to process.");
-            return Mono.just(legalEntityTask);
-        }
-        var processingErrors = new CopyOnWriteArrayList<>();
+        return processParties(legalEntityTask, legalEntity.getParties(),
+            legalEntity.getInternalId(),
+            legalEntity.getExternalId(), customerProfileService);
 
-        return Flux.fromStream(nullableCollectionToStream(legalEntity.getParties()))
-            .filter(Objects::nonNull)
-            .concatMap(party -> {
-                log.debug("Attempting to upsert party with partyId: {}", party.getPartyId());
-                return customerProfileService.upsertParty(party, legalEntity.getInternalId())
-                    .doOnSuccess(result -> legalEntityTask
-                        .info(PARTY, PROCESS_CUSTOMER_PROFILE, "upserted", party.getPartyId(), null,
-                        "Successfully upserted party: %s for LE: %s", party.getPartyId(),
-                        legalEntity.getExternalId()))
-                    .onErrorResume(throwable -> {
-                        log.error("Failed to upsert party {}: {}", party.getPartyId(), throwable.getMessage(),
-                            throwable);
-                        processingErrors.add(throwable);
-                        legalEntityTask.error(PARTY, PROCESS_CUSTOMER_PROFILE, FAILED, party.getPartyId(), null,
-                            throwable,
-                            throwable.getMessage(), "Error upserting party: %s for LE: %s", party.getPartyId(),
-                            legalEntity.getExternalId());
-                        return Mono.empty();
-                    })
-                    .then(Mono.just(true));
-            })
-            .then(Mono.fromRunnable(() -> {
-                if (!processingErrors.isEmpty()) {
-                    log.warn("Completed processing parties for LE {} with {} errors.", legalEntity.getExternalId(),
-                        processingErrors.size());
-                    legalEntityTask.warn(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "completed_with_errors",
-                        legalEntity.getExternalId(),
-                        legalEntity.getInternalId(), "Party processing completed with %d errors.",
-                        processingErrors.size());
-                } else {
-                    log.info("Successfully processed all parties for LE {}.", legalEntity.getExternalId());
-                    legalEntityTask.info(LEGAL_ENTITY, PROCESS_CUSTOMER_PROFILE, "completed_successfully",
-                        legalEntity.getExternalId(),
-                        legalEntity.getInternalId(), "Party processing completed successfully.");
-                }
-            }))
-            .thenReturn(legalEntityTask);
     }
 
     private Mono<LegalEntityTask> linkLegalEntityToRealm(LegalEntityTask streamTask) {
