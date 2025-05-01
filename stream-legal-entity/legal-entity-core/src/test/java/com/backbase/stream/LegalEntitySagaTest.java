@@ -1,16 +1,20 @@
 package com.backbase.stream;
 
+import static com.backbase.stream.FixtureUtils.reflectiveAlphaFixtureMonkey;
 import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.lenient;
 
+import com.backbase.customerprofile.api.integration.v1.model.PartyResponseUpsertDto;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
@@ -45,6 +49,7 @@ import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.Limit;
 import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.Multivalued;
+import com.backbase.stream.legalentity.model.Party;
 import com.backbase.stream.legalentity.model.PhoneNumber;
 import com.backbase.stream.legalentity.model.Privilege;
 import com.backbase.stream.legalentity.model.ProductGroup;
@@ -58,10 +63,12 @@ import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.stream.service.CustomerProfileService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
+import com.navercorp.fixturemonkey.FixtureMonkey;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.time.Duration;
@@ -122,9 +129,16 @@ class LegalEntitySagaTest {
     @Mock
     private UserKindSegmentationSaga userKindSegmentationSaga;
 
+    @Mock
+    private CustomerProfileService customerProfileService;
+
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
         getLegalEntitySagaConfigurationProperties();
+
+    private final FixtureMonkey fixtureMonkey = reflectiveAlphaFixtureMonkey;
+
+    private static final int PARTY_SIZE = 10;
 
     String leExternalId = "someLeExternalId";
     String leParentExternalId = "someParentLeExternalId";
@@ -338,6 +352,9 @@ class LegalEntitySagaTest {
     void testCustomServiceAgreement_IfFetchedServiceAgreementExists_ThenSettingUp() {
         var task = setupLegalEntityTask();
 
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
+
         mockAccessGroupService(userId);
         mockUserService(userId);
 
@@ -351,6 +368,8 @@ class LegalEntitySagaTest {
     void testCustomServiceAgreement_IfNoCustomServiceAgreementExists_ThenCreateMaster() {
         var task = setupLegalEntityTask();
 
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
         when(accessGroupService.getUserContextsByUserId(userId)).thenReturn(Mono.empty());
         mockUserService(userId);
 
@@ -363,6 +382,9 @@ class LegalEntitySagaTest {
     @Test
     void testCustomServiceAgreement_IfNoMatchingCustomServiceAgreementExists_ThenCreateMaster() {
         LegalEntityTask task = setupLegalEntityTask();
+
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
 
         when(accessGroupService.getUserContextsByUserId(userId))
             .thenReturn(
@@ -380,6 +402,8 @@ class LegalEntitySagaTest {
         LegalEntityTask task = setupLegalEntityTask();
         when(userService.getUsersByLegalEntity(any(), anyInt(), anyInt()))
             .thenReturn(Mono.just(new GetUsersList().totalElements(0L).users(null)));
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
         Assertions.assertThrows(
             StreamTaskException.class,
             () -> executeLegalEntityTaskAndBlock(task),
@@ -387,6 +411,49 @@ class LegalEntitySagaTest {
         );
         verifyUserService();
     }
+
+    @Test
+    void testSetupParties_IfPartyFound_ThenUpsertParty() {
+        var task = setupLegalEntityTask();
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
+        mockAccessGroupService(userId);
+        mockUserService(userId);
+        legalEntitySaga.executeTask(task).block();
+        verify(customerProfileService, times(PARTY_SIZE)).upsertParty(any(Party.class), anyString());
+    }
+
+    @Test
+    void testProcessCustomerProfile_IfUpsertPartyError_ThenTrowException() {
+        var task = setupLegalEntityTask();
+        var mockException = new WebClientResponseException(
+            "CPS Error",
+            400,
+            "Bad Request",
+            null,
+            null,
+            null
+        );
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(Mono.error(mockException));
+
+        mockAccessGroupService(userId);
+        mockUserService(userId);
+        legalEntitySaga.executeTask(task).block();
+        verify(customerProfileService, times(PARTY_SIZE)).upsertParty(any(Party.class), anyString());
+        verify(task, times(PARTY_SIZE)).error(
+            eq(LegalEntitySaga.PARTY),
+            eq(LegalEntitySaga.PROCESS_CUSTOMER_PROFILE),
+            eq("failed"),
+            anyString(),
+            isNull(),
+            any(Throwable.class),
+            anyString(),
+            eq("Error upserting party: %s for LE: %s"),
+            anyString(),
+            anyString()
+        );
+    }
+
 
     private void mockUserService(String userId) {
         when(userService.getUsersByLegalEntity(any(), anyInt(), anyInt()))
@@ -422,31 +489,32 @@ class LegalEntitySagaTest {
         var jobRole = new JobRole("someJobRole", "someJobRole");
         jobRole.setFunctionGroups(singletonList(functionGroup));
 
-        legalEntity = new LegalEntity("le_name", null, null);
-        legalEntity.setInternalId(leInternalId);
-        legalEntity.setExternalId(leExternalId);
-        legalEntity.setParentExternalId(leExternalId);
-        legalEntity.setProductGroups(singletonList(productGroup));
+        var setuplegalEntity = new LegalEntity("le_name", null, null);
+        setuplegalEntity.setInternalId(leInternalId);
+        setuplegalEntity.setExternalId(leExternalId);
+        setuplegalEntity.setParentExternalId(leExternalId);
+        setuplegalEntity.setProductGroups(singletonList(productGroup));
+        setuplegalEntity.setParties(fixtureMonkey.giveMe(Party.class, PARTY_SIZE));
         var sa = new ServiceAgreement().externalId(customSaExId).addJobRolesItem(jobRole)
             .creatorLegalEntity(leExternalId);
 
-        var task = mockLegalEntityTask(legalEntity);
+        var task = mockLegalEntityTask(setuplegalEntity);
 
-        when(task.getLegalEntity()).thenReturn(legalEntity);
+        when(task.getLegalEntity()).thenReturn(setuplegalEntity);
         when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.empty());
-        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(setuplegalEntity));
         when(legalEntityService.getMasterServiceAgreementForInternalLegalEntityId(leInternalId)).thenReturn(
             Mono.empty());
-        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(legalEntity));
+        when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(setuplegalEntity));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
         when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
         when(legalEntitySagaConfigurationProperties.getServiceAgreementPurposes()).thenReturn(
             Set.of("FAMILY_BANKING"));
         when(userService.setupRealm(task.getLegalEntity())).thenReturn(Mono.just(new Realm()));
-        when(userService.linkLegalEntityToRealm(task.getLegalEntity())).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(legalEntity));
+        when(userService.linkLegalEntityToRealm(task.getLegalEntity())).thenReturn(Mono.just(setuplegalEntity));
+        when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(setuplegalEntity));
+        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(setuplegalEntity));
 
         return task;
     }

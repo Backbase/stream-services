@@ -64,6 +64,7 @@ import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.stream.service.CustomerProfileService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
@@ -103,38 +104,8 @@ import reactor.util.function.Tuples;
  * After the users are created / retrieved and enriched with their internal Ids we can setup the Master Service
  */
 @Slf4j
-public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
+public class LegalEntitySaga extends HelperProcessor implements StreamTaskExecutor<LegalEntityTask> {
 
-    public static final String LEGAL_ENTITY = "LEGAL_ENTITY";
-    public static final String IDENTITY_USER = "IDENTITY_USER";
-    public static final String SERVICE_AGREEMENT = "SERVICE_AGREEMENT";
-    public static final String BUSINESS_FUNCTION_GROUP = "BUSINESS_FUNCTION_GROUP";
-    public static final String USER = "USER";
-    private static final String DEFAULT_DATA_GROUP = "Default data group";
-    private static final String DEFAULT_DATA_DESCRIPTION = "Default data group description";
-    public static final String UPSERT_LEGAL_ENTITY = "upsert-legal-entity";
-    public static final String FAILED = "failed";
-    public static final String EXISTS = "exists";
-    public static final String CREATED = "created";
-
-    public static final String UPDATED = "updated";
-    public static final String PROCESS_PRODUCTS = "process-products";
-    public static final String PROCESS_JOB_PROFILES = "process-job-profiles";
-    public static final String PROCESS_LIMITS = "process-limits";
-    public static final String PROCESS_CONTACTS = "process-contacts";
-    public static final String REJECTED = "rejected";
-    public static final String UPSERT = "upsert";
-    public static final String SETUP_SERVICE_AGREEMENT = "setup-service-agreement";
-    private static final String BATCH_PRODUCT_GROUP_ID = "batch_product_group_task-";
-
-    private static final String LEGAL_ENTITY_E_TYPE = "LE";
-    private static final String SERVICE_AGREEMENT_E_TYPE = "SA";
-    private static final String FUNCTION_GROUP_E_TYPE = "FAG";
-    private static final String FUNCTION_E_TYPE = "FUN";
-    private static final String PRIVILEGE_E_TYPE = "PRV";
-    private static final String JOB_ROLE_LIMITS = "job-role-limits";
-    private static final String USER_JOB_ROLE_LIMITS = "user-job-role-limits";
-    private static final String LEGAL_ENTITY_LIMITS = "legal-entity-limits";
 
     private final BusinessFunctionGroupMapper businessFunctionGroupMapper = Mappers.getMapper(BusinessFunctionGroupMapper.class);
     private final UserProfileMapper userProfileMapper = Mappers.getMapper(UserProfileMapper.class);
@@ -148,10 +119,11 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
     private final ContactsSaga contactsSaga;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
     private final UserKindSegmentationSaga userKindSegmentationSaga;
-
+    private final CustomerProfileService customerProfileService;
     private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
 
-    public LegalEntitySaga(LegalEntityService legalEntityService,
+    public LegalEntitySaga(
+        LegalEntityService legalEntityService,
         UserService userService,
         UserProfileService userProfileService,
         AccessGroupService accessGroupService,
@@ -159,7 +131,8 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties,
-        UserKindSegmentationSaga userKindSegmentationSaga) {
+        UserKindSegmentationSaga userKindSegmentationSaga,
+        CustomerProfileService customerProfileService) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
         this.userProfileService = userProfileService;
@@ -169,12 +142,14 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
         this.contactsSaga = contactsSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
         this.userKindSegmentationSaga = userKindSegmentationSaga;
+        this.customerProfileService = customerProfileService;
     }
 
     @Override
     public Mono<LegalEntityTask> executeTask(@SpanTag(value = "streamTask") LegalEntityTask streamTask) {
         return upsertLegalEntity(streamTask)
             .flatMap(this::linkLegalEntityToRealm)
+            .flatMap(this::setupParties)
             .flatMap(this::setupAdministrators)
             .flatMap(this::setupUsers)
             .flatMap(this::processAudiencesSegmentation)
@@ -1089,6 +1064,16 @@ public class LegalEntitySaga implements StreamTaskExecutor<LegalEntityTask> {
                 // Do Something With The Children
                 return streamTask;
             });
+    }
+
+    private Mono<LegalEntityTask> setupParties(LegalEntityTask legalEntityTask) {
+
+        var legalEntity = legalEntityTask.getData();
+
+        return processParties(legalEntityTask, legalEntity.getParties(),
+            legalEntity.getInternalId(),
+            legalEntity.getExternalId(), customerProfileService);
+
     }
 
     private Mono<LegalEntityTask> linkLegalEntityToRealm(LegalEntityTask streamTask) {

@@ -13,12 +13,13 @@ import com.backbase.stream.product.BatchProductIngestionSaga;
 import com.backbase.stream.product.ProductIngestionSagaConfiguration;
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.stream.service.CustomerProfileService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.repository.impl.InMemoryReactiveUnitOfWorkRepository;
-import com.backbase.streams.tailoredvalue.configuration.PlanServiceConfiguration;
 import com.backbase.streams.tailoredvalue.PlansService;
+import com.backbase.streams.tailoredvalue.configuration.PlanServiceConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -34,8 +35,8 @@ import org.springframework.context.annotation.Import;
     ContactsServiceConfiguration.class,
     LoansServiceConfiguration.class,
     AudiencesSegmentationConfiguration.class,
-    PlanServiceConfiguration.class
-
+    PlanServiceConfiguration.class,
+    CustomerProfileConfiguration.class
 })
 @EnableConfigurationProperties(
     {LegalEntitySagaConfigurationProperties.class}
@@ -51,7 +52,8 @@ public class LegalEntitySagaConfiguration {
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
-        UserKindSegmentationSaga userKindSegmentationSaga
+        UserKindSegmentationSaga userKindSegmentationSaga,
+        CustomerProfileService customerProfileService
     ) {
         return new LegalEntitySaga(
             legalEntityService,
@@ -62,7 +64,8 @@ public class LegalEntitySagaConfiguration {
             limitsSaga,
             contactsSaga,
             sinkConfigurationProperties,
-            userKindSegmentationSaga
+            userKindSegmentationSaga,
+            customerProfileService
         );
     }
 
@@ -74,7 +77,8 @@ public class LegalEntitySagaConfiguration {
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
-        UserKindSegmentationSaga userKindSegmentationSaga
+        UserKindSegmentationSaga userKindSegmentationSaga,
+        CustomerProfileService customerProfileService
     ) {
         return new LegalEntitySagaV2(
             legalEntityService,
@@ -84,7 +88,8 @@ public class LegalEntitySagaConfiguration {
             limitsSaga,
             contactsSaga,
             sinkConfigurationProperties,
-            userKindSegmentationSaga
+            userKindSegmentationSaga,
+            customerProfileService
         );
     }
 
@@ -103,7 +108,7 @@ public class LegalEntitySagaConfiguration {
             batchProductIngestionSaga,
             limitsSaga,
             contactsSaga,
-                plansService,
+            plansService,
             sinkConfigurationProperties
         );
     }
