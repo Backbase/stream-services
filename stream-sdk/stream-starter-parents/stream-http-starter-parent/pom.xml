@@ -73,7 +73,7 @@
                 <plugin>
                     <groupId>com.backbase.oss</groupId>
                     <artifactId>boat-maven-plugin</artifactId>
-                    <version>0.17.60</version>
+                    <version>0.17.61</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>

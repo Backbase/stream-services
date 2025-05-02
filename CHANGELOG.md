@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Bumping Backbase BOM to 2025.04
 - Upgraded SSDK to 19.0.0
-- Update boat-maven-plugin to 0.17.58
+- Update boat-maven-plugin to 0.17.61
 
 ## [7.0.0](https://github.com/Backbase/stream-services/compare/6.17.0...6.18.0)
 ### Added
