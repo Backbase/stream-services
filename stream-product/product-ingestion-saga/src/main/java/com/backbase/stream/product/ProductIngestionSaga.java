@@ -7,7 +7,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
-import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
+import com.backbase.dbs.arrangement.api.integration.v3.model.PostArrangement;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;

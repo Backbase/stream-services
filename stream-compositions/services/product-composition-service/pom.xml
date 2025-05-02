@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>6.18.0</version>
+        <version>7.0.0</version>
     </parent>
 
     <artifactId>product-composition-service</artifactId>
@@ -150,6 +150,10 @@
                             <apiPackage>com.backbase.stream.compositions.product.integration.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.product.integration.client.model
                             </modelPackage>
+                            <configOptions>
+                                <reactive>true</reactive>
+                                <performBeanValidation>true</performBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -164,6 +168,10 @@
                             </inputSpec>
                             <apiPackage>com.backbase.stream.compositions.transaction.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.transaction.client.model</modelPackage>
+                            <configOptions>
+                                <reactive>true</reactive>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -178,6 +186,10 @@
                             </inputSpec>
                             <apiPackage>com.backbase.stream.compositions.paymentorder.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.paymentorder.client.model</modelPackage>
+                            <configOptions>
+                                <reactive>true</reactive>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                 </executions>

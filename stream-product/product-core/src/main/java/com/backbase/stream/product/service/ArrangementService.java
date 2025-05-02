@@ -8,13 +8,13 @@ import static java.util.Collections.singletonList;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.fromCallable;
 
-import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseItemExtended;
-import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseStatusCode;
-import com.backbase.dbs.arrangement.api.integration.v2.model.ErrorItem;
-import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntity;
-import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntityIds;
-import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
-import com.backbase.dbs.arrangement.api.integration.v2.model.Subscription;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseItemExtended;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseStatusCode;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ErrorItem;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ExternalLegalEntity;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ExternalLegalEntityIds;
+import com.backbase.dbs.arrangement.api.integration.v3.model.PostArrangement;
+import com.backbase.dbs.arrangement.api.integration.v3.model.Subscription;
 import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
@@ -44,11 +44,11 @@ import reactor.core.publisher.Mono;
 public class ArrangementService {
 
     private final ArrangementsApi arrangementsApi;
-    private final com.backbase.dbs.arrangement.api.integration.v2.ArrangementsApi arrangementsIntegrationApi;
+    private final com.backbase.dbs.arrangement.api.integration.v3.ArrangementsApi arrangementsIntegrationApi;
     private final ProductMapper productMapper = Mappers.getMapper(ProductMapper.class);
 
     public ArrangementService(ArrangementsApi arrangementsApi,
-        com.backbase.dbs.arrangement.api.integration.v2.ArrangementsApi arrangementsIntegrationApi) {
+        com.backbase.dbs.arrangement.api.integration.v3.ArrangementsApi arrangementsIntegrationApi) {
         this.arrangementsApi = arrangementsApi;
         this.arrangementsIntegrationApi = arrangementsIntegrationApi;
     }

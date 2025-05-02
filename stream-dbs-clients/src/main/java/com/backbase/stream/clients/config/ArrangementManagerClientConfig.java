@@ -43,8 +43,8 @@ public class ArrangementManagerClientConfig extends CompositeApiClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public com.backbase.dbs.arrangement.api.integration.v2.ArrangementsApi arrangementApiIntegration(com.backbase.dbs.arrangement.api.integration.ApiClient arrangementManagerIntegrationApiClient) {
-        return new com.backbase.dbs.arrangement.api.integration.v2.ArrangementsApi(arrangementManagerIntegrationApiClient);
+    public com.backbase.dbs.arrangement.api.integration.v3.ArrangementsApi arrangementApiIntegration(com.backbase.dbs.arrangement.api.integration.ApiClient arrangementManagerIntegrationApiClient) {
+        return new com.backbase.dbs.arrangement.api.integration.v3.ArrangementsApi(arrangementManagerIntegrationApiClient);
     }
 
     @Bean

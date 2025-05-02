@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>6.18.0</version>
+        <version>7.0.0</version>
     </parent>
 
     <artifactId>transaction-composition-service</artifactId>
@@ -71,6 +71,7 @@
                             <modelPackage>com.backbase.stream.compositions.transaction.api.model</modelPackage>
                             <configOptions>
                                 <reactive>true</reactive>
+                                <performBeanValidation>true</performBeanValidation>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -84,6 +85,10 @@
                             <inputSpec>${project.basedir}/../../api/integrations-api/transaction-integration-api/src/main/resources/service-api-v2.yaml</inputSpec>
                             <apiPackage>com.backbase.stream.compositions.transaction.integration.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.transaction.integration.client.model</modelPackage>
+                            <configOptions>
+                                <reactive>true</reactive>
+                                <performBeanValidation>true</performBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -96,6 +101,10 @@
                             <inputSpec>${project.basedir}/../../api/cursors-api/transaction-cursor-api/src/main/resources/service-api-v2.yaml</inputSpec>
                             <apiPackage>com.backbase.stream.compositions.transaction.cursor.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.transaction.cursor.client.model</modelPackage>
+                            <configOptions>
+                                <reactive>true</reactive>
+                                <performBeanValidation>true</performBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                 </executions>

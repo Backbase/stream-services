@@ -1,6 +1,6 @@
 package com.backbase.stream.product.mapping;
 
-import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
+import com.backbase.dbs.arrangement.api.integration.v3.model.PostArrangement;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
 import com.backbase.stream.legalentity.model.AvailableBalance;
@@ -397,36 +397,36 @@ class ProductMapperTest {
     @Test
     void map_TermUnit_To_TimeUnit() {
         Assertions.assertNull(productMapper.map(TermUnit.QUARTERLY));
-        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.D, productMapper.map(TermUnit.DAILY));
-        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.W, productMapper.map(TermUnit.WEEKLY));
-        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.M, productMapper.map(TermUnit.MONTHLY));
-        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.Y, productMapper.map(TermUnit.YEARLY));
+        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.D, productMapper.map(TermUnit.DAILY));
+        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.W, productMapper.map(TermUnit.WEEKLY));
+        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.M, productMapper.map(TermUnit.MONTHLY));
+        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.Y, productMapper.map(TermUnit.YEARLY));
     }
 
     @Test
     void map_InterestPaymentFrequencyUnit_To_TimeUnit() {
         Assertions.assertNull(productMapper.map(InterestPaymentFrequencyUnit.QUARTERLY));
-        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.D, productMapper.map(InterestPaymentFrequencyUnit.DAILY));
-        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.W, productMapper.map(InterestPaymentFrequencyUnit.WEEKLY));
-        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.M, productMapper.map(InterestPaymentFrequencyUnit.MONTHLY));
-        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.Y, productMapper.map(InterestPaymentFrequencyUnit.YEARLY));
+        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.D, productMapper.map(InterestPaymentFrequencyUnit.DAILY));
+        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.W, productMapper.map(InterestPaymentFrequencyUnit.WEEKLY));
+        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.M, productMapper.map(InterestPaymentFrequencyUnit.MONTHLY));
+        Assertions.assertEquals(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.Y, productMapper.map(InterestPaymentFrequencyUnit.YEARLY));
     }
 
     @Test
     void map_TimeUnit_TermUnit() {
-        Assertions.assertEquals(TermUnit.DAILY, productMapper.map(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.D));
-        Assertions.assertEquals(TermUnit.WEEKLY, productMapper.map(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.W));
-        Assertions.assertEquals(TermUnit.MONTHLY, productMapper.map(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.M));
-        Assertions.assertEquals(TermUnit.YEARLY, productMapper.map(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.Y));
+        Assertions.assertEquals(TermUnit.DAILY, productMapper.map(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.D));
+        Assertions.assertEquals(TermUnit.WEEKLY, productMapper.map(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.W));
+        Assertions.assertEquals(TermUnit.MONTHLY, productMapper.map(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.M));
+        Assertions.assertEquals(TermUnit.YEARLY, productMapper.map(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.Y));
     }
 
     @Test
     void map_TimeUnit_To_InterestPaymentFrequencyUnit() {
         Assertions.assertNull(productMapper.mapInterestPayment(null));
-        Assertions.assertEquals(InterestPaymentFrequencyUnit.DAILY, productMapper.mapInterestPayment(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.D));
-        Assertions.assertEquals(InterestPaymentFrequencyUnit.WEEKLY, productMapper.mapInterestPayment(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.W));
-        Assertions.assertEquals(InterestPaymentFrequencyUnit.MONTHLY, productMapper.mapInterestPayment(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.M));
-        Assertions.assertEquals(InterestPaymentFrequencyUnit.YEARLY, productMapper.mapInterestPayment(com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit.Y));
+        Assertions.assertEquals(InterestPaymentFrequencyUnit.DAILY, productMapper.mapInterestPayment(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.D));
+        Assertions.assertEquals(InterestPaymentFrequencyUnit.WEEKLY, productMapper.mapInterestPayment(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.W));
+        Assertions.assertEquals(InterestPaymentFrequencyUnit.MONTHLY, productMapper.mapInterestPayment(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.M));
+        Assertions.assertEquals(InterestPaymentFrequencyUnit.YEARLY, productMapper.mapInterestPayment(com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit.Y));
     }
 
     @Test

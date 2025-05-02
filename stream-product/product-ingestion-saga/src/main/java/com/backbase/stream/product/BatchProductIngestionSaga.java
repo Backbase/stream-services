@@ -5,7 +5,7 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
 import static java.util.stream.Collectors.toMap;
 
-import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
+import com.backbase.dbs.arrangement.api.integration.v3.model.PostArrangement;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;

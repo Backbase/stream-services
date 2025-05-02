@@ -4,9 +4,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntity;
-import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
-import com.backbase.dbs.arrangement.api.integration.v2.model.TimeUnit;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ExternalLegalEntity;
+import com.backbase.dbs.arrangement.api.integration.v3.model.PostArrangement;
+import com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItemBase;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItemPostRequest;

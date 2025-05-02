@@ -16,7 +16,7 @@ import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserProfileManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
-import com.backbase.loan.inbound.api.service.v1.LoansApi;
+import com.backbase.loan.inbound.api.service.v2.LoansApi;
 import com.backbase.stream.audiences.UserKindSegmentationSaga;
 import com.backbase.stream.config.LegalEntityHttpConfiguration;
 import com.backbase.stream.configuration.LegalEntitySagaConfiguration;
@@ -113,7 +113,7 @@ class ServiceAgreementControllerTest {
     private ArrangementsApi arrangementsApiV3;
 
     @MockBean
-    private com.backbase.dbs.arrangement.api.integration.v2.ArrangementsApi arrangementsApi;
+    private com.backbase.dbs.arrangement.api.integration.v3.ArrangementsApi arrangementsApi;
 
     @MockBean
     private UserKindSegmentationSaga userKindSegmentationSaga;

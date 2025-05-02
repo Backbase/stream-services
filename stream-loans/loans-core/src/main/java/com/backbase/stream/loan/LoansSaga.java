@@ -1,9 +1,9 @@
 package com.backbase.stream.loan;
 
-import com.backbase.loan.inbound.api.service.v1.LoansApi;
-import com.backbase.loan.inbound.api.service.v1.model.BatchUpsertLoans;
-import com.backbase.loan.inbound.api.service.v1.model.InboundIntegrationArrangementAttributes;
-import com.backbase.loan.inbound.api.service.v1.model.InboundIntegrationLoan;
+import com.backbase.loan.inbound.api.service.v2.LoansApi;
+import com.backbase.loan.inbound.api.service.v2.model.BatchUpsertLoans;
+import com.backbase.loan.inbound.api.service.v2.model.InboundIntegrationArrangementAttributes;
+import com.backbase.loan.inbound.api.service.v2.model.InboundIntegrationLoan;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import io.micrometer.tracing.annotation.SpanTag;
 import java.util.List;

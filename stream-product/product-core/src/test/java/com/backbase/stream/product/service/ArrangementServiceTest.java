@@ -8,14 +8,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.arrangement.api.integration.v2.model.ArrangementAddedResponse;
-import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseItemExtended;
-import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseStatusCode;
-import com.backbase.dbs.arrangement.api.integration.v2.model.ErrorItem;
-import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntity;
-import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntityIds;
-import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
-import com.backbase.dbs.arrangement.api.integration.v2.model.Subscription;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementAddedResponse;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseItemExtended;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseStatusCode;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ErrorItem;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ExternalLegalEntity;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ExternalLegalEntityIds;
+import com.backbase.dbs.arrangement.api.integration.v3.model.PostArrangement;
+import com.backbase.dbs.arrangement.api.integration.v3.model.Subscription;
 import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
@@ -55,7 +55,7 @@ class ArrangementServiceTest {
     private ArrangementsApi arrangementsApi;
 
     @Mock
-    private com.backbase.dbs.arrangement.api.integration.v2.ArrangementsApi arrangementsIntegrationApi;
+    private com.backbase.dbs.arrangement.api.integration.v3.ArrangementsApi arrangementsIntegrationApi;
 
     private static WebClientResponseException buildWebClientResponseException(HttpStatus httpStatus, String statusText) {
         return WebClientResponseException.create(httpStatus.value(), statusText, null, null, null);

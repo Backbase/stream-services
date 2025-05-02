@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>6.18.0</version>
+        <version>7.0.0</version>
     </parent>
 
     <artifactId>product-catalog-composition-service</artifactId>
@@ -107,6 +107,7 @@
                             <modelPackage>com.backbase.stream.compositions.productcatalog.model</modelPackage>
                             <configOptions>
                                 <reactive>true</reactive>
+                                <performBeanValidation>true</performBeanValidation>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -120,6 +121,10 @@
                             <inputSpec>${project.build.directory}/yaml/product-catalog-integration-api/service-api-v2.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.stream.compositions.integration.productcatalog.api</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.integration.productcatalog.model</modelPackage>
+                            <configOptions>
+                                <reactive>true</reactive>
+                                <performBeanValidation>true</performBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                 </executions>
