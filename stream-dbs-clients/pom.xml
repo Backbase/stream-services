@@ -536,6 +536,19 @@
                             </configOptions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-customer-profile-integration-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/customer-profile/customer-profile-integration-api-v*.yaml</inputSpec>
+                            <apiPackage>com.backbase.customerprofile.api.integration.v1</apiPackage>
+                            <modelPackage>com.backbase.customerprofile.api.integration.v1.model</modelPackage>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 
