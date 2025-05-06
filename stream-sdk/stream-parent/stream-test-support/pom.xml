@@ -26,6 +26,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.navercorp.fixturemonkey</groupId>
+            <artifactId>fixture-monkey-starter</artifactId>
+            <version>1.1.11</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.iban4j</groupId>
             <artifactId>iban4j</artifactId>
             <version>3.2.3-RELEASE</version>
@@ -81,6 +87,12 @@
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8-standalone</artifactId>
             <version>2.35.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.backbase.buildingblocks</groupId>
+            <artifactId>service-sdk-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

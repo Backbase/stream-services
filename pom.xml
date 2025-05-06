@@ -35,6 +35,7 @@
         <module>stream-audiences</module>
         <module>stream-compositions</module>
         <module>stream-plan-manager</module>
+        <module>stream-customer-profile</module>
     </modules>
 
     <properties>
