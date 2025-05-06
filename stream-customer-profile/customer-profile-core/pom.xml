@@ -4,38 +4,30 @@
 
     <parent>
         <groupId>com.backbase.stream</groupId>
-        <artifactId>stream-access-control</artifactId>
+        <artifactId>stream-customer-profile</artifactId>
         <version>6.19.0</version>
     </parent>
 
-    <artifactId>access-control-core</artifactId>
-
+    <artifactId>customer-profile-core</artifactId>
     <packaging>jar</packaging>
-    <name>Stream :: Access Control Core</name>
+    <name>Stream :: Customer Profile Core</name>
 
     <properties>
         <checkstyle.disable.checks>true</checkstyle.disable.checks>
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>legal-entity-model</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
+            <artifactId>mapstruct</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>product-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -43,33 +35,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.backbase.stream</groupId>
             <artifactId>stream-dbs-clients</artifactId>
             <version>${project.version}</version>
+            <scope>compile</scope>
         </dependency>
-
         <dependency>
-            <groupId>com.backbase.stream</groupId>
-            <artifactId>stream-worker</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- TEST -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -78,7 +52,6 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
 </project>

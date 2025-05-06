@@ -1,15 +1,18 @@
 package com.backbase.stream;
 
+import static com.backbase.stream.FixtureUtils.reflectiveAlphaFixtureMonkey;
 import static com.backbase.stream.service.UserService.REMOVED_PREFIX;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.backbase.customerprofile.api.integration.v1.model.PartyResponseUpsertDto;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostResponseBody;
@@ -29,6 +32,7 @@ import com.backbase.stream.legalentity.model.ExternalContact;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
+import com.backbase.stream.legalentity.model.Party;
 import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
@@ -36,9 +40,11 @@ import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.mapper.LegalEntityV2toV1Mapper;
 import com.backbase.stream.mapper.ServiceAgreementV2ToV1Mapper;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.stream.service.CustomerProfileService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
+import com.navercorp.fixturemonkey.FixtureMonkey;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,9 +90,16 @@ class LegalEntitySagaV2Test {
     @Mock
     private UserKindSegmentationSaga userKindSegmentationSaga;
 
+    @Mock
+    private CustomerProfileService customerProfileService;
+
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
         getLegalEntitySagaConfigurationProperties();
+
+    private final FixtureMonkey fixtureMonkey = reflectiveAlphaFixtureMonkey;
+
+    private static final int PARTY_SIZE = 20;
 
     String leExternalId = "someLeExternalId";
     String leParentExternalId = "someParentLeExternalId";
@@ -352,6 +365,7 @@ class LegalEntitySagaV2Test {
         legalEntityV2 = new LegalEntityV2()
             .internalId(leInternalId)
             .externalId(leExternalId)
+            .parties(fixtureMonkey.giveMe(Party.class, PARTY_SIZE))
             .addAdministratorsItem(adminUser)
             .parentExternalId(leParentExternalId)
             .users(singletonList(regularUser))
@@ -382,6 +396,9 @@ class LegalEntitySagaV2Test {
         getMockLegalEntity();
         LegalEntityTaskV2 task = mockLegalEntityTask(legalEntityV2);
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.LE));
+
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
 
         LegalEntityTaskV2 result = legalEntitySaga.executeTask(task).block();
 
@@ -442,6 +459,9 @@ class LegalEntitySagaV2Test {
 
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
 
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
+
         LegalEntityTaskV2 result = legalEntitySaga.executeTask(task).block();
 
         Assertions.assertNotNull(result);
@@ -456,6 +476,9 @@ class LegalEntitySagaV2Test {
 
         when(userKindSegmentationSaga.isEnabled()).thenReturn(false);
 
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
+
         legalEntitySaga.executeTask(mockLegalEntityTask(legalEntityV2)).block();
 
         verify(userKindSegmentationSaga, never()).executeTask(Mockito.any());
@@ -467,6 +490,9 @@ class LegalEntitySagaV2Test {
         legalEntityV2.setCustomerCategory(CustomerCategory.RETAIL);
 
         when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
+
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
 
         legalEntitySaga.executeTask(mockLegalEntityTask(legalEntityV2)).block();
 
@@ -482,6 +508,8 @@ class LegalEntitySagaV2Test {
         when(userKindSegmentationSaga.getDefaultCustomerCategory()).thenReturn(CustomerCategory.RETAIL.getValue());
         when(userKindSegmentationSaga.executeTask(any())).thenReturn(
             Mono.just(Mockito.mock(UserKindSegmentationTask.class)));
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
 
         legalEntitySaga.executeTask(mockLegalEntityTask(legalEntityV2)).block();
 
@@ -496,6 +524,9 @@ class LegalEntitySagaV2Test {
         when(userKindSegmentationSaga.isEnabled()).thenReturn(true);
         when(userKindSegmentationSaga.getDefaultCustomerCategory()).thenReturn(null);
 
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
+
         var task = mockLegalEntityTask(legalEntityV2);
 
         Assertions.assertThrows(
@@ -503,6 +534,37 @@ class LegalEntitySagaV2Test {
             () -> executeLegalEntityTaskAndBlock(task),
             "Failed to determine LE customerCategory for UserKindSegmentationSage."
         );
+    }
+
+    @Test
+    void testSetupParties_IfPartyFound_ThenUpsertParty() {
+        getMockLegalEntity();
+        var task = mockLegalEntityTask(legalEntityV2);
+        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.LE));
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(
+            Mono.just(fixtureMonkey.giveMeOne(PartyResponseUpsertDto.class)));
+        var result = legalEntitySaga.executeTask(task).block();
+        verify(customerProfileService, times(PARTY_SIZE)).upsertParty(any(Party.class), anyString());
+        Assertions.assertNotNull(result);
+    }
+
+    @Test
+    void testProcessCustomerProfile_IfUpsertPartyError_ThenTrowException() {
+        getMockLegalEntity();
+        var task = mockLegalEntityTask(legalEntityV2);
+        when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.LE));
+        var mockException = new WebClientResponseException(
+            "CPS Error",
+            400,
+            "Bad Request",
+            null,
+            null,
+            null
+        );
+        when(customerProfileService.upsertParty(any(Party.class), anyString())).thenReturn(Mono.error(mockException));
+        var result = legalEntitySaga.executeTask(task).block();
+        verify(customerProfileService, times(PARTY_SIZE)).upsertParty(any(Party.class), anyString());
+        Assertions.assertNotNull(result);
     }
 
     @ParameterizedTest
