@@ -6,7 +6,9 @@ import static java.util.Comparator.nullsFirst;
 import static java.util.stream.Collectors.toMap;
 
 import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementPost;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementStateIdentification;
 import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntityExternal;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ProductIdentification;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -187,14 +189,24 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
       };
     }
 
-    private static Function<ArrangementPost, Object> arrangementPostToLegalEntity = arrangementPost ->
-        arrangementPost.getLegalEntities().stream().map(LegalEntityExternal::getExternalId).toList();
+    private static Function<ArrangementPost, List<String>> arrangementPostToLegalEntity = arrangementPost ->
+        Optional.ofNullable(arrangementPost)
+            .map(ArrangementPost::getLegalEntities)
+            .map(Collection::stream)
+            .map(stream -> stream.map(LegalEntityExternal::getExternalId).toList())
+            .orElse(null);
 
-    private static Function<ArrangementPost, Object> arrangementPostToProductExternalId = arrangementPost ->
-        arrangementPost.getProduct().getExternalId();
+    private static Function<ArrangementPost, String> arrangementPostToProductExternalId = arrangementPost ->
+        Optional.ofNullable(arrangementPost)
+            .map(ArrangementPost::getProduct)
+            .map(ProductIdentification::getExternalId)
+            .orElse(null);
 
-    private static Function<ArrangementPost, Object> arrangementPostToStateExternalId = arrangementPost ->
-        arrangementPost.getState().getExternalId();
+    private static Function<ArrangementPost, String> arrangementPostToStateExternalId = arrangementPost ->
+        Optional.ofNullable(arrangementPost)
+            .map(ArrangementPost::getState)
+            .map(ArrangementStateIdentification::getExternalId)
+            .orElse(null);
 
     protected Mono<BatchProductGroupTask> upsertArrangementsBatch(BatchProductGroupTask batchProductGroupTask) {
         List<ArrangementPost> batchArrangements = new ArrayList<>();

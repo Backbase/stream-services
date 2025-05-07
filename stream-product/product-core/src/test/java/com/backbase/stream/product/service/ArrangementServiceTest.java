@@ -100,19 +100,16 @@ class ArrangementServiceTest {
     void createArrangement() {
         ArrangementPost request = buildArrangementPost();
 
-        ArrangementItem accountArrangementAddedResponse = new ArrangementItem().id("arr_response_id");
-
-        UuidResponse uuidResponse = new UuidResponse().id(accountArrangementAddedResponse.getId());
+        UuidResponse uuidResponse = new UuidResponse().id("arr_response_id");
         when(arrangementsIntegrationApi.postArrangements(request)).thenReturn(Mono.just(uuidResponse));
 
         StepVerifier.create(arrangementService.createArrangement(request))
             .assertNext(response -> {
                 Assertions.assertNotNull(response);
-                Assertions.assertEquals(accountArrangementAddedResponse.getId(), response.getId());
-                Assertions.assertEquals(request.getProduct().getExternalId(), response.getProductId());
+                Assertions.assertEquals(uuidResponse.getId(), response.getId());
+                Assertions.assertEquals(request.getProduct().getExternalId(), response.getExternalProductId());
                 Assertions.assertNotNull(response.getState());
                 Assertions.assertEquals(request.getState().getExternalId(), response.getState().getState());
-                Assertions.assertEquals(request.getProduct().getExternalId(), response.getProductId());
                 Assertions.assertEquals(getLegalEntityIds(request.getLegalEntities()), response.getLegalEntityIds());
             }).verifyComplete();
 
@@ -468,14 +465,10 @@ class ArrangementServiceTest {
         LegalEntitiesListPost legalEntitiesListPost = new LegalEntitiesListPost()
             .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
             .legalEntities(Set.of(
-                (LegalEntityExternal) new LegalEntityExternal()
-                    .externalId("leid_1")
-                    .relation("fake-relation")
-                    .additions(Map.of("fake-key", "fake-value")),
-                (LegalEntityExternal) new LegalEntityExternal()
+               new LegalEntityExternal()
+                    .externalId("leid_1"),
+                new LegalEntityExternal()
                     .externalId("leid_2")
-                    .relation("fake-relation")
-                    .additions(Map.of("fake-key", "fake-value"))
             ));
 
         when(arrangementsIntegrationApi.postArrangementLegalEntities(legalEntitiesListPost))
@@ -499,14 +492,10 @@ class ArrangementServiceTest {
         LegalEntitiesListPost legalEntitiesListPost = new LegalEntitiesListPost()
             .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
             .legalEntities(Set.of(
-                (LegalEntityExternal) new LegalEntityExternal()
-                    .externalId("leid_1")
-                    .relation("fake-relation")
-                    .additions(Map.of("fake-key", "fake-value")),
-                (LegalEntityExternal) new LegalEntityExternal()
+                new LegalEntityExternal()
+                    .externalId("leid_1"),
+                new LegalEntityExternal()
                     .externalId("leid_2")
-                    .relation("fake-relation")
-                    .additions(Map.of("fake-key", "fake-value"))
             ));
 
         when(arrangementsIntegrationApi.postArrangementLegalEntities(legalEntitiesListPost))

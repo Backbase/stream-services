@@ -269,7 +269,7 @@ class ProductMapperTest {
     void map_AccountArrangementItemBase_To_AccountArrangementItem() {
         ArrangementPost source = productMapper.toPresentation(buildProduct());
         ArrangementItem target = productMapper.toArrangementItem(source);
-        Assertions.assertEquals(target.getId(), source.getExternalId());
+        Assertions.assertEquals(target.getExternalArrangementId(), source.getExternalId());
         Assertions.assertNotNull(target.getState());
         Assertions.assertEquals(target.getState().getState(), source.getState().getExternalId());
         Assertions.assertEquals(target.getAccountHolderNames(), source.getAccountHolder().getNames());

@@ -96,7 +96,7 @@ public class ArrangementService {
                     if (!BatchResponseStatusCode.HTTP_STATUS_OK.equals(r.getStatus())) {
                         List<ErrorItem> errors = r.getErrors();
                         sink.error(new IllegalStateException("Batch arrangement update failed: '%s'; errors: %s"
-                            .formatted(r.getArrangementId(), join(",", errors.stream().map(ErrorItem::toString).toList()))));
+                            .formatted(r.getArrangementExternalId(), join(",", errors.stream().map(ErrorItem::toString).toList()))));
                         return;
                     }
                     sink.next(r);
@@ -203,14 +203,8 @@ public class ArrangementService {
      * @return Mono<Void>
      */
     public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, @NonNull Set<String> legalEntitiesExternalIds) {
-        Set<LegalEntityExternal> externalLegalEntitySet = legalEntitiesExternalIds.stream()
-            .map(legalEntitiesExternalId -> new LegalEntityExternal().externalId(legalEntitiesExternalId))
-            .collect(Collectors.toSet());
-        log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, externalLegalEntitySet.stream().map(LegalEntityExternal::getExternalId).toList());
-        LegalEntitiesListPost legalEntitiesListPost = new LegalEntitiesListPost()
-            .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
-            .legalEntities(externalLegalEntitySet);
-
+        log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, legalEntitiesExternalIds);
+        LegalEntitiesListPost legalEntitiesListPost = productMapper.mapLegalEntitiesListPost(arrangementExternalId, legalEntitiesExternalIds);;
         return arrangementsIntegrationApi.postArrangementLegalEntities(legalEntitiesListPost);
     }
 

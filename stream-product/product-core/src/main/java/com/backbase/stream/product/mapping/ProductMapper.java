@@ -5,6 +5,8 @@ import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementPost;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntitiesListPost;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntityExternal;
 import com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItemBase;
@@ -36,7 +38,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import jdk.jfr.Name;
 import org.mapstruct.InheritConfiguration;
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -44,6 +48,8 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.ValueMapping;
 import org.mapstruct.ValueMappings;
+import org.springframework.lang.NonNull;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -121,8 +127,14 @@ public interface ProductMapper {
 
     @Mapping(source = "state.externalId", target = "state.state")
     @Mapping(source = "externalId", target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
+    @Mapping(source = "accountHolder.names", target = "accountHolderNames")
+    @Mapping(source = "product.externalId", target = "externalProductId")
+    @Mapping(source = "legalEntities", target = "legalEntityIds", qualifiedByName = "mapLegalEntitiesIdsSet")
     ArrangementItem toArrangementItem(ArrangementPost arrangementItemPost);
 
+    @Mapping(source = "externalId", target = "externalArrangementId")
+    @Mapping(source = "state.externalId", target = "stateId")
+    @Mapping(source = "accountHolder.names", target = "accountHolderNames")
     ArrangementPutItem toArrangementItemPut(ArrangementPost arrangementItemPost);
 
     ArrangementItemBase toArrangementItemBase(ArrangementItemPostRequest arrangementItemPost);
@@ -184,6 +196,31 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
     @Mapping(source = "currentInvestmentValue", target = "currentInvestment")
     InvestmentAccount mapInvestmentAccount(ArrangementItem product);
+
+    @Mapping(source = "arrangementExternalId", target = "arrangement.externalId")
+    @Mapping(source = "legalEntitiesExternalIds", target = "legalEntities", qualifiedByName = "mapLegalEntityExternalSet")
+    LegalEntitiesListPost mapLegalEntitiesListPost(String arrangementExternalId, Set<String> legalEntitiesExternalIds);
+
+    @Named("mapLegalEntitiesIdsSet")
+    @IterableMapping(qualifiedByName = "mapLegalEntityExternalId")
+    Set<String> mapLegalEntitiesIdsSet(Set<LegalEntityExternal> legalEntityExternalSet);
+
+    @Named("mapLegalEntityExternalId")
+    default String mapLegalEntityExternalId(LegalEntityExternal legalEntityExternal) {
+        if (legalEntityExternal == null) {
+            return null;
+        }
+        return legalEntityExternal.getExternalId();
+    }
+
+    @Named("mapLegalEntityExternalSet")
+    @IterableMapping(qualifiedByName = "mapLegalEntityExternal")
+    Set<LegalEntityExternal> mapLegalEntityExternalSet(Set<String> externalIds);
+
+    @Named("mapLegalEntityExternal")
+    default LegalEntityExternal mapLegalEntityExternal(String externalId) {
+        return new LegalEntityExternal().externalId(externalId);
+    }
 
 
     default List<LegalEntityReference> mapLegalEntities(Set<String> externalIds) {
