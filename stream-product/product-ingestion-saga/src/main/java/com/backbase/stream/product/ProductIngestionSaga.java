@@ -7,7 +7,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
-import com.backbase.dbs.arrangement.api.integration.v3.model.PostArrangement;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementPost;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntityExternal;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -39,7 +40,6 @@ import com.backbase.stream.service.UserService;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import io.micrometer.tracing.annotation.ContinueSpan;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -274,11 +274,11 @@ public class ProductIngestionSaga {
             .map(streamTask::data);
     }
 
-    private Mono<List<ArrangementItem>> upsertArrangements(ProductGroupTask streamTask, Flux<PostArrangement> productFlux) {
+    private Mono<List<ArrangementItem>> upsertArrangements(ProductGroupTask streamTask, Flux<ArrangementPost> productFlux) {
         ProductGroup productGroup = streamTask.getData();
         return productFlux
             .map(p -> ensureLegalEntityId(productGroup.getUsers(), p))
-            .sort(comparing(PostArrangement::getParentId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
+            .sort(comparing(ArrangementPost::getParentExternalId, nullsFirst(naturalOrder()))) // Avoiding child to be created before parent
             .flatMapSequential(arrangementItemPost -> upsertArrangement(streamTask, arrangementItemPost))
             .collectList();
     }
@@ -289,24 +289,24 @@ public class ProductIngestionSaga {
      * @param postArrangement Product to create
      * @return Created or Existing Product
      */
-    public Mono<ArrangementItem> upsertArrangement(ProductGroupTask streamTask, PostArrangement postArrangement) {
-        streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, "", postArrangement.getId(), null, "Inserting or updating arrangement: %s", postArrangement.getId());
-        log.info("Upsert Arrangement: {} in Product Group: {}", postArrangement.getId(), streamTask.getData().getName());
-        Mono<ArrangementItem> updateArrangement = arrangementService.getArrangementInternalId(postArrangement.getId())
+    public Mono<ArrangementItem> upsertArrangement(ProductGroupTask streamTask, ArrangementPost postArrangement) {
+        streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, "", postArrangement.getExternalId(), null, "Inserting or updating arrangement: %s", postArrangement.getExternalId());
+        log.info("Upsert Arrangement: {} in Product Group: {}", postArrangement.getExternalId(), streamTask.getData().getName());
+        Mono<ArrangementItem> updateArrangement = arrangementService.getArrangementInternalId(postArrangement.getExternalId())
             .flatMap(internalId -> {
                 String internalIds = String.join(",", internalId);
                 log.info("Arrangement already exists: {}", internalId);
-                streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, EXISTS, postArrangement.getId(), internalIds, "Arrangement %s already exists", postArrangement.getId());
+                streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, EXISTS, postArrangement.getExternalId(), internalIds, "Arrangement %s already exists", postArrangement.getExternalId());
                 ArrangementPutItem arrangemenItemBase = productMapper.toArrangementItemPut(postArrangement);
                 return arrangementService.updateArrangement(internalId, arrangemenItemBase)
                     .onErrorResume(ArrangementUpdateException.class, e -> {
-                        streamTask.error(ARRANGEMENT, UPDATE_ARRANGEMENT, FAILED, postArrangement.getId(), internalIds, e, e.getHttpResponse(), "Failed to update arrangement: %s", postArrangement.getId());
+                        streamTask.error(ARRANGEMENT, UPDATE_ARRANGEMENT, FAILED, postArrangement.getExternalId(), internalIds, e, e.getHttpResponse(), "Failed to update arrangement: %s", postArrangement.getExternalId());
                         return Mono.error(new StreamTaskException(streamTask, e.getCause(),
                             e.getMessage() + " " + e.getCause().getMessage()));
                     })
                     .map(actual -> {
                         log.info("Updated arrangement: {}", actual.getExternalArrangementId());
-                        streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, UPDATED, postArrangement.getId(), internalId, "Updated Arrangement");
+                        streamTask.info(ARRANGEMENT, UPSERT_ARRANGEMENT, UPDATED, postArrangement.getExternalId(), internalId, "Updated Arrangement");
                         ArrangementItem arrangementItem = productMapper.toArrangementItem(actual);
                         arrangementItem.setId(internalId);
                         return arrangementItem;
@@ -315,22 +315,22 @@ public class ProductIngestionSaga {
 
             Mono<ArrangementItem> createNewArrangement = createArrangement(postArrangement)
                 .map(arrangementItem -> {
-                    streamTask.info(ARRANGEMENT, "insert-arrangement", CREATED, postArrangement.getId(), arrangementItem.getId(), "Created Arrangement");
+                    streamTask.info(ARRANGEMENT, "insert-arrangement", CREATED, postArrangement.getExternalId(), arrangementItem.getId(), "Created Arrangement");
                     log.info("Created arrangement: {} with internalId: {} ", arrangementItem.getExternalArrangementId(), arrangementItem.getId());
                     return arrangementItem;
                 })
                 .onErrorResume(ArrangementCreationException.class, e -> {
-                    streamTask.error(ARRANGEMENT, "insert-arrangement", FAILED, postArrangement.getId(), null, e, e.getHttpResponse(), "Failed to update arrangement: %s", postArrangement.getId());
+                    streamTask.error(ARRANGEMENT, "insert-arrangement", FAILED, postArrangement.getExternalId(), null, e, e.getHttpResponse(), "Failed to update arrangement: %s", postArrangement.getExternalId());
                     return Mono.error(new StreamTaskException(streamTask, e, "Failed to create arrangement"));
                 });
 
         return updateArrangement.switchIfEmpty(createNewArrangement);
     }
 
-    private Mono<ArrangementItem> createArrangement(PostArrangement postArrangement) {
+    private Mono<ArrangementItem> createArrangement(ArrangementPost postArrangement) {
         return arrangementService.createArrangement(postArrangement)
             .doOnError(WebClientResponseException.class, throwable ->
-                log.error("Failed to create product: {}\n{}", postArrangement.getId(), throwable.getResponseBodyAsString()))
+                log.error("Failed to create product: {}\n{}", postArrangement.getExternalId(), throwable.getResponseBodyAsString()))
             .map(arrangementAddedResponse -> {
                 ArrangementItem arrangementItem = productMapper.toArrangementItem(postArrangement);
                 arrangementItem.setId(arrangementAddedResponse.getId());
@@ -386,15 +386,24 @@ public class ProductIngestionSaga {
             : Flux.fromIterable(productGroup.getCurrentAccounts());
     }
 
-    protected PostArrangement ensureLegalEntityId(List<JobProfileUser> users, PostArrangement product) {
+    protected ArrangementPost ensureLegalEntityId(List<JobProfileUser> users, ArrangementPost product) {
         Set<String> legalEntityExternalIds = users.stream()
             .map(jobProfileUser -> jobProfileUser.getLegalEntityReference().getExternalId())
             .collect(Collectors.toSet());
         // Make sure that we take into consideration Legal Entity Ids provided in Arrangement Item itself.
-        if (!isEmpty(product.getLegalEntityIds())) {
-            legalEntityExternalIds.addAll(product.getLegalEntityIds());
+        if (isEmpty(legalEntityExternalIds)) {
+            return product;
         }
-        product.setLegalEntityIds(new HashSet<>(legalEntityExternalIds));
+
+        List<String> existingLegalEntity = product.getLegalEntities()
+            .stream()
+            .map(LegalEntityExternal::getExternalId)
+            .toList();
+
+        legalEntityExternalIds.stream()
+            .filter(legalEntityExternalId -> !existingLegalEntity.contains(legalEntityExternalId))
+            .map(legalEntityExternalId -> new LegalEntityExternal().externalId(legalEntityExternalId))
+            .forEach(product::addLegalEntitiesItem);
         return product;
     }
 

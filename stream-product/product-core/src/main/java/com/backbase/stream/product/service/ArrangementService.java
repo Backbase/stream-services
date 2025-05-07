@@ -8,13 +8,19 @@ import static java.util.Collections.singletonList;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.fromCallable;
 
-import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseItemExtended;
+
+import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementIdentification;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseItem;
 import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseStatusCode;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchUpsertArrangement;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchUpsertResponse;
 import com.backbase.dbs.arrangement.api.integration.v3.model.ErrorItem;
-import com.backbase.dbs.arrangement.api.integration.v3.model.ExternalLegalEntity;
-import com.backbase.dbs.arrangement.api.integration.v3.model.ExternalLegalEntityIds;
-import com.backbase.dbs.arrangement.api.integration.v3.model.PostArrangement;
-import com.backbase.dbs.arrangement.api.integration.v3.model.Subscription;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntitiesListPost;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntityExternal;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementPost;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntitiesDelete;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntityIdentification;
+import com.backbase.dbs.arrangement.api.integration.v3.model.SubscriptionPost;
 import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
@@ -29,9 +35,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.lang.NonNull;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -53,10 +61,10 @@ public class ArrangementService {
         this.arrangementsIntegrationApi = arrangementsIntegrationApi;
     }
 
-    public Mono<ArrangementItem> createArrangement(PostArrangement postArrangement) {
+    public Mono<ArrangementItem> createArrangement(ArrangementPost postArrangement) {
 
         return arrangementsIntegrationApi.postArrangements(postArrangement)
-            .doOnError(WebClientResponseException.class, throwable -> log.error("Failed to create arrangement: {}\n{}", postArrangement.getId(), throwable.getResponseBodyAsString()))
+            .doOnError(WebClientResponseException.class, throwable -> log.error("Failed to create arrangement: {}\n{}", postArrangement.getExternalId(), throwable.getResponseBodyAsString()))
             .onErrorMap(WebClientResponseException.class, throwable -> new ArrangementCreationException(throwable, "Failed to post arrangements"))
             .map(arrangementAddedResponse -> {
                 ArrangementItem arrangementItem = productMapper.toArrangementItem(postArrangement);
@@ -78,24 +86,26 @@ public class ArrangementService {
             .onErrorResume(WebClientResponseException.class, throwable -> error(new ArrangementUpdateException(throwable, "Failed to update Arrangement: " + arrangementPutItem.getExternalArrangementId())));
     }
 
-    public Flux<BatchResponseItemExtended> upsertBatchArrangements(List<PostArrangement> arrangementItems) {
-        return arrangementsIntegrationApi.postBatchUpsertArrangements(arrangementItems)
-            .<BatchResponseItemExtended>handle((r, sink) -> {
-                log.info("Batch Arrangement update result for arrangementId: {}, resourceId: {}, action: {}, result: {}", r.getArrangementId(), r.getResourceId(), r.getAction(), r.getStatus());
-                // Check if any failed, then fail everything.
-                if (!BatchResponseStatusCode.HTTP_STATUS_OK.equals(r.getStatus())) {
-                    List<ErrorItem> errors = r.getErrors();
-                    sink.error(new IllegalStateException("Batch arrangement update failed: '%s'; errors: %s"
-                        .formatted(r.getResourceId(), join(",", errors.stream().map(ErrorItem::toString).toList()))));
-                    return;
-                }
-                sink.next(r);
+    public Flux<BatchResponseItem> upsertBatchArrangements(List<ArrangementPost> arrangementItems) {
+        BatchUpsertArrangement batchUpsertArrangement = new BatchUpsertArrangement().arrangements(arrangementItems);
+        return arrangementsIntegrationApi.postBatchUpsertArrangements(batchUpsertArrangement)
+            .flatMapIterable(BatchUpsertResponse::getResults)
+            .<BatchResponseItem>handle((r, sink) -> {
+                    log.info("Batch Arrangement update result for arrangementId: {}, resourceId: {}, action: {}, result: {}", r.getArrangementId(), r.getArrangementExternalId(), r.getAction(), r.getStatus());
+                    // Check if any failed, then fail everything.
+                    if (!BatchResponseStatusCode.HTTP_STATUS_OK.equals(r.getStatus())) {
+                        List<ErrorItem> errors = r.getErrors();
+                        sink.error(new IllegalStateException("Batch arrangement update failed: '%s'; errors: %s"
+                            .formatted(r.getArrangementId(), join(",", errors.stream().map(ErrorItem::toString).toList()))));
+                        return;
+                    }
+                    sink.next(r);
             }).onErrorResume(WebClientResponseException.class, throwable ->
                 Mono.error(new ArrangementUpdateException(throwable,
                     "Batch arrangement update failed for arrangements : "
                         + arrangementItems.stream()
                         .map(arrangementItem -> {
-                            String uniqueIdentifier = Objects.nonNull(arrangementItem.getBBAN())? arrangementItem.getBBAN(): arrangementItem.getId();
+                            String uniqueIdentifier = Objects.nonNull(arrangementItem.getBBAN())? arrangementItem.getBBAN(): arrangementItem.getExternalId();
                             return arrangementItem.getName() + " | "
                                 + uniqueIdentifier.substring(uniqueIdentifier.length() - 4);
                         }).toList())));
@@ -189,17 +199,19 @@ public class ArrangementService {
      * Assign Arrangement with specified Legal Entities.
      *
      * @param arrangementExternalId external id of Arrangement.
-     * @param externalLegalEntityIds list of Legal Entities external identifiers.
+     * @param legalEntitiesExternalIds set of Legal Entities external identifiers.
      * @return Mono<Void>
      */
-    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, @NonNull ExternalLegalEntityIds externalLegalEntityIds) {
-        Set<ExternalLegalEntity> externalLegalEntitySet = externalLegalEntityIds.getExternalLegalEntities();
-        // Being defensive here to avoid NPE during the logging below
-        if (externalLegalEntitySet == null) {
-            externalLegalEntitySet = emptySet();
-        }
-        log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, externalLegalEntitySet.stream().map(ExternalLegalEntity::getExternalId).toList());
-        return arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds);
+    public Mono<Void> addLegalEntitiesForArrangement(String arrangementExternalId, @NonNull Set<String> legalEntitiesExternalIds) {
+        Set<LegalEntityExternal> externalLegalEntitySet = legalEntitiesExternalIds.stream()
+            .map(legalEntitiesExternalId -> new LegalEntityExternal().externalId(legalEntitiesExternalId))
+            .collect(Collectors.toSet());
+        log.debug("Attaching Arrangement {} to Legal Entities: {}", arrangementExternalId, externalLegalEntitySet.stream().map(LegalEntityExternal::getExternalId).toList());
+        LegalEntitiesListPost legalEntitiesListPost = new LegalEntitiesListPost()
+            .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
+            .legalEntities(externalLegalEntitySet);
+
+        return arrangementsIntegrationApi.postArrangementLegalEntities(legalEntitiesListPost);
     }
 
     /**
@@ -212,8 +224,18 @@ public class ArrangementService {
     public Mono<Void> removeLegalEntityFromArrangement(String arrangementExternalId,
         List<String> legalEntityExternalIds) {
         log.debug("Removing Arrangement {} from Legal Entities {}", arrangementExternalId, legalEntityExternalIds);
-        return arrangementsIntegrationApi.deleteArrangementLegalEntities(arrangementExternalId,
-            new ExternalLegalEntityIds().ids(new HashSet<>(legalEntityExternalIds)));
+
+        if (CollectionUtils.isEmpty(legalEntityExternalIds)) {
+            return Mono.empty();
+        }
+
+        Set<LegalEntityIdentification> legalEntityIdentifications = legalEntityExternalIds.stream()
+            .map(legalEntityExternalId -> new LegalEntityIdentification().externalId(legalEntityExternalId))
+            .collect(Collectors.toSet());
+
+        LegalEntitiesDelete legalEntitiesDelete = new LegalEntitiesDelete().legalEntities(legalEntityIdentifications);
+
+        return arrangementsIntegrationApi.deleteArrangementLegalEntities(legalEntitiesDelete);
     }
 
     /**
@@ -229,8 +251,10 @@ public class ArrangementService {
         return Flux.fromIterable(subscriptionIdentifiers)
             .flatMap(identifier -> {
                     log.debug("Subscribe arrangement [{}] to subscription '{}'", arrangementExternalId, identifier);
-                    return arrangementsIntegrationApi
-                        .postSubscription(arrangementExternalId, new Subscription().identifier(identifier))
+                    SubscriptionPost subscriptionPost = new SubscriptionPost()
+                        .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
+                        .identifier(identifier);
+                    return arrangementsIntegrationApi.postSubscription(subscriptionPost)
                         .onErrorResume(WebClientResponseException.class, e -> {
                             log.warn("Failed to create subscription '{}' for arrangement [{}]: {}",
                                 identifier,

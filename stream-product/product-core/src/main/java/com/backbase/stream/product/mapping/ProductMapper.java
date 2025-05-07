@@ -4,13 +4,13 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-import com.backbase.dbs.arrangement.api.integration.v3.model.ExternalLegalEntity;
-import com.backbase.dbs.arrangement.api.integration.v3.model.PostArrangement;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementPost;
 import com.backbase.dbs.arrangement.api.integration.v3.model.TimeUnit;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItemBase;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItemPostRequest;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
+import com.backbase.dbs.arrangement.api.service.v3.model.ExternalLegalEntity;
 import com.backbase.stream.legalentity.model.AvailableBalance;
 import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BookedBalance;
@@ -50,98 +50,80 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings({"squid:S1710"})
 public interface ProductMapper {
 
-    @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
-    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
-    @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITIES)
-    @Mapping(source = "state.externalStateId", target = ProductMapperConstants.STATE_ID)
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
-    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
-    PostArrangement toPresentation(Product product);
+    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
+    @Mapping(source = "state.externalStateId", target = "state.externalId")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
+    ArrangementPost toPresentation(Product product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_PRODUCT_ID)
-    @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITIES)
     @Mapping(source = "state.externalStateId", target = ProductMapperConstants.EXTERNAL_STATE_ID)
     ArrangementItemPostRequest toPresentation(BaseProduct product);
 
     @InheritConfiguration
-    @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
-    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
-    @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITIES)
+    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
     @Mapping(source = "debitCardsItems", target = "debitCards")
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
-    @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
-    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
-    PostArrangement toPresentation(CurrentAccount currentAccount);
+    @Mapping(source = "state.state", target = "state.externalId")
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
+    ArrangementPost toPresentation(CurrentAccount currentAccount);
 
-    @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
-    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
-    @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITIES)
+    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
     @Mapping(source = ProductMapperConstants.DEBIT_CARDS_ITEMS, target = ProductMapperConstants.DEBIT_CARDS)
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
-    @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
-    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
+    @Mapping(source = "state.state", target = "state.externalId")
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
     @InheritConfiguration
-    PostArrangement toPresentation(SavingsAccount savingsAccount);
+    ArrangementPost toPresentation(SavingsAccount savingsAccount);
 
-    @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
-    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
-    @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITIES)
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
     @Mapping(source = "debitCard", qualifiedByName = "mapDebitCardNumber", target = ProductMapperConstants.NUMBER)
-    @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
-    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
+    @Mapping(source = "state.state", target = "state.externalId")
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
     @InheritConfiguration
-    PostArrangement toPresentation(DebitCard debitCard);
+    ArrangementPost toPresentation(DebitCard debitCard);
 
-    @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
-    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
-    @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITIES)
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
     @Mapping(source = "creditCard", qualifiedByName = "mapCreditCardNumber", target = ProductMapperConstants.NUMBER)
-    @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
-    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
+    @Mapping(source = "state.state", target = "state.externalId")
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
     @InheritConfiguration
-    PostArrangement toPresentation(CreditCard creditCard);
+    ArrangementPost toPresentation(CreditCard creditCard);
 
-    @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
-    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
-    @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITIES)
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
-    @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
-    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
+    @Mapping(source = "state.state", target = "state.externalId")
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
     @InheritConfiguration
-    PostArrangement toPresentation(TermDeposit termDeposit);
+    ArrangementPost toPresentation(TermDeposit termDeposit);
 
-    @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
-    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
-    @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITIES)
+    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
     @Mapping(source = "currentInvestment.amount", target = "currentInvestmentValue")
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
-    @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
-    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
+    @Mapping(source = "state.state", target = "state.externalId")
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
     @InheritConfiguration
-    PostArrangement toPresentation(InvestmentAccount investmentAccount);
+    ArrangementPost toPresentation(InvestmentAccount investmentAccount);
 
-    @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.ID)
-    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = ProductMapperConstants.PRODUCT_ID)
-    @Mapping(source = ProductMapperConstants.LEGAL_ENTITIES, target = ProductMapperConstants.EXTERNAL_LEGAL_ENTITIES)
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ProductMapperConstants.ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
-    @Mapping(source = "state.state", target = ProductMapperConstants.STATE_ID)
-    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = ProductMapperConstants.PARENT_ID)
+    @Mapping(source = "state.state", target = "state.externalId")
+    @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
     @InheritConfiguration
-    PostArrangement toPresentation(Loan loan);
+    ArrangementPost toPresentation(Loan loan);
 
-    @Mapping(source = ProductMapperConstants.STATE_ID, target = "state.state")
-    @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
-    ArrangementItem toArrangementItem(PostArrangement arrangementItemPost);
+    @Mapping(source = "state.externalId", target = "state.state")
+    @Mapping(source = "externalId", target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
+    ArrangementItem toArrangementItem(ArrangementPost arrangementItemPost);
 
-    @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
-    ArrangementPutItem toArrangementItemPut(PostArrangement arrangementItemPost);
+    ArrangementPutItem toArrangementItemPut(ArrangementPost arrangementItemPost);
 
     ArrangementItemBase toArrangementItemBase(ArrangementItemPostRequest arrangementItemPost);
 

@@ -60,10 +60,6 @@
                             <inputSpec>${raml2openapi-maven-plugin.input}</inputSpec>
                             <output>${openapi-generator-maven-plugin.output}</output>
                             <modelPackage>com.backbase.stream.cursor.model</modelPackage>
-                            <configOptions>
-                                <reactive>true</reactive>
-                                <performBeanValidation>true</performBeanValidation>
-                            </configOptions>
                         </configuration>
                     </execution>
 
