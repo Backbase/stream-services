@@ -94,7 +94,6 @@
                             </importMappings>
                             <configOptions>
                                 <reactive>true</reactive>
-                                <performBeanValidation>false</performBeanValidation>
                             </configOptions>
                         </configuration>
                     </execution>

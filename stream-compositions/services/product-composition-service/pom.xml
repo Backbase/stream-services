@@ -150,10 +150,6 @@
                             <apiPackage>com.backbase.stream.compositions.product.integration.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.product.integration.client.model
                             </modelPackage>
-                            <configOptions>
-                                <reactive>true</reactive>
-                                <performBeanValidation>true</performBeanValidation>
-                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -168,10 +164,6 @@
                             </inputSpec>
                             <apiPackage>com.backbase.stream.compositions.transaction.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.transaction.client.model</modelPackage>
-                            <configOptions>
-                                <reactive>true</reactive>
-                                <useBeanValidation>false</useBeanValidation>
-                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -186,10 +178,6 @@
                             </inputSpec>
                             <apiPackage>com.backbase.stream.compositions.paymentorder.client</apiPackage>
                             <modelPackage>com.backbase.stream.compositions.paymentorder.client.model</modelPackage>
-                            <configOptions>
-                                <reactive>true</reactive>
-                                <useBeanValidation>false</useBeanValidation>
-                            </configOptions>
                         </configuration>
                     </execution>
                 </executions>

@@ -143,7 +143,6 @@
                             <configOptions>
                                 <reactive>true</reactive>
                                 <additionalProperties>useWithModifiers=true</additionalProperties>
-                                <useBeanValidation>true</useBeanValidation>
                             </configOptions>
                         </configuration>
                     </execution>
