@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "url": "/arrangement-manager/integration-api/v2/arrangements/batch",
+    "url": "/arrangement-manager/integration-api/v3/arrangements/batch",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"

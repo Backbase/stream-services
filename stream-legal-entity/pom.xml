@@ -15,7 +15,6 @@
 
     <modules>
         <module>legal-entity-core</module>
-        <module>legal-entity-bootstrap-task</module>
         <module>legal-entity-http</module>
     </modules>
 </project>
