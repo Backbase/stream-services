@@ -16,7 +16,7 @@ public class ProductConfiguration {
 
     @Bean
     public ArrangementService arrangementService(ArrangementsApi arrangementsApi,
-        com.backbase.dbs.arrangement.api.integration.v2.ArrangementsApi arrangementsIntegrationApi) {
+        com.backbase.dbs.arrangement.api.integration.v3.ArrangementsApi arrangementsIntegrationApi) {
         return new ArrangementService(arrangementsApi, arrangementsIntegrationApi);
     }
 

@@ -8,14 +8,20 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.arrangement.api.integration.v2.model.ArrangementAddedResponse;
-import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseItemExtended;
-import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseStatusCode;
-import com.backbase.dbs.arrangement.api.integration.v2.model.ErrorItem;
-import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntity;
-import com.backbase.dbs.arrangement.api.integration.v2.model.ExternalLegalEntityIds;
-import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
-import com.backbase.dbs.arrangement.api.integration.v2.model.Subscription;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementIdentification;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementPost;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementStateIdentification;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseItem;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseStatusCode;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchUpsertResponse;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ErrorItem;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntitiesDelete;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntitiesListPost;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntityExternal;
+import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntityIdentification;
+import com.backbase.dbs.arrangement.api.integration.v3.model.ProductIdentification;
+import com.backbase.dbs.arrangement.api.integration.v3.model.SubscriptionPost;
+import com.backbase.dbs.arrangement.api.integration.v3.model.UuidResponse;
 import com.backbase.dbs.arrangement.api.service.ApiClient;
 import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
@@ -32,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -55,18 +62,22 @@ class ArrangementServiceTest {
     private ArrangementsApi arrangementsApi;
 
     @Mock
-    private com.backbase.dbs.arrangement.api.integration.v2.ArrangementsApi arrangementsIntegrationApi;
+    private com.backbase.dbs.arrangement.api.integration.v3.ArrangementsApi arrangementsIntegrationApi;
 
-    private static WebClientResponseException buildWebClientResponseException(HttpStatus httpStatus, String statusText) {
+    private static WebClientResponseException buildWebClientResponseException(HttpStatus httpStatus,
+        String statusText) {
         return WebClientResponseException.create(httpStatus.value(), statusText, null, null, null);
     }
 
-    private static PostArrangement buildPostArrangement() {
-        PostArrangement postArrangement = new PostArrangement();
-        postArrangement.setId("ext_arr_id");
-        postArrangement.setLegalEntityIds(Set.of("ext_leid_1", "ext_leid_2"));
-        postArrangement.setProductId("ext_prod_id");
-        postArrangement.setStateId("ext_state_id");
+    private static ArrangementPost buildArrangementPost() {
+        ArrangementPost postArrangement = new ArrangementPost();
+        postArrangement.setExternalId("ext_arr_id");
+        postArrangement.setLegalEntities(Set.of(
+            new LegalEntityExternal().externalId("ext_leid_1"),
+            new LegalEntityExternal().externalId("ext_leid_2")
+        ));
+        postArrangement.setProduct(new ProductIdentification().externalId("ext_prod_id"));
+        postArrangement.setState(new ArrangementStateIdentification().externalId("ext_state_id"));
         postArrangement.setName("arr_name");
         return postArrangement;
     }
@@ -87,32 +98,40 @@ class ArrangementServiceTest {
 
     @Test
     void createArrangement() {
-        PostArrangement request = buildPostArrangement();
+        ArrangementPost request = buildArrangementPost();
 
-        ArrangementItem accountArrangementAddedResponse = new ArrangementItem().id("arr_response_id");
-
-        ArrangementAddedResponse arrangementAddedResponse = new ArrangementAddedResponse().id(accountArrangementAddedResponse.getId());
-        when(arrangementsIntegrationApi.postArrangements(request)).thenReturn(Mono.just(arrangementAddedResponse));
+        UuidResponse uuidResponse = new UuidResponse().id("arr_response_id");
+        when(arrangementsIntegrationApi.postArrangements(request)).thenReturn(Mono.just(uuidResponse));
 
         StepVerifier.create(arrangementService.createArrangement(request))
             .assertNext(response -> {
                 Assertions.assertNotNull(response);
-                Assertions.assertEquals(accountArrangementAddedResponse.getId(), response.getId());
-                Assertions.assertEquals(request.getProductId(), response.getProductId());
+                Assertions.assertEquals(uuidResponse.getId(), response.getId());
+                Assertions.assertEquals(request.getProduct().getExternalId(), response.getExternalProductId());
                 Assertions.assertNotNull(response.getState());
-                Assertions.assertEquals(request.getStateId(), response.getState().getState());
-                Assertions.assertEquals(request.getProductId(), response.getProductId());
-                Assertions.assertEquals(request.getLegalEntityIds(), response.getLegalEntityIds());
+                Assertions.assertEquals(request.getState().getExternalId(), response.getState().getState());
+                Assertions.assertEquals(getLegalEntityIds(request.getLegalEntities()), response.getLegalEntityIds());
             }).verifyComplete();
 
         verify(arrangementsIntegrationApi).postArrangements(request);
     }
 
+    private Set<String> getLegalEntityIds(Set<LegalEntityExternal> legalEntityExternals) {
+        if (legalEntityExternals == null) {
+            return null;
+        }
+        if (legalEntityExternals.isEmpty()) {
+            return Set.of();
+        }
+        return legalEntityExternals.stream().map(LegalEntityExternal::getExternalId).collect(Collectors.toSet());
+    }
+
     @Test
     void createArrangement_Failure() {
-        PostArrangement request = buildPostArrangement();
+        ArrangementPost request = buildArrangementPost();
 
-        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.BAD_REQUEST, "Bad Request for create arrangement");
+        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.BAD_REQUEST,
+            "Bad Request for create arrangement");
 
         when(arrangementsIntegrationApi.postArrangements(any())).thenReturn(Mono.error(webClientResponseException));
 
@@ -148,13 +167,16 @@ class ArrangementServiceTest {
         String arrangementId = UUID.randomUUID().toString();
         ArrangementPutItem request = buildArrangementPutItem();
 
-        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.BAD_REQUEST, "Bad Request for update arrangement");
-        when(arrangementsApi.putArrangementById(arrangementId, request)).thenReturn(Mono.error(webClientResponseException));
+        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.BAD_REQUEST,
+            "Bad Request for update arrangement");
+        when(arrangementsApi.putArrangementById(arrangementId, request)).thenReturn(
+            Mono.error(webClientResponseException));
 
         StepVerifier.create(arrangementService.updateArrangement(arrangementId, request))
             .consumeErrorWith(e -> {
                 Assertions.assertInstanceOf(ArrangementUpdateException.class, e);
-                Assertions.assertEquals("Failed to update Arrangement: %s".formatted(request.getExternalArrangementId()), e.getMessage());
+                Assertions.assertEquals(
+                    "Failed to update Arrangement: %s".formatted(request.getExternalArrangementId()), e.getMessage());
                 Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
             }).verify();
 
@@ -163,19 +185,22 @@ class ArrangementServiceTest {
 
     @Test
     void upsertBatchArrangements() {
-        PostArrangement request = buildPostArrangement();
+        ArrangementPost request = buildArrangementPost();
 
-        BatchResponseItemExtended accountBatchResponseItemExtended = (BatchResponseItemExtended) new BatchResponseItemExtended()
+        BatchResponseItem batchResponseItem = new BatchResponseItem()
             .arrangementId("arr_id")
-            .resourceId("resource_id")
+            .arrangementExternalId("resource_id")
             .status(BatchResponseStatusCode.HTTP_STATUS_OK);
 
-        when(arrangementsIntegrationApi.postBatchUpsertArrangements(any())).thenReturn(Flux.just(accountBatchResponseItemExtended));
+        BatchUpsertResponse batchUpsertResponse = new BatchUpsertResponse()
+            .addResultsItem(batchResponseItem);
+
+        when(arrangementsIntegrationApi.postBatchUpsertArrangements(any())).thenReturn(Mono.just(batchUpsertResponse));
 
         StepVerifier.create(arrangementService.upsertBatchArrangements(List.of(request)))
             .assertNext(response -> {
                 Assertions.assertNotNull(response);
-                Assertions.assertEquals(accountBatchResponseItemExtended.getArrangementId(),
+                Assertions.assertEquals(batchResponseItem.getArrangementId(),
                     response.getArrangementId());
             }).verifyComplete();
 
@@ -184,16 +209,19 @@ class ArrangementServiceTest {
 
     @Test
     void upsertBatchArrangements_Batch_Error() {
-        PostArrangement request = buildPostArrangement();
+        ArrangementPost request = buildArrangementPost();
 
-        BatchResponseItemExtended accountBatchResponseItemExtended = new BatchResponseItemExtended();
-        accountBatchResponseItemExtended.setArrangementId("arr_id");
-        accountBatchResponseItemExtended.setResourceId("resource_id");
-        accountBatchResponseItemExtended.setStatus(BatchResponseStatusCode.HTTP_STATUS_BAD_REQUEST);
-        accountBatchResponseItemExtended.addErrorsItem(new ErrorItem().message("Some error"));
-        accountBatchResponseItemExtended.addErrorsItem(new ErrorItem().message("Some other error"));
+        BatchResponseItem batchResponseItem = new BatchResponseItem();
+        batchResponseItem.setArrangementId("arr_id");
+        batchResponseItem.setArrangementExternalId("resource_id");
+        batchResponseItem.setStatus(BatchResponseStatusCode.HTTP_STATUS_BAD_REQUEST);
+        batchResponseItem.addErrorsItem(new ErrorItem().message("Some error"));
+        batchResponseItem.addErrorsItem(new ErrorItem().message("Some other error"));
 
-        when(arrangementsIntegrationApi.postBatchUpsertArrangements(any())).thenReturn(Flux.just(accountBatchResponseItemExtended));
+        BatchUpsertResponse batchUpsertResponse = new BatchUpsertResponse()
+            .addResultsItem(batchResponseItem);
+
+        when(arrangementsIntegrationApi.postBatchUpsertArrangements(any())).thenReturn(Mono.just(batchUpsertResponse));
 
         StepVerifier.create(arrangementService.upsertBatchArrangements(List.of(request)))
             .consumeErrorWith(e -> {
@@ -208,21 +236,24 @@ class ArrangementServiceTest {
 
     @Test
     void upsertBatchArrangements_Failure() {
-        PostArrangement request = buildPostArrangement();
+        ArrangementPost request = buildArrangementPost();
 
-        List<PostArrangement> postArrangementList = List.of(request);
+        List<ArrangementPost> postArrangementList = List.of(request);
         List<String> last4ExtArrList = postArrangementList.stream()
-            .map(arrangementItem -> arrangementItem.getName() + " | " + arrangementItem.getId()
-                .substring(arrangementItem.getId().length() - 4))
+            .map(arrangementItem -> arrangementItem.getName() + " | " + arrangementItem.getExternalId()
+                .substring(arrangementItem.getExternalId().length() - 4))
             .toList();
 
-        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.BAD_REQUEST, "Bad Request for upsert arrangement");
-        when(arrangementsIntegrationApi.postBatchUpsertArrangements(any())).thenReturn(Flux.error(webClientResponseException));
+        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.BAD_REQUEST,
+            "Bad Request for upsert arrangement");
+        when(arrangementsIntegrationApi.postBatchUpsertArrangements(any())).thenReturn(
+            Mono.error(webClientResponseException));
 
         StepVerifier.create(arrangementService.upsertBatchArrangements(postArrangementList))
             .consumeErrorWith(e -> {
                 Assertions.assertInstanceOf(ArrangementUpdateException.class, e);
-                Assertions.assertEquals("Batch arrangement update failed for arrangements : " + last4ExtArrList, e.getMessage());
+                Assertions.assertEquals("Batch arrangement update failed for arrangements : " + last4ExtArrList,
+                    e.getMessage());
                 Assertions.assertEquals(webClientResponseException.getMessage(), e.getCause().getMessage());
             }).verify();
 
@@ -249,7 +280,8 @@ class ArrangementServiceTest {
     void getArrangement_NotFound() {
         String internalId = "internal_id";
 
-        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.NOT_FOUND, "Arrangement Not Found");
+        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.NOT_FOUND,
+            "Arrangement Not Found");
         when(arrangementsApi.getArrangementById(internalId, false)).thenReturn(Mono.error(webClientResponseException));
 
         StepVerifier.create(arrangementService.getArrangement(internalId)).verifyComplete();
@@ -269,7 +301,8 @@ class ArrangementServiceTest {
         ArrangementItem arrangementItem = new ArrangementItem().id("acct_arr_item_id");
         arrangementSearchesListResponse.setArrangementElements(List.of(arrangementItem));
 
-        when(arrangementsApi.postSearchArrangements(arrangementsSearchesPostRequest)).thenReturn(Mono.just(arrangementSearchesListResponse));
+        when(arrangementsApi.postSearchArrangements(arrangementsSearchesPostRequest)).thenReturn(
+            Mono.just(arrangementSearchesListResponse));
 
         StepVerifier.create(arrangementService.getArrangementByExternalId(externalId))
             .assertNext(response -> {
@@ -306,7 +339,8 @@ class ArrangementServiceTest {
         ArrangementSearchesListResponse arrangementSearchesListResponse = new ArrangementSearchesListResponse();
         arrangementSearchesListResponse.setArrangementElements(List.of(arrangementItem));
 
-        when(arrangementsApi.postSearchArrangements(arrangementsSearchesPostRequest)).thenReturn(Mono.just(arrangementSearchesListResponse));
+        when(arrangementsApi.postSearchArrangements(arrangementsSearchesPostRequest)).thenReturn(
+            Mono.just(arrangementSearchesListResponse));
 
         StepVerifier.create(arrangementService.getArrangementInternalId(externalId))
             .assertNext(response -> Assertions.assertEquals(response, arrangementItem.getId()))
@@ -319,12 +353,14 @@ class ArrangementServiceTest {
     void getArrangementInternalId_NotFound() {
         String externalId = "external_id";
 
-        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.NOT_FOUND, "Arrangement Not Found");
+        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.NOT_FOUND,
+            "Arrangement Not Found");
 
         ArrangementsSearchesPostRequest arrangementsSearchesPostRequest = new ArrangementsSearchesPostRequest();
         arrangementsSearchesPostRequest.setExternalArrangementIds(Set.of(externalId));
 
-        when(arrangementsApi.postSearchArrangements(arrangementsSearchesPostRequest)).thenReturn(Mono.error(webClientResponseException));
+        when(arrangementsApi.postSearchArrangements(arrangementsSearchesPostRequest)).thenReturn(
+            Mono.error(webClientResponseException));
 
         StepVerifier.create(arrangementService.getArrangementInternalId(externalId)).verifyComplete();
 
@@ -335,12 +371,14 @@ class ArrangementServiceTest {
     void getArrangementInternalId_Failure() {
         String externalId = "external_id";
 
-        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.BAD_REQUEST, "Bad Request to get Internal Id");
+        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.BAD_REQUEST,
+            "Bad Request to get Internal Id");
 
         ArrangementsSearchesPostRequest arrangementsSearchesPostRequest = new ArrangementsSearchesPostRequest();
         arrangementsSearchesPostRequest.setExternalArrangementIds(Set.of(externalId));
 
-        when(arrangementsApi.postSearchArrangements(arrangementsSearchesPostRequest)).thenReturn(Mono.error(webClientResponseException));
+        when(arrangementsApi.postSearchArrangements(arrangementsSearchesPostRequest)).thenReturn(
+            Mono.error(webClientResponseException));
 
         StepVerifier.create(arrangementService.getArrangementInternalId(externalId)).verifyComplete();
 
@@ -364,7 +402,8 @@ class ArrangementServiceTest {
         arrangementsDeleteResponseElement.setSelector(ArrangementsDeleteResponseElement.SelectorEnum.EXTERNAL_ID);
 
         when(arrangementsApi.getArrangementById(arrangementInternalId, false)).thenReturn(Mono.just(arrangementItem));
-        when(arrangementsApi.postDelete(arrangementsDeleteItemSet)).thenReturn(Flux.just(arrangementsDeleteResponseElement));
+        when(arrangementsApi.postDelete(arrangementsDeleteItemSet)).thenReturn(
+            Flux.just(arrangementsDeleteResponseElement));
 
         StepVerifier.create(arrangementService.deleteArrangementByInternalId(arrangementInternalId))
             .expectNext(arrangementInternalId).verifyComplete();
@@ -377,9 +416,11 @@ class ArrangementServiceTest {
     void deleteArrangementByInternalId_GetArrangement_Failure() {
         String arrangementInternalId = "arr_internal_id";
 
-        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error");
+        WebClientResponseException webClientResponseException = buildWebClientResponseException(
+            HttpStatus.INTERNAL_SERVER_ERROR, "Some error");
 
-        when(arrangementsApi.getArrangementById(arrangementInternalId, false)).thenReturn(Mono.error(webClientResponseException));
+        when(arrangementsApi.getArrangementById(arrangementInternalId, false)).thenReturn(
+            Mono.error(webClientResponseException));
 
         StepVerifier.create(arrangementService.deleteArrangementByInternalId(arrangementInternalId))
             .expectNext(arrangementInternalId).verifyComplete();
@@ -394,8 +435,10 @@ class ArrangementServiceTest {
 
         ArrangementItem accountArrangementItem = new ArrangementItem().externalArrangementId("ext_arr_id");
 
-        when(arrangementsApi.getArrangementById(arrangementInternalId, false)).thenReturn(Mono.just(accountArrangementItem));
-        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error");
+        when(arrangementsApi.getArrangementById(arrangementInternalId, false)).thenReturn(
+            Mono.just(accountArrangementItem));
+        WebClientResponseException webClientResponseException = buildWebClientResponseException(
+            HttpStatus.INTERNAL_SERVER_ERROR, "Some error");
 
         ArrangementsDeleteItem arrangementsDeleteItem = new ArrangementsDeleteItem();
         arrangementsDeleteItem.setSelector(SelectorEnum.EXTERNAL_ID);
@@ -419,22 +462,23 @@ class ArrangementServiceTest {
         String arrangementExternalId = "arr_ext_id";
         Set<String> legalEntitiesExternalIds = Set.of("leid_1", "leid_2");
 
-        ExternalLegalEntityIds externalLegalEntityIds = new ExternalLegalEntityIds();
-        externalLegalEntityIds.ids(legalEntitiesExternalIds);
-        externalLegalEntityIds.setExternalLegalEntities(legalEntitiesExternalIds.stream().map(legalEntityExternalId -> {
-            ExternalLegalEntity externalLegalEntity = new ExternalLegalEntity();
-            externalLegalEntity.setExternalId(legalEntityExternalId);
-            externalLegalEntity.setRelation("fake-relation");
-            externalLegalEntity.setAdditions(Map.of("fake-key", "fake-value"));
-            return externalLegalEntity;
-        }).collect(toSet()));
+        LegalEntitiesListPost legalEntitiesListPost = new LegalEntitiesListPost()
+            .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
+            .legalEntities(Set.of(
+               new LegalEntityExternal()
+                    .externalId("leid_1"),
+                new LegalEntityExternal()
+                    .externalId("leid_2")
+            ));
 
-        when(arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds))
+        when(arrangementsIntegrationApi.postArrangementLegalEntities(legalEntitiesListPost))
             .thenReturn(Mono.empty());
 
-        StepVerifier.create(arrangementService.addLegalEntitiesForArrangement(arrangementExternalId, externalLegalEntityIds)).verifyComplete();
+        StepVerifier.create(
+                arrangementService.addLegalEntitiesForArrangement(arrangementExternalId, legalEntitiesExternalIds))
+            .verifyComplete();
 
-        verify(arrangementsIntegrationApi).postArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds);
+        verify(arrangementsIntegrationApi).postArrangementLegalEntities(legalEntitiesListPost);
     }
 
     @Test
@@ -442,28 +486,29 @@ class ArrangementServiceTest {
         String arrangementExternalId = "arr_ext_id";
         Set<String> legalEntitiesExternalIds = Set.of("leid_1", "leid_2");
 
-        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error");
+        WebClientResponseException webClientResponseException = buildWebClientResponseException(
+            HttpStatus.INTERNAL_SERVER_ERROR, "Some error");
 
-        ExternalLegalEntityIds externalLegalEntityIds = new ExternalLegalEntityIds();
-        externalLegalEntityIds.ids(legalEntitiesExternalIds);
-        externalLegalEntityIds.setExternalLegalEntities(legalEntitiesExternalIds.stream().map(legalEntityExternalId -> {
-            ExternalLegalEntity externalLegalEntity = new ExternalLegalEntity();
-            externalLegalEntity.setExternalId(legalEntityExternalId);
-            externalLegalEntity.setRelation("fake-relation");
-            externalLegalEntity.setAdditions(Map.of("fake-key", "fake-value"));
-            return externalLegalEntity;
-        }).collect(toSet()));
+        LegalEntitiesListPost legalEntitiesListPost = new LegalEntitiesListPost()
+            .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
+            .legalEntities(Set.of(
+                new LegalEntityExternal()
+                    .externalId("leid_1"),
+                new LegalEntityExternal()
+                    .externalId("leid_2")
+            ));
 
-
-        when(arrangementsIntegrationApi.postArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds))
+        when(arrangementsIntegrationApi.postArrangementLegalEntities(legalEntitiesListPost))
             .thenReturn(Mono.error(webClientResponseException));
 
-        StepVerifier.create(arrangementService.addLegalEntitiesForArrangement(arrangementExternalId, externalLegalEntityIds)).consumeErrorWith(e -> {
-            Assertions.assertInstanceOf(WebClientResponseException.class, e);
-            Assertions.assertEquals("500 Some error", e.getMessage());
-        }).verify();
+        StepVerifier.create(
+                arrangementService.addLegalEntitiesForArrangement(arrangementExternalId, legalEntitiesExternalIds))
+            .consumeErrorWith(e -> {
+                Assertions.assertInstanceOf(WebClientResponseException.class, e);
+                Assertions.assertEquals("500 Some error", e.getMessage());
+            }).verify();
 
-        verify(arrangementsIntegrationApi).postArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds);
+        verify(arrangementsIntegrationApi).postArrangementLegalEntities(legalEntitiesListPost);
     }
 
     @Test
@@ -475,10 +520,13 @@ class ArrangementServiceTest {
         ApiClient apiClient = mock(ApiClient.class);
         when(arrangementsApi.getApiClient()).thenReturn(apiClient);
 
-        ExternalLegalEntityIds externalLegalEntityIds = new ExternalLegalEntityIds();
-        externalLegalEntityIds.setIds(legalEntityExternalIds);
+        LegalEntitiesDelete legalEntitiesDelete = new LegalEntitiesDelete()
+            .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
+            .legalEntities(legalEntityExternalIds.stream()
+                .map(legalEntityExternalId -> new LegalEntityIdentification().externalId(legalEntityExternalId))
+                .collect(toSet()));
 
-        verify(arrangementsIntegrationApi).deleteArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds);
+        verify(arrangementsIntegrationApi).deleteArrangementLegalEntities(legalEntitiesDelete);
 
         StepVerifier.create(arrangementService.removeLegalEntityFromArrangement(arrangementExternalId,
             legalEntityExternalIds.stream().toList())).verifyComplete();
@@ -496,15 +544,20 @@ class ArrangementServiceTest {
 
         when(arrangementsApi.getApiClient()).thenReturn(apiClient);
 
-        WebClientResponseException webClientResponseException = buildWebClientResponseException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error");
+        WebClientResponseException webClientResponseException = buildWebClientResponseException(
+            HttpStatus.INTERNAL_SERVER_ERROR, "Some error");
 
-        ExternalLegalEntityIds externalLegalEntityIds = new ExternalLegalEntityIds();
-        externalLegalEntityIds.setIds(legalEntityExternalIds);
+        LegalEntitiesDelete legalEntitiesDelete = new LegalEntitiesDelete()
+            .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
+            .legalEntities(legalEntityExternalIds.stream()
+                .map(legalEntityExternalId -> new LegalEntityIdentification().externalId(legalEntityExternalId))
+                .collect(toSet()));
 
-        verify(arrangementsIntegrationApi).deleteArrangementLegalEntities(arrangementExternalId, externalLegalEntityIds)
+        verify(arrangementsIntegrationApi).deleteArrangementLegalEntities(legalEntitiesDelete)
             .thenReturn(Mono.error(webClientResponseException));
 
-        StepVerifier.create(arrangementService.removeLegalEntityFromArrangement(arrangementExternalId, new ArrayList<>(legalEntityExternalIds)))
+        StepVerifier.create(arrangementService.removeLegalEntityFromArrangement(arrangementExternalId,
+                new ArrayList<>(legalEntityExternalIds)))
             .consumeErrorWith(e -> {
                 Assertions.assertInstanceOf(WebClientResponseException.class, e);
                 Assertions.assertEquals("500 Some error", e.getMessage());
@@ -518,7 +571,7 @@ class ArrangementServiceTest {
         // given
         var arrangementExternalId = "arr_ext_id";
         var identifiers = List.of("subsc_1", "subsc_2");
-        when(arrangementsIntegrationApi.postSubscription(any(), any())).thenReturn(Mono.empty());
+        when(arrangementsIntegrationApi.postSubscription(any())).thenReturn(Mono.empty());
 
         // when
         var monoResult = arrangementService
@@ -527,9 +580,13 @@ class ArrangementServiceTest {
         // then
         StepVerifier.create(monoResult).verifyComplete();
         verify(arrangementsIntegrationApi)
-            .postSubscription(arrangementExternalId, new Subscription().identifier("subsc_1"));
+            .postSubscription(new SubscriptionPost()
+                .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
+                .identifier("subsc_1"));
         verify(arrangementsIntegrationApi)
-            .postSubscription(arrangementExternalId, new Subscription().identifier("subsc_2"));
+            .postSubscription(new SubscriptionPost()
+                .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
+                .identifier("subsc_2"));
     }
 
     @Test
@@ -538,7 +595,7 @@ class ArrangementServiceTest {
         var arrangementExternalId = "arr_ext_id";
         var identifiers = List.of("subsc_1", "subsc_2");
         var exception = buildWebClientResponseException(HttpStatus.INTERNAL_SERVER_ERROR, "Some error occurred");
-        when(arrangementsIntegrationApi.postSubscription(any(), any())).thenReturn(Mono.error(exception));
+        when(arrangementsIntegrationApi.postSubscription(any())).thenReturn(Mono.error(exception));
 
         // when
         var monoResult = arrangementService
@@ -547,9 +604,36 @@ class ArrangementServiceTest {
         // then
         StepVerifier.create(monoResult).verifyComplete();
         verify(arrangementsIntegrationApi)
-            .postSubscription(arrangementExternalId, new Subscription().identifier("subsc_1"));
+            .postSubscription(new SubscriptionPost()
+                .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
+                .identifier("subsc_1"));
         verify(arrangementsIntegrationApi)
-            .postSubscription(arrangementExternalId, new Subscription().identifier("subsc_2"));
+            .postSubscription(new SubscriptionPost()
+                .arrangement(new ArrangementIdentification().externalId(arrangementExternalId))
+                .identifier("subsc_2"));
     }
 
+    @Test
+    void removeLegalEntityFromArrangement_Success() {
+        // given
+        String arrangementExternalId = "arr_ext_id";
+        List<String> legalEntityExternalIds = List.of("leid_1", "leid_2");
+
+        Set<LegalEntityIdentification> legalEntityIdentifications = legalEntityExternalIds.stream()
+            .map(legalEntityExternalId -> new LegalEntityIdentification().externalId(legalEntityExternalId))
+            .collect(Collectors.toSet());
+
+        LegalEntitiesDelete legalEntitiesDelete = new LegalEntitiesDelete()
+            .legalEntities(legalEntityIdentifications);
+
+        when(arrangementsIntegrationApi.deleteArrangementLegalEntities(legalEntitiesDelete))
+            .thenReturn(Mono.empty());
+
+        // when
+        var result = arrangementService.removeLegalEntityFromArrangement(arrangementExternalId, legalEntityExternalIds);
+
+        // then
+        StepVerifier.create(result).verifyComplete();
+        verify(arrangementsIntegrationApi).deleteArrangementLegalEntities(legalEntitiesDelete);
+    }
 }

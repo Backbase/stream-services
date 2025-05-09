@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>6.19.0</version>
+        <version>7.0.0</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -108,7 +108,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>com.backbase.dbs.accesscontrol</groupId>
-                                    <artifactId>access-control-openapi-spec</artifactId>
+                                    <artifactId>access-control</artifactId>
                                     <classifier>api</classifier>
                                     <type>zip</type>
                                     <outputDirectory>${project.build.directory}/yaml</outputDirectory>
@@ -127,7 +127,7 @@
                                     <artifactId>audit-spec</artifactId>
                                     <classifier>api</classifier>
                                     <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/yaml/audit</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
@@ -238,7 +238,7 @@
             <plugin>
                 <groupId>com.backbase.oss</groupId>
                 <artifactId>boat-maven-plugin</artifactId>
-                <version>0.17.24</version>
+                <version>0.17.62</version>
                 <executions>
                     <execution>
                         <id>generate-accesscontrol-client-api-code</id>
@@ -251,6 +251,9 @@
                             <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v3*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.service.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.service.v3.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -264,6 +267,9 @@
                             <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v3*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.integration.v3.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -277,6 +283,9 @@
                             <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v3*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.arrangement.api.service.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.arrangement.api.service.v3.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -287,9 +296,12 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-integration-inbound-api-v2*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.arrangement.api.integration.v2</apiPackage>
-                            <modelPackage>com.backbase.dbs.arrangement.api.integration.v2.model</modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-integration-inbound-api-v3*.yaml</inputSpec>
+                            <apiPackage>com.backbase.dbs.arrangement.api.integration.v3</apiPackage>
+                            <modelPackage>com.backbase.dbs.arrangement.api.integration.v3.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -300,9 +312,12 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/loan/loan-integration-inbound-api-v*.yaml</inputSpec>
-                            <apiPackage>com.backbase.loan.inbound.api.service.v1</apiPackage>
-                            <modelPackage>com.backbase.loan.inbound.api.service.v1.model</modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/loan/loan-integration-inbound-api-v2*.yaml</inputSpec>
+                            <apiPackage>com.backbase.loan.inbound.api.service.v2</apiPackage>
+                            <modelPackage>com.backbase.loan.inbound.api.service.v2.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -316,6 +331,9 @@
                             <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.user.api.service.v2.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -329,6 +347,9 @@
                             <inputSpec>${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.profile.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.user.profile.api.service.v2.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -342,6 +363,9 @@
                             <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.transaction.api.service.v2.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -361,6 +385,9 @@
                             <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v3*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.paymentorder.api.service.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.paymentorder.api.service.v3.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -374,6 +401,9 @@
                             <inputSpec>${project.build.directory}/yaml/audit/audit-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.audit.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.audit.api.service.v2.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -387,6 +417,9 @@
                             <inputSpec>${project.build.directory}/yaml/limit/limit-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.limit.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.limit.api.service.v2.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -400,6 +433,9 @@
                             <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.approval.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.approval.api.service.v2.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -410,9 +446,12 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/identity/identity-integration-outbound-api-v*.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/identity-integration-service/identity-integration-outbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.identity.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.identity.integration.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -426,6 +465,9 @@
                             <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-instrument-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.portfolio.instrument.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.portfolio.instrument.integration.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -439,6 +481,9 @@
                             <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.portfolio.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.portfolio.api.service.integration.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -452,6 +497,9 @@
                             <inputSpec>${project.build.directory}/yaml/contact-manager/contact-manager-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.contact.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.contact.api.service.v2.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -476,6 +524,9 @@
                             <inputSpec>${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.audiences.collector.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.audiences.collector.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
@@ -489,6 +540,9 @@
                             <inputSpec>${project.build.directory}/yaml/plan-manager/plan-manager-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.tailoredvalue.planmanager.service.api.v1</apiPackage>
                             <modelPackage>com.backbase.tailoredvalue.planmanager.service.api.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>

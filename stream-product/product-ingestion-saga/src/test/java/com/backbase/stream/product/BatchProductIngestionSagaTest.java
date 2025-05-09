@@ -6,9 +6,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseItemExtended;
-import com.backbase.dbs.arrangement.api.integration.v2.model.BatchResponseStatusCode;
-import com.backbase.loan.inbound.api.service.v1.LoansApi;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseItem;
+import com.backbase.dbs.arrangement.api.integration.v3.model.BatchResponseStatusCode;
+import com.backbase.loan.inbound.api.service.v2.LoansApi;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.IdentityUserLinkStrategy;
@@ -55,8 +55,8 @@ class BatchProductIngestionSagaTest {
     @BeforeEach
     void setUp() {
         batchProductGroupTask = mockBatchProductGroupTask();
-        BatchResponseItemExtended batchResponseItemExtended = new BatchResponseItemExtended();
-        batchResponseItemExtended.setResourceId("resource_id");
+        BatchResponseItem batchResponseItemExtended = new BatchResponseItem();
+        batchResponseItemExtended.setArrangementExternalId("resource_id");
         batchResponseItemExtended.setStatus(BatchResponseStatusCode.HTTP_STATUS_OK);
         when(arrangementService.upsertBatchArrangements(anyList()))
             .thenReturn(Flux.just(batchResponseItemExtended

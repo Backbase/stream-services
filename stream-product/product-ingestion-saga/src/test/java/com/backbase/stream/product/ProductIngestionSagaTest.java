@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementPutItem;
-import com.backbase.loan.inbound.api.service.v1.LoansApi;
+import com.backbase.loan.inbound.api.service.v2.LoansApi;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.loan.LoansSaga;
 import com.backbase.stream.product.configuration.ProductIngestionSagaConfigurationProperties;

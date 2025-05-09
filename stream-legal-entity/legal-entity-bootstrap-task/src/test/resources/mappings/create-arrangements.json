@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "url": "/arrangement-manager/integration-api/v2/arrangements/batch",
+    "url": "/arrangement-manager/integration-api/v3/arrangements/batch",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"
@@ -16,26 +16,28 @@
   },
   "response": {
     "status": 207,
-    "jsonBody": [
-      {
-        "arrangementId" : "arrangement-id",
-        "action" : "add",
-        "resourceId" : "021000021",
-        "status" : "200"
-      },
-      {
-        "arrangementId" : "arrangement-id",
-        "action" : "add",
-        "resourceId" : "021000022",
-        "status" : "200"
-      },
-      {
-        "arrangementId" : "arrangement-id",
-        "action" : "add",
-        "resourceId" : "021000023",
-        "status" : "200"
-      }
-    ],
+    "jsonBody": {
+      "results": [
+        {
+          "arrangementId": "arrangement-id",
+          "action": "add",
+          "arrangementExternalId": "021000021",
+          "status": "200"
+        },
+        {
+          "arrangementId": "arrangement-id",
+          "action": "add",
+          "arrangementExternalId": "021000022",
+          "status": "200"
+        },
+        {
+          "arrangementId": "arrangement-id",
+          "action": "add",
+          "arrangementExternalId": "021000023",
+          "status": "200"
+        }
+      ]
+    },
     "headers": {
       "Content-Type": "application/json"
     }

@@ -266,7 +266,7 @@ class LegalEntitySagaIT {
         );
 
         stubFor(
-            WireMock.post("/arrangement-manager/integration-api/v2/arrangements/batch")
+            WireMock.post("/arrangement-manager/integration-api/v3/arrangements/batch")
                 .willReturn(WireMock.aResponse().withStatus(HttpStatus.ACCEPTED.value()))
         );
 
@@ -291,7 +291,7 @@ class LegalEntitySagaIT {
                         .willReturn(WireMock.aResponse().withStatus(HttpStatus.OK.value()))
         );
         stubFor(
-            WireMock.post("/loan/service-api/v1/loans/batch")
+            WireMock.post("/loan/service-api/v2/loans/batch")
                 .willReturn(WireMock.aResponse().withStatus(HttpStatus.MULTI_STATUS.value())
                     .withHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE)
                     .withBody("[{\"arrangementId\":\"arrId1\",\"resourceId\":\"resId1\"}]"))

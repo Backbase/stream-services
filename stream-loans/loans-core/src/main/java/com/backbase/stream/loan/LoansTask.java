@@ -1,6 +1,6 @@
 package com.backbase.stream.loan;
 
-import com.backbase.loan.inbound.api.service.v1.model.BatchResponseItemExtended;
+import com.backbase.loan.inbound.api.service.v2.model.BatchResponseItemExtended;
 import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.List;

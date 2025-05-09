@@ -1,6 +1,6 @@
 package com.backbase.stream.configuration;
 
-import com.backbase.loan.inbound.api.service.v1.LoansApi;
+import com.backbase.loan.inbound.api.service.v2.LoansApi;
 import com.backbase.stream.loan.LoansSaga;
 import com.backbase.stream.loan.LoansTask;
 import com.backbase.stream.loan.LoansUnitOfWorkExecutor;

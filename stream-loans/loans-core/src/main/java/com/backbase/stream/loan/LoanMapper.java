@@ -1,10 +1,10 @@
 package com.backbase.stream.loan;
 
-import com.backbase.loan.inbound.api.service.v1.model.InboundIntegrationBorrower;
-import com.backbase.loan.inbound.api.service.v1.model.InboundIntegrationFrequency;
-import com.backbase.loan.inbound.api.service.v1.model.InboundIntegrationLoan;
-import com.backbase.loan.inbound.api.service.v1.model.InboundIntegrationLoanStatus;
-import com.backbase.loan.inbound.api.service.v1.model.InboundIntegrationTermUnit;
+import com.backbase.loan.inbound.api.service.v2.model.InboundIntegrationBorrower;
+import com.backbase.loan.inbound.api.service.v2.model.InboundIntegrationFrequency;
+import com.backbase.loan.inbound.api.service.v2.model.InboundIntegrationLoan;
+import com.backbase.loan.inbound.api.service.v2.model.InboundIntegrationLoanStatus;
+import com.backbase.loan.inbound.api.service.v2.model.InboundIntegrationTermUnit;
 import com.backbase.stream.legalentity.model.FrequencyUnit;
 import com.backbase.stream.legalentity.model.Loan;
 import com.backbase.stream.legalentity.model.LoanStatus;
