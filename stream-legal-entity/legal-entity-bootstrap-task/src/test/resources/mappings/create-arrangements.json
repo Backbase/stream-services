@@ -17,23 +17,23 @@
   "response": {
     "status": 207,
     "jsonBody": {
-      "arrangements": [
+      "results": [
         {
           "arrangementId": "arrangement-id",
           "action": "add",
-          "resourceId": "021000021",
+          "arrangementExternalId": "021000021",
           "status": "200"
         },
         {
           "arrangementId": "arrangement-id",
           "action": "add",
-          "resourceId": "021000022",
+          "arrangementExternalId": "021000022",
           "status": "200"
         },
         {
           "arrangementId": "arrangement-id",
           "action": "add",
-          "resourceId": "021000023",
+          "arrangementExternalId": "021000023",
           "status": "200"
         }
       ]
