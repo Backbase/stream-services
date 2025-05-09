@@ -613,4 +613,27 @@ class ArrangementServiceTest {
                 .identifier("subsc_2"));
     }
 
+    @Test
+    void removeLegalEntityFromArrangement_Success() {
+        // given
+        String arrangementExternalId = "arr_ext_id";
+        List<String> legalEntityExternalIds = List.of("leid_1", "leid_2");
+
+        Set<LegalEntityIdentification> legalEntityIdentifications = legalEntityExternalIds.stream()
+            .map(legalEntityExternalId -> new LegalEntityIdentification().externalId(legalEntityExternalId))
+            .collect(Collectors.toSet());
+
+        LegalEntitiesDelete legalEntitiesDelete = new LegalEntitiesDelete()
+            .legalEntities(legalEntityIdentifications);
+
+        when(arrangementsIntegrationApi.deleteArrangementLegalEntities(legalEntitiesDelete))
+            .thenReturn(Mono.empty());
+
+        // when
+        var result = arrangementService.removeLegalEntityFromArrangement(arrangementExternalId, legalEntityExternalIds);
+
+        // then
+        StepVerifier.create(result).verifyComplete();
+        verify(arrangementsIntegrationApi).deleteArrangementLegalEntities(legalEntitiesDelete);
+    }
 }
