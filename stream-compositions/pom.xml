@@ -7,13 +7,13 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-starter</artifactId>
-        <version>6.19.0</version>
+        <version>7.0.0</version>
         <relativePath>../stream-sdk/stream-starter</relativePath>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>6.19.0</version>
+    <version>7.0.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Compositions</name>
@@ -27,14 +27,14 @@
     </modules>
 
     <properties>
-        <backbase-bom.version>2025.03-LTS</backbase-bom.version>
-        <boat-maven-plugin.version>0.17.26</boat-maven-plugin.version>
+        <backbase-bom.version>2025.04.3</backbase-bom.version>
+        <boat-maven-plugin.version>0.17.62</boat-maven-plugin.version>
         <testcontainers.version>1.12.5</testcontainers.version>
         <mock.server.version>5.15.0</mock.server.version>
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
-        <spring-cloud.version>2023.0.1</spring-cloud.version>
-        <ssdk.version>18.1.0</ssdk.version>
+        <spring-cloud.version>2024.0.1</spring-cloud.version>
+        <ssdk.version>19.0.0</ssdk.version>
         <jakarta-validation.version>3.0.2</jakarta-validation.version>
         <jib.container.volumes>/tmp</jib.container.volumes>
         <archuint.skip>true</archuint.skip>

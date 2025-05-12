@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>6.19.0</version>
+        <version>7.0.0</version>
     </parent>
 
     <artifactId>product-composition-service</artifactId>
