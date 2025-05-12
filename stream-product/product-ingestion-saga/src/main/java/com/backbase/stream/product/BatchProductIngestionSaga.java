@@ -189,7 +189,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
       };
     }
 
-    private static Function<ArrangementPost, List<String>> arrangementPostToLegalEntity = arrangementPost ->
+    private static Function<ArrangementPost, List<String>> arrangementPostToLegalEntityExternalId = arrangementPost ->
         Optional.ofNullable(arrangementPost)
             .map(ArrangementPost::getLegalEntities)
             .map(Collection::stream)
@@ -232,7 +232,7 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
         List<ArrangementPost> itemsToUpsert = batchArrangements.stream()
             .filter(distinctByKeys(
                 ArrangementPost::getExternalId,
-                arrangementPostToLegalEntity,
+                arrangementPostToLegalEntityExternalId,
                 arrangementPostToProductExternalId,
                 arrangementPostToStateExternalId,
                /* AccountArrangementItemPost::getAlias,*/
