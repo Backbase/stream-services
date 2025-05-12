@@ -93,6 +93,7 @@
                                 <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
                             </importMappings>
                             <configOptions>
+                                <!--removed provisionally, to be added back once DAS-1780 is done-->
                                 <reactive>true</reactive>
                             </configOptions>
                         </configuration>

@@ -252,6 +252,7 @@
                             <apiPackage>com.backbase.dbs.accesscontrol.api.service.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.service.v3.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -268,6 +269,7 @@
                             <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.integration.v3.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -284,6 +286,7 @@
                             <apiPackage>com.backbase.dbs.arrangement.api.service.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.arrangement.api.service.v3.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -300,6 +303,7 @@
                             <apiPackage>com.backbase.dbs.arrangement.api.integration.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.arrangement.api.integration.v3.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -316,6 +320,7 @@
                             <apiPackage>com.backbase.loan.inbound.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.loan.inbound.api.service.v2.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -332,6 +337,7 @@
                             <apiPackage>com.backbase.dbs.user.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.user.api.service.v2.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -348,6 +354,7 @@
                             <apiPackage>com.backbase.dbs.user.profile.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.user.profile.api.service.v2.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -364,6 +371,7 @@
                             <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.transaction.api.service.v2.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -386,6 +394,7 @@
                             <apiPackage>com.backbase.dbs.paymentorder.api.service.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.paymentorder.api.service.v3.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -402,6 +411,7 @@
                             <apiPackage>com.backbase.dbs.audit.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.audit.api.service.v2.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -418,6 +428,7 @@
                             <apiPackage>com.backbase.dbs.limit.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.limit.api.service.v2.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -434,6 +445,7 @@
                             <apiPackage>com.backbase.dbs.approval.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.approval.api.service.v2.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -450,6 +462,7 @@
                             <apiPackage>com.backbase.identity.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.identity.integration.api.service.v1.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -466,6 +479,7 @@
                             <apiPackage>com.backbase.portfolio.instrument.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.portfolio.instrument.integration.api.service.v1.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -482,6 +496,7 @@
                             <apiPackage>com.backbase.portfolio.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.portfolio.api.service.integration.v1.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -498,6 +513,7 @@
                             <apiPackage>com.backbase.dbs.contact.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.contact.api.service.v2.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -525,6 +541,7 @@
                             <apiPackage>com.backbase.audiences.collector.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.audiences.collector.api.service.v1.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
@@ -541,6 +558,7 @@
                             <apiPackage>com.backbase.tailoredvalue.planmanager.service.api.v1</apiPackage>
                             <modelPackage>com.backbase.tailoredvalue.planmanager.service.api.v1.model</modelPackage>
                             <configOptions>
+                                <!--disabled provisionally, to be added back once DAS-1780 is done-->
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
