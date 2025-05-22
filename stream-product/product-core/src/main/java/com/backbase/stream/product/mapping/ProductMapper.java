@@ -1,5 +1,6 @@
 package com.backbase.stream.product.mapping;
 
+import static com.backbase.stream.product.mapping.ProductMapperConstants.*;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -48,8 +49,6 @@ import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 import org.mapstruct.ValueMapping;
 import org.mapstruct.ValueMappings;
-import org.springframework.lang.NonNull;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -58,7 +57,14 @@ public interface ProductMapper {
 
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
     @Mapping(source = "state.externalStateId", target = "state.externalId")
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ACCOUNT_HOLDER_WITH_NAMES)
+    @Mapping(source = ACCOUNT_HOLDER_COUNTRY, target = ACCOUNT_HOLDER_WITH_COUNTRY)
+    @Mapping(source = ACCOUNT_HOLDER_ADDRESS_1, target = ACCOUNT_HOLDER_WITH_ADDRESS_1)
+    @Mapping(source = ACCOUNT_HOLDER_ADDRESS_2, target = ACCOUNT_HOLDER_WITH_ADDRESS_2)
+    @Mapping(source = ACCOUNT_HOLDER_POST_CODE, target = ACCOUNT_HOLDER_WITH_POST_CODE)
+    @Mapping(source = ACCOUNT_HOLDER_CITY, target = ACCOUNT_HOLDER_WITH_CITY)
+    @Mapping(source = ACCOUNT_HOLDER_COUNTRY_SUBDIVISION, target = ACCOUNT_HOLDER_WITH_COUNTRY_SUBDIVISION)
+    @Mapping(source = ACCOUNT_HOLDER_STREET_NAME, target = ACCOUNT_HOLDER_WITH_STREET_NAME)
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
     ArrangementPost toPresentation(Product product);
 
@@ -70,7 +76,14 @@ public interface ProductMapper {
     @InheritConfiguration
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
     @Mapping(source = "debitCardsItems", target = "debitCards")
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ACCOUNT_HOLDER_WITH_NAMES)
+    @Mapping(source = ACCOUNT_HOLDER_COUNTRY, target = ACCOUNT_HOLDER_WITH_COUNTRY)
+    @Mapping(source = ACCOUNT_HOLDER_ADDRESS_1, target = ACCOUNT_HOLDER_WITH_ADDRESS_1)
+    @Mapping(source = ACCOUNT_HOLDER_ADDRESS_2, target = ACCOUNT_HOLDER_WITH_ADDRESS_2)
+    @Mapping(source = ACCOUNT_HOLDER_POST_CODE, target = ACCOUNT_HOLDER_WITH_POST_CODE)
+    @Mapping(source = ACCOUNT_HOLDER_CITY, target = ACCOUNT_HOLDER_WITH_CITY)
+    @Mapping(source = ACCOUNT_HOLDER_COUNTRY_SUBDIVISION, target = ACCOUNT_HOLDER_WITH_COUNTRY_SUBDIVISION)
+    @Mapping(source = ACCOUNT_HOLDER_STREET_NAME, target = ACCOUNT_HOLDER_WITH_STREET_NAME)
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = "state.externalId")
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
@@ -78,7 +91,14 @@ public interface ProductMapper {
 
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
     @Mapping(source = ProductMapperConstants.DEBIT_CARDS_ITEMS, target = ProductMapperConstants.DEBIT_CARDS)
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ACCOUNT_HOLDER_WITH_NAMES)
+    @Mapping(source = ACCOUNT_HOLDER_COUNTRY, target = ACCOUNT_HOLDER_WITH_COUNTRY)
+    @Mapping(source = ACCOUNT_HOLDER_ADDRESS_1, target = ACCOUNT_HOLDER_WITH_ADDRESS_1)
+    @Mapping(source = ACCOUNT_HOLDER_ADDRESS_2, target = ACCOUNT_HOLDER_WITH_ADDRESS_2)
+    @Mapping(source = ACCOUNT_HOLDER_POST_CODE, target = ACCOUNT_HOLDER_WITH_POST_CODE)
+    @Mapping(source = ACCOUNT_HOLDER_CITY, target = ACCOUNT_HOLDER_WITH_CITY)
+    @Mapping(source = ACCOUNT_HOLDER_COUNTRY_SUBDIVISION, target = ACCOUNT_HOLDER_WITH_COUNTRY_SUBDIVISION)
+    @Mapping(source = ACCOUNT_HOLDER_STREET_NAME, target = ACCOUNT_HOLDER_WITH_STREET_NAME)
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = "state.externalId")
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
@@ -86,7 +106,7 @@ public interface ProductMapper {
     ArrangementPost toPresentation(SavingsAccount savingsAccount);
 
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ACCOUNT_HOLDER_WITH_NAMES)
     @Mapping(source = "debitCard", qualifiedByName = "mapDebitCardNumber", target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = "state.externalId")
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
@@ -94,7 +114,7 @@ public interface ProductMapper {
     ArrangementPost toPresentation(DebitCard debitCard);
 
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ACCOUNT_HOLDER_WITH_NAMES)
     @Mapping(source = "creditCard", qualifiedByName = "mapCreditCardNumber", target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = "state.externalId")
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
@@ -102,7 +122,7 @@ public interface ProductMapper {
     ArrangementPost toPresentation(CreditCard creditCard);
 
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = ACCOUNT_HOLDER_WITH_NAMES)
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = "state.externalId")
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
@@ -113,12 +133,14 @@ public interface ProductMapper {
     @Mapping(source = "currentInvestment.amount", target = "currentInvestmentValue")
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = "state.externalId")
+    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAMES, target = ACCOUNT_HOLDER_WITH_NAMES)
+    @Mapping(source = ACCOUNT_HOLDER_COUNTRY, target = ACCOUNT_HOLDER_WITH_COUNTRY)
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
     @InheritConfiguration
     ArrangementPost toPresentation(InvestmentAccount investmentAccount);
 
     @Mapping(source = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID, target = "product.externalId")
-    @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
+    @Mapping(source = ACCOUNT_HOLDER_NAME, target = ACCOUNT_HOLDER_WITH_NAMES)
     @Mapping(source = ProductMapperConstants.PAN_SUFFIX, target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = "state.externalId")
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
@@ -127,14 +149,28 @@ public interface ProductMapper {
 
     @Mapping(source = "state.externalId", target = "state.state")
     @Mapping(source = "externalId", target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
-    @Mapping(source = "accountHolder.names", target = "accountHolderNames")
+    @Mapping(source = ACCOUNT_HOLDER_WITH_NAMES, target = ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_COUNTRY, target = ACCOUNT_HOLDER_COUNTRY)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_ADDRESS_1, target = ACCOUNT_HOLDER_ADDRESS_1)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_ADDRESS_2, target = ACCOUNT_HOLDER_ADDRESS_2)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_POST_CODE, target = ACCOUNT_HOLDER_POST_CODE)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_CITY, target = ACCOUNT_HOLDER_CITY)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_COUNTRY_SUBDIVISION, target = ACCOUNT_HOLDER_COUNTRY_SUBDIVISION)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_STREET_NAME, target = ACCOUNT_HOLDER_STREET_NAME)
     @Mapping(source = "product.externalId", target = "externalProductId")
     @Mapping(source = "legalEntities", target = "legalEntityIds", qualifiedByName = "mapLegalEntitiesIdsSet")
     ArrangementItem toArrangementItem(ArrangementPost arrangementItemPost);
 
     @Mapping(source = "externalId", target = "externalArrangementId")
     @Mapping(source = "state.externalId", target = "stateId")
-    @Mapping(source = "accountHolder.names", target = "accountHolderNames")
+    @Mapping(source = ACCOUNT_HOLDER_WITH_NAMES, target = ACCOUNT_HOLDER_NAMES)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_COUNTRY, target = ACCOUNT_HOLDER_COUNTRY)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_ADDRESS_1, target = ACCOUNT_HOLDER_ADDRESS_1)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_ADDRESS_2, target = ACCOUNT_HOLDER_ADDRESS_2)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_POST_CODE, target = ACCOUNT_HOLDER_POST_CODE)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_CITY, target = ACCOUNT_HOLDER_CITY)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_COUNTRY_SUBDIVISION, target = ACCOUNT_HOLDER_COUNTRY_SUBDIVISION)
+    @Mapping(source = ACCOUNT_HOLDER_WITH_STREET_NAME, target = ACCOUNT_HOLDER_STREET_NAME)
     ArrangementPutItem toArrangementItemPut(ArrangementPost arrangementItemPost);
 
     ArrangementItemBase toArrangementItemBase(ArrangementItemPostRequest arrangementItemPost);
@@ -145,12 +181,14 @@ public interface ProductMapper {
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
     @Mapping(source = "state.state", target = ProductMapperConstants.EXTERNAL_STATE_ID)
+    @Mapping(source = ACCOUNT_HOLDER_NAME, target = ACCOUNT_HOLDER_NAMES)
     ArrangementItem toPresentationWithWeirdSpellingError(Product product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID, target = ProductMapperConstants.EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.EXTERNAL_PRODUCT_ID, target = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITY_IDS, target = ProductMapperConstants.LEGAL_ENTITIES)
     @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
+    @Mapping(source = ACCOUNT_HOLDER_NAMES, target = ACCOUNT_HOLDER_NAME)
     @InheritConfiguration
     Product mapCustomProduct(ArrangementItem arrangementItem);
 
@@ -158,36 +196,42 @@ public interface ProductMapper {
     @Mapping(source = ProductMapperConstants.EXTERNAL_PRODUCT_ID, target = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITY_IDS, target = ProductMapperConstants.LEGAL_ENTITIES)
     @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
+    @Mapping(source = ACCOUNT_HOLDER_NAMES, target = ACCOUNT_HOLDER_NAME)
     CurrentAccount mapCurrentAccount(ArrangementItem product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID, target = ProductMapperConstants.EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.EXTERNAL_PRODUCT_ID, target = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITY_IDS, target = ProductMapperConstants.LEGAL_ENTITIES)
     @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
+    @Mapping(source = ACCOUNT_HOLDER_NAMES, target = ACCOUNT_HOLDER_NAME)
     SavingsAccount mapSavingAccount(ArrangementItem product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID, target = ProductMapperConstants.EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.EXTERNAL_PRODUCT_ID, target = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITY_IDS, target = ProductMapperConstants.LEGAL_ENTITIES)
     @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
+    @Mapping(source = ACCOUNT_HOLDER_NAMES, target = ACCOUNT_HOLDER_NAME)
     DebitCard mapDebitCard(ArrangementItem product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID, target = ProductMapperConstants.EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.EXTERNAL_PRODUCT_ID, target = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITY_IDS, target = ProductMapperConstants.LEGAL_ENTITIES)
     @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
+    @Mapping(source = ACCOUNT_HOLDER_NAMES, target = ACCOUNT_HOLDER_NAME)
     CreditCard mapCreditCard(ArrangementItem product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID, target = ProductMapperConstants.EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.EXTERNAL_PRODUCT_ID, target = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITY_IDS, target = ProductMapperConstants.LEGAL_ENTITIES)
     @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
+    @Mapping(source = ACCOUNT_HOLDER_NAMES, target = ACCOUNT_HOLDER_NAME)
     Loan mapLoan(ArrangementItem product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID, target = ProductMapperConstants.EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.EXTERNAL_PRODUCT_ID, target = ProductMapperConstants.PRODUCT_TYPE_EXTERNAL_ID)
     @Mapping(source = ProductMapperConstants.LEGAL_ENTITY_IDS, target = ProductMapperConstants.LEGAL_ENTITIES)
     @Mapping(source = ProductMapperConstants.ID, target = ProductMapperConstants.INTERNAL_ID)
+    @Mapping(source = ACCOUNT_HOLDER_NAMES, target = ACCOUNT_HOLDER_NAME)
     TermDeposit mapTermDeposit(ArrangementItem product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID, target = ProductMapperConstants.EXTERNAL_ID)
