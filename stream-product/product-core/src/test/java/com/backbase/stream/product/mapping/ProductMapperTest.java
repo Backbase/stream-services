@@ -158,7 +158,7 @@ class ProductMapperTest {
         Assertions.assertEquals(source.getLegalEntities().size(), target.getLegalEntities().size());
         Assertions.assertEquals(source.getState().getExternalStateId(), target.getState().getExternalId());
         Assertions.assertEquals(source.getAccountHolderName(), target.getAccountHolder().getNames());
-        Assertions.assertEquals(source.getAccountHolderCountry(), target.getAccountHolder().getAddress(). getCountry());
+        Assertions.assertEquals(source.getAccountHolderCountry(), target.getAccountHolder().getAddress().getCountry());
         Assertions.assertEquals(source.getAccountHolderStreetName(), target.getAccountHolder().getAddress().getStreetName());
         Assertions.assertEquals(source.getAccountHolderAddressLine1(), target.getAccountHolder().getAddress().getAddressLine1());
         Assertions.assertEquals(source.getAccountHolderAddressLine2(), target.getAccountHolder().getAddress().getAddressLine2());
