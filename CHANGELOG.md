@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [7.2.0](https://github.com/Backbase/stream-services/compare/7.1.0...7.2.0)
+### Changed
+- Updated Product Mapper
+- Updated Test cases for Product Mapper
+- 
 ## [7.0.0](https://github.com/Backbase/stream-services/compare/6.19.0...7.0.0)
 ### Changed
 - Bumping Backbase BOM to 2025.04
