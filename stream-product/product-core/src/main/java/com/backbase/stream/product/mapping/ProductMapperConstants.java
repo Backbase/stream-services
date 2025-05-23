@@ -40,5 +40,21 @@ class ProductMapperConstants {
     static final String EXTERNAL_PARENT_ID = "externalParentId";
     static final String INTEREST_PAYMENT_FREQUENCY_UNIT = "interestPaymentFrequencyUnit";
     static final String TERM_UNIT = "termUnit";
+    static final String ACCOUNT_HOLDER_COUNTRY = "accountHolderCountry";
+    static final String ACCOUNT_HOLDER_ADDRESS_1 =  "accountHolderAddressLine1";
+    static final String ACCOUNT_HOLDER_ADDRESS_2 =  "accountHolderAddressLine2";
+    static final String ACCOUNT_HOLDER_POST_CODE = "postCode";
+    static final String ACCOUNT_HOLDER_CITY = "town";
+    static final String ACCOUNT_HOLDER_COUNTRY_SUBDIVISION = "countrySubDivision";
+    static final String ACCOUNT_HOLDER_STREET_NAME = "accountHolderStreetName";
+    static final String ACCOUNT_HOLDER_WITH_NAMES = "accountHolder.names";
+    static final String ACCOUNT_HOLDER_WITH_NAME = "accountHolder.name";
+    static final String ACCOUNT_HOLDER_WITH_ADDRESS_1 = "accountHolder.address.addressLine1";
+    static final String ACCOUNT_HOLDER_WITH_ADDRESS_2 = "accountHolder.address.addressLine2";
+    static final String ACCOUNT_HOLDER_WITH_POST_CODE = "accountHolder.address.postCode";
+    static final String ACCOUNT_HOLDER_WITH_CITY = "accountHolder.address.city";
+    static final String ACCOUNT_HOLDER_WITH_COUNTRY_SUBDIVISION = "accountHolder.address.countrySubDivision";
+    static final String ACCOUNT_HOLDER_WITH_COUNTRY = "accountHolder.address.country";
+    static final String ACCOUNT_HOLDER_WITH_STREET_NAME = "accountHolder.address.streetName";
 
 }

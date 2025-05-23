@@ -100,7 +100,16 @@ class ProductMapperTest {
             .autoRenewalIndicator(true)
             .interestSettlementAccount("ISA")
             .outstandingPrincipalAmount(new BigDecimal("101"))
-            .monthlyInstalmentAmount(new BigDecimal("250"));
+            .monthlyInstalmentAmount(new BigDecimal("250"))
+            .accountHolderCountry("NL")
+            .accountHolderStreetName("WhiteField Road")
+            .accountHolderAddressLine1("Ground Floor")
+            .accountHolderAddressLine2("Western Aqua")
+            .postCode("500084")
+            .town("Hyderabad")
+            .countrySubDivision("Telangana");
+
+
     }
 
     private SavingsAccount buildSavingsAccount() {
@@ -149,6 +158,13 @@ class ProductMapperTest {
         Assertions.assertEquals(source.getLegalEntities().size(), target.getLegalEntities().size());
         Assertions.assertEquals(source.getState().getExternalStateId(), target.getState().getExternalId());
         Assertions.assertEquals(source.getAccountHolderName(), target.getAccountHolder().getNames());
+        Assertions.assertEquals(source.getAccountHolderCountry(), target.getAccountHolder().getAddress().getCountry());
+        Assertions.assertEquals(source.getAccountHolderStreetName(), target.getAccountHolder().getAddress().getStreetName());
+        Assertions.assertEquals(source.getAccountHolderAddressLine1(), target.getAccountHolder().getAddress().getAddressLine1());
+        Assertions.assertEquals(source.getAccountHolderAddressLine2(), target.getAccountHolder().getAddress().getAddressLine2());
+        Assertions.assertEquals(source.getPostCode(), target.getAccountHolder().getAddress().getPostCode());
+        Assertions.assertEquals(source.getTown(), target.getAccountHolder().getAddress().getCity());
+        Assertions.assertEquals(source.getCountrySubDivision(), target.getAccountHolder().getAddress().getCountrySubDivision());
     }
 
     @Test
@@ -297,6 +313,14 @@ class ProductMapperTest {
         CurrentAccount target = productMapper.mapCurrentAccount(source);
         Assertions.assertEquals(target.getExternalId(), source.getExternalArrangementId());
         Assertions.assertEquals(target.getProductTypeExternalId(), source.getExternalProductId());
+        Assertions.assertEquals(target.getAccountHolderCountry(), source.getAccountHolderCountry());
+        Assertions.assertEquals(target.getAccountHolderName(), source.getAccountHolderNames());
+        Assertions.assertEquals(target.getAccountHolderStreetName(), source.getAccountHolderStreetName());
+        Assertions.assertEquals(target.getAccountHolderAddressLine1(), source.getAccountHolderAddressLine1());
+        Assertions.assertEquals(target.getAccountHolderAddressLine2(), source.getAccountHolderAddressLine2());
+        Assertions.assertEquals(target.getPostCode(), source.getPostCode());
+        Assertions.assertEquals(target.getTown(), source.getTown());
+        Assertions.assertEquals(target.getCountrySubDivision(), source.getCountrySubDivision());
     }
 
     @Test
