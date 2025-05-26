@@ -9,7 +9,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroup;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupItem;
-import com.backbase.stream.configuration.CustomerAccessGroupConfiguration;
+import com.backbase.stream.configuration.CustomerAccessGroupConfigurationProperties;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
@@ -28,9 +28,9 @@ import reactor.core.publisher.Mono;
 public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAccessGroupTask> {
 
     private final CustomerAccessGroupService cagService;
-    private final CustomerAccessGroupConfiguration cagConfig;
+    private final CustomerAccessGroupConfigurationProperties cagConfig;
 
-    public CustomerAccessGroupSaga(CustomerAccessGroupService cagService, CustomerAccessGroupConfiguration cagConfig) {
+    public CustomerAccessGroupSaga(CustomerAccessGroupService cagService, CustomerAccessGroupConfigurationProperties cagConfig) {
         this.cagService = cagService;
         this.cagConfig = cagConfig;
     }

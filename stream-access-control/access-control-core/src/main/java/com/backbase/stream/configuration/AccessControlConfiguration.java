@@ -1,5 +1,6 @@
 package com.backbase.stream.configuration;
 
+import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.CustomerAccessGroupApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
@@ -13,6 +14,7 @@ import com.backbase.identity.integration.api.service.v1.IdentityIntegrationServi
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.product.service.ArrangementService;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.stream.service.CustomerAccessGroupService;
 import com.backbase.stream.service.EntitlementsService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
@@ -31,8 +33,8 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import(ProductConfiguration.class)
 @Slf4j
-@EnableConfigurationProperties({DeletionProperties.class,UserManagementProperties.class,
-    AccessControlConfigurationProperties.class})
+@EnableConfigurationProperties({DeletionProperties.class, UserManagementProperties.class,
+    AccessControlConfigurationProperties.class, CustomerAccessGroupConfigurationProperties.class})
 public class AccessControlConfiguration {
 
     @Bean
@@ -60,7 +62,7 @@ public class AccessControlConfiguration {
         UserManagementApi usersApi,
         IdentityManagementApi identityManagementApi,
         com.backbase.dbs.user.api.service.v2.UserProfileManagementApi userProfileManagementApi,
-                                   UserManagementProperties userManagementProperties) {
+        UserManagementProperties userManagementProperties) {
         return new UserService(usersApi, identityManagementApi, identityApi,
             userProfileManagementApi, userManagementProperties);
     }
@@ -68,6 +70,11 @@ public class AccessControlConfiguration {
     @Bean
     public UserProfileService userProfileService(UserProfileManagementApi userProfileManagementApi) {
         return new UserProfileService(userProfileManagementApi);
+    }
+
+    @Bean
+    public CustomerAccessGroupService customerAccessGroupService(CustomerAccessGroupApi customerAccessGroupApi) {
+        return new CustomerAccessGroupService(customerAccessGroupApi);
     }
 
     @Bean

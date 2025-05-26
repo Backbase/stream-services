@@ -65,11 +65,32 @@ public class CustomerAccessGroupService {
             });
     }
 
+    public Mono<Void> updateCustomerAccessGroup(StreamTask streamTask, Long cagId,
+        CustomerAccessGroup customerAccessGroup) {
+        return customerAccessGroupApi.updateCustomerAccessGroup(cagId, customerAccessGroup)
+            .onErrorResume(WebClientResponseException.class, throwable -> {
+                streamTask.error(CUSTOMER_ACCESS_GROUP, "update", "failed", null,
+                    String.valueOf(cagId), throwable, throwable.getResponseBodyAsString(), "Failed to update CAG");
+                return Mono.error(new StreamTaskException(streamTask, throwable,
+                    "Failed to update: " + throwable.getResponseBodyAsString()));
+            })
+            .then(Mono.empty());
+    }
+
+    public Mono<Void> deleteCustomerAccessGroup(StreamTask streamTask, Long cagId) {
+        return customerAccessGroupApi.deleteCustomerAccessGroupById(cagId)
+            .onErrorResume(WebClientResponseException.class, throwable -> {
+                streamTask.error(CUSTOMER_ACCESS_GROUP, "delete", "failed", null,
+                    String.valueOf(cagId), throwable, throwable.getResponseBodyAsString(), "Failed to delete CAG");
+                return Mono.error(new StreamTaskException(streamTask, throwable,
+                    "Failed to delete: " + throwable.getResponseBodyAsString()));
+            })
+            .then(Mono.empty());
+    }
+
     public Mono<List<CustomerAccessGroupItem>> getCustomerAccessGroups(StreamTask streamTask) {
         return customerAccessGroupApi.getCustomerAccessGroups(null, null, null)
-        .map(response -> {
-            return response.getCustomerAccessGroups();
-        });
+        .map(GetCustomerAccessGroups::getCustomerAccessGroups);
     }
 
     public Mono<LegalEntityV2> assignCustomerAccessGroupsToLegalEntity(StreamTask streamTask, LegalEntityV2 legalEntity, Set<Long> cagIds) {
@@ -96,9 +117,9 @@ public class CustomerAccessGroupService {
         }
         return customerAccessGroupApi.assignCustomerAccessGroupsToJobRoles(userId, serviceAgreement.getInternalId(), items)
             .onErrorResume(WebClientResponseException.class, throwable -> {
-                // TODO FIX
-                streamTask.error(CUSTOMER_ACCESS_GROUP, "assign", "failed", null,
-                null, throwable, throwable.getResponseBodyAsString(), "Failed to assign CAGs to Legal Entity");
+                streamTask.error(CUSTOMER_ACCESS_GROUP, "assign", "failed", serviceAgreement.getExternalId(),
+                    serviceAgreement.getInternalId(), throwable, throwable.getResponseBodyAsString(),
+                    "Failed to assign CAGs to Function Group");
                 return Mono.error(throwable);
             })
             .then(Mono.just(serviceAgreement));
