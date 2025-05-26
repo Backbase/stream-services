@@ -35,6 +35,13 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
+    public com.backbase.accesscontrol.customeraccessgroup.api.service.ApiClient customerAccessGroupApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.customeraccessgroup.api.service.ApiClient(getWebClient(), objectMapper, dateFormat)
+            .setBasePath(createBasePath());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public UsersApi accessControlUsersApi(ApiClient accessControlApiClient) {
         return new UsersApi(accessControlApiClient);
     }
