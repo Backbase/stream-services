@@ -1358,6 +1358,28 @@ public class AccessGroupService {
             .flatMap(dataGroupItem -> Flux.fromIterable(dataGroupItem.getItems()));
     }
 
+    public Mono<List<JobRole>> setupJobRoleForSa(StreamTask streamTask, ServiceAgreement serviceAgreement, Stream<JobRole> jobRoleStream) {
+
+        Mono<Map<String, FunctionGroupItem>> functionGroupsFromDb = getFunctionGroupsForServiceAgreement(serviceAgreement.getInternalId())
+            .flatMapMany(Flux::fromIterable)
+            .collectMap(FunctionGroupItem::getName, Function.identity());
+
+        return functionGroupsFromDb.flatMap(functionGroupsMap ->
+            Flux.fromStream(jobRoleStream)
+                .flatMap(jobRole -> {
+                    FunctionGroupItem matchingGroup = functionGroupsMap.get(jobRole.getName());
+                    if (matchingGroup == null) {
+                        log.debug("Creating new Job Role: {}", jobRole.getName());
+                        return createJobRole(streamTask, serviceAgreement, jobRole);
+                    } else {
+                        log.debug("Updating existing Job Role: {}", jobRole.getName());
+                        return updateJobRole(streamTask, serviceAgreement, jobRole, matchingGroup);
+                    }
+                })
+                .collectList()
+        );
+    }
+
     public Mono<JobRole> setupJobRole(StreamTask streamTask, ServiceAgreement masterServiceAgreement, JobRole jobRole) {
         streamTask.info(JOB_ROLE, SETUP_JOB_ROLE, "", masterServiceAgreement.getExternalId(),
             masterServiceAgreement.getInternalId(), "Setting up %s Job Role for Service Agreement: %s",
