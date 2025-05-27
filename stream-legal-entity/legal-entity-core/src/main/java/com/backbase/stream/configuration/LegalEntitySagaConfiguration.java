@@ -79,7 +79,8 @@ public class LegalEntitySagaConfiguration {
         ContactsSaga contactsSaga,
         CustomerAccessGroupSaga customerAccessGroupSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
-        UserKindSegmentationSaga userKindSegmentationSaga
+        UserKindSegmentationSaga userKindSegmentationSaga,
+        CustomerProfileService customerProfileService
     ) {
         return new LegalEntitySagaV2(
             legalEntityService,
