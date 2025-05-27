@@ -115,14 +115,6 @@
                                     <overWrite>true</overWrite>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.backbase.accesscontrol</groupId>
-                                    <artifactId>customer-access-group-spec</artifactId>
-                                    <classifier>api</classifier>
-                                    <type>zip</type>
-                                    <outputDirectory>${project.build.directory}/yaml</outputDirectory>
-                                    <overWrite>true</overWrite>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>com.backbase.products</groupId>
                                     <artifactId>arrangement-manager</artifactId>
                                     <classifier>api</classifier>
@@ -288,7 +280,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/customer-access-group-service-api-v1*.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/customer-access-group-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.customeraccessgroup.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model</modelPackage>
                         </configuration>
