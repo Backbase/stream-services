@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroup;
@@ -25,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Component
 @Slf4j
 public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAccessGroupTask> {
 
