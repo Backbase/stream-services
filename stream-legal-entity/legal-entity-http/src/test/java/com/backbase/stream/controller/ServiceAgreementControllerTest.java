@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.CustomerAccessGroupApi;
 import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
@@ -18,6 +19,7 @@ import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserProfileManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.loan.inbound.api.service.v2.LoansApi;
+import com.backbase.stream.CustomerAccessGroupSaga;
 import com.backbase.stream.audiences.UserKindSegmentationSaga;
 import com.backbase.stream.clients.config.CustomerProfileClientConfig;
 import com.backbase.stream.config.LegalEntityHttpConfiguration;
@@ -135,6 +137,12 @@ class ServiceAgreementControllerTest {
 
     @MockBean
     private CustomerProfileClientConfig customerProfileClientConfig;
+
+    @MockBean
+    private CustomerAccessGroupSaga  customerAccessGroupSaga;
+
+    @MockBean
+    private CustomerAccessGroupApi customerAccessGroupApi;
 
     @Autowired
     private WebTestClient webTestClient;
