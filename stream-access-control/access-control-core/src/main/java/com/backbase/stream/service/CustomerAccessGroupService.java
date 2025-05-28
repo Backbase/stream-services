@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -14,7 +13,6 @@ import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.Custo
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupItem;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupUserPermissionItem;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.GetCustomerAccessGroups;
-import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.worker.exception.StreamTaskException;
@@ -118,9 +116,9 @@ public class CustomerAccessGroupService {
         return customerAccessGroupApi.assignCustomerAccessGroupsToJobRoles(userId, serviceAgreement.getInternalId(), items)
             .onErrorResume(WebClientResponseException.class, throwable -> {
                 streamTask.error(CUSTOMER_ACCESS_GROUP, "assign", "failed", serviceAgreement.getExternalId(),
-                    serviceAgreement.getInternalId(), throwable, throwable.getResponseBodyAsString(),
-                    "Failed to assign CAGs to Function Group");
-                return Mono.error(throwable);
+                    serviceAgreement.getInternalId(), throwable, throwable.getResponseBodyAsString(), "Failed to assign CAGs to Function Group");
+                return Mono.error(new StreamTaskException(streamTask, throwable,
+                    "Failed to assign CAGs to Job Roles: " + throwable.getResponseBodyAsString()));
             })
             .then(Mono.just(serviceAgreement));
 
