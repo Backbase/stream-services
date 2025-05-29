@@ -358,19 +358,16 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             return Mono.just(streamTask);
         }
 
+        Stream<JobRole> jobRoleStream = Stream.of(serviceAgreement.getJobRoles(),
+            serviceAgreement.getReferenceJobRoles()).flatMap(Collection::stream);
+
         log.info("Creating Job Roles...");
 
-        return Flux.fromStream(Stream.of(serviceAgreement.getJobRoles(), serviceAgreement.getReferenceJobRoles())
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream))
-            .flatMap(jobRole -> accessGroupService.setupJobRole(streamTask, saMapper.map(serviceAgreement),
-                jobRole))
-            .flatMap(jobRole -> {
-                log.debug("Job Role: {}", jobRole.getName());
+        return accessGroupService.setupJobRoleForSa(streamTask, saMapper.map(serviceAgreement), jobRoleStream)
+            .flatMap(jobRoles -> {
+                jobRoles.forEach(jobRole -> log.debug("Job Role: {}", jobRole.getName()));
                 return Mono.just(streamTask);
-            })
-            .collectList()
-            .map(actual -> streamTask);
+            });
     }
 
     private Mono<ServiceAgreementTaskV2> processJobProfiles(ServiceAgreementTaskV2 streamTask) {

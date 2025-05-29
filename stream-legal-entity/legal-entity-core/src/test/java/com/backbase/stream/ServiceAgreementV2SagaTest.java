@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,12 +62,12 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.backbase.streams.tailoredvalue.PlansService;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -155,7 +156,7 @@ class ServiceAgreementV2SagaTest {
         when(accessGroupService.getServiceAgreementByExternalId(any())).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), any()))
             .thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
+        when(accessGroupService.setupJobRoleForSa(any(), any(), any())).thenReturn(Mono.just(List.of(jobRole)));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
             any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
         when(accessGroupService.getUserByExternalId(any(), anyBoolean())).thenReturn(Mono.just(new GetUser()
@@ -171,7 +172,7 @@ class ServiceAgreementV2SagaTest {
 
         verify(accessGroupService).createServiceAgreement(eq(task), eq(transformServiceAgreement(customSa)));
         verify(accessGroupService).updateServiceAgreementRegularUsers(eq(task), eq(transformServiceAgreement(customSa)), any());
-        verify(accessGroupService).setupJobRole(eq(task), eq(transformServiceAgreement(customSa)), eq(jobRole));
+        verify(accessGroupService).setupJobRoleForSa(eq(task), eq(transformServiceAgreement(customSa)), any(Stream.class));
 
     }
 
@@ -214,7 +215,7 @@ class ServiceAgreementV2SagaTest {
         when(accessGroupService.getServiceAgreementByExternalId(eq(customSaExId))).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), eq(transformServiceAgreement(customSa))))
             .thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
+        when(accessGroupService.setupJobRoleForSa(any(), any(), any())).thenReturn(Mono.just(List.of(jobRole)));
         when(accessGroupService.createServiceAgreement(any(), any()))
             .thenReturn(Mono.just(transformServiceAgreement(customSa)));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
@@ -346,7 +347,7 @@ class ServiceAgreementV2SagaTest {
             .thenReturn(Mono.empty());
         when(accessGroupService.getFunctionGroupsForServiceAgreement("101"))
             .thenReturn(Mono.empty());
-        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(new JobRole()));
+        when(accessGroupService.setupJobRoleForSa(any(), any(), any())).thenReturn(Mono.just(List.of(new JobRole())));
         when(accessGroupService.getUserByExternalId("john.doe", true))
             .thenReturn(Mono.just(new GetUser().externalId("john.doe").id("internalId")));
         when(limitsSaga.executeTask(any())).thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
@@ -482,7 +483,7 @@ class ServiceAgreementV2SagaTest {
     }
 
     private ServiceAgreementTaskV2 mockServiceAgreementTask(ServiceAgreementV2 serviceAgreement) {
-        ServiceAgreementTaskV2 task = Mockito.mock(ServiceAgreementTaskV2.class);
+        ServiceAgreementTaskV2 task = mock(ServiceAgreementTaskV2.class);
         when(task.getServiceAgreement()).thenReturn(serviceAgreement);
         when(task.addHistory(any())).thenReturn(task);
         return task;
@@ -520,7 +521,7 @@ class ServiceAgreementV2SagaTest {
         when(accessGroupService.getServiceAgreementByExternalId(customSaExId)).thenReturn(Mono.empty());
         when(accessGroupService.createServiceAgreement(any(), any()))
             .thenReturn(Mono.just(transformServiceAgreement(customSa)));
-        when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
+        when(accessGroupService.setupJobRoleForSa(any(), any(), any())).thenReturn(Mono.just(List.of(jobRole)));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), eq(transformServiceAgreement(customSa)),
             any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
