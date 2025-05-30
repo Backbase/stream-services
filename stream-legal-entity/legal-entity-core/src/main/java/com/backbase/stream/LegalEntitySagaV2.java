@@ -8,6 +8,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
+import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupItem;
 import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest;
 import com.backbase.audiences.collector.api.service.v1.model.CustomerOnboardedRequest.UserKindEnum;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
@@ -48,6 +49,7 @@ import com.backbase.stream.mapper.UserProfileMapper;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.CustomerProfileService;
+import com.backbase.stream.service.CustomerAccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
 import com.backbase.stream.service.UserProfileService;
 import com.backbase.stream.service.UserService;
@@ -59,8 +61,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
@@ -89,6 +93,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
     private final AccessGroupService accessGroupService;
     private final LimitsSaga limitsSaga;
     private final ContactsSaga contactsSaga;
+    private final CustomerAccessGroupSaga customerAccessGroupSaga;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
     private final UserKindSegmentationSaga userKindSegmentationSaga;
     private final CustomerProfileService customerProfileService;
@@ -102,6 +107,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
         AccessGroupService accessGroupService,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
+        CustomerAccessGroupSaga customerAccessGroupSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties,
         UserKindSegmentationSaga userKindSegmentationSaga,
         CustomerProfileService customerProfileService) {
@@ -111,6 +117,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
         this.accessGroupService = accessGroupService;
         this.limitsSaga = limitsSaga;
         this.contactsSaga = contactsSaga;
+        this.customerAccessGroupSaga = customerAccessGroupSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
         this.userKindSegmentationSaga = userKindSegmentationSaga;
         this.customerProfileService = customerProfileService;
@@ -126,7 +133,16 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
             .flatMap(this::processAudiencesSegmentation)
             .flatMap(this::setupLimits)
             .flatMap(this::postLegalEntityContacts)
-            .flatMap(this::processSubsidiaries);
+            .flatMap(this::processSubsidiaries)
+            .flatMap(this::processCustomerAccessGroups);
+    }
+
+    private Mono<LegalEntityTaskV2> processCustomerAccessGroups(LegalEntityTaskV2 streamTask) {
+        if (!customerAccessGroupSaga.isEnabled()) {
+            log.info("Skipping customer access group set up - feature is disabled.");
+            return Mono.just(streamTask);
+        }
+        return customerAccessGroupSaga.assignCustomerAccessGroupsToLegalEntity(streamTask);
     }
 
     private Mono<LegalEntityTaskV2> processAudiencesSegmentation(LegalEntityTaskV2 streamTask) {
