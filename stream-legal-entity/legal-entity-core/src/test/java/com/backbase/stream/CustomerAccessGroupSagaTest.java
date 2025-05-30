@@ -56,6 +56,9 @@ class CustomerAccessGroupSagaTest {
         when(customerAccessGroupService.createCustomerAccessGroup(any(), any()))
             .thenReturn(Mono.just(customerAccessGroupItem));
 
+        when(customerAccessGroupService.getCustomerAccessGroups(any()))
+            .thenReturn(Mono.empty());
+
         Mono<CustomerAccessGroupTask> result = customerAccessGroupSaga.executeTask(task);
 
         Assertions.assertNotNull(result);
@@ -67,6 +70,34 @@ class CustomerAccessGroupSagaTest {
         customerAccessGroup.setMandatory(customerAccessGroupItem.getMandatory());
 
         verify(customerAccessGroupService).createCustomerAccessGroup(eq(task), eq(customerAccessGroup));
+    }
+
+    @Test
+    void shouldUpdateCreatedCustomerAccessGroup() {
+        CustomerAccessGroupItem customerAccessGroupItem = new CustomerAccessGroupItem();
+        customerAccessGroupItem.name("cag-name");
+        customerAccessGroupItem.description("cag-description");
+        customerAccessGroupItem.setMandatory(true);
+        customerAccessGroupItem.setId(1L);
+        CustomerAccessGroupTask task = mockCustomerAccessGroupTask(customerAccessGroupItem);
+
+        when(customerAccessGroupService.updateCustomerAccessGroup(any(), any(), any()))
+            .thenReturn(Mono.empty());
+
+        when(customerAccessGroupService.getCustomerAccessGroups(any()))
+            .thenReturn(Mono.just(List.of(customerAccessGroupItem)));
+
+        Mono<CustomerAccessGroupTask> result = customerAccessGroupSaga.executeTask(task);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(customerAccessGroupItem, result.block().getCustomerAccessGroup());
+
+        CustomerAccessGroup customerAccessGroup = new CustomerAccessGroup();
+        customerAccessGroup.setName(customerAccessGroupItem.getName());
+        customerAccessGroup.setDescription(customerAccessGroupItem.getDescription());
+        customerAccessGroup.setMandatory(customerAccessGroupItem.getMandatory());
+
+        verify(customerAccessGroupService).updateCustomerAccessGroup(eq(task), eq(1L), eq(customerAccessGroup));
     }
 
     @Test

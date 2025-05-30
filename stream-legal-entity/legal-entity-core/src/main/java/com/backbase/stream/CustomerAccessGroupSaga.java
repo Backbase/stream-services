@@ -99,17 +99,23 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
     private Mono<CustomerAccessGroupTask> setUpCustomerAccessGroup(CustomerAccessGroupTask streamTask) {
         CustomerAccessGroupItem cag = streamTask.getCustomerAccessGroup();
 
-        log.info("Starting setup of Customer Access Group with name: {}", streamTask.getName());
-
         CustomerAccessGroup request = new CustomerAccessGroup()
             .name(cag.getName()).description(cag.getDescription()).mandatory(cag.getMandatory());
+        Set<Long> matchedCag = getCustomerAccessGroupIdsMatchingNames(streamTask, List.of(cag.getName()));
+        if (matchedCag.isEmpty()) {
+            log.info("Creating new Customer Access Group");
+            return cagService.createCustomerAccessGroup(streamTask, request)
+                .map(createdGroup -> {
+                    streamTask.setCustomerAccessGroup(createdGroup);
+                    log.info("Created Customer Access Group: {}", createdGroup.getId());
+                    return streamTask;
+                });
+        }
 
-        return cagService.createCustomerAccessGroup(streamTask, request)
-            .map(createdGroup -> {
-                streamTask.setCustomerAccessGroup(createdGroup);
-                log.info("Created Customer Access Group: {}", createdGroup.getId());
-                return streamTask;
-            });
+        log.info("Updating Customer Access Group: {}", matchedCag.iterator().next());
+        cagService.updateCustomerAccessGroup(streamTask, matchedCag.iterator().next(), request);
+        cag.setId(matchedCag.iterator().next());
+        return Mono.just(streamTask);
     }
 
     private Set<Long> getCustomerAccessGroupIdsMatchingNames(StreamTask streamTask, List<String> cagNames) {
