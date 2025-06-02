@@ -1244,10 +1244,10 @@ components:
           type: array
           items:
             type: string
-        customerAccessGroupNames:
+        jobRoleIdToCustomerAccessGroupNames:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/JobRoleIdToCustomerAccessGroupNames'
         planName:
           type: string
           description: Plan name
@@ -1266,6 +1266,16 @@ components:
             $ref: '#/components/schemas/ExternalContact'
       required:
         - user
+
+    JobRoleIdToCustomerAccessGroupNames:
+      type: object
+      properties:
+        jobRoleId:
+          type: string
+        customerAccessGroupNames:
+          type: array
+          items:
+            type: string
     LegalEntityType:
       type: string
       title: Legal Entity Type
