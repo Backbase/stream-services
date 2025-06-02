@@ -1,5 +1,6 @@
 package com.backbase.stream;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,11 +12,8 @@ import org.springframework.util.CollectionUtils;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroup;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupItem;
 import com.backbase.stream.configuration.CustomerAccessGroupConfigurationProperties;
-import com.backbase.stream.legalentity.model.BaseProductGroup;
-import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
-import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.service.CustomerAccessGroupService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
@@ -76,22 +74,23 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
     }
 
     public Mono<ServiceAgreementTaskV2> assignCustomerAccessGroupsToJobRoles(
-        @SpanTag(value = "streamTask") ServiceAgreementTaskV2 streamTask,
-        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> map) {
+        @SpanTag(value = "streamTask") ServiceAgreementTaskV2 streamTask) {
         ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
         log.info("Processing Customer Access Groups for Service Agreement: {}", serviceAgreement.getExternalId());
         serviceAgreement.getJobProfileUsers().stream()
-            .filter(jobProfileUser -> !CollectionUtils.isEmpty(jobProfileUser.getCustomerAccessGroupNames()))
+            .filter(jobProfileUser -> !CollectionUtils.isEmpty(jobProfileUser.getJobRoleIdToCustomerAccessGroupNames()))
             .forEach(jobProfileUser -> {
-                var entry = map.get(jobProfileUser.getUser());
-                var cagIds = getCustomerAccessGroupIdsMatchingNames(streamTask,
-                    jobProfileUser.getCustomerAccessGroupNames());
+                Map<String, Set<Long>> jobRoleToCagsMap = new HashMap<>();
+                jobProfileUser.getJobRoleIdToCustomerAccessGroupNames().stream()
+                    .filter(jobRoleToCag -> !CollectionUtils.isEmpty(jobRoleToCag.getCustomerAccessGroupNames()))
+                    .forEach(jobRoleToCag -> {
+                        Set<Long> cagIds = getCustomerAccessGroupIdsMatchingNames(streamTask,
+                            jobRoleToCag.getCustomerAccessGroupNames());
+                        jobRoleToCagsMap.put(jobRoleToCag.getJobRoleId(), cagIds);
 
-                Map<String, Set<Long>> fgIdToCagIds = entry.keySet().stream()
-                    .collect(Collectors.toMap(BusinessFunctionGroup::getId, bfg -> cagIds));
-
-                cagService.assignCustomerAccessGroupsToJobRoles(streamTask, jobProfileUser.getUser().getInternalId(),
-                    serviceAgreement, fgIdToCagIds);
+                    });
+                cagService.assignCustomerAccessGroupsToJobRoles(streamTask,
+                    jobProfileUser.getUser().getInternalId(), serviceAgreement, jobRoleToCagsMap);
             });
         return Mono.just(streamTask);
     }

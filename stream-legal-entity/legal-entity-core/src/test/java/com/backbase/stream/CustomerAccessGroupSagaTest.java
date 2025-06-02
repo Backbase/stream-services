@@ -8,14 +8,13 @@ import static org.mockito.Mockito.when;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroup;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupItem;
 import com.backbase.stream.configuration.CustomerAccessGroupConfigurationProperties;
-import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobProfileUser;
+import com.backbase.stream.legalentity.model.JobRoleIdToCustomerAccessGroupNames;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.service.CustomerAccessGroupService;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -138,15 +137,20 @@ class CustomerAccessGroupSagaTest {
     @Test
     void shouldAssignCustomerAccessGroupsToJobRole() {
         List<String> cagNames = List.of("cag-name-1", "cag-name-2");
-        String functionGroup = "functionGroupId";
+        String functionGroup1 = "functionGroup1Id";
+        String functionGroup2 = "functionGroup2Id";
         String userId = "userId";
 
         User user = new User().internalId(userId);
-        BusinessFunctionGroup businessFunctionGroup = new BusinessFunctionGroup().id(functionGroup);
+        BusinessFunctionGroup businessFunctionGroup1 = new BusinessFunctionGroup().id(functionGroup1);
+        BusinessFunctionGroup businessFunctionGroup2 = new BusinessFunctionGroup().id(functionGroup2);
         JobProfileUser jobProfileUser = new JobProfileUser()
             .user(user)
-            .businessFunctionGroups(List.of(businessFunctionGroup))
-            .customerAccessGroupNames(cagNames);
+            .businessFunctionGroups(List.of(businessFunctionGroup1, businessFunctionGroup2))
+            .jobRoleIdToCustomerAccessGroupNames(List.of(
+                new JobRoleIdToCustomerAccessGroupNames().jobRoleId(functionGroup1).customerAccessGroupNames(cagNames),
+                new JobRoleIdToCustomerAccessGroupNames().jobRoleId(functionGroup2)
+            ));
 
         ServiceAgreementV2 serviceAgreementV2 = new ServiceAgreementV2()
             .jobProfileUsers(List.of(jobProfileUser));
@@ -169,17 +173,12 @@ class CustomerAccessGroupSagaTest {
             Mono.just(serviceAgreementV2)
         );
 
-        Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
-        baseProductGroupMap.put(businessFunctionGroup, List.of(new BaseProductGroup().internalId("dataGroupId")));
-
-        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> map = Map.of(user, baseProductGroupMap);
-
-        Mono<ServiceAgreementTaskV2> result = customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task, map);
+        Mono<ServiceAgreementTaskV2> result = customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task);
         Assertions.assertNotNull(result);
 
         verify(customerAccessGroupService).getCustomerAccessGroups(eq(task));
         verify(customerAccessGroupService).assignCustomerAccessGroupsToJobRoles(eq(task), eq(userId),
-            eq(serviceAgreementV2), eq(Map.of(functionGroup, Set.of(1L, 2L))));
+            eq(serviceAgreementV2), eq(Map.of(functionGroup1, Set.of(1L, 2L))));
     }
 
 
