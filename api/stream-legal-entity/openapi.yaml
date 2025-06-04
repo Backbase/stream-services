@@ -1244,10 +1244,10 @@ components:
           type: array
           items:
             type: string
-        jobRoleIdToCustomerAccessGroupNames:
+        jobRoleNameToCustomerAccessGroupNames:
           type: array
           items:
-            $ref: '#/components/schemas/JobRoleIdToCustomerAccessGroupNames'
+            $ref: '#/components/schemas/JobRoleNameToCustomerAccessGroupNames'
         planName:
           type: string
           description: Plan name
@@ -1267,10 +1267,10 @@ components:
       required:
         - user
 
-    JobRoleIdToCustomerAccessGroupNames:
+    JobRoleNameToCustomerAccessGroupNames:
       type: object
       properties:
-        jobRoleId:
+        jobRoleName:
           type: string
         customerAccessGroupNames:
           type: array
