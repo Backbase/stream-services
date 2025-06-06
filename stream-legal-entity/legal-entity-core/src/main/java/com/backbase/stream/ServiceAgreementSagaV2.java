@@ -405,7 +405,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                         serviceAgreement.getExternalId()));
                     return setupUserPermissions(streamTask, jobProfileUser);
                 })
-                .map(actual -> jobProfileUser))
+                .map(actual -> jobProfileUser), 1)
             .collectList()
             .map(jobProfileUsers -> {
                 if (!jobProfileUsers.isEmpty())

@@ -1375,7 +1375,7 @@ public class AccessGroupService {
                         log.debug("Updating existing Job Role: {}", jobRole.getName());
                         return updateJobRole(streamTask, serviceAgreement, jobRole, matchingGroup);
                     }
-                })
+                }, 1)
                 .collectList()
         );
     }
