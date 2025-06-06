@@ -102,6 +102,9 @@ class ServiceAgreementV2SagaTest {
     @Mock
     private PlansService plansService;
 
+    @Mock
+    private CustomerAccessGroupSaga customerAccessGroupSaga;
+
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =
         getLegalEntitySagaConfigurationProperties();

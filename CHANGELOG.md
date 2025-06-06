@@ -1,9 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [7.4.0](https://github.com/Backbase/stream-services/compare/7.3.0...7.4.0)
+### Changed
+- Added CustomerAccessGroupSaga
+- Updated LegalEntityV2Saga to include CustomerAccessGroup assign
+- Updated ServiceAgreementV2Saga to include CustomerAccessGroup assign
+
 ## [7.3.0](https://github.com/Backbase/stream-services/compare/7.2.0...7.3.0)
 ### Changed
-- Fixed job role ingestion 
+- Fixed job role ingestion
 
 ## [7.2.0](https://github.com/Backbase/stream-services/compare/7.1.0...7.2.0)
 ### Changed

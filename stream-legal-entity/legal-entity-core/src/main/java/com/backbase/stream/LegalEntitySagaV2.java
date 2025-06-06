@@ -57,9 +57,7 @@ import com.backbase.stream.worker.model.StreamTask;
 import io.micrometer.tracing.annotation.SpanTag;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
@@ -89,6 +87,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
     private final AccessGroupService accessGroupService;
     private final LimitsSaga limitsSaga;
     private final ContactsSaga contactsSaga;
+    private final CustomerAccessGroupSaga customerAccessGroupSaga;
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
     private final UserKindSegmentationSaga userKindSegmentationSaga;
     private final CustomerProfileService customerProfileService;
@@ -102,6 +101,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
         AccessGroupService accessGroupService,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
+        CustomerAccessGroupSaga customerAccessGroupSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties,
         UserKindSegmentationSaga userKindSegmentationSaga,
         CustomerProfileService customerProfileService) {
@@ -111,6 +111,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
         this.accessGroupService = accessGroupService;
         this.limitsSaga = limitsSaga;
         this.contactsSaga = contactsSaga;
+        this.customerAccessGroupSaga = customerAccessGroupSaga;
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
         this.userKindSegmentationSaga = userKindSegmentationSaga;
         this.customerProfileService = customerProfileService;
@@ -126,7 +127,16 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
             .flatMap(this::processAudiencesSegmentation)
             .flatMap(this::setupLimits)
             .flatMap(this::postLegalEntityContacts)
-            .flatMap(this::processSubsidiaries);
+            .flatMap(this::processSubsidiaries)
+            .flatMap(this::processCustomerAccessGroups);
+    }
+
+    private Mono<LegalEntityTaskV2> processCustomerAccessGroups(LegalEntityTaskV2 streamTask) {
+        if (!customerAccessGroupSaga.isEnabled()) {
+            log.info("Skipping customer access group set up - feature is disabled.");
+            return Mono.just(streamTask);
+        }
+        return customerAccessGroupSaga.assignCustomerAccessGroupsToLegalEntity(streamTask);
     }
 
     private Mono<LegalEntityTaskV2> processAudiencesSegmentation(LegalEntityTaskV2 streamTask) {
