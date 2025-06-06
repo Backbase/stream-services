@@ -21,6 +21,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermissio
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermissionFunctionGroupUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.Privilege;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
+import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.legalentity.model.BusinessFunction;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -71,6 +72,9 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
     @Mock
     private DeletionProperties deletionProperties;
+
+    @Mock
+    private AccessControlConfigurationProperties accessControlConfigurationProperties;
 
     @Spy
     private BatchResponseUtils batchResponseUtils;
@@ -131,6 +135,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         Mockito.when(functionGroupsApi.postPresentationIngestFunctionGroup(any()))
             .thenReturn(Mono.just(new IdItem().id("1")));
+        Mockito.when(accessControlConfigurationProperties.getConcurrency())
+                .thenReturn(1);
 
         Mono<List<JobRole>> listMono = subject.setupJobRoleForSa(streamTask, serviceAgreement, Stream.of(jobRole));
         List<JobRole> setupJobRole = listMono.block();
@@ -209,6 +215,9 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         Mockito.when(functionGroupsApi.putFunctionGroupsUpdate(any()))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
+        Mockito.when(accessControlConfigurationProperties.getConcurrency())
+                .thenReturn(1);
+
 
         Mono<List<JobRole>> listMono = subject.setupJobRoleForSa(streamTask, serviceAgreement, Stream.of(jobRole));
         List<JobRole> setupJobRole = listMono.block();
