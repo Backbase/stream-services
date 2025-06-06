@@ -2,6 +2,8 @@ package com.backbase.stream.configuration;
 
 import com.backbase.stream.worker.configuration.StreamWorkerConfiguration;
 import java.util.Set;
+
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -31,4 +33,9 @@ public class LegalEntitySagaConfigurationProperties extends StreamWorkerConfigur
      */
     private Set<String> serviceAgreementPurposes;
 
+    /**
+     * Concurrency for job roles creation and assigning job roles
+     */
+    @Min(1)
+    private int concurrency = 1;
 }
