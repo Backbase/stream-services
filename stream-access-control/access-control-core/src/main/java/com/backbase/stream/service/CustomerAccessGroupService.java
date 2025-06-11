@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.CustomerAccessGroupApi;
@@ -91,7 +90,6 @@ public class CustomerAccessGroupService {
             .then(Mono.empty());
     }
 
-    @Cacheable(value = CUSTOMER_ACCESS_GROUP, sync = true)
     public Mono<List<CustomerAccessGroupItem>> getCustomerAccessGroups(StreamTask streamTask) {
         return customerAccessGroupApi.getCustomerAccessGroups(null, null, null)
             .map(GetCustomerAccessGroups::getCustomerAccessGroups);
