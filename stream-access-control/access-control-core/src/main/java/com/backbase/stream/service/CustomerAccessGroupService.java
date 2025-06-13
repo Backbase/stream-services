@@ -1,26 +1,24 @@
 package com.backbase.stream.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
-
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.CustomerAccessGroupApi;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroup;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupItem;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupUserPermissionItem;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.GetCustomerAccessGroups;
+import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-
 import jakarta.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -67,7 +65,7 @@ public class CustomerAccessGroupService {
                 .mandatory(cag.getMandatory()));
     }
 
-    public Mono<Void> updateCustomerAccessGroup(StreamTask streamTask, Long cagId,
+    public Mono<CustomerAccessGroupItem> updateCustomerAccessGroup(StreamTask streamTask, Long cagId,
         CustomerAccessGroup customerAccessGroup) {
         return customerAccessGroupApi.updateCustomerAccessGroup(cagId, customerAccessGroup)
             .onErrorResume(WebClientResponseException.class, throwable -> {
@@ -76,7 +74,8 @@ public class CustomerAccessGroupService {
                 return Mono.error(new StreamTaskException(streamTask, throwable,
                     "Failed to update: " + throwable.getResponseBodyAsString()));
             })
-            .then(Mono.empty());
+            .then(Mono.just(new CustomerAccessGroupItem().id(cagId).name(customerAccessGroup.getName())
+                .mandatory(customerAccessGroup.getMandatory()).description(customerAccessGroup.getDescription())));
     }
 
     public Mono<Void> deleteCustomerAccessGroup(StreamTask streamTask, Long cagId) {
@@ -91,7 +90,7 @@ public class CustomerAccessGroupService {
     }
 
     public Mono<List<CustomerAccessGroupItem>> getCustomerAccessGroups(StreamTask streamTask) {
-        return customerAccessGroupApi.getCustomerAccessGroups(null, null, null)
+        return customerAccessGroupApi.getCustomerAccessGroups(null, 100, null)
             .map(GetCustomerAccessGroups::getCustomerAccessGroups);
     }
 
@@ -111,7 +110,8 @@ public class CustomerAccessGroupService {
 
     }
 
-    public Mono<ServiceAgreementV2> assignCustomerAccessGroupsToJobRoles(StreamTask streamTask, String userId,
+    public Mono<JobProfileUser> assignCustomerAccessGroupsToJobRoles(StreamTask streamTask,
+        JobProfileUser jobProfileUser,
         ServiceAgreementV2 serviceAgreement, Map<String, Set<Long>> functionGroupsToCags) {
         List<CustomerAccessGroupUserPermissionItem> items = new ArrayList<>();
         for (Entry<String, Set<Long>> fgIdToCagIds : functionGroupsToCags.entrySet()) {
@@ -119,7 +119,8 @@ public class CustomerAccessGroupService {
                 .functionGroupId(fgIdToCagIds.getKey())
                 .customerAccessGroupIds(fgIdToCagIds.getValue()));
         }
-        return customerAccessGroupApi.assignCustomerAccessGroupsToJobRoles(userId, serviceAgreement.getInternalId(),
+        return customerAccessGroupApi.assignCustomerAccessGroupsToJobRoles(jobProfileUser.getUser().getInternalId(),
+                serviceAgreement.getInternalId(),
                 items)
             .onErrorResume(WebClientResponseException.class, throwable -> {
                 streamTask.error(CUSTOMER_ACCESS_GROUP, "assign", "failed", serviceAgreement.getExternalId(),
@@ -128,8 +129,7 @@ public class CustomerAccessGroupService {
                 return Mono.error(new StreamTaskException(streamTask, throwable,
                     "Failed to assign CAGs to Job Roles: " + throwable.getResponseBodyAsString()));
             })
-            .then(Mono.just(serviceAgreement));
-
+            .then(Mono.just(jobProfileUser));
     }
 
 }

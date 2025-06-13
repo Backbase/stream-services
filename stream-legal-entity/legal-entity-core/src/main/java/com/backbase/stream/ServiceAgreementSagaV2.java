@@ -522,6 +522,10 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             log.info("Skipping customer access group set up - feature is disabled.");
             return Mono.just(streamTask);
         }
+        if (Boolean.FALSE.equals(streamTask.getServiceAgreement().getIsMaster())) {
+            log.info("Skipping customer access group set up for custom service agreement.");
+            return Mono.just(streamTask);
+        }
         return customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(streamTask);
     }
 
