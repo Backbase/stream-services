@@ -1,7 +1,7 @@
 package com.backbase.stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -19,7 +19,6 @@ import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.service.CustomerAccessGroupService;
-import com.backbase.stream.worker.exception.StreamTaskException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -139,11 +138,34 @@ class CustomerAccessGroupSagaTest {
         );
 
         Mono<LegalEntityTaskV2> result = customerAccessGroupSaga.assignCustomerAccessGroupsToLegalEntity(task);
-        Assertions.assertNotNull(result);
+        StepVerifier.create(result).expectNext(task).verifyComplete();
 
-        verify(customerAccessGroupService).getCustomerAccessGroups(eq(task));
-        verify(customerAccessGroupService).assignCustomerAccessGroupsToLegalEntity(eq(task), eq(legalEntityV2),
-            eq(Set.of(1L, 2L)));
+        verify(customerAccessGroupService).getCustomerAccessGroups(task);
+        verify(customerAccessGroupService).assignCustomerAccessGroupsToLegalEntity(task, legalEntityV2, Set.of(1L, 2L));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenAssigningCagToLegalEntityIfCagNameNotExist() {
+        List<String> cagNames = List.of("cag-name-1", "cag-name-2");
+        String leInternalId = "someLegalEntityId";
+        String leExternalId = "someCustomerAccessGroupId";
+        LegalEntityV2 legalEntityV2 = new LegalEntityV2()
+            .internalId(leInternalId).externalId(leExternalId)
+            .customerAccessGroupNames(cagNames);
+        LegalEntityTaskV2 task = mockLegalEntityTask(legalEntityV2);
+
+        CustomerAccessGroupItem cag1 = new CustomerAccessGroupItem()
+            .id(1L)
+            .name("cag-name-1")
+            .description("cag-description-1")
+            .mandatory(true);
+        when(customerAccessGroupService.getCustomerAccessGroups(any())).thenReturn(Mono.just(List.of(cag1)));
+        when(customerAccessGroupService.assignCustomerAccessGroupsToLegalEntity(any(), any(), any())).thenReturn(
+            Mono.just(legalEntityV2)
+        );
+
+        StepVerifier.create(customerAccessGroupSaga.assignCustomerAccessGroupsToLegalEntity(task))
+            .expectErrorMessage("Customer access groups '[cag-name-2]' do not exist").verify();
     }
 
     @Test
@@ -192,55 +214,55 @@ class CustomerAccessGroupSagaTest {
         when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Flux.just(functionGroupItem1, functionGroupItem2));
 
         Mono<ServiceAgreementTaskV2> result = customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task);
-        Assertions.assertNotNull(result);
+        StepVerifier.create(result).expectNext(task).verifyComplete();
 
-        verify(customerAccessGroupService).getCustomerAccessGroups(eq(task));
-        verify(customerAccessGroupService).assignCustomerAccessGroupsToJobRoles(eq(task), eq(jobProfileUser),
-            eq(serviceAgreementV2), eq(Map.of(functionGroup1, Set.of(1L, 2L), functionGroup2, Collections.emptySet())));
+        verify(customerAccessGroupService).getCustomerAccessGroups(task);
+        verify(customerAccessGroupService).assignCustomerAccessGroupsToJobRoles(task, jobProfileUser,
+            serviceAgreementV2, Map.of(functionGroup1, Set.of(1L, 2L), functionGroup2, Collections.emptySet()));
     }
-//
-//    @Test
-//    void shouldThrowExceptionIfFunctionGroupNameNotExist() {
-//        String fg1Name = "fg1Name";
-//        String fg2Name = "fg2Name";
-//        List<String> cagNames = List.of("cag-name-1", "cag-name-2");
-//        String functionGroup1 = "functionGroup1Id";
-//        String functionGroup2 = "functionGroup2Id";
-//        String userId = "userId";
-//
-//        User user = new User().internalId(userId);
-//        BusinessFunctionGroup businessFunctionGroup1 = new BusinessFunctionGroup().id(functionGroup1);
-//        BusinessFunctionGroup businessFunctionGroup2 = new BusinessFunctionGroup().id(functionGroup2);
-//        JobProfileUser jobProfileUser = new JobProfileUser()
-//            .user(user)
-//            .businessFunctionGroups(List.of(businessFunctionGroup1, businessFunctionGroup2))
-//            .jobRoleNameToCustomerAccessGroupNames(List.of(
-//                new JobRoleNameToCustomerAccessGroupNames().jobRoleName("RandomName").customerAccessGroupNames(cagNames),
-//                new JobRoleNameToCustomerAccessGroupNames().jobRoleName(fg2Name)
-//            ));
-//
-//        ServiceAgreementV2 serviceAgreementV2 = new ServiceAgreementV2()
-//            .jobProfileUsers(List.of(jobProfileUser));
-//        ServiceAgreementTaskV2 task = mockServiceAgreementTask(serviceAgreementV2);
-//
-//        FunctionGroupItem functionGroupItem1 = new FunctionGroupItem().id(functionGroup1).name(fg1Name);
-//        FunctionGroupItem functionGroupItem2 = new FunctionGroupItem().id(functionGroup2).name(fg2Name);
-//
-//        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Flux.just(functionGroupItem1, functionGroupItem2));
-//
-//        CustomerAccessGroupItem cag1 = new CustomerAccessGroupItem()
-//            .id(1L)
-//            .name("cag-name-1")
-//            .description("cag-description-1")
-//            .mandatory(true);
-//        when(customerAccessGroupService.getCustomerAccessGroups(any())).thenReturn(Mono.just(List.of(cag1)));
-//
-//        NoSuchElementException exception = assertThrows(NoSuchElementException.class,
-//            () -> customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task).block());
-//
-//        assertThat(exception.getMessage()).isEqualTo("Function group with name 'RandomName' not exist");
-//    }
-//
+
+    @Test
+    void shouldThrowExceptionIfFunctionGroupNameNotExist() {
+        String fg1Name = "fg1Name";
+        String fg2Name = "fg2Name";
+        List<String> cagNames = List.of("cag-name-1", "cag-name-2");
+        String functionGroup1 = "functionGroup1Id";
+        String functionGroup2 = "functionGroup2Id";
+        String userId = "userId";
+
+        User user = new User().internalId(userId);
+        BusinessFunctionGroup businessFunctionGroup1 = new BusinessFunctionGroup().id(functionGroup1);
+        BusinessFunctionGroup businessFunctionGroup2 = new BusinessFunctionGroup().id(functionGroup2);
+        JobProfileUser jobProfileUser = new JobProfileUser()
+            .user(user)
+            .businessFunctionGroups(List.of(businessFunctionGroup1, businessFunctionGroup2))
+            .jobRoleNameToCustomerAccessGroupNames(List.of(
+                new JobRoleNameToCustomerAccessGroupNames().jobRoleName("RandomName").customerAccessGroupNames(cagNames),
+                new JobRoleNameToCustomerAccessGroupNames().jobRoleName(fg2Name)
+            ));
+
+        ServiceAgreementV2 serviceAgreementV2 = new ServiceAgreementV2()
+            .jobProfileUsers(List.of(jobProfileUser));
+        ServiceAgreementTaskV2 task = mockServiceAgreementTask(serviceAgreementV2);
+
+        FunctionGroupItem functionGroupItem1 = new FunctionGroupItem().id(functionGroup1).name(fg1Name);
+        FunctionGroupItem functionGroupItem2 = new FunctionGroupItem().id(functionGroup2).name(fg2Name);
+
+        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Flux.just(functionGroupItem1, functionGroupItem2));
+
+        CustomerAccessGroupItem cag1 = new CustomerAccessGroupItem()
+            .id(1L)
+            .name("cag-name-1")
+            .description("cag-description-1")
+            .mandatory(true);
+        when(customerAccessGroupService.getCustomerAccessGroups(any())).thenReturn(Mono.just(List.of(cag1)));
+
+        NoSuchElementException exception = assertThrows(NoSuchElementException.class,
+            () -> customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task).block());
+
+        assertThat(exception.getMessage()).isEqualTo("Function group with name 'RandomName' not exist");
+    }
+
 //    @Test
 //    void shouldThrowExceptionIfCustomerAccessGroupNameNotExist() {
 //        String fg1Name = "fg1Name";
@@ -276,7 +298,7 @@ class CustomerAccessGroupSagaTest {
 //            Mono.just(jobProfileUser)
 //        );
 //        FunctionGroupItem functionGroupItem1 = new FunctionGroupItem().id(functionGroup1).name(fg1Name);
-//        FunctionGroupItem functionGroupItem2 = new FunctionGroupItem().id(functionGroup1).name(fg2Name);
+//        FunctionGroupItem functionGroupItem2 = new FunctionGroupItem().id(functionGroup2).name(fg2Name);
 //
 //        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Flux.just(functionGroupItem1, functionGroupItem2));
 //

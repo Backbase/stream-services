@@ -67,15 +67,16 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
         @SpanTag(value = "streamTask") LegalEntityTaskV2 streamTask) {
         LegalEntityV2 legalEntity = streamTask.getData();
         var cagNames = legalEntity.getCustomerAccessGroupNames();
-        if (!CollectionUtils.isEmpty(cagNames)) {
-            log.info("Assigning {} Customer Access Groups to Legal Entity: {}", cagNames.size(),
-                legalEntity.getExternalId());
-            getCustomerAccessGroupIdsMatchingNames(streamTask, cagNames)
-                .flatMap(cagIds -> cagService.assignCustomerAccessGroupsToLegalEntity(streamTask, legalEntity, cagIds))
-                .subscribe(legalEntityTask -> log.info("Assigned Customer Access Groups {} to Legal Entity : {}",
-                    legalEntityTask.getCustomerAccessGroupNames(), legalEntityTask.getName()));
+        if (CollectionUtils.isEmpty(cagNames)) {
+            return Mono.just(streamTask);
         }
-        return Mono.just(streamTask);
+        log.info("Assigning {} Customer Access Groups to Legal Entity: {}", cagNames.size(),
+            legalEntity.getExternalId());
+        return getCustomerAccessGroupIdsMatchingNames(streamTask, cagNames)
+            .flatMap(cagIds -> cagService.assignCustomerAccessGroupsToLegalEntity(streamTask, legalEntity, cagIds))
+            .doOnNext(legalEntityTask -> log.info("Assigned Customer Access Groups {} to Legal Entity {}",
+                legalEntityTask.getCustomerAccessGroupNames(), legalEntityTask.getName()))
+            .then(Mono.just(streamTask));
     }
 
     public Mono<ServiceAgreementTaskV2> assignCustomerAccessGroupsToJobRoles(
@@ -91,9 +92,9 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
         log.info("Processing Customer Access Groups for {} users in Service Agreement: {}",
             usersToBeAssignedWithCags.size(), serviceAgreement.getExternalId());
 
-        Mono<Map<String, String>> fgNamesToIdsMono = getFunctionGroupsInSaNameToIdMapMono(streamTask);
-        Mono<Map<String, Long>> cagNamesToIdsMono = getCustomerAccessGroupNameToIdMapMono(streamTask);
-        Mono.zip(fgNamesToIdsMono, cagNamesToIdsMono)
+        Mono<Map<String, String>> fgNamesToIdsMono = getFunctionGroupsInSaNameToIdMap(streamTask);
+        Mono<Map<String, Long>> cagNamesToIdsMono = getCustomerAccessGroupNameToIdMap(streamTask);
+        return Mono.zip(fgNamesToIdsMono, cagNamesToIdsMono)
             .flatMapMany(fgAndCagDataTuple -> Flux.concat(
                 usersToBeAssignedWithCags.stream().map(user -> {
                     Map<String, Set<Long>> jobRoleIdToCagIdsMap = covertJobRoleAndCagNamesToIds(fgAndCagDataTuple,
@@ -104,9 +105,9 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
                         jobRoleIdToCagIdsMap);
                 }).collect(Collectors.toSet())
             ))
-            .subscribe(i -> log.info("Assigned CAG permissions to User {} in SA {}", i.getUser().getExternalId(),
-                serviceAgreement.getExternalId()));
-        return Mono.just(streamTask);
+            .doOnNext(i -> log.info("Assigned CAG permissions to User {} in SA {}", i.getUser().getExternalId(),
+                serviceAgreement.getExternalId()))
+            .then(Mono.just(streamTask));
     }
 
     private static Map<String, Set<Long>> covertJobRoleAndCagNamesToIds(
@@ -128,7 +129,7 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
 
         CustomerAccessGroup request = new CustomerAccessGroup()
             .name(cag.getName()).description(cag.getDescription()).mandatory(cag.getMandatory());
-        getCustomerAccessGroupNameToIdMapMono(streamTask)
+        return getCustomerAccessGroupNameToIdMap(streamTask)
             .flatMap(existingCagNameToIdMap -> {
                 if (!existingCagNameToIdMap.containsKey(cag.getName())) {
                     log.info("Creating new Customer Access Group {}", cag.getName());
@@ -139,12 +140,12 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
                 log.info("Updating Customer Access Group: {}", existingCagId);
                 return cagService.updateCustomerAccessGroup(streamTask, existingCagId, request);
             })
-            .subscribe(item -> log.info("Customer Access Group {} ingested with ID {}", item.getName(), item.getId()));
-        return Mono.just(streamTask);
+            .doOnNext(item -> log.info("Customer Access Group {} ingested with ID {}", item.getName(), item.getId()))
+            .then(Mono.just(streamTask));
     }
 
     public Mono<Set<Long>> getCustomerAccessGroupIdsMatchingNames(StreamTask streamTask, List<String> cagNames) {
-        return getCustomerAccessGroupNameToIdMapMono(streamTask)
+        return getCustomerAccessGroupNameToIdMap(streamTask)
             .handle((cagMap, sink) -> {
                 if (!cagMap.keySet().containsAll(cagNames)) {
                     Set<String> invalidCagNames = cagNames.stream().filter(name -> !cagMap.containsKey(name))
@@ -157,13 +158,13 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
             });
     }
 
-    private Mono<Map<String, Long>> getCustomerAccessGroupNameToIdMapMono(StreamTask streamTask) {
+    private Mono<Map<String, Long>> getCustomerAccessGroupNameToIdMap(StreamTask streamTask) {
         return cagService.getCustomerAccessGroups(streamTask)
             .map(cagList -> cagList.stream()
                 .collect(Collectors.toMap(CustomerAccessGroupItem::getName, CustomerAccessGroupItem::getId)));
     }
 
-    private Mono<Map<String, String>> getFunctionGroupsInSaNameToIdMapMono(ServiceAgreementTaskV2 streamTask) {
+    private Mono<Map<String, String>> getFunctionGroupsInSaNameToIdMap(ServiceAgreementTaskV2 streamTask) {
         return functionGroupsApi.getFunctionGroups(streamTask.getServiceAgreement().getInternalId())
             .collectList()
             .map(fgList -> fgList.stream()
