@@ -13,9 +13,11 @@ import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.Custo
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupUserPermissionItem;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.GetCustomerAccessGroups;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.IdItem;
+import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
+import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.List;
@@ -189,7 +191,7 @@ class CustomerAccessGroupServiceTest {
         List<CustomerAccessGroupItem> actual = cagService.getCustomerAccessGroups(streamTask).block();
 
         assertThat(actual).containsExactlyInAnyOrder(cag1Item, cag2Item);
-        verify(customerAccessGroupApi).getCustomerAccessGroups(null, null, null);
+        verify(customerAccessGroupApi).getCustomerAccessGroups(null, 100, null);
     }
 
     @Test
@@ -237,9 +239,12 @@ class CustomerAccessGroupServiceTest {
     void testAssignCustomerAccessGroupsToJobRole() {
         Set<Long> cagIds = Set.of(1L, 2L);
         String functionGroupId = "functionGroupId";
-        String userId = "userId";
         String serviceAgreementId = "serviceAgreementId";
         String serviceAgreementExtId = "serviceAgreementExtId";
+
+        String userId = "userId";
+        User user = new User().internalId(userId);
+        JobProfileUser jobProfileUser = new JobProfileUser().user(user);
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
@@ -254,7 +259,7 @@ class CustomerAccessGroupServiceTest {
 
         when(customerAccessGroupApi.assignCustomerAccessGroupsToJobRoles(any(), any(), any())).thenReturn(Mono.empty());
 
-        cagService.assignCustomerAccessGroupsToJobRoles(streamTask, userId, serviceAgreement,
+        cagService.assignCustomerAccessGroupsToJobRoles(streamTask, jobProfileUser, serviceAgreement,
             Map.of(functionGroupId, cagIds)).block();
 
         verify(customerAccessGroupApi).assignCustomerAccessGroupsToJobRoles(userId, serviceAgreementId,
@@ -265,9 +270,11 @@ class CustomerAccessGroupServiceTest {
     void testHandleErrorOnAssignCustomerAccessGroupsToJobRole() {
         Set<Long> cagIds = Set.of(1L);
         String functionGroupId = "functionGroupId";
-        String userId = "userId";
         String serviceAgreementId = "serviceAgreementId";
         String serviceAgreementExtId = "serviceAgreementExtId";
+        String userId = "userId";
+        User user = new User().internalId(userId);
+        JobProfileUser jobProfileUser = new JobProfileUser().user(user);
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
@@ -284,7 +291,7 @@ class CustomerAccessGroupServiceTest {
             Mono.error(error));
 
         assertThrows(StreamTaskException.class,
-            () -> cagService.assignCustomerAccessGroupsToJobRoles(streamTask, userId, serviceAgreement,
+            () -> cagService.assignCustomerAccessGroupsToJobRoles(streamTask, jobProfileUser, serviceAgreement,
                 Map.of(functionGroupId, cagIds)).block());
 
         verify(streamTask).error("customer-access-group", "assign", "failed", serviceAgreementExtId,
