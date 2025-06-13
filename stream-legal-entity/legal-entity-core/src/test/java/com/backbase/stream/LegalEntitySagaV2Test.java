@@ -83,6 +83,8 @@ class LegalEntitySagaV2Test {
     @Mock
     private AccessGroupService accessGroupService;
 
+    @Mock
+    private CustomerAccessGroupSaga customerAccessGroupSaga;
 
     @Mock
     private ContactsSaga contactsSaga;
