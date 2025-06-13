@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.backbase.stream.compositions</groupId>
         <artifactId>services</artifactId>
-        <version>7.3.0</version>
+        <version>7.4.0</version>
     </parent>
 
     <artifactId>legal-entity-composition-service</artifactId>
