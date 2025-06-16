@@ -54,7 +54,7 @@ public class CustomerAccessGroupService {
             });
     }
 
-    public Mono<CustomerAccessGroupItem> getCustomerAccessGroup(StreamTask streamTask, Long cagId) {
+    public Mono<CustomerAccessGroupItem> getCustomerAccessGroup(Long cagId) {
         CustomerAccessGroupItem cagItem = new CustomerAccessGroupItem();
         cagItem.setId(cagId);
 
@@ -89,7 +89,7 @@ public class CustomerAccessGroupService {
             .then(Mono.empty());
     }
 
-    public Mono<List<CustomerAccessGroupItem>> getCustomerAccessGroups(StreamTask streamTask) {
+    public Mono<List<CustomerAccessGroupItem>> getCustomerAccessGroups() {
         return customerAccessGroupApi.getCustomerAccessGroups(null, 100, null)
             .map(GetCustomerAccessGroups::getCustomerAccessGroups);
     }

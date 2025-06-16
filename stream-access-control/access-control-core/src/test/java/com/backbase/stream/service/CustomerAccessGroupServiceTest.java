@@ -86,13 +86,12 @@ class CustomerAccessGroupServiceTest {
         long cagId = 1L;
         String saName = "someSaName";
         String saDesc = "someSaDesc";
-        StreamTask streamTask = Mockito.mock(StreamTask.class);
         CustomerAccessGroup cag = new CustomerAccessGroup().name(saName).description(saDesc)
             .mandatory(true);
 
         when(customerAccessGroupApi.getCustomerAccessGroupById(any())).thenReturn(Mono.just(cag));
 
-        CustomerAccessGroupItem actual = cagService.getCustomerAccessGroup(streamTask, cagId).block();
+        CustomerAccessGroupItem actual = cagService.getCustomerAccessGroup(cagId).block();
 
         CustomerAccessGroupItem expected = new CustomerAccessGroupItem()
             .id(cagId).name(saName).description(saDesc).mandatory(true);
@@ -174,7 +173,6 @@ class CustomerAccessGroupServiceTest {
     void testGetCustomerAccessGroups() {
         String saName = "someSaName";
         String saDesc = "someSaDesc";
-        StreamTask streamTask = Mockito.mock(StreamTask.class);
 
         CustomerAccessGroupItem cag1Item = new CustomerAccessGroupItem().id(1L).name(saName).description(saDesc)
             .mandatory(true);
@@ -188,7 +186,7 @@ class CustomerAccessGroupServiceTest {
         when(customerAccessGroupApi.getCustomerAccessGroups(any(), any(), any())).thenReturn(
             Mono.just(getCustomerAccessGroups));
 
-        List<CustomerAccessGroupItem> actual = cagService.getCustomerAccessGroups(streamTask).block();
+        List<CustomerAccessGroupItem> actual = cagService.getCustomerAccessGroups().block();
 
         assertThat(actual).containsExactlyInAnyOrder(cag1Item, cag2Item);
         verify(customerAccessGroupApi).getCustomerAccessGroups(null, 100, null);

@@ -3,7 +3,6 @@ package com.backbase.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +18,7 @@ import com.backbase.stream.legalentity.model.LegalEntityV2;
 import com.backbase.stream.legalentity.model.ServiceAgreementV2;
 import com.backbase.stream.legalentity.model.User;
 import com.backbase.stream.service.CustomerAccessGroupService;
+import com.backbase.stream.worker.exception.StreamTaskException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -66,8 +66,7 @@ class CustomerAccessGroupSagaTest {
         when(customerAccessGroupService.createCustomerAccessGroup(any(), any()))
             .thenReturn(Mono.just(customerAccessGroupItem));
 
-        when(customerAccessGroupService.getCustomerAccessGroups(any()))
-            .thenReturn(Mono.just(Collections.emptyList()));
+        when(customerAccessGroupService.getCustomerAccessGroups()).thenReturn(Mono.just(Collections.emptyList()));
 
         Mono<CustomerAccessGroupTask> result = customerAccessGroupSaga.executeTask(task);
 
@@ -79,7 +78,7 @@ class CustomerAccessGroupSagaTest {
         customerAccessGroup.setDescription(customerAccessGroupItem.getDescription());
         customerAccessGroup.setMandatory(customerAccessGroupItem.getMandatory());
 
-        verify(customerAccessGroupService).createCustomerAccessGroup(eq(task), eq(customerAccessGroup));
+        verify(customerAccessGroupService).createCustomerAccessGroup(task, customerAccessGroup);
     }
 
     @Test
@@ -94,7 +93,7 @@ class CustomerAccessGroupSagaTest {
         when(customerAccessGroupService.updateCustomerAccessGroup(any(), any(), any()))
             .thenReturn(Mono.empty());
 
-        when(customerAccessGroupService.getCustomerAccessGroups(any()))
+        when(customerAccessGroupService.getCustomerAccessGroups())
             .thenReturn(Mono.just(List.of(customerAccessGroupItem)));
 
         Mono<CustomerAccessGroupTask> result = customerAccessGroupSaga.executeTask(task);
@@ -107,7 +106,7 @@ class CustomerAccessGroupSagaTest {
         customerAccessGroup.setDescription(customerAccessGroupItem.getDescription());
         customerAccessGroup.setMandatory(customerAccessGroupItem.getMandatory());
 
-        verify(customerAccessGroupService).updateCustomerAccessGroup(eq(task), eq(1L), eq(customerAccessGroup));
+        verify(customerAccessGroupService).updateCustomerAccessGroup(task, 1L, customerAccessGroup);
     }
 
     @Test
@@ -132,7 +131,7 @@ class CustomerAccessGroupSagaTest {
             .description("cag-description-2")
             .mandatory(false);
 
-        when(customerAccessGroupService.getCustomerAccessGroups(any())).thenReturn(Mono.just(List.of(cag1, cag2)));
+        when(customerAccessGroupService.getCustomerAccessGroups()).thenReturn(Mono.just(List.of(cag1, cag2)));
         when(customerAccessGroupService.assignCustomerAccessGroupsToLegalEntity(any(), any(), any())).thenReturn(
             Mono.just(legalEntityV2)
         );
@@ -140,7 +139,7 @@ class CustomerAccessGroupSagaTest {
         Mono<LegalEntityTaskV2> result = customerAccessGroupSaga.assignCustomerAccessGroupsToLegalEntity(task);
         StepVerifier.create(result).expectNext(task).verifyComplete();
 
-        verify(customerAccessGroupService).getCustomerAccessGroups(task);
+        verify(customerAccessGroupService).getCustomerAccessGroups();
         verify(customerAccessGroupService).assignCustomerAccessGroupsToLegalEntity(task, legalEntityV2, Set.of(1L, 2L));
     }
 
@@ -159,7 +158,7 @@ class CustomerAccessGroupSagaTest {
             .name("cag-name-1")
             .description("cag-description-1")
             .mandatory(true);
-        when(customerAccessGroupService.getCustomerAccessGroups(any())).thenReturn(Mono.just(List.of(cag1)));
+        when(customerAccessGroupService.getCustomerAccessGroups()).thenReturn(Mono.just(List.of(cag1)));
         when(customerAccessGroupService.assignCustomerAccessGroupsToLegalEntity(any(), any(), any())).thenReturn(
             Mono.just(legalEntityV2)
         );
@@ -204,7 +203,7 @@ class CustomerAccessGroupSagaTest {
             .description("cag-description-2")
             .mandatory(false);
 
-        when(customerAccessGroupService.getCustomerAccessGroups(any())).thenReturn(Mono.just(List.of(cag1, cag2)));
+        when(customerAccessGroupService.getCustomerAccessGroups()).thenReturn(Mono.just(List.of(cag1, cag2)));
         when(customerAccessGroupService.assignCustomerAccessGroupsToJobRoles(any(), any(), any(), any())).thenReturn(
             Mono.just(jobProfileUser)
         );
@@ -216,7 +215,7 @@ class CustomerAccessGroupSagaTest {
         Mono<ServiceAgreementTaskV2> result = customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task);
         StepVerifier.create(result).expectNext(task).verifyComplete();
 
-        verify(customerAccessGroupService).getCustomerAccessGroups(task);
+        verify(customerAccessGroupService).getCustomerAccessGroups();
         verify(customerAccessGroupService).assignCustomerAccessGroupsToJobRoles(task, jobProfileUser,
             serviceAgreementV2, Map.of(functionGroup1, Set.of(1L, 2L), functionGroup2, Collections.emptySet()));
     }
@@ -255,58 +254,63 @@ class CustomerAccessGroupSagaTest {
             .name("cag-name-1")
             .description("cag-description-1")
             .mandatory(true);
-        when(customerAccessGroupService.getCustomerAccessGroups(any())).thenReturn(Mono.just(List.of(cag1)));
+        CustomerAccessGroupItem cag2 = new CustomerAccessGroupItem()
+            .id(2L)
+            .name("cag-name-2")
+            .description("cag-description-2")
+            .mandatory(false);
+        when(customerAccessGroupService.getCustomerAccessGroups()).thenReturn(Mono.just(List.of(cag1, cag2)));
 
         NoSuchElementException exception = assertThrows(NoSuchElementException.class,
             () -> customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task).block());
 
-        assertThat(exception.getMessage()).isEqualTo("Function group with name 'RandomName' not exist");
+        assertThat(exception.getMessage()).isEqualTo("Function group with name 'RandomName' does not exist");
     }
 
-//    @Test
-//    void shouldThrowExceptionIfCustomerAccessGroupNameNotExist() {
-//        String fg1Name = "fg1Name";
-//        String fg2Name = "fg2Name";
-//        List<String> cagNames = List.of("cag-name-1", "cag-name-2");
-//        String functionGroup1 = "functionGroup1Id";
-//        String functionGroup2 = "functionGroup2Id";
-//        String userId = "userId";
-//
-//        User user = new User().internalId(userId);
-//        BusinessFunctionGroup businessFunctionGroup1 = new BusinessFunctionGroup().id(functionGroup1);
-//        BusinessFunctionGroup businessFunctionGroup2 = new BusinessFunctionGroup().id(functionGroup2);
-//        JobProfileUser jobProfileUser = new JobProfileUser()
-//            .user(user)
-//            .businessFunctionGroups(List.of(businessFunctionGroup1, businessFunctionGroup2))
-//            .jobRoleNameToCustomerAccessGroupNames(List.of(
-//                new JobRoleNameToCustomerAccessGroupNames().jobRoleName(fg1Name).customerAccessGroupNames(cagNames),
-//                new JobRoleNameToCustomerAccessGroupNames().jobRoleName(fg2Name)
-//            ));
-//
-//        ServiceAgreementV2 serviceAgreementV2 = new ServiceAgreementV2()
-//            .jobProfileUsers(List.of(jobProfileUser));
-//        ServiceAgreementTaskV2 task = mockServiceAgreementTask(serviceAgreementV2);
-//
-//        CustomerAccessGroupItem cag1 = new CustomerAccessGroupItem()
-//            .id(1L)
-//            .name("cag-name-1")
-//            .description("cag-description-1")
-//            .mandatory(true);
-//
-//        when(customerAccessGroupService.getCustomerAccessGroups(any())).thenReturn(Mono.just(List.of(cag1)));
-//        when(customerAccessGroupService.assignCustomerAccessGroupsToJobRoles(any(), any(), any(), any())).thenReturn(
-//            Mono.just(jobProfileUser)
-//        );
-//        FunctionGroupItem functionGroupItem1 = new FunctionGroupItem().id(functionGroup1).name(fg1Name);
-//        FunctionGroupItem functionGroupItem2 = new FunctionGroupItem().id(functionGroup2).name(fg2Name);
-//
-//        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Flux.just(functionGroupItem1, functionGroupItem2));
-//
-//        StreamTaskException exception = assertThrows(StreamTaskException.class,
-//            () -> customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task).block());
-//
-//        assertThat(exception.getMessage()).isEqualTo("Customer access group names '[cag-name-2]' not exist");
-//    }
+    @Test
+    void shouldThrowExceptionIfCustomerAccessGroupNameNotExist() {
+        String fg1Name = "fg1Name";
+        String fg2Name = "fg2Name";
+        List<String> cagNames = List.of("cag-name-1", "cag-name-2");
+        String functionGroup1 = "functionGroup1Id";
+        String functionGroup2 = "functionGroup2Id";
+        String userId = "userId";
+
+        User user = new User().internalId(userId);
+        BusinessFunctionGroup businessFunctionGroup1 = new BusinessFunctionGroup().id(functionGroup1);
+        BusinessFunctionGroup businessFunctionGroup2 = new BusinessFunctionGroup().id(functionGroup2);
+        JobProfileUser jobProfileUser = new JobProfileUser()
+            .user(user)
+            .businessFunctionGroups(List.of(businessFunctionGroup1, businessFunctionGroup2))
+            .jobRoleNameToCustomerAccessGroupNames(List.of(
+                new JobRoleNameToCustomerAccessGroupNames().jobRoleName(fg1Name).customerAccessGroupNames(cagNames),
+                new JobRoleNameToCustomerAccessGroupNames().jobRoleName(fg2Name)
+            ));
+
+        ServiceAgreementV2 serviceAgreementV2 = new ServiceAgreementV2()
+            .jobProfileUsers(List.of(jobProfileUser));
+        ServiceAgreementTaskV2 task = mockServiceAgreementTask(serviceAgreementV2);
+
+        CustomerAccessGroupItem cag1 = new CustomerAccessGroupItem()
+            .id(1L)
+            .name("cag-name-1")
+            .description("cag-description-1")
+            .mandatory(true);
+
+        when(customerAccessGroupService.getCustomerAccessGroups()).thenReturn(Mono.just(List.of(cag1)));
+        when(customerAccessGroupService.assignCustomerAccessGroupsToJobRoles(any(), any(), any(), any())).thenReturn(
+            Mono.just(jobProfileUser)
+        );
+        FunctionGroupItem functionGroupItem1 = new FunctionGroupItem().id(functionGroup1).name(fg1Name);
+        FunctionGroupItem functionGroupItem2 = new FunctionGroupItem().id(functionGroup2).name(fg2Name);
+
+        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Flux.just(functionGroupItem1, functionGroupItem2));
+
+        StreamTaskException exception = assertThrows(StreamTaskException.class,
+            () -> customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task).block());
+
+        assertThat(exception.getMessage()).isEqualTo("Customer access groups '[cag-name-2]' do not exist");
+    }
 
 
     private CustomerAccessGroupTask mockCustomerAccessGroupTask(CustomerAccessGroupItem customerAccessGroupItem) {
