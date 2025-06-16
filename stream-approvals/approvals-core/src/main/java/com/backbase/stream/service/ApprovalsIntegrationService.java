@@ -6,6 +6,7 @@ import com.backbase.dbs.approval.api.service.v2.PoliciesApi;
 import com.backbase.dbs.approval.api.service.v2.PolicyAssignmentsApi;
 import com.backbase.dbs.approval.api.service.v2.model.PostApprovalTypeResponse;
 import com.backbase.dbs.approval.api.service.v2.model.PostPolicyResponse;
+import com.backbase.dbs.approval.api.service.v2.model.PostPolicyServiceApiResponse;
 import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.Policy;
 import com.backbase.stream.approval.model.PolicyAssignment;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpRequest;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
@@ -36,12 +38,22 @@ public class ApprovalsIntegrationService {
     private final PoliciesApi policiesApi;
     private final PolicyAssignmentsApi policyAssignmentsApi;
 
+    private static final String CREATE_APPROVAL_POLICY_LOG_MESSAGE = "Created approval policy: '{}' with identifier: [{}].";
+
     public Mono<ApprovalType> createApprovalType(ApprovalType approvalType) {
-        return approvalTypesApi.postApprovalType(approvalMapper.mapApprovalType(approvalType))
+        Mono<PostApprovalTypeResponse> apiCallMono;
+
+        if (ObjectUtils.isEmpty(approvalType.getScope())) {
+            apiCallMono = approvalTypesApi.postApprovalType(approvalMapper.mapApprovalType(approvalType));
+        } else {
+            apiCallMono = approvalTypesApi.postScopedApprovalType(approvalMapper.mapScopedApprovalType(approvalType));
+        }
+
+        return apiCallMono
             .map(PostApprovalTypeResponse::getApprovalType)
             .map(at -> {
                 String id = at.getId();
-                log.info("Created Approval Type: {} with ID: {}", at.getName(), id);
+                log.info("Created approval type: {} with identifier: [{}].", at.getName(), id);
                 approvalType.setInternalId(id);
                 return approvalType;
             })
@@ -52,19 +64,35 @@ public class ApprovalsIntegrationService {
     }
 
     public Mono<Policy> createPolicy(Policy policy) {
-        return policiesApi.postPolicy(policyMapper.mapPolicy(policy))
-            .map(PostPolicyResponse::getPolicy)
-            .map(at -> {
-                String id = at.getId();
-                log.info("Created Approval Type: {} with ID: {}", at.getName(), id);
-                policy.setInternalId(id);
-                return policy;
-            })
+        Mono<Policy> createdPolicyMono;
+
+        if (ObjectUtils.isEmpty(policy.getScope())) {
+            createdPolicyMono = policiesApi.postPolicy(policyMapper.mapPolicy(policy))
+                .map(PostPolicyResponse::getPolicy)
+                .map(at -> {
+                    String id = at.getId();
+                    log.info(CREATE_APPROVAL_POLICY_LOG_MESSAGE, at.getName(), id);
+                    policy.setInternalId(id);
+                    return policy;
+                });
+        } else {
+            createdPolicyMono = policiesApi.postScopedPolicy(policyMapper.mapScopedPolicy(policy))
+                .map(PostPolicyServiceApiResponse::getPolicy)
+                .map(at -> {
+                    String id = at.getId();
+                    log.info(CREATE_APPROVAL_POLICY_LOG_MESSAGE, at.getName(), id);
+                    policy.setInternalId(id);
+                    return policy;
+                });
+        }
+
+        return createdPolicyMono
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .onErrorResume(WebClientResponseException.class, exception ->
                 Mono.error(new PolicyException(policy, "Failed to create Policy", exception)))
             .onErrorStop();
     }
+
 
     public Mono<PolicyAssignment> assignPolicies(PolicyAssignment policyAssignment) {
         return policyAssignmentsApi
