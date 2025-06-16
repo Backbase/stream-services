@@ -373,6 +373,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private Mono<ServiceAgreementTaskV2> processJobProfiles(ServiceAgreementTaskV2 streamTask) {
         log.info("Processing Job Profiles for: {}", streamTask.getName());
         ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
+        var concurrency = legalEntitySagaConfigurationProperties.getConcurrency();
 
         if (serviceAgreement.getJobProfileUsers() == null) {
             streamTask.warn(BUSINESS_FUNCTION_GROUP, PROCESS_JOB_PROFILES, REJECTED,
@@ -405,7 +406,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
                         serviceAgreement.getExternalId()));
                     return setupUserPermissions(streamTask, jobProfileUser);
                 })
-                .map(actual -> jobProfileUser))
+                .map(actual -> jobProfileUser), concurrency)
             .collectList()
             .map(jobProfileUsers -> {
                 if (!jobProfileUsers.isEmpty())

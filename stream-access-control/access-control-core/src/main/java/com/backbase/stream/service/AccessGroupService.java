@@ -1364,6 +1364,8 @@ public class AccessGroupService {
             .flatMapMany(Flux::fromIterable)
             .collectMap(FunctionGroupItem::getName, Function.identity());
 
+        var concurrency = accessControlProperties.getConcurrency();
+
         return functionGroupsFromDb.flatMap(functionGroupsMap ->
             Flux.fromStream(jobRoleStream)
                 .flatMap(jobRole -> {
@@ -1375,7 +1377,7 @@ public class AccessGroupService {
                         log.debug("Updating existing Job Role: {}", jobRole.getName());
                         return updateJobRole(streamTask, serviceAgreement, jobRole, matchingGroup);
                     }
-                })
+                }, concurrency)
                 .collectList()
         );
     }

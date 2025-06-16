@@ -14,4 +14,7 @@ public class AccessControlConfigurationProperties {
 
     @Min(1)
     private int userContextPageSize = 10;
+
+    @Min(1)
+    private int concurrency = 1;
 }
