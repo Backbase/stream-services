@@ -27,6 +27,11 @@ public class CustomerAccessGroupService {
 
     private static final String CUSTOMER_ACCESS_GROUP = "customer-access-group";
 
+    // default page size is 20, max page size is 1000.
+    // At the moment we have 14 CAGs in the core data, 100 feels like more than enough for the near future.
+    // But if number of CAGs in the system grows too much, let's think of some way to filter CAGs.
+    public static final int CAG_PAGE_SIZE = 100;
+
     @NotNull
     private final CustomerAccessGroupApi customerAccessGroupApi;
 
@@ -90,7 +95,7 @@ public class CustomerAccessGroupService {
     }
 
     public Mono<List<CustomerAccessGroupItem>> getCustomerAccessGroups() {
-        return customerAccessGroupApi.getCustomerAccessGroups(null, 100, null)
+        return customerAccessGroupApi.getCustomerAccessGroups(null, CAG_PAGE_SIZE, null)
             .map(GetCustomerAccessGroups::getCustomerAccessGroups);
     }
 

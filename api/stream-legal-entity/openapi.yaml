@@ -1246,6 +1246,9 @@ components:
             type: string
         jobRoleNameToCustomerAccessGroupNames:
           type: array
+          description: |
+            Customer Access Groups assigned to Job Roles for a particular user. Job Role without Customer Access Groups 
+            gives access to all customers below in the hierarchy ("power-mode"). Job Role names should also be listed in referenceJobRoleNames).
           items:
             $ref: '#/components/schemas/JobRoleNameToCustomerAccessGroupNames'
         planName:
