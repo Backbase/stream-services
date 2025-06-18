@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-services</artifactId>
-        <version>7.4.0</version>
+        <version>7.5.0</version>
     </parent>
 
     <artifactId>stream-dbs-clients</artifactId>
@@ -270,6 +270,19 @@
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-customer-access-group-client-api-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/customer-access-group-service-api-v1*.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.customeraccessgroup.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
