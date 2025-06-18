@@ -1,5 +1,6 @@
 package com.backbase.stream.configuration;
 
+import com.backbase.stream.CustomerAccessGroupSaga;
 import com.backbase.stream.LegalEntitySaga;
 import com.backbase.stream.LegalEntitySagaV2;
 import com.backbase.stream.LegalEntityTask;
@@ -76,6 +77,7 @@ public class LegalEntitySagaConfiguration {
         AccessGroupService accessGroupService,
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
+        CustomerAccessGroupSaga customerAccessGroupSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
         UserKindSegmentationSaga userKindSegmentationSaga,
         CustomerProfileService customerProfileService
@@ -87,6 +89,7 @@ public class LegalEntitySagaConfiguration {
             accessGroupService,
             limitsSaga,
             contactsSaga,
+            customerAccessGroupSaga,
             sinkConfigurationProperties,
             userKindSegmentationSaga,
             customerProfileService
@@ -100,6 +103,7 @@ public class LegalEntitySagaConfiguration {
         LimitsSaga limitsSaga,
         ContactsSaga contactsSaga,
         PlansService plansService,
+        CustomerAccessGroupSaga customerAccessGroupSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties
     ) {
         return new ServiceAgreementSagaV2(
@@ -109,6 +113,7 @@ public class LegalEntitySagaConfiguration {
             limitsSaga,
             contactsSaga,
             plansService,
+            customerAccessGroupSaga,
             sinkConfigurationProperties
         );
     }

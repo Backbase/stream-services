@@ -1188,6 +1188,10 @@ components:
           $ref: '#/components/schemas/LegalEntityType'
         customerCategory:
           $ref: '#/components/schemas/CustomerCategory'
+        customerAccessGroupNames:
+          type: array
+          items: 
+            type: string
         realmName:
           type: string
           description: Realm to which the Legal Entity should be mapped.
@@ -1240,6 +1244,13 @@ components:
           type: array
           items:
             type: string
+        jobRoleNameToCustomerAccessGroupNames:
+          type: array
+          description: |
+            Customer Access Groups assigned to Job Roles for a particular user. Job Role without Customer Access Groups 
+            gives access to all customers below in the hierarchy ("power-mode"). Job Role names should also be listed in referenceJobRoleNames).
+          items:
+            $ref: '#/components/schemas/JobRoleNameToCustomerAccessGroupNames'
         planName:
           type: string
           description: Plan name
@@ -1258,6 +1269,16 @@ components:
             $ref: '#/components/schemas/ExternalContact'
       required:
         - user
+
+    JobRoleNameToCustomerAccessGroupNames:
+      type: object
+      properties:
+        jobRoleName:
+          type: string
+        customerAccessGroupNames:
+          type: array
+          items:
+            type: string
     LegalEntityType:
       type: string
       title: Legal Entity Type
