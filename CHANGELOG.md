@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [7.6.0](https://github.com/Backbase/stream-services/compare/7.5.0...7.6.0)
+### Changed
+- Extended stream-approvals openapi.yaml in case of 'scope' property for the Policy and ApprovalType
+- The logic of ApprovalsIntegrationService.createApprovalType() and ApprovalsIntegrationService.createPolicy() was extended to use different endpoints in case scope property presents
+- Unit test has been updated accordingly
+
 ## [7.5.0](https://github.com/Backbase/stream-services/compare/7.4.0...7.5.0)
 ### Changed
 - Added CustomerAccessGroupSaga
