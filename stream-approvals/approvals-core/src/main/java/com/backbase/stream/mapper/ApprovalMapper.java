@@ -1,6 +1,7 @@
 package com.backbase.stream.mapper;
 
 import com.backbase.dbs.approval.api.service.v2.model.PostApprovalTypeRequest;
+import com.backbase.dbs.approval.api.service.v2.model.PostScopedApprovalTypeRequest;
 import com.backbase.dbs.approval.api.service.v2.model.PresentationPostBulkApprovalTypeAssignmentRequest;
 import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.PolicyAssignment;
@@ -11,6 +12,8 @@ import org.mapstruct.Mapping;
 public interface ApprovalMapper {
 
     PostApprovalTypeRequest mapApprovalType(ApprovalType approvalType);
+
+    PostScopedApprovalTypeRequest mapScopedApprovalType(ApprovalType approvalType);
 
     @Mapping(source = "approvalTypeAssignments", target = "approvalTypeAssignments")
     PresentationPostBulkApprovalTypeAssignmentRequest mapApprovalTypeAssignment(PolicyAssignment policyAssignment);
