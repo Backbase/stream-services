@@ -91,6 +91,8 @@ components:
           type: string
         rank:
           type: number
+        scope:
+          type: string
     Policy:
       type: object
       title: "Approval Policy configuration"
@@ -103,6 +105,10 @@ components:
         name:
           type: string
         description:
+          type: string
+        scope:
+          type: string
+        serviceAgreementId:
           type: string
         logicalItems:
           type: array
