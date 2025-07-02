@@ -4,6 +4,7 @@ import com.backbase.dbs.approval.api.service.v2.ApprovalTypeAssignmentsApi;
 import com.backbase.dbs.approval.api.service.v2.ApprovalTypesApi;
 import com.backbase.dbs.approval.api.service.v2.PoliciesApi;
 import com.backbase.dbs.approval.api.service.v2.PolicyAssignmentsApi;
+import com.backbase.dbs.approval.api.service.v2.model.PolicyScope;
 import com.backbase.dbs.approval.api.service.v2.model.PostApprovalTypeResponse;
 import com.backbase.dbs.approval.api.service.v2.model.PostPolicyResponse;
 import com.backbase.dbs.approval.api.service.v2.model.PostPolicyServiceApiResponse;
@@ -13,6 +14,7 @@ import com.backbase.stream.approval.model.PolicyAssignment;
 import com.backbase.stream.exceptions.ApprovalTypeException;
 import com.backbase.stream.exceptions.PolicyAssignmentException;
 import com.backbase.stream.exceptions.PolicyException;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.mapper.ApprovalMapper;
 import com.backbase.stream.mapper.PolicyMapper;
 import java.util.Objects;
@@ -37,6 +39,8 @@ public class ApprovalsIntegrationService {
     private final ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi;
     private final PoliciesApi policiesApi;
     private final PolicyAssignmentsApi policyAssignmentsApi;
+    private final AccessGroupService accessGroupService;
+
 
     private static final String CREATE_APPROVAL_POLICY_LOG_MESSAGE = "Created approval policy: '{}' with identifier: [{}].";
 
@@ -76,6 +80,14 @@ public class ApprovalsIntegrationService {
                     return policy;
                 });
         } else {
+            if (PolicyScope.LOCAL.getValue().equals(policy.getScope())) {
+                String serviceAgreementInternalId = accessGroupService.getServiceAgreementByExternalId(
+                        policy.getServiceAgreementId())
+                    .map(ServiceAgreement::getInternalId)
+                    .block();
+                policy.setServiceAgreementId(serviceAgreementInternalId);
+            }
+
             createdPolicyMono = policiesApi.postScopedPolicy(policyMapper.mapScopedPolicy(policy))
                 .map(PostPolicyServiceApiResponse::getPolicy)
                 .map(at -> {

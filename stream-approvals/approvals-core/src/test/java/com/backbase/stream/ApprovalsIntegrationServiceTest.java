@@ -25,6 +25,8 @@ import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.Policy;
 import com.backbase.stream.exceptions.ApprovalTypeException;
 import com.backbase.stream.exceptions.PolicyException;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
+import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.ApprovalsIntegrationService;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -47,6 +49,9 @@ class ApprovalsIntegrationServiceTest {
 
     @Mock
     private ApprovalTypesApi approvalTypesApi;
+
+    @Mock
+    private AccessGroupService accessGroupService;
 
     @InjectMocks
     private ApprovalsIntegrationService approvalsIntegrationService;
@@ -207,20 +212,31 @@ class ApprovalsIntegrationServiceTest {
 
     @Test
     void shouldCreateScopedPolicy() {
-        final String serviceAgreementId = UUID.randomUUID().toString();
+        final String serviceAgreementInternalId = UUID.randomUUID().toString();
+        final String serviceAgreementExternalId = "External identifier";
 
         final Policy inputPolicy = new Policy()
             .name(TEST_POLICY_NAME)
             .scope(ApprovalTypeScope.LOCAL.getValue())
-            .serviceAgreementId(serviceAgreementId);
+            .serviceAgreementId(serviceAgreementExternalId);
+
+        final ServiceAgreement serviceAgreement = new ServiceAgreement()
+            .internalId(serviceAgreementInternalId)
+            .externalId(serviceAgreementExternalId);
+
+        when(accessGroupService.getServiceAgreementByExternalId(serviceAgreementExternalId))
+            .thenReturn(Mono.just(serviceAgreement));
 
         final PostPolicyServiceApiRequest expectedMappedRequest = new PostPolicyServiceApiRequest()
             .name(TEST_POLICY_NAME)
             .scope(PolicyScope.LOCAL)
-            .serviceAgreementId(serviceAgreementId);
+            .serviceAgreementId(serviceAgreementInternalId);
 
         final PostPolicyServiceApiResponse apiResponse = new PostPolicyServiceApiResponse()
-            .policy(new PolicyServiceApiResponseDto().name(TEST_POLICY_NAME).scope(PolicyScope.LOCAL));
+            .policy(new PolicyServiceApiResponseDto()
+                .name(TEST_POLICY_NAME)
+                .scope(PolicyScope.LOCAL)
+                .serviceAgreementId(serviceAgreementInternalId));
 
         when(policiesApi.postScopedPolicy(expectedMappedRequest)).thenReturn(Mono.just(apiResponse));
 
@@ -230,6 +246,35 @@ class ApprovalsIntegrationServiceTest {
             .expectNextMatches(createdPolicy -> {
                 assertThat(createdPolicy.getName()).isEqualTo(TEST_POLICY_NAME);
                 assertThat(createdPolicy.getScope()).isEqualTo(ApprovalTypeScope.LOCAL.getValue());
+                return true;
+            })
+            .verifyComplete();
+
+        verify(policiesApi, times(1)).postScopedPolicy(expectedMappedRequest);
+        verify(policiesApi, never()).postPolicy(any());
+    }
+
+    @Test
+    void shouldCreateSystemScopedPolicy() {
+        final Policy inputPolicy = new Policy()
+            .name(TEST_POLICY_NAME)
+            .scope(ApprovalTypeScope.SYSTEM.getValue());
+
+        final PostPolicyServiceApiRequest expectedMappedRequest = new PostPolicyServiceApiRequest()
+            .name(TEST_POLICY_NAME)
+            .scope(PolicyScope.SYSTEM);
+
+        final PostPolicyServiceApiResponse apiResponse = new PostPolicyServiceApiResponse()
+            .policy(new PolicyServiceApiResponseDto().name(TEST_POLICY_NAME).scope(PolicyScope.SYSTEM));
+
+        when(policiesApi.postScopedPolicy(expectedMappedRequest)).thenReturn(Mono.just(apiResponse));
+
+        final Mono<Policy> resultMono = approvalsIntegrationService.createPolicy(inputPolicy);
+
+        StepVerifier.create(resultMono)
+            .expectNextMatches(createdPolicy -> {
+                assertThat(createdPolicy.getName()).isEqualTo(TEST_POLICY_NAME);
+                assertThat(createdPolicy.getScope()).isEqualTo(ApprovalTypeScope.SYSTEM.getValue());
                 return true;
             })
             .verifyComplete();
@@ -266,17 +311,25 @@ class ApprovalsIntegrationServiceTest {
 
     @Test
     void shouldNotCreateScopedPolicyAndThrowInternalServerError() {
-        final String serviceAgreementId = UUID.randomUUID().toString();
+        final String serviceAgreementInternalId = UUID.randomUUID().toString();
+        final String serviceAgreementExternalId = "External identifier";
 
         final Policy inputPolicy = new Policy()
             .name(TEST_POLICY_NAME)
             .scope(ApprovalTypeScope.LOCAL.getValue())
-            .serviceAgreementId(serviceAgreementId);
+            .serviceAgreementId(serviceAgreementExternalId);
+
+        final ServiceAgreement serviceAgreement = new ServiceAgreement()
+            .internalId(serviceAgreementInternalId)
+            .externalId(serviceAgreementExternalId);
+
+        when(accessGroupService.getServiceAgreementByExternalId(serviceAgreementExternalId))
+            .thenReturn(Mono.just(serviceAgreement));
 
         final PostPolicyServiceApiRequest expectedMappedRequest = new PostPolicyServiceApiRequest()
             .name(TEST_POLICY_NAME)
             .scope(PolicyScope.LOCAL)
-            .serviceAgreementId(serviceAgreementId);
+            .serviceAgreementId(serviceAgreementInternalId);
 
         final WebClientResponseException webClientException = new WebClientResponseException(
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
