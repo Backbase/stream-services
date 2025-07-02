@@ -44,6 +44,8 @@ public class ApprovalsIntegrationService {
 
     private static final String CREATE_APPROVAL_POLICY_LOG_MESSAGE = "Created approval policy: '{}' with identifier: [{}].";
 
+    private static final String CREATE_APPROVAL_POLICY_LOG_MESSAGE = "Created approval policy: '{}' with identifier: [{}].";
+
     public Mono<ApprovalType> createApprovalType(ApprovalType approvalType) {
         Mono<PostApprovalTypeResponse> apiCallMono;
 
