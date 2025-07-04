@@ -1,6 +1,7 @@
 package com.backbase.stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -91,7 +92,8 @@ class ApprovalsIntegrationServiceTest {
         final ApprovalType inputApprovalType = new ApprovalType()
             .name(TEST_APPROVAL_TYPE_NAME)
             .rank(new BigDecimal(2))
-            .scope(ApprovalTypeScope.LOCAL.getValue());
+            .scope(ApprovalTypeScope.LOCAL.getValue())
+            .serviceAgreementId("externalServiceAgreementId");
 
         final PostScopedApprovalTypeRequest mappedApprovalTypeItem = new PostScopedApprovalTypeRequest()
             .name(TEST_APPROVAL_TYPE_NAME)
@@ -101,6 +103,12 @@ class ApprovalsIntegrationServiceTest {
         final PostApprovalTypeResponse apiResponse = new PostApprovalTypeResponse()
             .approvalType(new ApprovalTypeDto().name(TEST_APPROVAL_TYPE_NAME).scope(ApprovalTypeScope.LOCAL));
 
+        final ServiceAgreement serviceAgreement = new ServiceAgreement()
+            .internalId(UUID.randomUUID().toString())
+            .externalId(UUID.randomUUID().toString());
+
+        when(accessGroupService.getServiceAgreementByExternalId(anyString()))
+            .thenReturn(Mono.just(serviceAgreement));
         when(approvalTypesApi.postScopedApprovalType(mappedApprovalTypeItem)).thenReturn(Mono.just(apiResponse));
 
         final Mono<ApprovalType> resultMono = approvalsIntegrationService.createApprovalType(inputApprovalType);
@@ -149,7 +157,8 @@ class ApprovalsIntegrationServiceTest {
     void shouldNotCreateLocalApprovalTypeAndThrowInternalServerError() {
         final ApprovalType inputApprovalType = new ApprovalType()
             .name(TEST_APPROVAL_TYPE_NAME)
-            .scope(ApprovalTypeScope.LOCAL.getValue());
+            .scope(ApprovalTypeScope.LOCAL.getValue())
+            .serviceAgreementId("externalServiceAgreementId");
 
         final PostScopedApprovalTypeRequest mappedApprovalTypeItem = new
             PostScopedApprovalTypeRequest().name(TEST_APPROVAL_TYPE_NAME).scope(ApprovalTypeScope.LOCAL);
@@ -158,6 +167,13 @@ class ApprovalsIntegrationServiceTest {
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
             INTERNAL_SERVER_ERROR,
             null, null, null);
+
+        final ServiceAgreement serviceAgreement = new ServiceAgreement()
+            .internalId(UUID.randomUUID().toString())
+            .externalId(UUID.randomUUID().toString());
+
+        when(accessGroupService.getServiceAgreementByExternalId(anyString()))
+            .thenReturn(Mono.just(serviceAgreement));
 
         when(approvalTypesApi.postScopedApprovalType(mappedApprovalTypeItem)).thenReturn(
             Mono.error(webClientException));
