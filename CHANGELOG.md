@@ -19,10 +19,19 @@ All notable changes to this project will be documented in this file.
 - Added CustomerAccessGroupSaga
 - Updated LegalEntityV2Saga to include CustomerAccessGroup assign
 - Updated ServiceAgreementV2Saga to include CustomerAccessGroup assign
-
+- New properties added to enable CAG ingestion with bootstrap (false by default):
+```properties
+backbase.stream.customer-access-groups.enabled=true|false
+backbase.bootstrap.ingestions.cag.enabled=true|false
+```
 ## [7.4.0](https://github.com/Backbase/stream-services/compare/7.3.0...7.4.0)
 ### Changed
-- Add concurrency for job role ingestion
+- Add concurrency for job role ingestion 
+- New properties for concurrency for job roles ingestion (default values are 1):    
+```properties
+backbase.stream.access.control.concurrency=1
+backbase.stream.legalentity.sink.concurrency=1
+```
 
 ## [7.3.0](https://github.com/Backbase/stream-services/compare/7.2.0...7.3.0)
 ### Changed
