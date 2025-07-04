@@ -4,8 +4,9 @@ import com.backbase.dbs.approval.api.service.v2.ApprovalTypeAssignmentsApi;
 import com.backbase.dbs.approval.api.service.v2.ApprovalTypesApi;
 import com.backbase.dbs.approval.api.service.v2.PoliciesApi;
 import com.backbase.dbs.approval.api.service.v2.PolicyAssignmentsApi;
+import com.backbase.dbs.approval.api.service.v2.model.ApprovalTypeScope;
+import com.backbase.dbs.approval.api.service.v2.model.PolicyScope;
 import com.backbase.dbs.approval.api.service.v2.model.PostApprovalTypeResponse;
-import com.backbase.dbs.approval.api.service.v2.model.PostPolicyResponse;
 import com.backbase.dbs.approval.api.service.v2.model.PostPolicyServiceApiResponse;
 import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.Policy;
@@ -13,6 +14,7 @@ import com.backbase.stream.approval.model.PolicyAssignment;
 import com.backbase.stream.exceptions.ApprovalTypeException;
 import com.backbase.stream.exceptions.PolicyAssignmentException;
 import com.backbase.stream.exceptions.PolicyException;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.mapper.ApprovalMapper;
 import com.backbase.stream.mapper.PolicyMapper;
 import java.util.Objects;
@@ -37,19 +39,21 @@ public class ApprovalsIntegrationService {
     private final ApprovalTypeAssignmentsApi approvalTypeAssignmentsApi;
     private final PoliciesApi policiesApi;
     private final PolicyAssignmentsApi policyAssignmentsApi;
+    private final AccessGroupService accessGroupService;
 
     private static final String CREATE_APPROVAL_POLICY_LOG_MESSAGE = "Created approval policy: '{}' with identifier: [{}].";
 
     public Mono<ApprovalType> createApprovalType(ApprovalType approvalType) {
-        Mono<PostApprovalTypeResponse> apiCallMono;
-
-        if (ObjectUtils.isEmpty(approvalType.getScope())) {
-            apiCallMono = approvalTypesApi.postApprovalType(approvalMapper.mapApprovalType(approvalType));
-        } else {
-            apiCallMono = approvalTypesApi.postScopedApprovalType(approvalMapper.mapScopedApprovalType(approvalType));
+        if (!ObjectUtils.isEmpty(approvalType.getScope()) &&
+            ApprovalTypeScope.LOCAL.getValue().equals(approvalType.getScope())) {
+            String serviceAgreementInternalId = accessGroupService.getServiceAgreementByExternalId(
+                    approvalType.getServiceAgreementId())
+                .map(ServiceAgreement::getInternalId)
+                .block();
+            approvalType.setServiceAgreementId(serviceAgreementInternalId);
         }
 
-        return apiCallMono
+        return approvalTypesApi.postScopedApprovalType(approvalMapper.mapScopedApprovalType(approvalType))
             .map(PostApprovalTypeResponse::getApprovalType)
             .map(at -> {
                 String id = at.getId();
@@ -64,35 +68,27 @@ public class ApprovalsIntegrationService {
     }
 
     public Mono<Policy> createPolicy(Policy policy) {
-        Mono<Policy> createdPolicyMono;
-
-        if (ObjectUtils.isEmpty(policy.getScope())) {
-            createdPolicyMono = policiesApi.postPolicy(policyMapper.mapPolicy(policy))
-                .map(PostPolicyResponse::getPolicy)
-                .map(at -> {
-                    String id = at.getId();
-                    log.info(CREATE_APPROVAL_POLICY_LOG_MESSAGE, at.getName(), id);
-                    policy.setInternalId(id);
-                    return policy;
-                });
-        } else {
-            createdPolicyMono = policiesApi.postScopedPolicy(policyMapper.mapScopedPolicy(policy))
-                .map(PostPolicyServiceApiResponse::getPolicy)
-                .map(at -> {
-                    String id = at.getId();
-                    log.info(CREATE_APPROVAL_POLICY_LOG_MESSAGE, at.getName(), id);
-                    policy.setInternalId(id);
-                    return policy;
-                });
+        if (!ObjectUtils.isEmpty(policy.getScope()) && PolicyScope.LOCAL.getValue().equals(policy.getScope())) {
+            String serviceAgreementInternalId = accessGroupService.getServiceAgreementByExternalId(
+                    policy.getServiceAgreementId())
+                .map(ServiceAgreement::getInternalId)
+                .block();
+            policy.setServiceAgreementId(serviceAgreementInternalId);
         }
 
-        return createdPolicyMono
+        return policiesApi.postScopedPolicy(policyMapper.mapScopedPolicy(policy))
+            .map(PostPolicyServiceApiResponse::getPolicy)
+            .map(at -> {
+                String id = at.getId();
+                log.info(CREATE_APPROVAL_POLICY_LOG_MESSAGE, at.getName(), id);
+                policy.setInternalId(id);
+                return policy;
+            })
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .onErrorResume(WebClientResponseException.class, exception ->
                 Mono.error(new PolicyException(policy, "Failed to create Policy", exception)))
             .onErrorStop();
     }
-
 
     public Mono<PolicyAssignment> assignPolicies(PolicyAssignment policyAssignment) {
         return policyAssignmentsApi
