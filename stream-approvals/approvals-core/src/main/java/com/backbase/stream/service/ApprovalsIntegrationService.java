@@ -4,6 +4,7 @@ import com.backbase.dbs.approval.api.service.v2.ApprovalTypeAssignmentsApi;
 import com.backbase.dbs.approval.api.service.v2.ApprovalTypesApi;
 import com.backbase.dbs.approval.api.service.v2.PoliciesApi;
 import com.backbase.dbs.approval.api.service.v2.PolicyAssignmentsApi;
+import com.backbase.dbs.approval.api.service.v2.model.ApprovalTypeScope;
 import com.backbase.dbs.approval.api.service.v2.model.PolicyScope;
 import com.backbase.dbs.approval.api.service.v2.model.PostApprovalTypeResponse;
 import com.backbase.dbs.approval.api.service.v2.model.PostPolicyServiceApiResponse;
@@ -43,6 +44,15 @@ public class ApprovalsIntegrationService {
     private static final String CREATE_APPROVAL_POLICY_LOG_MESSAGE = "Created approval policy: '{}' with identifier: [{}].";
 
     public Mono<ApprovalType> createApprovalType(ApprovalType approvalType) {
+        if (!ObjectUtils.isEmpty(approvalType.getScope()) &&
+            ApprovalTypeScope.LOCAL.getValue().equals(approvalType.getScope())) {
+            String serviceAgreementInternalId = accessGroupService.getServiceAgreementByExternalId(
+                    approvalType.getServiceAgreementId())
+                .map(ServiceAgreement::getInternalId)
+                .block();
+            approvalType.setServiceAgreementId(serviceAgreementInternalId);
+        }
+
         return approvalTypesApi.postScopedApprovalType(approvalMapper.mapScopedApprovalType(approvalType))
             .map(PostApprovalTypeResponse::getApprovalType)
             .map(at -> {

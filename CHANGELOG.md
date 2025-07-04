@@ -3,9 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [7.7.0](https://github.com/Backbase/stream-services/compare/7.6.0...7.7.0)
 ### Changed
-- Add new logic for create approval policy to extract internal service agreement id by external service agreement id
+- Add new logic for create approval policy and type to extract internal service agreement id by external service agreement id
 - Replace usages of the old create approval policy and type endpoints with the new improved ones
 - Unit tests have been updated accordingly
+- Add new property for approval type model - serviceAgreementId
 
 ## [7.6.0](https://github.com/Backbase/stream-services/compare/7.5.0...7.6.0)
 ### Changed
