@@ -1,6 +1,5 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.dbs.approval.api.service.v2.model.PostPolicyRequest;
 import com.backbase.dbs.approval.api.service.v2.model.PostPolicyServiceApiRequest;
 import com.backbase.dbs.approval.api.service.v2.model.PresentationPostPolicyAssignmentBulkRequest;
 import com.backbase.stream.approval.model.Policy;
@@ -15,8 +14,6 @@ import org.mapstruct.MappingTarget;
 
 @Mapper
 public interface PolicyMapper {
-
-    PostPolicyRequest mapPolicy(Policy policy);
 
     PostPolicyServiceApiRequest mapScopedPolicy(Policy policy);
 

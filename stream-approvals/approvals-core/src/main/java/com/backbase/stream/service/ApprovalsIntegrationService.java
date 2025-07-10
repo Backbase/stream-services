@@ -4,8 +4,6 @@ import com.backbase.dbs.approval.api.service.v2.ApprovalTypeAssignmentsApi;
 import com.backbase.dbs.approval.api.service.v2.ApprovalTypesApi;
 import com.backbase.dbs.approval.api.service.v2.PoliciesApi;
 import com.backbase.dbs.approval.api.service.v2.PolicyAssignmentsApi;
-import com.backbase.dbs.approval.api.service.v2.model.ApprovalTypeScope;
-import com.backbase.dbs.approval.api.service.v2.model.PolicyScope;
 import com.backbase.dbs.approval.api.service.v2.model.PostApprovalTypeResponse;
 import com.backbase.dbs.approval.api.service.v2.model.PostPolicyServiceApiResponse;
 import com.backbase.stream.approval.model.ApprovalType;
@@ -44,8 +42,7 @@ public class ApprovalsIntegrationService {
     private static final String CREATE_APPROVAL_POLICY_LOG_MESSAGE = "Created approval policy: '{}' with identifier: [{}].";
 
     public Mono<ApprovalType> createApprovalType(ApprovalType approvalType) {
-        if (!ObjectUtils.isEmpty(approvalType.getScope()) &&
-            ApprovalTypeScope.LOCAL.getValue().equals(approvalType.getScope())) {
+        if (!ObjectUtils.isEmpty(approvalType.getServiceAgreementId())) {
             String serviceAgreementInternalId = accessGroupService.getServiceAgreementByExternalId(
                     approvalType.getServiceAgreementId())
                 .map(ServiceAgreement::getInternalId)
@@ -68,7 +65,7 @@ public class ApprovalsIntegrationService {
     }
 
     public Mono<Policy> createPolicy(Policy policy) {
-        if (!ObjectUtils.isEmpty(policy.getScope()) && PolicyScope.LOCAL.getValue().equals(policy.getScope())) {
+        if (!ObjectUtils.isEmpty(policy.getServiceAgreementId())) {
             String serviceAgreementInternalId = accessGroupService.getServiceAgreementByExternalId(
                     policy.getServiceAgreementId())
                 .map(ServiceAgreement::getInternalId)
