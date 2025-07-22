@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.http.HttpRequest;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
@@ -42,21 +41,23 @@ public class ApprovalsIntegrationService {
     private static final String CREATE_APPROVAL_POLICY_LOG_MESSAGE = "Created approval policy: '{}' with identifier: [{}].";
 
     public Mono<ApprovalType> createApprovalType(ApprovalType approvalType) {
-        if (!ObjectUtils.isEmpty(approvalType.getServiceAgreementId())) {
-            String serviceAgreementInternalId = accessGroupService.getServiceAgreementByExternalId(
-                    approvalType.getServiceAgreementId())
-                .map(ServiceAgreement::getInternalId)
-                .block();
-            approvalType.setServiceAgreementId(serviceAgreementInternalId);
-        }
-
-        return approvalTypesApi.postScopedApprovalType(approvalMapper.mapScopedApprovalType(approvalType))
-            .map(PostApprovalTypeResponse::getApprovalType)
-            .map(at -> {
-                String id = at.getId();
-                log.info("Created approval type: {} with identifier: [{}].", at.getName(), id);
-                approvalType.setInternalId(id);
-                return approvalType;
+        return Mono.justOrEmpty(approvalType.getServiceAgreementId())
+            .flatMap(serviceAgreementId ->
+                accessGroupService.getServiceAgreementByExternalId(serviceAgreementId)
+                    .map(ServiceAgreement::getInternalId)
+                    .defaultIfEmpty(serviceAgreementId)
+            )
+            .switchIfEmpty(Mono.just(approvalType.getServiceAgreementId()))
+            .flatMap(internalId -> {
+                approvalType.setServiceAgreementId(internalId);
+                return approvalTypesApi.postScopedApprovalType(approvalMapper.mapScopedApprovalType(approvalType))
+                    .map(PostApprovalTypeResponse::getApprovalType)
+                    .map(at -> {
+                        String id = at.getId();
+                        log.info("Created approval type: {} with identifier: [{}].", at.getName(), id);
+                        approvalType.setInternalId(id);
+                        return approvalType;
+                    });
             })
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .onErrorResume(WebClientResponseException.class, exception ->
@@ -65,21 +66,23 @@ public class ApprovalsIntegrationService {
     }
 
     public Mono<Policy> createPolicy(Policy policy) {
-        if (!ObjectUtils.isEmpty(policy.getServiceAgreementId())) {
-            String serviceAgreementInternalId = accessGroupService.getServiceAgreementByExternalId(
-                    policy.getServiceAgreementId())
-                .map(ServiceAgreement::getInternalId)
-                .block();
-            policy.setServiceAgreementId(serviceAgreementInternalId);
-        }
-
-        return policiesApi.postScopedPolicy(policyMapper.mapScopedPolicy(policy))
-            .map(PostPolicyServiceApiResponse::getPolicy)
-            .map(at -> {
-                String id = at.getId();
-                log.info(CREATE_APPROVAL_POLICY_LOG_MESSAGE, at.getName(), id);
-                policy.setInternalId(id);
-                return policy;
+        return Mono.justOrEmpty(policy.getServiceAgreementId())
+            .flatMap(serviceAgreementId ->
+                accessGroupService.getServiceAgreementByExternalId(serviceAgreementId)
+                    .map(ServiceAgreement::getInternalId)
+                    .defaultIfEmpty(serviceAgreementId)
+            )
+            .switchIfEmpty(Mono.just(policy.getServiceAgreementId()))
+            .flatMap(internalId -> {
+                policy.setServiceAgreementId(internalId);
+                return policiesApi.postScopedPolicy(policyMapper.mapScopedPolicy(policy))
+                    .map(PostPolicyServiceApiResponse::getPolicy)
+                    .map(at -> {
+                        String id = at.getId();
+                        log.info(CREATE_APPROVAL_POLICY_LOG_MESSAGE, at.getName(), id);
+                        policy.setInternalId(id);
+                        return policy;
+                    });
             })
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .onErrorResume(WebClientResponseException.class, exception ->
