@@ -59,32 +59,20 @@ class ApprovalsIntegrationServiceTest {
 
     @Test
     void shouldCreateSystemApprovalType() {
-        final String serviceAgreementInternalId = UUID.randomUUID().toString();
-        final String serviceAgreementExternalId = UUID.randomUUID().toString();
-
         final ApprovalType inputApprovalType = new ApprovalType()
             .name(TEST_APPROVAL_TYPE_NAME)
             .scope(ApprovalTypeScope.SYSTEM.getValue())
-            .rank(new BigDecimal(1))
-            .serviceAgreementId(serviceAgreementExternalId);
+            .rank(new BigDecimal(1));
 
         final PostScopedApprovalTypeRequest mappedApprovalTypeItem = new PostScopedApprovalTypeRequest()
             .name(TEST_APPROVAL_TYPE_NAME)
             .scope(ApprovalTypeScope.SYSTEM)
-            .rank(1)
-            .creatorServiceAgreementId(serviceAgreementInternalId);
+            .rank(1);
 
         final PostApprovalTypeResponse apiResponse = new PostApprovalTypeResponse()
             .approvalType(new ApprovalTypeDto()
-                .name(TEST_APPROVAL_TYPE_NAME)
-                .creatorServiceAgreementId(serviceAgreementInternalId));
+                .name(TEST_APPROVAL_TYPE_NAME));
 
-        final ServiceAgreement serviceAgreement = new ServiceAgreement()
-            .internalId(serviceAgreementInternalId)
-            .externalId(serviceAgreementExternalId);
-
-        when(accessGroupService.getServiceAgreementByExternalId(anyString()))
-            .thenReturn(Mono.just(serviceAgreement));
         when(approvalTypesApi.postScopedApprovalType(mappedApprovalTypeItem)).thenReturn(Mono.just(apiResponse));
 
         final Mono<ApprovalType> resultMono = approvalsIntegrationService.createApprovalType(inputApprovalType);
@@ -146,28 +134,17 @@ class ApprovalsIntegrationServiceTest {
 
     @Test
     void shouldNotCreateSystemApprovalTypeAndThrowBadRequest() {
-        final String serviceAgreementInternalId = UUID.randomUUID().toString();
-        final String serviceAgreementExternalId = UUID.randomUUID().toString();
-
         final ApprovalType inputApprovalType = new ApprovalType()
-            .name(TEST_APPROVAL_TYPE_NAME)
-            .serviceAgreementId(serviceAgreementExternalId);
+            .name(TEST_APPROVAL_TYPE_NAME);
 
         final PostScopedApprovalTypeRequest mappedApprovalTypeItem = new PostScopedApprovalTypeRequest()
-            .name(TEST_APPROVAL_TYPE_NAME)
-            .creatorServiceAgreementId(serviceAgreementInternalId);
+            .name(TEST_APPROVAL_TYPE_NAME);
 
         final WebClientResponseException webClientException = new WebClientResponseException(
             HttpStatus.BAD_REQUEST.value(),
             BAD_REQUEST,
             null, null, null);
 
-        final ServiceAgreement serviceAgreement = new ServiceAgreement()
-            .internalId(serviceAgreementInternalId)
-            .externalId(serviceAgreementExternalId);
-
-        when(accessGroupService.getServiceAgreementByExternalId(anyString()))
-            .thenReturn(Mono.just(serviceAgreement));
         when(approvalTypesApi.postScopedApprovalType(mappedApprovalTypeItem)).thenReturn(
             Mono.error(webClientException));
 
@@ -229,31 +206,19 @@ class ApprovalsIntegrationServiceTest {
 
     @Test
     void shouldCreateSystemPolicy() {
-        final String serviceAgreementInternalId = UUID.randomUUID().toString();
-        final String serviceAgreementExternalId = UUID.randomUUID().toString();
-
         final Policy inputPolicy = new Policy()
             .name(TEST_POLICY_NAME)
-            .scope(ApprovalTypeScope.SYSTEM.getValue())
-            .serviceAgreementId(serviceAgreementExternalId);
+            .scope(ApprovalTypeScope.SYSTEM.getValue());
 
         final PostPolicyServiceApiRequest expectedMappedRequest = new PostPolicyServiceApiRequest()
             .name(TEST_POLICY_NAME)
-            .scope(PolicyScope.SYSTEM)
-            .serviceAgreementId(serviceAgreementInternalId);
+            .scope(PolicyScope.SYSTEM);
 
         final PostPolicyServiceApiResponse apiResponse = new PostPolicyServiceApiResponse()
             .policy(new PolicyServiceApiResponseDto()
                 .name(TEST_POLICY_NAME)
-                .scope(PolicyScope.SYSTEM)
-                .serviceAgreementId(serviceAgreementInternalId));
+                .scope(PolicyScope.SYSTEM));
 
-        final ServiceAgreement serviceAgreement = new ServiceAgreement()
-            .internalId(serviceAgreementInternalId)
-            .externalId(serviceAgreementExternalId);
-
-        when(accessGroupService.getServiceAgreementByExternalId(anyString()))
-            .thenReturn(Mono.just(serviceAgreement));
         when(policiesApi.postScopedPolicy(expectedMappedRequest)).thenReturn(Mono.just(apiResponse));
 
         final Mono<Policy> resultMono = approvalsIntegrationService.createPolicy(inputPolicy);
@@ -314,28 +279,17 @@ class ApprovalsIntegrationServiceTest {
 
     @Test
     void shouldNotCreateSystemPolicyAndThrowBadRequest() {
-        final String serviceAgreementInternalId = UUID.randomUUID().toString();
-        final String serviceAgreementExternalId = UUID.randomUUID().toString();
-
         final Policy inputPolicy = new Policy()
-            .name(TEST_POLICY_NAME)
-            .serviceAgreementId(serviceAgreementExternalId);
+            .name(TEST_POLICY_NAME);
 
         final PostPolicyServiceApiRequest expectedMappedRequest = new PostPolicyServiceApiRequest()
-            .name(TEST_POLICY_NAME)
-            .serviceAgreementId(serviceAgreementInternalId);
+            .name(TEST_POLICY_NAME);
 
         final WebClientResponseException webClientException = new WebClientResponseException(
             HttpStatus.BAD_REQUEST.value(),
             BAD_REQUEST,
             null, null, null);
 
-        final ServiceAgreement serviceAgreement = new ServiceAgreement()
-            .internalId(serviceAgreementInternalId)
-            .externalId(serviceAgreementExternalId);
-
-        when(accessGroupService.getServiceAgreementByExternalId(serviceAgreementExternalId))
-            .thenReturn(Mono.just(serviceAgreement));
         when(policiesApi.postScopedPolicy(expectedMappedRequest)).thenReturn(Mono.error(webClientException));
 
         final Mono<Policy> resultMono = approvalsIntegrationService.createPolicy(inputPolicy);
