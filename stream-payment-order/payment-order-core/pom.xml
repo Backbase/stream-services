@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-payment-order</artifactId>
-        <version>7.6.0</version>
+        <version>7.7.0</version>
     </parent>
 
     <artifactId>payment-order-core</artifactId>

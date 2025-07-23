@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-starter</artifactId>
-        <version>7.6.0</version>
+        <version>7.7.0</version>
         <relativePath>../../stream-starter</relativePath>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-task-starter-parent</artifactId>
-    <version>7.6.0</version>
+    <version>7.7.0</version>
     <packaging>pom</packaging>
     <name>Stream :: SDK :: Task Starter</name>
     <description>Parent for Stream Executable Tasks</description>
