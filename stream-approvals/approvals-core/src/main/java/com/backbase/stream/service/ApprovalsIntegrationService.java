@@ -38,13 +38,12 @@ public class ApprovalsIntegrationService {
     private final PolicyAssignmentsApi policyAssignmentsApi;
     private final AccessGroupService accessGroupService;
 
-    private static final String CREATE_APPROVAL_POLICY_LOG_MESSAGE = "Created approval policy: '{}' with identifier: [{}].";
-
     public Mono<ApprovalType> createApprovalType(ApprovalType approvalType) {
         return Mono.just(approvalType)
             .flatMap(inputApprovalType -> {
                 if (inputApprovalType.getServiceAgreementId() == null) {
-                    return approvalTypesApi.postScopedApprovalType(approvalMapper.mapScopedApprovalType(inputApprovalType))
+                    return approvalTypesApi.postScopedApprovalType(
+                            approvalMapper.mapScopedApprovalType(inputApprovalType))
                         .map(createdApprovalType -> mapCreatedApprovalType(inputApprovalType, createdApprovalType));
                 } else {
                     return accessGroupService.getServiceAgreementByExternalId(inputApprovalType.getServiceAgreementId())
@@ -52,8 +51,10 @@ public class ApprovalsIntegrationService {
                         .defaultIfEmpty(inputApprovalType.getServiceAgreementId())
                         .flatMap(internalId -> {
                             inputApprovalType.setServiceAgreementId(internalId);
-                            return approvalTypesApi.postScopedApprovalType(approvalMapper.mapScopedApprovalType(inputApprovalType))
-                                .map(createdApprovalType -> mapCreatedApprovalType(inputApprovalType, createdApprovalType));
+                            return approvalTypesApi.postScopedApprovalType(
+                                    approvalMapper.mapScopedApprovalType(inputApprovalType))
+                                .map(createdApprovalType -> mapCreatedApprovalType(inputApprovalType,
+                                    createdApprovalType));
                         });
                 }
             })
@@ -63,7 +64,8 @@ public class ApprovalsIntegrationService {
             .onErrorStop();
     }
 
-    private ApprovalType mapCreatedApprovalType(ApprovalType inputApprovalType, PostApprovalTypeResponse createdApprovalTypeResponse) {
+    private ApprovalType mapCreatedApprovalType(ApprovalType inputApprovalType,
+        PostApprovalTypeResponse createdApprovalTypeResponse) {
         String id = createdApprovalTypeResponse.getApprovalType().getId();
         String name = createdApprovalTypeResponse.getApprovalType().getName();
         log.info("Created approval type: {} with identifier: [{}].", name, id);
@@ -99,7 +101,7 @@ public class ApprovalsIntegrationService {
     private Policy mapCreatedPolicy(Policy inputPolicy, PostPolicyServiceApiResponse createdPolicyResponse) {
         String id = createdPolicyResponse.getPolicy().getId();
         String name = createdPolicyResponse.getPolicy().getName();
-        log.info(CREATE_APPROVAL_POLICY_LOG_MESSAGE, name, id);
+        log.info("Created approval policy: '{}' with identifier: [{}].", name, id);
         inputPolicy.setInternalId(id);
         return inputPolicy;
     }
