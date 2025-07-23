@@ -7,6 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import com.backbase.dbs.approval.api.service.v2.model.ApprovalTypeScope;
+import com.backbase.dbs.approval.api.service.v2.model.PolicyScope;
 import com.backbase.stream.approval.model.Approval;
 import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.ApprovalTypeAssignmentItem;
@@ -71,9 +73,25 @@ class ApprovalSagaTest {
                 .name(APPROVAL_NAME)
                 .addPoliciesItem(new Policy(List.of(new PolicyLogicalItem().rank(BigDecimal.ONE)
                     .addItemsItem(new PolicyItem().approvalTypeName("Level A").numberOfApprovals(BigDecimal.ONE))),
-                    List.of()).scope("LOCAL").serviceAgreementId("internalId"))
+                    List.of()).scope(PolicyScope.LOCAL.getValue()).serviceAgreementId("internalId"))
                 .addApprovalTypesItem(
-                    new ApprovalType().rank(BigDecimal.ONE).name("Level A").description("Level A Approvals").scope("LOCAL"))
+                    new ApprovalType().rank(BigDecimal.ONE).name("Level A").description("Level A Approvals")
+                        .scope(ApprovalTypeScope.LOCAL.getValue()))
+                .addPolicyAssignmentsItem(new PolicyAssignment().externalServiceAgreementId("externalId")
+                    .addApprovalTypeAssignmentsItem(
+                        new ApprovalTypeAssignmentItem().approvalTypeName("Level A").jobProfileName("All"))
+                    .addPolicyAssignmentItemsItem(new PolicyAssignmentItem().externalServiceAgreementId("externalId")
+                        .addFunctionsItem("Assign Users")
+                        .addBoundsItem(new IntegrationPolicyAssignmentRequestBounds("id").policyName("Dual Control"))
+                        .addBoundsItem(new IntegrationPolicyAssignmentRequestBounds(null).policyName("Control"))))),
+            Arguments.of(new Approval()
+                .name(APPROVAL_NAME)
+                .addPoliciesItem(new Policy(List.of(new PolicyLogicalItem().rank(BigDecimal.ONE)
+                    .addItemsItem(new PolicyItem().approvalTypeName("Level A").numberOfApprovals(BigDecimal.ONE))),
+                    List.of()).scope(PolicyScope.SYSTEM.getValue()))
+                .addApprovalTypesItem(
+                    new ApprovalType().rank(BigDecimal.ONE).name("Level A").description("Level A Approvals").scope(
+                        ApprovalTypeScope.SYSTEM.getValue()))
                 .addPolicyAssignmentsItem(new PolicyAssignment().externalServiceAgreementId("externalId")
                     .addApprovalTypeAssignmentsItem(
                         new ApprovalTypeAssignmentItem().approvalTypeName("Level A").jobProfileName("All"))

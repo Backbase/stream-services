@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [7.7.0](https://github.com/Backbase/stream-services/compare/7.6.0...7.7.0)
+### Changed
+- Add new logic for create approval policy and type to extract internal service agreement id by external service agreement id
+- Replace usages of the old create approval policy and type endpoints with the new improved ones
+- Unit tests have been updated accordingly
+- Add new property for approval type model - serviceAgreementId
+
 ## [7.6.0](https://github.com/Backbase/stream-services/compare/7.5.0...7.6.0)
 ### Changed
 - Extended stream-approvals openapi.yaml in case of 'scope' property for the Policy and ApprovalType
@@ -12,10 +19,19 @@ All notable changes to this project will be documented in this file.
 - Added CustomerAccessGroupSaga
 - Updated LegalEntityV2Saga to include CustomerAccessGroup assign
 - Updated ServiceAgreementV2Saga to include CustomerAccessGroup assign
-
+- New properties added to enable CAG ingestion with bootstrap (false by default):
+```properties
+backbase.stream.customer-access-groups.enabled=true|false
+backbase.bootstrap.ingestions.cag.enabled=true|false
+```
 ## [7.4.0](https://github.com/Backbase/stream-services/compare/7.3.0...7.4.0)
 ### Changed
-- Add concurrency for job role ingestion
+- Add concurrency for job role ingestion 
+- New properties for concurrency for job roles ingestion (default values are 1):    
+```properties
+backbase.stream.access.control.concurrency=1
+backbase.stream.legalentity.sink.concurrency=1
+```
 
 ## [7.3.0](https://github.com/Backbase/stream-services/compare/7.2.0...7.3.0)
 ### Changed
