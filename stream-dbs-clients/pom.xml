@@ -240,6 +240,7 @@
                 <artifactId>boat-maven-plugin</artifactId>
                 <version>0.17.62</version>
                 <executions>
+                    <!-- todo remove after migration -->
                     <execution>
                         <id>generate-accesscontrol-client-api-code</id>
                         <goals>
@@ -257,16 +258,112 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-accesscontrol-integration-api-code</id>
+                        <id>generate-accesscontrol-datagroup-service-api-v1-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v3*.yaml</inputSpec>
-                            <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v3</apiPackage>
-                            <modelPackage>com.backbase.dbs.accesscontrol.api.integration.v3.model</modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/access-control/data-group-service-api-v1.0.1.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.datagroup.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.datagroup.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-accesscontrol-functiongroup-service-api-v1-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/function-group-service-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.functiongroup.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.functiongroup.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-accesscontrol-legalentity-service-api-v1-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/legal-entity-service-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.legalentity.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.legalentity.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-accesscontrol-permissionset-service-api-v1-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/permission-set-service-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.permissionset.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.permissionset.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-accesscontrol-serviceagreement-service-api-v1-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/service-agreement-service-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.serviceagreement.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.serviceagreement.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-accesscontrol-usercontext-service-api-v1-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/user-context-service-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.usercontext.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.usercontext.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-accesscontrol-permissioncheck-service-api-v1-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/permission-check-service-api-v1.7.1.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.permissioncheck.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.permissioncheck.api.service.v1.model</modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
