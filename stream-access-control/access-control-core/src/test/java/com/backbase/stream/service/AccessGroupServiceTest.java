@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
+import com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup;
 import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
@@ -59,7 +60,6 @@ import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CurrentAccount;
 import com.backbase.stream.legalentity.model.JobProfileUser;
-import com.backbase.stream.legalentity.model.JobRole;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityType;
@@ -80,6 +80,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
@@ -650,12 +651,12 @@ class AccessGroupServiceTest {
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
             List.of(new BaseProductGroup().name("Test product group"))));
 
-        DataGroupItem dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
+        DataGroup dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
             "Repository Group Template Custom", "template-custom");
-        DataGroupItem dataGroupItemEngagementTemplateCustom = buildDataGroupItem(
+        DataGroup dataGroupItemEngagementTemplateCustom = buildDataGroupItem(
             "Repository Group Engagement Template Custom",
             "Repository Group Engagement Template Custom", "engagement-template-custom");
-        DataGroupItem dataGroupItemEngagementTemplateNotification = buildDataGroupItem(
+        DataGroup dataGroupItemEngagementTemplateNotification = buildDataGroupItem(
             "Repository Group Engagement Template Notification",
             "Repository Group Engagement Template Notification", "engagement-template-notification");
 
@@ -691,11 +692,11 @@ class AccessGroupServiceTest {
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
             List.of(new BaseProductGroup().name("Test product group"))));
 
-        DataGroupItem dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
+        DataGroup dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
             "Repository Group Template Custom");
-        DataGroupItem dataGroupItemEngagementTemplateCustom = buildDataGroupItem("Repository Group Engagement Template Custom",
+        DataGroup dataGroupItemEngagementTemplateCustom = buildDataGroupItem("Repository Group Engagement Template Custom",
             "Repository Group Engagement Template Custom");
-        DataGroupItem dataGroupItemEngagementTemplateNotification = buildDataGroupItem("Repository Group Engagement Template Notification",
+        DataGroup dataGroupItemEngagementTemplateNotification = buildDataGroupItem("Repository Group Engagement Template Notification",
             "Repository Group Engagement Template Notification");
 
         BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
@@ -738,11 +739,11 @@ class AccessGroupServiceTest {
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
             List.of(new BaseProductGroup().name("Test product group"))));
 
-        DataGroupItem dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
+        DataGroup dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
             "Repository Group Template Custom", "template-custom-test");
-        DataGroupItem dataGroupItemEngagementTemplateCustom = buildDataGroupItem("Repository Group Engagement Template Custom",
+        DataGroup dataGroupItemEngagementTemplateCustom = buildDataGroupItem("Repository Group Engagement Template Custom",
             "Repository Group Engagement Template Custom", "engagement-template-custom-test");
-        DataGroupItem dataGroupItemEngagementTemplateNotification = buildDataGroupItem("Repository Group Engagement Template Notification",
+        DataGroup dataGroupItemEngagementTemplateNotification = buildDataGroupItem("Repository Group Engagement Template Notification",
             "Repository Group Engagement Template Notification", "engagement-template-notification-test");
 
         BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
@@ -788,9 +789,9 @@ class AccessGroupServiceTest {
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
             List.of(new BaseProductGroup().name("Test product group"))));
 
-        DataGroupItem existingDGroupItemCustom = buildDataGroupItem("Custom data group item",
+        DataGroup existingDGroupItemCustom = buildDataGroupItem("Custom data group item",
             "custom desc", "custom-dg-item1", "custom-dg-item2");
-        DataGroupItem existingDGroupItemRepository = buildDataGroupItem("Repository data group item",
+        DataGroup existingDGroupItemRepository = buildDataGroupItem("Repository data group item",
             "rep desc", "repository-dg-item1");
 
         BaseProductGroup upsertProductGroupCustom = buildBaseProductGroup("Custom data group item",
@@ -830,7 +831,7 @@ class AccessGroupServiceTest {
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
             List.of(new BaseProductGroup().name("Test product group"))));
 
-        DataGroupItem existingDGroup = new DataGroupItem().id("dgId1").name("arrangement1")
+        DataGroup existingDGroup = new DataGroup().id("dgId1").name("arrangement1")
             .addItemsItem("debitAccountInId").serviceAgreementId("saInId");
 
         BaseProductGroup upsertProductGroupArrangement = new BaseProductGroup()
@@ -856,7 +857,7 @@ class AccessGroupServiceTest {
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
             List.of(new BaseProductGroup().name("Test product group"))));
 
-        DataGroupItem existingDGroup = new DataGroupItem().id("debitAccountInId1").name("arrangement1")
+        DataGroup existingDGroup = new DataGroup().id("debitAccountInId1").name("arrangement1")
             .addItemsItem("debitAccountExId1").serviceAgreementId("saInId");
 
         when(dataGroupsApi.putDataGroupItemsUpdate(any()))
@@ -892,7 +893,7 @@ class AccessGroupServiceTest {
             .serviceAgreement(new ServiceAgreement())
             .productGroups(List.of(new BaseProductGroup().name("Test product group"))));
 
-        DataGroupItem existingDGroupItemCustom = buildDataGroupItem("Custom data group item",
+        DataGroup existingDGroupItemCustom = buildDataGroupItem("Custom data group item",
             "custom desc", "custom-dg-item1");
 
         BaseProductGroup upsertProductGroupCustom = buildBaseProductGroup("Custom data group item",
@@ -1061,10 +1062,11 @@ class AccessGroupServiceTest {
     @Test
     void deleteFunctionGroupsForServiceAgreement_noneTypeConfigured_doesNotInvokeDeletion() {
         String internalSaId = "sa-internal-id";
+        String externalSaId = "external-id";
 
         when(configurationProperties.getFunctionGroupItemType()).thenReturn(DeletionProperties.FunctionGroupItemType.NONE);
 
-        subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
+        subject.deleteFunctionGroupsForServiceAgreement(internalSaId, externalSaId).block();
 
         verify(functionGroupsApi, times(0)).postFunctionGroupsDelete(any());
     }
@@ -1072,6 +1074,7 @@ class AccessGroupServiceTest {
     @Test
     void deleteFunctionGroupsForServiceAgreement_templateTypeConfigured_deletesOnlyTemplateType() {
         String internalSaId = "sa-internal-id";
+        String externalSaId = "external-id";
 
         FunctionGroupItem systemFunctionGroup = new FunctionGroupItem().id("system-group-id-1")
             .name("SYSTEM_FUNCTION_GROUP")
@@ -1090,7 +1093,7 @@ class AccessGroupServiceTest {
 
         when(configurationProperties.getFunctionGroupItemType()).thenReturn(DeletionProperties.FunctionGroupItemType.TEMPLATE);
 
-        subject.deleteFunctionGroupsForServiceAgreement(internalSaId).block();
+        subject.deleteFunctionGroupsForServiceAgreement(internalSaId, externalSaId).block();
 
         ArgumentCaptor<List<PresentationIdentifier>> captor = ArgumentCaptor.forClass(
             List.class);
@@ -1176,11 +1179,11 @@ class AccessGroupServiceTest {
             .validUntilTime(validUntilTime);
     }
 
-    private DataGroupItem buildDataGroupItem(String name, String description, String... items) {
-        return new DataGroupItem()
+    private DataGroup buildDataGroupItem(String name, String description, String... items) {
+        return new DataGroup()
             .name(name)
             .description(description)
-            .items(List.of(items));
+            .items(Set.of(items));
     }
 
     private BaseProductGroup buildBaseProductGroup(String name, String description,

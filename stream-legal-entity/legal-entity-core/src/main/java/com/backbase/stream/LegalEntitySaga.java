@@ -388,7 +388,7 @@ public class LegalEntitySaga extends HelperProcessor implements StreamTaskExecut
                 ServiceAgreement sa = data.getT1();
                 LegalEntity le = data.getT2();
                 List<String> userIds = data.getT3();
-                return accessGroupService.deleteFunctionGroupsForServiceAgreement(sa.getInternalId())
+                return accessGroupService.deleteFunctionGroupsForServiceAgreement(sa.getInternalId(), sa.getExternalId())
                     .then(accessGroupService.deleteAdmins(sa))
                     .then(userService.archiveUsers(le.getInternalId(), userIds))
                     .then(legalEntityService.deleteLegalEntity(legalEntityExternalId));

@@ -370,6 +370,38 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>generate-accesscontrol-datagroup-integration-api-v1-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/data-group-integration-inbound-api-v1.0.1.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.datagroup.api.integration.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.datagroup.api.integration.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-accesscontrol-functiongroup-integration-api-v1-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/function-group-integration-inbound-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.functiongroup.api.integration.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.functiongroup.api.integration.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>generate-customer-access-group-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>

@@ -1,5 +1,6 @@
 package com.backbase.stream.product;
 
+import com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.stream.legalentity.model.AvailableBalance;
@@ -91,8 +92,8 @@ public class MockUtil {
         .referenceJobRoleNames(List.of("someJR"));
   }
 
-  public static DataGroupItem buildDataGroupItem() {
-    return new DataGroupItem().id("someDgItemExId1In").name("somePgName");
+  public static DataGroup buildDataGroupItem() {
+    return new DataGroup().id("someDgItemExId1In").name("somePgName");
   }
 
   public static FunctionGroupItem buildFunctionGroupItem() {

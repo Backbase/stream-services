@@ -1,10 +1,10 @@
 package com.backbase.stream.mapper;
 
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupCreateRequest;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.Permission;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIngestFunctionGroup;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermission;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermissionFunctionGroupUpdate;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItemQuery;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -51,7 +52,7 @@ public interface AccessGroupMapper {
     @Mapping(defaultExpression = "java( new ArrayList<>() )", source = "users", target = "users")
     ParticipantIngest toPresentation(LegalEntityParticipant legalEntityParticipant);
 
-    PresentationIngestFunctionGroup toPresentation(JobRole referenceJobRole);
+    FunctionGroupCreateRequest toPresentation(JobRole referenceJobRole);
 
     @Mapping(source = "serviceAgreementId", target = "internalId")
     @Mapping(source = "serviceAgreementName", target = "name")
@@ -66,7 +67,7 @@ public interface AccessGroupMapper {
      * @param functionGroups defined function groups
      * @return mapped object
      */
-    default List<PresentationPermission> toPresentation(List<BusinessFunctionGroup> functionGroups) {
+    default List<Permission> toPresentation(List<BusinessFunctionGroup> functionGroups) {
         if (Objects.isNull(functionGroups)) {
             return Collections.emptyList();
         }
@@ -76,37 +77,46 @@ public interface AccessGroupMapper {
             .map(BusinessFunctionGroup::getFunctions)
             .flatMap(Collection::stream)
             .map(f -> {
-                PresentationPermission presentationPermission = new PresentationPermission();
-                presentationPermission.setFunctionId(f.getFunctionId());
-                f.getPrivileges().stream()
+                Set<String> privileges = f.getPrivileges().stream()
                     .filter(Objects::nonNull)
                     .map(Privilege::getPrivilege)
-                    .forEach(presentationPermission::addPrivilegesItem);
-
-                return presentationPermission;
+                    .collect(Collectors.toSet());
+                return new Permission()
+                    .businessFunctionName(f.getName())
+                    .resourceName(f.getResourceName())
+                    .privileges(privileges);
             }).collect(Collectors.toList());
     }
 
-    default List<PresentationPermissionFunctionGroupUpdate> toUpdate(List<BusinessFunctionGroup> functionGroups) {
+    default List<com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission> toUpdate(
+        List<BusinessFunctionGroup> functionGroups) {
         if (Objects.isNull(functionGroups)) {
             return Collections.emptyList();
         }
 
         return functionGroups.stream()
             .filter(Objects::nonNull)
-            .map(BusinessFunctionGroup::getFunctions)
+            .map(this::toUpdate)
+            .filter(Objects::nonNull)
             .flatMap(Collection::stream)
-            .map(f -> {
-                PresentationPermissionFunctionGroupUpdate presentationPermission
-                    = new PresentationPermissionFunctionGroupUpdate();
-                presentationPermission.functionName(f.getName());
-                f.getPrivileges().stream()
+            .collect(Collectors.toList());
+    }
+
+    default List<com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission> toUpdate(
+        BusinessFunctionGroup functionGroups) {
+        if (Objects.isNull(functionGroups)) {
+            return null;
+        }
+
+        return functionGroups.getFunctions().stream()
+            .map(f -> new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
+                .resourceName(f.getResourceName())
+                .businessFunctionName(f.getName())
+                .privileges(f.getPrivileges().stream()
                     .filter(Objects::nonNull)
                     .map(Privilege::getPrivilege)
-                    .forEach(presentationPermission::addPrivilegesItem);
-
-                return presentationPermission;
-            }).collect(Collectors.toList());
+                    .collect(Collectors.toSet())))
+            .collect(Collectors.toList());
     }
 
 }
