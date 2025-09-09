@@ -1,12 +1,12 @@
 package com.backbase.stream.product;
 
+import static com.backbase.stream.product.task.BatchProductIngestionMode.UPSERT;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
 import static java.util.stream.Collectors.toMap;
 
 import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
-import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -22,6 +22,7 @@ import com.backbase.stream.loan.LoansTask;
 import com.backbase.stream.product.configuration.ProductIngestionSagaConfigurationProperties;
 import com.backbase.stream.product.service.ArrangementService;
 import com.backbase.stream.product.task.BatchProductGroupTask;
+import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.product.utils.StreamUtils;
 import com.backbase.stream.service.AccessGroupService;
@@ -75,6 +76,22 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
                 streamTask.addHistory(batchProductGroup.getHistory());
                 return streamTask;
             });
+    }
+
+    public Mono<ProductGroupTask> process(ProductGroupTask streamTask, BatchProductIngestionMode ingestionMode) {
+
+        ProductGroup productGroup = streamTask.getProductGroup();
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
+        batchProductGroupTask.setIngestionMode(Optional.ofNullable(ingestionMode).orElse(UPSERT));
+        batchProductGroupTask.setBatchProductGroup(new BatchProductGroup()
+                .serviceAgreement(productGroup.getServiceAgreement())
+                .addProductGroupsItem(productGroup));
+
+        return process(batchProductGroupTask)
+                .map(batchProductGroup -> {
+                    streamTask.addHistory(batchProductGroup.getHistory());
+                    return streamTask;
+                });
     }
 
 
