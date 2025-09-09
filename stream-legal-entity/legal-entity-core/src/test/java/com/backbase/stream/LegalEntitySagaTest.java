@@ -509,7 +509,7 @@ class LegalEntitySagaTest {
         when(legalEntityService.createLegalEntity(any())).thenReturn(Mono.just(setuplegalEntity));
         when(accessGroupService.setupJobRole(any(), any(), any())).thenReturn(Mono.just(jobRole));
         when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
-        when(batchProductIngestionSaga.process(any(ProductGroupTask.class))).thenReturn(productGroupTaskMono);
+        when(batchProductIngestionSaga.process(any(ProductGroupTask.class),any())).thenReturn(productGroupTaskMono);
         when(legalEntitySagaConfigurationProperties.getServiceAgreementPurposes()).thenReturn(
             Set.of("FAMILY_BANKING"));
         when(userService.setupRealm(task.getLegalEntity())).thenReturn(Mono.just(new Realm()));

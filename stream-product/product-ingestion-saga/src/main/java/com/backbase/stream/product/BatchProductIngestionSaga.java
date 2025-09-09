@@ -7,7 +7,6 @@ import static java.util.Comparator.nullsFirst;
 import static java.util.stream.Collectors.toMap;
 
 import com.backbase.dbs.arrangement.api.integration.v2.model.PostArrangement;
-import com.backbase.stream.legalentity.model.BaseProduct;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
@@ -85,14 +84,14 @@ public class BatchProductIngestionSaga extends ProductIngestionSaga {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
         batchProductGroupTask.setIngestionMode(Optional.ofNullable(ingestionMode).orElse(UPSERT));
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup()
-            .serviceAgreement(productGroup.getServiceAgreement())
-            .addProductGroupsItem(productGroup));
+                .serviceAgreement(productGroup.getServiceAgreement())
+                .addProductGroupsItem(productGroup));
 
         return process(batchProductGroupTask)
-            .map(batchProductGroup -> {
-                streamTask.addHistory(batchProductGroup.getHistory());
-               return streamTask;
-            });
+                .map(batchProductGroup -> {
+                    streamTask.addHistory(batchProductGroup.getHistory());
+                    return streamTask;
+                });
     }
 
 
