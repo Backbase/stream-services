@@ -1,5 +1,8 @@
 package com.backbase.stream.mapper;
 
+import com.backbase.accesscontrol.legalentity.api.integration.v3.model.SingleServiceAgreement;
+import com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntityUpdate;
+import com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntityWithParent;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.GetServiceAgreement;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityCreateItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItem;
@@ -18,7 +21,9 @@ public interface LegalEntityMapper {
 
 
     @Mapping(source = "legalEntityType", target = "type")
-    LegalEntityCreateItem toPresentation(LegalEntity legalEntity);
+    @Mapping(source = "createSingleServiceAgreement", target = "activateSingleServiceAgreement")
+    com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntityItem toPresentation(
+        LegalEntity legalEntity);
 
     @Mapping(source = "legalEntityType", target = "type")
     LegalEntityCreateItem toPresentation(LegalEntityV2 legalEntity);
@@ -29,12 +34,17 @@ public interface LegalEntityMapper {
 
     @Mapping(source = "type", target = "legalEntityType")
     @Mapping(source = "id", target = "internalId")
+    LegalEntity toStream(
+        com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntity legalEntityItemBase);
+
+    @Mapping(source = "type", target = "legalEntityType")
+    @Mapping(source = "id", target = "internalId")
     LegalEntityV2 toStreamV2(LegalEntityItemBase legalEntityItemBase);
 
     @Mapping(source = "type", target = "legalEntityType")
     @Mapping(source = "id", target = "internalId")
     @Mapping(source = "parentId", target = "parentInternalId")
-    LegalEntity toStream(LegalEntityItem legalEntityItem);
+    LegalEntity toStream(LegalEntityWithParent legalEntityItem);
 
     @Mapping(source = "type", target = "legalEntityType")
     @Mapping(source = "id", target = "internalId")
@@ -47,20 +57,13 @@ public interface LegalEntityMapper {
     LegalEntity toModel(LegalEntityCreateItem legalEntity);
 
     @Mapping(source = "id", target = "internalId")
-    ServiceAgreement toStream(GetServiceAgreement getServiceAgreement);
+    ServiceAgreement toStream(SingleServiceAgreement getServiceAgreement);
 
     @Mapping(source = "id", target = "internalId")
     ServiceAgreementV2 toStreamV2(GetServiceAgreement getServiceAgreement);
 
-    @Mapping(source = "additions", target = "newValues.additions")
-    @Mapping(source = "externalId", target = "newValues.externalId")
-    @Mapping(source = "name", target = "newValues.name")
-    @Mapping(source = "legalEntityType", target = "newValues.type")
-    @Mapping(source = "customerCategory", target = "newValues.customerCategory")
-    @Mapping(source = "parentExternalId", target = "newValues.parentExternalId")
-    @Mapping(source = "activateSingleServiceAgreement", target = "newValues.activateSingleServiceAgreement")
-    @Mapping(source = "externalId", target = "currentExternalId")
-    LegalEntityPut toLegalEntityPut(LegalEntity legalEntity);
+    @Mapping(source = "legalEntityType", target = "type")
+    LegalEntityUpdate toLegalEntityPut(LegalEntity legalEntity);
 
     @Mapping(source = "additions", target = "newValues.additions")
     @Mapping(source = "externalId", target = "newValues.externalId")

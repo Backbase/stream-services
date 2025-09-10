@@ -1,14 +1,14 @@
 package com.backbase.stream.exceptions;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityCreateItem;
+import com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntityItem;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 public class LegalEntityException extends RuntimeException {
 
-    LegalEntityCreateItem legalEntityCreateItem;
+    LegalEntityItem legalEntityCreateItem;
     String httpResponse;
 
-    public LegalEntityException(LegalEntityCreateItem legalEntity, String message,
+    public LegalEntityException(LegalEntityItem legalEntity, String message,
         WebClientResponseException exception) {
         super(exception);
         httpResponse = exception.getResponseBodyAsString();

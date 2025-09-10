@@ -11,7 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Participant;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostResponseBody;
@@ -53,6 +53,7 @@ import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.LegalEntityService;
+import com.backbase.streams.tailoredvalue.PlansService;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Arrays;
@@ -60,8 +61,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import com.backbase.streams.tailoredvalue.PlansService;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -79,6 +78,7 @@ import reactor.core.publisher.Mono;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ServiceAgreementV2SagaTest {
+
     private static final ServiceAgreementV2ToV1Mapper saMapper = ServiceAgreementV2ToV1Mapper.INSTANCE;
 
     @InjectMocks
@@ -174,8 +174,10 @@ class ServiceAgreementV2SagaTest {
         Assertions.assertEquals(customSaExId, result.getServiceAgreement().getExternalId());
 
         verify(accessGroupService).createServiceAgreement(eq(task), eq(transformServiceAgreement(customSa)));
-        verify(accessGroupService).updateServiceAgreementRegularUsers(eq(task), eq(transformServiceAgreement(customSa)), any());
-        verify(accessGroupService).setupJobRoleForSa(eq(task), eq(transformServiceAgreement(customSa)), any(Stream.class));
+        verify(accessGroupService).updateServiceAgreementRegularUsers(eq(task), eq(transformServiceAgreement(customSa)),
+            any());
+        verify(accessGroupService).setupJobRoleForSa(eq(task), eq(transformServiceAgreement(customSa)),
+            any(Stream.class));
 
     }
 
@@ -188,7 +190,8 @@ class ServiceAgreementV2SagaTest {
             .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)));
         ProductGroup productGroup = new ProductGroup();
         productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-            .description("somePgDescription").savingAccounts(singletonList(account)).users(List.of(regularUser));;
+            .description("somePgDescription").savingAccounts(singletonList(account)).users(List.of(regularUser));
+        ;
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
@@ -224,7 +227,7 @@ class ServiceAgreementV2SagaTest {
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(), any()))
             .thenReturn(Mono.just(transformServiceAgreement(customSa)));
         when(accessGroupService.getServiceAgreementParticipants(any(), any()))
-            .thenReturn(Flux.just(new ServiceAgreementParticipantsGetResponseBody().externalId(customSaExId)));
+            .thenReturn(Flux.just(new Participant().externalId(customSaExId)));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
             .thenReturn(productGroupTaskMono);
         when(accessGroupService.getUserByExternalId(any(), anyBoolean())).thenReturn(Mono.just(new GetUser()
@@ -242,9 +245,8 @@ class ServiceAgreementV2SagaTest {
     }
 
     /**
-     * Intention of this test is to verify that {@link ProductGroupTask} are processed in order at
-     *  (in short that .concatMap is used instead of .flatMap).
-     * Otherwise it may happen that during permission assignment at
+     * Intention of this test is to verify that {@link ProductGroupTask} are processed in order at (in short that
+     * .concatMap is used instead of .flatMap). Otherwise it may happen that during permission assignment at
      * {@link AccessGroupService#assignPermissionsBatch(BatchProductGroupTask, Map)} there will be stale set of
      * permissions which will lead to state when not all of desired applied
      */
@@ -259,8 +261,8 @@ class ServiceAgreementV2SagaTest {
             .referenceJobRoles(Collections.singletonList((JobRole) new JobRole()
                 .name("Job Role with Limits").functionGroups(Collections.singletonList(new BusinessFunctionGroup()
                     .name("someFunctionGroup")
-                .addFunctionsItem(new BusinessFunction().functionId("1071").name("US Domestic Wire")
-                    .addPrivilegesItem(new Privilege().privilege("create").limit(limit)))))))
+                    .addFunctionsItem(new BusinessFunction().functionId("1071").name("US Domestic Wire")
+                        .addPrivilegesItem(new Privilege().privilege("create").limit(limit)))))))
             .productGroups(Arrays.asList(
                 (ProductGroup) new ProductGroup()
                     .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)
@@ -312,8 +314,8 @@ class ServiceAgreementV2SagaTest {
                     .loans(singletonList((Loan) new Loan()
                         .IBAN("IBAN123321")
                         .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)))
-            ))))
-                .addJobProfileUsersItem(new JobProfileUser()
+                    ))))
+            .addJobProfileUsersItem(new JobProfileUser()
                 .user(
                     new User()
                         .externalId("john.doe")
@@ -341,7 +343,7 @@ class ServiceAgreementV2SagaTest {
         when(accessGroupService.getServiceAgreementByExternalId("100000"))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
         lenient().when(accessGroupService.updateServiceAgreementItem(any(), any()))
-                .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
+            .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
         when(accessGroupService.updateServiceAgreementAssociations(any(), any(), any()))
             .thenReturn(Mono.just(new ServiceAgreement().internalId("101").externalId("100000")));
         when(accessGroupService.createServiceAgreement(any(), any()))
@@ -354,7 +356,7 @@ class ServiceAgreementV2SagaTest {
         when(accessGroupService.getUserByExternalId("john.doe", true))
             .thenReturn(Mono.just(new GetUser().externalId("john.doe").id("internalId")));
         when(limitsSaga.executeTask(any())).thenReturn(Mono.just(new LimitsTask("1", new CreateLimitRequestBody())));
- //       when(contactsSaga.executeTask(any())).thenReturn(Mono.just(new ContactsTask("1", new ContactsBulkPostRequestBody())));
+        //       when(contactsSaga.executeTask(any())).thenReturn(Mono.just(new ContactsTask("1", new ContactsBulkPostRequestBody())));
         when(batchProductIngestionSaga.process(any(ProductGroupTask.class)))
             .thenAnswer((Answer<Mono<ProductGroupTask>>) invocationOnMock -> {
                 ProductGroupTask productGroupTask = invocationOnMock.getArgument(0);
@@ -369,7 +371,6 @@ class ServiceAgreementV2SagaTest {
                         return productGroup;
                     });
             });
-
 
         // When
         serviceAgreementSaga.executeTask(serviceAgreementTaskV2)
@@ -409,9 +410,9 @@ class ServiceAgreementV2SagaTest {
         Assertions.assertEquals(leExternalId, result.getServiceAgreement().getContacts().get(0).getExternalId());
 
         LegalEntityParticipant participant = new LegalEntityParticipant()
-                .externalId(leExternalId)
-                .sharingUsers(true)
-                .users(singletonList("USER1"));
+            .externalId(leExternalId)
+            .sharingUsers(true)
+            .users(singletonList("USER1"));
         customSa.setParticipants(singletonList(participant));
         result = serviceAgreementSaga.executeTask(task).block();
         Assertions.assertNotNull(result);
@@ -456,9 +457,9 @@ class ServiceAgreementV2SagaTest {
         when(plansService.isEnabled()).thenReturn(false);
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
         when(legalEntityService.getLegalEntityByExternalId(any()))
-                .thenReturn(Mono.just(new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
+            .thenReturn(Mono.just(new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
-                any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+            any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
 
         serviceAgreementSaga.executeTask(task).block();
 
@@ -472,9 +473,9 @@ class ServiceAgreementV2SagaTest {
 
         when(contactsSaga.executeTask(any(ContactsTask.class))).thenReturn(getContactsTask(AccessContextScope.USER));
         when(legalEntityService.getLegalEntityByExternalId(any()))
-                .thenReturn(Mono.just(new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
+            .thenReturn(Mono.just(new LegalEntity("test", LegalEntityType.CUSTOMER, List.of()).internalId("id")));
         when(accessGroupService.updateServiceAgreementRegularUsers(any(), any(),
-                any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
+            any())).thenReturn(Mono.just(transformServiceAgreement(customSa)));
 
         //Plans mocks
         when(plansService.isEnabled()).thenReturn(true);
@@ -494,16 +495,17 @@ class ServiceAgreementV2SagaTest {
 
     void getMockServiceAgreement() {
         regularUser = new JobProfileUser().user(new User().internalId("someRegularUserInId")
-            .externalId(regularUserExId))
+                .externalId(regularUserExId))
             .legalEntityReference(new LegalEntityReference(leInternalId, leExternalId))
             .planName("somPlanName");
 
         SavingsAccount account = new SavingsAccount();
         account.externalId("someAccountExId").productTypeExternalId("Account").currency("GBP")
-        .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)));
+            .legalEntities(List.of(new LegalEntityReference().externalId(leExternalId)));
         ProductGroup productGroup = new ProductGroup();
         productGroup.productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS).name("somePgName")
-            .description("somePgDescription").savingAccounts(singletonList(account)).users(List.of(regularUser));;
+            .description("somePgDescription").savingAccounts(singletonList(account)).users(List.of(regularUser));
+        ;
 
         ProductGroupTask productGroupTask = new ProductGroupTask(productGroup);
         Mono<ProductGroupTask> productGroupTaskMono = Mono.just(productGroupTask);
@@ -535,13 +537,13 @@ class ServiceAgreementV2SagaTest {
 
     private ExternalContact getMockExternalContact() {
         ExternalAccountInformation externalAccount = new ExternalAccountInformation()
-                .name("ACC1")
-                .externalId("ACCEXT1")
-                .accountNumber("12345");
+            .name("ACC1")
+            .externalId("ACCEXT1")
+            .accountNumber("12345");
         return new ExternalContact()
-                .name("Sam")
-                .externalId(leExternalId)
-                .accounts(Collections.singletonList(externalAccount));
+            .name("Sam")
+            .externalId(leExternalId)
+            .accounts(Collections.singletonList(externalAccount));
     }
 
     private ContactsBulkPostRequestBody getMockContactsBulkRequest(AccessContextScope accessContextScope) {
@@ -604,7 +606,7 @@ class ServiceAgreementV2SagaTest {
     }
 
     private LegalEntitySagaConfigurationProperties getLegalEntitySagaConfigurationProperties() {
-        LegalEntitySagaConfigurationProperties sagaConfiguration =  new LegalEntitySagaConfigurationProperties();
+        LegalEntitySagaConfigurationProperties sagaConfiguration = new LegalEntitySagaConfigurationProperties();
         sagaConfiguration.setUseIdentityIntegration(true);
         sagaConfiguration.setUserProfileEnabled(true);
         return sagaConfiguration;

@@ -1,9 +1,10 @@
 package com.backbase.stream.service;
 
-import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_OK;
 import static com.backbase.stream.legalentity.model.ServiceAgreementUserAction.ActionEnum.ADD;
 import static com.backbase.stream.legalentity.model.ServiceAgreementUserAction.ActionEnum.REMOVE;
 
+import com.backbase.accesscontrol.assignepermissions.api.service.v1.AssignPermissionsApi;
+import com.backbase.accesscontrol.assignepermissions.api.service.v1.model.UserPermissionItem;
 import com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action;
 import com.backbase.accesscontrol.datagroup.api.integration.v1.model.DataGroupNameIdentifier;
 import com.backbase.accesscontrol.datagroup.api.integration.v1.model.DataItemBatchUpdate;
@@ -20,33 +21,38 @@ import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGro
 import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
 import com.backbase.accesscontrol.functiongroup.api.service.v1.model.GetFunctionGroups;
 import com.backbase.accesscontrol.functiongroup.api.service.v1.model.Permission;
-import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementAdmin;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementAdminsBatchUpdateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementUserExternal;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementUsersBatchUpdateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.StatusCode;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.UpdateParticipantItem;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Admin;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.CustomerCategory;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Participant;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ParticipantWithAdminsAndUsers;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ResultId;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementCreateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementParticipants;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Status;
 import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ArrangementPrivilegesGetResponseBody;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.GetContexts;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ListOfFunctionGroupsWithDataGroups;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAssignUserPermissions;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationFunctionDataGroup;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationFunctionGroupDataGroup;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationGenericObjectId;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationParticipantBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationServiceAgreementUserPair;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationServiceAgreementUsersBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementUsersQuery;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.configuration.DeletionProperties.FunctionGroupItemType;
+import com.backbase.stream.legalentity.model.ApsIdentifiers;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
@@ -72,6 +78,7 @@ import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,7 +139,11 @@ public class AccessGroupService {
     @NonNull
     private final com.backbase.accesscontrol.functiongroup.api.integration.v1.FunctionGroupApi functionGroupIntegrationApi;
     @NonNull
-    private final ServiceAgreementsApi serviceAgreementsApi;
+    private final ServiceAgreementApi serviceAgreementServiceApi;
+    @NonNull
+    private final com.backbase.accesscontrol.serviceagreement.api.integration.v1.ServiceAgreementApi serviceAgreementIntegrationApi;
+    @NonNull
+    private final AssignPermissionsApi assignPermissionsServiceApi;
     @NonNull
     private final DeletionProperties deletionProperties;
     @NonNull
@@ -154,14 +165,53 @@ public class AccessGroupService {
      * @return Created Service Agreement
      */
     public Mono<ServiceAgreement> createServiceAgreement(StreamTask streamTask, ServiceAgreement serviceAgreement) {
-        ServicesAgreementIngest servicesAgreementIngest = accessGroupMapper.toPresentation(serviceAgreement);
-        return serviceAgreementsApi.postServiceAgreementIngest(servicesAgreementIngest)
+        ServiceAgreementCreateRequest servicesAgreementIngest = map(serviceAgreement);
+        return serviceAgreementServiceApi.createServiceAgreement(servicesAgreementIngest)
             .onErrorResume(WebClientResponseException.class, throwable -> {
                 streamTask.error(SERVICE_AGREEMENT, "create", "failed", serviceAgreement.getExternalId(),
                     "", throwable, throwable.getResponseBodyAsString(), "Failed to create Service Agreement");
                 return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to create Service Agreement"));
             })
             .zipWith(Mono.just(serviceAgreement), storeIdInServiceAgreement());
+    }
+
+    private ServiceAgreementCreateRequest map(ServiceAgreement serviceAgreement) {
+        //TODO move to a mapper class
+        return new ServiceAgreementCreateRequest().name(serviceAgreement.getName())
+            .description(serviceAgreement.getDescription())
+            .status(Status.valueOf(serviceAgreement.getStatus().toString()))
+            .externalId(serviceAgreement.getExternalId())
+//            .validFrom() //todo
+//            .validUntil()
+            .isSingle(serviceAgreement.getIsMaster())
+            .creatorLegalEntity(serviceAgreement.getCreatorLegalEntity())
+            .regularUserApsIds(mapAspIds(serviceAgreement.getRegularUserAps()))
+            .adminUserApsIds(mapAspIds(serviceAgreement.getAdminUserAps()))
+            .customerCategory(CustomerCategory.valueOf(serviceAgreement.getCustomerCategory().toString()))
+            .purpose(serviceAgreement.getPurpose())
+            .participants(mapParticipants(serviceAgreement.getParticipants()))
+            .additions(serviceAgreement.getAdditions());
+    }
+
+    private List<ParticipantWithAdminsAndUsers> mapParticipants(List<LegalEntityParticipant> participants) {
+        if (participants == null || participants.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return participants.stream().map(participant ->
+                new ParticipantWithAdminsAndUsers()
+                    .legalEntityId(participant.getInternalId()) //todo check if defined
+                    .sharingUsers(participant.getSharingUsers())
+                    .sharingAccounts(participant.getSharingAccounts())
+                    .admins(participant.getAdmins().stream().map(admin -> new Admin().userId(admin)).toList())
+                    .users(participant.getUsers().stream()
+                        .map(user -> new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId(
+                            user)).toList()))
+            .toList();
+    }
+
+    private Set<Long> mapAspIds(ApsIdentifiers aspIdentifiers) {
+        return aspIdentifiers == null ? Collections.emptySet() :
+            aspIdentifiers.getIdIdentifiers().stream().map(BigDecimal::longValue).collect(Collectors.toSet());
     }
 
     /**
@@ -172,7 +222,7 @@ public class AccessGroupService {
      */
     public Mono<ServiceAgreement> getServiceAgreementByExternalId(String externalId) {
         log.info("setting up getting Service Agreement with external Id: {} flow", externalId);
-        return serviceAgreementsApi.getServiceAgreementExternalId(externalId)
+        return serviceAgreementIntegrationApi.getServiceAgreementByExternalId(externalId)
             .doOnNext(serviceAgreementItem -> log
                 .info("Service Agreement: {} found", serviceAgreementItem.getExternalId()))
             .onErrorResume(WebClientResponseException.NotFound.class, throwable -> {
@@ -192,8 +242,8 @@ public class AccessGroupService {
      */
     public Mono<ServiceAgreement> updateServiceAgreementItem(StreamTask streamTask, ServiceAgreement serviceAgreement) {
         log.info("Updating Service Agreement with external Id: {}", serviceAgreement.getExternalId());
-        ServiceAgreementPut serviceAgreementPut = accessGroupMapper.toPresentationPut(serviceAgreement);
-        return serviceAgreementsApi.putServiceAgreementItem(serviceAgreement.getInternalId(), serviceAgreementPut)
+        ServiceAgreementUpdateRequest serviceAgreementPut = accessGroupMapper.toPresentationPut(serviceAgreement);
+        return serviceAgreementServiceApi.putServiceAgreement(serviceAgreement.getInternalId(), serviceAgreementPut)
             .onErrorResume(WebClientResponseException.class, throwable -> {
                 log.error(SERVICE_AGREEMENT, "update", "failed", serviceAgreement.getExternalId(),
                     "", throwable, throwable.getResponseBodyAsString(), "Failed to update Service Agreement");
@@ -248,12 +298,11 @@ public class AccessGroupService {
             .flatMap(task -> getServiceAgreementUsers(serviceAgreement))
             .flatMapMany(existingUsers -> {
 
-                Map<String, String> existingMap = existingUsers.getUserIds().stream()
-                    .collect(Collectors.toMap(Function.identity(), Function.identity()));
+                Set<String> existingUsersSet = new HashSet<>(existingUsers);
 
                 Predicate<ServiceAgreementUserAction> existing = ac ->
                     ac.getUserProfile().getUser().getInternalId() != null
-                        && existingMap.get(ac.getUserProfile().getUser().getInternalId()) != null;
+                        && existingUsersSet.contains(ac.getUserProfile().getUser().getInternalId());
 
                 Predicate<ServiceAgreementUserAction> notExistingToAdd = existing.negate()
                     .and(ac -> ac.getAction() == ADD);
@@ -265,7 +314,7 @@ public class AccessGroupService {
                     .filter(notExistingToAdd.or(existingToRemove))
                     .collect(Collectors.toList());
 
-                List<PresentationServiceAgreementUsersBatchUpdate> actionsGroups =
+                List<ServiceAgreementUsersBatchUpdateRequest> actionsGroups =
                     buildServiceAgreementUserActionGroups(serviceAgreement, toAffect);
 
                 log.debug("associating users to service agreement {}, request: {}", serviceAgreement.getExternalId(),
@@ -276,7 +325,7 @@ public class AccessGroupService {
             .flatMap(actionGroup -> {
                 log.info("Update regular users of Service Agreement with external Id: {}",
                     serviceAgreement.getExternalId());
-                return serviceAgreementsApi.putPresentationServiceAgreementUsersBatchUpdate(actionGroup)
+                return serviceAgreementIntegrationApi.batchUpdateServiceAgreementUsers(actionGroup)
                     .onErrorResume(WebClientResponseException.class,
                         e -> Mono.error(new StreamTaskException(streamTask, e,
                             MessageFormat
@@ -287,7 +336,7 @@ public class AccessGroupService {
             .collectList()
             .flatMap(lists -> Mono.just(lists.stream().flatMap(List::stream).collect(Collectors.toList())))
             .flatMap(list -> {
-                list.stream().filter(r -> r.getStatus() != HTTP_STATUS_OK).forEach(r -> {
+                list.stream().filter(r -> r.getStatus() != StatusCode.HTTP_STATUS_OK).forEach(r -> {
                     String errorMessage = "error associating user to Service Agreement" + r.toString();
                     log.error(errorMessage);
                     streamTask.error(SERVICE_AGREEMENT, "update-regular-users", "failed",
@@ -311,26 +360,42 @@ public class AccessGroupService {
             .thenReturn(task);
     }
 
-    private Mono<ServiceAgreementUsersQuery> getServiceAgreementUsers(ServiceAgreement serviceAgreement) {
-        return serviceAgreementsApi.getServiceAgreementUsers(serviceAgreement.getInternalId())
+    private Mono<List<String>> getServiceAgreementUsers(ServiceAgreement serviceAgreement) {
+        return fetchAllUsersPages(serviceAgreement.getInternalId(), null, 1000)
             .onErrorResume(WebClientResponseException.NotFound.class, e -> {
                 log.info("users not found");
-                return Mono.just(new ServiceAgreementUsersQuery());
+                return Flux.just();
+            })
+            .collectList();
+    }
+
+    public Flux<String> fetchAllUsersPages(String serviceAgreementInternalId, String cursor, int size) {
+        return serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementInternalId, cursor, size)
+            .flatMapMany(response -> {
+                Flux<String> currentPage = Flux.fromIterable(response.getUserIds().stream().map(
+                    com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User::getUserId).toList());
+                if (!response.getUserIds().isEmpty()) {
+                    return Flux.concat(currentPage,
+                        fetchAllUsersPages(serviceAgreementInternalId, response.getNextPage(), size));
+                } else {
+                    return currentPage;
+                }
             });
     }
 
     @NotNull
-    private List<PresentationServiceAgreementUsersBatchUpdate> buildServiceAgreementUserActionGroups(
+    private List<ServiceAgreementUsersBatchUpdateRequest> buildServiceAgreementUserActionGroups(
         ServiceAgreement serviceAgreement, List<ServiceAgreementUserAction> actions) {
         return actions.stream()
             .filter(saUa -> saUa.getAction() != null)
             .collect(Collectors.groupingBy(ServiceAgreementUserAction::getAction))
             .entrySet().stream().map(actionGroup ->
-                new PresentationServiceAgreementUsersBatchUpdate()
-                    .action(PresentationAction.valueOf(actionGroup.getKey().getValue()))
+                new ServiceAgreementUsersBatchUpdateRequest()
+                    .action(com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Action.valueOf(
+                        actionGroup.getKey().getValue()))
                     .users(actionGroup.getValue().stream().map(ServiceAgreementUserAction::getUserProfile)
                         .map(JobProfileUser::getUser).map(User::getExternalId)
-                        .map(id -> new PresentationServiceAgreementUserPair()
+                        .map(id -> new ServiceAgreementUserExternal()
                             .externalServiceAgreementId(serviceAgreement.getExternalId())
                             .externalUserId(id)).collect(Collectors.toList())))
             .collect(Collectors.toList());
@@ -353,7 +418,7 @@ public class AccessGroupService {
             monoMap.put(LegalEntityParticipant.ActionEnum.ADD, Mono.just(serviceAgreement));
             return Mono.just(monoMap);
         }
-        serviceAgreement.getParticipants().stream().forEach(p -> {
+        serviceAgreement.getParticipants().forEach(p -> {
             if (p.getAction() == null) {
                 p.setAction(LegalEntityParticipant.ActionEnum.ADD);
             }
@@ -365,7 +430,7 @@ public class AccessGroupService {
                 return serviceAgreement;
             })
             .flatMap(sa -> getServiceAgreementParticipants(streamTask, serviceAgreement)
-                .collectMap(ServiceAgreementParticipantsGetResponseBody::getExternalId, Function.identity()))
+                .collectMap(Participant::getExternalId, Function.identity()))
             .flatMap(existingMap -> {
 
                 log.debug("existing participants:" + Arrays.asList(existingMap.values().toArray()));
@@ -373,19 +438,20 @@ public class AccessGroupService {
                 List<LegalEntityParticipant> toRemove = serviceAgreement.getParticipants().stream()
                     .filter(p -> existingMap.get(p.getExternalId()) != null
                         && p.getAction() == LegalEntityParticipant.ActionEnum.REMOVE)
-                    .collect(Collectors.toList());
+                    .toList();
 
                 List<LegalEntityParticipant> toAdd = serviceAgreement.getParticipants().stream()
                     .filter(p -> existingMap.get(p.getExternalId()) == null
                         && p.getAction() == LegalEntityParticipant.ActionEnum.ADD)
+                    .toList();
+
+                List<UpdateParticipantItem> removeRequest = toRemove.stream()
+                    .map(participant -> participantMapper.toPresentation(participant, serviceAgreement.getExternalId()))
                     .collect(Collectors.toList());
 
-                PresentationParticipantBatchUpdate removeRequest =
-                    participantMapper.toPresentation(new ServiceAgreement()
-                        .externalId(serviceAgreement.getExternalId()).participants(toRemove));
-
-                PresentationParticipantBatchUpdate addRequest = participantMapper.toPresentation(new ServiceAgreement()
-                    .externalId(serviceAgreement.getExternalId()).participants(toAdd));
+                List<UpdateParticipantItem> addRequest = toAdd.stream()
+                    .map(participant -> participantMapper.toPresentation(participant, serviceAgreement.getExternalId()))
+                    .collect(Collectors.toList());
 
                 monoMap.put(LegalEntityParticipant.ActionEnum.ADD, putServiceAgreementParticipants(streamTask,
                     serviceAgreement, addRequest));
@@ -396,10 +462,9 @@ public class AccessGroupService {
             });
     }
 
-    public Flux<ServiceAgreementParticipantsGetResponseBody> getServiceAgreementParticipants(
-        StreamTask streamTask, ServiceAgreement serviceAgreement) {
-        return serviceAgreementsApi.getServiceAgreementParticipants(serviceAgreement.getInternalId(), false)
-            .onErrorResume(WebClientResponseException.NotFound.class, e -> Flux.empty())
+    public Flux<Participant> getServiceAgreementParticipants(StreamTask streamTask, ServiceAgreement serviceAgreement) {
+        return serviceAgreementServiceApi.getServiceAgreementParticipants(serviceAgreement.getInternalId())
+            .onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
             .onErrorResume(WebClientResponseException.class, e -> {
                 streamTask.error("participant", "update-participant", "failed",
                     serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), e, e.getMessage(),
@@ -407,19 +472,20 @@ public class AccessGroupService {
                 return Mono.error(new StreamTaskException(streamTask, MessageFormat
                     .format("error retrieving participants for Service Agreement {0}",
                         serviceAgreement.getExternalId())));
-            });
+            })
+            .map(ServiceAgreementParticipants::getParticipants)
+            .flatMapMany(Flux::fromIterable);
     }
 
     private Mono<ServiceAgreement> putServiceAgreementParticipants(StreamTask streamTask,
-        ServiceAgreement serviceAgreement,
-        PresentationParticipantBatchUpdate request) {
-        if (CollectionUtils.isEmpty(request.getParticipants())) {
+        ServiceAgreement serviceAgreement, List<UpdateParticipantItem> request) {
+        if (CollectionUtils.isEmpty(request)) {
             return Mono.just(serviceAgreement);
         }
 
-        log.debug("updating participants: " + request.toString());
+        log.debug("updating participants: " + request);
 
-        return serviceAgreementsApi.putPresentationIngestServiceAgreementParticipants(request)
+        return serviceAgreementIntegrationApi.batchUpdateParticipants(request)
             .onErrorResume(WebClientResponseException.class, e -> {
                 streamTask.error("participant", "update-participants", "failed",
                     serviceAgreement.getExternalId(), serviceAgreement.getInternalId(), e, e.getResponseBodyAsString(),
@@ -432,7 +498,7 @@ public class AccessGroupService {
             .collectList()
             .flatMap(resultList -> {
                 resultList.stream().forEach(r -> {
-                    if (r.getStatus() != HTTP_STATUS_OK) {
+                    if (r.getStatus() != StatusCode.HTTP_STATUS_OK) {
                         streamTask.error("participant", "update-participant", "failed", r.getResourceId(),
                             null, "Error updating Participant %s for Service Agreement: %s", r.getResourceId(),
                             serviceAgreement.getExternalId());
@@ -460,7 +526,7 @@ public class AccessGroupService {
             .onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty());
     }
 
-    private BiFunction<IdItem, ServiceAgreement, ServiceAgreement> storeIdInServiceAgreement() {
+    private BiFunction<ResultId, ServiceAgreement, ServiceAgreement> storeIdInServiceAgreement() {
         return (idItem, serviceAgreement1) -> {
             serviceAgreement1.setInternalId(idItem.getId());
             log.info("Created Service Agreement: {} with id: {}", serviceAgreement1.getName(), idItem.getId());
@@ -478,18 +544,19 @@ public class AccessGroupService {
 
     public Mono<LegalEntity> setAdministrators(LegalEntity legalEntity) {
 
-        List<PresentationServiceAgreementUserPair> userPairs = legalEntity.getAdministrators().stream().map(user -> {
-            PresentationServiceAgreementUserPair usersItem = new PresentationServiceAgreementUserPair();
+        List<ServiceAgreementAdmin> userPairs = legalEntity.getAdministrators().stream().map(user -> {
+            ServiceAgreementAdmin usersItem = new ServiceAgreementAdmin();
             usersItem.setExternalServiceAgreementId(legalEntity.getMasterServiceAgreement().getExternalId());
             usersItem.setExternalUserId(user.getExternalId());
             return usersItem;
         }).collect(Collectors.toList());
 
-        PresentationServiceAgreementUsersBatchUpdate presentationServiceAgreementUsersBatchUpdate = new PresentationServiceAgreementUsersBatchUpdate();
+        ServiceAgreementAdminsBatchUpdateRequest presentationServiceAgreementUsersBatchUpdate = new ServiceAgreementAdminsBatchUpdateRequest();
         presentationServiceAgreementUsersBatchUpdate.users(userPairs);
-        presentationServiceAgreementUsersBatchUpdate.setAction(PresentationAction.ADD);
+        presentationServiceAgreementUsersBatchUpdate.setAction(
+            com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Action.ADD);
 
-        return serviceAgreementsApi.putPresentationServiceAgreementAdminsBatchUpdate(
+        return serviceAgreementIntegrationApi.batchUpdateServiceAgreementAdmins(
                 presentationServiceAgreementUsersBatchUpdate)
             .doOnError(WebClientResponseException.BadRequest.class, this::handleError)
             .collectList()
@@ -514,7 +581,7 @@ public class AccessGroupService {
         ProductGroup productGroup = streamTask.getData();
         ServiceAgreement serviceAgreement = productGroup.getServiceAgreement();
 
-        ListOfFunctionGroupsWithDataGroups functionGroups = functionGroupsWithDataGroup(jobProfileUser, productGroup);
+        List<UserPermissionItem> functionGroups = functionGroupsWithDataGroup(jobProfileUser, productGroup);
 
         return assignPermissions(streamTask, serviceAgreement, jobProfileUser, functionGroups);
     }
@@ -527,7 +594,7 @@ public class AccessGroupService {
      * @return An approval status if approvals is enabled or an empty mojo on completion.
      */
     public Mono<JobProfileUser> assignPermissions(StreamTask streamTask, ServiceAgreement serviceAgreement,
-        JobProfileUser jobProfileUser, ListOfFunctionGroupsWithDataGroups functionGroups) {
+        JobProfileUser jobProfileUser, List<UserPermissionItem> functionGroups) {
 
         streamTask.info(ACCESS_GROUP, "assign-permissions", "",
             streamTask.getName(), null,
@@ -536,7 +603,7 @@ public class AccessGroupService {
         String serviceAgreementId = serviceAgreement.getInternalId();
         String userId = jobProfileUser.getUser().getInternalId();
 
-        return serviceAgreementsApi.putAssignUsersPermissions(serviceAgreementId, userId, functionGroups)
+        return assignPermissionsServiceApi.putUserPermissions(serviceAgreementId, userId, functionGroups)
             .onErrorResume(WebClientResponseException.class, e -> {
                 streamTask.error(ACCESS_GROUP, "assign-permissions", "failed", serviceAgreement.getExternalId(),
                     serviceAgreementId, e, e.getResponseBodyAsString(), "Failed to to assign permissions");
@@ -765,25 +832,15 @@ public class AccessGroupService {
         return r.stream().map(PresentationAssignUserPermissions::getExternalUserId).collect(Collectors.joining(", "));
     }
 
-    private ListOfFunctionGroupsWithDataGroups functionGroupsWithDataGroup(JobProfileUser jobProfileUser,
+    private List<UserPermissionItem> functionGroupsWithDataGroup(JobProfileUser jobProfileUser,
         ProductGroup productGroup) {
         /// Must also include existing function groupss!!
 
-        ListOfFunctionGroupsWithDataGroups functionGroups = new ListOfFunctionGroupsWithDataGroups();
-        List<PresentationFunctionDataGroup> collect = jobProfileUser.getBusinessFunctionGroups().stream()
-            .map(businessFunctionGroup -> getPresentationFunctionDataGroup(productGroup, businessFunctionGroup))
+        return jobProfileUser.getBusinessFunctionGroups().stream()
+            .map(businessFunctionGroup -> new UserPermissionItem()
+                .functionGroupId(businessFunctionGroup.getId())
+                .dataGroupIds(Set.of(productGroup.getInternalId())))
             .collect(Collectors.toList());
-
-        functionGroups.setItems(collect);
-        return functionGroups;
-    }
-
-    private PresentationFunctionDataGroup getPresentationFunctionDataGroup(ProductGroup productGroup,
-        BusinessFunctionGroup businessFunctionGroup) {
-        return new PresentationFunctionDataGroup()
-            .functionGroupId(businessFunctionGroup.getId())
-            .dataGroupIds(
-                Collections.singletonList(new PresentationGenericObjectId().id(productGroup.getInternalId())));
     }
 
     /**
@@ -1078,10 +1135,10 @@ public class AccessGroupService {
     public Mono<Void> removePermissionsForUser(String serviceAgreementInternalId, String userInternalId) {
         log.debug("Removing permissions from all Data Groups for user: {} in service agreement {}", userInternalId,
             serviceAgreementInternalId);
-        return serviceAgreementsApi.putAssignUsersPermissions(
+        return assignPermissionsServiceApi.putUserPermissions(
                 serviceAgreementInternalId,
                 userInternalId,
-                new ListOfFunctionGroupsWithDataGroups())
+                List.of())
             .then();
     }
 
@@ -1137,15 +1194,15 @@ public class AccessGroupService {
      */
     public Mono<Void> deleteAdmins(ServiceAgreement serviceAgreement) {
         log.debug("Removing admins for Service Agreement {}", serviceAgreement.getName());
-        return serviceAgreementsApi.getServiceAgreementAdmins(serviceAgreement.getInternalId())
-            .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins()))
+        return serviceAgreementServiceApi.getServiceAgreementAdmins(serviceAgreement.getInternalId())
+            .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins().stream().map(Admin::getUserId).toList()))
             // get External  ID for each admin.
             // We need to  get the user by using the internal id to facilitate the delete for issue #46
             .flatMap(userId -> usersApi.getUserById(userId, true)).map(GetUser::getExternalId)
             .collectList()
             .doOnNext(adminIds -> log.debug("Found  admins: {}", adminIds))
             .map(adminsExternalIds -> adminsExternalIds.stream()
-                .map(adminId -> new PresentationServiceAgreementUserPair()
+                .map(adminId -> new ServiceAgreementAdmin()
                     .externalServiceAgreementId(serviceAgreement.getExternalId())
                     .externalUserId(adminId))
                 .collect(Collectors.toList()))
@@ -1153,9 +1210,9 @@ public class AccessGroupService {
                 if (CollectionUtils.isEmpty(admins)) {
                     return Mono.empty();
                 } else {
-                    return serviceAgreementsApi.putPresentationServiceAgreementAdminsBatchUpdate(
-                            new PresentationServiceAgreementUsersBatchUpdate()
-                                .action(PresentationAction.REMOVE)
+                    return serviceAgreementIntegrationApi.batchUpdateServiceAgreementAdmins(
+                            new ServiceAgreementAdminsBatchUpdateRequest()
+                                .action(com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Action.REMOVE)
                                 .users(admins))
                         .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Delete Admin", r.getStatus().getValue(),
                             r.getResourceId(), r.getErrors()))
@@ -1170,15 +1227,15 @@ public class AccessGroupService {
 
     public Mono<Void> deleteAdmins(ServiceAgreementV2 serviceAgreement) {
         log.debug("Removing admins for Service Agreement {}", serviceAgreement.getName());
-        return serviceAgreementsApi.getServiceAgreementAdmins(serviceAgreement.getInternalId())
-            .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins()))
+        return serviceAgreementServiceApi.getServiceAgreementAdmins(serviceAgreement.getInternalId())
+            .flatMapMany(admins -> Flux.fromIterable(admins.getAdmins().stream().map(Admin::getUserId).toList()))
             // get External  ID for each admin.
             // We need to  get the user by using the internal id to facilitate the delete for issue #46
             .flatMap(userId -> usersApi.getUserById(userId, true)).map(GetUser::getExternalId)
             .collectList()
             .doOnNext(adminIds -> log.debug("Found  admins: {}", adminIds))
             .map(adminsExternalIds -> adminsExternalIds.stream()
-                .map(adminId -> new PresentationServiceAgreementUserPair()
+                .map(adminId -> new ServiceAgreementAdmin()
                     .externalServiceAgreementId(serviceAgreement.getExternalId())
                     .externalUserId(adminId))
                 .collect(Collectors.toList()))
@@ -1186,9 +1243,9 @@ public class AccessGroupService {
                 if (CollectionUtils.isEmpty(admins)) {
                     return Mono.empty();
                 } else {
-                    return serviceAgreementsApi.putPresentationServiceAgreementAdminsBatchUpdate(
-                            new PresentationServiceAgreementUsersBatchUpdate()
-                                .action(PresentationAction.REMOVE)
+                    return serviceAgreementIntegrationApi.batchUpdateServiceAgreementAdmins(
+                            new ServiceAgreementAdminsBatchUpdateRequest()
+                                .action(com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Action.REMOVE)
                                 .users(admins))
                         .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Delete Admin", r.getStatus().getValue(),
                             r.getResourceId(), r.getErrors()))

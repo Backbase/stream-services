@@ -2,12 +2,13 @@ package com.backbase.stream.mapper;
 
 import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupCreateRequest;
 import com.backbase.accesscontrol.functiongroup.api.service.v1.model.Permission;
+import com.backbase.accesscontrol.legalentity.api.service.v1.model.SingleServiceAgreement;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementDetails;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermission;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItemQuery;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.UserContextItem;
 import com.backbase.stream.legalentity.model.BusinessFunction;
@@ -30,13 +31,15 @@ import org.mapstruct.Mapping;
 public interface AccessGroupMapper {
 
     @Mapping(source = "id", target = "internalId")
-    ServiceAgreement toStream(ServiceAgreementItemQuery getServiceAgreement);
+    @Mapping(source = "isSingle", target = "isMaster")
+    @Mapping(source = "creatorLegalEntityId", target = "creatorLegalEntity")
+    ServiceAgreement toStream(ServiceAgreementDetails getServiceAgreement);
 
     @Mapping(source = "id", target = "internalId")
     ServiceAgreementV2 toStreamV2(ServiceAgreementItemQuery getServiceAgreement);
 
     @Mapping(source = "id", target = "internalId")
-    ServiceAgreement toStream(ServiceAgreementItem serviceAgreementItem);
+    ServiceAgreement toStream(SingleServiceAgreement serviceAgreementItem);
 
     BusinessFunction toStream(FunctionGroupItem functionsGetResponseBody);
 
@@ -46,7 +49,7 @@ public interface AccessGroupMapper {
     @Mapping(source = "participants", target = "participantsToIngest")
     ServicesAgreementIngest toPresentation(ServiceAgreementV2 serviceAgreement);
 
-    ServiceAgreementPut toPresentationPut(ServiceAgreement serviceAgreement);
+    ServiceAgreementUpdateRequest toPresentationPut(ServiceAgreement serviceAgreement);
 
     // Initialize users list to workaround https://backbase.atlassian.net/browse/MAINT-10442
     @Mapping(defaultExpression = "java( new ArrayList<>() )", source = "users", target = "users")
