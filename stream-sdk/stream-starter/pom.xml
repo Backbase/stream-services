@@ -114,7 +114,7 @@
             <dependency>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>backbase-building-blocks-release</artifactId>
-                <version>19.0.0</version>
+                <version>19.1.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -362,12 +362,12 @@
                         <dependency>
                             <groupId>com.backbase.buildingblocks</groupId>
                             <artifactId>jib-dependencies-extension</artifactId>
-                            <version>19.0.0</version>
+                            <version>19.1.1</version>
                         </dependency>
                         <dependency>
                             <groupId>com.backbase.buildingblocks</groupId>
                             <artifactId>jib-entrypoint-extension</artifactId>
-                            <version>19.0.0</version>
+                            <version>19.1.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -415,7 +415,7 @@
             <plugin>
                 <groupId>com.backbase.buildingblocks</groupId>
                 <artifactId>service-sdk-build-utils-maven-plugin</artifactId>
-                <version>19.0.0</version>
+                <version>19.1.1</version>
                 <executions>
                     <execution>
                         <id>find-main-package-for-archunit-maven</id>
@@ -516,7 +516,7 @@
                     <dependency>
                         <groupId>com.backbase.buildingblocks</groupId>
                         <artifactId>service-sdk-archunit</artifactId>
-                        <version>19.0.0</version>
+                        <version>19.1.1</version>
                     </dependency>
                 </dependencies>
                 <executions>

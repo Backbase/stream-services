@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.buildingblocks</groupId>
         <artifactId>backbase-parent</artifactId>
-        <version>19.0.0</version>
+        <version>19.1.1</version>
         <relativePath/>
     </parent>
 
@@ -40,8 +40,8 @@
 
     <properties>
         <java.version>21</java.version>
-        <ssdk.version>19.0.0</ssdk.version>
-        <backbase-bom.version>2025.04.3</backbase-bom.version>
+        <ssdk.version>19.1.1</ssdk.version>
+        <backbase-bom.version>2025.08.6</backbase-bom.version>
         <boat-maven-plugin.version>0.17.62</boat-maven-plugin.version>
         <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
         <openapi-generator-maven-plugin.language>spring</openapi-generator-maven-plugin.language>
