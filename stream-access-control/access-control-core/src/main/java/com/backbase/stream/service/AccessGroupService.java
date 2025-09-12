@@ -41,9 +41,6 @@ import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceA
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Status;
 import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIdentifier;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.configuration.AccessControlConfigurationProperties;
@@ -126,6 +123,12 @@ public class AccessGroupService {
     @NonNull
     private final UserManagementApi usersApi;
     @NonNull
+    private final BatchResponseUtils batchResponseUtils;
+    @NonNull
+    private final DeletionProperties deletionProperties;
+    @NonNull
+    private final AccessControlConfigurationProperties accessControlProperties;
+    @NonNull
     private final PermissionCheckApi permissionCheckServiceApi;
     @NonNull
     private final DataGroupApi dataGroupServiceApi;
@@ -142,15 +145,7 @@ public class AccessGroupService {
     @NonNull
     private final AssignPermissionsApi assignPermissionsServiceApi;
     @NonNull
-    private final com.backbase.accesscontrol.assignpermissions.api.integration.v1.AssignPermissionsApi assignPermissionsIntegrationApi;
-    @NonNull
-    private final DeletionProperties deletionProperties;
-    @NonNull
-    private final BatchResponseUtils batchResponseUtils;
-
     private final UserContextApi userContextApi;
-
-    private final AccessControlConfigurationProperties accessControlProperties;
 
     private final AccessGroupMapper accessGroupMapper = Mappers.getMapper(AccessGroupMapper.class);
 
@@ -533,14 +528,6 @@ public class AccessGroupService {
         };
     }
 
-    private BiFunction<IdItem, ServiceAgreementV2, ServiceAgreementV2> storeIdInServiceAgreementV2() {
-        return (idItem, serviceAgreement1) -> {
-            serviceAgreement1.setInternalId(idItem.getId());
-            log.info("Created Service Agreement: {} with id: {}", serviceAgreement1.getName(), idItem.getId());
-            return serviceAgreement1;
-        };
-    }
-
     public Mono<LegalEntity> setAdministrators(LegalEntity legalEntity) {
 
         List<ServiceAgreementAdmin> userPairs = legalEntity.getAdministrators().stream().map(user -> {
@@ -759,14 +746,6 @@ public class AccessGroupService {
             return "NO DATA GROUP IDS!";
         }
         return String.join(",", dataGroupIdentifiers);
-    }
-
-    private PresentationIdentifier mapFunctionGroup(String id) {
-        return new PresentationIdentifier().idIdentifier(id);
-    }
-
-    private PresentationDataGroupIdentifier mapDataGroupId(String id) {
-        return new PresentationDataGroupIdentifier().idIdentifier(id);
     }
 
     private String prettyPrintDataGroups(Collection<UserWithPermissions> userPermissionItems) {
@@ -1385,7 +1364,7 @@ public class AccessGroupService {
         String resourceName,
         String functionName,
         String privilege,
-       String dataItemId) {
+        String dataItemId) {
         AssignedPermission assignedPermission = new AssignedPermission();
         assignedPermission.setPermittedObjectInternalIds(List.of(dataItemId));
         assignedPermission.setFunctionName(functionName);

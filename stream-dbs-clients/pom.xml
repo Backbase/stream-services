@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -241,25 +240,6 @@
                 <artifactId>boat-maven-plugin</artifactId>
                 <version>0.17.62</version>
                 <executions>
-                    <!-- todo remove after migration -->
-                    <execution>
-                        <id>generate-accesscontrol-client-api-code</id>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/access-control-service-api-v3*.yaml
-                            </inputSpec>
-                            <apiPackage>com.backbase.dbs.accesscontrol.api.service.v3</apiPackage>
-                            <modelPackage>com.backbase.dbs.accesscontrol.api.service.v3.model</modelPackage>
-                            <configOptions>
-                                <useBeanValidation>false</useBeanValidation>
-                            </configOptions>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>generate-accesscontrol-datagroup-service-api-v1-code</id>
                         <goals>
@@ -268,9 +248,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/data-group-service-api-v1.0.1.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/data-group-service-api-v1.0.1.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.datagroup.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.datagroup.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -286,9 +264,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/function-group-service-api-v1.0.0.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/function-group-service-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.functiongroup.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.functiongroup.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -304,29 +280,9 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/legal-entity-service-api-v1.0.0.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/legal-entity-service-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.legalentity.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.legalentity.api.service.v1.model</modelPackage>
-                            <configOptions>
-                                <useBeanValidation>false</useBeanValidation>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-accesscontrol-permissionset-service-api-v1-code</id>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/permission-set-service-api-v1.0.0.yaml
-                            </inputSpec>
-                            <apiPackage>com.backbase.accesscontrol.permissionset.api.service.v1</apiPackage>
-                            <modelPackage>com.backbase.accesscontrol.permissionset.api.service.v1.model</modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
@@ -340,9 +296,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/service-agreement-service-api-v1.0.0.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/service-agreement-service-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.serviceagreement.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.serviceagreement.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -358,9 +312,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/user-context-service-api-v1.0.0.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/user-context-service-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.usercontext.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.usercontext.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -376,9 +328,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/permission-check-service-api-v1.7.1.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/permission-check-service-api-v1.7.1.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.permissioncheck.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.permissioncheck.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -410,9 +360,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/data-group-integration-inbound-api-v1.0.1.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/data-group-integration-inbound-api-v1.0.1.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.datagroup.api.integration.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.datagroup.api.integration.v1.model</modelPackage>
                             <configOptions>
@@ -428,12 +376,9 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/function-group-integration-inbound-api-v1.0.0.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/function-group-integration-inbound-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.functiongroup.api.integration.v1</apiPackage>
-                            <modelPackage>com.backbase.accesscontrol.functiongroup.api.integration.v1.model
-                            </modelPackage>
+                            <modelPackage>com.backbase.accesscontrol.functiongroup.api.integration.v1.model</modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
@@ -447,12 +392,9 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/service-agreement-integration-inbound-api-v1.0.0.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/service-agreement-integration-inbound-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.serviceagreement.api.integration.v1</apiPackage>
-                            <modelPackage>com.backbase.accesscontrol.serviceagreement.api.integration.v1.model
-                            </modelPackage>
+                            <modelPackage>com.backbase.accesscontrol.serviceagreement.api.integration.v1.model</modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
@@ -466,27 +408,9 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/legal-entity-integration-inbound-api-v3.0.0.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/legal-entity-integration-inbound-api-v3.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.legalentity.api.integration.v3</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.legalentity.api.integration.v3.model</modelPackage>
-                            <configOptions>
-                                <useBeanValidation>false</useBeanValidation>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>generate-accesscontrol-assignpermissions-integration-api-v1-code</id>
-                        <goals>
-                            <goal>generate-webclient-embedded</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/assign-permissions-integration-inbound-api-v1.0.0.yaml</inputSpec>
-                            <apiPackage>com.backbase.accesscontrol.assignpermissions.api.integration.v1</apiPackage>
-                            <modelPackage>com.backbase.accesscontrol.assignpermissions.api.integration.v1.model</modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
@@ -500,12 +424,9 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/customer-access-group-service-api-v1*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/customer-access-group-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.customeraccessgroup.api.service.v1</apiPackage>
-                            <modelPackage>com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model
-                            </modelPackage>
+                            <modelPackage>com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model</modelPackage>
                         </configuration>
                     </execution>
                     <execution>
@@ -516,9 +437,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v3*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-service-api-v3*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.arrangement.api.service.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.arrangement.api.service.v3.model</modelPackage>
                             <configOptions>
@@ -534,9 +453,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/arrangement-manager/arrangement-integration-inbound-api-v3*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/arrangement-manager/arrangement-integration-inbound-api-v3*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.arrangement.api.integration.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.arrangement.api.integration.v3.model</modelPackage>
                             <configOptions>
@@ -552,8 +469,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/loan/loan-integration-inbound-api-v2*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/loan/loan-integration-inbound-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.loan.inbound.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.loan.inbound.api.service.v2.model</modelPackage>
                             <configOptions>
@@ -569,8 +485,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/user-manager/user-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.user.api.service.v2.model</modelPackage>
                             <configOptions>
@@ -586,9 +501,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/user-profile-manager/user-profile-manager-service-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.user.profile.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.user.profile.api.service.v2.model</modelPackage>
                             <configOptions>
@@ -604,9 +517,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v2*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/transaction-manager/transaction-manager-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.transaction.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.transaction.api.service.v2.model</modelPackage>
                             <configOptions>
@@ -628,8 +539,7 @@
                                 <importMapping>java.time.OffsetDateTime=java.lang.String</importMapping>
                             </importMappings>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v3*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/payment/payment-order-service-api-v3*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.paymentorder.api.service.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.paymentorder.api.service.v3.model</modelPackage>
                             <configOptions>
@@ -677,8 +587,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/approval/approval-service-api-v2.*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.approval.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.approval.api.service.v2.model</modelPackage>
                             <configOptions>
@@ -694,9 +603,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/identity-integration-service/identity-integration-outbound-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/identity-integration-service/identity-integration-outbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.identity.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.identity.integration.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -712,12 +619,9 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/portfolio/portfolio-instrument-integration-inbound-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-instrument-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.portfolio.instrument.integration.api.service.v1</apiPackage>
-                            <modelPackage>com.backbase.portfolio.instrument.integration.api.service.v1.model
-                            </modelPackage>
+                            <modelPackage>com.backbase.portfolio.instrument.integration.api.service.v1.model</modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
@@ -731,9 +635,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/portfolio/portfolio-integration-inbound-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/portfolio/portfolio-integration-inbound-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.portfolio.integration.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.portfolio.api.service.integration.v1.model</modelPackage>
                             <configOptions>
@@ -749,9 +651,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/contact-manager/contact-manager-service-api-v2*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/contact-manager/contact-manager-service-api-v2*.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.contact.api.service.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.contact.api.service.v2.model</modelPackage>
                             <configOptions>
@@ -766,8 +666,7 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <input>${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml
-                            </input>
+                            <input>${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml</input>
                             <failOnWarning>true</failOnWarning>
                         </configuration>
                     </execution>
@@ -779,9 +678,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml
-                            </inputSpec>
+                            <inputSpec>${project.basedir}/src/main/openapi/user-segments-collector-service-api-v1.0.0.yaml</inputSpec>
                             <apiPackage>com.backbase.audiences.collector.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.audiences.collector.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -797,8 +694,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/plan-manager/plan-manager-service-api-v1*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/plan-manager/plan-manager-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.tailoredvalue.planmanager.service.api.v1</apiPackage>
                             <modelPackage>com.backbase.tailoredvalue.planmanager.service.api.v1.model</modelPackage>
                             <configOptions>
@@ -814,9 +710,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/customer-profile/customer-profile-integration-api-v*.yaml
-                            </inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/customer-profile/customer-profile-integration-api-v*.yaml</inputSpec>
                             <apiPackage>com.backbase.customerprofile.api.integration.v1</apiPackage>
                             <modelPackage>com.backbase.customerprofile.api.integration.v1.model</modelPackage>
                         </configuration>
