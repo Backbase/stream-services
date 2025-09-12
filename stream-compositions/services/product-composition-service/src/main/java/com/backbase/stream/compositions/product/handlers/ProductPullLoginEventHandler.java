@@ -7,7 +7,6 @@ import com.backbase.audit.rest.spec.v3.model.AuditMessage;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItemQuery;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;

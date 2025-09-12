@@ -22,7 +22,7 @@ public class AccessControlServiceImpl implements AccessControlService {
 
     private final UserManagementApi userManagementApi;
     private final LegalEntityApi legalEntityServiceApi;
-    private final ServiceAgreementApi serviceAgreementServiceApi
+    private final ServiceAgreementApi serviceAgreementServiceApi;
 
     @Override
     public Mono<GetUser> getUserByExternalId(String externalId, boolean skipHierarchyCheck) {

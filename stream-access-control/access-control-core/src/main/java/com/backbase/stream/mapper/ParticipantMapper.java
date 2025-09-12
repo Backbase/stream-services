@@ -8,8 +8,11 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface ParticipantMapper {
 
-    @Mapping(source = "externalId", target = "externalLegalEntityId")
-    @Mapping(source = "java(externalServiceAgreementId)", target = "externalServiceAgreementId")
+    @Mapping(source = "participant.externalId", target = "externalLegalEntityId")
+    @Mapping(source = "externalServiceAgreementId", target = "externalServiceAgreementId")
+    @Mapping(source = "participant.action", target = "action")
+    @Mapping(source = "participant.sharingUsers", target = "sharingUsers")
+    @Mapping(source = "participant.sharingAccounts", target = "sharingAccounts")
     UpdateParticipantItem toPresentation(LegalEntityParticipant participant, String externalServiceAgreementId);
 
 }

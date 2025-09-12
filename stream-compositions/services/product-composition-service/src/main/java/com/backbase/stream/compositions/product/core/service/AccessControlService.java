@@ -1,7 +1,5 @@
 package com.backbase.stream.compositions.product.core.service;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItemQuery;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.ServiceAgreement;

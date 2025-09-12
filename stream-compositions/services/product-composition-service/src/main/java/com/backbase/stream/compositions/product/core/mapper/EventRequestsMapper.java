@@ -1,8 +1,6 @@
 package com.backbase.stream.compositions.product.core.mapper;
 
 import com.backbase.audit.rest.spec.v3.model.AuditMessage;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItemQuery;
 import com.backbase.stream.compositions.events.ingress.event.spec.v1.ProductPullEvent;
 import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsPullEvent;
 import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequest;
