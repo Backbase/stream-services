@@ -344,8 +344,7 @@
                                 ${project.build.directory}/yaml/access-control/service-agreement-service-api-v1.0.0.yaml
                             </inputSpec>
                             <apiPackage>com.backbase.accesscontrol.serviceagreement.api.service.v1</apiPackage>
-                            <modelPackage>com.backbase.accesscontrol.serviceagreement.api.service.v1.model
-                            </modelPackage>
+                            <modelPackage>com.backbase.accesscontrol.serviceagreement.api.service.v1.model</modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
@@ -388,19 +387,16 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-accesscontrol-assignepermissions-service-api-v1-code</id>
+                        <id>generate-accesscontrol-assignpermissions-service-api-v1-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>
-                                ${project.build.directory}/yaml/access-control/assign-permissions-service-api-v1.0.0.yaml
-                            </inputSpec>
-                            <apiPackage>com.backbase.accesscontrol.assignepermissions.api.service.v1</apiPackage>
-                            <modelPackage>com.backbase.accesscontrol.assignepermissions.api.service.v1.model
-                            </modelPackage>
+                            <inputSpec>${project.build.directory}/yaml/access-control/assign-permissions-service-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.assignpermissions.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.assignpermissions.api.service.v1.model</modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
@@ -475,6 +471,22 @@
                             </inputSpec>
                             <apiPackage>com.backbase.accesscontrol.legalentity.api.integration.v3</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.legalentity.api.integration.v3.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-accesscontrol-assignpermissions-integration-api-v1-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/assign-permissions-integration-inbound-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.assignpermissions.api.integration.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.assignpermissions.api.integration.v1.model</modelPackage>
                             <configOptions>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>

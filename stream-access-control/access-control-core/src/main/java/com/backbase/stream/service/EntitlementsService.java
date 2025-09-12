@@ -56,12 +56,8 @@ public class EntitlementsService {
                 getAssignedPermissionForServiceAgreement(resourceName, functionName, privilege, user, sa));
     }
 
-    private Flux<AssignedPermission> getAssignedPermissionForServiceAgreement(
-        String resourceName,
-        String functionName,
-        String privilege,
-        User user,
-        ServiceAgreement sa) {
+    private Flux<AssignedPermission> getAssignedPermissionForServiceAgreement(String resourceName, String functionName,
+        String privilege, User user, ServiceAgreement sa) {
         return accessGroupService.getAssignedPermissions(sa, user, resourceName, functionName, privilege)
             .flatMap(permission ->
                 Flux.fromIterable(permission.getPermittedObjectInternalIds())

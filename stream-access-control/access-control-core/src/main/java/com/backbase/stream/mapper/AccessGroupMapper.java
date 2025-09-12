@@ -5,6 +5,7 @@ import com.backbase.accesscontrol.functiongroup.api.service.v1.model.Permission;
 import com.backbase.accesscontrol.legalentity.api.service.v1.model.SingleServiceAgreement;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementDetails;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
+import com.backbase.accesscontrol.usercontext.api.service.v1.model.ContextServiceAgreement;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
 import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermission;
@@ -57,10 +58,9 @@ public interface AccessGroupMapper {
 
     FunctionGroupCreateRequest toPresentation(JobRole referenceJobRole);
 
-    @Mapping(source = "serviceAgreementId", target = "internalId")
-    @Mapping(source = "serviceAgreementName", target = "name")
-    @Mapping(source = "serviceAgreementMaster", target = "isMaster")
-    ServiceAgreement toStream(UserContextItem userContext);
+    @Mapping(source = "id", target = "internalId")
+    @Mapping(source = "isSingle", target = "isMaster")
+    ServiceAgreement toStream(ContextServiceAgreement userContext);
 
     List<ServiceAgreement> toStream(List<UserContextItem> userContextItems);
 
