@@ -40,7 +40,7 @@ class LegalEntityServiceTest {
         LegalEntity legalEntityUpdated = new LegalEntity().externalId(externalId).internalId(internalId).name(newName);
 
         com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntity leItemBase = new com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntity().externalId(
-            externalId).name(newName);
+            externalId).name(newName).id(internalId);
 
         when(legalEntitiesApi.updateLegalEntity(any(), any())).thenReturn(Mono.empty());
         when(legalEntityIntegrationApi.getLegalEntityByExternalId(externalId))

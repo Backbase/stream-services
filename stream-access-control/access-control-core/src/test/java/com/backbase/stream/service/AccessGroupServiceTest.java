@@ -394,21 +394,21 @@ class AccessGroupServiceTest {
             Mono.just(new ServiceAgreementUsers().userIds(List.of(
                 new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId("in_userId1"),
                 new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId("in_userId3"))));
-        when(serviceAgreementServiceApi.getServiceAgreementUsers(eq(saInternalId), null, 1000))
+        when(serviceAgreementServiceApi.getServiceAgreementUsers(saInternalId, null, 1000))
             .thenReturn(existingUsersList);
 
         Mono<ServiceAgreement> result = subject.updateServiceAgreementAssociations(streamTask, serviceAgreement,
             regularUsers);
         result.block();
 
-        InOrder inOrderValidator = inOrder(serviceAgreementServiceApi);
+        InOrder inOrderValidator = inOrder(serviceAgreementIntegrationApi);
         thenUpdateParticipantsCall(inOrderValidator, saExternalId, Action.ADD,
             new ExpectedParticipantUpdate("p3", false, false));
         thenUpdateParticipantsCall(inOrderValidator, saExternalId, Action.REMOVE,
             new ExpectedParticipantUpdate("p2", false, false));
 
-        thenRegularUsersUpdateCall(saExternalId, Action.ADD, "ex_userId3");
-        thenRegularUsersUpdateCall(saExternalId, Action.REMOVE, "ex_userId2");
+        thenRegularUsersUpdateCall(saExternalId, Action.REMOVE, "ex_userId3");
+        thenRegularUsersUpdateCall(saExternalId, Action.ADD, "ex_userId2");
     }
 
     @Test
@@ -516,7 +516,11 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(assignPermissionsServiceApi).putUserPermissions("sa-internal-id", "sa-internal-id", expectedPermissions);
+        ArgumentCaptor<List<UserPermissionItem>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(assignPermissionsServiceApi).putUserPermissions(eq("user-internal-id"), eq("sa-internal-id"),
+            argumentCaptor.capture());
+        assertEquals(expectedPermissions.size(), argumentCaptor.getValue().size());
+        assertTrue(argumentCaptor.getValue().containsAll(expectedPermissions));
     }
 
     /*
@@ -551,8 +555,8 @@ class AccessGroupServiceTest {
 
         List<UserPermissionItem> expectedPermissions = List.of(
             new UserPermissionItem().functionGroupId("function-group-id-1").dataGroupIds(Set.of()),
-            new UserPermissionItem().functionGroupId("business-function-group-id-1").dataGroupIds(Set.of("data-group-1",
-                "data-group-0")),
+            new UserPermissionItem().functionGroupId("business-function-group-id-1").dataGroupIds(Set.of("data-group-0",
+                "data-group-1")),
             new UserPermissionItem().functionGroupId("business-function-group-id-2")
                 .dataGroupIds(Set.of("data-group-2"))
         );
@@ -571,7 +575,7 @@ class AccessGroupServiceTest {
             .thenReturn(Mono.just(new UserPermissions().permissions(List.of(
                 new UserPermissionItem().functionGroupId("function-group-id-1").dataGroupIds(Set.of()),
                 new UserPermissionItem().functionGroupId("business-function-group-id-1")
-                    .dataGroupIds(Set.of("data-group-id"))
+                    .dataGroupIds(Set.of("data-group-1"))
             ))));
 
         when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
@@ -583,7 +587,11 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(assignPermissionsServiceApi).putUserPermissions("sa-internal-id", "sa-internal-id", expectedPermissions);
+        ArgumentCaptor<List<UserPermissionItem>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(assignPermissionsServiceApi).putUserPermissions(eq("user-internal-id"), eq("sa-internal-id"),
+            argumentCaptor.capture());
+        assertEquals(expectedPermissions.size(), argumentCaptor.getValue().size());
+        assertTrue(argumentCaptor.getValue().containsAll(expectedPermissions));
     }
 
     @Test
@@ -617,7 +625,8 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(assignPermissionsServiceApi).putUserPermissions("sa-internal-id", "sa-internal-id", expectedPermissions);
+        verify(assignPermissionsServiceApi).putUserPermissions("user-internal-id", "sa-internal-id",
+            expectedPermissions);
     }
 
     @Test
@@ -669,7 +678,8 @@ class AccessGroupServiceTest {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
-            List.of(new BaseProductGroup().name("Test product group"))));
+                List.of(new BaseProductGroup().name("Test product group")))
+            .serviceAgreement(new ServiceAgreement().externalId("sa-internal-id")));
 
         DataGroup dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
             "Repository Group Template Custom");
@@ -721,7 +731,8 @@ class AccessGroupServiceTest {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
-            List.of(new BaseProductGroup().name("Test product group"))));
+                List.of(new BaseProductGroup().name("Test product group")))
+            .serviceAgreement(new ServiceAgreement().externalId("sa-external-id")));
 
         DataGroup dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
             "Repository Group Template Custom", "template-custom-test");
@@ -789,7 +800,8 @@ class AccessGroupServiceTest {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
-            List.of(new BaseProductGroup().name("Test product group"))));
+                List.of(new BaseProductGroup().name("Test product group")))
+            .serviceAgreement(new ServiceAgreement().externalId("sa-external-id")));
 
         DataGroup existingDGroupItemCustom = buildDataGroupItem("Custom data group item",
             "custom desc", "custom-dg-item1", "custom-dg-item2");
@@ -872,7 +884,8 @@ class AccessGroupServiceTest {
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask();
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
         batchProductGroupTask.setBatchProductGroup(new BatchProductGroup().productGroups(
-            List.of(new BaseProductGroup().name("Test product group"))));
+                List.of(new BaseProductGroup().name("Test product group")))
+            .serviceAgreement(new ServiceAgreement().externalId("sa-external-id")));
 
         DataGroup existingDGroup = new DataGroup().id("debitAccountInId1").name("arrangement1")
             .addItemsItem("debitAccountExId1").serviceAgreementId("saInId");
@@ -1001,9 +1014,7 @@ class AccessGroupServiceTest {
             ));
 
         when(assignPermissionsServiceApi.getUserPermissions("user-internal-id", "sa-internal-id"))
-            .thenReturn(Mono.just(new UserPermissions().permissions(List.of(
-                new UserPermissionItem().functionGroupId("function-group-id-1").dataGroupIds(Set.of())
-            ))));
+            .thenReturn(Mono.just(new UserPermissions().permissions(List.of())));
 
         when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
 
@@ -1014,7 +1025,8 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(assignPermissionsServiceApi).putUserPermissions("sa-internal-id", "sa-internal-id", expectedPermissions);
+        verify(assignPermissionsServiceApi).putUserPermissions("user-internal-id", "sa-internal-id",
+            expectedPermissions);
     }
 
     /*
@@ -1070,7 +1082,8 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(assignPermissionsServiceApi).putUserPermissions("sa-internal-id", "sa-internal-id", expectedPermissions);
+        verify(assignPermissionsServiceApi).putUserPermissions("user-internal-id", "sa-internal-id",
+            expectedPermissions);
     }
 
     @Test
@@ -1093,9 +1106,11 @@ class AccessGroupServiceTest {
 
         FunctionGroupItem systemFunctionGroup = new FunctionGroupItem().id("system-group-id-1")
             .name("SYSTEM_FUNCTION_GROUP")
+            .serviceAgreementId(internalSaId)
             .type(TypeEnum.SYSTEM);
 
         FunctionGroupItem templateFunctionGroup = new FunctionGroupItem().id("template-group-id-2").name("Full access")
+            .serviceAgreementId(internalSaId)
             .type(TypeEnum.REFERENCE);
 
         when(functionGroupServiceApi.getFunctionGroups(internalSaId))
@@ -1135,7 +1150,7 @@ class AccessGroupServiceTest {
             .verifyComplete();
 
         verify(serviceAgreementServiceApi, times(1))
-            .putServiceAgreement(eq("internal-id"), new ServiceAgreementUpdateRequest()
+            .putServiceAgreement("internal-id", new ServiceAgreementUpdateRequest()
                 .name("name")
                 .externalId("external-id"));
 

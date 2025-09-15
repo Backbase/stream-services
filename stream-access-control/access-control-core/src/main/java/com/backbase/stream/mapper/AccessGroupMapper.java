@@ -106,7 +106,8 @@ public interface AccessGroupMapper {
         //TODO move to a mapper class
         return new ServiceAgreementCreateRequest().name(serviceAgreement.getName())
             .description(serviceAgreement.getDescription())
-            .status(Status.valueOf(serviceAgreement.getStatus().toString()))
+            .status(
+                serviceAgreement.getStatus() == null ? null : Status.valueOf(serviceAgreement.getStatus().toString()))
             .externalId(serviceAgreement.getExternalId())
 //            .validFrom() //todo
 //            .validUntil()
@@ -114,7 +115,8 @@ public interface AccessGroupMapper {
             .creatorLegalEntity(serviceAgreement.getCreatorLegalEntity())
             .regularUserApsIds(mapAspIds(serviceAgreement.getRegularUserAps()))
             .adminUserApsIds(mapAspIds(serviceAgreement.getAdminUserAps()))
-            .customerCategory(CustomerCategory.valueOf(serviceAgreement.getCustomerCategory().toString()))
+            .customerCategory(serviceAgreement.getCustomerCategory() == null ? null
+                : CustomerCategory.valueOf(serviceAgreement.getCustomerCategory().toString()))
             .purpose(serviceAgreement.getPurpose())
             .participants(mapParticipants(serviceAgreement.getParticipants()))
             .additions(serviceAgreement.getAdditions());

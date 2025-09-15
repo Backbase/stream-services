@@ -567,7 +567,7 @@ public class AccessGroupService {
                         .dataGroupIds(usersPermissions.get(user).get(bfg).stream()
                             .map(BaseProductGroup::getInternalId)
                             .collect(Collectors.toSet())))
-                    .toList()))
+                    .collect(Collectors.toList())))
             .collect(Collectors.toList());
 
         return Mono.just(request)

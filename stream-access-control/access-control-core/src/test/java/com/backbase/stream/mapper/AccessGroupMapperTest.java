@@ -60,7 +60,7 @@ class AccessGroupMapperTest {
             .isSingle(isMaster)
             .description(description)
             .status(Status.ENABLED)
-            .participants(List.of(new ParticipantWithAdminsAndUsers().legalEntityId("someID")
+            .participants(List.of(new ParticipantWithAdminsAndUsers().legalEntityId("someId")
                 .addUsersItem(new User().userId("userId"))
                 .addAdminsItem(new Admin().userId("adminId"))))
             .name(name)

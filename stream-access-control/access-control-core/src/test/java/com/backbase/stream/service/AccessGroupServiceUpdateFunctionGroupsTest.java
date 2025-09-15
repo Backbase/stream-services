@@ -153,11 +153,11 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .type(FunctionGroupCreateRequest.TypeEnum.CUSTOM)
                 .metadata(Map.of("key1", "value1"))
                 .addPermissionsItem(new Permission()
-                    .resourceName("name1")
+                    .businessFunctionName("name1")
                     .addPrivilegesItem("view")
                 )
                 .addPermissionsItem(new Permission()
-                    .resourceName("name2")
+                    .businessFunctionName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
                 ));
@@ -228,7 +228,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         Mockito.verify(functionGroupIntegrationApi)
             .batchUpdateFunctionGroups(Collections.singletonList(new FunctionGroupBatchPutItem()
-                .identifier(new FunctionGroupNameIdentifier().name("fg1"))
+                .identifier(new FunctionGroupNameIdentifier().name("jobRole").serviceAgreementExternalId(saExternalId))
                 .newValues(new FunctionGroupUpdate()
                     .name("jobRole")
                     .description("jobRole")
@@ -316,11 +316,11 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .type(FunctionGroupCreateRequest.TypeEnum.CUSTOM)
                 .metadata(Map.of("key1", "value1"))
                 .addPermissionsItem(new Permission()
-                    .resourceName("name1")
+                    .businessFunctionName("name1")
                     .addPrivilegesItem("view")
                 )
                 .addPermissionsItem(new Permission()
-                    .resourceName("name2")
+                    .businessFunctionName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
                 ));
@@ -400,11 +400,11 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .type(FunctionGroupCreateRequest.TypeEnum.REFERENCE)
                 .metadata(Map.of("key1", "value1"))
                 .addPermissionsItem(new Permission()
-                    .resourceName("name1")
+                    .businessFunctionName("name1")
                     .addPrivilegesItem("view")
                 )
                 .addPermissionsItem(new Permission()
-                    .resourceName("name2")
+                    .businessFunctionName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
                 ));
@@ -583,7 +583,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         Mockito.verify(functionGroupIntegrationApi)
             .batchUpdateFunctionGroups(Collections.singletonList(new FunctionGroupBatchPutItem()
-                .identifier(new FunctionGroupNameIdentifier().name("fg1"))
+                .identifier(new FunctionGroupNameIdentifier().name("jobRole").serviceAgreementExternalId(saExternalId))
                 .newValues(new FunctionGroupUpdate()
                     .name("jobRole")
                     .description("jobRole")
@@ -650,7 +650,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                     .functionId("102")
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
-                ));
+                ))
+            .putMetadataItem("key1", "value1");
 
         Mockito.when(functionGroupIntegrationApi.batchUpdateFunctionGroups(any()))
             .thenReturn(Flux.just(new BatchResponseItemExtended()
@@ -666,7 +667,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         Mockito.verify(functionGroupIntegrationApi)
             .batchUpdateFunctionGroups(Collections.singletonList(new FunctionGroupBatchPutItem()
-                .identifier(new FunctionGroupNameIdentifier().name("fg1"))
+                .identifier(new FunctionGroupNameIdentifier().name("jobRole").serviceAgreementExternalId(saExternalId))
                 .newValues(new FunctionGroupUpdate()
                     .name("jobRole")
                     .description("jobRole")
@@ -749,7 +750,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         Mockito.verify(functionGroupIntegrationApi)
             .batchUpdateFunctionGroups(Collections.singletonList(new FunctionGroupBatchPutItem()
-                .identifier(new FunctionGroupNameIdentifier().name("fg1"))
+                .identifier(new FunctionGroupNameIdentifier().name("fg1").serviceAgreementExternalId(saExternalId))
                 .newValues(new FunctionGroupUpdate()
                     .name("fg1")
                     .description("fg1")
@@ -765,7 +766,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .description("fg2")
                 .type(FunctionGroupCreateRequest.TypeEnum.CUSTOM)
                 .addPermissionsItem(new Permission()
-                    .resourceName("name2")
+                    .businessFunctionName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
                 ));
