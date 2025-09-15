@@ -3,10 +3,11 @@ package com.backbase.stream.product;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.Permission;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.Privilege;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.Permission;
+import com.backbase.stream.legalentity.model.BusinessFunctionGroup.TypeEnum;
 import java.util.Collections;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class BusinessFunctionGroupMapperTest {
@@ -22,33 +23,28 @@ class BusinessFunctionGroupMapperTest {
         assertNotNull(result);
         assertEquals("1001", result.getId());
         assertEquals("S001", result.getServiceAgreementId());
-    }
-
-    @Test
-    void testMapBusinessFunction() {
-        // When
-        var result = mapper.map(createFunctionGroupItem());
-
-        // Then
-        assertNotNull(result);
-        assertEquals("F001", result.getFunctions().get(0).getFunctionId());
+        assertEquals("Payments", result.getName());
+        assertEquals(TypeEnum.DEFAULT, result.getType());
+        assertEquals("functionName", result.getFunctions().get(0).getName());
+        assertEquals("resourceName", result.getFunctions().get(0).getResourceName());
         assertEquals("CREATE", result.getFunctions().get(0).getPrivileges().get(0).getPrivilege());
+
     }
 
     private FunctionGroupItem createFunctionGroupItem() {
-        FunctionGroupItem item = new FunctionGroupItem();
-        item.setId("1001");
-        item.setServiceAgreementId("S001");
-        item.setName("Payments");
-        item.setPermissions(Collections.singletonList(createPermission()));
-        return item;
+        return new FunctionGroupItem()
+            .id("1001")
+            .serviceAgreementId("S001")
+            .name("Payments")
+            .type(FunctionGroupItem.TypeEnum.CUSTOM)
+            .permissions(Collections.singletonList(createPermission()));
     }
 
     private Permission createPermission() {
-        Permission permission = new Permission();
-        permission.setFunctionId("F001");
-        permission.setAssignedPrivileges(Collections.singletonList(new Privilege().privilege("CREATE")));
-        return permission;
+        return new Permission()
+            .businessFunctionName("functionName")
+            .resourceName("resourceName")
+            .privileges(Set.of("CREATE"));
     }
 
 }

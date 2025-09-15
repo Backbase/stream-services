@@ -27,6 +27,7 @@ public interface LegalEntityMapper {
     LegalEntity toStream(LegalEntityWithParent legalEntityItem);
 
     @Mapping(source = "id", target = "internalId")
+    @Mapping(constant = "true", target = "isMater")
     ServiceAgreement toStream(SingleServiceAgreement getServiceAgreement);
 
     @Mapping(source = "legalEntityType", target = "type")

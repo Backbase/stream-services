@@ -2,22 +2,23 @@ package com.backbase.stream.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.CreateStatus;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.CustomerCategory;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationUserApsIdentifiers;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementPut;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.Status;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.UserContextItem;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementDetails;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Admin;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ParticipantWithAdminsAndUsers;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementCreateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Status;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User;
+import com.backbase.accesscontrol.usercontext.api.service.v1.model.ContextServiceAgreement;
+import com.backbase.accesscontrol.usercontext.api.service.v1.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.ApsIdentifiers;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,37 +38,33 @@ class AccessGroupMapperTest {
         final String validFromTime = "00:00:00";
         final String validUntilDate = "2022-03-08";
         final String validUntilTime = "23:59:59";
-        final String userExId = "someUserExternalId";
 
         ServiceAgreement input = new ServiceAgreement()
             .externalId(externalId)
             .isMaster(isMaster)
             .description(description)
             .status(LegalEntityStatus.ENABLED)
-            .addParticipantsItem(new LegalEntityParticipant().externalId("someLeExId").addUsersItem(userExId))
+            .addParticipantsItem(new LegalEntityParticipant().internalId("someId").addUsersItem("userId")
+                .addAdminsItem("adminId"))
             .name(name)
             .validFromDate(LocalDate.parse(validFromDate))
             .validFromTime(validFromTime)
             .validUntilDate(LocalDate.parse(validUntilDate))
             .validUntilTime(validUntilTime)
-            .regularUserAps(new ApsIdentifiers().addNameIdentifiersItem(userExId));
+            .regularUserAps(new ApsIdentifiers().addIdIdentifiersItem(BigDecimal.ONE));
 
+        ServiceAgreementCreateRequest actual = subject.map(input);
 
-        ServicesAgreementIngest actual = subject.toPresentation(input);
-
-
-        ServicesAgreementIngest expected = new ServicesAgreementIngest()
+        ServiceAgreementCreateRequest expected = new ServiceAgreementCreateRequest()
             .externalId(externalId)
-            .isMaster(isMaster)
+            .isSingle(isMaster)
             .description(description)
-            .status(CreateStatus.ENABLED)
-            .addParticipantsToIngestItem(new ParticipantIngest().externalId("someLeExId").addUsersItem(userExId))
+            .status(Status.ENABLED)
+            .participants(List.of(new ParticipantWithAdminsAndUsers().legalEntityId("someID")
+                .addUsersItem(new User().userId("userId"))
+                .addAdminsItem(new Admin().userId("adminId"))))
             .name(name)
-            .validFromDate(validFromDate)
-            .validFromTime(validFromTime)
-            .validUntilDate(validUntilDate)
-            .validUntilTime(validUntilTime)
-            .regularUserAps(new PresentationUserApsIdentifiers().addNameIdentifiersItem(userExId));
+            .regularUserApsIds(Set.of(1L));
         assertEquals(expected, actual);
     }
 
@@ -79,36 +76,22 @@ class AccessGroupMapperTest {
         final Boolean isMaster = true;
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
 
-        ServiceAgreementItem input = new ServiceAgreementItem()
+        ServiceAgreementDetails input = new ServiceAgreementDetails()
             .id(internalId)
             .externalId(externalId)
-            .isMaster(isMaster)
+            .isSingle(isMaster)
             .description(description)
-            .name(name)
-            .validFromDate(validFromDate)
-            .validFromTime(validFromTime)
-            .validUntilDate(validUntilDate)
-            .validUntilTime(validUntilTime);
-
+            .name(name);
 
         ServiceAgreement actual = subject.toStream(input);
-
 
         ServiceAgreement expected = new ServiceAgreement()
             .internalId(internalId)
             .externalId(externalId)
             .isMaster(isMaster)
             .description(description)
-            .name(name)
-            .validFromDate(LocalDate.parse(validFromDate))
-            .validFromTime(validFromTime)
-            .validUntilDate(LocalDate.parse(validUntilDate))
-            .validUntilTime(validUntilTime);
+            .name(name);
 
         assertEquals(expected, actual);
     }
@@ -118,34 +101,20 @@ class AccessGroupMapperTest {
         final String externalId = "someExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
         final LegalEntityStatus status = LegalEntityStatus.ENABLED;
 
         ServiceAgreement input = new ServiceAgreement()
             .externalId(externalId)
             .description(description)
             .name(name)
-            .validFromDate(LocalDate.parse(validFromDate))
-            .validFromTime(validFromTime)
-            .validUntilDate(LocalDate.parse(validUntilDate))
-            .validUntilTime(validUntilTime)
             .status(status);
 
+        ServiceAgreementUpdateRequest actual = subject.toPresentationPut(input);
 
-        ServiceAgreementPut actual = subject.toPresentationPut(input);
-
-
-        ServiceAgreementPut expected = new ServiceAgreementPut()
+        ServiceAgreementUpdateRequest expected = new ServiceAgreementUpdateRequest()
             .externalId(externalId)
             .description(description)
             .name(name)
-            .validFromDate(validFromDate)
-            .validFromTime(validFromTime)
-            .validUntilDate(validUntilDate)
-            .validUntilTime(validUntilTime)
             .status(Status.ENABLED);
 
         assertEquals(expected, actual);
@@ -164,48 +133,26 @@ class AccessGroupMapperTest {
         assertEquals(expectedServiceAgreement, actualServiceAgreement);
     }
 
-    @Test
-    void toStreamMapsListOfUserContextItemsToListOfServiceAgreements() {
-        var userContextItem1 = createUserContextItem("someServiceAgreementId1", "someExternalId1",
-            "someServiceAgreementName1",
-            "someDescription1", "somePurpose1", true);
-        var userContextItem2 = createUserContextItem("someServiceAgreementId2", "someExternalId2",
-            "someServiceAgreementName2",
-            "someDescription2", "somePurpose2", false);
-
-        var userContexts = List.of(userContextItem1, userContextItem2);
-
-        var actualServiceAgreements = subject.toStream(userContexts);
-
-        var expectedServiceAgreements = Arrays.asList(
-            createServiceAgreementFromUserContextItem(userContextItem1),
-            createServiceAgreementFromUserContextItem(userContextItem2)
-        );
-
-        assertEquals(expectedServiceAgreements, actualServiceAgreements);
-    }
-
-    private UserContextItem createUserContextItem(String serviceAgreementId, String externalId,
-        String serviceAgreementName,
-        String description, String purpose, Boolean serviceAgreementMaster) {
-        return new UserContextItem()
-            .serviceAgreementId(serviceAgreementId)
+    private ContextServiceAgreement createUserContextItem(String serviceAgreementId, String externalId,
+        String serviceAgreementName, String description, String purpose, Boolean serviceAgreementMaster) {
+        return new ContextServiceAgreement()
+            .id(serviceAgreementId)
             .externalId(externalId)
-            .serviceAgreementName(serviceAgreementName)
+            .name(serviceAgreementName)
             .description(description)
             .purpose(purpose)
-            .serviceAgreementMaster(serviceAgreementMaster)
+            .isSingle(serviceAgreementMaster)
             .customerCategory(CustomerCategory.RETAIL);
     }
 
-    private ServiceAgreement createServiceAgreementFromUserContextItem(UserContextItem item) {
+    private ServiceAgreement createServiceAgreementFromUserContextItem(ContextServiceAgreement item) {
         return new ServiceAgreement()
-            .internalId(item.getServiceAgreementId())
+            .internalId(item.getId())
             .externalId(item.getExternalId())
-            .name(item.getServiceAgreementName())
+            .name(item.getName())
             .description(item.getDescription())
             .purpose(item.getPurpose())
-            .isMaster(item.getServiceAgreementMaster())
+            .isMaster(item.getIsSingle())
             .customerCategory(com.backbase.stream.legalentity.model.CustomerCategory.RETAIL);
     }
 

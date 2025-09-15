@@ -2,24 +2,22 @@ package com.backbase.stream.service;
 
 import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
 import static org.mockito.ArgumentMatchers.any;
-import static reactor.core.publisher.Mono.when;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.Permission;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationFunctionGroupPutRequestBody;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIngestFunctionGroup;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermission;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationPermissionFunctionGroupUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.Privilege;
+import com.backbase.accesscontrol.assignpermissions.api.service.v1.AssignPermissionsApi;
+import com.backbase.accesscontrol.datagroup.api.service.v1.DataGroupApi;
+import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.BatchResponseItemExtended;
+import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupBatchPutItem;
+import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupNameIdentifier;
+import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupUpdate;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.FunctionGroupApi;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupCreateRequest;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.GetFunctionGroups;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.Permission;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.ResultId;
+import com.backbase.accesscontrol.permissioncheck.api.service.v1.PermissionCheckApi;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
+import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
@@ -37,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -57,27 +56,30 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
     @Mock
     private UserManagementApi usersApi;
-
     @Mock
-    private UsersApi accessControlUsersApi;
-
+    private PermissionCheckApi permissionCheckServiceApi;
     @Mock
-    private DataGroupsApi dataGroupsApi;
-
+    private DataGroupApi dataGroupServiceApi;
     @Mock
-    private FunctionGroupsApi functionGroupsApi;
-
+    private com.backbase.accesscontrol.datagroup.api.integration.v1.DataGroupApi dataGroupIntegrationApi;
     @Mock
-    private ServiceAgreementsApi serviceAgreementsApi;
-
+    private FunctionGroupApi functionGroupServiceApi;
     @Mock
-    private DeletionProperties deletionProperties;
-
+    private com.backbase.accesscontrol.functiongroup.api.integration.v1.FunctionGroupApi functionGroupIntegrationApi;
     @Mock
-    private AccessControlConfigurationProperties accessControlConfigurationProperties;
-
+    private ServiceAgreementApi serviceAgreementServiceApi;
+    @Mock
+    private com.backbase.accesscontrol.serviceagreement.api.integration.v1.ServiceAgreementApi serviceAgreementIntegrationApi;
+    @Mock
+    private AssignPermissionsApi assignPermissionsServiceApi;
+    @Mock
+    private UserContextApi userContextApi;
+    @Spy
+    private DeletionProperties configurationProperties;
     @Spy
     private BatchResponseUtils batchResponseUtils;
+    @Mock
+    private AccessControlConfigurationProperties accessControlProperties;
 
     @Test
     void shouldCreateNewJobRoleForSA() {
@@ -106,13 +108,13 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         serviceAgreement.setIsMaster(true);
 
-        Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
-            .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
-                .name("jobRoleOld").id("2")
-                .addPermissionsItem(new Permission().functionId("102")
-                    .addAssignedPrivilegesItem(new Privilege().privilege("view"))
-                    .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
-            )));
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(Mono.just(new GetFunctionGroups()
+                .functionGroups(List.of(new FunctionGroupItem()
+                    .name("jobRoleOld").id("2")
+                    .addPermissionsItem(new Permission().businessFunctionName("name2")
+                        .privileges(Set.of("view", "edit"))
+                    )))));
 
         JobRole jobRole = new JobRole()
             .name("jobRoleNew")
@@ -131,31 +133,31 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
                 ))
-            .metadata(Map.of("key1","value1"));
+            .metadata(Map.of("key1", "value1"));
 
-        Mockito.when(functionGroupsApi.postPresentationIngestFunctionGroup(any()))
-            .thenReturn(Mono.just(new IdItem().id("1")));
-        Mockito.when(accessControlConfigurationProperties.getConcurrency())
-                .thenReturn(1);
+        Mockito.when(functionGroupServiceApi.createFunctionGroup(any()))
+            .thenReturn(Mono.just(new ResultId().id("1")));
+        Mockito.when(accessControlProperties.getConcurrency())
+            .thenReturn(1);
 
         Mono<List<JobRole>> listMono = subject.setupJobRoleForSa(streamTask, serviceAgreement, Stream.of(jobRole));
         List<JobRole> setupJobRole = listMono.block();
 
         Assertions.assertNotNull(setupJobRole);
 
-        Mockito.verify(functionGroupsApi)
-            .postPresentationIngestFunctionGroup(new PresentationIngestFunctionGroup()
-                .externalServiceAgreementId(saExternalId)
+        Mockito.verify(functionGroupServiceApi)
+            .createFunctionGroup(new FunctionGroupCreateRequest()
+                .serviceAgreementId(saInternalId)
                 .name("jobRoleNew")
                 .description("jobRoleNew")
-                .type(PresentationIngestFunctionGroup.TypeEnum.REGULAR)
-                .metadata(Map.of("key1","value1"))
-                .addPermissionsItem(new PresentationPermission()
-                    .functionId("101")
+                .type(FunctionGroupCreateRequest.TypeEnum.CUSTOM)
+                .metadata(Map.of("key1", "value1"))
+                .addPermissionsItem(new Permission()
+                    .resourceName("name1")
                     .addPrivilegesItem("view")
                 )
-                .addPermissionsItem(new PresentationPermission()
-                    .functionId("102")
+                .addPermissionsItem(new Permission()
+                    .resourceName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
                 ));
@@ -186,13 +188,14 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
             .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
                 .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
 
-        Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
-            .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
-                .name("jobRole").id("1")
-                .addPermissionsItem(new Permission().functionId("101")
-                    .addAssignedPrivilegesItem(new Privilege().privilege("view"))
-                    .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
-            )));
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(
+                Mono.just(new GetFunctionGroups().functionGroups(Collections.singletonList(new FunctionGroupItem()
+                    .name("jobRole").id("1")
+                    .addPermissionsItem(new Permission().businessFunctionName("name1")
+                        .addPrivilegesItem("view")
+                        .addPrivilegesItem("edit")
+                    )))));
 
         JobRole jobRole = new JobRole()
             .name("jobRole")
@@ -211,33 +214,34 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
                 ))
-            .metadata(Map.of("key1","value1"));
+            .metadata(Map.of("key1", "value1"));
 
-        Mockito.when(functionGroupsApi.putFunctionGroupsUpdate(any()))
+        Mockito.when(functionGroupIntegrationApi.batchUpdateFunctionGroups(any()))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
-        Mockito.when(accessControlConfigurationProperties.getConcurrency())
-                .thenReturn(1);
-
+        Mockito.when(accessControlProperties.getConcurrency())
+            .thenReturn(1);
 
         Mono<List<JobRole>> listMono = subject.setupJobRoleForSa(streamTask, serviceAgreement, Stream.of(jobRole));
         List<JobRole> setupJobRole = listMono.block();
 
         Assertions.assertNotNull(setupJobRole);
 
-        Mockito.verify(functionGroupsApi)
-            .putFunctionGroupsUpdate(Collections.singletonList(new PresentationFunctionGroupPutRequestBody()
-                .identifier(new PresentationIdentifier().idIdentifier("1"))
-                .functionGroup(new FunctionGroupUpdate()
+        Mockito.verify(functionGroupIntegrationApi)
+            .batchUpdateFunctionGroups(Collections.singletonList(new FunctionGroupBatchPutItem()
+                .identifier(new FunctionGroupNameIdentifier().name("fg1"))
+                .newValues(new FunctionGroupUpdate()
                     .name("jobRole")
                     .description("jobRole")
-                    .metadata(Map.of("key1","value1"))
-                    .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
-                        .functionName("name1")
-                        .addPrivilegesItem("view"))
-                    .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
-                        .functionName("name2")
-                        .addPrivilegesItem("view")
-                        .addPrivilegesItem("edit")))
+                    .metadata(Map.of("key1", "value1"))
+                    .addPermissionsItem(
+                        new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
+                            .businessFunctionName("name1")
+                            .addPrivilegesItem("view"))
+                    .addPermissionsItem(
+                        new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
+                            .businessFunctionName("name2")
+                            .addPrivilegesItem("view")
+                            .addPrivilegesItem("edit")))
             ));
     }
 
@@ -268,13 +272,14 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         serviceAgreement.setIsMaster(true);
 
-        Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
-            .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
-                .name("jobRoleOld").id("2")
-                .addPermissionsItem(new Permission().functionId("102")
-                    .addAssignedPrivilegesItem(new Privilege().privilege("view"))
-                    .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
-            )));
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(
+                Mono.just(new GetFunctionGroups().functionGroups(Collections.singletonList(new FunctionGroupItem()
+                    .name("jobRoleOld").id("2")
+                    .addPermissionsItem(new Permission().businessFunctionName("name2")
+                        .addPrivilegesItem("view")
+                        .addPrivilegesItem("edit")
+                    )))));
 
         JobRole jobRole = new JobRole()
             .name("jobRoleNew")
@@ -293,33 +298,32 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
                 ))
-            .metadata(Map.of("key1","value1"));
+            .metadata(Map.of("key1", "value1"));
 
-        Mockito.when(functionGroupsApi.postPresentationIngestFunctionGroup(any()))
-            .thenReturn(Mono.just(new IdItem().id("1")));
+        Mockito.when(functionGroupServiceApi.createFunctionGroup(any()))
+            .thenReturn(Mono.just(new ResultId().id("1")));
 
         Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
         JobRole setupJobRole = listMono.block();
 
         Assertions.assertNotNull(setupJobRole);
 
-        Mockito.verify(functionGroupsApi)
-            .postPresentationIngestFunctionGroup(new PresentationIngestFunctionGroup()
-                .externalServiceAgreementId(saExternalId)
+        Mockito.verify(functionGroupServiceApi)
+            .createFunctionGroup(new FunctionGroupCreateRequest()
+                .serviceAgreementId(saInternalId)
                 .name("jobRoleNew")
                 .description("jobRoleNew")
-                .type(PresentationIngestFunctionGroup.TypeEnum.REGULAR)
-                .metadata(Map.of("key1","value1"))
-                .addPermissionsItem(new PresentationPermission()
-                    .functionId("101")
+                .type(FunctionGroupCreateRequest.TypeEnum.CUSTOM)
+                .metadata(Map.of("key1", "value1"))
+                .addPermissionsItem(new Permission()
+                    .resourceName("name1")
                     .addPrivilegesItem("view")
                 )
-                .addPermissionsItem(new PresentationPermission()
-                    .functionId("102")
+                .addPermissionsItem(new Permission()
+                    .resourceName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
                 ));
-
     }
 
     @Test
@@ -349,13 +353,14 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         serviceAgreement.setIsMaster(true);
 
-        Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
-            .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
-                .name("jobRoleOld").id("2")
-                .addPermissionsItem(new Permission().functionId("102")
-                    .addAssignedPrivilegesItem(new Privilege().privilege("view"))
-                    .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
-            )));
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(
+                Mono.just(new GetFunctionGroups().functionGroups(Collections.singletonList(new FunctionGroupItem()
+                    .name("jobRoleOld").id("2")
+                    .addPermissionsItem(new Permission().businessFunctionName("name2")
+                        .addPrivilegesItem("view")
+                        .addPrivilegesItem("edit")
+                    )))));
 
         JobRole jobRole = new JobRole()
             .name("jobRoleNew")
@@ -377,33 +382,32 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
                 ))
-            .metadata(Map.of("key1","value1"));
+            .metadata(Map.of("key1", "value1"));
 
-        Mockito.when(functionGroupsApi.postPresentationIngestFunctionGroup(any()))
-            .thenReturn(Mono.just(new IdItem().id("1")));
+        Mockito.when(functionGroupServiceApi.createFunctionGroup(any()))
+            .thenReturn(Mono.just(new ResultId().id("1")));
 
         Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
         JobRole setupJobRole = listMono.block();
 
         Assertions.assertNotNull(setupJobRole);
 
-        Mockito.verify(functionGroupsApi)
-            .postPresentationIngestFunctionGroup(new PresentationIngestFunctionGroup()
-                .externalServiceAgreementId(saExternalId)
+        Mockito.verify(functionGroupServiceApi)
+            .createFunctionGroup(new FunctionGroupCreateRequest()
+                .serviceAgreementId(saInternalId)
                 .name("jobRoleNew")
                 .description("jobRoleNew")
-                .type(PresentationIngestFunctionGroup.TypeEnum.TEMPLATE)
-                .metadata(Map.of("key1","value1"))
-                .addPermissionsItem(new PresentationPermission()
-                    .functionId("101")
+                .type(FunctionGroupCreateRequest.TypeEnum.REFERENCE)
+                .metadata(Map.of("key1", "value1"))
+                .addPermissionsItem(new Permission()
+                    .resourceName("name1")
                     .addPrivilegesItem("view")
                 )
-                .addPermissionsItem(new PresentationPermission()
-                    .functionId("102")
+                .addPermissionsItem(new Permission()
+                    .resourceName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
                 ));
-
     }
 
     @Test
@@ -433,13 +437,14 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         serviceAgreement.setIsMaster(true);
 
-        Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
-            .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
-                .name("jobRoleOld").id("2")
-                .addPermissionsItem(new Permission().functionId("102")
-                    .addAssignedPrivilegesItem(new Privilege().privilege("view"))
-                    .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
-            )));
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(
+                Mono.just(new GetFunctionGroups().functionGroups(Collections.singletonList(new FunctionGroupItem()
+                    .name("jobRoleOld").id("2")
+                    .addPermissionsItem(new Permission().businessFunctionName("name2")
+                        .addPrivilegesItem("view")
+                        .addPrivilegesItem("edit")
+                    )))));
 
         JobRole jobRole = new JobRole()
             .name("jobRoleNew")
@@ -461,7 +466,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
                 ))
-            .metadata(Map.of("key1","value1"));
+            .metadata(Map.of("key1", "value1"));
 
         Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
 
@@ -496,17 +501,18 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         serviceAgreement.setIsMaster(true);
 
-        Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
-            .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
-                .name("jobRoleOld").id("2")
-                .addPermissionsItem(new Permission().functionId("102")
-                    .addAssignedPrivilegesItem(new Privilege().privilege("view"))
-                    .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
-            )));
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(
+                Mono.just(new GetFunctionGroups().functionGroups(Collections.singletonList(new FunctionGroupItem()
+                    .name("jobRoleOld").id("2")
+                    .addPermissionsItem(new Permission().businessFunctionName("name2")
+                        .addPrivilegesItem("view")
+                        .addPrivilegesItem("edit")
+                    )))));
 
         JobRole jobRole = new JobRole()
             .name("jobRoleNew")
-            .metadata(Map.of("key1","value1"));
+            .metadata(Map.of("key1", "value1"));
 
         Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
 
@@ -539,13 +545,14 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
             .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
                 .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
 
-        Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
-            .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
-                .name("jobRole").id("1")
-                .addPermissionsItem(new Permission().functionId("101")
-                    .addAssignedPrivilegesItem(new Privilege().privilege("view"))
-                    .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
-            )));
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(
+                Mono.just(new GetFunctionGroups().functionGroups(Collections.singletonList(new FunctionGroupItem()
+                    .name("jobRole").id("1")
+                    .addPermissionsItem(new Permission().businessFunctionName("name1")
+                        .addPrivilegesItem("view")
+                        .addPrivilegesItem("edit")
+                    )))));
 
         JobRole jobRole = new JobRole()
             .name("jobRole")
@@ -564,9 +571,9 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
                     .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
                 ))
-            .metadata(Map.of("key1","value1"));
+            .metadata(Map.of("key1", "value1"));
 
-        Mockito.when(functionGroupsApi.putFunctionGroupsUpdate(any()))
+        Mockito.when(functionGroupIntegrationApi.batchUpdateFunctionGroups(any()))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
 
         Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
@@ -574,20 +581,22 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         Assertions.assertNotNull(setupJobRole);
 
-        Mockito.verify(functionGroupsApi)
-            .putFunctionGroupsUpdate(Collections.singletonList(new PresentationFunctionGroupPutRequestBody()
-                .identifier(new PresentationIdentifier().idIdentifier("1"))
-                .functionGroup(new FunctionGroupUpdate()
+        Mockito.verify(functionGroupIntegrationApi)
+            .batchUpdateFunctionGroups(Collections.singletonList(new FunctionGroupBatchPutItem()
+                .identifier(new FunctionGroupNameIdentifier().name("fg1"))
+                .newValues(new FunctionGroupUpdate()
                     .name("jobRole")
                     .description("jobRole")
-                        .metadata(Map.of("key1","value1"))
-                    .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
-                        .functionName("name1")
-                        .addPrivilegesItem("view"))
-                    .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
-                        .functionName("name2")
-                        .addPrivilegesItem("view")
-                        .addPrivilegesItem("edit")))
+                    .metadata(Map.of("key1", "value1"))
+                    .addPermissionsItem(
+                        new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
+                            .businessFunctionName("name1")
+                            .addPrivilegesItem("view"))
+                    .addPermissionsItem(
+                        new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
+                            .businessFunctionName("name2")
+                            .addPrivilegesItem("view")
+                            .addPrivilegesItem("edit")))
             ));
     }
 
@@ -605,68 +614,74 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
         ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-                LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
 
         // participants
         serviceAgreement
-                .addParticipantsItem(new LegalEntityParticipant().externalId("p1").sharingAccounts(true)
-                        .sharingUsers(true).action(LegalEntityParticipant.ActionEnum.ADD))
-                .addParticipantsItem(new LegalEntityParticipant().externalId("p2").sharingAccounts(false)
-                        .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.REMOVE))
-                .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
-                        .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
+            .addParticipantsItem(new LegalEntityParticipant().externalId("p1").sharingAccounts(true)
+                .sharingUsers(true).action(LegalEntityParticipant.ActionEnum.ADD))
+            .addParticipantsItem(new LegalEntityParticipant().externalId("p2").sharingAccounts(false)
+                .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.REMOVE))
+            .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
+                .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
 
-        Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
-                .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
-                        .name("jobRole").id("1")
-                        .addPermissionsItem(new Permission().functionId("101")
-                                .addAssignedPrivilegesItem(new Privilege().privilege("view"))
-                                .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
-                )));
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(
+                Mono.just(new GetFunctionGroups().functionGroups(Collections.singletonList(new FunctionGroupItem()
+                    .name("jobRole").id("1")
+                    .addPermissionsItem(new Permission().businessFunctionName("name1")
+                        .addPrivilegesItem("view")
+                        .addPrivilegesItem("edit")
+                    )))));
 
         JobRole jobRole = new JobRole()
-                .name("jobRole")
-                .addFunctionGroupsItem(new BusinessFunctionGroup()
-                        .name("fg1")
-                        .addFunctionsItem(new BusinessFunction()
-                                .name("name1")
-                                .functionId("101")
-                                .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
-                        )
+            .name("jobRole")
+            .addFunctionGroupsItem(new BusinessFunctionGroup()
+                .name("fg1")
+                .addFunctionsItem(new BusinessFunction()
+                    .name("name1")
+                    .functionId("101")
+                    .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
                 )
-                .addFunctionGroupsItem(new BusinessFunctionGroup().name("fg2")
-                        .addFunctionsItem(new BusinessFunction()
-                                .name("name2")
-                                .functionId("102")
-                                .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
-                                .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
-                        ));
-
-        Mockito.when(functionGroupsApi.putFunctionGroupsUpdate(any()))
-                .thenReturn(Flux.just(new BatchResponseItemExtended()
-                        .resourceId("4028db307522bfbb017523171c9d0007")
-                        .status(BatchResponseItemExtended.StatusEnum.HTTP_STATUS_BAD_REQUEST)
-                        .addErrorsItem("You cannot manage this entity, while the referenced service agreement has a pending change.")
+            )
+            .addFunctionGroupsItem(new BusinessFunctionGroup().name("fg2")
+                .addFunctionsItem(new BusinessFunction()
+                    .name("name2")
+                    .functionId("102")
+                    .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
+                    .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
                 ));
+
+        Mockito.when(functionGroupIntegrationApi.batchUpdateFunctionGroups(any()))
+            .thenReturn(Flux.just(new BatchResponseItemExtended()
+                .resourceId("4028db307522bfbb017523171c9d0007")
+                .status(BatchResponseItemExtended.StatusEnum.HTTP_STATUS_BAD_REQUEST)
+                .addErrorsItem(
+                    "You cannot manage this entity, while the referenced service agreement has a pending change.")
+            ));
 
         Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
 
         Assertions.assertThrows(StreamTaskException.class, listMono::block);
 
-        Mockito.verify(functionGroupsApi)
-                .putFunctionGroupsUpdate(Collections.singletonList(new PresentationFunctionGroupPutRequestBody()
-                        .identifier(new PresentationIdentifier().idIdentifier("1"))
-                        .functionGroup(new FunctionGroupUpdate()
-                                .name("jobRole")
-                                .description("jobRole")
-                                .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
-                                        .functionName("name1")
-                                        .addPrivilegesItem("view"))
-                                .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
-                                        .functionName("name2")
-                                        .addPrivilegesItem("view")
-                                        .addPrivilegesItem("edit")))
-                ));
+        Mockito.verify(functionGroupIntegrationApi)
+            .batchUpdateFunctionGroups(Collections.singletonList(new FunctionGroupBatchPutItem()
+                .identifier(new FunctionGroupNameIdentifier().name("fg1"))
+                .newValues(new FunctionGroupUpdate()
+                    .name("jobRole")
+                    .description("jobRole")
+                    .metadata(Map.of("key1", "value1"))
+                    .addPermissionsItem(
+                        new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
+                            .businessFunctionName("name1")
+                            .addPrivilegesItem("view"))
+                    .addPermissionsItem(
+                        new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
+                            .businessFunctionName("name2")
+                            .addPrivilegesItem("view")
+                            .addPrivilegesItem("edit")))
+            ));
+
     }
 
     @Test
@@ -694,13 +709,14 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
             .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
                 .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
 
-        Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
-            .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
-                .name("fg1").id("1")
-                .addPermissionsItem(new Permission().functionId("101")
-                    .addAssignedPrivilegesItem(new Privilege().privilege("view"))
-                    .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
-            )));
+        Mockito.when(functionGroupServiceApi.getFunctionGroups(saInternalId))
+            .thenReturn(
+                Mono.just(new GetFunctionGroups().functionGroups(Collections.singletonList(new FunctionGroupItem()
+                    .name("fg1").id("1")
+                    .addPermissionsItem(new Permission().businessFunctionName("name1")
+                        .addPrivilegesItem("view")
+                        .addPrivilegesItem("edit")
+                    )))));
 
         List<BusinessFunctionGroup> newFunctionGroup = Arrays.asList(new BusinessFunctionGroup()
                 .name("fg1")
@@ -719,10 +735,10 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 )
         );
 
-        Mockito.when(functionGroupsApi.putFunctionGroupsUpdate(any()))
+        Mockito.when(functionGroupIntegrationApi.batchUpdateFunctionGroups(any()))
             .thenReturn(Flux.fromIterable(Collections.emptyList()));
-        Mockito.when(functionGroupsApi.postPresentationIngestFunctionGroup(any()))
-            .thenReturn(Mono.just(new IdItem().id("2")));
+        Mockito.when(functionGroupServiceApi.createFunctionGroup(any()))
+            .thenReturn(Mono.just(new ResultId().id("2")));
 
         Mono<List<BusinessFunctionGroup>> listMono =
             subject.setupFunctionGroups(streamTask, serviceAgreement, newFunctionGroup);
@@ -731,25 +747,25 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         Assertions.assertNotNull(businessFunctionGroups);
         Assertions.assertEquals(2, businessFunctionGroups.size());
 
-        Mockito.verify(functionGroupsApi)
-            .putFunctionGroupsUpdate(Collections.singletonList(new PresentationFunctionGroupPutRequestBody()
-                .identifier(new PresentationIdentifier().idIdentifier("1"))
-                .functionGroup(new FunctionGroupUpdate()
+        Mockito.verify(functionGroupIntegrationApi)
+            .batchUpdateFunctionGroups(Collections.singletonList(new FunctionGroupBatchPutItem()
+                .identifier(new FunctionGroupNameIdentifier().name("fg1"))
+                .newValues(new FunctionGroupUpdate()
                     .name("fg1")
                     .description("fg1")
-                    .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
-                        .functionName("name1")
-                        .addPrivilegesItem("view")))
+                    .addPermissionsItem(
+                        new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
+                            .businessFunctionName("name1")
+                            .addPrivilegesItem("view")))
             ));
-
-        Mockito.verify(functionGroupsApi)
-            .postPresentationIngestFunctionGroup(new PresentationIngestFunctionGroup()
-                .externalServiceAgreementId(saExternalId)
+        Mockito.verify(functionGroupServiceApi)
+            .createFunctionGroup(new FunctionGroupCreateRequest()
+                .serviceAgreementId(saInternalId)
                 .name("fg2")
                 .description("fg2")
-                .type(PresentationIngestFunctionGroup.TypeEnum.REGULAR)
-                .addPermissionsItem(new PresentationPermission()
-                    .functionId("102")
+                .type(FunctionGroupCreateRequest.TypeEnum.CUSTOM)
+                .addPermissionsItem(new Permission()
+                    .resourceName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
                 ));

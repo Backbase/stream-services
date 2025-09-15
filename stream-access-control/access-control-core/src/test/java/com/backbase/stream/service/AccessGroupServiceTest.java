@@ -1,9 +1,5 @@
 package com.backbase.stream.service;
 
-import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_INTERNAL_SERVER_ERROR;
-import static com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended.StatusEnum.HTTP_STATUS_OK;
-import static com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction.ADD;
-import static com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction.REMOVE;
 import static com.backbase.stream.LambdaAssertions.assertEqualsTo;
 import static com.backbase.stream.WebClientTestUtils.buildWebResponseExceptionMono;
 import static com.backbase.stream.legalentity.model.LegalEntityStatus.ENABLED;
@@ -12,45 +8,50 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
+import com.backbase.accesscontrol.assignpermissions.api.service.v1.AssignPermissionsApi;
+import com.backbase.accesscontrol.assignpermissions.api.service.v1.model.UserPermissionItem;
+import com.backbase.accesscontrol.assignpermissions.api.service.v1.model.UserPermissions;
+import com.backbase.accesscontrol.datagroup.api.integration.v1.model.BatchResponseItemExtended.StatusEnum;
+import com.backbase.accesscontrol.datagroup.api.integration.v1.model.DataItemBatchUpdate;
+import com.backbase.accesscontrol.datagroup.api.service.v1.DataGroupApi;
 import com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup;
-import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.BatchResponseItemExtended;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.DataGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem.TypeEnum;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.GetContexts;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.IdItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ParticipantIngest;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissions;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PersistenceApprovalPermissionsGetResponseBody;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAction;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationAssignUserPermissions;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupItemPutRequestBody;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationDataGroupUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationFunctionGroupDataGroup;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationItemIdentifier;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationParticipantBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationParticipantPutBody;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationServiceAgreementUserPair;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.PresentationServiceAgreementUsersBatchUpdate;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementUsersQuery;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServicesAgreementIngest;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.UserContextItem;
+import com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroupUpdateRequest;
+import com.backbase.accesscontrol.datagroup.api.service.v1.model.GetDataGroups;
+import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupNameIdentifier;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.FunctionGroupApi;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem.TypeEnum;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.GetFunctionGroups;
+import com.backbase.accesscontrol.permissioncheck.api.service.v1.PermissionCheckApi;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Action;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.BatchResponseItemExtended;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementAdmin;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementAdminsBatchUpdateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementDetails;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementUserExternal;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementUsersBatchUpdateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.StatusCode;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.UpdateParticipantItem;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Participant;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ParticipantWithAdminsAndUsers;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ResultId;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementCreateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementParticipants;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUsers;
+import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
+import com.backbase.accesscontrol.usercontext.api.service.v1.model.ContextServiceAgreement;
+import com.backbase.accesscontrol.usercontext.api.service.v1.model.GetContexts;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
@@ -59,15 +60,15 @@ import com.backbase.stream.legalentity.model.BaseProductGroup.ProductGroupTypeEn
 import com.backbase.stream.legalentity.model.BatchProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.CurrentAccount;
+import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityType;
+import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
-import com.backbase.stream.legalentity.model.ProductGroup;
-import com.backbase.stream.legalentity.model.CustomDataGroupItem;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.BatchProductIngestionMode;
 import com.backbase.stream.product.task.ProductGroupTask;
@@ -87,7 +88,13 @@ import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InOrder;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -101,36 +108,34 @@ class AccessGroupServiceTest {
 
     @InjectMocks
     private AccessGroupService subject;
-
     @Mock
     private UserManagementApi usersApi;
-
     @Mock
-    private UsersApi accessControlUsersApi;
-
+    private PermissionCheckApi permissionCheckServiceApi;
     @Mock
-    private DataGroupsApi dataGroupsApi;
-
+    private DataGroupApi dataGroupServiceApi;
     @Mock
-    private FunctionGroupsApi functionGroupsApi;
-
+    private com.backbase.accesscontrol.datagroup.api.integration.v1.DataGroupApi dataGroupIntegrationApi;
     @Mock
-    private ServiceAgreementsApi serviceAgreementsApi;
-
-    @Spy
-    private DeletionProperties configurationProperties;
-
-    @Spy
-    private BatchResponseUtils batchResponseUtils;
-
+    private FunctionGroupApi functionGroupServiceApi;
+    @Mock
+    private com.backbase.accesscontrol.functiongroup.api.integration.v1.FunctionGroupApi functionGroupIntegrationApi;
+    @Mock
+    private ServiceAgreementApi serviceAgreementServiceApi;
+    @Mock
+    private com.backbase.accesscontrol.serviceagreement.api.integration.v1.ServiceAgreementApi serviceAgreementIntegrationApi;
+    @Mock
+    private AssignPermissionsApi assignPermissionsServiceApi;
     @Mock
     private UserContextApi userContextApi;
-
+    @Spy
+    private DeletionProperties configurationProperties;
+    @Spy
+    private BatchResponseUtils batchResponseUtils;
     @Mock
     private AccessControlConfigurationProperties accessControlProperties;
-
     @Captor
-    private ArgumentCaptor<List<PresentationDataGroupItemPutRequestBody>> presentationDataGroupItemPutRequestBodyCaptor;
+    private ArgumentCaptor<List<DataItemBatchUpdate>> presentationDataGroupItemPutRequestBodyCaptor;
 
     String userInternalId = "userInternalId";
 
@@ -145,19 +150,19 @@ class AccessGroupServiceTest {
         StreamTask streamTask = Mockito.mock(StreamTask.class);
         ServiceAgreement serviceAgreement = new ServiceAgreement()
             .externalId(saExId).name(saName).description(saDesc)
-            .participants(List.of(new LegalEntityParticipant().externalId(participantExId)));
+            .participants(List.of(new LegalEntityParticipant().internalId(participantExId)));
 
-        when(serviceAgreementsApi.postServiceAgreementIngest(any())).thenReturn(Mono.just(new IdItem().id(saInId)));
+        when(serviceAgreementServiceApi.createServiceAgreement(any())).thenReturn(Mono.just(new ResultId().id(saInId)));
 
         ServiceAgreement actual = subject.createServiceAgreement(streamTask, serviceAgreement).block();
 
         assertEquals(saInId, actual.getInternalId());
 
-        ServicesAgreementIngest expectedSA = new ServicesAgreementIngest()
-            .status(null).isMaster(null)
+        ServiceAgreementCreateRequest expectedSA = new ServiceAgreementCreateRequest()
+            .status(null).isSingle(null)
             .externalId(saExId).name(saName).description(saDesc)
-            .participantsToIngest(List.of(new ParticipantIngest().externalId(participantExId)));
-        verify(serviceAgreementsApi).postServiceAgreementIngest(expectedSA);
+            .participants(List.of(new ParticipantWithAdminsAndUsers().legalEntityId(participantExId)));
+        verify(serviceAgreementServiceApi).createServiceAgreement(expectedSA);
     }
 
     @Test
@@ -177,7 +182,7 @@ class AccessGroupServiceTest {
         WebClientResponseException.InternalServerError error =
             Mockito.mock(WebClientResponseException.InternalServerError.class);
         when(error.getResponseBodyAsString()).thenReturn(errorMessage);
-        when(serviceAgreementsApi.postServiceAgreementIngest(any()))
+        when(serviceAgreementServiceApi.createServiceAgreement(any()))
             .thenReturn(Mono.error(error));
 
         assertThrows(StreamTaskException.class,
@@ -202,20 +207,19 @@ class AccessGroupServiceTest {
             .customDataGroupItems(List.of(
                 new CustomDataGroupItem().internalId(existingDgItemInId1).externalId(existingDgItemExId1))));
 
-        when(dataGroupsApi.getDataGroups(saInId, ProductGroupTypeEnum.CUSTOM.name(), true))
-            .thenReturn(Flux.just(new DataGroupItem().id(existingDgItemInId1).name(productGroupName)));
+        when(dataGroupServiceApi.getDataGroups(saInId, ProductGroupTypeEnum.CUSTOM.name(), true, null, 1000))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(
+                List.of(new DataGroup().id(existingDgItemInId1).name(productGroupName)))));
 
-        when(dataGroupsApi.putDataGroups(any())).thenReturn(Mono.empty());
+        when(dataGroupServiceApi.updateDataGroup(any(), any())).thenReturn(Mono.empty());
 
         subject.setupProductGroups(streamTask).block();
 
-        PresentationDataGroupUpdate expectedDGUpdate1 = new PresentationDataGroupUpdate();
-        expectedDGUpdate1.setDataGroupIdentifier(
-            new PresentationDataGroupIdentifier().idIdentifier(existingDgItemInId1));
-        expectedDGUpdate1.setDataItems(List.of(new PresentationItemIdentifier().id(existingDgItemInId1)));
+        DataGroupUpdateRequest expectedDGUpdate1 = new DataGroupUpdateRequest();
+        expectedDGUpdate1.setDataItems(Set.of(existingDgItemInId1));
         expectedDGUpdate1.setName(productGroupName);
 
-        verify(dataGroupsApi).putDataGroups(expectedDGUpdate1);
+        verify(dataGroupServiceApi).updateDataGroup(existingDgItemInId1, expectedDGUpdate1);
     }
 
     @Test
@@ -231,31 +235,31 @@ class AccessGroupServiceTest {
                 new User().fullName(fullName).legalEntityId(leInId).externalId(userExId)))
                 .masterServiceAgreement(new ServiceAgreement().externalId(saExId));
 
-        when(serviceAgreementsApi.putPresentationServiceAgreementAdminsBatchUpdate(any()))
+        when(serviceAgreementIntegrationApi.batchUpdateServiceAgreementAdmins(any()))
             .thenReturn(Flux.just(new BatchResponseItemExtended()));
 
         subject.setAdministrators(legalEntity).block();
 
-        PresentationServiceAgreementUsersBatchUpdate expected = new PresentationServiceAgreementUsersBatchUpdate()
-            .action(ADD).addUsersItem(new PresentationServiceAgreementUserPair()
+        ServiceAgreementAdminsBatchUpdateRequest expected = new ServiceAgreementAdminsBatchUpdateRequest()
+            .action(Action.ADD).addUsersItem(new ServiceAgreementAdmin()
                 .externalServiceAgreementId(saExId).externalUserId(userExId));
-        verify(serviceAgreementsApi).putPresentationServiceAgreementAdminsBatchUpdate(expected);
+        verify(serviceAgreementIntegrationApi).batchUpdateServiceAgreementAdmins(expected);
     }
 
     @Test
     void getServiceAgreementByExternalIdRetrievesServiceAgreementByExternalId() {
         final String externalId = "someExternalId";
-        final Mono<ServiceAgreementItem> dbsSa = Mono.just(new ServiceAgreementItem().externalId(externalId));
+        final Mono<ServiceAgreementDetails> dbsSa = Mono.just(new ServiceAgreementDetails().externalId(externalId));
 
-        when(serviceAgreementsApi.getServiceAgreementExternalId(eq(externalId))).thenReturn(dbsSa);
+        when(serviceAgreementIntegrationApi.getServiceAgreementByExternalId(eq(externalId))).thenReturn(dbsSa);
 
         Mono<ServiceAgreement> result = subject.getServiceAgreementByExternalId(externalId);
 
         ServiceAgreement expected = new ServiceAgreement().externalId(externalId);
 
         StepVerifier.create(result)
-                .assertNext(serviceAgreement -> assertEquals(serviceAgreement,expected))
-                .verifyComplete();
+            .assertNext(serviceAgreement -> assertEquals(serviceAgreement, expected))
+            .verifyComplete();
 
     }
 
@@ -263,14 +267,12 @@ class AccessGroupServiceTest {
     void getServiceAgreementByExternalIdReturnsEmptyOnServiceAgreementNotFound() {
         final String externalId = "someExternalId";
 
-        Mono<ServiceAgreementItem> response =
+        Mono<ServiceAgreementDetails> response =
             buildWebResponseExceptionMono(WebClientResponseException.NotFound.class, HttpMethod.GET);
-        when(serviceAgreementsApi.getServiceAgreementExternalId(eq(externalId)))
+        when(serviceAgreementIntegrationApi.getServiceAgreementByExternalId(eq(externalId)))
             .thenReturn(response);
 
-
         Mono<ServiceAgreement> actual = subject.getServiceAgreementByExternalId(externalId);
-
 
         actual.subscribe(assertEqualsTo(null));
     }
@@ -287,7 +289,7 @@ class AccessGroupServiceTest {
         final String validUntilTime = "23:59:59";
         final List<ServiceAgreementUserAction> regularUsers = asList("userId1", "userId2").stream()
             .map(u -> new ServiceAgreementUserAction().userProfile(new JobProfileUser().user(new User()
-                .externalId("ex_" + u).internalId("in_" + u)))
+                    .externalId("ex_" + u).internalId("in_" + u)))
                 .action(ServiceAgreementUserAction.ActionEnum.ADD))
             .collect(Collectors.toList());
 
@@ -302,35 +304,37 @@ class AccessGroupServiceTest {
             .addParticipantsItem(new LegalEntityParticipant().externalId("p2").sharingAccounts(false)
                 .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
 
-        when(serviceAgreementsApi.putPresentationIngestServiceAgreementParticipants(any()))
+        when(serviceAgreementIntegrationApi.batchUpdateParticipants(any()))
             .thenReturn(Flux.concat(
-                Mono.just(new BatchResponseItemExtended().action(ADD).resourceId("p1").status(HTTP_STATUS_OK)),
-                Mono.just(new BatchResponseItemExtended().action(ADD).resourceId("p2").status(HTTP_STATUS_OK))
+                Mono.just(new BatchResponseItemExtended().action(Action.ADD).resourceId("p1")
+                    .status(StatusCode.HTTP_STATUS_OK)),
+                Mono.just(new BatchResponseItemExtended().action(Action.ADD).resourceId("p2")
+                    .status(StatusCode.HTTP_STATUS_OK))
             ));
 
         Flux<BatchResponseItemExtended> usersResponse = Flux.fromIterable(regularUsers.stream()
-            .map(u -> new BatchResponseItemExtended().status(HTTP_STATUS_OK)
+            .map(u -> new BatchResponseItemExtended().status(StatusCode.HTTP_STATUS_OK)
                 .resourceId(u.getUserProfile().getUser().getExternalId()))
             .collect(Collectors.toList()));
-        when(serviceAgreementsApi.putPresentationServiceAgreementUsersBatchUpdate(any())).thenReturn(usersResponse);
+        when(serviceAgreementIntegrationApi.batchUpdateServiceAgreementUsers(any())).thenReturn(usersResponse);
 
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId), eq(false)))
-            .thenReturn(Flux.fromIterable(Collections.emptyList()));
+        when(serviceAgreementServiceApi.getServiceAgreementParticipants(eq(saInternalId)))
+            .thenReturn(Mono.just(new ServiceAgreementParticipants()));
 
-        Mono<ServiceAgreementUsersQuery> emptyExistingUsersList = Mono.just(new ServiceAgreementUsersQuery());
-        when(serviceAgreementsApi.getServiceAgreementUsers(eq(saInternalId))).thenReturn(emptyExistingUsersList);
+        Mono<ServiceAgreementUsers> emptyExistingUsersList = Mono.just(new ServiceAgreementUsers());
+        when(serviceAgreementServiceApi.getServiceAgreementUsers(saInternalId, null, 1000)).thenReturn(
+            emptyExistingUsersList);
 
-
-        Mono<ServiceAgreement> result = subject.updateServiceAgreementAssociations(streamTask, serviceAgreement, regularUsers);
+        Mono<ServiceAgreement> result = subject.updateServiceAgreementAssociations(streamTask, serviceAgreement,
+            regularUsers);
         result.block();
 
-
-        InOrder inOrderValidator = inOrder(serviceAgreementsApi);
-        thenUpdateParticipantsCall(inOrderValidator, saExternalId, ADD,
+        InOrder inOrderValidator = inOrder(serviceAgreementIntegrationApi);
+        thenUpdateParticipantsCall(inOrderValidator, saExternalId, Action.ADD,
             new ExpectedParticipantUpdate("p1", true, true),
             new ExpectedParticipantUpdate("p2", false, false));
 
-        thenRegularUsersUpdateCall(saExternalId, ADD, "ex_userId1", "ex_userId2");
+        thenRegularUsersUpdateCall(saExternalId, Action.ADD, "ex_userId1", "ex_userId2");
     }
 
     @Test
@@ -345,12 +349,12 @@ class AccessGroupServiceTest {
         final String validUntilTime = "23:59:59";
         final List<ServiceAgreementUserAction> regularUsersToAdd = asList("userId1", "userId2").stream()
             .map(u -> new ServiceAgreementUserAction().userProfile(new JobProfileUser().user(new User()
-                .externalId("ex_" + u).internalId("in_" + u)))
+                    .externalId("ex_" + u).internalId("in_" + u)))
                 .action(ServiceAgreementUserAction.ActionEnum.ADD))
             .collect(Collectors.toList());
         final List<ServiceAgreementUserAction> regularUsersToRemove = asList("userId3", "userId4").stream()
             .map(u -> new ServiceAgreementUserAction().userProfile(new JobProfileUser().user(new User()
-                .externalId("ex_" + u).internalId("in_" + u)))
+                    .externalId("ex_" + u).internalId("in_" + u)))
                 .action(ServiceAgreementUserAction.ActionEnum.REMOVE))
             .collect(Collectors.toList());
         final List<ServiceAgreementUserAction> regularUsers =
@@ -370,40 +374,41 @@ class AccessGroupServiceTest {
             .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
                 .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
 
-        when(serviceAgreementsApi.putPresentationIngestServiceAgreementParticipants(any()))
-            .thenReturn(Flux.concat(Mono.just(new BatchResponseItemExtended().status(HTTP_STATUS_OK))));
+        when(serviceAgreementIntegrationApi.batchUpdateParticipants(any()))
+            .thenReturn(Flux.concat(Mono.just(new BatchResponseItemExtended().status(StatusCode.HTTP_STATUS_OK))));
 
-        ServiceAgreementParticipantsGetResponseBody existingPar1 =
-            new ServiceAgreementParticipantsGetResponseBody().externalId("p1");
-        ServiceAgreementParticipantsGetResponseBody existingPar2 =
-            new ServiceAgreementParticipantsGetResponseBody().externalId("p2");
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId), eq(false)))
-            .thenReturn(Flux.fromIterable(asList(existingPar1, existingPar2)));
+        when(serviceAgreementServiceApi.getServiceAgreementParticipants(eq(saInternalId)))
+            .thenReturn(Mono.just(new ServiceAgreementParticipants().participants(List.of(
+                new Participant().externalId("p1"),
+                new Participant().externalId("p2")
+            ))));
 
         // users
         Flux<BatchResponseItemExtended> usersResponse = Flux.fromIterable(regularUsers.stream()
-            .map(u -> new BatchResponseItemExtended().status(HTTP_STATUS_OK)
+            .map(u -> new BatchResponseItemExtended().status(StatusCode.HTTP_STATUS_OK)
                 .resourceId(u.getUserProfile().getUser().getExternalId()))
             .collect(Collectors.toList()));
-        when(serviceAgreementsApi.putPresentationServiceAgreementUsersBatchUpdate(any())).thenReturn(usersResponse);
+        when(serviceAgreementIntegrationApi.batchUpdateServiceAgreementUsers(any())).thenReturn(usersResponse);
 
-        Mono<ServiceAgreementUsersQuery> existingUsersList =
-            Mono.just(new ServiceAgreementUsersQuery().addUserIdsItem("in_userId1").addUserIdsItem("in_userId3"));
-        when(serviceAgreementsApi.getServiceAgreementUsers(eq(saInternalId))).thenReturn(existingUsersList);
+        Mono<ServiceAgreementUsers> existingUsersList =
+            Mono.just(new ServiceAgreementUsers().userIds(List.of(
+                new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId("in_userId1"),
+                new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId("in_userId3"))));
+        when(serviceAgreementServiceApi.getServiceAgreementUsers(eq(saInternalId), null, 1000))
+            .thenReturn(existingUsersList);
 
-
-        Mono<ServiceAgreement> result = subject.updateServiceAgreementAssociations(streamTask, serviceAgreement, regularUsers);
+        Mono<ServiceAgreement> result = subject.updateServiceAgreementAssociations(streamTask, serviceAgreement,
+            regularUsers);
         result.block();
 
-
-        InOrder inOrderValidator = inOrder(serviceAgreementsApi);
-        thenUpdateParticipantsCall(inOrderValidator, saExternalId, ADD,
+        InOrder inOrderValidator = inOrder(serviceAgreementServiceApi);
+        thenUpdateParticipantsCall(inOrderValidator, saExternalId, Action.ADD,
             new ExpectedParticipantUpdate("p3", false, false));
-        thenUpdateParticipantsCall(inOrderValidator, saExternalId, REMOVE,
+        thenUpdateParticipantsCall(inOrderValidator, saExternalId, Action.REMOVE,
             new ExpectedParticipantUpdate("p2", false, false));
 
-        thenRegularUsersUpdateCall(saExternalId, REMOVE, "ex_userId3");
-        thenRegularUsersUpdateCall(saExternalId, ADD, "ex_userId2");
+        thenRegularUsersUpdateCall(saExternalId, Action.ADD, "ex_userId3");
+        thenRegularUsersUpdateCall(saExternalId, Action.REMOVE, "ex_userId2");
     }
 
     @Test
@@ -426,21 +431,20 @@ class AccessGroupServiceTest {
             .addParticipantsItem(new LegalEntityParticipant().externalId("p4").sharingAccounts(false)
                 .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
 
-        when(serviceAgreementsApi.putPresentationIngestServiceAgreementParticipants(any()))
+        when(serviceAgreementIntegrationApi.batchUpdateParticipants(any()))
             .thenReturn(Flux.concat(
-                Mono.just(new BatchResponseItemExtended().action(ADD).resourceId("p1")
-                    .status(HTTP_STATUS_OK)),
-                Mono.just(new BatchResponseItemExtended().action(ADD).resourceId("p2")
-                    .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)),
-                Mono.just(new BatchResponseItemExtended().action(ADD).resourceId("p3")
-                    .status(HTTP_STATUS_INTERNAL_SERVER_ERROR)),
-                Mono.just(new BatchResponseItemExtended().action(ADD).resourceId("p4")
-                    .status(HTTP_STATUS_OK))
+                Mono.just(new BatchResponseItemExtended().action(Action.ADD).resourceId("p1")
+                    .status(StatusCode.HTTP_STATUS_OK)),
+                Mono.just(new BatchResponseItemExtended().action(Action.ADD).resourceId("p2")
+                    .status(StatusCode.HTTP_STATUS_INTERNAL_SERVER_ERROR)),
+                Mono.just(new BatchResponseItemExtended().action(Action.ADD).resourceId("p3")
+                    .status(StatusCode.HTTP_STATUS_INTERNAL_SERVER_ERROR)),
+                Mono.just(new BatchResponseItemExtended().action(Action.ADD).resourceId("p4")
+                    .status(StatusCode.HTTP_STATUS_OK))
             ));
 
-        when(serviceAgreementsApi.getServiceAgreementParticipants(eq(saInternalId), eq(false)))
-            .thenReturn(Flux.fromIterable(Collections.emptyList()));
-
+        when(serviceAgreementServiceApi.getServiceAgreementParticipants(eq(saInternalId)))
+            .thenReturn(Mono.just(new ServiceAgreementParticipants()));
 
         Mono<Map<LegalEntityParticipant.ActionEnum, Mono<ServiceAgreement>>> result =
             subject.updateParticipants(streamTask, serviceAgreement);
@@ -450,7 +454,6 @@ class AccessGroupServiceTest {
                 .then(map.get(LegalEntityParticipant.ActionEnum.REMOVE))
                 .block();
         });
-
 
         InOrder verifier = inOrder(streamTask);
         verifier.verify(streamTask).error(eq("participant"), eq("update-participant"), eq("failed"),
@@ -463,7 +466,8 @@ class AccessGroupServiceTest {
     void assignPermissionsBatch() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
-            new BatchProductGroup().serviceAgreement(new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
+            new BatchProductGroup().serviceAgreement(
+                new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
         );
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
@@ -477,41 +481,33 @@ class AccessGroupServiceTest {
             baseProductGroupMap
         );
 
-        List<PresentationAssignUserPermissions> expectedPermissions = Collections.singletonList(
-            new PresentationAssignUserPermissions()
-                .externalUserId("benedict")
-                .externalServiceAgreementId("sa_benedict")
-                .functionGroupDataGroups(Arrays.asList(
-                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
-                        new PresentationIdentifier().idIdentifier("system-group-id-2")
-                    ).dataGroupIdentifiers(Collections.emptyList()),
-                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
-                        new PresentationIdentifier().idIdentifier("system-group-id-3")
-                    ).dataGroupIdentifiers(Collections.emptyList()),
-                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
-                        new PresentationIdentifier().idIdentifier("business-function-group-id-1")
-                    ).dataGroupIdentifiers(List.of(new PresentationDataGroupIdentifier().idIdentifier("data-group-id")))
-                ))
+        List<UserPermissionItem> expectedPermissions = List.of(
+            new UserPermissionItem().functionGroupId("system-group-id-2").dataGroupIds(Set.of()),
+            new UserPermissionItem().functionGroupId("system-group-id-3").dataGroupIds(Set.of()),
+            new UserPermissionItem().functionGroupId("business-function-group-id-1")
+                .dataGroupIds(Set.of("data-group-id"))
         );
 
-        when(functionGroupsApi.getFunctionGroups("sa-internal-id"))
-            .thenReturn(Flux.just(
-                new FunctionGroupItem().id("system-group-id-1").name("SYSTEM_FUNCTION_GROUP").type(FunctionGroupItem.TypeEnum.SYSTEM),
-                new FunctionGroupItem().id("system-group-id-2").name("Full access").type(FunctionGroupItem.TypeEnum.TEMPLATE)
+        when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
+            .thenReturn(Mono.just(new GetFunctionGroups()
+                .functionGroups(List.of(
+                    new FunctionGroupItem().id("system-group-id-1").name("SYSTEM_FUNCTION_GROUP")
+                        .type(FunctionGroupItem.TypeEnum.SYSTEM),
+                    new FunctionGroupItem().id("system-group-id-2").name("Full access")
+                        .type(TypeEnum.REFERENCE)
+                ))
             ));
 
-        when(accessControlUsersApi.getPersistenceApprovalPermissions("user-internal-id", "sa-internal-id"))
-            .thenReturn(Mono.just(new PersistenceApprovalPermissions().items(Arrays.asList(
-                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("system-group-id-1").dataGroupIds(Collections.emptyList()),
-                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("system-group-id-2").dataGroupIds(Collections.emptyList()),
-                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("system-group-id-3").dataGroupIds(Collections.emptyList()),
-                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("business-function-group-id-1").dataGroupIds(List.of("data-group-id"))
+        when(assignPermissionsServiceApi.getUserPermissions("user-internal-id", "sa-internal-id"))
+            .thenReturn(Mono.just(new UserPermissions().permissions(List.of(
+                new UserPermissionItem().functionGroupId("system-group-id-1").dataGroupIds(Set.of()),
+                new UserPermissionItem().functionGroupId("system-group-id-2").dataGroupIds(Set.of()),
+                new UserPermissionItem().functionGroupId("system-group-id-3").dataGroupIds(Set.of()),
+                new UserPermissionItem().functionGroupId("business-function-group-id-1")
+                    .dataGroupIds(Set.of("data-group-id"))
             ))));
 
-        when(accessControlUsersApi.putAssignUserPermissions(expectedPermissions))
-            .thenReturn(Flux.just(
-                new BatchResponseItemExtended().resourceId("resource-id").status(HTTP_STATUS_OK).errors(Collections.emptyList())
-            ));
+        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
 
         // When
         BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
@@ -520,7 +516,7 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(accessControlUsersApi).putAssignUserPermissions(expectedPermissions);
+        verify(assignPermissionsServiceApi).putUserPermissions("sa-internal-id", "sa-internal-id", expectedPermissions);
     }
 
     /*
@@ -532,7 +528,8 @@ class AccessGroupServiceTest {
     void assignPermissionsBatchNoExistingFunctionGroups() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
-            new BatchProductGroup().serviceAgreement(new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
+            new BatchProductGroup().serviceAgreement(
+                new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
         );
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
@@ -542,8 +539,8 @@ class AccessGroupServiceTest {
             Collections.singletonList(new BaseProductGroup().internalId("data-group-0"))
         );
         baseProductGroupMap.put(
-             new BusinessFunctionGroup().id("business-function-group-id-2"),
-             Collections.singletonList(new BaseProductGroup().internalId("data-group-2"))
+            new BusinessFunctionGroup().id("business-function-group-id-2"),
+            Collections.singletonList(new BaseProductGroup().internalId("data-group-2"))
         );
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
@@ -552,43 +549,32 @@ class AccessGroupServiceTest {
             baseProductGroupMap
         );
 
-        List<PresentationAssignUserPermissions> expectedPermissions = Collections.singletonList(
-            new PresentationAssignUserPermissions()
-                .externalUserId("benedict")
-                .externalServiceAgreementId("sa_benedict")
-                .functionGroupDataGroups(Arrays.asList(
-                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
-                        new PresentationIdentifier().idIdentifier("function-group-id-1")
-                    ).dataGroupIdentifiers(Collections.emptyList()),
-                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
-                        new PresentationIdentifier().idIdentifier("business-function-group-id-1")
-                    ).dataGroupIdentifiers(Arrays.asList(
-                        new PresentationDataGroupIdentifier().idIdentifier("data-group-1"),
-                        new PresentationDataGroupIdentifier().idIdentifier("data-group-0"))),
-                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
-                        new PresentationIdentifier().idIdentifier("business-function-group-id-2")
-                    ).dataGroupIdentifiers(Arrays.asList(
-                        new PresentationDataGroupIdentifier().idIdentifier("data-group-2")
-                    )
-                ))
-        ));
+        List<UserPermissionItem> expectedPermissions = List.of(
+            new UserPermissionItem().functionGroupId("function-group-id-1").dataGroupIds(Set.of()),
+            new UserPermissionItem().functionGroupId("business-function-group-id-1").dataGroupIds(Set.of("data-group-1",
+                "data-group-0")),
+            new UserPermissionItem().functionGroupId("business-function-group-id-2")
+                .dataGroupIds(Set.of("data-group-2"))
+        );
 
-        when(functionGroupsApi.getFunctionGroups("sa-internal-id"))
-            .thenReturn(Flux.just(
-                new FunctionGroupItem().id("system-group-id-1").name("SFG").type(FunctionGroupItem.TypeEnum.SYSTEM),
-                new FunctionGroupItem().id("function-group-id-1").name("Full access").type(FunctionGroupItem.TypeEnum.TEMPLATE)
+        when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
+            .thenReturn(Mono.just(new GetFunctionGroups()
+                .functionGroups(List.of(
+                    new FunctionGroupItem().id("system-group-id-1").name("SFG")
+                        .type(FunctionGroupItem.TypeEnum.SYSTEM),
+                    new FunctionGroupItem().id("function-group-id-1").name("Full access")
+                        .type(TypeEnum.REFERENCE)
+                ))
             ));
 
-        when(accessControlUsersApi.getPersistenceApprovalPermissions("user-internal-id", "sa-internal-id"))
-            .thenReturn(Mono.just(new PersistenceApprovalPermissions().items(Arrays.asList(
-                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("function-group-id-1").dataGroupIds(Collections.emptyList()),
-                new PersistenceApprovalPermissionsGetResponseBody().functionGroupId("business-function-group-id-1").dataGroupIds(Collections.singletonList("data-group-1"))
+        when(assignPermissionsServiceApi.getUserPermissions("user-internal-id", "sa-internal-id"))
+            .thenReturn(Mono.just(new UserPermissions().permissions(List.of(
+                new UserPermissionItem().functionGroupId("function-group-id-1").dataGroupIds(Set.of()),
+                new UserPermissionItem().functionGroupId("business-function-group-id-1")
+                    .dataGroupIds(Set.of("data-group-id"))
             ))));
 
-        when(accessControlUsersApi.putAssignUserPermissions(expectedPermissions))
-            .thenReturn(Flux.just(
-                new BatchResponseItemExtended().resourceId("resource-id").status(HTTP_STATUS_OK).errors(Collections.emptyList())
-            ));
+        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
 
         // When
         BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
@@ -597,19 +583,21 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(accessControlUsersApi).putAssignUserPermissions(expectedPermissions);
+        verify(assignPermissionsServiceApi).putUserPermissions("sa-internal-id", "sa-internal-id", expectedPermissions);
     }
 
     @Test
     void assignPermissionsBatchIngestionModeReplace() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
-            new BatchProductGroup().serviceAgreement(new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
+            new BatchProductGroup().serviceAgreement(
+                new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
         );
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
-        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"), Collections.emptyList());
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"),
+            Collections.emptyList());
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
         usersPermissions.put(
@@ -617,21 +605,10 @@ class AccessGroupServiceTest {
             baseProductGroupMap
         );
 
-        List<PresentationAssignUserPermissions> expectedPermissions = Collections.singletonList(
-            new PresentationAssignUserPermissions()
-                .externalUserId("benedict")
-                .externalServiceAgreementId("sa_benedict")
-                .functionGroupDataGroups(Collections.singletonList(
-                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
-                        new PresentationIdentifier().idIdentifier("business-function-group-id-1")
-                    ).dataGroupIdentifiers(Collections.emptyList())
-                ))
-        );
+        List<UserPermissionItem> expectedPermissions = List.of(
+            new UserPermissionItem().functionGroupId("business-function-group-id-1").dataGroupIds(Set.of()));
 
-        when(accessControlUsersApi.putAssignUserPermissions(expectedPermissions))
-            .thenReturn(Flux.just(
-                new BatchResponseItemExtended().resourceId("resource-id").status(HTTP_STATUS_OK).errors(Collections.emptyList())
-            ));
+        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
 
         // When
         BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
@@ -640,7 +617,7 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(accessControlUsersApi).putAssignUserPermissions(expectedPermissions);
+        verify(assignPermissionsServiceApi).putUserPermissions("sa-internal-id", "sa-internal-id", expectedPermissions);
     }
 
     @Test
@@ -663,10 +640,12 @@ class AccessGroupServiceTest {
         BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
             "Repository Group Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "template-custom");
-        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup("Repository Group Engagement Template Custom",
+        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup(
+            "Repository Group Engagement Template Custom",
             "Repository Group Engagement Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-custom");
-        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup("Repository Group Engagement Template Notification",
+        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup(
+            "Repository Group Engagement Template Notification",
             "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-notification");
 
@@ -681,7 +660,7 @@ class AccessGroupServiceTest {
             .block();
 
         // Then
-        verify(dataGroupsApi, times(0)).putDataGroupItemsUpdate(any());
+        verify(dataGroupIntegrationApi, times(0)).batchUpdateDataItems(any());
     }
 
     @Test
@@ -694,23 +673,28 @@ class AccessGroupServiceTest {
 
         DataGroup dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
             "Repository Group Template Custom");
-        DataGroup dataGroupItemEngagementTemplateCustom = buildDataGroupItem("Repository Group Engagement Template Custom",
+        DataGroup dataGroupItemEngagementTemplateCustom = buildDataGroupItem(
+            "Repository Group Engagement Template Custom",
             "Repository Group Engagement Template Custom");
-        DataGroup dataGroupItemEngagementTemplateNotification = buildDataGroupItem("Repository Group Engagement Template Notification",
+        DataGroup dataGroupItemEngagementTemplateNotification = buildDataGroupItem(
+            "Repository Group Engagement Template Notification",
             "Repository Group Engagement Template Notification");
 
         BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
             "Repository Group Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "template-custom");
-        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup("Repository Group Engagement Template Custom",
+        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup(
+            "Repository Group Engagement Template Custom",
             "Repository Group Engagement Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-custom");
-        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup("Repository Group Engagement Template Notification",
+        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup(
+            "Repository Group Engagement Template Notification",
             "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-notification");
-        when(dataGroupsApi.putDataGroupItemsUpdate(any())).thenReturn(Flux.just(new BatchResponseItemExtended()
-            .status(HTTP_STATUS_OK)
-            .resourceId("test-resource-id")));
+        when(dataGroupIntegrationApi.batchUpdateDataItems(any())).thenReturn(
+            Flux.just(new com.backbase.accesscontrol.datagroup.api.integration.v1.model.BatchResponseItemExtended()
+                .status(StatusEnum.HTTP_STATUS_OK)
+                .resourceId("test-resource-id")));
 
         // When
         subject.updateExistingDataGroupsBatch(batchProductGroupTask,
@@ -723,10 +707,10 @@ class AccessGroupServiceTest {
             .block();
 
         // Then
-        verify(dataGroupsApi).putDataGroupItemsUpdate(presentationDataGroupItemPutRequestBodyCaptor.capture());
+        verify(dataGroupIntegrationApi).batchUpdateDataItems(presentationDataGroupItemPutRequestBodyCaptor.capture());
         assertEquals(3, presentationDataGroupItemPutRequestBodyCaptor.getValue().stream()
-            .map(PresentationDataGroupItemPutRequestBody::getAction)
-            .filter(ADD::equals)
+            .map(DataItemBatchUpdate::getAction)
+            .filter(com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD::equals)
             .toList()
             .size());
     }
@@ -741,23 +725,29 @@ class AccessGroupServiceTest {
 
         DataGroup dataGroupItemTemplateCustom = buildDataGroupItem("Repository Group Template Custom",
             "Repository Group Template Custom", "template-custom-test");
-        DataGroup dataGroupItemEngagementTemplateCustom = buildDataGroupItem("Repository Group Engagement Template Custom",
+        DataGroup dataGroupItemEngagementTemplateCustom = buildDataGroupItem(
+            "Repository Group Engagement Template Custom",
             "Repository Group Engagement Template Custom", "engagement-template-custom-test");
-        DataGroup dataGroupItemEngagementTemplateNotification = buildDataGroupItem("Repository Group Engagement Template Notification",
+        DataGroup dataGroupItemEngagementTemplateNotification = buildDataGroupItem(
+            "Repository Group Engagement Template Notification",
             "Repository Group Engagement Template Notification", "engagement-template-notification-test");
 
         BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
             "Repository Group Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "template-custom");
-        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup("Repository Group Engagement Template Custom",
+        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup(
+            "Repository Group Engagement Template Custom",
             "Repository Group Engagement Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-custom");
-        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup("Repository Group Engagement Template Notification",
+        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup(
+            "Repository Group Engagement Template Notification",
             "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-notification");
-        when(dataGroupsApi.putDataGroupItemsUpdate(any())).thenReturn(Flux.just(new BatchResponseItemExtended()
-            .status(HTTP_STATUS_OK)
-            .resourceId("test-resource-id")));
+        when(dataGroupIntegrationApi.batchUpdateDataItems(any()))
+            .thenReturn(
+                Flux.just(new com.backbase.accesscontrol.datagroup.api.integration.v1.model.BatchResponseItemExtended()
+                    .status(StatusEnum.HTTP_STATUS_OK)
+                    .resourceId("test-resource-id")));
 
         // When
         subject.updateExistingDataGroupsBatch(batchProductGroupTask,
@@ -770,15 +760,27 @@ class AccessGroupServiceTest {
             .block();
 
         // Then
-        verify(dataGroupsApi).putDataGroupItemsUpdate(presentationDataGroupItemPutRequestBodyCaptor.capture());
-        List<PresentationDataGroupItemPutRequestBody> actions = presentationDataGroupItemPutRequestBodyCaptor.getValue();
+        verify(dataGroupIntegrationApi).batchUpdateDataItems(presentationDataGroupItemPutRequestBodyCaptor.capture());
+        List<DataItemBatchUpdate> actions = presentationDataGroupItemPutRequestBodyCaptor.getValue();
         assertEquals(6, actions.size());
-        assertTrue(actionForItemIsPresent(actions, REMOVE, "template-custom-test"));
-        assertTrue(actionForItemIsPresent(actions, REMOVE, "engagement-template-custom-test"));
-        assertTrue(actionForItemIsPresent(actions, REMOVE, "engagement-template-notification-test"));
-        assertTrue(actionForItemIsPresent(actions, ADD, "template-custom"));
-        assertTrue(actionForItemIsPresent(actions, ADD, "engagement-template-custom"));
-        assertTrue(actionForItemIsPresent(actions, ADD, "engagement-template-notification"));
+        assertTrue(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
+                "template-custom-test"));
+        assertTrue(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
+                "engagement-template-custom-test"));
+        assertTrue(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
+                "engagement-template-notification-test"));
+        assertTrue(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
+                "template-custom"));
+        assertTrue(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
+                "engagement-template-custom"));
+        assertTrue(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
+                "engagement-template-notification"));
     }
 
     @Test
@@ -800,9 +802,12 @@ class AccessGroupServiceTest {
         BaseProductGroup upsertProductGroupRepository = buildBaseProductGroup("Repository data group item",
             "rep desc", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "repository-dg-item2");
-        when(dataGroupsApi.putDataGroupItemsUpdate(any())).thenReturn(Flux.just(new BatchResponseItemExtended()
-            .status(HTTP_STATUS_OK)
-            .resourceId("test-resource-id")));
+
+        when(dataGroupIntegrationApi.batchUpdateDataItems(any()))
+            .thenReturn(
+                Flux.just(new com.backbase.accesscontrol.datagroup.api.integration.v1.model.BatchResponseItemExtended()
+                    .status(StatusEnum.HTTP_STATUS_OK)
+                    .resourceId("test-resource-id")));
 
         // When
         subject.updateExistingDataGroupsBatch(batchProductGroupTask,
@@ -811,17 +816,29 @@ class AccessGroupServiceTest {
             .block();
 
         // Then
-        verify(dataGroupsApi).putDataGroupItemsUpdate(presentationDataGroupItemPutRequestBodyCaptor.capture());
-
-        List<PresentationDataGroupItemPutRequestBody> actions = presentationDataGroupItemPutRequestBodyCaptor.getValue();
+        verify(dataGroupIntegrationApi).batchUpdateDataItems(presentationDataGroupItemPutRequestBodyCaptor.capture());
+        List<DataItemBatchUpdate> actions = presentationDataGroupItemPutRequestBodyCaptor.getValue();
         assertEquals(2, actions.size());
-        assertTrue(actionForItemIsPresent(actions, ADD, "repository-dg-item2"));
-        assertTrue(actionForItemIsPresent(actions, REMOVE, "repository-dg-item1"));
+
+        assertTrue(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
+                "repository-dg-item2"));
+        assertTrue(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
+                "repository-dg-item1"));
         // the following assertions is to test if for some reason "custom-dg-item1" and "custom-dg-item2" ended up paired with "repository-dg-item*" ;)
-        assertFalse(actionForItemIsPresent(actions, REMOVE, "custom-dg-item1"));
-        assertFalse(actionForItemIsPresent(actions, REMOVE, "custom-dg-item2"));
-        assertFalse(actionForItemIsPresent(actions, ADD, "custom-dg-item1"));
-        assertFalse(actionForItemIsPresent(actions, ADD, "custom-dg-item2"));
+        assertFalse(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
+                "custom-dg-item1"));
+        assertFalse(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
+                "custom-dg-item2"));
+        assertFalse(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
+                "custom-dg-item1"));
+        assertFalse(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
+                "custom-dg-item2"));
     }
 
     @Test
@@ -846,7 +863,7 @@ class AccessGroupServiceTest {
                 List.of(upsertProductGroupArrangement))
             .block();
 
-        verify(dataGroupsApi, times(0)).putDataGroupItemsUpdate(any());
+        verify(dataGroupIntegrationApi, times(0)).batchUpdateDataGroups(any());
 
     }
 
@@ -860,9 +877,11 @@ class AccessGroupServiceTest {
         DataGroup existingDGroup = new DataGroup().id("debitAccountInId1").name("arrangement1")
             .addItemsItem("debitAccountExId1").serviceAgreementId("saInId");
 
-        when(dataGroupsApi.putDataGroupItemsUpdate(any()))
+        when(dataGroupIntegrationApi.batchUpdateDataItems(any()))
             .thenReturn(
-                Flux.just(new BatchResponseItemExtended().status(HTTP_STATUS_OK).resourceId("test-resource-id")));
+                Flux.just(new com.backbase.accesscontrol.datagroup.api.integration.v1.model.BatchResponseItemExtended()
+                    .status(StatusEnum.HTTP_STATUS_OK)
+                    .resourceId("test-resource-id")));
 
         BaseProductGroup upsertProductGroupArrangement = new BaseProductGroup()
             .name("arrangement1")
@@ -876,12 +895,15 @@ class AccessGroupServiceTest {
                 List.of(upsertProductGroupArrangement))
             .block();
 
-        verify(dataGroupsApi).putDataGroupItemsUpdate(presentationDataGroupItemPutRequestBodyCaptor.capture());
-
-        List<PresentationDataGroupItemPutRequestBody> actions = presentationDataGroupItemPutRequestBodyCaptor.getValue();
+        verify(dataGroupIntegrationApi).batchUpdateDataItems(presentationDataGroupItemPutRequestBodyCaptor.capture());
+        List<DataItemBatchUpdate> actions = presentationDataGroupItemPutRequestBodyCaptor.getValue();
         assertEquals(2, actions.size());
-        assertTrue(actionForItemIsPresent(actions, ADD, "debitAccountInId2"));
-        assertTrue(actionForItemIsPresent(actions, REMOVE, "debitAccountExId1"));
+        assertTrue(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.ADD,
+                "debitAccountInId2"));
+        assertTrue(
+            actionForItemIsPresent(actions, com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action.REMOVE,
+                "debitAccountExId1"));
     }
 
     @Test
@@ -899,7 +921,7 @@ class AccessGroupServiceTest {
         BaseProductGroup upsertProductGroupCustom = buildBaseProductGroup("Custom data group item",
             "custom desc", ProductGroupTypeEnum.CUSTOM,
             "custom-dg-item2");
-        when(dataGroupsApi.putDataGroupItemsUpdate(any())).thenReturn(
+        when(dataGroupIntegrationApi.batchUpdateDataItems(any())).thenReturn(
             Flux.error(WebClientResponseException.create(500, "Internal error", null, null, null, null)));
 
         assertThrows(StreamTaskException.class,
@@ -920,10 +942,12 @@ class AccessGroupServiceTest {
         BaseProductGroup baseProductGroupTemplateCustom = buildBaseProductGroup("Repository Group Template Custom",
             "Repository Group Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "template-custom");
-        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup("Repository Group Engagement Template Custom",
+        BaseProductGroup baseProductGroupEngagementTemplateCustom = buildBaseProductGroup(
+            "Repository Group Engagement Template Custom",
             "Repository Group Engagement Template Custom", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-custom");
-        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup("Repository Group Engagement Template Notification",
+        BaseProductGroup baseProductGroupEngagementTemplateNotification = buildBaseProductGroup(
+            "Repository Group Engagement Template Notification",
             "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-notification");
 
@@ -936,7 +960,7 @@ class AccessGroupServiceTest {
             .block();
 
         // Then
-        verify(dataGroupsApi, times(0)).putDataGroupItemsUpdate(any());
+        verify(dataGroupIntegrationApi, times(0)).batchUpdateDataItems(any());
     }
 
     /*
@@ -948,12 +972,14 @@ class AccessGroupServiceTest {
     void assignPermissionsBatchEmptyExistingPermissions() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
-            new BatchProductGroup().serviceAgreement(new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
+            new BatchProductGroup().serviceAgreement(
+                new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
         );
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
-        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"), Collections.emptyList());
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"),
+            Collections.emptyList());
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
         usersPermissions.put(
@@ -961,30 +987,25 @@ class AccessGroupServiceTest {
             baseProductGroupMap
         );
 
-        List<PresentationAssignUserPermissions> expectedPermissions = Collections.singletonList(
-            new PresentationAssignUserPermissions()
-                .externalUserId("benedict")
-                .externalServiceAgreementId("sa_benedict")
-                .functionGroupDataGroups(Collections.singletonList(
-                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
-                        new PresentationIdentifier().idIdentifier("business-function-group-id-1")
-                    ).dataGroupIdentifiers(Collections.emptyList())
+        List<UserPermissionItem> expectedPermissions = List.of(
+            new UserPermissionItem().functionGroupId("business-function-group-id-1").dataGroupIds(Set.of()));
+
+        when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
+            .thenReturn(Mono.just(new GetFunctionGroups()
+                .functionGroups(List.of(
+                    new FunctionGroupItem().id("system-group-id-1").name("SYSTEM_FUNCTION_GROUP")
+                        .type(FunctionGroupItem.TypeEnum.SYSTEM),
+                    new FunctionGroupItem().id("system-group-id-2").name("Full access")
+                        .type(TypeEnum.REFERENCE)
                 ))
-        );
-
-        when(functionGroupsApi.getFunctionGroups("sa-internal-id"))
-            .thenReturn(Flux.just(
-                new FunctionGroupItem().id("system-group-id-1").name("SYSTEM_FUNCTION_GROUP").type(FunctionGroupItem.TypeEnum.SYSTEM),
-                new FunctionGroupItem().id("system-group-id-2").name("Full access").type(FunctionGroupItem.TypeEnum.TEMPLATE)
             ));
 
-        when(accessControlUsersApi.getPersistenceApprovalPermissions("user-internal-id", "sa-internal-id"))
-            .thenReturn(Mono.just(new PersistenceApprovalPermissions().items(Collections.emptyList())));
+        when(assignPermissionsServiceApi.getUserPermissions("user-internal-id", "sa-internal-id"))
+            .thenReturn(Mono.just(new UserPermissions().permissions(List.of(
+                new UserPermissionItem().functionGroupId("function-group-id-1").dataGroupIds(Set.of())
+            ))));
 
-        when(accessControlUsersApi.putAssignUserPermissions(expectedPermissions))
-            .thenReturn(Flux.just(
-                new BatchResponseItemExtended().resourceId("resource-id").status(HTTP_STATUS_OK).errors(Collections.emptyList())
-            ));
+        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
 
         // When
         BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
@@ -993,7 +1014,7 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(accessControlUsersApi).putAssignUserPermissions(expectedPermissions);
+        verify(assignPermissionsServiceApi).putUserPermissions("sa-internal-id", "sa-internal-id", expectedPermissions);
     }
 
     /*
@@ -1005,7 +1026,8 @@ class AccessGroupServiceTest {
     void assignPermissionsBatchOnlySystemFunctionGroupExists() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
-            new BatchProductGroup().serviceAgreement(new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
+            new BatchProductGroup().serviceAgreement(
+                new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
         );
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
@@ -1021,33 +1043,25 @@ class AccessGroupServiceTest {
             baseProductGroupMap
         );
 
-        List<PresentationAssignUserPermissions> expectedPermissions = Collections.singletonList(
-            new PresentationAssignUserPermissions()
-                .externalUserId("benedict")
-                .externalServiceAgreementId("sa_benedict")
-                .functionGroupDataGroups(Collections.singletonList(
-                    new PresentationFunctionGroupDataGroup().functionGroupIdentifier(
-                        new PresentationIdentifier().idIdentifier("business-function-group-id-1")
-                    ).dataGroupIdentifiers(Collections.singletonList(new PresentationDataGroupIdentifier().idIdentifier("data-group-0")))
-                ))
-        );
+        List<UserPermissionItem> expectedPermissions = List.of(
+            new UserPermissionItem().functionGroupId("business-function-group-id-1")
+                .dataGroupIds(Set.of("data-group-0")));
 
-        when(functionGroupsApi.getFunctionGroups("sa-internal-id"))
-            .thenReturn(Flux.just(
-                new FunctionGroupItem().id("system-group-id-1").name("SYSTEM_FUNCTION_GROUP").type(FunctionGroupItem.TypeEnum.SYSTEM)
+        when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
+            .thenReturn(Mono.just(new GetFunctionGroups()
+                .functionGroups(List.of(
+                    new FunctionGroupItem().id("system-group-id-1").name("SYSTEM_FUNCTION_GROUP")
+                        .type(FunctionGroupItem.TypeEnum.SYSTEM)
+                ))
             ));
 
-        when(accessControlUsersApi.getPersistenceApprovalPermissions("user-internal-id", "sa-internal-id"))
-            .thenReturn(Mono.just(new PersistenceApprovalPermissions().items(Collections.singletonList(
-                new PersistenceApprovalPermissionsGetResponseBody()
-                    .functionGroupId("system-group-id-1")
-                    .dataGroupIds(Arrays.asList("system-data-group-1", "system-data-group-2"))
+        when(assignPermissionsServiceApi.getUserPermissions("user-internal-id", "sa-internal-id"))
+            .thenReturn(Mono.just(new UserPermissions().permissions(List.of(
+                new UserPermissionItem().functionGroupId("system-group-id-1")
+                    .dataGroupIds(Set.of("system-data-group-1", "system-data-group-2"))
             ))));
 
-        when(accessControlUsersApi.putAssignUserPermissions(expectedPermissions))
-            .thenReturn(Flux.just(
-                new BatchResponseItemExtended().resourceId("resource-id").status(HTTP_STATUS_OK).errors(Collections.emptyList())
-            ));
+        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
 
         // When
         BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
@@ -1056,7 +1070,7 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(accessControlUsersApi).putAssignUserPermissions(expectedPermissions);
+        verify(assignPermissionsServiceApi).putUserPermissions("sa-internal-id", "sa-internal-id", expectedPermissions);
     }
 
     @Test
@@ -1064,11 +1078,12 @@ class AccessGroupServiceTest {
         String internalSaId = "sa-internal-id";
         String externalSaId = "external-id";
 
-        when(configurationProperties.getFunctionGroupItemType()).thenReturn(DeletionProperties.FunctionGroupItemType.NONE);
+        when(configurationProperties.getFunctionGroupItemType()).thenReturn(
+            DeletionProperties.FunctionGroupItemType.NONE);
 
         subject.deleteFunctionGroupsForServiceAgreement(internalSaId, externalSaId).block();
 
-        verify(functionGroupsApi, times(0)).postFunctionGroupsDelete(any());
+        verify(functionGroupIntegrationApi, times(0)).batchDeleteFunctionGroups(any());
     }
 
     @Test
@@ -1081,27 +1096,27 @@ class AccessGroupServiceTest {
             .type(TypeEnum.SYSTEM);
 
         FunctionGroupItem templateFunctionGroup = new FunctionGroupItem().id("template-group-id-2").name("Full access")
-            .type(TypeEnum.TEMPLATE);
+            .type(TypeEnum.REFERENCE);
 
-        when(functionGroupsApi.getFunctionGroups(internalSaId))
-            .thenReturn(Flux.just(
-                systemFunctionGroup,
-                templateFunctionGroup
-            ));
+        when(functionGroupServiceApi.getFunctionGroups(internalSaId))
+            .thenReturn(Mono.just(new GetFunctionGroups()
+                .functionGroups(List.of(systemFunctionGroup, templateFunctionGroup))));
 
-        when(functionGroupsApi.postFunctionGroupsDelete(any())).thenReturn(Flux.empty());
+        when(functionGroupIntegrationApi.batchDeleteFunctionGroups(any())).thenReturn(Flux.empty());
 
-        when(configurationProperties.getFunctionGroupItemType()).thenReturn(DeletionProperties.FunctionGroupItemType.TEMPLATE);
+        when(configurationProperties.getFunctionGroupItemType()).thenReturn(
+            DeletionProperties.FunctionGroupItemType.TEMPLATE);
 
         subject.deleteFunctionGroupsForServiceAgreement(internalSaId, externalSaId).block();
 
-        ArgumentCaptor<List<PresentationIdentifier>> captor = ArgumentCaptor.forClass(
-            List.class);
-        verify(functionGroupsApi).postFunctionGroupsDelete(captor.capture());
+        ArgumentCaptor<List<FunctionGroupNameIdentifier>> captor = ArgumentCaptor.forClass(List.class);
+        verify(functionGroupIntegrationApi).batchDeleteFunctionGroups(captor.capture());
 
-        List<PresentationIdentifier> value = captor.getValue();
-        assertEquals(templateFunctionGroup.getId(), value.get(0).getIdIdentifier());
+        List<FunctionGroupNameIdentifier> value = captor.getValue();
+        assertEquals(templateFunctionGroup.getName(), value.get(0).getName());
+        assertEquals(externalSaId, value.get(0).getServiceAgreementExternalId());
     }
+
     @Test
     void testUpdateServiceAgreementItem() {
         StreamTask streamTask = Mockito.mock(StreamTask.class);
@@ -1111,16 +1126,18 @@ class AccessGroupServiceTest {
         serviceAgreement.setInternalId("internal-id");
         serviceAgreement.setName("name");
 
-        when(serviceAgreementsApi.putServiceAgreementItem(any(), any())).thenReturn(Mono.empty());
+        when(serviceAgreementServiceApi.putServiceAgreement(any(), any())).thenReturn(Mono.empty());
 
         Mono<ServiceAgreement> resultMono = subject.updateServiceAgreementItem(streamTask, serviceAgreement);
 
         StepVerifier.create(resultMono)
-                .expectNext(serviceAgreement)
-                .verifyComplete();
+            .expectNext(serviceAgreement)
+            .verifyComplete();
 
-        verify(serviceAgreementsApi, times(1))
-                .putServiceAgreementItem(eq("internal-id"), any());
+        verify(serviceAgreementServiceApi, times(1))
+            .putServiceAgreement(eq("internal-id"), new ServiceAgreementUpdateRequest()
+                .name("name")
+                .externalId("external-id"));
 
     }
 
@@ -1132,41 +1149,41 @@ class AccessGroupServiceTest {
         serviceAgreement.setExternalId("external-id");
         serviceAgreement.setInternalId("internal-id");
 
-        when(serviceAgreementsApi.putServiceAgreementItem(any(), any()))
-                .thenReturn(Mono.error(new WebClientResponseException(BAD_REQUEST, "Bad request", null, null, null, null)));
+        when(serviceAgreementServiceApi.putServiceAgreement(any(), any()))
+            .thenReturn(Mono.error(new WebClientResponseException(BAD_REQUEST, "Bad request", null, null, null, null)));
 
         Mono<ServiceAgreement> resultMono = subject.updateServiceAgreementItem(streamTask, serviceAgreement);
 
         StepVerifier.create(resultMono)
-                .verifyError(StreamTaskException.class);
+            .verifyError(StreamTaskException.class);
 
-        verify(serviceAgreementsApi, times(1))
-                .putServiceAgreementItem(eq("internal-id"), any());
+        verify(serviceAgreementServiceApi, times(1))
+            .putServiceAgreement(eq("internal-id"), any());
     }
 
-    private void thenRegularUsersUpdateCall(String expectedSaExId, PresentationAction expectedAction,
-                                            String... expectedUserIds) {
-        PresentationServiceAgreementUsersBatchUpdate expectedRegularUserAddUpdate =
-            new PresentationServiceAgreementUsersBatchUpdate().action(expectedAction)
-                .users(Stream.of(expectedUserIds).map(userId -> new PresentationServiceAgreementUserPair()
+    private void thenRegularUsersUpdateCall(String expectedSaExId, Action expectedAction,
+        String... expectedUserIds) {
+        ServiceAgreementUsersBatchUpdateRequest expectedRegularUserAddUpdate =
+            new ServiceAgreementUsersBatchUpdateRequest().action(expectedAction)
+                .users(Stream.of(expectedUserIds).map(userId -> new ServiceAgreementUserExternal()
                     .externalUserId(userId).externalServiceAgreementId(expectedSaExId)).collect(Collectors.toList()));
-        verify(serviceAgreementsApi, times(1))
-            .putPresentationServiceAgreementUsersBatchUpdate(eq(expectedRegularUserAddUpdate));
+        verify(serviceAgreementIntegrationApi, times(1))
+            .batchUpdateServiceAgreementUsers(eq(expectedRegularUserAddUpdate));
     }
 
-    private void thenUpdateParticipantsCall(InOrder validator, String expectedSaExId, PresentationAction expectedAction,
-                                            ExpectedParticipantUpdate... expectedParticipants) {
-        PresentationParticipantBatchUpdate expectedRequest = new PresentationParticipantBatchUpdate()
-            .participants(Stream.of(expectedParticipants).map(ep -> new PresentationParticipantPutBody()
-                .externalServiceAgreementId(expectedSaExId).externalParticipantId(ep.exId)
+    private void thenUpdateParticipantsCall(InOrder validator, String expectedSaExId, Action expectedAction,
+        ExpectedParticipantUpdate... expectedParticipants) {
+        List<UpdateParticipantItem> expectedRequest = Stream.of(expectedParticipants)
+            .map(ep -> new UpdateParticipantItem()
+                .externalServiceAgreementId(expectedSaExId).externalLegalEntityId(ep.exId)
                 .sharingAccounts(ep.sharingAccounts).sharingUsers(ep.sharingAccounts).action(expectedAction))
-                .collect(Collectors.toList()));
-        validator.verify(serviceAgreementsApi).putPresentationIngestServiceAgreementParticipants(eq(expectedRequest));
+            .collect(Collectors.toList());
+        validator.verify(serviceAgreementIntegrationApi).batchUpdateParticipants(eq(expectedRequest));
     }
 
     private ServiceAgreement buildInputServiceAgreement(String saInternalId, String saExternalId, String description,
-                                                        String name, LocalDate validFromDate, String validFromTime,
-                                                        LocalDate validUntilDate, String validUntilTime) {
+        String name, LocalDate validFromDate, String validFromTime,
+        LocalDate validUntilDate, String validUntilTime) {
         return new ServiceAgreement()
             .internalId(saInternalId)
             .externalId(saExternalId)
@@ -1197,14 +1214,15 @@ class AccessGroupServiceTest {
         return productGroup;
     }
 
-    private boolean actionForItemIsPresent(List<PresentationDataGroupItemPutRequestBody> actions,
-        PresentationAction expectedAction, String expectedItem) {
+    private boolean actionForItemIsPresent(List<DataItemBatchUpdate> actions,
+        com.backbase.accesscontrol.datagroup.api.integration.v1.model.Action expectedAction, String expectedItem) {
         return actions.stream().anyMatch(a -> a.getAction().equals(expectedAction)
-            && a.getDataItems().stream().map(PresentationItemIdentifier::getId).anyMatch(expectedItem::equals));
+            && a.getDataItems().stream().anyMatch(expectedItem::equals));
     }
 
     @AllArgsConstructor
     private static class ExpectedParticipantUpdate {
+
         String exId;
         boolean sharingAccounts;
         boolean sharingUsers;
@@ -1212,8 +1230,8 @@ class AccessGroupServiceTest {
 
     @Test
     void testGetUserContextsByUserId_success() {
-        var getContexts = new GetContexts().elements(
-            Collections.singletonList(new UserContextItem().serviceAgreementId("sa_id"))).totalElements(1L);
+        var getContexts = new GetContexts().contextServiceAgreements(
+            List.of(new ContextServiceAgreement().id("sa_id"))).totalCount(1L);
 
         when(userContextApi.getUserContexts(anyString(), any(), any(), any()))
             .thenReturn(Mono.just(getContexts));
@@ -1242,7 +1260,7 @@ class AccessGroupServiceTest {
     }
 
     private GetContexts getEmptyContext() {
-        return new GetContexts().elements(Collections.emptyList()).totalElements(0L);
+        return new GetContexts().contextServiceAgreements(Collections.emptyList()).totalCount(0L);
     }
 
     @Test
@@ -1275,10 +1293,10 @@ class AccessGroupServiceTest {
 
     @Test
     void testGetUserContextsByUserId_pagination() {
-        var page1 = new GetContexts().elements(List.of(new UserContextItem().serviceAgreementId("sa_1")))
-            .totalElements(2L);
-        var page2 = new GetContexts().elements(List.of(new UserContextItem().serviceAgreementId("sa_2")))
-            .totalElements(2L);
+        var page1 = new GetContexts().contextServiceAgreements(List.of(new ContextServiceAgreement().id("sa_1")))
+            .totalCount(2L);
+        var page2 = new GetContexts().contextServiceAgreements(List.of(new ContextServiceAgreement().id("sa_2")))
+            .totalCount(2L);
 
         when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(0), any()))
             .thenReturn(Mono.just(page1));
@@ -1299,16 +1317,16 @@ class AccessGroupServiceTest {
 
     @Test
     void testGetUserContextsByUserId_paginationLargeNumber() {
-        var page1 = new GetContexts().elements(
-            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_1"))).totalElements(120L);
-        var page2 = new GetContexts().elements(
-            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_2"))).totalElements(120L);
-        var page3 = new GetContexts().elements(
-            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_3"))).totalElements(120L);
-        var page4 = new GetContexts().elements(
-            Collections.nCopies(25, new UserContextItem().serviceAgreementId("sa_4"))).totalElements(120L);
-        var page5 = new GetContexts().elements(
-            Collections.nCopies(20, new UserContextItem().serviceAgreementId("sa_5"))).totalElements(120L);
+        var page1 = new GetContexts().contextServiceAgreements(
+            Collections.nCopies(25, new ContextServiceAgreement().id("sa_1"))).totalCount(120L);
+        var page2 = new GetContexts().contextServiceAgreements(
+            Collections.nCopies(25, new ContextServiceAgreement().id("sa_2"))).totalCount(120L);
+        var page3 = new GetContexts().contextServiceAgreements(
+            Collections.nCopies(25, new ContextServiceAgreement().id("sa_3"))).totalCount(120L);
+        var page4 = new GetContexts().contextServiceAgreements(
+            Collections.nCopies(25, new ContextServiceAgreement().id("sa_4"))).totalCount(120L);
+        var page5 = new GetContexts().contextServiceAgreements(
+            Collections.nCopies(20, new ContextServiceAgreement().id("sa_5"))).totalCount(120L);
 
         when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(0), any()))
             .thenReturn(Mono.just(page1));
@@ -1336,11 +1354,10 @@ class AccessGroupServiceTest {
 
     @Test
     void testGetUserContextsByUserId_paginationEdgeCases() {
-        var page1 = new GetContexts().elements(
-            Collections.nCopies(10, new UserContextItem().serviceAgreementId("sa_1"))).totalElements(11L);
-        var page2 = new GetContexts().elements(
-            Collections.nCopies(1, new UserContextItem().serviceAgreementId("sa_2"))).totalElements(11L);
-
+        var page1 = new GetContexts().contextServiceAgreements(
+            Collections.nCopies(10, new ContextServiceAgreement().id("sa_1"))).totalCount(11L);
+        var page2 = new GetContexts().contextServiceAgreements(
+            Collections.nCopies(1, new ContextServiceAgreement().id("sa_2"))).totalCount(11L);
 
         when(userContextApi.getUserContexts(eq(userInternalId), any(), eq(0), any()))
             .thenReturn(Mono.just(page1));

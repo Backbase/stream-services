@@ -32,21 +32,17 @@ import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Stat
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.UpdateParticipantItem;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Admin;
-import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.CustomerCategory;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Participant;
-import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ParticipantWithAdminsAndUsers;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ResultId;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementCreateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementParticipants;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
-import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Status;
 import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
 import com.backbase.stream.configuration.DeletionProperties.FunctionGroupItemType;
-import com.backbase.stream.legalentity.model.ApsIdentifiers;
 import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BusinessFunction;
@@ -72,7 +68,6 @@ import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
 import jakarta.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -159,7 +154,7 @@ public class AccessGroupService {
      * @return Created Service Agreement
      */
     public Mono<ServiceAgreement> createServiceAgreement(StreamTask streamTask, ServiceAgreement serviceAgreement) {
-        ServiceAgreementCreateRequest servicesAgreementIngest = map(serviceAgreement);
+        ServiceAgreementCreateRequest servicesAgreementIngest = accessGroupMapper.map(serviceAgreement);
         return serviceAgreementServiceApi.createServiceAgreement(servicesAgreementIngest)
             .onErrorResume(WebClientResponseException.class, throwable -> {
                 streamTask.error(SERVICE_AGREEMENT, "create", "failed", serviceAgreement.getExternalId(),
@@ -167,45 +162,6 @@ public class AccessGroupService {
                 return Mono.error(new StreamTaskException(streamTask, throwable, "Failed to create Service Agreement"));
             })
             .zipWith(Mono.just(serviceAgreement), storeIdInServiceAgreement());
-    }
-
-    private ServiceAgreementCreateRequest map(ServiceAgreement serviceAgreement) {
-        //TODO move to a mapper class
-        return new ServiceAgreementCreateRequest().name(serviceAgreement.getName())
-            .description(serviceAgreement.getDescription())
-            .status(Status.valueOf(serviceAgreement.getStatus().toString()))
-            .externalId(serviceAgreement.getExternalId())
-//            .validFrom() //todo
-//            .validUntil()
-            .isSingle(serviceAgreement.getIsMaster())
-            .creatorLegalEntity(serviceAgreement.getCreatorLegalEntity())
-            .regularUserApsIds(mapAspIds(serviceAgreement.getRegularUserAps()))
-            .adminUserApsIds(mapAspIds(serviceAgreement.getAdminUserAps()))
-            .customerCategory(CustomerCategory.valueOf(serviceAgreement.getCustomerCategory().toString()))
-            .purpose(serviceAgreement.getPurpose())
-            .participants(mapParticipants(serviceAgreement.getParticipants()))
-            .additions(serviceAgreement.getAdditions());
-    }
-
-    private List<ParticipantWithAdminsAndUsers> mapParticipants(List<LegalEntityParticipant> participants) {
-        if (participants == null || participants.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return participants.stream().map(participant ->
-                new ParticipantWithAdminsAndUsers()
-                    .legalEntityId(participant.getInternalId()) //todo check if defined
-                    .sharingUsers(participant.getSharingUsers())
-                    .sharingAccounts(participant.getSharingAccounts())
-                    .admins(participant.getAdmins().stream().map(admin -> new Admin().userId(admin)).toList())
-                    .users(participant.getUsers().stream()
-                        .map(user -> new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId(
-                            user)).toList()))
-            .toList();
-    }
-
-    private Set<Long> mapAspIds(ApsIdentifiers aspIdentifiers) {
-        return aspIdentifiers == null ? Collections.emptySet() :
-            aspIdentifiers.getIdIdentifiers().stream().map(BigDecimal::longValue).collect(Collectors.toSet());
     }
 
     /**
@@ -255,8 +211,7 @@ public class AccessGroupService {
      * @return Service Agreement
      */
     public Mono<ServiceAgreement> updateServiceAgreementAssociations(StreamTask streamTask,
-        ServiceAgreement serviceAgreement,
-        List<ServiceAgreementUserAction> regularUsersActions) {
+        ServiceAgreement serviceAgreement, List<ServiceAgreementUserAction> regularUsersActions) {
         log.info("setting up Service Agreement with external Id: {}, associations update flow",
             serviceAgreement.getExternalId());
 
@@ -364,15 +319,16 @@ public class AccessGroupService {
     }
 
     public Flux<String> fetchAllUsersPages(String serviceAgreementInternalId, String cursor, int size) {
+        //TODO add test for fetch multiple pages
         return serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementInternalId, cursor, size)
             .flatMapMany(response -> {
                 Flux<String> currentPage = Flux.fromIterable(response.getUserIds().stream().map(
                     com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User::getUserId).toList());
-                if (!response.getUserIds().isEmpty()) {
+                if (response.getUserIds().isEmpty() || response.getUserIds().size() < 1000) {
+                    return currentPage;
+                } else {
                     return Flux.concat(currentPage,
                         fetchAllUsersPages(serviceAgreementInternalId, response.getNextPage(), size));
-                } else {
-                    return currentPage;
                 }
             });
     }
@@ -639,7 +595,7 @@ public class AccessGroupService {
                         .collect(Collectors.joining(",")));
                 return Flux.fromIterable(userPermissionsList)
                     .flatMap(permissions -> assignPermissionsServiceApi.putUserPermissions(
-                        permissions.user().getInternalId(), permissions.serviceAgreement.getInternalId(),
+                        permissions.user().getInternalId(), permissions.serviceAgreement().getInternalId(),
                         permissions.permissionItems()))
                     .onErrorResume(WebClientResponseException.class, e -> {
                         task.error(ACCESS_GROUP, "assign-permissions", "failed",
@@ -907,6 +863,7 @@ public class AccessGroupService {
     }
 
     public Flux<DataGroup> getExistingDataGroups(String serviceAgreementInternalId, String type) {
+//       TODO add a test for the paging
         return fetchAllDataGroupPages(serviceAgreementInternalId, type, null);
     }
 
@@ -914,11 +871,11 @@ public class AccessGroupService {
         return dataGroupServiceApi.getDataGroups(serviceAgreementInternalId, type, true, cursor, 1000)
             .flatMapMany(response -> {
                 Flux<DataGroup> currentPage = Flux.fromIterable(response.getDataGroups());
-                if (!response.getDataGroups().isEmpty()) {
+                if (response.getDataGroups().isEmpty() || response.getDataGroups().size() < 1000) {
+                    return currentPage;
+                } else {
                     return Flux.concat(currentPage,
                         fetchAllDataGroupPages(serviceAgreementInternalId, type, response.getNextPage()));
-                } else {
-                    return currentPage;
                 }
             });
     }
@@ -1090,6 +1047,7 @@ public class AccessGroupService {
             .switchIfEmpty(Mono.just(Collections.emptyList()))
             .flatMapIterable(Function.identity())
             .filter(functionGroup -> FunctionGroupItem.TypeEnum.REFERENCE.equals(functionGroup.getType()))
+            .filter(functionGroup -> functionGroup.getServiceAgreementId().equals(serviceAgreementInternalId))
             .map(FunctionGroupItem::getName)
             .map(name -> new FunctionGroupNameIdentifier().name(name)
                 .serviceAgreementExternalId(serviceAgreementExternalId))
