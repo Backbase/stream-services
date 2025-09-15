@@ -728,7 +728,7 @@ class LegalEntitySagaTest {
 
         when(accessGroupService.removePermissionsForUser(any(), any())).thenReturn(Mono.empty());
 
-        when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any(), sa.getExternalId())).thenReturn(
+        when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any(), any())).thenReturn(
             Mono.empty());
         when(accessGroupService.deleteAdmins((ServiceAgreement) any())).thenReturn(Mono.empty());
         when(userService.archiveUsers(any(), any())).thenReturn(Mono.empty());
@@ -772,7 +772,7 @@ class LegalEntitySagaTest {
 
         when(accessGroupService.removePermissionsForUser(any(), any())).thenReturn(Mono.empty());
 
-        when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any(), sa.getExternalId())).thenReturn(
+        when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any(), any())).thenReturn(
             Mono.empty());
         when(accessGroupService.deleteAdmins((ServiceAgreement) any())).thenReturn(Mono.empty());
         when(userService.archiveUsers(any(), any())).thenReturn(Mono.empty());

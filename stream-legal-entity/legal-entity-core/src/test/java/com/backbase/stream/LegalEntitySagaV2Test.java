@@ -187,7 +187,8 @@ class LegalEntitySagaV2Test {
         result.block();
 
         verify(userService, times(2)).setupRealm(leMapper.mapLegalEntityV2ToLegalEntity(task.getLegalEntityV2()));
-        verify(userService, times(2)).linkLegalEntityToRealm(leMapper.mapLegalEntityV2ToLegalEntity(task.getLegalEntityV2()));
+        verify(userService, times(2)).linkLegalEntityToRealm(
+            leMapper.mapLegalEntityV2ToLegalEntity(task.getLegalEntityV2()));
     }
 
     @Test
@@ -215,7 +216,7 @@ class LegalEntitySagaV2Test {
 
         when(accessGroupService.removePermissionsForUser(any(), any())).thenReturn(Mono.empty());
 
-        when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any(), sa.getExternalId())).thenReturn(Mono.empty());
+        when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any(), any())).thenReturn(Mono.empty());
         when(accessGroupService.deleteAdmins((ServiceAgreementV2) any())).thenReturn(Mono.empty());
         when(userService.archiveUsers(any(), any())).thenReturn(Mono.empty());
         when(legalEntityService.deleteLegalEntity(any())).thenReturn(Mono.empty());
@@ -259,7 +260,7 @@ class LegalEntitySagaV2Test {
 
         when(accessGroupService.removePermissionsForUser(any(), any())).thenReturn(Mono.empty());
 
-        when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any(), sa.getExternalId())).thenReturn(Mono.empty());
+        when(accessGroupService.deleteFunctionGroupsForServiceAgreement(any(), any())).thenReturn(Mono.empty());
         when(accessGroupService.deleteAdmins((ServiceAgreementV2) any())).thenReturn(Mono.empty());
         when(userService.archiveUsers(any(), any())).thenReturn(Mono.empty());
         when(legalEntityService.deleteLegalEntity(any())).thenReturn(Mono.empty());
@@ -300,7 +301,8 @@ class LegalEntitySagaV2Test {
         when(accessGroupService.createServiceAgreement(any(), any())).thenReturn(Mono.just(sa));
         when(legalEntityService.getLegalEntityByExternalId(leExternalId)).thenReturn(Mono.just(legalEntity));
         when(legalEntityService.getLegalEntityByInternalId(leInternalId)).thenReturn(Mono.just(legalEntity));
-        when(legalEntityService.putLegalEntity(any())).thenReturn(Mono.just(leMapper.mapLegalEntityV2ToLegalEntity(newLE)));
+        when(legalEntityService.putLegalEntity(any())).thenReturn(
+            Mono.just(leMapper.mapLegalEntityV2ToLegalEntity(newLE)));
         when(userService.getUserByExternalId(regularUserExId)).thenReturn(Mono.just(regularUser));
         when(userService.getUserByExternalId(adminExId)).thenReturn(Mono.just(adminUser));
         when(userService.createUser(any(), any(), any())).thenReturn(Mono.empty());

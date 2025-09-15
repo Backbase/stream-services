@@ -13,6 +13,7 @@ import org.mapstruct.ValueMapping;
 @Mapper
 public interface BusinessFunctionGroupMapper {
 
+    @Mapping(source = "permissions", target = "functions")
     BusinessFunctionGroup map(FunctionGroupItem functionGroupItem);
 
     @ValueMapping(source = "CUSTOM", target = "DEFAULT")
@@ -21,7 +22,7 @@ public interface BusinessFunctionGroupMapper {
     BusinessFunctionGroup.TypeEnum map(TypeEnum type);
 
     @Mapping(source = "businessFunctionName", target = "name")
-    BusinessFunction map(Permission functionGroupItem);
+    BusinessFunction map(Permission permission);
 
     @Mapping(target = "privilege", source = "privilege")
     Privilege map(String privilege);

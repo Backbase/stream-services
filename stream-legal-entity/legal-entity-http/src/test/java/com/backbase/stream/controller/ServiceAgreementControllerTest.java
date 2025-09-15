@@ -40,6 +40,7 @@ import com.backbase.stream.mapper.PartyMapper;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.stream.service.LegalEntityService;
 import com.backbase.streams.tailoredvalue.PlansService;
 import java.net.URI;
 import java.util.List;
@@ -98,6 +99,8 @@ class ServiceAgreementControllerTest {
 
     @MockitoBean
     private AccessGroupService accessGroupService;
+    @MockitoBean
+    private LegalEntityService legalEntityService;
 
     @MockitoBean
     private LoansApi loansApi;
