@@ -1035,12 +1035,7 @@ public class LegalEntitySaga extends HelperProcessor implements StreamTaskExecut
                         .thenReturn(streamTask);
                 }
             });
-        // As creatorLegalEntity doesnt accept external ID
-        // If creatorLegalEntity property is specified and equals to LE's parentExternalId then setup the
-        // creatorLegalEntity for SA as the LE's parent Internal ID
-        if (legalEntity.getParentExternalId().equals(newSa.getCreatorLegalEntity())) {
-            newSa.setCreatorLegalEntity(legalEntity.getParentInternalId());
-        }
+
         Mono<LegalEntityTask> createServiceAgreement = accessGroupService.createServiceAgreement(streamTask, newSa)
             .onErrorMap(AccessGroupException.class, accessGroupException -> {
                 streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, newSa.getExternalId(), null,

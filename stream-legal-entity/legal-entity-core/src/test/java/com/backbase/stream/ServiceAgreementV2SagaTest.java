@@ -588,10 +588,8 @@ class ServiceAgreementV2SagaTest {
         serviceAgreement.setName(serviceAgreementV2.getName());
         serviceAgreement.setDescription(serviceAgreementV2.getDescription());
         serviceAgreement.setParticipants(serviceAgreementV2.getParticipants());
-        serviceAgreement.setValidFromDate(serviceAgreementV2.getValidFromDate());
-        serviceAgreement.setValidFromTime(serviceAgreementV2.getValidFromTime());
-        serviceAgreement.setValidUntilDate(serviceAgreementV2.getValidUntilDate());
-        serviceAgreement.setValidUntilTime(serviceAgreementV2.getValidUntilTime());
+        serviceAgreement.setValidFrom(serviceAgreementV2.getValidFrom());
+        serviceAgreement.setValidUntil(serviceAgreementV2.getValidUntil());
         serviceAgreement.setStatus(serviceAgreementV2.getStatus());
         serviceAgreement.setIsMaster(serviceAgreementV2.getIsMaster());
         serviceAgreement.setRegularUserAps(serviceAgreementV2.getRegularUserAps());

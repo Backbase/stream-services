@@ -30,7 +30,9 @@ import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -81,21 +83,21 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
     @Mock
     private AccessControlConfigurationProperties accessControlProperties;
 
+    private static final OffsetDateTime VALID_FROM = OffsetDateTime.of(LocalDateTime.now().minusYears(1L),
+        ZoneOffset.UTC);
+    private static final OffsetDateTime VALID_UNTIL = OffsetDateTime.of(LocalDateTime.now().plusMonths(10L),
+        ZoneOffset.UTC);
+
     @Test
     void shouldCreateNewJobRoleForSA() {
         final String saInternalId = "someSaInternalId";
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         // participants
         serviceAgreement
@@ -118,6 +120,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         JobRole jobRole = new JobRole()
             .name("jobRoleNew")
+            .validFrom(VALID_FROM)
+            .validUntil(VALID_UNTIL)
             .addFunctionGroupsItem(new BusinessFunctionGroup()
                 .name("fg1")
                 .addFunctionsItem(new BusinessFunction()
@@ -148,6 +152,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         Mockito.verify(functionGroupServiceApi)
             .createFunctionGroup(new FunctionGroupCreateRequest()
                 .serviceAgreementId(saInternalId)
+                .validFrom(VALID_FROM)
+                .validUntil(VALID_UNTIL)
                 .name("jobRoleNew")
                 .description("jobRoleNew")
                 .type(FunctionGroupCreateRequest.TypeEnum.CUSTOM)
@@ -169,15 +175,10 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         // participants
         serviceAgreement
@@ -199,6 +200,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         JobRole jobRole = new JobRole()
             .name("jobRole")
+            .validFrom(VALID_FROM)
+            .validUntil(VALID_UNTIL)
             .addFunctionGroupsItem(new BusinessFunctionGroup()
                 .name("fg1")
                 .addFunctionsItem(new BusinessFunction()
@@ -231,6 +234,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .identifier(new FunctionGroupNameIdentifier().name("jobRole").serviceAgreementExternalId(saExternalId))
                 .newValues(new FunctionGroupUpdate()
                     .name("jobRole")
+                    .validFrom(VALID_FROM)
+                    .validUntil(VALID_UNTIL)
                     .description("jobRole")
                     .metadata(Map.of("key1", "value1"))
                     .addPermissionsItem(
@@ -251,15 +256,10 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         // participants
         serviceAgreement
@@ -283,6 +283,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         JobRole jobRole = new JobRole()
             .name("jobRoleNew")
+            .validFrom(VALID_FROM)
+            .validUntil(VALID_UNTIL)
             .addFunctionGroupsItem(new BusinessFunctionGroup()
                 .name("fg1")
                 .addFunctionsItem(new BusinessFunction()
@@ -312,6 +314,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
             .createFunctionGroup(new FunctionGroupCreateRequest()
                 .serviceAgreementId(saInternalId)
                 .name("jobRoleNew")
+                .validFrom(VALID_FROM)
+                .validUntil(VALID_UNTIL)
                 .description("jobRoleNew")
                 .type(FunctionGroupCreateRequest.TypeEnum.CUSTOM)
                 .metadata(Map.of("key1", "value1"))
@@ -332,15 +336,10 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         // participants
         serviceAgreement
@@ -364,6 +363,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         JobRole jobRole = new JobRole()
             .name("jobRoleNew")
+            .validFrom(VALID_FROM)
+            .validUntil(VALID_UNTIL)
             .addFunctionGroupsItem(new BusinessFunctionGroup()
                 .name("fg1")
                 .type(TypeEnum.TEMPLATE)
@@ -396,6 +397,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
             .createFunctionGroup(new FunctionGroupCreateRequest()
                 .serviceAgreementId(saInternalId)
                 .name("jobRoleNew")
+                .validFrom(VALID_FROM)
+                .validUntil(VALID_UNTIL)
                 .description("jobRoleNew")
                 .type(FunctionGroupCreateRequest.TypeEnum.REFERENCE)
                 .metadata(Map.of("key1", "value1"))
@@ -416,15 +419,10 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         // participants
         serviceAgreement
@@ -480,15 +478,10 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         // participants
         serviceAgreement
@@ -526,15 +519,10 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         // participants
         serviceAgreement
@@ -606,15 +594,10 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         // participants
         serviceAgreement
@@ -691,15 +674,10 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         // participants
         serviceAgreement
@@ -773,7 +751,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
     }
 
     private ServiceAgreement buildInputServiceAgreement(String saInternalId, String saExternalId, String description,
-        String name, LocalDate validFromDate, String validFromTime, LocalDate validUntilDate, String validUntilTime) {
+        String name) {
 
         return new ServiceAgreement()
             .internalId(saInternalId)
@@ -781,10 +759,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
             .description(description)
             .status(ENABLED)
             .name(name)
-            .validFromDate(validFromDate)
-            .validFromTime(validFromTime)
-            .validUntilDate(validUntilDate)
-            .validUntilTime(validUntilTime);
+            .validFrom(VALID_FROM)
+            .validUntil(VALID_UNTIL);
     }
 
 }

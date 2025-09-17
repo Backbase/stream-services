@@ -1693,20 +1693,14 @@ components:
           description: Participants of the service agreement
           items:
             $ref: '#/components/schemas/LegalEntityParticipant'
-        validFromDate:
+        validFrom:
           type: string
-          format: date
+          format: date-time
           description: Start date of the service agreement.
-        validFromTime:
+        validUntil:
           type: string
-          description: Start time of the service agreement.
-        validUntilDate:
-          type: string
-          format: date
+          format: date-time
           description: End date of the service agreement.
-        validUntilTime:
-          type: string
-          description: End time of the service agreement.
         status:
           $ref: '#/components/schemas/LegalEntityStatus'
         customerCategory:
@@ -1775,20 +1769,14 @@ components:
           description: Participants of the service agreement
           items:
             $ref: '#/components/schemas/LegalEntityParticipant'
-        validFromDate:
+        validFrom:
           type: string
-          format: date
+          format: date-time
           description: Start date of the service agreement.
-        validFromTime:
+        validUntil:
           type: string
-          description: Start time of the service agreement.
-        validUntilDate:
-          type: string
-          format: date
+          format: date-time
           description: End date of the service agreement.
-        validUntilTime:
-          type: string
-          description: End time of the service agreement.
         status:
           $ref: '#/components/schemas/LegalEntityStatus'
         customerCategory:
@@ -3058,18 +3046,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BusinessFunctionGroup'
-        validFromDate:
+        validFrom:
           type: string
-          description: Start date of the function group. (date-only from RFC3339 - yyyy-MM-dd)
-        validFromTime:
+          format: date-time
+          description: Start date of the function group.
+        validUntil:
           type: string
-          description: Start time of the function group. (time-only from RFC3339 - HH:mm:ss)
-        validUntilDate:
-          type: string
-          description: End date of the function group. (date-only from RFC3339 - yyyy-MM-dd)
-        validUntilTime:
-          type: string
-          description: End time of the function group. (time-only from RFC3339 - HH:mm:ss)
+          format: date-time
+          description: End date of the function group.
         apsId:
           type: number
           description: Assignable Permission Set Id

@@ -34,6 +34,8 @@ import com.backbase.accesscontrol.functiongroup.api.service.v1.model.GetFunction
 import com.backbase.accesscontrol.permissioncheck.api.service.v1.PermissionCheckApi;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Action;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.BatchResponseItemExtended;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ParticipantCreateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ResultId;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementAdmin;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementAdminsBatchUpdateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementDetails;
@@ -44,8 +46,7 @@ import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Upda
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Participant;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ParticipantWithAdminsAndUsers;
-import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ResultId;
-import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementCreateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementCreateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementParticipants;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUsers;
@@ -75,7 +76,9 @@ import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.utils.BatchResponseUtils;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import com.backbase.stream.worker.model.StreamTask;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -138,6 +141,10 @@ class AccessGroupServiceTest {
     private ArgumentCaptor<List<DataItemBatchUpdate>> presentationDataGroupItemPutRequestBodyCaptor;
 
     String userInternalId = "userInternalId";
+    private static final OffsetDateTime VALID_FROM = OffsetDateTime.of(LocalDateTime.now().minusYears(1L),
+        ZoneOffset.UTC);
+    private static final OffsetDateTime VALID_UNTIL = OffsetDateTime.of(LocalDateTime.now().plusMonths(10L),
+        ZoneOffset.UTC);
 
     @Test
     void shouldCreateServiceAgreement() {
@@ -150,9 +157,11 @@ class AccessGroupServiceTest {
         StreamTask streamTask = Mockito.mock(StreamTask.class);
         ServiceAgreement serviceAgreement = new ServiceAgreement()
             .externalId(saExId).name(saName).description(saDesc)
-            .participants(List.of(new LegalEntityParticipant().internalId(participantExId)));
+            .validFrom(VALID_FROM).validUntil(VALID_UNTIL)
+            .participants(List.of(new LegalEntityParticipant().externalId(participantExId)));
 
-        when(serviceAgreementServiceApi.createServiceAgreement(any())).thenReturn(Mono.just(new ResultId().id(saInId)));
+        when(serviceAgreementIntegrationApi.ingestServiceAgreement(any())).thenReturn(
+            Mono.just(new ResultId().id(saInId)));
 
         ServiceAgreement actual = subject.createServiceAgreement(streamTask, serviceAgreement).block();
 
@@ -160,9 +169,10 @@ class AccessGroupServiceTest {
 
         ServiceAgreementCreateRequest expectedSA = new ServiceAgreementCreateRequest()
             .status(null).isSingle(null)
+            .validFrom(VALID_FROM).validUntil(VALID_UNTIL)
             .externalId(saExId).name(saName).description(saDesc)
-            .participants(List.of(new ParticipantWithAdminsAndUsers().legalEntityId(participantExId)));
-        verify(serviceAgreementServiceApi).createServiceAgreement(expectedSA);
+            .participants(List.of(new ParticipantCreateRequest().externalId(participantExId)));
+        verify(serviceAgreementIntegrationApi).ingestServiceAgreement(expectedSA);
     }
 
     @Test
@@ -171,7 +181,6 @@ class AccessGroupServiceTest {
         String saName = "someSaName";
         String saDesc = "someSaDesc";
         String participantExId = "someParticipantExId";
-        String saInId = "someSaInId";
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
         ServiceAgreement serviceAgreement = new ServiceAgreement()
@@ -182,7 +191,7 @@ class AccessGroupServiceTest {
         WebClientResponseException.InternalServerError error =
             Mockito.mock(WebClientResponseException.InternalServerError.class);
         when(error.getResponseBodyAsString()).thenReturn(errorMessage);
-        when(serviceAgreementServiceApi.createServiceAgreement(any()))
+        when(serviceAgreementIntegrationApi.ingestServiceAgreement(any()))
             .thenReturn(Mono.error(error));
 
         assertThrows(StreamTaskException.class,
@@ -260,7 +269,6 @@ class AccessGroupServiceTest {
         StepVerifier.create(result)
             .assertNext(serviceAgreement -> assertEquals(serviceAgreement, expected))
             .verifyComplete();
-
     }
 
     @Test
@@ -283,10 +291,6 @@ class AccessGroupServiceTest {
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
         final List<ServiceAgreementUserAction> regularUsers = asList("userId1", "userId2").stream()
             .map(u -> new ServiceAgreementUserAction().userProfile(new JobProfileUser().user(new User()
                     .externalId("ex_" + u).internalId("in_" + u)))
@@ -295,8 +299,7 @@ class AccessGroupServiceTest {
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         serviceAgreement
             .addParticipantsItem(new LegalEntityParticipant().externalId("p1").sharingAccounts(true)
@@ -343,27 +346,22 @@ class AccessGroupServiceTest {
         final String saExternalId = "someSaExternalId";
         final String description = "someDescription";
         final String name = "someName";
-        final String validFromDate = "2021-03-08";
-        final String validFromTime = "00:00:00";
-        final String validUntilDate = "2022-03-08";
-        final String validUntilTime = "23:59:59";
         final List<ServiceAgreementUserAction> regularUsersToAdd = asList("userId1", "userId2").stream()
             .map(u -> new ServiceAgreementUserAction().userProfile(new JobProfileUser().user(new User()
                     .externalId("ex_" + u).internalId("in_" + u)))
                 .action(ServiceAgreementUserAction.ActionEnum.ADD))
-            .collect(Collectors.toList());
+            .toList();
         final List<ServiceAgreementUserAction> regularUsersToRemove = asList("userId3", "userId4").stream()
             .map(u -> new ServiceAgreementUserAction().userProfile(new JobProfileUser().user(new User()
                     .externalId("ex_" + u).internalId("in_" + u)))
                 .action(ServiceAgreementUserAction.ActionEnum.REMOVE))
-            .collect(Collectors.toList());
+            .toList();
         final List<ServiceAgreementUserAction> regularUsers =
             Stream.concat(regularUsersToAdd.stream(), regularUsersToRemove.stream()).collect(Collectors.toList());
 
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name);
 
         // participants
         serviceAgreement
@@ -418,8 +416,7 @@ class AccessGroupServiceTest {
 
         StreamTask streamTask = Mockito.spy(StreamTask.class);
 
-        ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId,
-            "", "", null, null, null, null);
+        ServiceAgreement serviceAgreement = new ServiceAgreement().internalId(saInternalId).externalId(saExternalId);
 
         serviceAgreement
             .addParticipantsItem(new LegalEntityParticipant().externalId("p1").sharingAccounts(true)
@@ -1197,18 +1194,15 @@ class AccessGroupServiceTest {
     }
 
     private ServiceAgreement buildInputServiceAgreement(String saInternalId, String saExternalId, String description,
-        String name, LocalDate validFromDate, String validFromTime,
-        LocalDate validUntilDate, String validUntilTime) {
+        String name) {
         return new ServiceAgreement()
             .internalId(saInternalId)
             .externalId(saExternalId)
             .description(description)
             .status(ENABLED)
             .name(name)
-            .validFromDate(validFromDate)
-            .validFromTime(validFromTime)
-            .validUntilDate(validUntilDate)
-            .validUntilTime(validUntilTime);
+            .validFrom(VALID_FROM)
+            .validUntil(VALID_UNTIL);
     }
 
     private DataGroup buildDataGroupItem(String name, String description, String... items) {

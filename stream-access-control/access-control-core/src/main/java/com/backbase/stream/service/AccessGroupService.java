@@ -34,7 +34,7 @@ import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreeme
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Admin;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Participant;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ResultId;
-import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementCreateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementCreateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementParticipants;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
 import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
@@ -155,7 +155,7 @@ public class AccessGroupService {
      */
     public Mono<ServiceAgreement> createServiceAgreement(StreamTask streamTask, ServiceAgreement serviceAgreement) {
         ServiceAgreementCreateRequest servicesAgreementIngest = accessGroupMapper.map(serviceAgreement);
-        return serviceAgreementServiceApi.createServiceAgreement(servicesAgreementIngest)
+        return serviceAgreementIntegrationApi.ingestServiceAgreement(servicesAgreementIngest)
             .onErrorResume(WebClientResponseException.class, throwable -> {
                 streamTask.error(SERVICE_AGREEMENT, "create", "failed", serviceAgreement.getExternalId(),
                     "", throwable, throwable.getResponseBodyAsString(), "Failed to create Service Agreement");
@@ -476,7 +476,7 @@ public class AccessGroupService {
             .onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty());
     }
 
-    private BiFunction<ResultId, ServiceAgreement, ServiceAgreement> storeIdInServiceAgreement() {
+    private BiFunction<com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ResultId, ServiceAgreement, ServiceAgreement> storeIdInServiceAgreement() {
         return (idItem, serviceAgreement1) -> {
             serviceAgreement1.setInternalId(idItem.getId());
             log.info("Created Service Agreement: {} with id: {}", serviceAgreement1.getName(), idItem.getId());
@@ -1401,14 +1401,12 @@ public class AccessGroupService {
             .identifier(new FunctionGroupNameIdentifier().name(jobRole.getName())
                 .serviceAgreementExternalId(serviceAgreement.getExternalId()))
             .newValues(new FunctionGroupUpdate()
-                    .name(jobRole.getName())
-                    .description(jobRole.getDescription())
-//            .validFromDate(jobRole.getValidFromDate())
-//            .validFromTime(jobRole.getValidFromTime())
-//            .validUntilDate(jobRole.getValidUntilDate()) //todo VALID FROM/TO
-//            .validUntilTime(jobRole.getValidUntilTime())
-                    .permissions(accessGroupMapper.toUpdate(jobRole.getFunctionGroups()))
-                    .metadata(jobRole.getMetadata())
+                .name(jobRole.getName())
+                .description(jobRole.getDescription())
+                .validFrom(jobRole.getValidFrom())
+                .validUntil(jobRole.getValidUntil())
+                .permissions(accessGroupMapper.toUpdate(jobRole.getFunctionGroups()))
+                .metadata(jobRole.getMetadata())
             );
 
         var batchRequest = List.of(putRequestBody);
