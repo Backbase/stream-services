@@ -26,6 +26,7 @@ import com.backbase.accesscontrol.permissioncheck.api.service.v1.PermissionCheck
 import com.backbase.accesscontrol.permissioncheck.api.service.v1.model.UserDataItemPermissionsList;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementAdmin;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementAdminsBatchUpdateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementCreateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementUserExternal;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementUsersBatchUpdateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.StatusCode;
@@ -33,8 +34,6 @@ import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Upda
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Admin;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Participant;
-import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ResultId;
-import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementCreateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementParticipants;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
 import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
@@ -319,18 +318,17 @@ public class AccessGroupService {
     }
 
     public Flux<String> fetchAllUsersPages(String serviceAgreementInternalId, String cursor, int size) {
-        //TODO add test for fetch multiple pages
         return serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementInternalId, cursor, size)
-            .flatMapMany(response -> {
-                Flux<String> currentPage = Flux.fromIterable(response.getUserIds().stream().map(
-                    com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User::getUserId).toList());
-                if (response.getUserIds().isEmpty() || response.getUserIds().size() < 1000) {
-                    return currentPage;
+            .expand(response -> {
+                if (response.getUserIds().isEmpty() || response.getUserIds().size() < size) {
+                    return Mono.empty();
                 } else {
-                    return Flux.concat(currentPage,
-                        fetchAllUsersPages(serviceAgreementInternalId, response.getNextPage(), size));
+                    return serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementInternalId,
+                        response.getNextPage(), size);
                 }
-            });
+            })
+            .flatMap(response -> Flux.fromIterable(response.getUserIds().stream().map(
+                com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User::getUserId).toList()));
     }
 
     @NotNull
@@ -863,21 +861,21 @@ public class AccessGroupService {
     }
 
     public Flux<DataGroup> getExistingDataGroups(String serviceAgreementInternalId, String type) {
-//       TODO add a test for the paging
-        return fetchAllDataGroupPages(serviceAgreementInternalId, type, null);
+        return fetchAllDataGroupPages(serviceAgreementInternalId, type, null, 1000);
     }
 
-    public Flux<DataGroup> fetchAllDataGroupPages(String serviceAgreementInternalId, String type, String cursor) {
-        return dataGroupServiceApi.getDataGroups(serviceAgreementInternalId, type, true, cursor, 1000)
-            .flatMapMany(response -> {
-                Flux<DataGroup> currentPage = Flux.fromIterable(response.getDataGroups());
-                if (response.getDataGroups().isEmpty() || response.getDataGroups().size() < 1000) {
-                    return currentPage;
+    public Flux<DataGroup> fetchAllDataGroupPages(String serviceAgreementInternalId, String type, String cursor,
+        int size) {
+        return dataGroupServiceApi.getDataGroups(serviceAgreementInternalId, type, true, cursor, size)
+            .expand(response -> {
+                if (response.getDataGroups().isEmpty() || response.getDataGroups().size() < size) {
+                    return Mono.empty();
                 } else {
-                    return Flux.concat(currentPage,
-                        fetchAllDataGroupPages(serviceAgreementInternalId, type, response.getNextPage()));
+                    return dataGroupServiceApi.getDataGroups(serviceAgreementInternalId, type, true,
+                        response.getNextPage(), size);
                 }
-            });
+            })
+            .flatMap(response -> Flux.fromIterable(response.getDataGroups()));
     }
 
     /**

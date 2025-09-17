@@ -38,6 +38,7 @@ import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Part
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ResultId;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementAdmin;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementAdminsBatchUpdateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementCreateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementDetails;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementUserExternal;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementUsersBatchUpdateRequest;
@@ -45,8 +46,6 @@ import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Stat
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.UpdateParticipantItem;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Participant;
-import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ParticipantWithAdminsAndUsers;
-import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementCreateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementParticipants;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUsers;
@@ -1382,5 +1381,289 @@ class AccessGroupServiceTest {
         verify(userContextApi, times(1)).getUserContexts(eq(userInternalId), any(), eq(1), any());
         verify(accessControlProperties).getUserContextPageSize();
     }
+
+    @Test
+    void shouldGetAllFunctionGroupPagesWhenLastPageNotFull() {
+        String serviceAgreementId = "sa-internal-id";
+
+        var userIdsPage1 = Stream.of("id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "id11",
+                "id12").map(id -> new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId(id))
+            .toList();
+        var userIdsPage2 = Stream.of("id13", "id14", "id15", "id16", "id17", "id18", "id19", "id20", "id21",
+                "id22", "id23", "id24")
+            .map(id -> new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId(id)).toList();
+        var userIdsPage3 = Stream.of("id25", "id26", "id27", "id28", "id29", "id30", "id31", "id32", "id33",
+                "id34").map(id -> new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId(id))
+            .toList();
+
+        String page2Cursor = "cursor-2";
+        String page3Cursor = "cursor-3";
+        String page4Cursor = "cursor-4";
+
+        when(serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementId, null, 12))
+            .thenReturn(Mono.just(new ServiceAgreementUsers().userIds(userIdsPage1).nextPage(page2Cursor)));
+        when(serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementId, page2Cursor, 12))
+            .thenReturn(Mono.just(new ServiceAgreementUsers().userIds(userIdsPage2).nextPage(page3Cursor)));
+        when(serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementId, page3Cursor, 12))
+            .thenReturn(Mono.just(new ServiceAgreementUsers().userIds(userIdsPage3).nextPage(page4Cursor)));
+
+        StepVerifier.create(subject.fetchAllUsersPages(serviceAgreementId, null, 12))
+            .expectNextMatches(userId -> userId.equals("id1"))
+            .expectNextMatches(userId -> userId.equals("id2"))
+            .expectNextMatches(userId -> userId.equals("id3"))
+            .expectNextMatches(userId -> userId.equals("id4"))
+            .expectNextMatches(userId -> userId.equals("id5"))
+            .expectNextMatches(userId -> userId.equals("id6"))
+            .expectNextMatches(userId -> userId.equals("id7"))
+            .expectNextMatches(userId -> userId.equals("id8"))
+            .expectNextMatches(userId -> userId.equals("id9"))
+            .expectNextMatches(userId -> userId.equals("id10"))
+            .expectNextMatches(userId -> userId.equals("id11"))
+            .expectNextMatches(userId -> userId.equals("id12"))
+            .expectNextMatches(userId -> userId.equals("id13"))
+            .expectNextMatches(userId -> userId.equals("id14"))
+            .expectNextMatches(userId -> userId.equals("id15"))
+            .expectNextMatches(userId -> userId.equals("id16"))
+            .expectNextMatches(userId -> userId.equals("id17"))
+            .expectNextMatches(userId -> userId.equals("id18"))
+            .expectNextMatches(userId -> userId.equals("id19"))
+            .expectNextMatches(userId -> userId.equals("id20"))
+            .expectNextMatches(userId -> userId.equals("id21"))
+            .expectNextMatches(userId -> userId.equals("id22"))
+            .expectNextMatches(userId -> userId.equals("id23"))
+            .expectNextMatches(userId -> userId.equals("id24"))
+            .expectNextMatches(userId -> userId.equals("id25"))
+            .expectNextMatches(userId -> userId.equals("id26"))
+            .expectNextMatches(userId -> userId.equals("id27"))
+            .expectNextMatches(userId -> userId.equals("id28"))
+            .expectNextMatches(userId -> userId.equals("id29"))
+            .expectNextMatches(userId -> userId.equals("id30"))
+            .expectNextMatches(userId -> userId.equals("id31"))
+            .expectNextMatches(userId -> userId.equals("id32"))
+            .expectNextMatches(userId -> userId.equals("id33"))
+            .expectNextMatches(userId -> userId.equals("id34"))
+            .verifyComplete();
+
+        verify(serviceAgreementServiceApi).getServiceAgreementUsers(serviceAgreementId, null, 12);
+        verify(serviceAgreementServiceApi).getServiceAgreementUsers(serviceAgreementId, page2Cursor, 12);
+        verify(serviceAgreementServiceApi).getServiceAgreementUsers(serviceAgreementId, page3Cursor, 12);
+
+    }
+
+    @Test
+    void shouldGetAllFunctionGroupPagesWhenLastPageFull() {
+        String serviceAgreementId = "sa-internal-id";
+
+        var userIdsPage1 = Stream.of("id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "id11",
+                "id12").map(id -> new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId(id))
+            .toList();
+        var userIdsPage2 = Stream.of("id13", "id14", "id15", "id16", "id17", "id18", "id19", "id20", "id21",
+                "id22", "id23", "id24")
+            .map(id -> new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId(id)).toList();
+        var userIdsPage3 = Stream.of("id25", "id26", "id27", "id28", "id29", "id30", "id31", "id32", "id33",
+                "id34", "id35", "id36")
+            .map(id -> new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.User().userId(id)).toList();
+
+        String page2Cursor = "cursor-2";
+        String page3Cursor = "cursor-3";
+        String page4Cursor = "cursor-4";
+
+        when(serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementId, null, 12))
+            .thenReturn(Mono.just(new ServiceAgreementUsers().userIds(userIdsPage1).nextPage(page2Cursor)));
+        when(serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementId, page2Cursor, 12))
+            .thenReturn(Mono.just(new ServiceAgreementUsers().userIds(userIdsPage2).nextPage(page3Cursor)));
+        when(serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementId, page3Cursor, 12))
+            .thenReturn(Mono.just(new ServiceAgreementUsers().userIds(userIdsPage3).nextPage(page4Cursor)));
+        when(serviceAgreementServiceApi.getServiceAgreementUsers(serviceAgreementId, page4Cursor, 12))
+            .thenReturn(Mono.just(new ServiceAgreementUsers().userIds(List.of()).nextPage(page4Cursor)));
+
+        StepVerifier.create(subject.fetchAllUsersPages(serviceAgreementId, null, 12))
+            .expectNextMatches(userId -> userId.equals("id1"))
+            .expectNextMatches(userId -> userId.equals("id2"))
+            .expectNextMatches(userId -> userId.equals("id3"))
+            .expectNextMatches(userId -> userId.equals("id4"))
+            .expectNextMatches(userId -> userId.equals("id5"))
+            .expectNextMatches(userId -> userId.equals("id6"))
+            .expectNextMatches(userId -> userId.equals("id7"))
+            .expectNextMatches(userId -> userId.equals("id8"))
+            .expectNextMatches(userId -> userId.equals("id9"))
+            .expectNextMatches(userId -> userId.equals("id10"))
+            .expectNextMatches(userId -> userId.equals("id11"))
+            .expectNextMatches(userId -> userId.equals("id12"))
+            .expectNextMatches(userId -> userId.equals("id13"))
+            .expectNextMatches(userId -> userId.equals("id14"))
+            .expectNextMatches(userId -> userId.equals("id15"))
+            .expectNextMatches(userId -> userId.equals("id16"))
+            .expectNextMatches(userId -> userId.equals("id17"))
+            .expectNextMatches(userId -> userId.equals("id18"))
+            .expectNextMatches(userId -> userId.equals("id19"))
+            .expectNextMatches(userId -> userId.equals("id20"))
+            .expectNextMatches(userId -> userId.equals("id21"))
+            .expectNextMatches(userId -> userId.equals("id22"))
+            .expectNextMatches(userId -> userId.equals("id23"))
+            .expectNextMatches(userId -> userId.equals("id24"))
+            .expectNextMatches(userId -> userId.equals("id25"))
+            .expectNextMatches(userId -> userId.equals("id26"))
+            .expectNextMatches(userId -> userId.equals("id27"))
+            .expectNextMatches(userId -> userId.equals("id28"))
+            .expectNextMatches(userId -> userId.equals("id29"))
+            .expectNextMatches(userId -> userId.equals("id30"))
+            .expectNextMatches(userId -> userId.equals("id31"))
+            .expectNextMatches(userId -> userId.equals("id32"))
+            .expectNextMatches(userId -> userId.equals("id33"))
+            .expectNextMatches(userId -> userId.equals("id34"))
+            .expectNextMatches(userId -> userId.equals("id35"))
+            .expectNextMatches(userId -> userId.equals("id36"))
+            .verifyComplete();
+
+        verify(serviceAgreementServiceApi).getServiceAgreementUsers(serviceAgreementId, null, 12);
+        verify(serviceAgreementServiceApi).getServiceAgreementUsers(serviceAgreementId, page2Cursor, 12);
+        verify(serviceAgreementServiceApi).getServiceAgreementUsers(serviceAgreementId, page3Cursor, 12);
+        verify(serviceAgreementServiceApi).getServiceAgreementUsers(serviceAgreementId, page4Cursor, 12);
+
+    }
+
+    @Test
+    void shouldGetAllDataGroupPagesWhenLastPageNotFull() {
+        String serviceAgreementId = "sa-internal-id";
+        String dataGroupType = "data-group-type";
+
+        var page1 = Stream.of("id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "id11",
+                "id12").map(id -> new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup().id(id))
+            .toList();
+        var page2 = Stream.of("id13", "id14", "id15", "id16", "id17", "id18", "id19", "id20", "id21",
+                "id22", "id23", "id24")
+            .map(id -> new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup().id(id)).toList();
+        var page3 = Stream.of("id25", "id26", "id27", "id28", "id29", "id30", "id31", "id32", "id33",
+                "id34").map(id -> new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup().id(id))
+            .toList();
+
+        String page2Cursor = "cursor-2";
+        String page3Cursor = "cursor-3";
+        String page4Cursor = "cursor-4";
+
+        when(dataGroupServiceApi.getDataGroups(serviceAgreementId, dataGroupType, true, null, 12))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(page1).nextPage(page2Cursor)));
+        when(dataGroupServiceApi.getDataGroups(serviceAgreementId, dataGroupType, true, page2Cursor, 12))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(page2).nextPage(page3Cursor)));
+        when(dataGroupServiceApi.getDataGroups(serviceAgreementId, dataGroupType, true, page3Cursor, 12))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(page3).nextPage(page4Cursor)));
+
+        StepVerifier.create(subject.fetchAllDataGroupPages(serviceAgreementId, dataGroupType, null, 12))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id1"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id2"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id3"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id4"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id5"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id6"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id7"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id8"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id9"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id10"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id11"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id12"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id13"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id14"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id15"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id16"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id17"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id18"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id19"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id20"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id21"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id22"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id23"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id24"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id25"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id26"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id27"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id28"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id29"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id30"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id31"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id32"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id33"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id34"))
+            .verifyComplete();
+
+        verify(dataGroupServiceApi).getDataGroups(serviceAgreementId, dataGroupType, true, null, 12);
+        verify(dataGroupServiceApi).getDataGroups(serviceAgreementId, dataGroupType, true, page2Cursor, 12);
+        verify(dataGroupServiceApi).getDataGroups(serviceAgreementId, dataGroupType, true, page3Cursor, 12);
+
+    }
+
+    @Test
+    void shouldGetAllDataGroupPagesWhenLastPageFull() {
+        String serviceAgreementId = "sa-internal-id";
+        String dataGroupType = "data-group-type";
+
+        var page1 = Stream.of("id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8", "id9", "id10", "id11",
+                "id12").map(id -> new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup().id(id))
+            .toList();
+        var page2 = Stream.of("id13", "id14", "id15", "id16", "id17", "id18", "id19", "id20", "id21",
+                "id22", "id23", "id24")
+            .map(id -> new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup().id(id)).toList();
+        var page3 = Stream.of("id25", "id26", "id27", "id28", "id29", "id30", "id31", "id32", "id33",
+                "id34", "id35", "id36").map(id -> new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup().id(id))
+            .toList();
+        String page2Cursor = "cursor-2";
+        String page3Cursor = "cursor-3";
+        String page4Cursor = "cursor-4";
+
+        when(dataGroupServiceApi.getDataGroups(serviceAgreementId, dataGroupType, true, null, 12))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(page1).nextPage(page2Cursor)));
+        when(dataGroupServiceApi.getDataGroups(serviceAgreementId, dataGroupType, true, page2Cursor, 12))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(page2).nextPage(page3Cursor)));
+        when(dataGroupServiceApi.getDataGroups(serviceAgreementId, dataGroupType, true, page3Cursor, 12))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(page3).nextPage(page4Cursor)));
+        when(dataGroupServiceApi.getDataGroups(serviceAgreementId, dataGroupType, true, page4Cursor, 12))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(List.of()).nextPage(page4Cursor)));
+
+        StepVerifier.create(subject.fetchAllDataGroupPages(serviceAgreementId, dataGroupType, null, 12))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id1"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id2"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id3"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id4"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id5"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id6"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id7"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id8"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id9"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id10"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id11"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id12"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id13"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id14"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id15"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id16"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id17"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id18"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id19"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id20"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id21"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id22"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id23"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id24"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id25"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id26"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id27"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id28"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id29"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id30"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id31"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id32"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id33"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id34"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id35"))
+            .expectNextMatches(dataGroup -> dataGroup.getId().equals("id36"))
+            .verifyComplete();
+
+        verify(dataGroupServiceApi).getDataGroups(serviceAgreementId, dataGroupType, true, null, 12);
+        verify(dataGroupServiceApi).getDataGroups(serviceAgreementId, dataGroupType, true, page2Cursor, 12);
+        verify(dataGroupServiceApi).getDataGroups(serviceAgreementId, dataGroupType, true, page3Cursor, 12);
+        verify(dataGroupServiceApi).getDataGroups(serviceAgreementId, dataGroupType, true, page4Cursor, 12);
+
+    }
+
 
 }
