@@ -2,6 +2,7 @@ package com.backbase.stream.clients.config;
 
 import com.backbase.accesscontrol.assignpermissions.api.service.v1.AssignPermissionsApi;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.CustomerAccessGroupApi;
+import com.backbase.accesscontrol.permissionset.api.service.v1.PermissionSetApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -197,5 +198,20 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
     public com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi userContextServiceApi(
         com.backbase.accesscontrol.usercontext.api.service.ApiClient apiClient) {
         return new com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi(apiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public com.backbase.accesscontrol.permissionset.api.service.ApiClient permissionSetServiceApiClient(
+        ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.permissionset.api.service.ApiClient(getWebClient(), objectMapper,
+            dateFormat).setBasePath(createBasePath());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PermissionSetApi permissionSetPermissionsApi(
+        com.backbase.accesscontrol.permissionset.api.service.ApiClient apiClient) {
+        return new PermissionSetApi(apiClient);
     }
 }
