@@ -417,6 +417,22 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>generate-accesscontrol-permissionset-service-api-v1-code</id>
+                        <goals>
+                            <goal>generate-webclient-embedded</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
+                            <inputSpec>${project.build.directory}/yaml/access-control/permission-set-service-api-v1.0.0.yaml</inputSpec>
+                            <apiPackage>com.backbase.accesscontrol.permissionset.api.service.v1</apiPackage>
+                            <modelPackage>com.backbase.accesscontrol.permissionset.api.service.v1.model</modelPackage>
+                            <configOptions>
+                                <useBeanValidation>false</useBeanValidation>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>generate-customer-access-group-client-api-code</id>
                         <goals>
                             <goal>generate-webclient-embedded</goal>
