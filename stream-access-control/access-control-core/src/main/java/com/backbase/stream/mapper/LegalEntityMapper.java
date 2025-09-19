@@ -7,12 +7,14 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.NullValueCheckStrategy;
 
 @Mapper
 public interface LegalEntityMapper {
 
     @Mapping(source = "legalEntityType", target = "type")
-    @Mapping(source = "activateSingleServiceAgreement", target = "createSingleServiceAgreement")
+    @Mapping(nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS,
+        source = "activateSingleServiceAgreement", target = "createSingleServiceAgreement")
     com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntityItem toPresentation(
         LegalEntity legalEntity);
 

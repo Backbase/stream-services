@@ -13,8 +13,10 @@ import com.backbase.accesscontrol.datagroup.api.service.v1.DataGroupApi;
 import com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup;
 import com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroupCreateRequest;
 import com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroupUpdateRequest;
+import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.BatchResponseItemExtended;
 import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.BatchResponseItemExtended.StatusEnum;
 import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupBatchPutItem;
+import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupIngest;
 import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupNameIdentifier;
 import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupUpdate;
 import com.backbase.accesscontrol.functiongroup.api.service.v1.FunctionGroupApi;
@@ -138,6 +140,8 @@ public class AccessGroupService {
     private final com.backbase.accesscontrol.serviceagreement.api.integration.v1.ServiceAgreementApi serviceAgreementIntegrationApi;
     @NonNull
     private final AssignPermissionsApi assignPermissionsServiceApi;
+    @NonNull
+    private final com.backbase.accesscontrol.assignpermissions.api.integration.v1.AssignPermissionsApi assignPermissionsIntegrationApi;
     @NonNull
     private final UserContextApi userContextApi;
 
@@ -1239,9 +1243,9 @@ public class AccessGroupService {
             jobRole.setDescription(jobRole.getName());
         }
 
-        FunctionGroupCreateRequest presentationIngestFunctionGroup = accessGroupMapper.toPresentation(jobRole);
+        FunctionGroupIngest presentationIngestFunctionGroup = accessGroupMapper.toPresentation(jobRole);
         presentationIngestFunctionGroup.setPermissions(accessGroupMapper.toPresentation(jobRole.getFunctionGroups()));
-        presentationIngestFunctionGroup.serviceAgreementId(serviceAgreement.getInternalId());
+        presentationIngestFunctionGroup.setExternalServiceAgreementId(serviceAgreement.getExternalId());
         presentationIngestFunctionGroup.setMetadata(jobRole.getMetadata());
 
         //Logic to map the job roles types
@@ -1253,10 +1257,10 @@ public class AccessGroupService {
         if (!ObjectUtils.isEmpty(jobRoleType)) {
             switch (jobRoleType) {
                 case TEMPLATE:
-                    presentationIngestFunctionGroup.setType(FunctionGroupCreateRequest.TypeEnum.REFERENCE);
+                    presentationIngestFunctionGroup.setType(FunctionGroupIngest.TypeEnum.REFERENCE);
                     break;
                 case DEFAULT:
-                    presentationIngestFunctionGroup.setType(FunctionGroupCreateRequest.TypeEnum.CUSTOM);
+                    presentationIngestFunctionGroup.setType(FunctionGroupIngest.TypeEnum.CUSTOM);
                     break;
                 default:
                     throw new IllegalArgumentException(
@@ -1264,10 +1268,10 @@ public class AccessGroupService {
             }
         } else {
             log.debug("No function group job role type is provided, creating a Local Job Role");
-            presentationIngestFunctionGroup.setType(FunctionGroupCreateRequest.TypeEnum.CUSTOM);
+            presentationIngestFunctionGroup.setType(FunctionGroupIngest.TypeEnum.CUSTOM);
         }
 
-        return functionGroupServiceApi.createFunctionGroup(presentationIngestFunctionGroup)
+        return functionGroupIntegrationApi.ingestFunctionGroup(presentationIngestFunctionGroup)
             .doOnError(WebClientResponseException.BadRequest.class, badRequest ->
                 handleError(jobRole, badRequest))
             .onErrorResume(WebClientResponseException.class, badRequest -> {
@@ -1445,8 +1449,7 @@ public class AccessGroupService {
     }
 
     private Mono<List<com.backbase.accesscontrol.functiongroup.api.integration.v1.model.BatchResponseItemExtended>> updateBatchBusinessFunctionGroup(
-        StreamTask streamTask,
-        ServiceAgreement serviceAgreement, List<BusinessFunctionGroup> existingBusinessGroups) {
+        StreamTask streamTask, ServiceAgreement serviceAgreement, List<BusinessFunctionGroup> existingBusinessGroups) {
 
         log.info("Start Job Role updating: {}",
             existingBusinessGroups.stream().map(BusinessFunctionGroup::getName).collect(Collectors.toList()));
@@ -1474,6 +1477,15 @@ public class AccessGroupService {
         }
         log.debug("Functions to Update: {}", presentationFunctionGroupPutRequestBody);
 
+        return Flux.fromIterable(partitionList(presentationFunctionGroupPutRequestBody, 1000))
+            //the api does not support more than 1000 items in batch
+            .flatMap(batch -> batchUpdateFunctionGroups(streamTask, batch))
+            .flatMap(Flux::fromIterable)
+            .collectList();
+    }
+
+    private Mono<List<BatchResponseItemExtended>> batchUpdateFunctionGroups(StreamTask streamTask,
+        List<FunctionGroupBatchPutItem> presentationFunctionGroupPutRequestBody) {
         return functionGroupIntegrationApi.batchUpdateFunctionGroups(presentationFunctionGroupPutRequestBody)
             .doOnError(WebClientResponseException.BadRequest.class, this::handleError)
             .onErrorResume(WebClientResponseException.class, badRequest -> {
@@ -1484,6 +1496,14 @@ public class AccessGroupService {
                     "Failed to update Business Function Group: " + badRequest.getResponseBodyAsString()));
             })
             .collectList();
+    }
+
+    public static <T> List<List<T>> partitionList(List<T> list, int size) {
+        List<List<T>> partitions = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += size) {
+            partitions.add(list.subList(i, Math.min(i + size, list.size())));
+        }
+        return partitions;
     }
 
     private boolean isEmptyFunctionName(List<FunctionGroupBatchPutItem> putRequestBodies) {

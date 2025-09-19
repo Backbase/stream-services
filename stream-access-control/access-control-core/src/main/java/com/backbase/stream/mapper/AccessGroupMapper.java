@@ -1,7 +1,6 @@
 package com.backbase.stream.mapper;
 
-import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupCreateRequest;
-import com.backbase.accesscontrol.functiongroup.api.service.v1.model.Permission;
+import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupIngest;
 import com.backbase.accesscontrol.legalentity.api.service.v1.model.SingleServiceAgreement;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.CustomerCategory;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ParticipantCreateRequest;
@@ -38,7 +37,7 @@ public interface AccessGroupMapper {
 
     ServiceAgreementUpdateRequest toPresentationPut(ServiceAgreement serviceAgreement);
 
-    FunctionGroupCreateRequest toPresentation(JobRole referenceJobRole);
+    FunctionGroupIngest toPresentation(JobRole referenceJobRole);
 
     @Mapping(source = "id", target = "internalId")
     @Mapping(source = "isSingle", target = "isMaster")
@@ -48,7 +47,8 @@ public interface AccessGroupMapper {
      * @param functionGroups defined function groups
      * @return mapped object
      */
-    default List<Permission> toPresentation(List<BusinessFunctionGroup> functionGroups) {
+    default List<com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission> toPresentation(
+        List<BusinessFunctionGroup> functionGroups) {
         if (Objects.isNull(functionGroups)) {
             return Collections.emptyList();
         }
@@ -62,7 +62,7 @@ public interface AccessGroupMapper {
                     .filter(Objects::nonNull)
                     .map(Privilege::getPrivilege)
                     .collect(Collectors.toSet());
-                return new Permission()
+                return new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
                     .businessFunctionName(f.getName())
                     .resourceName(f.getResourceName())
                     .privileges(privileges);
@@ -104,7 +104,8 @@ public interface AccessGroupMapper {
         return new ServiceAgreementCreateRequest().name(serviceAgreement.getName())
             .description(serviceAgreement.getDescription())
             .status(
-                serviceAgreement.getStatus() == null ? null : Status.valueOf(serviceAgreement.getStatus().toString()))
+                serviceAgreement.getStatus() == null ? Status.ENABLED
+                    : Status.valueOf(serviceAgreement.getStatus().toString()))
             .externalId(serviceAgreement.getExternalId())
             .validFrom(serviceAgreement.getValidFrom())
             .validUntil(serviceAgreement.getValidUntil())

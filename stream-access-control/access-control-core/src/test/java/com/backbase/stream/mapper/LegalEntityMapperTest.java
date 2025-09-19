@@ -28,7 +28,7 @@ class LegalEntityMapperTest {
         .legalEntityType(com.backbase.stream.legalentity.model.LegalEntityType.BANK)
         .customerCategory(com.backbase.stream.legalentity.model.CustomerCategory.RETAIL)
         .parentExternalId("parentExternalId")
-        .activateSingleServiceAgreement(true)
+        .activateSingleServiceAgreement(null)
         .additions(Map.of("k1", "v1", "k2", "v2"));
 
     private final LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
@@ -54,7 +54,7 @@ class LegalEntityMapperTest {
                 presentation.getCustomerCategory()
             ),
             () -> assertEquals("parentExternalId", presentation.getParentExternalId()),
-            () -> assertEquals(Boolean.TRUE, presentation.getCreateSingleServiceAgreement())
+            () -> assertEquals(Boolean.FALSE, presentation.getCreateSingleServiceAgreement())
         );
     }
 

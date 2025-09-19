@@ -42,6 +42,7 @@ import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Serv
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementDetails;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementUserExternal;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ServiceAgreementUsersBatchUpdateRequest;
+import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Status;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.StatusCode;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.UpdateParticipantItem;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
@@ -129,6 +130,8 @@ class AccessGroupServiceTest {
     @Mock
     private AssignPermissionsApi assignPermissionsServiceApi;
     @Mock
+    private com.backbase.accesscontrol.assignpermissions.api.integration.v1.AssignPermissionsApi assignPermissionsIntegrationApi;
+    @Mock
     private UserContextApi userContextApi;
     @Spy
     private DeletionProperties configurationProperties;
@@ -167,7 +170,7 @@ class AccessGroupServiceTest {
         assertEquals(saInId, actual.getInternalId());
 
         ServiceAgreementCreateRequest expectedSA = new ServiceAgreementCreateRequest()
-            .status(null).isSingle(null)
+            .status(Status.ENABLED).isSingle(null)
             .validFrom(VALID_FROM).validUntil(VALID_UNTIL)
             .externalId(saExId).name(saName).description(saDesc)
             .participants(List.of(new ParticipantCreateRequest().externalId(participantExId)));

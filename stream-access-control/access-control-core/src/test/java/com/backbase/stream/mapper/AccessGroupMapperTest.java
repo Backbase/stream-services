@@ -44,7 +44,7 @@ class AccessGroupMapperTest {
             .externalId(externalId)
             .isMaster(isMaster)
             .description(description)
-            .status(LegalEntityStatus.ENABLED)
+            .status(null)
             .addParticipantsItem(new LegalEntityParticipant().externalId("someId").addUsersItem("userId")
                 .addAdminsItem("adminId"))
             .name(name)

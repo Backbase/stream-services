@@ -7,6 +7,7 @@ import com.backbase.accesscontrol.assignpermissions.api.service.v1.AssignPermiss
 import com.backbase.accesscontrol.datagroup.api.service.v1.DataGroupApi;
 import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.BatchResponseItemExtended;
 import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupBatchPutItem;
+import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupIngest;
 import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupNameIdentifier;
 import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupUpdate;
 import com.backbase.accesscontrol.functiongroup.api.service.v1.FunctionGroupApi;
@@ -75,6 +76,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
     @Mock
     private AssignPermissionsApi assignPermissionsServiceApi;
     @Mock
+    private com.backbase.accesscontrol.assignpermissions.api.integration.v1.AssignPermissionsApi assignPermissionsIntegrationApi;
+    @Mock
     private UserContextApi userContextApi;
     @Spy
     private DeletionProperties configurationProperties;
@@ -122,6 +125,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
             .name("jobRoleNew")
             .validFrom(VALID_FROM)
             .validUntil(VALID_UNTIL)
+            .apsName("apsName")
             .addFunctionGroupsItem(new BusinessFunctionGroup()
                 .name("fg1")
                 .addFunctionsItem(new BusinessFunction()
@@ -139,8 +143,8 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 ))
             .metadata(Map.of("key1", "value1"));
 
-        Mockito.when(functionGroupServiceApi.createFunctionGroup(any()))
-            .thenReturn(Mono.just(new ResultId().id("1")));
+        Mockito.when(functionGroupIntegrationApi.ingestFunctionGroup(any()))
+            .thenReturn(Mono.just(new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.ResultId().id("1")));
         Mockito.when(accessControlProperties.getConcurrency())
             .thenReturn(1);
 
@@ -149,20 +153,21 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
 
         Assertions.assertNotNull(setupJobRole);
 
-        Mockito.verify(functionGroupServiceApi)
-            .createFunctionGroup(new FunctionGroupCreateRequest()
-                .serviceAgreementId(saInternalId)
+        Mockito.verify(functionGroupIntegrationApi)
+            .ingestFunctionGroup(new FunctionGroupIngest()
+                .externalServiceAgreementId(saExternalId)
                 .validFrom(VALID_FROM)
                 .validUntil(VALID_UNTIL)
                 .name("jobRoleNew")
                 .description("jobRoleNew")
-                .type(FunctionGroupCreateRequest.TypeEnum.CUSTOM)
+                .type(FunctionGroupIngest.TypeEnum.CUSTOM)
                 .metadata(Map.of("key1", "value1"))
-                .addPermissionsItem(new Permission()
+                .apsName("apsName")
+                .addPermissionsItem(new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
                     .businessFunctionName("name1")
                     .addPrivilegesItem("view")
                 )
-                .addPermissionsItem(new Permission()
+                .addPermissionsItem(new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
                     .businessFunctionName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
@@ -302,28 +307,28 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 ))
             .metadata(Map.of("key1", "value1"));
 
-        Mockito.when(functionGroupServiceApi.createFunctionGroup(any()))
-            .thenReturn(Mono.just(new ResultId().id("1")));
+        Mockito.when(functionGroupIntegrationApi.ingestFunctionGroup(any()))
+            .thenReturn(Mono.just(new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.ResultId().id("1")));
 
         Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
         JobRole setupJobRole = listMono.block();
 
         Assertions.assertNotNull(setupJobRole);
 
-        Mockito.verify(functionGroupServiceApi)
-            .createFunctionGroup(new FunctionGroupCreateRequest()
-                .serviceAgreementId(saInternalId)
+        Mockito.verify(functionGroupIntegrationApi)
+            .ingestFunctionGroup(new FunctionGroupIngest()
+                .externalServiceAgreementId(saExternalId)
                 .name("jobRoleNew")
                 .validFrom(VALID_FROM)
                 .validUntil(VALID_UNTIL)
                 .description("jobRoleNew")
-                .type(FunctionGroupCreateRequest.TypeEnum.CUSTOM)
+                .type(FunctionGroupIngest.TypeEnum.CUSTOM)
                 .metadata(Map.of("key1", "value1"))
-                .addPermissionsItem(new Permission()
+                .addPermissionsItem(new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
                     .businessFunctionName("name1")
                     .addPrivilegesItem("view")
                 )
-                .addPermissionsItem(new Permission()
+                .addPermissionsItem(new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
                     .businessFunctionName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
@@ -365,6 +370,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
             .name("jobRoleNew")
             .validFrom(VALID_FROM)
             .validUntil(VALID_UNTIL)
+            .apsName("apsName")
             .addFunctionGroupsItem(new BusinessFunctionGroup()
                 .name("fg1")
                 .type(TypeEnum.TEMPLATE)
@@ -385,28 +391,29 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 ))
             .metadata(Map.of("key1", "value1"));
 
-        Mockito.when(functionGroupServiceApi.createFunctionGroup(any()))
-            .thenReturn(Mono.just(new ResultId().id("1")));
+        Mockito.when(functionGroupIntegrationApi.ingestFunctionGroup(any()))
+            .thenReturn(Mono.just(new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.ResultId().id("1")));
 
         Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
         JobRole setupJobRole = listMono.block();
 
         Assertions.assertNotNull(setupJobRole);
 
-        Mockito.verify(functionGroupServiceApi)
-            .createFunctionGroup(new FunctionGroupCreateRequest()
-                .serviceAgreementId(saInternalId)
+        Mockito.verify(functionGroupIntegrationApi)
+            .ingestFunctionGroup(new FunctionGroupIngest()
+                .externalServiceAgreementId(saExternalId)
                 .name("jobRoleNew")
                 .validFrom(VALID_FROM)
                 .validUntil(VALID_UNTIL)
                 .description("jobRoleNew")
-                .type(FunctionGroupCreateRequest.TypeEnum.REFERENCE)
+                .type(FunctionGroupIngest.TypeEnum.REFERENCE)
                 .metadata(Map.of("key1", "value1"))
-                .addPermissionsItem(new Permission()
+                .apsName("apsName")
+                .addPermissionsItem(new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
                     .businessFunctionName("name1")
                     .addPrivilegesItem("view")
                 )
-                .addPermissionsItem(new Permission()
+                .addPermissionsItem(new com.backbase.accesscontrol.functiongroup.api.integration.v1.model.Permission()
                     .businessFunctionName("name2")
                     .addPrivilegesItem("view")
                     .addPrivilegesItem("edit")
@@ -697,7 +704,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                         .addPrivilegesItem("edit")
                     )))));
 
-        List<BusinessFunctionGroup> newFunctionGroup = Arrays.asList(new BusinessFunctionGroup()
+        List<BusinessFunctionGroup> newFunctionGroup = List.of(new BusinessFunctionGroup()
                 .name("fg1")
                 .id("1")
                 .addFunctionsItem(new BusinessFunction()
@@ -763,4 +770,16 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
             .validUntil(VALID_UNTIL);
     }
 
+    @Test
+    void testPartitionList() {
+        List<Integer> input = List.of(1, 2, 3, 4, 5, 6, 7);
+        int partitionSize = 3;
+
+        List<List<Integer>> result = AccessGroupService.partitionList(input, partitionSize);
+
+        Assertions.assertEquals(3, result.size());
+        Assertions.assertEquals(List.of(1, 2, 3), result.get(0));
+        Assertions.assertEquals(List.of(4, 5, 6), result.get(1));
+        Assertions.assertEquals(List.of(7), result.get(2));
+    }
 }

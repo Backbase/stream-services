@@ -93,12 +93,13 @@ public class AccessControlConfiguration {
         ServiceAgreementApi serviceAgreementServiceApi,
         com.backbase.accesscontrol.serviceagreement.api.integration.v1.ServiceAgreementApi serviceAgreementIntegrationApi,
         AssignPermissionsApi assignPermissionsApi,
+        com.backbase.accesscontrol.assignpermissions.api.integration.v1.AssignPermissionsApi assignPermissionsIntegrationApi,
         UserContextApi userContextApi) {
         return new AccessGroupService(usersApi, batchResponseUtils, configurationProperties,
             accessControlConfigurationProperties,
             permissionCheckApi, dataGroupServiceApi, dataGroupIntegrationApi, functionGroupServiceApi,
             functionGroupIntegrationApi,
-            serviceAgreementServiceApi, serviceAgreementIntegrationApi, assignPermissionsApi, userContextApi);
+            serviceAgreementServiceApi, serviceAgreementIntegrationApi, assignPermissionsApi, assignPermissionsIntegrationApi, userContextApi);
     }
 
 }

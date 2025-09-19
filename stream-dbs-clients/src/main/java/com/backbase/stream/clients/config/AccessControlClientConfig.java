@@ -125,6 +125,21 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
+    public com.backbase.accesscontrol.assignpermissions.api.integration.ApiClient assignPermissionsIntegrationApiClient(
+        ObjectMapper objectMapper, DateFormat dateFormat) {
+        return new com.backbase.accesscontrol.assignpermissions.api.integration.ApiClient(getWebClient(), objectMapper,
+            dateFormat).setBasePath(createBasePath());
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public com.backbase.accesscontrol.assignpermissions.api.integration.v1.AssignPermissionsApi assignPermissionsIntegrationApi(
+        com.backbase.accesscontrol.assignpermissions.api.integration.ApiClient apiClient) {
+        return new com.backbase.accesscontrol.assignpermissions.api.integration.v1.AssignPermissionsApi(apiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     public CustomerAccessGroupApi customerAccessGroupApi(
         com.backbase.accesscontrol.customeraccessgroup.api.service.ApiClient apiClient) {
         return new CustomerAccessGroupApi(apiClient);
@@ -210,7 +225,7 @@ public class AccessControlClientConfig extends CompositeApiClientConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public PermissionSetApi permissionSetPermissionsApi(
+    public PermissionSetApi permissionSetServiceApi(
         com.backbase.accesscontrol.permissionset.api.service.ApiClient apiClient) {
         return new PermissionSetApi(apiClient);
     }
