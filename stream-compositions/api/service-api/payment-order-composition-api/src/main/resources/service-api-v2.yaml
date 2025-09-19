@@ -125,7 +125,7 @@ components:
         paymentOrders:
           type: array
           items:
-            $ref: '../../../target/yaml/payment/payment-order-service-api-v3.11.0.yaml#/components/schemas/PaymentOrderPostRequest'
+            $ref: '../../../target/yaml/payment/payment-order-service-api-v3.15.0.yaml#/components/schemas/PaymentOrderPostRequest'
 
     PaymentOrderIngestionResponse:
       type: object
@@ -133,11 +133,11 @@ components:
         newPaymentOrder:
           type: array
           items:
-            $ref: '../../../target/yaml/payment/payment-order-service-api-v3.11.0.yaml#/components/schemas/PaymentOrderPostResponse'
+            $ref: '../../../target/yaml/payment/payment-order-service-api-v3.15.0.yaml#/components/schemas/PaymentOrderPostResponse'
         updatedPaymentOrder:
           type: array
           items:
-            $ref: '../../../target/yaml/payment/payment-order-service-api-v3.11.0.yaml#/components/schemas/PaymentOrderPostResponse'
+            $ref: '../../../target/yaml/payment/payment-order-service-api-v3.15.0.yaml#/components/schemas/PaymentOrderPostResponse'
         deletedPaymentOrder:
           type: array
           items:

@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [7.8.0](https://github.com/Backbase/stream-services/compare/7.7.0...7.8.0)
+### Changed
+- Bumping Backbase BOM to 2025.09-LTS
+- Upgraded SSDK to 19.1.1
+
 ## [7.7.0](https://github.com/Backbase/stream-services/compare/7.6.0...7.7.0)
 ### Changed
 - Add new logic for create approval policy and type to extract internal service agreement id by external service agreement id
