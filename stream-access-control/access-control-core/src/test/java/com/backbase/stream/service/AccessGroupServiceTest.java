@@ -17,6 +17,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
+import com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.AssignUserPermissionsBatch;
+import com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.DataGroupNameIdentifier;
 import com.backbase.accesscontrol.assignpermissions.api.service.v1.AssignPermissionsApi;
 import com.backbase.accesscontrol.assignpermissions.api.service.v1.model.UserPermissionItem;
 import com.backbase.accesscontrol.assignpermissions.api.service.v1.model.UserPermissions;
@@ -466,34 +468,33 @@ class AccessGroupServiceTest {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
             new BatchProductGroup().serviceAgreement(
-                new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
+                new ServiceAgreement().externalId("sa-external-id").internalId("sa-internal-id"))
         );
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
-        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"),
-            List.of(new BaseProductGroup().internalId("data-group-id")));
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1")
+                .serviceAgreementId("parent-sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-2")));
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-2")
+                .serviceAgreementId("parent-sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-3")));
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("system-group-id-1")
+                .serviceAgreementId("sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-4")));
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
         usersPermissions.put(
-            new User().internalId("user-internal-id").externalId("benedict"),
+            new User().internalId("user-internal-id").externalId("user-external-id"),
             baseProductGroupMap
-        );
-
-        List<UserPermissionItem> expectedPermissions = List.of(
-            new UserPermissionItem().functionGroupId("system-group-id-2").dataGroupIds(Set.of()),
-            new UserPermissionItem().functionGroupId("system-group-id-3").dataGroupIds(Set.of()),
-            new UserPermissionItem().functionGroupId("business-function-group-id-1")
-                .dataGroupIds(Set.of("data-group-id"))
         );
 
         when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
             .thenReturn(Mono.just(new GetFunctionGroups()
                 .functionGroups(List.of(
-                    new FunctionGroupItem().id("system-group-id-1").name("SYSTEM_FUNCTION_GROUP")
-                        .type(FunctionGroupItem.TypeEnum.SYSTEM),
-                    new FunctionGroupItem().id("system-group-id-2").name("Full access")
-                        .type(TypeEnum.REFERENCE)
+                    new FunctionGroupItem().id("system-group-id-1").type(TypeEnum.SYSTEM),
+                    new FunctionGroupItem().id("system-group-id-2").type(TypeEnum.REFERENCE),
+                    new FunctionGroupItem().id("system-group-id-3").type(TypeEnum.SYSTEM)
                 ))
             ));
 
@@ -503,81 +504,38 @@ class AccessGroupServiceTest {
                 new UserPermissionItem().functionGroupId("system-group-id-2").dataGroupIds(Set.of()),
                 new UserPermissionItem().functionGroupId("system-group-id-3").dataGroupIds(Set.of()),
                 new UserPermissionItem().functionGroupId("business-function-group-id-1")
-                    .dataGroupIds(Set.of("data-group-id"))
+                    .dataGroupIds(Set.of("data-group-id-1"))
             ))));
 
-        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
-
-        // When
-        BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
-            .block();
-
-        // Then
-        Assertions.assertSame(batchProductGroupTask, result);
-
-        ArgumentCaptor<List<UserPermissionItem>> argumentCaptor = ArgumentCaptor.forClass(List.class);
-        verify(assignPermissionsServiceApi).putUserPermissions(eq("user-internal-id"), eq("sa-internal-id"),
-            argumentCaptor.capture());
-        assertEquals(expectedPermissions.size(), argumentCaptor.getValue().size());
-        assertTrue(argumentCaptor.getValue().containsAll(expectedPermissions));
-    }
-
-    /*
-       Request contains business-function-group-id-1, business-function-group-id-2
-       Existing permissions are: system-group-id-1, function-group-id-1, business-function-group-id-1 and business-function-group-id-2
-       Expectation is to have function-group-id-1, business-function-group-id-1 and business-function-group-id-2 in PUT permissions request together with data group ids specified in request
-     */
-    @Test
-    void assignPermissionsBatchNoExistingFunctionGroups() {
-        // Given
-        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
-            new BatchProductGroup().serviceAgreement(
-                new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
-        );
-        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
-
-        Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
-        baseProductGroupMap.put(
-            new BusinessFunctionGroup().id("business-function-group-id-1"),
-            Collections.singletonList(new BaseProductGroup().internalId("data-group-0"))
-        );
-        baseProductGroupMap.put(
-            new BusinessFunctionGroup().id("business-function-group-id-2"),
-            Collections.singletonList(new BaseProductGroup().internalId("data-group-2"))
-        );
-
-        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
-        usersPermissions.put(
-            new User().internalId("user-internal-id").externalId("benedict"),
-            baseProductGroupMap
-        );
-
-        List<UserPermissionItem> expectedPermissions = List.of(
-            new UserPermissionItem().functionGroupId("function-group-id-1").dataGroupIds(Set.of()),
-            new UserPermissionItem().functionGroupId("business-function-group-id-1").dataGroupIds(Set.of("data-group-0",
-                "data-group-1")),
-            new UserPermissionItem().functionGroupId("business-function-group-id-2")
-                .dataGroupIds(Set.of("data-group-2"))
-        );
-
-        when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
-            .thenReturn(Mono.just(new GetFunctionGroups()
-                .functionGroups(List.of(
-                    new FunctionGroupItem().id("system-group-id-1").name("SFG")
-                        .type(FunctionGroupItem.TypeEnum.SYSTEM),
-                    new FunctionGroupItem().id("function-group-id-1").name("Full access")
-                        .type(TypeEnum.REFERENCE)
-                ))
+        when(functionGroupServiceApi.bulkSearchFunctionGroups(any()))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(
+                List.of(new FunctionGroupItem().id("system-group-id-1").name("system-group-name-1")
+                        .serviceAgreementId("sa-internal-id"),
+                    new FunctionGroupItem().id("system-group-id-2").name("system-group-name-2")
+                        .serviceAgreementId("sa-internal-id"),
+                    new FunctionGroupItem().id("business-function-group-id-1")
+                        .name("business-function-group-name-1").serviceAgreementId("parent-sa-internal-id"),
+                    new FunctionGroupItem().id("business-function-group-id-2")
+                        .name("business-function-group-name-2").serviceAgreementId("parent-sa-internal-id")
+                )
+            )));
+        when(serviceAgreementServiceApi.getServiceAgreementById("parent-sa-internal-id"))
+            .thenReturn(
+                Mono.just(
+                    new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreement()
+                        .id("parent-sa-internal-id").externalId("parent-sa-external-id")));
+        when(dataGroupServiceApi.bulkSearchDataGroups(any()))
+            .thenReturn(Mono.just(new GetDataGroups()
+                .dataGroups(List.of(
+                        new DataGroup().id("data-group-id-1").name("data-group-name-1").type("data-group-type-1"),
+                        new DataGroup().id("data-group-id-2").name("data-group-name-2").type("data-group-type-2"),
+                        new DataGroup().id("data-group-id-3").name("data-group-name-3").type("data-group-type-3"),
+                        new DataGroup().id("data-group-id-4").name("data-group-name-4").type("data-group-type-4")
+                    )
+                )
             ));
 
-        when(assignPermissionsServiceApi.getUserPermissions("user-internal-id", "sa-internal-id"))
-            .thenReturn(Mono.just(new UserPermissions().permissions(List.of(
-                new UserPermissionItem().functionGroupId("function-group-id-1").dataGroupIds(Set.of()),
-                new UserPermissionItem().functionGroupId("business-function-group-id-1")
-                    .dataGroupIds(Set.of("data-group-1"))
-            ))));
-
-        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
+        when(assignPermissionsIntegrationApi.batchUpdateUserPermissions(any())).thenReturn(Flux.empty());
 
         // When
         BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
@@ -586,11 +544,43 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        ArgumentCaptor<List<UserPermissionItem>> argumentCaptor = ArgumentCaptor.forClass(List.class);
-        verify(assignPermissionsServiceApi).putUserPermissions(eq("user-internal-id"), eq("sa-internal-id"),
-            argumentCaptor.capture());
-        assertEquals(expectedPermissions.size(), argumentCaptor.getValue().size());
-        assertTrue(argumentCaptor.getValue().containsAll(expectedPermissions));
+        List<com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem> expectedPermissions = List.of(
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("system-group-name-1").serviceAgreementExternalId("sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-4").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS"))),
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("system-group-name-2").serviceAgreementExternalId("sa-external-id")),
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("business-function-group-name-1")
+                        .serviceAgreementExternalId("parent-sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                        .name("data-group-name-1").serviceAgreementExternalId("sa-external-id")
+                        .dataGroupType("data-group-type-1"),
+                    new DataGroupNameIdentifier()
+                        .name("data-group-name-2").serviceAgreementExternalId("sa-external-id")
+                        .dataGroupType("ARRANGEMENTS"))),
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("business-function-group-name-2")
+                        .serviceAgreementExternalId("parent-sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-3").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS")))
+        );
+
+        ArgumentCaptor<List<AssignUserPermissionsBatch>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(assignPermissionsIntegrationApi).batchUpdateUserPermissions(argumentCaptor.capture());
+        assertEquals(expectedPermissions.size(), argumentCaptor.getValue().getFirst().getPermissions().size());
+        assertTrue(argumentCaptor.getValue().getFirst().getPermissions().containsAll(expectedPermissions));
     }
 
     @Test
@@ -598,24 +588,53 @@ class AccessGroupServiceTest {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
             new BatchProductGroup().serviceAgreement(
-                new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
+                new ServiceAgreement().externalId("sa-external-id").internalId("sa-internal-id"))
         );
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
-        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"),
-            Collections.emptyList());
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1")
+                .serviceAgreementId("parent-sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-2")));
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-2")
+                .serviceAgreementId("parent-sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-3")));
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("system-group-id-1")
+                .serviceAgreementId("sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-4")));
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
         usersPermissions.put(
-            new User().internalId("user-internal-id").externalId("benedict"),
+            new User().internalId("user-internal-id").externalId("user-external-id"),
             baseProductGroupMap
         );
 
-        List<UserPermissionItem> expectedPermissions = List.of(
-            new UserPermissionItem().functionGroupId("business-function-group-id-1").dataGroupIds(Set.of()));
+        when(functionGroupServiceApi.bulkSearchFunctionGroups(any()))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(
+                List.of(new FunctionGroupItem().id("system-group-id-1").name("system-group-name-1")
+                        .serviceAgreementId("sa-internal-id"),
+                    new FunctionGroupItem().id("business-function-group-id-1")
+                        .name("business-function-group-name-1").serviceAgreementId("parent-sa-internal-id"),
+                    new FunctionGroupItem().id("business-function-group-id-2")
+                        .name("business-function-group-name-2").serviceAgreementId("parent-sa-internal-id")
+                )
+            )));
+        when(serviceAgreementServiceApi.getServiceAgreementById("parent-sa-internal-id"))
+            .thenReturn(
+                Mono.just(
+                    new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreement()
+                        .id("parent-sa-internal-id").externalId("parent-sa-external-id")));
+        when(dataGroupServiceApi.bulkSearchDataGroups(any()))
+            .thenReturn(Mono.just(new GetDataGroups()
+                .dataGroups(List.of(
+                        new DataGroup().id("data-group-id-2").name("data-group-name-2").type("data-group-type-2"),
+                        new DataGroup().id("data-group-id-3").name("data-group-name-3").type("data-group-type-3"),
+                        new DataGroup().id("data-group-id-4").name("data-group-name-4").type("data-group-type-4")
+                    )
+                )
+            ));
 
-        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
+        when(assignPermissionsIntegrationApi.batchUpdateUserPermissions(any())).thenReturn(Flux.empty());
 
         // When
         BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
@@ -624,9 +643,111 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(assignPermissionsServiceApi).putUserPermissions("user-internal-id", "sa-internal-id",
-            expectedPermissions);
+        List<com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem> expectedPermissions = List.of(
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("system-group-name-1").serviceAgreementExternalId("sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-4").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS"))),
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("business-function-group-name-1")
+                        .serviceAgreementExternalId("parent-sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                        .name("data-group-name-2").serviceAgreementExternalId("sa-external-id")
+                        .dataGroupType("ARRANGEMENTS"))),
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("business-function-group-name-2")
+                        .serviceAgreementExternalId("parent-sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-3").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS")))
+        );
+
+        ArgumentCaptor<List<AssignUserPermissionsBatch>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(assignPermissionsIntegrationApi).batchUpdateUserPermissions(argumentCaptor.capture());
+        assertEquals(expectedPermissions.size(), argumentCaptor.getValue().getFirst().getPermissions().size());
+        assertTrue(argumentCaptor.getValue().getFirst().getPermissions().containsAll(expectedPermissions));
     }
+
+    @Test
+    void shouldNotEnrichIfAllDataProvidedWhenAssignPermissionsBatchIngestionModeReplace() {
+        // Given
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
+            new BatchProductGroup().serviceAgreement(
+                new ServiceAgreement().externalId("sa-external-id").internalId("sa-internal-id"))
+        );
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.REPLACE);
+
+        Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1")
+                .name("business-function-group-name-1")
+                .serviceAgreementId("sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-2").name("data-group-name-2")
+                .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)));
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-2")
+                .name("business-function-group-name-2")
+                .serviceAgreementId("sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-3").name("data-group-name-3")
+                .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)));
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("system-group-id-1")
+                .name("system-group-name-1")
+                .serviceAgreementId("sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-4").name("data-group-name-4")
+                .productGroupType(BaseProductGroup.ProductGroupTypeEnum.ARRANGEMENTS)));
+
+        Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
+        usersPermissions.put(
+            new User().internalId("user-internal-id").externalId("user-external-id"),
+            baseProductGroupMap
+        );
+
+        when(assignPermissionsIntegrationApi.batchUpdateUserPermissions(any())).thenReturn(Flux.empty());
+
+        // When
+        BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
+            .block();
+
+        // Then
+        Assertions.assertSame(batchProductGroupTask, result);
+
+        List<com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem> expectedPermissions = List.of(
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("system-group-name-1").serviceAgreementExternalId("sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-4").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS"))),
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("business-function-group-name-1")
+                        .serviceAgreementExternalId("sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-2").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS"))),
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("business-function-group-name-2")
+                        .serviceAgreementExternalId("sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-3").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS")))
+        );
+
+        ArgumentCaptor<List<AssignUserPermissionsBatch>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(assignPermissionsIntegrationApi).batchUpdateUserPermissions(argumentCaptor.capture());
+        assertEquals(expectedPermissions.size(), argumentCaptor.getValue().getFirst().getPermissions().size());
+        assertTrue(argumentCaptor.getValue().getFirst().getPermissions().containsAll(expectedPermissions));
+    }
+
 
     @Test
     void updateExistingDataGroupsBatchWithSameInDbsIngestionModeReplace() {
@@ -975,47 +1096,71 @@ class AccessGroupServiceTest {
         verify(dataGroupIntegrationApi, times(0)).batchUpdateDataItems(any());
     }
 
-    /*
-       Request contains business-function-group-id-1
-       Existing permissions are empty
-       Expectation is to have business-function-group-id-1 in PUT permissions request
-     */
+
     @Test
     void assignPermissionsBatchEmptyExistingPermissions() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
             new BatchProductGroup().serviceAgreement(
-                new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
+                new ServiceAgreement().externalId("sa-external-id").internalId("sa-internal-id"))
         );
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
-        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1"),
-            Collections.emptyList());
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1")
+                .serviceAgreementId("parent-sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-2")));
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-2")
+                .serviceAgreementId("parent-sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-3")));
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("system-group-id-1")
+                .serviceAgreementId("sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-4")));
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
         usersPermissions.put(
-            new User().internalId("user-internal-id").externalId("benedict"),
+            new User().internalId("user-internal-id").externalId("user-external-id"),
             baseProductGroupMap
         );
-
-        List<UserPermissionItem> expectedPermissions = List.of(
-            new UserPermissionItem().functionGroupId("business-function-group-id-1").dataGroupIds(Set.of()));
 
         when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
             .thenReturn(Mono.just(new GetFunctionGroups()
                 .functionGroups(List.of(
-                    new FunctionGroupItem().id("system-group-id-1").name("SYSTEM_FUNCTION_GROUP")
-                        .type(FunctionGroupItem.TypeEnum.SYSTEM),
-                    new FunctionGroupItem().id("system-group-id-2").name("Full access")
-                        .type(TypeEnum.REFERENCE)
+                    new FunctionGroupItem().id("system-group-id-1").type(TypeEnum.SYSTEM),
+                    new FunctionGroupItem().id("system-group-id-2").type(TypeEnum.REFERENCE),
+                    new FunctionGroupItem().id("system-group-id-3").type(TypeEnum.SYSTEM)
                 ))
             ));
 
         when(assignPermissionsServiceApi.getUserPermissions("user-internal-id", "sa-internal-id"))
             .thenReturn(Mono.just(new UserPermissions().permissions(List.of())));
 
-        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
+        when(functionGroupServiceApi.bulkSearchFunctionGroups(any()))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(
+                List.of(new FunctionGroupItem().id("system-group-id-1").name("system-group-name-1")
+                        .serviceAgreementId("sa-internal-id"),
+                    new FunctionGroupItem().id("business-function-group-id-1")
+                        .name("business-function-group-name-1").serviceAgreementId("parent-sa-internal-id"),
+                    new FunctionGroupItem().id("business-function-group-id-2")
+                        .name("business-function-group-name-2").serviceAgreementId("parent-sa-internal-id")
+                )
+            )));
+        when(serviceAgreementServiceApi.getServiceAgreementById("parent-sa-internal-id"))
+            .thenReturn(
+                Mono.just(
+                    new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreement()
+                        .id("parent-sa-internal-id").externalId("parent-sa-external-id")));
+        when(dataGroupServiceApi.bulkSearchDataGroups(any()))
+            .thenReturn(Mono.just(new GetDataGroups()
+                .dataGroups(List.of(
+                        new DataGroup().id("data-group-id-2").name("data-group-name-2").type("data-group-type-2"),
+                        new DataGroup().id("data-group-id-3").name("data-group-name-3").type("data-group-type-3"),
+                        new DataGroup().id("data-group-id-4").name("data-group-name-4").type("data-group-type-4")
+                    )
+                )
+            ));
+
+        when(assignPermissionsIntegrationApi.batchUpdateUserPermissions(any())).thenReturn(Flux.empty());
 
         // When
         BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
@@ -1024,55 +1169,100 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(assignPermissionsServiceApi).putUserPermissions("user-internal-id", "sa-internal-id",
-            expectedPermissions);
+        List<com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem> expectedPermissions = List.of(
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("system-group-name-1").serviceAgreementExternalId("sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-4").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS"))),
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("business-function-group-name-1")
+                        .serviceAgreementExternalId("parent-sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-2").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS"))),
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("business-function-group-name-2")
+                        .serviceAgreementExternalId("parent-sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-3").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS")))
+        );
+
+        ArgumentCaptor<List<AssignUserPermissionsBatch>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(assignPermissionsIntegrationApi).batchUpdateUserPermissions(argumentCaptor.capture());
+        assertEquals(expectedPermissions.size(), argumentCaptor.getValue().getFirst().getPermissions().size());
+        assertTrue(argumentCaptor.getValue().getFirst().getPermissions().containsAll(expectedPermissions));
     }
 
-    /*
-       Request contains business-function-group-id-1
-       Existing permissions returns only SFG system-group-id-1
-       Expectation is to have business-function-group-id-1 in PUT permissions request
-     */
     @Test
     void assignPermissionsBatchOnlySystemFunctionGroupExists() {
         // Given
         BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
             new BatchProductGroup().serviceAgreement(
-                new ServiceAgreement().externalId("sa_benedict").internalId("sa-internal-id"))
+                new ServiceAgreement().externalId("sa-external-id").internalId("sa-internal-id"))
         );
         batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> baseProductGroupMap = new HashMap<>();
-        baseProductGroupMap.put(
-            new BusinessFunctionGroup().id("business-function-group-id-1"),
-            Collections.singletonList(new BaseProductGroup().internalId("data-group-0"))
-        );
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-1")
+                .serviceAgreementId("parent-sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-2")));
+        baseProductGroupMap.put(new BusinessFunctionGroup().id("business-function-group-id-2")
+                .serviceAgreementId("parent-sa-internal-id"),
+            List.of(new BaseProductGroup().internalId("data-group-id-3")));
 
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions = new HashMap<>();
         usersPermissions.put(
-            new User().internalId("user-internal-id").externalId("benedict"),
+            new User().internalId("user-internal-id").externalId("user-external-id"),
             baseProductGroupMap
         );
-
-        List<UserPermissionItem> expectedPermissions = List.of(
-            new UserPermissionItem().functionGroupId("business-function-group-id-1")
-                .dataGroupIds(Set.of("data-group-0")));
 
         when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
             .thenReturn(Mono.just(new GetFunctionGroups()
                 .functionGroups(List.of(
-                    new FunctionGroupItem().id("system-group-id-1").name("SYSTEM_FUNCTION_GROUP")
-                        .type(FunctionGroupItem.TypeEnum.SYSTEM)
+                    new FunctionGroupItem().id("system-group-id-1").type(TypeEnum.SYSTEM),
+                    new FunctionGroupItem().id("system-group-id-2").type(TypeEnum.SYSTEM),
+                    new FunctionGroupItem().id("system-group-id-3").type(TypeEnum.SYSTEM)
                 ))
             ));
 
         when(assignPermissionsServiceApi.getUserPermissions("user-internal-id", "sa-internal-id"))
             .thenReturn(Mono.just(new UserPermissions().permissions(List.of(
-                new UserPermissionItem().functionGroupId("system-group-id-1")
-                    .dataGroupIds(Set.of("system-data-group-1", "system-data-group-2"))
+                new UserPermissionItem().functionGroupId("system-group-id-1").dataGroupIds(Set.of()),
+                new UserPermissionItem().functionGroupId("system-group-id-2").dataGroupIds(Set.of()),
+                new UserPermissionItem().functionGroupId("system-group-id-3").dataGroupIds(Set.of())
             ))));
 
-        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
+        when(functionGroupServiceApi.bulkSearchFunctionGroups(any()))
+            .thenReturn(Mono.just(new GetFunctionGroups().functionGroups(
+                List.of(new FunctionGroupItem().id("business-function-group-id-1")
+                        .name("business-function-group-name-1").serviceAgreementId("parent-sa-internal-id"),
+                    new FunctionGroupItem().id("business-function-group-id-2")
+                        .name("business-function-group-name-2").serviceAgreementId("parent-sa-internal-id")
+                )
+            )));
+        when(serviceAgreementServiceApi.getServiceAgreementById("parent-sa-internal-id"))
+            .thenReturn(
+                Mono.just(
+                    new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreement()
+                        .id("parent-sa-internal-id").externalId("parent-sa-external-id")));
+        when(dataGroupServiceApi.bulkSearchDataGroups(any()))
+            .thenReturn(Mono.just(new GetDataGroups()
+                .dataGroups(List.of(
+                        new DataGroup().id("data-group-id-2").name("data-group-name-2").type("data-group-type-2"),
+                        new DataGroup().id("data-group-id-3").name("data-group-name-3").type("data-group-type-3")
+                    )
+                )
+            ));
+
+        when(assignPermissionsIntegrationApi.batchUpdateUserPermissions(any())).thenReturn(Flux.empty());
 
         // When
         BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, usersPermissions)
@@ -1081,8 +1271,29 @@ class AccessGroupServiceTest {
         // Then
         Assertions.assertSame(batchProductGroupTask, result);
 
-        verify(assignPermissionsServiceApi).putUserPermissions("user-internal-id", "sa-internal-id",
-            expectedPermissions);
+        List<com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem> expectedPermissions = List.of(
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("business-function-group-name-1")
+                        .serviceAgreementExternalId("parent-sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-2").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS"))),
+            new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
+                .functionGroup(
+                    new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
+                        .name("business-function-group-name-2")
+                        .serviceAgreementExternalId("parent-sa-external-id"))
+                .dataGroups(List.of(new DataGroupNameIdentifier()
+                    .name("data-group-name-3").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS")))
+        );
+
+        ArgumentCaptor<List<AssignUserPermissionsBatch>> argumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(assignPermissionsIntegrationApi).batchUpdateUserPermissions(argumentCaptor.capture());
+        assertEquals(expectedPermissions.size(), argumentCaptor.getValue().getFirst().getPermissions().size());
+        assertTrue(argumentCaptor.getValue().getFirst().getPermissions().containsAll(expectedPermissions));
     }
 
     @Test
@@ -1607,7 +1818,8 @@ class AccessGroupServiceTest {
                 "id22", "id23", "id24")
             .map(id -> new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup().id(id)).toList();
         var page3 = Stream.of("id25", "id26", "id27", "id28", "id29", "id30", "id31", "id32", "id33",
-                "id34", "id35", "id36").map(id -> new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup().id(id))
+                "id34", "id35", "id36")
+            .map(id -> new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup().id(id))
             .toList();
         String page2Cursor = "cursor-2";
         String page3Cursor = "cursor-3";
