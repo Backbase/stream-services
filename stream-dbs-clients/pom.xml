@@ -248,7 +248,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/data-group-service-api-v1.0.1.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/data-group-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.datagroup.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.datagroup.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -264,7 +264,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/function-group-service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/function-group-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.functiongroup.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.functiongroup.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -280,7 +280,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/legal-entity-service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/legal-entity-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.legalentity.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.legalentity.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -296,7 +296,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/service-agreement-service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/service-agreement-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.serviceagreement.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.serviceagreement.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -312,7 +312,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/user-context-service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/user-context-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.usercontext.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.usercontext.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -328,7 +328,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/permission-check-service-api-v1.7.1.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/permission-check-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.permissioncheck.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.permissioncheck.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -344,7 +344,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/assign-permissions-service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/assign-permissions-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.assignpermissions.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.assignpermissions.api.service.v1.model</modelPackage>
                             <configOptions>
@@ -360,7 +360,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/assign-permissions-integration-inbound-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/assign-permissions-integration-inbound-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.assignpermissions.api.integration.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.assignpermissions.api.integration.v1.model</modelPackage>
                             <configOptions>
@@ -376,7 +376,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/data-group-integration-inbound-api-v1.0.1.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/data-group-integration-inbound-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.datagroup.api.integration.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.datagroup.api.integration.v1.model</modelPackage>
                             <configOptions>
@@ -392,7 +392,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/function-group-integration-inbound-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/function-group-integration-inbound-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.functiongroup.api.integration.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.functiongroup.api.integration.v1.model</modelPackage>
                             <configOptions>
@@ -408,7 +408,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/service-agreement-integration-inbound-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/service-agreement-integration-inbound-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.serviceagreement.api.integration.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.serviceagreement.api.integration.v1.model</modelPackage>
                             <configOptions>
@@ -424,7 +424,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/legal-entity-integration-inbound-api-v3.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/legal-entity-integration-inbound-api-v3*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.legalentity.api.integration.v3</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.legalentity.api.integration.v3.model</modelPackage>
                             <configOptions>
@@ -440,7 +440,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <openapiNormalizer>REFACTOR_ALLOF_WITH_PROPERTIES_ONLY=true</openapiNormalizer>
-                            <inputSpec>${project.build.directory}/yaml/access-control/permission-set-service-api-v1.0.0.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/permission-set-service-api-v1*.yaml</inputSpec>
                             <apiPackage>com.backbase.accesscontrol.permissionset.api.service.v1</apiPackage>
                             <modelPackage>com.backbase.accesscontrol.permissionset.api.service.v1.model</modelPackage>
                             <configOptions>
