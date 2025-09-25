@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "url": "/access-control/service-api/v3/accesscontrol/data-groups",
+    "url": "/access-control/service-api/v1/access-control/data-groups",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"
