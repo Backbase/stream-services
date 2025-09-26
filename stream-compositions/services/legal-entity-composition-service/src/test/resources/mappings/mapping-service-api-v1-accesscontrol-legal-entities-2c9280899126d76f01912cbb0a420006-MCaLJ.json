@@ -1,7 +1,7 @@
 {
   "id": "3601f251-7f65-37eb-bc76-c1d7f6cbc792",
   "request": {
-    "url": "/service-api/v3/accesscontrol/legal-entities/2c9280899126d76f01912cbb0a420006",
+    "url": "/service-api/v1/access-control/legal-entities/2c9280899126d76f01912cbb0a420006",
     "method": "GET"
   },
   "response": {

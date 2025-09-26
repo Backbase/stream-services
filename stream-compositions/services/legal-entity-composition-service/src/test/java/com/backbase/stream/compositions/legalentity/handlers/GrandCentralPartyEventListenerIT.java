@@ -44,9 +44,9 @@ public class GrandCentralPartyEventListenerIT {
         envelopedEvent.setEvent(event);
         listener.handle(envelopedEvent);
 
-        verify(postRequestedFor(urlEqualTo("/service-api/v3/accesscontrol/legal-entities/create")));
-        verify(postRequestedFor(urlEqualTo("/service-api/v3/accesscontrol/service-agreements/ingest")));
-        verify(putRequestedFor(urlEqualTo("/service-api/v3/accessgroups/users/permissions/user-permissions")));
+        verify(postRequestedFor(urlEqualTo("/integration-api/v3/access-control/legal-entities")));
+        verify(postRequestedFor(urlEqualTo("/integration-api/v1/access-control/service-agreements")));
+        verify(putRequestedFor(urlEqualTo("/integration-api/v1/access-control/user-permissions")));
         verify(postRequestedFor(urlEqualTo("/service-api/v2/users/identities")));
     }
 
@@ -58,9 +58,9 @@ public class GrandCentralPartyEventListenerIT {
         envelopedEvent.setEvent(event);
         listener.handle(envelopedEvent);
 
-        verify(postRequestedFor(urlEqualTo("/service-api/v3/accesscontrol/legal-entities/create")));
-        verify(postRequestedFor(urlEqualTo("/service-api/v3/accesscontrol/service-agreements/ingest")));
-        verify(0, putRequestedFor(urlEqualTo("/service-api/v3/accessgroups/users/permissions/user-permissions")));
+        verify(postRequestedFor(urlEqualTo("/integration-api/v3/access-control/legal-entities")));
+        verify(postRequestedFor(urlEqualTo("/integration-api/v1/access-control/service-agreements")));
+        verify(0, putRequestedFor(urlEqualTo("/integration-api/v1/access-control/user-permissions")));
         verify(0, postRequestedFor(urlEqualTo("/service-api/v2/users/identities")));
     }
 

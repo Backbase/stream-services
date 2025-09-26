@@ -1,122 +1,93 @@
-[
-  {
-    "additions": {},
-    "id": "2c92808991135a27019121bb18080005",
-    "serviceAgreementId": "2c92808991135a27019121bb16ad0001",
-    "name": "Retail User - USA",
-    "description": "Retail User Permissions for USA",
-    "type": "TEMPLATE",
-    "permissions": [
-      {
-        "functionId": "1003",
-        "assignedPrivileges": [
-          {
-            "privilege": "view"
-          },
-          {
-            "privilege": "edit"
-          }
-        ]
-      },
-      {
-        "functionId": "1006",
-        "assignedPrivileges": [
-          {
-            "privilege": "view"
-          }
-        ]
-      },
-      {
-        "functionId": "1005",
-        "assignedPrivileges": [
-          {
-            "privilege": "view"
-          },
-          {
-            "privilege": "create"
-          },
-          {
-            "privilege": "edit"
-          },
-          {
-            "privilege": "delete"
-          }
-        ]
-      },
-      {
-        "functionId": "1018",
-        "assignedPrivileges": [
-          {
-            "privilege": "view"
-          },
-          {
-            "privilege": "create"
-          }
-        ]
-      },
-      {
-        "functionId": "1017",
-        "assignedPrivileges": [
-          {
-            "privilege": "view"
-          },
-          {
-            "privilege": "create"
-          }
-        ]
-      }
-    ],
-    "validFrom": null,
-    "validUntil": null,
-    "approvalId": null,
-    "metadata": {}
-  },
-  {
-    "additions": {},
-    "id": "2c92808991135a27019121bb18080006",
-    "serviceAgreementId": "2c92808991135a27019121bb16ad0001",
-    "name": "Entitlements - Manager",
-    "description": "Full Entitlements administration.",
-    "type": "TEMPLATE",
-    "permissions": [
-      {
-        "functionId": "1020",
-        "assignedPrivileges": [
-          {
-            "privilege": "view"
-          },
-          {
-            "privilege": "create"
-          },
-          {
-            "privilege": "edit"
-          },
-          {
-            "privilege": "delete"
-          }
-        ]
-      },
-      {
-        "functionId": "1019",
-        "assignedPrivileges": [
-          {
-            "privilege": "view"
-          },
-          {
-            "privilege": "create"
-          },
-          {
-            "privilege": "edit"
-          },
-          {
-            "privilege": "delete"
-          }
-        ]
-      }
-    ],
-    "validFrom": null,
-    "validUntil": null,
-    "approvalId": null,
-    "metadata": {}
-  }
-]
+{
+  "functionGroups": [
+    {
+      "additions": {},
+      "id": "2c92808991135a27019121bb18080005",
+      "serviceAgreementId": "2c92808991135a27019121bb16ad0001",
+      "name": "Retail User - USA",
+      "description": "Retail User Permissions for USA",
+      "type": "REFERENCE",
+      "permissions": [
+        {
+          "resourceName": "Transactions",
+          "businessFunctionName": "Transactions",
+          "assignedPrivileges": [
+            "view",
+            "edit"
+          ]
+        },
+        {
+          "resourceName": "Product Summary",
+          "businessFunctionName": "Product Summary",
+          "assignedPrivileges": [
+            "view"
+          ]
+        },
+        {
+          "resourceName": "Contacts",
+          "businessFunctionName": "Contacts",
+          "assignedPrivileges": [
+            "view",
+            "create",
+            "edit",
+            "delete"
+          ]
+        },
+        {
+          "resourceName": "Payments",
+          "businessFunctionName": "US Foreign Wire",
+          "assignedPrivileges": [
+            "view",
+            "create"
+          ]
+        },
+        {
+          "resourceName": "Payments",
+          "businessFunctionName": "US Domestic Wire",
+          "assignedPrivileges": [
+            "view",
+            "create"
+          ]
+        }
+      ],
+      "validFrom": null,
+      "validUntil": null,
+      "approvalId": null,
+      "metadata": {}
+    },
+    {
+      "additions": {},
+      "id": "2c92808991135a27019121bb18080006",
+      "serviceAgreementId": "2c92808991135a27019121bb16ad0001",
+      "name": "Entitlements - Manager",
+      "description": "Full Entitlements administration.",
+      "type": "REFERENCE",
+      "permissions": [
+        {
+          "resourceName": "Entitlements",
+          "businessFunctionName": "Manage Function Groups",
+          "assignedPrivileges": [
+            "view",
+            "create",
+            "edit",
+            "delete"
+          ]
+        },
+        {
+          "resourceName": "Entitlements",
+          "businessFunctionName": "Manage Data Groups",
+          "assignedPrivileges": [
+            "view",
+            "create",
+            "edit",
+            "delete"
+          ]
+        }
+      ],
+      "validFrom": null,
+      "validUntil": null,
+      "approvalId": null,
+      "metadata": {}
+    }
+  ]
+}
