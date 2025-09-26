@@ -8,8 +8,9 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroup;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.FunctionGroupApi;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.GetFunctionGroups;
 import com.backbase.stream.configuration.CustomerAccessGroupConfigurationProperties;
 import com.backbase.stream.legalentity.model.BusinessFunctionGroup;
 import com.backbase.stream.legalentity.model.JobProfileUser;
@@ -34,7 +35,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -49,7 +49,7 @@ class CustomerAccessGroupSagaTest {
     private CustomerAccessGroupService customerAccessGroupService;
 
     @Mock
-    private FunctionGroupsApi functionGroupsApi;
+    private FunctionGroupApi functionGroupsApi;
 
     @Spy
     private final CustomerAccessGroupConfigurationProperties customerAccessGroupConfigurationProperties =
@@ -207,10 +207,11 @@ class CustomerAccessGroupSagaTest {
         when(customerAccessGroupService.assignCustomerAccessGroupsToJobRoles(any(), any(), any(), any())).thenReturn(
             Mono.just(jobProfileUser)
         );
-        FunctionGroupItem functionGroupItem1 = new FunctionGroupItem().id(functionGroup1).name(fg1Name);
-        FunctionGroupItem functionGroupItem2 = new FunctionGroupItem().id(functionGroup2).name(fg2Name);
+        GetFunctionGroups getFunctionGroups = new GetFunctionGroups()
+            .functionGroups(List.of(new FunctionGroupItem().id(functionGroup1).name(fg1Name),
+                new FunctionGroupItem().id(functionGroup2).name(fg2Name)));
 
-        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Flux.just(functionGroupItem1, functionGroupItem2));
+        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Mono.just(getFunctionGroups));
 
         Mono<ServiceAgreementTaskV2> result = customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task);
         StepVerifier.create(result).expectNext(task).verifyComplete();
@@ -236,7 +237,8 @@ class CustomerAccessGroupSagaTest {
             .user(user)
             .businessFunctionGroups(List.of(businessFunctionGroup1, businessFunctionGroup2))
             .jobRoleNameToCustomerAccessGroupNames(List.of(
-                new JobRoleNameToCustomerAccessGroupNames().jobRoleName("RandomName").customerAccessGroupNames(cagNames),
+                new JobRoleNameToCustomerAccessGroupNames().jobRoleName("RandomName")
+                    .customerAccessGroupNames(cagNames),
                 new JobRoleNameToCustomerAccessGroupNames().jobRoleName(fg2Name)
             ));
 
@@ -244,10 +246,11 @@ class CustomerAccessGroupSagaTest {
             .jobProfileUsers(List.of(jobProfileUser));
         ServiceAgreementTaskV2 task = mockServiceAgreementTask(serviceAgreementV2);
 
-        FunctionGroupItem functionGroupItem1 = new FunctionGroupItem().id(functionGroup1).name(fg1Name);
-        FunctionGroupItem functionGroupItem2 = new FunctionGroupItem().id(functionGroup2).name(fg2Name);
+        GetFunctionGroups getFunctionGroups = new GetFunctionGroups()
+            .functionGroups(List.of(new FunctionGroupItem().id(functionGroup1).name(fg1Name),
+                new FunctionGroupItem().id(functionGroup2).name(fg2Name)));
 
-        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Flux.just(functionGroupItem1, functionGroupItem2));
+        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Mono.just(getFunctionGroups));
 
         CustomerAccessGroupItem cag1 = new CustomerAccessGroupItem()
             .id(1L)
@@ -301,10 +304,11 @@ class CustomerAccessGroupSagaTest {
         when(customerAccessGroupService.assignCustomerAccessGroupsToJobRoles(any(), any(), any(), any())).thenReturn(
             Mono.just(jobProfileUser)
         );
-        FunctionGroupItem functionGroupItem1 = new FunctionGroupItem().id(functionGroup1).name(fg1Name);
-        FunctionGroupItem functionGroupItem2 = new FunctionGroupItem().id(functionGroup2).name(fg2Name);
+        GetFunctionGroups getFunctionGroups = new GetFunctionGroups()
+            .functionGroups(List.of(new FunctionGroupItem().id(functionGroup1).name(fg1Name),
+                new FunctionGroupItem().id(functionGroup2).name(fg2Name)));
 
-        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Flux.just(functionGroupItem1, functionGroupItem2));
+        when(functionGroupsApi.getFunctionGroups(any())).thenReturn(Mono.just(getFunctionGroups));
 
         StreamTaskException exception = assertThrows(StreamTaskException.class,
             () -> customerAccessGroupSaga.assignCustomerAccessGroupsToJobRoles(task).block());

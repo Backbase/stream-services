@@ -1,12 +1,12 @@
 {
-  "id": "2324355a-cfee-3ad4-b9ae-9c1701b78ef0",
+  "id": "57d408f5-00ff-3cb9-90c6-79959cefdec3",
   "request": {
-    "url": "/service-api/v3/accesscontrol/function-groups?serviceAgreementId=2c9280899126d76f01912cbb0e310007",
+    "url": "/service-api/v1/access-control/user-permissions/529ebcee-bd67-430e-85d9-dabce2345b59/service-agreements/2c9280899126d76f01912cbb0e310007",
     "method": "GET"
   },
   "response": {
     "status": 200,
-    "bodyFileName": "body-service-api-v3-accesscontrol-function-groups-XhOBQ.json",
+    "bodyFileName": "body-service-api-v3-accessgroups-users-529ebcee-bd67-430e-85d9-dabce2345b59-service-agreements-2c9280899126d76f01912cbb0e310007-permissions-lPJBP.json",
     "headers": {
       "Vary": "origin,access-control-request-method,access-control-request-headers,accept-encoding",
       "X-Content-Type-Options": "nosniff",
@@ -20,5 +20,5 @@
       "Keep-Alive": "timeout=60"
     }
   },
-  "uuid": "2324355a-cfee-3ad4-b9ae-9c1701b78ef0"
+  "uuid": "57d408f5-00ff-3cb9-90c6-79959cefdec3"
 }

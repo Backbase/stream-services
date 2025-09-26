@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "PUT",
-    "url": "/access-control/service-api/v3/accesscontrol/function-groups/batch/update",
+    "url": "/access-control/integration-api/v1/access-control/function-groups/batch/update",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"

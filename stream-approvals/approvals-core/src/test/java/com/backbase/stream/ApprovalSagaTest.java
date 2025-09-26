@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
 import com.backbase.dbs.approval.api.service.v2.model.ApprovalTypeScope;
 import com.backbase.dbs.approval.api.service.v2.model.PolicyScope;
 import com.backbase.stream.approval.model.Approval;
@@ -24,9 +24,7 @@ import com.backbase.stream.service.ApprovalsIntegrationService;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -100,19 +98,19 @@ class ApprovalSagaTest {
                         .addBoundsItem(new IntegrationPolicyAssignmentRequestBounds("id").policyName("Dual Control"))
                         .addBoundsItem(new IntegrationPolicyAssignmentRequestBounds(null).policyName("Control"))))),
             Arguments.of(new Approval()
-                    .name(APPROVAL_NAME)
-                    .addPoliciesItem(new Policy(List.of(new PolicyLogicalItem().rank(BigDecimal.ONE)
-                        .addItemsItem(new PolicyItem().approvalTypeName("Level A").numberOfApprovals(BigDecimal.ONE))),
-                        List.of()))
-                    .addApprovalTypesItem(
-                        new ApprovalType().rank(BigDecimal.ONE).name("Level A").description("Level A Approvals"))
-                    .addPolicyAssignmentsItem(new PolicyAssignment().externalServiceAgreementId("externalId")
-                        .addApprovalTypeAssignmentsItem(
-                            new ApprovalTypeAssignmentItem().approvalTypeName("Level A").jobProfileName("All"))
-                        .addPolicyAssignmentItemsItem(new PolicyAssignmentItem().externalServiceAgreementId("externalId")
-                            .addFunctionsItem("Assign Users")
-                            .addBoundsItem(new IntegrationPolicyAssignmentRequestBounds("id").policyName("Dual Control"))
-                            .addBoundsItem(new IntegrationPolicyAssignmentRequestBounds(null).policyName("Control")))))
+                .name(APPROVAL_NAME)
+                .addPoliciesItem(new Policy(List.of(new PolicyLogicalItem().rank(BigDecimal.ONE)
+                    .addItemsItem(new PolicyItem().approvalTypeName("Level A").numberOfApprovals(BigDecimal.ONE))),
+                    List.of()))
+                .addApprovalTypesItem(
+                    new ApprovalType().rank(BigDecimal.ONE).name("Level A").description("Level A Approvals"))
+                .addPolicyAssignmentsItem(new PolicyAssignment().externalServiceAgreementId("externalId")
+                    .addApprovalTypeAssignmentsItem(
+                        new ApprovalTypeAssignmentItem().approvalTypeName("Level A").jobProfileName("All"))
+                    .addPolicyAssignmentItemsItem(new PolicyAssignmentItem().externalServiceAgreementId("externalId")
+                        .addFunctionsItem("Assign Users")
+                        .addBoundsItem(new IntegrationPolicyAssignmentRequestBounds("id").policyName("Dual Control"))
+                        .addBoundsItem(new IntegrationPolicyAssignmentRequestBounds(null).policyName("Control")))))
         );
     }
 

@@ -1,7 +1,7 @@
 {
   "id": "3b10b1ba-1f52-30fe-8fe7-363b2a2476cf",
   "request": {
-    "url": "/service-api/v3/accesscontrol/legal-entities/external/gc-party",
+    "url": "/integration-api/v3/access-control/legal-entities/gc-party",
     "method": "GET"
   },
   "response": {

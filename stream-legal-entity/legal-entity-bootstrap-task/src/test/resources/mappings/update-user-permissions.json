@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "PUT",
-    "url": "/access-control/service-api/v3/accessgroups/users/permissions/user-permissions",
+    "url": "/access-control/integration-api/v1/access-control/user-permissions",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"

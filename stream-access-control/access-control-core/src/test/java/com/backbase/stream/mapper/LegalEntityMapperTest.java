@@ -5,19 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.GetServiceAgreement;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityCreateItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItemBase;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityPut;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.Status;
+import com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntityItem;
+import com.backbase.accesscontrol.legalentity.api.integration.v3.model.SingleServiceAgreement;
+import com.backbase.accesscontrol.legalentity.api.integration.v3.model.Status;
+import com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntityUpdate;
+import com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntityWithParent;
 import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
-import java.time.LocalDate;
-import java.time.Month;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -31,7 +28,7 @@ class LegalEntityMapperTest {
         .legalEntityType(com.backbase.stream.legalentity.model.LegalEntityType.BANK)
         .customerCategory(com.backbase.stream.legalentity.model.CustomerCategory.RETAIL)
         .parentExternalId("parentExternalId")
-        .activateSingleServiceAgreement(true)
+        .activateSingleServiceAgreement(null)
         .additions(Map.of("k1", "v1", "k2", "v2"));
 
     private final LegalEntityMapper mapper = Mappers.getMapper(LegalEntityMapper.class);
@@ -43,38 +40,32 @@ class LegalEntityMapperTest {
 
     @Test
     void toPresentationShouldCopyAllAttributes() {
-        LegalEntityCreateItem presentation = mapper.toPresentation(LEGAL_ENTITY_MODEL);
+        LegalEntityItem presentation = mapper.toPresentation(LEGAL_ENTITY_MODEL);
 
         assertAll(
             () -> assertNotNull(presentation),
             () -> assertEquals("externalId", presentation.getExternalId()),
             () -> assertEquals("Test Legal Entity", presentation.getName()),
-            () -> assertEquals(
-                com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityType.BANK,
+            () -> assertEquals(com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntityType.BANK,
                 presentation.getType()
             ),
             () -> assertEquals(
-                com.backbase.dbs.accesscontrol.api.service.v3.model.CustomerCategory.RETAIL,
+                com.backbase.accesscontrol.legalentity.api.integration.v3.model.CustomerCategory.RETAIL,
                 presentation.getCustomerCategory()
             ),
             () -> assertEquals("parentExternalId", presentation.getParentExternalId()),
-            () -> assertEquals(Boolean.TRUE, presentation.getActivateSingleServiceAgreement())
+            () -> assertEquals(Boolean.FALSE, presentation.getCreateSingleServiceAgreement())
         );
     }
 
     @Test
-    void toStreamFromLegalEntityItemBaseWithNullArg() {
-        assertNull(mapper.toStream((LegalEntityItemBase) null));
-    }
-
-    @Test
     void toStreamFromLegalEntityItemBaseShouldCopyAllAttributes() {
-        LegalEntityItemBase legalEntityItemBase = new LegalEntityItemBase()
+        var legalEntityItemBase = new com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntity()
             .name("Test Legal Entity")
             .id("internalId")
             .externalId("externalId")
-            .type(com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityType.CUSTOMER)
-            .customerCategory(com.backbase.dbs.accesscontrol.api.service.v3.model.CustomerCategory.BUSINESS)
+            .type(com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntityType.CUSTOMER)
+            .customerCategory(com.backbase.accesscontrol.legalentity.api.integration.v3.model.CustomerCategory.BUSINESS)
             .additions(Map.of("k1", "v1", "k2", "v2"));
         LegalEntity model = mapper.toStream(legalEntityItemBase);
         assertAll(
@@ -89,19 +80,13 @@ class LegalEntityMapperTest {
     }
 
     @Test
-    void toStreamFromLegalEntityItemWithNullArg() {
-        assertNull(mapper.toStream((LegalEntityItem) null));
-    }
-
-    @Test
     void toStreamFromLegalEntityItemShouldCopyAllAttributes() {
-        LegalEntityItem legalEntityItem = new LegalEntityItem()
+        LegalEntityWithParent legalEntityItem = new LegalEntityWithParent()
             .id("internalId")
             .externalId("externalId")
             .parentId("parentId")
             .name("Test Legal Entity")
-            .type(com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityType.CUSTOMER)
-            ;
+            .type(com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntityType.CUSTOMER);
         LegalEntity model = mapper.toStream(legalEntityItem);
         assertAll(
             () -> assertNotNull(model),
@@ -114,47 +99,13 @@ class LegalEntityMapperTest {
     }
 
     @Test
-    void toModelFromLegalEntityCreateItemWithNullArg() {
-        assertNull(mapper.toModel(null));
-    }
-
-    @Test
-    void toModelFromLegalEntityCreateItemShouldCopyAllAttributes() {
-        LegalEntityCreateItem legalEntity = new LegalEntityCreateItem()
-            .externalId("externalId")
-            .parentExternalId("parentExternalId")
-            .name("Test Legal Entity")
-            .type(com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityType.CUSTOMER)
-            .activateSingleServiceAgreement(true);
-        LegalEntity model = mapper.toModel(legalEntity);
-        assertAll(
-            () -> assertNotNull(model),
-            () -> assertEquals("externalId", model.getExternalId()),
-            () -> assertEquals("parentExternalId", model.getParentExternalId()),
-            () -> assertEquals("Test Legal Entity", model.getName()),
-            () -> assertEquals(LegalEntityType.CUSTOMER, model.getLegalEntityType()),
-            () -> assertEquals(Boolean.TRUE, model.getActivateSingleServiceAgreement())
-        );
-    }
-
-    @Test
-    void toStreamFromGetServiceAgreementWithNullArg() {
-        assertNull(mapper.toStream((GetServiceAgreement) null));
-    }
-
-    @Test
     void toStreamFromGetServiceAgreementShouldCopyAllAttributes() {
-        GetServiceAgreement getServiceAgreement = new GetServiceAgreement()
+        SingleServiceAgreement getServiceAgreement = new SingleServiceAgreement()
             .id("internalId")
             .externalId("externalId")
             .name("Test Service Agreement")
             .description("description")
-            .validFromDate("2018-08-31")
-            .validFromTime("07:48:23")
-            .validUntilDate("2018-09-30")
-            .validUntilTime("07:49:24")
             .status(Status.ENABLED)
-            .isMaster(true)
             .creatorLegalEntity("creatorLegalEntity");
         ServiceAgreement model = mapper.toStream(getServiceAgreement);
         assertAll(
@@ -163,10 +114,6 @@ class LegalEntityMapperTest {
             () -> assertEquals("internalId", model.getInternalId()),
             () -> assertEquals("Test Service Agreement", model.getName()),
             () -> assertEquals("description", model.getDescription()),
-            () -> assertEquals(LocalDate.of(2018, Month.AUGUST, 31), model.getValidFromDate()),
-            () -> assertEquals("07:48:23", model.getValidFromTime()),
-            () -> assertEquals(LocalDate.of(2018, Month.SEPTEMBER, 30), model.getValidUntilDate()),
-            () -> assertEquals("07:49:24", model.getValidUntilTime()),
             () -> assertEquals(Boolean.TRUE, model.getIsMaster()),
             () -> assertEquals(LegalEntityStatus.ENABLED, model.getStatus())
         );
@@ -179,23 +126,20 @@ class LegalEntityMapperTest {
 
     @Test
     void testToLegalEntityPutShouldCopyAllAttributes() {
-        LegalEntityPut presentation = mapper.toLegalEntityPut(LEGAL_ENTITY_MODEL);
+        LegalEntityUpdate presentation = mapper.toLegalEntityPut(LEGAL_ENTITY_MODEL);
 
         assertAll(
             () -> assertNotNull(presentation),
-            () -> assertEquals("externalId", presentation.getCurrentExternalId()),
-            () -> assertEquals("externalId", presentation.getNewValues().getExternalId()),
-            () -> assertEquals("Test Legal Entity", presentation.getNewValues().getName()),
+            () -> assertEquals("externalId", presentation.getExternalId()),
+            () -> assertEquals("Test Legal Entity", presentation.getName()),
             () -> assertEquals(
-                com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityType.BANK,
-                presentation.getNewValues().getType()
+                com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntityType.BANK,
+                presentation.getType()
             ),
             () -> assertEquals(
-                com.backbase.dbs.accesscontrol.api.service.v3.model.CustomerCategory.RETAIL,
-                presentation.getNewValues().getCustomerCategory()
-            ),
-            () -> assertEquals("parentExternalId", presentation.getNewValues().getParentExternalId()),
-            () -> assertEquals(Boolean.TRUE, presentation.getNewValues().getActivateSingleServiceAgreement())
+                com.backbase.accesscontrol.legalentity.api.service.v1.model.CustomerCategory.RETAIL,
+                presentation.getCustomerCategory()
+            )
         );
     }
 }

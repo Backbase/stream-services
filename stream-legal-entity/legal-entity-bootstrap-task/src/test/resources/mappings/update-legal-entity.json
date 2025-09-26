@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "PUT",
-    "url": "/access-control/service-api/v3/accesscontrol/legal-entities",
+    "url": "/access-control/service-api/v1/access-control/legal-entities/internal-id",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"
@@ -16,10 +16,6 @@
   },
   "response": {
     "status": 200,
-    "jsonBody": {
-      "id": "internal-id",
-      "externalId": "external-id"
-    },
     "headers": {
       "Content-Type": "application/json"
     }

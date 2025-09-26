@@ -7,7 +7,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem.TypeEnum;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
@@ -79,9 +80,9 @@ class UpdatedServiceAgreementSagaTest {
         ServiceAgreement internalSA = new ServiceAgreement().externalId(saExternalId).internalId(saInternalId);
         UpdatedServiceAgreementTask task = new UpdatedServiceAgreementTask(serviceAgreement);
         List<FunctionGroupItem> serviceAgreementFunctionGroups = asList(
-            new FunctionGroupItem().name("someJobRole1").type(FunctionGroupItem.TypeEnum.DEFAULT),
-            new FunctionGroupItem().name("someJobRole2").type(FunctionGroupItem.TypeEnum.DEFAULT),
-            new FunctionGroupItem().name("someJobRole3").type(FunctionGroupItem.TypeEnum.DEFAULT));
+            new FunctionGroupItem().name("someJobRole1").type(TypeEnum.CUSTOM),
+            new FunctionGroupItem().name("someJobRole2").type(TypeEnum.CUSTOM),
+            new FunctionGroupItem().name("someJobRole3").type(TypeEnum.CUSTOM));
         ProductGroup productGroup = new ProductGroup().serviceAgreement(serviceAgreement);
         productGroup.loans(baseProductGroup.getLoans());
 
@@ -110,9 +111,7 @@ class UpdatedServiceAgreementSagaTest {
             .thenReturn(Flux.fromIterable(
                 Collections.singletonList(new ArrangementItem().id(loanInId).externalArrangementId(loanExId))));
 
-
         UpdatedServiceAgreementTask actual = updatedServiceAgreementSaga.executeTask(task).block();
-
 
         assertEquals(StreamTask.State.COMPLETED, actual.getState());
 

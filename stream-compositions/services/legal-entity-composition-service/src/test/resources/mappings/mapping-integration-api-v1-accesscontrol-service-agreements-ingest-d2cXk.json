@@ -1,11 +1,11 @@
 {
   "id": "27f3f149-fa78-3fe2-a61c-2b6528969122",
   "request": {
-    "url": "/service-api/v3/accesscontrol/service-agreements/ingest",
+    "url": "/integration-api/v1/access-control/service-agreements",
     "method": "POST",
     "bodyPatterns": [
       {
-        "equalToJson": "{\"externalId\":\"sa_gc-party\",\"participantsToIngest\":[{\"externalId\":\"gc-party\",\"sharingUsers\":true,\"sharingAccounts\":true,\"admins\":[],\"users\":[]}],\"validFromDate\":null,\"validFromTime\":null,\"validUntilDate\":null,\"validUntilTime\":null,\"status\":\"ENABLED\",\"isMaster\":true,\"regularUserAps\":null,\"adminUserAps\":null,\"creatorLegalEntity\":null,\"customerCategory\":null,\"additions\":{}}",
+        "equalToJson": "{\"externalId\":\"sa_gc-party\",\"participants\":[{\"externalId\":\"gc-party\",\"sharingUsers\":true,\"sharingAccounts\":true,\"admins\":[],\"users\":[]}],\"validFrom\":null,\"validUntil\":null,\"status\":\"ENABLED\",\"isSingle\":true,\"regularUserApsNames\":[],\"adminUserApsNames\":[],\"creatorLegalEntityExternalId\":null,\"customerCategory\":null,\"additions\":{}}",
         "ignoreArrayOrder": true,
         "ignoreExtraElements": true
       }

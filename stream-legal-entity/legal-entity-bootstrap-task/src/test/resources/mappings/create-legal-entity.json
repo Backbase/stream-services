@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "url": "/access-control/service-api/v3/accesscontrol/legal-entities/create",
+    "url": "/access-control/integration-api/v3/access-control/legal-entities",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"

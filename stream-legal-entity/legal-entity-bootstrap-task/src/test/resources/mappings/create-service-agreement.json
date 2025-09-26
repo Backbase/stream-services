@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "url": "/access-control/service-api/v3/accessgroups/serviceagreements/ingest/serviceagreements",
+    "url": "/access-control/integration-api/v1/access-control/service-agreements",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"

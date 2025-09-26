@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/access-control/service-api/v3/accesscontrol/data-groups",
+    "urlPath": "/access-control/service-api/v1/access-control/data-groups",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"

@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPathPattern": "/access-control/service-api/v3/accessgroups/users/([\\w-]+)/service-agreements/([\\w-]+)/permissions",
+    "urlPathPattern": "/access-control/service-api/v1/access-control/user-permissions/([\\w-]+)/service-agreements/([\\w-]+)",
     "headers": {
       "X-B3-TraceId": {
         "matches": "[\\w-]+"
