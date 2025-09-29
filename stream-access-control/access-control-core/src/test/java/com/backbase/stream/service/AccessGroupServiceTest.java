@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +27,7 @@ import com.backbase.accesscontrol.datagroup.api.integration.v1.model.BatchRespon
 import com.backbase.accesscontrol.datagroup.api.integration.v1.model.DataItemBatchUpdate;
 import com.backbase.accesscontrol.datagroup.api.service.v1.DataGroupApi;
 import com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup;
+import com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroupCreateRequest;
 import com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroupUpdateRequest;
 import com.backbase.accesscontrol.datagroup.api.service.v1.model.GetDataGroups;
 import com.backbase.accesscontrol.functiongroup.api.integration.v1.model.FunctionGroupNameIdentifier;
@@ -34,6 +36,9 @@ import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGro
 import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem.TypeEnum;
 import com.backbase.accesscontrol.functiongroup.api.service.v1.model.GetFunctionGroups;
 import com.backbase.accesscontrol.permissioncheck.api.service.v1.PermissionCheckApi;
+import com.backbase.accesscontrol.permissioncheck.api.service.v1.model.DataItem;
+import com.backbase.accesscontrol.permissioncheck.api.service.v1.model.UserDataItemPermission;
+import com.backbase.accesscontrol.permissioncheck.api.service.v1.model.UserDataItemPermissionsList;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.Action;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.BatchResponseItemExtended;
 import com.backbase.accesscontrol.serviceagreement.api.integration.v1.model.ParticipantCreateRequest;
@@ -58,6 +63,7 @@ import com.backbase.accesscontrol.usercontext.api.service.v1.model.GetContexts;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.stream.configuration.AccessControlConfigurationProperties;
 import com.backbase.stream.configuration.DeletionProperties;
+import com.backbase.stream.legalentity.model.AssignedPermission;
 import com.backbase.stream.legalentity.model.BaseProductGroup;
 import com.backbase.stream.legalentity.model.BaseProductGroup.ProductGroupTypeEnum;
 import com.backbase.stream.legalentity.model.BatchProductGroup;
@@ -69,6 +75,7 @@ import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityType;
 import com.backbase.stream.legalentity.model.ProductGroup;
+import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import com.backbase.stream.legalentity.model.ServiceAgreementUserAction;
 import com.backbase.stream.legalentity.model.User;
@@ -84,6 +91,7 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -657,8 +665,8 @@ class AccessGroupServiceTest {
                         .name("business-function-group-name-1")
                         .serviceAgreementExternalId("parent-sa-external-id"))
                 .dataGroups(List.of(new DataGroupNameIdentifier()
-                        .name("data-group-name-2").serviceAgreementExternalId("sa-external-id")
-                        .dataGroupType("ARRANGEMENTS"))),
+                    .name("data-group-name-2").serviceAgreementExternalId("sa-external-id")
+                    .dataGroupType("ARRANGEMENTS"))),
             new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.UserPermissionItem()
                 .functionGroup(
                     new com.backbase.accesscontrol.assignpermissions.api.integration.v1.model.FunctionGroupNameIdentifier()
@@ -1877,8 +1885,134 @@ class AccessGroupServiceTest {
         verify(dataGroupServiceApi).getDataGroups(serviceAgreementId, dataGroupType, true, page2Cursor, 12);
         verify(dataGroupServiceApi).getDataGroups(serviceAgreementId, dataGroupType, true, page3Cursor, 12);
         verify(dataGroupServiceApi).getDataGroups(serviceAgreementId, dataGroupType, true, page4Cursor, 12);
-
     }
 
+    @Test
+    void shouldThrowIfAnyDataItemIdEqualsNull() {
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
 
+        ServiceAgreement serviceAgreement = new ServiceAgreement();
+        BaseProductGroup productGroup = new BaseProductGroup()
+            .currentAccounts(List.of(new CurrentAccount().internalId("ca-internal-id")))
+            .savingAccounts(List.of(new SavingsAccount().internalId(null)));
+
+        assertThrows(StreamTaskException.class,
+            () -> subject.createArrangementDataAccessGroup(serviceAgreement, productGroup,
+                streamTask).block());
+
+        verify(dataGroupServiceApi, never()).createDataGroup(any());
+    }
+
+    @Test
+    void shouldThrowIfCreationError() {
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+
+        ServiceAgreement serviceAgreement = new ServiceAgreement();
+        BaseProductGroup productGroup = new BaseProductGroup()
+            .currentAccounts(List.of(new CurrentAccount().internalId("ca-internal-id")))
+            .savingAccounts(List.of(new SavingsAccount().internalId("saving-internal-id")));
+
+        when(dataGroupServiceApi.createDataGroup(any()))
+            .thenReturn(Mono.error(new WebClientResponseException(BAD_REQUEST, "Bad request", null, null, null, null)));
+
+        Mono<BaseProductGroup> arrangementDataAccessGroup = subject.createArrangementDataAccessGroup(serviceAgreement,
+            productGroup, streamTask);
+
+        StepVerifier.create(arrangementDataAccessGroup)
+            .verifyError(StreamTaskException.class);
+    }
+
+    @Test
+    void shouldCreateDataGroup() {
+        StreamTask streamTask = Mockito.mock(StreamTask.class);
+
+        ServiceAgreement serviceAgreement = new ServiceAgreement().internalId("sa-internal-id");
+        BaseProductGroup productGroup = new BaseProductGroup()
+            .name("pg-name")
+            .description("pg-description")
+            .productGroupType(ProductGroupTypeEnum.ARRANGEMENTS)
+            .currentAccounts(List.of(new CurrentAccount().internalId("ca-internal-id")))
+            .savingAccounts(List.of(new SavingsAccount().internalId("saving-internal-id")));
+
+        when(dataGroupServiceApi.createDataGroup(new DataGroupCreateRequest()
+            .serviceAgreementId("sa-internal-id")
+            .name("pg-name")
+            .description("pg-description")
+            .type("ARRANGEMENTS")
+            .items(Set.of("ca-internal-id", "saving-internal-id")
+            )))
+            .thenReturn(Mono.just(
+                new com.backbase.accesscontrol.datagroup.api.service.v1.model.ResultId().id("created-dg-id")));
+
+        Mono<BaseProductGroup> arrangementDataAccessGroup = subject.createArrangementDataAccessGroup(serviceAgreement,
+            productGroup, streamTask);
+        StepVerifier.create(arrangementDataAccessGroup)
+            .assertNext(createdProductGroup -> {
+                assertEquals("pg-name", createdProductGroup.getName());
+                assertEquals("pg-description", createdProductGroup.getDescription());
+                assertEquals(ProductGroupTypeEnum.ARRANGEMENTS, createdProductGroup.getProductGroupType());
+                assertEquals("created-dg-id", createdProductGroup.getInternalId());
+                assertEquals(1, createdProductGroup.getCurrentAccounts().size());
+                assertTrue(createdProductGroup.getCurrentAccounts().stream()
+                    .anyMatch(item -> item.getInternalId().equals("ca-internal-id")));
+                assertEquals(1, createdProductGroup.getSavingAccounts().size());
+                assertTrue(createdProductGroup.getSavingAccounts().stream()
+                    .anyMatch(item -> item.getInternalId().equals("saving-internal-id")));
+            })
+            .verifyComplete();
+    }
+
+    @Test
+    void shouldRemoveUserPermissions() {
+        when(assignPermissionsServiceApi.putUserPermissions(any(), any(), any())).thenReturn(Mono.empty());
+        subject.removePermissionsForUser("sa-id", "user-id").block();
+        verify(assignPermissionsServiceApi).putUserPermissions("sa-id", "user-id", List.of());
+    }
+
+    @Test
+    void shouldGetArrangementInternalIdsForServiceAgreement() {
+        when(dataGroupServiceApi.getDataGroups("sa-id", null, true, null, 1000))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(List.of(
+                new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup()
+                    .id("dg-1")
+                    .items(Set.of("arr-1", "arr-2")),
+                new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup()
+                    .id("dg-2")
+                    .items(Set.of("arr-3"))
+            )).nextPage(null)));
+
+        Flux<String> result = subject.getArrangementInternalIdsForServiceAgreement("sa-id");
+
+        StepVerifier.create(result.collectList())
+            .assertNext(ids -> assertEquals(Set.of("arr-1", "arr-2", "arr-3"), new HashSet<>(ids)))
+            .verifyComplete();
+    }
+
+    @Test
+    void shouldGetAssignedPermissions() {
+        when(permissionCheckServiceApi.getDataItemPermissions("user-id", "sa-id", "function-name", "resource-name", "privilege", null, null))
+            .thenReturn(Mono.just(new UserDataItemPermissionsList().dataItems(List.of(
+                new UserDataItemPermission().dataItem(new DataItem().id("data-item-1")),
+                new UserDataItemPermission().dataItem(new DataItem().id("data-item-2")),
+                new UserDataItemPermission().dataItem(new DataItem().id("data-item-3"))
+            ))));
+        Flux<AssignedPermission> result = subject.getAssignedPermissions(new ServiceAgreement().internalId("sa-id"),
+            new User().internalId("user-id"),
+            "resource-name", "function-name", "privilege");
+
+        StepVerifier.create(result)
+            .expectNextMatches(ap -> ap.getFunctionName().equals("function-name") && ap.getPrivileges().getPrivilege()
+                .equals("privilege")
+                && ap.getResourceName().equals("resource-name") && ap.getPermittedObjectInternalIds()
+                .equals(List.of("data-item-1")))
+            .expectNextMatches(ap -> ap.getFunctionName().equals("function-name") && ap.getPrivileges().getPrivilege()
+                .equals("privilege")
+                && ap.getResourceName().equals("resource-name") && ap.getPermittedObjectInternalIds()
+                .equals(List.of("data-item-2")))
+            .expectNextMatches(ap -> ap.getFunctionName().equals("function-name") && ap.getPrivileges().getPrivilege()
+                .equals("privilege")
+                && ap.getResourceName().equals("resource-name") && ap.getPermittedObjectInternalIds()
+                .equals(List.of("data-item-3")))
+            .verifyComplete();
+    }
 }

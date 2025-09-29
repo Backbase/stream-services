@@ -1226,8 +1226,7 @@ public class AccessGroupService {
         return assignPermissionsServiceApi.putUserPermissions(
                 serviceAgreementInternalId,
                 userInternalId,
-                List.of())
-            .then();
+                List.of());
     }
 
     /**
@@ -1510,7 +1509,7 @@ public class AccessGroupService {
             .privileges(privileges);
     }
 
-    Flux<AssignedPermission> getAssignedPermissions(ServiceAgreement serviceAgreement, User user, String
+    public Flux<AssignedPermission> getAssignedPermissions(ServiceAgreement serviceAgreement, User user, String
         resourceName, String functionName, String privilege) {
         return permissionCheckServiceApi.getDataItemPermissions(user.getInternalId(), serviceAgreement.getInternalId(),
                 functionName, resourceName, privilege, null, null)
@@ -1521,10 +1520,7 @@ public class AccessGroupService {
             );
     }
 
-    private AssignedPermission mapAssignedPermission(
-        String resourceName,
-        String functionName,
-        String privilege,
+    private AssignedPermission mapAssignedPermission(String resourceName, String functionName, String privilege,
         String dataItemId) {
         AssignedPermission assignedPermission = new AssignedPermission();
         assignedPermission.setPermittedObjectInternalIds(List.of(dataItemId));
