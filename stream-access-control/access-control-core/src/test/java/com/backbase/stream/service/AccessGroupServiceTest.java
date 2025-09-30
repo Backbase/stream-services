@@ -1971,7 +1971,7 @@ class AccessGroupServiceTest {
 
     @Test
     void shouldGetArrangementInternalIdsForServiceAgreement() {
-        when(dataGroupServiceApi.getDataGroups("sa-id", null, true, null, 1000))
+        when(dataGroupServiceApi.getDataGroups("sa-id", "ARRANGEMENTS", true, null, 1000))
             .thenReturn(Mono.just(new GetDataGroups().dataGroups(List.of(
                 new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup()
                     .id("dg-1")
@@ -1990,7 +1990,8 @@ class AccessGroupServiceTest {
 
     @Test
     void shouldGetAssignedPermissions() {
-        when(permissionCheckServiceApi.getDataItemPermissions("user-id", "sa-id", "function-name", "resource-name", "privilege", null, null))
+        when(permissionCheckServiceApi.getDataItemPermissions("user-id", "sa-id", "function-name", "resource-name",
+            "privilege", null, null))
             .thenReturn(Mono.just(new UserDataItemPermissionsList().dataItems(List.of(
                 new UserDataItemPermission().dataItem(new DataItem().id("data-item-1")),
                 new UserDataItemPermission().dataItem(new DataItem().id("data-item-2")),
@@ -2015,4 +2016,45 @@ class AccessGroupServiceTest {
                 .equals(List.of("data-item-3")))
             .verifyComplete();
     }
+
+    @Test
+    void shouldGetDataGroupItemIdsByServiceAgreementId() {
+        when(dataGroupServiceApi.getDataGroups("sa-id", "ARRANGEMENTS", true, null, 1000))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(List.of(
+                new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup()
+                    .id("dg-1")
+                    .items(Set.of("arr-1", "arr-2")),
+                new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup()
+                    .id("dg-2")
+                    .items(Set.of("arr-3"))
+            )).nextPage(null)));
+
+        Flux<String> result = subject.getDataGroupItemIdsByServiceAgreementId("sa-id");
+
+        StepVerifier.create(result.collectList())
+            .assertNext(ids -> assertEquals(Set.of("arr-1", "arr-2", "arr-3"), new HashSet<>(ids)))
+            .verifyComplete();
+    }
+
+    @Test
+    void shouldGetDataGroupItemIdsByExternalServiceAgreementId() {
+        when(serviceAgreementIntegrationApi.getServiceAgreementByExternalId("sa-external-id"))
+            .thenReturn(Mono.just(new ServiceAgreementDetails().id("sa-id")));
+        when(dataGroupServiceApi.getDataGroups("sa-id", "ARRANGEMENTS", true, null, 1000))
+            .thenReturn(Mono.just(new GetDataGroups().dataGroups(List.of(
+                new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup()
+                    .id("dg-1")
+                    .items(Set.of("arr-1", "arr-2")),
+                new com.backbase.accesscontrol.datagroup.api.service.v1.model.DataGroup()
+                    .id("dg-2")
+                    .items(Set.of("arr-3"))
+            )).nextPage(null)));
+
+        Flux<String> result = subject.getDataGroupItemIdsByExternalServiceAgreementId("sa-external-id", "ARRANGEMENTS");
+
+        StepVerifier.create(result.collectList())
+            .assertNext(ids -> assertEquals(Set.of("arr-1", "arr-2", "arr-3"), new HashSet<>(ids)))
+            .verifyComplete();
+    }
+
 }

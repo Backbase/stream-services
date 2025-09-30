@@ -594,7 +594,7 @@ public class AccessGroupService {
                         prettyPrintExternalIds(userPermissionsRequest),
                         prettyPrintDataGroups(userPermissionsRequest));
                     return Flux.fromIterable(userPermissionsRequest)
-                            .flatMap(permissions -> enrichUserPermissions(task, permissions))
+                        .flatMap(permissions -> enrichUserPermissions(task, permissions))
                         .collectList();
                 }
 
@@ -1084,6 +1084,17 @@ public class AccessGroupService {
     }
 
     /**
+     * Return Data Group Items linked to a Service Agreement.
+     *
+     * @param serviceAgreementId Service Agreement Internal ID
+     * @return List of IDs
+     */
+    @SuppressWarnings("WeakerAccess")
+    public Flux<String> getDataGroupItemIdsByServiceAgreementId(String serviceAgreementId) {
+        return getArrangementInternalIdsForServiceAgreement(serviceAgreementId);
+    }
+
+    /**
      * Setup Business Function Groups and link them to the Service Agreement.
      *
      * @param streamTask
@@ -1120,6 +1131,21 @@ public class AccessGroupService {
                         });
                 }
             );
+    }
+
+    /**
+     * Retrieve list of IDs from external Service Agreement ID.
+     *
+     * @param externalServiceAgreementId External Service Agreement ID
+     * @param type                       Type of objects to retrieve
+     * @return list of ids
+     */
+    public Flux<String> getDataGroupItemIdsByExternalServiceAgreementId(String externalServiceAgreementId,
+        String type) {
+        return getServiceAgreementByExternalId(externalServiceAgreementId)
+            .flatMapMany(serviceAgreement -> getExistingDataGroups(serviceAgreement.getInternalId(), type))
+            .mapNotNull(DataGroup::getItems)
+            .flatMapIterable(Function.identity());
     }
 
     public boolean isEquals(BaseProductGroup productGroup, DataGroup item) {
@@ -1224,9 +1250,9 @@ public class AccessGroupService {
         log.debug("Removing permissions from all Data Groups for user: {} in service agreement {}", userInternalId,
             serviceAgreementInternalId);
         return assignPermissionsServiceApi.putUserPermissions(
-                serviceAgreementInternalId,
-                userInternalId,
-                List.of());
+            serviceAgreementInternalId,
+            userInternalId,
+            List.of());
     }
 
     /**
@@ -1353,7 +1379,7 @@ public class AccessGroupService {
      * @return flux of arrangements internal ids.
      */
     public Flux<String> getArrangementInternalIdsForServiceAgreement(String serviceAgreementInternalId) {
-        return getExistingDataGroups(serviceAgreementInternalId, null)
+        return getExistingDataGroups(serviceAgreementInternalId, "ARRANGEMENTS")
             .mapNotNull(DataGroup::getItems)
             .flatMapIterable(Function.identity());
     }
