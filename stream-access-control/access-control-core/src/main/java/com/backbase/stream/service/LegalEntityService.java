@@ -3,6 +3,7 @@ package com.backbase.stream.service;
 import com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntityItem;
 import com.backbase.accesscontrol.legalentity.api.integration.v3.model.ResultId;
 import com.backbase.accesscontrol.legalentity.api.service.v1.LegalEntityApi;
+import com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntitiesList;
 import com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntityUpdate;
 import com.backbase.stream.exceptions.LegalEntityException;
 import com.backbase.stream.legalentity.model.LegalEntity;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.mapstruct.factory.Mappers;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -62,6 +64,20 @@ public class LegalEntityService {
             .onErrorResume(WebClientResponseException.class, exception ->
                 Mono.error(new LegalEntityException(legalEntity, "Failed to create Legal Entity", exception)))
             .onErrorStop();
+    }
+
+    /**
+     * Get Subsidiaries for Legal Entity.
+     *
+     * @param legalEntityExternalId External Legal Entity ID
+     * @param cursor                pointer to the last returned item
+     * @param size                  page size
+     * @return List of Legal Entities
+     */
+    public Flux<LegalEntitiesList> getSubEntities(String legalEntityExternalId, String cursor, int size) {
+        return getLegalEntityByExternalId(legalEntityExternalId)
+            .flatMapMany(legalEntity ->
+                legalEntityServiceApi.getLegalEntities(legalEntity.getInternalId(), cursor, size, null, null, null));
     }
 
     /**

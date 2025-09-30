@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.backbase.accesscontrol.legalentity.api.service.v1.LegalEntityApi;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.utils.BatchResponseUtils;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +51,29 @@ class LegalEntityServiceTest {
 
         StepVerifier.create(result)
             .assertNext(assertEqualsTo(legalEntityUpdated))
+            .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnSubEntities() {
+        when(legalEntityIntegrationApi.getLegalEntityByExternalId("external-id"))
+            .thenReturn(Mono.just(
+                new com.backbase.accesscontrol.legalentity.api.integration.v3.model.LegalEntity().id("internal-id")));
+        when(legalEntitiesApi.getLegalEntities("internal-id", "cursor", 10, null, null, null))
+            .thenReturn(Mono.just(new com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntitiesList()
+                .legalEntities(List.of(new com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntityItem()
+                    .id("internal-id")
+                    .externalId("external-id"))
+                ).nextPage("next-cursor")));
+        subject.getSubEntities("external-id", "cursor", 10)
+            .as(StepVerifier::create)
+            .assertNext(
+                assertEqualsTo(new com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntitiesList()
+                    .legalEntities(
+                        List.of(new com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntityItem()
+                            .id("internal-id")
+                            .externalId("external-id"))
+                    ).nextPage("next-cursor")))
             .verifyComplete();
     }
 }
