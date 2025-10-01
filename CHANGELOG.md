@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.72.7](https://github.com/Backbase/stream-services/compare/3.72.6...3.72.7)
+### Changed
+- Replaced `BOAT` with `openapi-generator-maven-plugin` when generating webclient for access control to fix URI Template Masking.
+
 ## [3.72.6](https://github.com/Backbase/stream-services/compare/3.72.5...3.72.6)
 ### Updated
 - Replaced `openapi-generator-maven-plugin` with `BOAT` when generating webclient for product integration ap

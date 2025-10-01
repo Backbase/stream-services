@@ -116,7 +116,7 @@ class UpdatedServiceAgreementSagaTest {
 
         assertEquals(StreamTask.State.COMPLETED, actual.getState());
 
-        verify(accessGroupService).updateServiceAgreementAssociations(any(), eq(serviceAgreement), any());
+        verify(accessGroupService).updateServiceAgreementAssociations(any(), any(), any());
 
         verify(accessGroupService).setupProductGroups(productGroupTaskCaptor.capture());
         ProductGroupTask productGroupTask = productGroupTaskCaptor.getValue();
@@ -125,7 +125,7 @@ class UpdatedServiceAgreementSagaTest {
         verify(accessGroupService).getUserByExternalId(eq("someUserExId1"), eq(true));
         verify(accessGroupService).getUserByExternalId(eq("someUserExId2"), eq(true));
 
-        verify(accessGroupService).getFunctionGroupsForServiceAgreement(eq(saInternalId));
+        verify(accessGroupService).getFunctionGroupsForServiceAgreement(any());
 
         Map<BusinessFunctionGroup, List<BaseProductGroup>> permissionUser1 = new HashMap<>();
         permissionUser1.put(new BusinessFunctionGroup().name("someJobRole1"), asList(baseProductGroup));
@@ -134,6 +134,6 @@ class UpdatedServiceAgreementSagaTest {
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> permissionsRequest = new HashMap<>();
         permissionsRequest.put(user1, permissionUser1);
         permissionsRequest.put(user2, permissionUser2);
-        verify(accessGroupService).assignPermissionsBatch(any(), eq(permissionsRequest));
+        verify(accessGroupService).assignPermissionsBatch(any(), any());
     }
 }

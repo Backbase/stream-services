@@ -14,6 +14,7 @@ import com.backbase.stream.legalentity.model.LegalEntityParticipant;
 import com.backbase.stream.legalentity.model.LegalEntityStatus;
 import com.backbase.stream.legalentity.model.ServiceAgreement;
 import java.time.LocalDate;
+import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -46,7 +47,9 @@ class AccessGroupMapperTest {
             .validFromTime(validFromTime)
             .validUntilDate(LocalDate.parse(validUntilDate))
             .validUntilTime(validUntilTime)
-            .regularUserAps(new ApsIdentifiers().addNameIdentifiersItem(userExId));
+            .regularUserAps(new ApsIdentifiers()
+                .addNameIdentifiersItem(userExId)
+                .idIdentifiers(Collections.emptyList()));
 
 
         ServicesAgreementIngest actual = subject.toPresentation(input);
@@ -104,7 +107,8 @@ class AccessGroupMapperTest {
             .validFromDate(LocalDate.parse(validFromDate))
             .validFromTime(validFromTime)
             .validUntilDate(LocalDate.parse(validUntilDate))
-            .validUntilTime(validUntilTime);
+            .validUntilTime(validUntilTime)
+            .additions(Collections.emptyMap());
 
         assertEquals(expected, actual);
     }
@@ -142,7 +146,8 @@ class AccessGroupMapperTest {
             .validFromTime(validFromTime)
             .validUntilDate(validUntilDate)
             .validUntilTime(validUntilTime)
-            .status(Status.ENABLED);
+            .status(Status.ENABLED)
+            .additions(Collections.emptyMap());
 
         assertEquals(expected, actual);
     }

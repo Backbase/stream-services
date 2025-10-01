@@ -10,6 +10,7 @@ import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItemBase;
 import com.backbase.stream.legalentity.model.LegalEntity;
 import com.backbase.stream.mapper.LegalEntityMapper;
 import com.backbase.stream.utils.BatchResponseUtils;
+import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +43,8 @@ class LegalEntityServiceTest {
         final String oldName = "oldName";
         final String newName = "newName";
         LegalEntity legalEntity = new LegalEntity().externalId(externalId).internalId(internalId).name(oldName);
-        LegalEntity legalEntityUpdated = new LegalEntity().externalId(externalId).internalId(internalId).name(newName);
+        LegalEntity legalEntityUpdated = new LegalEntity().externalId(externalId).internalId(internalId).name(newName)
+            .additions(Collections.emptyMap());
 
         LegalEntityItemBase leItemBase = new LegalEntityItemBase().id(internalId).externalId(externalId).name(newName);
 
@@ -54,8 +56,8 @@ class LegalEntityServiceTest {
         Mono<LegalEntity> result = subject.putLegalEntity(legalEntity);
 
         StepVerifier.create(result)
-                .assertNext(assertEqualsTo(legalEntityUpdated))
-                .verifyComplete();
+            .assertNext(assertEqualsTo(legalEntityUpdated))
+            .verifyComplete();
     }
 
     @Test
@@ -65,7 +67,8 @@ class LegalEntityServiceTest {
         final String oldName = "oldName";
         final String newName = "newName";
         LegalEntity legalEntity = new LegalEntity().externalId(externalId).internalId(internalId).name(oldName);
-        LegalEntity legalEntityUpdated = new LegalEntity().externalId(externalId).internalId(internalId).name(newName);
+        LegalEntity legalEntityUpdated = new LegalEntity().externalId(externalId).internalId(internalId).name(newName)
+            .additions(Collections.emptyMap());
 
         LegalEntityItemBase leItemBase = new LegalEntityItemBase().id(internalId).externalId(externalId).name(newName);
 
@@ -77,7 +80,7 @@ class LegalEntityServiceTest {
         Mono<LegalEntity> result = subject.putLegalEntity(legalEntity);
 
         StepVerifier.create(result)
-                .assertNext(assertEqualsTo(legalEntityUpdated))
-                .verifyComplete();
+            .assertNext(assertEqualsTo(legalEntityUpdated))
+            .verifyComplete();
     }
 }

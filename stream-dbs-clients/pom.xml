@@ -14,6 +14,7 @@
 
     <properties>
         <sonar.skip>true</sonar.skip>
+        <openapi-generator-maven-plugin.version>7.11.0</openapi-generator-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -216,36 +217,56 @@
                 </executions>
             </plugin>
 
-            <!-- Generate models and clients from unpacked OpenAPI specs -->
+            <!-- Generate access control clients with OpenAPI Plugin to fix URI template masking -->
             <plugin>
-                <groupId>com.backbase.oss</groupId>
-                <artifactId>boat-maven-plugin</artifactId>
-                <version>0.16.5</version>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi-generator-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>generate-accesscontrol-client-api-code</id>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>generate-webclient-embedded</goal>
+                            <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v3*.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v3.5.2.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.service.v3</apiPackage>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.service.v3.model</modelPackage>
+                            <generatorName>java</generatorName>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <configOptions>
+                                <library>webclient</library>
+                            </configOptions>
                         </configuration>
                     </execution>
                     <execution>
                         <id>generate-accesscontrol-integration-api-code</id>
                         <phase>generate-sources</phase>
                         <goals>
-                            <goal>generate-webclient-embedded</goal>
+                            <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2*.yaml</inputSpec>
+                            <inputSpec>${project.build.directory}/yaml/access-control/access-control-service-api-v2.11.5.yaml</inputSpec>
                             <apiPackage>com.backbase.dbs.accesscontrol.api.integration.v2</apiPackage>
                             <modelPackage>com.backbase.dbs.accesscontrol.api.integration.v2.model</modelPackage>
+                            <generatorName>java</generatorName>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <configOptions>
+                                <library>webclient</library>
+                            </configOptions>
                         </configuration>
                     </execution>
+                </executions>
+            </plugin>
+            <!-- Generate models and clients from unpacked OpenAPI specs -->
+            <plugin>
+                <groupId>com.backbase.oss</groupId>
+                <artifactId>boat-maven-plugin</artifactId>
+                <version>0.16.5</version>
+                <executions>
                     <execution>
                         <id>generate-arrangement-manager-client-api-code</id>
                         <phase>generate-sources</phase>
