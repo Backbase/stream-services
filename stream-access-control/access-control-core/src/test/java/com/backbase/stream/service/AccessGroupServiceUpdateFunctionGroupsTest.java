@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +44,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@Slf4j
 @ExtendWith(MockitoExtension.class)
 class AccessGroupServiceUpdateFunctionGroupsTest {
 
@@ -219,7 +217,7 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
                 .functionGroup(new FunctionGroupUpdate()
                     .name("jobRole")
                     .description("jobRole")
-                    .metadata(Map.of("key1","value1"))
+                        .metadata(Map.of("key1","value1"))
                     .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
                         .functionName("name1")
                         .addPrivilegesItem("view"))
@@ -244,71 +242,71 @@ class AccessGroupServiceUpdateFunctionGroupsTest {
         StreamTask streamTask = Mockito.mock(StreamTask.class);
 
         ServiceAgreement serviceAgreement = buildInputServiceAgreement(saInternalId, saExternalId, description, name,
-            LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
+                LocalDate.parse(validFromDate), validFromTime, LocalDate.parse(validUntilDate), validUntilTime);
 
         // participants
         serviceAgreement
-            .addParticipantsItem(new LegalEntityParticipant().externalId("p1").sharingAccounts(true)
-                .sharingUsers(true).action(LegalEntityParticipant.ActionEnum.ADD))
-            .addParticipantsItem(new LegalEntityParticipant().externalId("p2").sharingAccounts(false)
-                .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.REMOVE))
-            .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
-                .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
+                .addParticipantsItem(new LegalEntityParticipant().externalId("p1").sharingAccounts(true)
+                        .sharingUsers(true).action(LegalEntityParticipant.ActionEnum.ADD))
+                .addParticipantsItem(new LegalEntityParticipant().externalId("p2").sharingAccounts(false)
+                        .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.REMOVE))
+                .addParticipantsItem(new LegalEntityParticipant().externalId("p3").sharingAccounts(false)
+                        .sharingUsers(false).action(LegalEntityParticipant.ActionEnum.ADD));
 
         Mockito.when(functionGroupsApi.getFunctionGroups(saInternalId))
-            .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
-                .name("jobRole").id("1")
-                .additions(Collections.emptyMap())
-                .metadata(Collections.emptyMap())
-                .addPermissionsItem(new Permission().functionId("101")
-                    .addAssignedPrivilegesItem(new Privilege().privilege("view"))
-                    .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
-            )));
+                .thenReturn(Flux.fromIterable(Collections.singletonList(new FunctionGroupItem()
+                        .name("jobRole").id("1")
+                        .additions(Collections.emptyMap())
+                        .metadata(Collections.emptyMap())
+                        .addPermissionsItem(new Permission().functionId("101")
+                                .addAssignedPrivilegesItem(new Privilege().privilege("view"))
+                                .addAssignedPrivilegesItem(new Privilege().privilege("edit")))
+                )));
 
         JobRole jobRole = new JobRole()
-            .name("jobRole")
-            .addFunctionGroupsItem(new BusinessFunctionGroup()
-                .name("fg1")
-                .addFunctionsItem(new BusinessFunction()
-                    .name("name1")
-                    .functionId("101")
-                    .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
+                .name("jobRole")
+                .addFunctionGroupsItem(new BusinessFunctionGroup()
+                        .name("fg1")
+                        .addFunctionsItem(new BusinessFunction()
+                                .name("name1")
+                                .functionId("101")
+                                .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
+                        )
                 )
-            )
-            .addFunctionGroupsItem(new BusinessFunctionGroup().name("fg2")
-                .addFunctionsItem(new BusinessFunction()
-                    .name("name2")
-                    .functionId("102")
-                    .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
-                    .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
-                ));
+                .addFunctionGroupsItem(new BusinessFunctionGroup().name("fg2")
+                        .addFunctionsItem(new BusinessFunction()
+                                .name("name2")
+                                .functionId("102")
+                                .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("view"))
+                                .addPrivilegesItem(new com.backbase.stream.legalentity.model.Privilege().privilege("edit"))
+                        ));
 
         Mockito.when(functionGroupsApi.putFunctionGroupsUpdate(any()))
-            .thenReturn(Flux.just(new BatchResponseItemExtended()
-                .resourceId("4028db307522bfbb017523171c9d0007")
-                .status(BatchResponseItemExtended.StatusEnum.HTTP_STATUS_BAD_REQUEST)
-                .addErrorsItem("You cannot manage this entity, while the referenced service agreement has a pending change.")
-            ));
+                .thenReturn(Flux.just(new BatchResponseItemExtended()
+                        .resourceId("4028db307522bfbb017523171c9d0007")
+                        .status(BatchResponseItemExtended.StatusEnum.HTTP_STATUS_BAD_REQUEST)
+                        .addErrorsItem("You cannot manage this entity, while the referenced service agreement has a pending change.")
+                ));
 
         Mono<JobRole> listMono = subject.setupJobRole(streamTask, serviceAgreement, jobRole);
 
         Assertions.assertThrows(StreamTaskException.class, listMono::block);
 
         Mockito.verify(functionGroupsApi)
-            .putFunctionGroupsUpdate(Collections.singletonList(new PresentationFunctionGroupPutRequestBody()
-                .identifier(new PresentationIdentifier().idIdentifier("1"))
-                .functionGroup(new FunctionGroupUpdate()
-                    .metadata(null)
-                    .name("jobRole")
-                    .description("jobRole")
-                    .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
-                        .functionName("name1")
-                        .addPrivilegesItem("view"))
-                    .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
-                        .functionName("name2")
-                        .addPrivilegesItem("view")
-                        .addPrivilegesItem("edit")))
-            ));
+                .putFunctionGroupsUpdate(Collections.singletonList(new PresentationFunctionGroupPutRequestBody()
+                        .identifier(new PresentationIdentifier().idIdentifier("1"))
+                        .functionGroup(new FunctionGroupUpdate()
+                                .name("jobRole")
+                                .description("jobRole")
+                                .metadata(null)
+                                .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
+                                        .functionName("name1")
+                                        .addPrivilegesItem("view"))
+                                .addPermissionsItem(new PresentationPermissionFunctionGroupUpdate()
+                                        .functionName("name2")
+                                        .addPrivilegesItem("view")
+                                        .addPrivilegesItem("edit")))
+                ));
     }
 
     @Test

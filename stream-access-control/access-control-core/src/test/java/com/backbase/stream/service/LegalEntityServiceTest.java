@@ -56,8 +56,8 @@ class LegalEntityServiceTest {
         Mono<LegalEntity> result = subject.putLegalEntity(legalEntity);
 
         StepVerifier.create(result)
-            .assertNext(assertEqualsTo(legalEntityUpdated))
-            .verifyComplete();
+                .assertNext(assertEqualsTo(legalEntityUpdated))
+                .verifyComplete();
     }
 
     @Test
@@ -80,7 +80,7 @@ class LegalEntityServiceTest {
         Mono<LegalEntity> result = subject.putLegalEntity(legalEntity);
 
         StepVerifier.create(result)
-            .assertNext(assertEqualsTo(legalEntityUpdated))
-            .verifyComplete();
+                .assertNext(assertEqualsTo(legalEntityUpdated))
+                .verifyComplete();
     }
 }
