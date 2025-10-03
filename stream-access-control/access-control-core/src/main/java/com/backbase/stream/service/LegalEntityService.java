@@ -62,7 +62,7 @@ public class LegalEntityService {
         return legalEntityIntegrationApi.ingestLegalEntity(legalEntity)
             .doOnError(WebClientResponseException.class, this::handleWebClientResponseException)
             .onErrorResume(WebClientResponseException.class, exception ->
-                Mono.error(new LegalEntityException(legalEntity, "Failed to create Legal Entity", exception)))
+                Mono.error(new LegalEntityException(exception)))
             .onErrorStop();
     }
 
