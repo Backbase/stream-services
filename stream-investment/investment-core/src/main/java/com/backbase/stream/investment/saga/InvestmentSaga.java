@@ -34,8 +34,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     public static final String RESULT_FAILED = "failed";
 
     private final InvestmentClientService clientService;
-    private final InvestmentSagaConfigurationProperties properties;
-    private boolean enabled;
+    private boolean enabled = true;
 
     @Override
     public Mono<InvestmentTask> executeTask(InvestmentTask streamTask) {

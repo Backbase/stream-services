@@ -21,8 +21,8 @@ import org.springframework.context.annotation.Import;
 public class InvestmentServiceConfiguration {
 
     @Bean
-    public InvestmentSaga investmentSaga(ClientApi clientApi, InvestmentSagaConfigurationProperties properties) {
-        return new InvestmentSaga(new InvestmentClientService(clientApi), properties);
+    public InvestmentSaga investmentSaga(ClientApi clientApi) {
+        return new InvestmentSaga(new InvestmentClientService(clientApi));
     }
 
 }

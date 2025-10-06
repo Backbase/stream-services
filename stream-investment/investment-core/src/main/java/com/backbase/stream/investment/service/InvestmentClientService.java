@@ -58,7 +58,7 @@ public class InvestmentClientService {
                         request.getExtraData().get("user_external_id"));
                     return Mono.empty();
                 }
-                OASClient client = clients.getResults().getFirst();
+                OASClient client = clients.getResults().get(0);
                 // PATCH doesn't work
                 /*PatchedOASClientUpdateRequest patch = mapper.map(client);
                 patch.setStatus(ONBOARDING);
