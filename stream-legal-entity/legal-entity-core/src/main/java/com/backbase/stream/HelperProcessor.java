@@ -49,6 +49,7 @@ class HelperProcessor {
     protected static final String USER_JOB_ROLE_LIMITS = "user-job-role-limits";
     protected static final String LEGAL_ENTITY_LIMITS = "legal-entity-limits";
     protected static final String IDENTITY_USER = "IDENTITY_USER";
+    protected static final String LEGAL_ENTITY_INVESTMENT = "legal-entity-investment";
 
     private <T extends StreamTask> boolean isValidParty(
         T legalEntityTask,

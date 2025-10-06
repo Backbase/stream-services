@@ -1,5 +1,7 @@
 ## Contributing
 
+Before starting any change, read and follow the repository coding standards defined in [CODING_RULES_COPILOT.md](CODING_RULES_COPILOT.md). If a change intentionally deviates from a rule, document the rationale in your PR under an "Rule Deviations" section.
+
 You are welcome to provide bug fixes and new features in the form of pull requests. If you'd like to contribute, please be mindful of the following guidelines:
 
 - All changes should be properly tested for common scenarios (i.e. if changing Legal Entity SAGA, test that your change doesn't affect in non-intended ways to LE ingestion and update).

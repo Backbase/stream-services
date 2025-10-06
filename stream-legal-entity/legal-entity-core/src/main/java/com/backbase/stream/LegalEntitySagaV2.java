@@ -27,6 +27,10 @@ import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
 import com.backbase.stream.exceptions.LegalEntityException;
+import com.backbase.stream.investment.ClientUser;
+import com.backbase.stream.investment.InvestmentData;
+import com.backbase.stream.investment.InvestmentTask;
+import com.backbase.stream.investment.saga.InvestmentSaga;
 import com.backbase.stream.legalentity.model.BusinessFunctionLimit;
 import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.ExternalContact;
@@ -91,6 +95,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
     private final UserKindSegmentationSaga userKindSegmentationSaga;
     private final CustomerProfileService customerProfileService;
+    private final InvestmentSaga investmentSaga;
 
     private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
 
@@ -104,7 +109,8 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
         CustomerAccessGroupSaga customerAccessGroupSaga,
         LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties,
         UserKindSegmentationSaga userKindSegmentationSaga,
-        CustomerProfileService customerProfileService) {
+        CustomerProfileService customerProfileService,
+        InvestmentSaga investmentSaga) {
         this.legalEntityService = legalEntityService;
         this.userService = userService;
         this.userProfileService = userProfileService;
@@ -115,6 +121,7 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
         this.legalEntitySagaConfigurationProperties = legalEntitySagaConfigurationProperties;
         this.userKindSegmentationSaga = userKindSegmentationSaga;
         this.customerProfileService = customerProfileService;
+        this.investmentSaga = investmentSaga;
     }
 
     @Override
@@ -128,7 +135,20 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
             .flatMap(this::setupLimits)
             .flatMap(this::postLegalEntityContacts)
             .flatMap(this::processSubsidiaries)
-            .flatMap(this::processCustomerAccessGroups);
+            .flatMap(this::processCustomerAccessGroups)
+            .flatMap(this::setupInvestment)
+            ;
+    }
+
+    private Mono<LegalEntityTaskV2> setupInvestment(LegalEntityTaskV2 streamTask) {
+        if (!investmentSaga.isEnabled()) {
+            log.info("Skipping investment set up - feature is disabled.");
+            return Mono.just(streamTask);
+        }
+        return investmentSaga.executeTask(
+                createInvestmentTask(streamTask, null, streamTask.getData().getInternalId()))
+            .flatMap(investmentTask -> requireNonNull(Mono.just(streamTask)))
+            .then(Mono.just(streamTask));
     }
 
     private Mono<LegalEntityTaskV2> processCustomerAccessGroups(LegalEntityTaskV2 streamTask) {
@@ -615,6 +635,20 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
                             .currency(limit.getCurrencyCode()));
                 return new LimitsTask(streamTask.getId() + "-" + LEGAL_ENTITY_LIMITS, limitData);
             });
+    }
+
+    private InvestmentTask createInvestmentTask(LegalEntityTaskV2 streamTask, ServiceAgreementV2 serviceAgreement,
+        String legalEntityId) {
+
+        var investmentData = new InvestmentData();
+        List<ClientUser> users = streamTask.getData().getUsers().stream().map(user -> ClientUser.builder()
+                .externalUserId(user.getExternalId())
+                .internalUserId(user.getInternalId())
+                .build())
+            .toList();
+        investmentData.setClientUsers(users);
+
+        return new InvestmentTask(streamTask.getId() + "-" + LEGAL_ENTITY_INVESTMENT, investmentData);
     }
 
     private LimitsTask createLimitsTask(LegalEntityTaskV2 streamTask, ServiceAgreementV2 serviceAgreement,

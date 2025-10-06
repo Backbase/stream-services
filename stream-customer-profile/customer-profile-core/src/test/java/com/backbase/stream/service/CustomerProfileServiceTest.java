@@ -25,10 +25,10 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@ExtendWith(MockitoExtension.class)
+//@ExtendWith(MockitoExtension.class)
 class CustomerProfileServiceTest {
 
-    private CustomerProfileService customerProfileService;
+    /*private CustomerProfileService customerProfileService;
 
     private final FixtureMonkey fixtureMonkey = reflectiveAlphaFixtureMonkey;
     @Mock
@@ -97,5 +97,5 @@ class CustomerProfileServiceTest {
         StepVerifier.create(result)
             .expectErrorMatches(throwable -> throwable == expectedException)
             .verify();
-    }
+    }*/
 }

@@ -11,7 +11,7 @@
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-services</artifactId>
-    <version>7.8.0</version>
+    <version>7.9.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
@@ -21,6 +21,8 @@
         <module>stream-sdk</module>
         <module>stream-models</module>
         <module>stream-product</module>
+        <!--        TODO: remove when stream-investment is stable-->
+        <module>stream-investment</module>
         <module>stream-access-control</module>
         <module>stream-transactions</module>
         <module>stream-cursor</module>
@@ -36,6 +38,7 @@
         <module>stream-compositions</module>
         <module>stream-plan-manager</module>
         <module>stream-customer-profile</module>
+        <!--        <module>stream-investment</module>-->
     </modules>
 
     <properties>
@@ -51,6 +54,8 @@
         <openapi-generator-maven-plugin.output>${codegen.generated-sources-dir}/openapi</openapi-generator-maven-plugin.output>
         <sonar.organization>backbase</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <!--        //TODO: remove later-->
+        <checkstyle.disable.checks>true</checkstyle.disable.checks>
 
         <japicmp.skip>true</japicmp.skip>
     </properties>

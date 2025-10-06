@@ -26,6 +26,7 @@ import com.backbase.stream.audiences.UserKindSegmentationTask;
 import com.backbase.stream.configuration.LegalEntitySagaConfigurationProperties;
 import com.backbase.stream.contact.ContactsSaga;
 import com.backbase.stream.contact.ContactsTask;
+import com.backbase.stream.investment.saga.InvestmentSaga;
 import com.backbase.stream.legalentity.model.CustomerCategory;
 import com.backbase.stream.legalentity.model.ExternalAccountInformation;
 import com.backbase.stream.legalentity.model.ExternalContact;
@@ -94,6 +95,8 @@ class LegalEntitySagaV2Test {
 
     @Mock
     private CustomerProfileService customerProfileService;
+    @Mock
+    private InvestmentSaga investmentSaga;
 
     @Spy
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties =

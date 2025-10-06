@@ -71,3 +71,10 @@ Please see the license terms [here](LICENSE.txt).
 ## Contributing
 This is an open-source project! Please check our contribution guidelines [here](CONTRIBUTING.md).
 
+## Coding Rules & AI Contribution Guidelines
+
+This repository includes an explicit rule set for human and AI-assisted changes. Before opening or reviewing a PR, read and follow:
+
+[Coding Rules for Copilot & Contributors](CODING_RULES_COPILOT.md)
+
+The PR checklist enforces the acceptance criteria defined there (architecture boundaries, dependency policy, logging hygiene, idempotent saga steps, no edits to generated sources, etc.). If a change intentionally violates a rule, call it out in the PR description with rationale.
