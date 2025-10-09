@@ -2,7 +2,7 @@ package com.backbase.stream;
 
 import static com.backbase.stream.product.utils.StreamUtils.nullableCollectionToStream;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
 import com.backbase.stream.approval.model.Approval;
 import com.backbase.stream.approval.model.ApprovalType;
 import com.backbase.stream.approval.model.Policy;

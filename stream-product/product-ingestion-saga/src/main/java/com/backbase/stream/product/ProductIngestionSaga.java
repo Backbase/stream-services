@@ -6,7 +6,7 @@ import static java.util.Comparator.nullsFirst;
 import static java.util.stream.Collectors.toMap;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
 import com.backbase.dbs.arrangement.api.integration.v3.model.ArrangementPost;
 import com.backbase.dbs.arrangement.api.integration.v3.model.LegalEntityExternal;
 import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
@@ -170,29 +170,6 @@ public class ProductIngestionSaga {
         }
         return Mono.justOrEmpty(businessFunctionGroups);
     }
-
-    /***********
-     * FIX ME
-     */
-//    private Mono<JobProfileUser> setupPermissions(ProductGroupTask streamTask, JobProfileUser jobProfileUser) {
-//        return processUser(streamTask, jobProfileUser)
-//            .map(jobProfileUser::user)
-//            .flatMap(actual -> {
-//                List<BusinessFunctionGroup> businessFunctionGroups = jobProfileUser.getBusinessFunctionGroups();
-//
-//                Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = new HashMap<>();
-//                request.put(jobProfileUser.getUser(),businessFunctionGroups.stream()
-//                    .collect(Collectors.toMap(
-//                        bfg -> bfg,
-//                        bfg -> Collections.emptyList()
-//                    )) );
-//
-//                return accessGroupService.assignPermissionsBatch(
-//                    new BatchProductGroupTask(streamTask.getId(), new BatchProductGroup()
-//                        .serviceAgreement(streamTask.getProductGroup().getServiceAgreement()), BatchProductGroupTask.IngestionMode.UPDATE), request)
-//                    .thenReturn(jobProfileUser);
-//            });
-//    }
 
     private Mono<JobProfileUser> setupPermissions(ProductGroupTask streamTask, JobProfileUser jobProfileUser) {
         return processUser(streamTask, jobProfileUser)

@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [8.0.0](https://github.com/Backbase/stream-services/compare/7.8.0...8.0.0)
+### Changed
+- Remove usages of deprecated access-control service-api/v3
+- Migrate to access-control service-api/v1 and integration-api/v1
+- Date and time format changed in api/stream-legal-entity/openapi.yaml. Dates are now represented in full ISO-8601 format including time and timezone, e.g. "2023-10-02T14:48:00.000Z"
+
 ## [7.8.0](https://github.com/Backbase/stream-services/compare/7.7.0...7.8.0)
 ### Changed
 - Bumping Backbase BOM to 2025.09-LTS

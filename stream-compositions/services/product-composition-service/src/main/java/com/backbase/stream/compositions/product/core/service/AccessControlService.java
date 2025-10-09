@@ -1,8 +1,8 @@
 package com.backbase.stream.compositions.product.core.service;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItemQuery;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
 import reactor.core.publisher.Mono;
 
 public interface AccessControlService {
@@ -21,7 +21,7 @@ public interface AccessControlService {
      * @param legalEntityInternalId Internal legal entity ID
      * @return Master service agreement
      */
-    Mono<ServiceAgreementItemQuery> getMasterServiceAgreementByInternalLegalEntityId(String legalEntityInternalId);
+    Mono<ServiceAgreement> getMasterServiceAgreementByInternalLegalEntityId(String legalEntityInternalId);
 
     /**
      * Get service agreement by ID
@@ -29,7 +29,7 @@ public interface AccessControlService {
      * @param serviceAgreementId service agreement ID
      * @return Service agreement
      */
-    Mono<ServiceAgreementItemQuery> getServiceAgreementById(String serviceAgreementId);
+    Mono<ServiceAgreement> getServiceAgreementById(String serviceAgreementId);
 
     /**
      * Get Legal Entity by ID
@@ -37,6 +37,6 @@ public interface AccessControlService {
      * @param legalEntityId Legal entity ID
      * @return Legal Entity
      */
-    Mono<LegalEntityItem> getLegalEntityById(String legalEntityId);
+    Mono<LegalEntity> getLegalEntityById(String legalEntityId);
 
 }

@@ -7,7 +7,6 @@ import com.backbase.audit.rest.spec.v3.model.AuditMessage;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItemQuery;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductFailedEvent;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
@@ -17,6 +16,7 @@ import com.backbase.stream.compositions.product.core.model.ProductIngestPullRequ
 import com.backbase.stream.compositions.product.core.model.ProductIngestResponse;
 import com.backbase.stream.compositions.product.core.service.AccessControlService;
 import com.backbase.stream.compositions.product.core.service.ProductIngestionService;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -82,7 +82,7 @@ public class ProductPullLoginEventHandler implements EventHandler<AuditMessagesC
      * @param legalEntityId legal entity ID
      * @return service agreement
      */
-    private Mono<ServiceAgreementItemQuery> getServiceAgreement(AuditMessage auditMessage, String legalEntityId) {
+    private Mono<ServiceAgreement> getServiceAgreement(AuditMessage auditMessage, String legalEntityId) {
         return StringUtils.hasText(auditMessage.getServiceAgreementId())
                 ? accessControlService.getServiceAgreementById(auditMessage.getServiceAgreementId())
                 : accessControlService.getMasterServiceAgreementByInternalLegalEntityId(legalEntityId);

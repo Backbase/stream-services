@@ -2,8 +2,9 @@ package com.backbase.stream;
 
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroup;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.model.CustomerAccessGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.FunctionGroupApi;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.GetFunctionGroups;
 import com.backbase.stream.configuration.CustomerAccessGroupConfigurationProperties;
 import com.backbase.stream.legalentity.model.JobProfileUser;
 import com.backbase.stream.legalentity.model.JobRoleNameToCustomerAccessGroupNames;
@@ -36,10 +37,10 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
 
     private final CustomerAccessGroupService cagService;
     private final CustomerAccessGroupConfigurationProperties cagConfig;
-    private final FunctionGroupsApi functionGroupsApi;
+    private final FunctionGroupApi functionGroupsApi;
 
     public CustomerAccessGroupSaga(CustomerAccessGroupService cagService,
-        CustomerAccessGroupConfigurationProperties cagConfig, FunctionGroupsApi functionGroupsApi) {
+        CustomerAccessGroupConfigurationProperties cagConfig, FunctionGroupApi functionGroupsApi) {
         this.cagService = cagService;
         this.cagConfig = cagConfig;
         this.functionGroupsApi = functionGroupsApi;
@@ -176,6 +177,7 @@ public class CustomerAccessGroupSaga implements StreamTaskExecutor<CustomerAcces
 
     private Mono<Map<String, String>> getFunctionGroupsInSaNameToIdMap(ServiceAgreementTaskV2 streamTask) {
         return functionGroupsApi.getFunctionGroups(streamTask.getServiceAgreement().getInternalId())
+            .flatMapIterable(GetFunctionGroups::getFunctionGroups)
             .collectMap(FunctionGroupItem::getName, FunctionGroupItem::getId);
     }
 }

@@ -1,12 +1,12 @@
 package com.backbase.stream.configuration;
 
+import com.backbase.accesscontrol.assignpermissions.api.service.v1.AssignPermissionsApi;
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.CustomerAccessGroupApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.DataGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.FunctionGroupsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.UserContextApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.UsersApi;
+import com.backbase.accesscontrol.datagroup.api.service.v1.DataGroupApi;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.FunctionGroupApi;
+import com.backbase.accesscontrol.permissioncheck.api.service.v1.PermissionCheckApi;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
+import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
 import com.backbase.dbs.user.api.service.v2.IdentityManagementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi;
@@ -52,9 +52,11 @@ public class AccessControlConfiguration {
     }
 
     @Bean
-    public LegalEntityService legalEntityService(LegalEntitiesApi legalEntitiesApi,
+    public LegalEntityService legalEntityService(
+        com.backbase.accesscontrol.legalentity.api.service.v1.LegalEntityApi legalEntitiesServiceApi,
+        com.backbase.accesscontrol.legalentity.api.integration.v3.LegalEntityApi legalEntitiesIntegrationApi,
         BatchResponseUtils batchResponseUtils) {
-        return new LegalEntityService(legalEntitiesApi, batchResponseUtils);
+        return new LegalEntityService(legalEntitiesServiceApi, legalEntitiesIntegrationApi, batchResponseUtils);
     }
 
     @Bean
@@ -81,13 +83,23 @@ public class AccessControlConfiguration {
     public AccessGroupService accessGroupService(
         UserManagementApi usersApi,
         DeletionProperties configurationProperties,
-        UsersApi accessControlUsersApi,
-        DataGroupsApi dataGroupsApi, ServiceAgreementsApi serviceAgreementsApi,
-        FunctionGroupsApi functionGroupsApi, BatchResponseUtils batchResponseUtils, UserContextApi userContextApi,
-        AccessControlConfigurationProperties accessControlConfigurationProperties) {
-        return new AccessGroupService(usersApi, accessControlUsersApi, dataGroupsApi,
-            functionGroupsApi, serviceAgreementsApi,
-            configurationProperties, batchResponseUtils, userContextApi, accessControlConfigurationProperties);
+        BatchResponseUtils batchResponseUtils,
+        AccessControlConfigurationProperties accessControlConfigurationProperties,
+        PermissionCheckApi permissionCheckApi,
+        DataGroupApi dataGroupServiceApi,
+        com.backbase.accesscontrol.datagroup.api.integration.v1.DataGroupApi dataGroupIntegrationApi,
+        FunctionGroupApi functionGroupServiceApi,
+        com.backbase.accesscontrol.functiongroup.api.integration.v1.FunctionGroupApi functionGroupIntegrationApi,
+        ServiceAgreementApi serviceAgreementServiceApi,
+        com.backbase.accesscontrol.serviceagreement.api.integration.v1.ServiceAgreementApi serviceAgreementIntegrationApi,
+        AssignPermissionsApi assignPermissionsApi,
+        com.backbase.accesscontrol.assignpermissions.api.integration.v1.AssignPermissionsApi assignPermissionsIntegrationApi,
+        UserContextApi userContextApi) {
+        return new AccessGroupService(usersApi, batchResponseUtils, configurationProperties,
+            accessControlConfigurationProperties,
+            permissionCheckApi, dataGroupServiceApi, dataGroupIntegrationApi, functionGroupServiceApi,
+            functionGroupIntegrationApi,
+            serviceAgreementServiceApi, serviceAgreementIntegrationApi, assignPermissionsApi, assignPermissionsIntegrationApi, userContextApi);
     }
 
 }

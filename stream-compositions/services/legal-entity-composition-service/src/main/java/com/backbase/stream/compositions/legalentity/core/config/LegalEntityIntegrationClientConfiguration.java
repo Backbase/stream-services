@@ -21,14 +21,14 @@ public class LegalEntityIntegrationClientConfiguration extends CompositeApiClien
     }
 
     @Bean
-    public ApiClient legalEntityClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient legalEntityCompositionClient(ObjectMapper objectMapper, DateFormat dateFormat) {
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
 
     @Bean
     @Primary
-    public LegalEntityIntegrationApi legalEntityIntegrationApi(ApiClient legalEntityClient) {
+    public LegalEntityIntegrationApi legalEntityCompositionIntegrationApi(ApiClient legalEntityClient) {
         return new LegalEntityIntegrationApi(legalEntityClient);
     }
 

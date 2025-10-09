@@ -3,12 +3,14 @@ package com.backbase.stream.compositions.product.core.service.impl;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.ServiceAgreementsApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.LegalEntityItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementItemQuery;
+import com.backbase.accesscontrol.legalentity.api.service.v1.LegalEntityApi;
+import com.backbase.accesscontrol.legalentity.api.service.v1.model.LegalEntityWithParent;
+import com.backbase.accesscontrol.legalentity.api.service.v1.model.SingleServiceAgreement;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.ServiceAgreementApi;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
+import com.backbase.stream.legalentity.model.LegalEntity;
+import com.backbase.stream.legalentity.model.ServiceAgreement;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,133 +34,134 @@ class AccessControlServiceImplTest {
     @Mock
     private UserManagementApi userManagementApi;
     @Mock
-    private LegalEntitiesApi legalEntitiesApi;
+    private LegalEntityApi legalEntitiesApi;
     @Mock
-    private ServiceAgreementsApi serviceAgreementsApi;
+    private ServiceAgreementApi serviceAgreementsApi;
     @InjectMocks
     private AccessControlServiceImpl accessControlService;
 
     @Test
     void getUserByExternalId_success() {
         when(userManagementApi.getUserByExternalId(any(), any()))
-                .thenReturn(Mono.just(new GetUser().externalId(SARA_EXT_ID).id(SARA_ID)));
+            .thenReturn(Mono.just(new GetUser().externalId(SARA_EXT_ID).id(SARA_ID)));
 
         Mono<GetUser> responseMono = accessControlService.getUserByExternalId(SARA_EXT_ID, false);
 
         StepVerifier.create(responseMono)
-                .assertNext(user -> Assertions.assertEquals(SARA_ID, user.getId()))
-                .verifyComplete();
+            .assertNext(user -> Assertions.assertEquals(SARA_ID, user.getId()))
+            .verifyComplete();
     }
 
     @Test
     void getUserByExternalId_error() {
         when(userManagementApi.getUserByExternalId(any(), any()))
-                .thenReturn(Mono.error(WebClientResponseException.NotFound
-                        .create(404, "not found", new HttpHeaders(), new byte[0], null)));
+            .thenReturn(Mono.error(WebClientResponseException.NotFound
+                .create(404, "not found", new HttpHeaders(), new byte[0], null)));
 
         Mono<GetUser> userByExternalId = accessControlService.getUserByExternalId(SARA_EXT_ID, false);
 
         StepVerifier.create(userByExternalId)
-                .expectError()
-                .verify();
+            .expectError()
+            .verify();
     }
 
     @Test
     void getMasterServiceAgreementByInternalLegalEntityId_success() {
-        when(legalEntitiesApi.getMasterServiceAgreement(any()))
-                .thenReturn(Mono.just(new ServiceAgreementItemQuery()
-                        .id(SERVICE_AGREEMENT_ID)
-                        .externalId(SERVICE_AGREEMENT_EXT_ID)));
+        when(legalEntitiesApi.getSingleServiceAgreement(any()))
+            .thenReturn(Mono.just(new SingleServiceAgreement()
+                .id(SERVICE_AGREEMENT_ID)
+                .externalId(SERVICE_AGREEMENT_EXT_ID)));
 
-        Mono<ServiceAgreementItemQuery> serviceAgreement = accessControlService
-                .getMasterServiceAgreementByInternalLegalEntityId(SARA_LE_ID);
+        Mono<ServiceAgreement> serviceAgreement = accessControlService
+            .getMasterServiceAgreementByInternalLegalEntityId(SARA_LE_ID);
 
         StepVerifier.create(serviceAgreement)
-                .assertNext(sa -> {
-                    Assertions.assertEquals(SERVICE_AGREEMENT_ID, sa.getId());
-                    Assertions.assertEquals(SERVICE_AGREEMENT_EXT_ID, sa.getExternalId());
+            .assertNext(sa -> {
+                Assertions.assertEquals(SERVICE_AGREEMENT_ID, sa.getInternalId());
+                Assertions.assertEquals(SERVICE_AGREEMENT_EXT_ID, sa.getExternalId());
 
-                })
-                .verifyComplete();
+            })
+            .verifyComplete();
     }
 
     @Test
     void getMasterServiceAgreementByInternalLegalEntityId_error() {
-        when(legalEntitiesApi.getMasterServiceAgreement(any()))
-                .thenReturn(Mono.error(WebClientResponseException.NotFound
-                        .create(404, "not found", new HttpHeaders(), new byte[0], null)));
+        when(legalEntitiesApi.getSingleServiceAgreement(any()))
+            .thenReturn(Mono.error(WebClientResponseException.NotFound
+                .create(404, "not found", new HttpHeaders(), new byte[0], null)));
 
-        Mono<ServiceAgreementItemQuery> serviceAgreement = accessControlService
-                .getMasterServiceAgreementByInternalLegalEntityId(SARA_LE_ID);
+        Mono<ServiceAgreement> serviceAgreement = accessControlService
+            .getMasterServiceAgreementByInternalLegalEntityId(SARA_LE_ID);
 
         StepVerifier.create(serviceAgreement)
-                .expectError()
-                .verify();
+            .expectError()
+            .verify();
     }
 
     @Test
     void getServiceAgreementById_success() {
-        when(serviceAgreementsApi.getServiceAgreement(any()))
-                .thenReturn(Mono.just(new ServiceAgreementItemQuery()
-                        .id(SERVICE_AGREEMENT_ID)
-                        .externalId(SERVICE_AGREEMENT_EXT_ID)));
+        when(serviceAgreementsApi.getServiceAgreementById(any()))
+            .thenReturn(
+                Mono.just(new com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreement()
+                    .id(SERVICE_AGREEMENT_ID)
+                    .externalId(SERVICE_AGREEMENT_EXT_ID)));
 
-        Mono<ServiceAgreementItemQuery> serviceAgreement = accessControlService
-                .getServiceAgreementById(SERVICE_AGREEMENT_ID);
+        Mono<ServiceAgreement> serviceAgreement = accessControlService
+            .getServiceAgreementById(SERVICE_AGREEMENT_ID);
 
         StepVerifier.create(serviceAgreement)
-                .assertNext(sa -> {
-                    Assertions.assertEquals(SERVICE_AGREEMENT_ID, sa.getId());
-                    Assertions.assertEquals(SERVICE_AGREEMENT_EXT_ID, sa.getExternalId());
+            .assertNext(sa -> {
+                Assertions.assertEquals(SERVICE_AGREEMENT_ID, sa.getInternalId());
+                Assertions.assertEquals(SERVICE_AGREEMENT_EXT_ID, sa.getExternalId());
 
-                })
-                .verifyComplete();
+            })
+            .verifyComplete();
     }
 
     @Test
     void getServiceAgreementById_error() {
-        when(serviceAgreementsApi.getServiceAgreement(any()))
-                .thenReturn(Mono.error(WebClientResponseException.NotFound
-                        .create(404, "not found", new HttpHeaders(), new byte[0], null)));
+        when(serviceAgreementsApi.getServiceAgreementById(any()))
+            .thenReturn(Mono.error(WebClientResponseException.NotFound
+                .create(404, "not found", new HttpHeaders(), new byte[0], null)));
 
-        Mono<ServiceAgreementItemQuery> serviceAgreement = accessControlService
-                .getServiceAgreementById(SERVICE_AGREEMENT_ID);
+        Mono<ServiceAgreement> serviceAgreement = accessControlService
+            .getServiceAgreementById(SERVICE_AGREEMENT_ID);
 
         StepVerifier.create(serviceAgreement)
-                .expectError()
-                .verify();
+            .expectError()
+            .verify();
     }
 
     @Test
     void getLegalEntityById_success() {
         when(legalEntitiesApi.getLegalEntityById(any()))
-                .thenReturn(Mono.just(new LegalEntityItem()
-                        .id(SARA_LE_ID)
-                        .externalId(SARA_LE_EXT_ID)));
+            .thenReturn(Mono.just(new LegalEntityWithParent()
+                .id(SARA_LE_ID)
+                .externalId(SARA_LE_EXT_ID)));
 
-        Mono<LegalEntityItem> legalEntity = accessControlService.getLegalEntityById(SARA_LE_ID);
+        Mono<LegalEntity> legalEntity = accessControlService.getLegalEntityById(SARA_LE_ID);
 
         StepVerifier.create(legalEntity)
-                .assertNext(le -> {
-                    Assertions.assertEquals(SARA_LE_ID, le.getId());
-                    Assertions.assertEquals(SARA_LE_EXT_ID, le.getExternalId());
+            .assertNext(le -> {
+                Assertions.assertEquals(SARA_LE_ID, le.getInternalId());
+                Assertions.assertEquals(SARA_LE_EXT_ID, le.getExternalId());
 
-                })
-                .verifyComplete();
+            })
+            .verifyComplete();
 
     }
 
     @Test
     void getLegalEntityById_error() {
         when(legalEntitiesApi.getLegalEntityById(any()))
-                .thenReturn(Mono.error(WebClientResponseException.NotFound
-                        .create(404, "not found", new HttpHeaders(), new byte[0], null)));
+            .thenReturn(Mono.error(WebClientResponseException.NotFound
+                .create(404, "not found", new HttpHeaders(), new byte[0], null)));
 
-        Mono<LegalEntityItem> legalEntity = accessControlService.getLegalEntityById(SARA_LE_ID);
+        Mono<LegalEntity> legalEntity = accessControlService.getLegalEntityById(SARA_LE_ID);
 
         StepVerifier.create(legalEntity)
-                .expectError()
-                .verify();
+            .expectError()
+            .verify();
 
     }
 }

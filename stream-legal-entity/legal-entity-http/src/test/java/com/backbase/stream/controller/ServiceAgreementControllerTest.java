@@ -8,9 +8,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import com.backbase.accesscontrol.customeraccessgroup.api.service.v1.CustomerAccessGroupApi;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem.TypeEnum;
 import com.backbase.customerprofile.api.integration.v1.PartyManagementIntegrationApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.LegalEntitiesApi;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
 import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
 import com.backbase.dbs.contact.api.service.v2.ContactsApi;
 import com.backbase.dbs.limit.api.service.v2.LimitsServiceApi;
@@ -40,6 +40,7 @@ import com.backbase.stream.mapper.PartyMapper;
 import com.backbase.stream.product.task.BatchProductGroupTask;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
+import com.backbase.stream.service.LegalEntityService;
 import com.backbase.streams.tailoredvalue.PlansService;
 import java.net.URI;
 import java.util.List;
@@ -48,10 +49,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -66,82 +67,78 @@ import reactor.core.publisher.Mono;
     UpdatedServiceAgreementSagaConfiguration.class})
 class ServiceAgreementControllerTest {
 
-    @MockBean
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
     private ReactiveClientRegistrationRepository reactiveClientRegistrationRepository;
 
-    @MockBean
+    @MockitoBean
     private WebClient webClient;
 
-    @MockBean
-    private com.backbase.dbs.accesscontrol.api.service.ApiClient accessControlApiClient;
-
-    @MockBean
+    @MockitoBean
     private com.backbase.dbs.user.api.service.ApiClient userApiClient;
 
-    @MockBean
+    @MockitoBean
     private com.backbase.dbs.user.profile.api.service.ApiClient userProfileApiClient;
 
-    @MockBean
+    @MockitoBean
     private com.backbase.dbs.arrangement.api.service.ApiClient accountsApiClient;
 
-    @MockBean
+    @MockitoBean
     private com.backbase.identity.integration.api.service.ApiClient identityApiClient;
 
-    @MockBean
+    @MockitoBean
     private com.backbase.customerprofile.api.integration.ApiClient customerProfileApiClient;
 
-    @MockBean
+    @MockitoBean
     private LimitsServiceApi limitsApi;
 
-    @MockBean
+    @MockitoBean
     private ContactsApi contactsApi;
 
-    @MockBean
+    @MockitoBean
     private UserManagementApi userManagementApi;
 
-    @MockBean
+    @MockitoBean
     private AccessGroupService accessGroupService;
+    @MockitoBean
+    private LegalEntityService legalEntityService;
 
-    @MockBean
-    private LegalEntitiesApi legalEntitiesApi;
-
-    @MockBean
+    @MockitoBean
     private LoansApi loansApi;
 
-    @MockBean
+    @MockitoBean
     private IdentityManagementApi identityManagementApi;
 
-    @MockBean
+    @MockitoBean
     private UserProfileManagementApi userProfileManagementApi;
 
-    @MockBean
+    @MockitoBean
     private PartyManagementIntegrationApi partyManagementIntegrationApi;
 
-    @MockBean
+    @MockitoBean
     private com.backbase.dbs.user.profile.api.service.v2.UserProfileManagementApi userProfileManagement;
 
-    @MockBean
+    @MockitoBean
     private ArrangementsApi arrangementsApiV3;
 
-    @MockBean
+    @MockitoBean
     private com.backbase.dbs.arrangement.api.integration.v3.ArrangementsApi arrangementsApi;
 
-    @MockBean
+    @MockitoBean
     private UserKindSegmentationSaga userKindSegmentationSaga;
 
-    @MockBean
+    @MockitoBean
     private PlansService plansService;
 
-    @MockBean
+    @MockitoBean
     private PartyMapper partyMapper;
 
-    @MockBean
+    @MockitoBean
     private CustomerProfileClientConfig customerProfileClientConfig;
 
-    @MockBean
-    private CustomerAccessGroupSaga  customerAccessGroupSaga;
+    @MockitoBean
+    private CustomerAccessGroupSaga customerAccessGroupSaga;
 
-    @MockBean
+    @MockitoBean
     private CustomerAccessGroupApi customerAccessGroupApi;
 
     @Autowired
@@ -168,9 +165,9 @@ class ServiceAgreementControllerTest {
             .addParticipantsItem(participant);
         ServiceAgreement internalSA = new ServiceAgreement().externalId(saExternalId).internalId(saInternalId);
         List<FunctionGroupItem> serviceAgreementFunctionGroups = asList(
-            new FunctionGroupItem().name("someJobRole1").type(FunctionGroupItem.TypeEnum.DEFAULT),
-            new FunctionGroupItem().name("someJobRole2").type(FunctionGroupItem.TypeEnum.DEFAULT),
-            new FunctionGroupItem().name("someJobRole3").type(FunctionGroupItem.TypeEnum.DEFAULT));
+            new FunctionGroupItem().name("someJobRole1").type(TypeEnum.CUSTOM),
+            new FunctionGroupItem().name("someJobRole2").type(TypeEnum.CUSTOM),
+            new FunctionGroupItem().name("someJobRole3").type(TypeEnum.CUSTOM));
         ProductGroup productGroup = new ProductGroup().serviceAgreement(serviceAgreement);
         productGroup.loans(baseProductGroup.getLoans());
 

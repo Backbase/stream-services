@@ -1,11 +1,11 @@
 {
-  "id": "d455ef56-d81b-331c-9153-1acd06a3240c",
+  "id": "a1b7e79e-1736-32a5-a564-fcbdc2cab420",
   "request": {
-    "url": "/service-api/v3/accessgroups/users/permissions/user-permissions",
+    "url": "/integration-api/v1/access-control/function-groups/batch/update",
     "method": "PUT",
     "bodyPatterns": [
       {
-        "equalToJson": "[{\"externalUserId\":\"gc-party\",\"externalServiceAgreementId\":\"sa_gc-party\",\"functionGroupDataGroups\":[{\"functionGroupIdentifier\":{\"idIdentifier\":\"2c92808991135a27019121bb18080005\",\"nameIdentifier\":null},\"dataGroupIdentifiers\":[],\"selfApprovalPolicies\":[],\"permissionScope\":null}]}]",
+        "equalToJson": "[]",
         "ignoreArrayOrder": true,
         "ignoreExtraElements": true
       }
@@ -13,7 +13,7 @@
   },
   "response": {
     "status": 207,
-    "bodyFileName": "body-service-api-v3-accessgroups-users-permissions-user-permissions-vqBqR.json",
+    "bodyFileName": "body-service-api-v3-accesscontrol-function-groups-batch-update-EqWdt.json",
     "headers": {
       "Vary": "origin,access-control-request-method,access-control-request-headers,accept-encoding",
       "X-Content-Type-Options": "nosniff",
@@ -27,5 +27,5 @@
       "Keep-Alive": "timeout=60"
     }
   },
-  "uuid": "d455ef56-d81b-331c-9153-1acd06a3240c"
+  "uuid": "a1b7e79e-1736-32a5-a564-fcbdc2cab420"
 }

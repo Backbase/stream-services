@@ -7,8 +7,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
-import com.backbase.dbs.accesscontrol.api.service.v3.model.FunctionGroupItem;
-import com.backbase.dbs.accesscontrol.api.service.v3.model.ServiceAgreementParticipantsGetResponseBody;
+import com.backbase.accesscontrol.functiongroup.api.service.v1.model.FunctionGroupItem;
+import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Participant;
 import com.backbase.dbs.contact.api.service.v2.model.AccessContextScope;
 import com.backbase.dbs.contact.api.service.v2.model.ContactsBulkPostRequestBody;
 import com.backbase.dbs.contact.api.service.v2.model.ExternalAccessContext;
@@ -437,9 +437,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
             return accessGroupService.getFunctionGroupsForServiceAgreement(
                     streamTask.getServiceAgreement().getInternalId())
                 .map(functionGroups -> {
-                    Map<String, FunctionGroupItem> idByFunctionGroupName = functionGroups
-                        .stream()
-                        .filter(fg -> nonNull(fg.getId()))
+                    Map<String, FunctionGroupItem> idByFunctionGroupName = functionGroups.stream()
                         .collect(Collectors.toMap(FunctionGroupItem::getName, Function.identity()));
                     return jobProfileUser.getReferenceJobRoleNames().stream()
                         .map(idByFunctionGroupName::get)
@@ -662,9 +660,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         List<ServiceAgreementUserAction> userActions,
         Mono<ServiceAgreementTaskV2> existingServiceAgreement) {
 
-        Mono<ServiceAgreementV2> updatedServiceAgreement = setLECreator4SA(serviceAgreementV2);
-
-        Mono<ServiceAgreementTaskV2> createServiceAgreement = updatedServiceAgreement.flatMap(updatedSa ->
+        Mono<ServiceAgreementTaskV2> createServiceAgreement = Mono.just(serviceAgreementV2).flatMap(updatedSa ->
             accessGroupService.createServiceAgreement(streamTask, saMapper.map(updatedSa))
                 .onErrorMap(AccessGroupException.class, accessGroupException -> {
                     streamTask.error(SERVICE_AGREEMENT, SETUP_SERVICE_AGREEMENT, FAILED, updatedSa.getExternalId(),
@@ -692,18 +688,6 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         );
 
         return existingServiceAgreement.switchIfEmpty(createServiceAgreement);
-    }
-
-
-    private Mono<ServiceAgreementV2> setLECreator4SA(ServiceAgreementV2 serviceAgreementV2) {
-        //unlike LegalEntitySaga, we simply check if there is a creatorLegalEntity specified, and if it is
-        //external id, we change it to relevant internal id
-        if (StringUtils.isNotEmpty(serviceAgreementV2.getCreatorLegalEntity())) {
-            return legalEntityService.getLegalEntityByExternalId(serviceAgreementV2.getCreatorLegalEntity())
-                .doOnNext(le -> serviceAgreementV2.setCreatorLegalEntity(le.getInternalId()))
-                .thenReturn(serviceAgreementV2);
-        }
-        return Mono.just(serviceAgreementV2);
     }
 
     private ServiceAgreement createMasterServiceAgreement(ServiceAgreement serviceAgreement) {
@@ -756,7 +740,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         ServiceAgreement serviceAgreement = saMapper.map(saV2);
         if (isNull(serviceAgreement.getParticipants())
             || serviceAgreement.getParticipants().stream()
-                .noneMatch(legalEntityParticipant -> legalEntityParticipant.getLimit() != null)) {
+            .noneMatch(legalEntityParticipant -> legalEntityParticipant.getLimit() != null)) {
             streamTask.info(SERVICE_AGREEMENT, PROCESS_LIMITS, FAILED, serviceAgreement.getInternalId(),
                 serviceAgreement.getExternalId(),
                 "SA: %s does not have any Participant with Limits in Service Agreement",
@@ -784,7 +768,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     }
 
     private Limit getLimits(ServiceAgreement serviceAgreement,
-        ServiceAgreementParticipantsGetResponseBody participant) {
+        Participant participant) {
         return serviceAgreement.getParticipants().stream()
             .filter(legalEntityParticipant -> legalEntityParticipant.getExternalId()
                 .equalsIgnoreCase(participant.getExternalId()))
@@ -846,13 +830,13 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
         ServiceAgreementV2 serviceAgreement = streamTask.getServiceAgreement();
         if (serviceAgreement.getProductGroups() == null
             || serviceAgreement.getProductGroups().stream()
-                .allMatch(productGroup -> Objects.isNull(productGroup.getUsers()))
+            .allMatch(productGroup -> Objects.isNull(productGroup.getUsers()))
             || serviceAgreement.getProductGroups().stream().filter(productGroup -> nonNull(productGroup.getUsers()))
-                .flatMap(productGroup -> productGroup.getUsers().stream())
-                .noneMatch(jobProfileUser -> nonNull(jobProfileUser)
-                                             && nonNull(jobProfileUser.getUser())
-                                             && nonNull(jobProfileUser.getUser().getSupportsLimit())
-                                             && jobProfileUser.getUser().getSupportsLimit())) {
+            .flatMap(productGroup -> productGroup.getUsers().stream())
+            .noneMatch(jobProfileUser -> nonNull(jobProfileUser)
+                && nonNull(jobProfileUser.getUser())
+                && nonNull(jobProfileUser.getUser().getSupportsLimit())
+                && jobProfileUser.getUser().getSupportsLimit())) {
             return Mono.just(streamTask);
         }
 
@@ -947,7 +931,7 @@ public class ServiceAgreementSagaV2 implements StreamTaskExecutor<ServiceAgreeme
     private boolean atLeastOneLimitExist(Privilege privilege) {
         var limit = privilege.getLimit();
         return nonNull(limit.getDaily()) || nonNull(limit.getWeekly()) || nonNull(limit.getMonthly())
-               || nonNull(limit.getQuarterly()) || nonNull(limit.getYearly()) || nonNull(limit.getTransactional());
+            || nonNull(limit.getQuarterly()) || nonNull(limit.getYearly()) || nonNull(limit.getTransactional());
     }
 
     private boolean limitsExist(BusinessFunctionGroup businessFunctionGroup) {
