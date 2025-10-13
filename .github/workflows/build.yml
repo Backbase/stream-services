@@ -121,5 +121,5 @@ jobs:
         run: mvn -B clean deploy -Pdocker-image,no-latest-tag -Dmaven.test.skip=true -Ddocker.default.tag=${{ env.DOCKER_TAG_VERSION }} -Ddocker.repo.url=repo.backbase.com -Ddocker.repo.project=backbase-stream-images -Djib.to.auth.username=${{ secrets.REPO_USERNAME }} -Djib.to.auth.password=${{ secrets.REPO_PASSWORD }} -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
 
       - name: Upload PR Artifacts to Repo
-        if: "contains(github.ref, '/pull/') && github.event.inputs.deploy_artifacts == 'true' && (contains(env.NEW_VERSION, 'SNAPSHOT') || contains(env.NEW_VERSION, '-PR-'))"
+        if: "contains(github.ref, '/pull/') && (contains(env.NEW_VERSION, 'SNAPSHOT') || contains(env.NEW_VERSION, '-PR-'))"
         run: mvn -B clean deploy -Dmaven.test.skip=true -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-snapshots/
