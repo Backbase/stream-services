@@ -122,4 +122,4 @@ jobs:
 
       - name: Upload PR Artifacts to Repo
         if: "contains(github.ref, '/pull/') && (contains(env.NEW_VERSION, 'SNAPSHOT') || contains(env.NEW_VERSION, '-PR-'))"
-        run: mvn -B clean deploy -Dmaven.test.skip=true -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-snapshots/
+        run: mvn -B clean deploy -Dmaven.test.skip=true   -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-mvn-snapshot
