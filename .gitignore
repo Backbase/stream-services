@@ -2,6 +2,7 @@
 **/target
 target
 
+/.vscode/
 /.idea/
 *.iml
 .project
