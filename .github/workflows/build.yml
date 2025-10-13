@@ -12,7 +12,7 @@ on:
       deploy_artifacts:
         description: 'Deploy artifacts to repository (for PR builds)'
         required: false
-        default: false
+        default: true
         type: boolean
 jobs:
   main:
