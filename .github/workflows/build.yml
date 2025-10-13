@@ -7,6 +7,13 @@ on:
       - 'support/**'
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      deploy_artifacts:
+        description: 'Deploy artifacts to repository (for PR builds)'
+        required: false
+        default: false
+        type: boolean
 jobs:
   main:
     if: "!contains(github.event.head_commit.message, '[skip bump]') && !contains(github.event.head_commit.message, 'nobump/')"
@@ -112,3 +119,7 @@ jobs:
       - name: Upload to Repo
         if: "contains(github.ref, 'master') || contains(github.ref, 'support/') || contains(github.ref, 'develop')" # In case of develop branch it will upload the snapshot version
         run: mvn -B clean deploy -Pdocker-image,no-latest-tag -Dmaven.test.skip=true -Ddocker.default.tag=${{ env.DOCKER_TAG_VERSION }} -Ddocker.repo.url=repo.backbase.com -Ddocker.repo.project=backbase-stream-images -Djib.to.auth.username=${{ secrets.REPO_USERNAME }} -Djib.to.auth.password=${{ secrets.REPO_PASSWORD }} -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
+
+      - name: Upload PR Artifacts to Repo
+        if: "contains(github.ref, '/pull/') && github.event.inputs.deploy_artifacts == 'true' && contains(env.NEW_VERSION, 'SNAPSHOT')"
+        run: mvn -B clean deploy -Dmaven.test.skip=true -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-snapshots/
