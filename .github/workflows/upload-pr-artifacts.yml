@@ -1,0 +1,51 @@
+name: Upload PR Artifacts to Repo
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force upload even if version not SNAPSHOT (not recommended)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+      - name: Configure Maven
+        uses: whelk-io/maven-settings-xml-action@v4
+        with:
+          repositories: '[{ "id": "backbase", "url": "https://repo.backbase.com/repo" }]'
+          plugin_repositories: '[{ "id": "backbase-plugins", "url": "https://repo.backbase.com/repo" }]'
+          servers: '[{ "id": "backbase", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" },{ "id": "backbase-plugins", "username": "${{ secrets.REPO_USERNAME }}", "password": "${{ secrets.REPO_PASSWORD }}" }]'
+      - name: Resolve Version
+        id: version
+        run: |
+          VERSION=$(mvn -B help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Check SNAPSHOT Version
+        if: ${{ steps.version.outputs.version && !inputs.force }}
+        run: |
+          VERSION='${{ steps.version.outputs.version }}'
+          echo "Resolved version: $VERSION"
+          if echo "$VERSION" | grep -q 'SNAPSHOT'; then
+            echo "Version is a SNAPSHOT, proceeding."
+          else
+            echo "Version is NOT a SNAPSHOT. Set workflow input force=true to override." >&2
+            exit 1
+          fi
+      - name: Deploy PR Artifacts (skip tests)
+        run: mvn -B clean deploy -DskipTests -DaltDeploymentRepository=backbase::default::https://repo.backbase.com/backbase-stream-releases/
+        env:
+          REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
+          REPO_PASSWORD: ${{ secrets.REPO_PASSWORD }}
+
