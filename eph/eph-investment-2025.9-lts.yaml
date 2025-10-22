@@ -1,0 +1,572 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name:
+  #generateName: ep-
+  namespace: argocd
+  annotations:
+    requested-by: &username ${REQUESTED_BY}
+    janitor/ttl: &ttl 16h
+  labels:
+    requested-by: *username
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    name: in-cluster
+    namespace: ep-*
+  project: ephemeral-manager
+  sources:
+    - repoURL: "crbackbasesharedprd874.azurecr.io/charts"
+      chart: ephemeral-init
+      targetRevision: 0.4.3
+      helm:
+        valuesObject:
+          istio:
+            virtualServices:
+              access-control:
+                destinationService: access-control
+              accessgroup:
+                destinationService: accessgroup-integration-service
+              app:
+                destinationService: edge
+                http:
+                  - match:
+                      - uri:
+                          prefix: /web
+                    name: wealth-universal-web
+                    route:
+                      - destination:
+                          host: wealth-universal-web-portalless
+                          port:
+                            number: 8080
+                  - match:
+                      - uri:
+                          prefix: /market-news
+                    name: market-news-service
+                    route:
+                      - destination:
+                          host: market-news
+                          port:
+                            number: 8080
+                  - match:
+                      - uri:
+                          prefix: /media
+                    name: investment-statics
+                    route:
+                      - destination:
+                          host: investment
+                          port:
+                            number: 8080
+                  - name: edge
+                    route:
+                      - destination:
+                          host: edge
+                          port:
+                            number: 8080
+              arrangement:
+                destinationService: arrangement-manager
+              audit:
+                destinationService: audit-service
+              communicationsmock:
+                destinationService: "commsoutboundmock"
+              confirmation:
+                destinationService: confirmation
+              content-services:
+                destinationService: contentservices
+              edge:
+                destinationService: edge
+              employee:
+                destinationService: employee-web-portalless
+              employee-essentials:
+                destinationService: employee-essentials-web-portalless
+              identity:
+                destinationService: identity-backbaseidentity
+              identity-integration:
+                destinationService: identity-integration-service
+              legalentity:
+                destinationService: legalentity-integration-service
+              mssql-server:
+                destinationService: mssql
+              portfolio:
+                destinationService: portfolio
+              token-converter:
+                destinationService: token-converter
+              user-manager:
+                destinationService: user-manager
+              # For mobile platform
+              device-management:
+                destinationService: device-management-service
+              mobile-authentication:
+                destinationService: mobile-authentication
+              fido:
+                destinationService: fido-service
+              investment-integration-service:
+                destinationService: dnr-investment-passthrough-accelerator
+              # DI istio virtual service
+              digital-investing:
+                  http:
+                    - name: digital-investing-web-edge
+                      match:
+                        - uri:
+                            prefix: /api
+                      route:
+                        - destination:
+                            host: edge
+                            port:
+                              number: 8080
+                    - name: digital-investing-web-portalless
+                      route:
+                        - destination:
+                            host: digital-investing-universal-web-portalless
+                            port:
+                              number: 8080
+              investment:
+                  http:
+                    - name: investment-edge
+                      match:
+                        - uri:
+                            prefix: /api
+                      route:
+                        - destination:
+                            host: edge
+                            port:
+                              number: 8080
+                    - name: investment-statics
+                      match:
+                        - uri:
+                            prefix: /static
+                      route:
+                        - destination:
+                            host: investment-statics-portalless
+                            port:
+                              number: 8080
+                    - name: investment
+                      route:
+                        - destination:
+                            host: investment
+                            port:
+                              number: 8080
+
+          topstack:
+            targetRevision: &branch "main"
+            valuesObject:
+              #investmentBETag: &investmentBETag "2025.08-RC2"
+
+              investmentBETag: &investmentBETag "7.75.0"
+              investmentFETag: &investmentFETag "digital-investing-app-digital-investing-frontend-ang-2025-09-19--181"
+              bbomOverrideTag: &bbomOverrideTag "2025.09"
+              BSJTag: &BSJTag "3.0.0-SNAPSHOT-20250514094354"
+
+              profileSelector:
+                - development
+                - dnr-ephemeral
+                - backbase-identity/dnr-ephemeral-modelbank-realms
+                - bootstrap-job/dnr-ephemeral-base
+                - bootstrap-job/bootstrap-user-default-passwords
+                - bootstrap-job/ingest-base-core-data
+                - bootstrap-job/ingest-wealth-legacy-standalone
+     
+              selector:
+                - access-control
+                - accessgroup-integration-service
+                - account-statement
+                - approval-service
+                - arrangement-manager
+                - audit
+                - backbase-identity
+                - bootstrap-job
+                - confirmation
+                - contentservices
+                - device-management-service
+                # - dnr-account-mock
+                # - dnr-account-mock-sid-1
+                # - dnr-account-mock-sid-2
+                - dnr-azurite
+                # - dnr-communications-outbound-integration-mock
+                # - dnr-currency-exchange-mock
+                - dnr-ephemeral-base
+                # - dnr-hard-token-integration-outbound-mock
+                - dnr-identity-fake-smtp-service
+                - dnr-investment-db
+                # - dnr-legalentity-integration-external-mock
+                - dnr-mssql-2019
+                - dnr-redis
+                # - dnr-user-integration-external-mock
+                # - dnr-user-profile-core-mock
+                # - dnr-user-profile-manager  
+                - edge
+                - employee-essentials
+                - employee-premium
+                - identity-integration
+                - identity-proxy
+                - investment
+                - investment-statics
+                - legalentity-integration-service
+                - limit
+                - oidc-token-converter
+                - orchestration
+                - platform
+                - remote-config
+                - remote-config-web
+                - user-manager
+                - digital-investing-universal-web
+                - web-authentication
+                - api-tracker
+                - portfolio
+                - portfolio-mock-service
+                - user-segment
+                - user-segments-
+                
+                # For mobile platform
+                - mobile-authentication
+                - fido-service
+                - dnr-investment-passthrough-accelerator
+                #Disabled apps
+                - -azure-blob-storage-connector
+                - -rtc-twilio-integrator
+                - -rtc-twilio-resource-setup
+              applications:
+                dnr-mssql-2019:
+                  values:
+                    resources:
+                      limits:
+                        cpu: 2
+                        memory: 5Gi
+                      requests:
+                        cpu: 2
+                        memory: 5Gi
+                user-manager:
+                  values:
+                    env:
+                      "LOGGING_LEVEL_COM_BACKBASE": "DEBUG"
+                      "BACKBASE_USERS_ATTRIBUTEWHITELIST_0": "dwUserId"
+                      "backbase.security.mtls.enabled": "false"
+                      "backbase.security.public.paths": "/integration-api/**"
+                      "BACKBASE_USERS_REALMS_0_REALMNAME": "retail"
+                      "BACKBASE_USERS_REALMS_0_DEFAULTREALM": "retail"
+                access-control:
+                  values:
+                    env:
+                      "backbase.approval.level.enabled": "false"
+                      "backbase.approval.validation.enabled": "false"
+                      "backbase.data-group.types": "ARRANGEMENTS,CONTACTS,CUSTOMERS,PAYEES,REPOSITORIES,CUSTOM"
+                    resources:
+                      limits:
+                        cpu: 2
+                        memory: 2Gi
+                      requests:
+                        cpu: 2
+                        memory: 2Gi
+                    replicaCount: 2
+                accessgroup-integration-service:
+                  values:
+                    env:
+                      "LOGGING_LEVEL_COM_BACKBASE": "DEBUG"
+                portfolio-mock-service:
+                  values:
+                    fullnameOverride: "market-news"
+                    image:
+                      registry: "harborStaging"
+                      repository: "portfolio-mock"
+                      tag: "2025.09.4-LTS-prepare-2025-09-4-LTS-release"
+                    env:
+                      backbase.portfolio-mock.trading.accounts.pending: "641531316"
+                      backbase.portfolio-mock.trading-mock.accounts.sent: "371362585"
+                      backbase.portfolio-mock.trading-mock.accounts.timeout: "external_account_id_3"
+                      backbase.portfolio-mock.trading-mock.placement-timeout.accept: "true"
+                arrangement-manager:
+                  values:
+                    env:
+                      "LOGGING_LEVEL_COM_BACKBASE": "DEBUG"
+                      "backbase.security.mtls.enabled": "false"
+                      "backbase.security.public.paths": "/integration-api/**"
+                      "backbase.arrangement.pull-latest-balance": "false"
+                      "backbase.communication.services.account.integration.serviceId": "portfolio-mock-service"
+                      "backbase.api.extensions.classes.com.backbase.dbs.product.arrangement.BatchArrangementsCommand": "additional-fields"
+                      "backbase.api.extensions.classes.com.backbase.dbs.arrangement.inbound.model.PutArrangementDto": "additional-fields"
+                      "backbase.api.extensions.classes.com.backbase.dbs.product.persistence.Arrangement": "additional-fields"
+                      "backbase.api.extensions.classes.com.backbase.dbs.arrangement.inbound.model.PostArrangementDto": "additional-fields"
+                      "BACKBASE_API_EXTENSIONS_PROPERTY-SETS_ADDITIONAL-FIELDS_PROPERTIES_0_PROPERTY-NAME": ignoreMarketHoursForTest
+                      "BACKBASE_API_EXTENSIONS_PROPERTY-SETS_ADDITIONAL-FIELDS_PROPERTIES_0_TYPE": STRING
+                      "BACKBASE_API_EXTENSIONS_PROPERTY-SETS_ADDITIONAL-FIELDS_PROPERTIES_1_PROPERTY-NAME": riskLevel
+                      "BACKBASE_API_EXTENSIONS_PROPERTY-SETS_ADDITIONAL-FIELDS_PROPERTIES_1_TYPE": STRING
+                      "backbase.arrangement.product-kinds.use-db": "false"
+                      "backbase.arrangement.product-kinds.kinds.kind7.masked-attributes": "IBAN,BBAN,number"
+                      "backbase.arrangement.product-kinds.kinds.kind7.unmaskable-attributes": "IBAN,BBAN,number"
+                      "backbase.arrangement.masking.use-mask-indicator": "false"
+                      "backbase.arrangement.masking.attributes.iban.keep": "4"
+                      "backbase.arrangement.masking.attributes.iban.behaviour": "last"
+                # backbase-identity:
+                #   values:
+                #     command: []
+                #     database:
+                #       liquibase:
+                #         command: []
+                #     eventbridge:
+                #       env:
+                #         "spring.cloud.azure.eventhubs.kafka.enabled": "false"
+                #         "spring_cloud_stream_binders_servicebus_environment_spring_main_sources": ""
+                #     env:
+                #       KC_HOSTNAME:
+                #         value: "https://identity-$(NAMESPACE).$(BASE_DOMAIN)/auth/"
+                #         dependentOn: ["NAMESPACE", "BASE_DOMAIN"]
+                bootstrap-job:
+                  values:
+                    backoffLimit: 10
+                    env:
+                      BACKBASE_STREAM_BOOTSTRAP_FIDO-APPLICATIONS_APPLICATIONS_0_APPKEY: wealth
+                      BACKBASE_BOOTSTRAP_DATA_FIDO-APPLICATIONS_0_APPKEY: wealth
+                      BACKBASE_BOOTSTRAP_DATA_FIDO-APPLICATIONS_0_APPID:
+                        value: "https://identity-$(NAMESPACE).eph.rndwlt.azure.backbaseservices.com/auth/realms/retail/protocol/fido-uaf/applications/wealth/facets"
+                      BACKBASE_BOOTSTRAP_DATA_FIDO-APPLICATIONS_0_TRUSTEDFACETIDS:
+                        value:
+                          configMapKeyRef:
+                            name: development-mobile-access
+                            key: BACKBASE_STREAM_BOOTSTRAP_FIDO-APPLICATIONS_APPLICATIONS_0_TRUSTEDFACETIDS
+                      BACKBASE_BOOTSTRAP_DATA_FIDO-APPLICATIONS_1_APPKEY: business
+                      BACKBASE_BOOTSTRAP_DATA_FIDO-APPLICATIONS_1_APPID:
+                        value: "https://identity-$(NAMESPACE).eph.rndwlt.azure.backbaseservices.com/auth/realms/business/protocol/fido-uaf/applications/business/facets"
+                      BACKBASE_BOOTSTRAP_DATA_FIDO-APPLICATIONS_1_TRUSTEDFACETIDS:
+                        value:
+                          configMapKeyRef:
+                            name: development-mobile-access
+                            key: BACKBASE_STREAM_BOOTSTRAP_FIDO-APPLICATIONS_APPLICATIONS_0_TRUSTEDFACETIDS
+                      backbase.bootstrap.ingestions.permissionSet.enabled: 'true'
+                      backbase.bootstrap.ingestions.permissionSet.database-update.enabled: 'false'
+                      backbase.stream.contact.worker.continueOnError: "true"
+                      backbase.stream.plans.enabled: 'false'
+                      backbase.bootstrap.ingestions.fido-applications.enabled: 'true' #for mobile platform
+                      backbase.bootstrap.ingestions.approvals.enabled: "true"
+                      backbase.bootstrap.ingestions.wealth.instruments.enabled: 'false'
+                      backbase.bootstrap.ingestions.product-catalog.enabled: 'true'
+                      backbase.stream.audiences.segmentation.user-kind.enabled: 'false'
+                    image:
+                      registry: reference
+                      repository: "staging/bootstrap-job"
+                      tag: "3.1.0-SNAPSHOT-20250616140054"
+                identity-proxy:
+                  values:
+                    image:
+                      registry: shared
+                      tag: *bbomOverrideTag
+                dnr-redis:
+                  annotations:
+                    argocd.argoproj.io/sync-wave: "-3"
+                  values:
+                    image:
+                      registry: harbor.backbase.eu/dockerhub
+                      repository: bitnamilegacy/redis
+                      tag: 6.2.16-debian-12-r0
+                    master:
+                      disableCommands: []
+                dnr-investment-db:
+                  annotations:
+                    argocd.argoproj.io/sync-wave: "-3"
+                  values:
+                    image:
+                      repository: bitnamilegacy/postgresql
+                identity-integration:
+                  values:
+                    env:
+                      IDENTITY_REALMCONFIGURATION_FALLBACKOPTIONS_USETEMPORARYPASSWORD: "false"
+                employee-web:
+                  values:
+                    env:
+                      AUTH_REALM: employee
+                wealth-universal-web:
+                  values:
+                    image:
+                      registries:
+                        backbaseacr: "backbaseregistry.azurecr.io/"
+                      registry: "backbaseacr"
+                      repository: "internal/wealth-app"
+                      tag: "wealth-app-wealth-frontend-ang-2025-04-16--56"
+                    env:
+                      AUTH_REALM: retail
+                digital-investing-universal-web:
+                  values:
+                    env:
+                      API_ROOT : /api/
+                      AUTH_REALM: retail
+                      CSP: "*"
+                    image:
+                      registries:
+                        backbaseacr: "backbaseregistry.azurecr.io/"
+                      registry: "backbaseacr"
+                      repository: "internal/digital-investing-app"
+                      tag: *investmentFETag
+                    resources:
+                      requests:
+                        cpu: 1
+                        memory: 256Mi
+                      limits:
+                        cpu: 1500m
+                        memory: 512Mi
+                api-tracker:
+                  annotations:
+                    argocd.argoproj.io/sync-wave: "100"
+                  values:
+                    env:
+                      EMAIL_FROM: "alejandror@backbase.com"
+                      EMAIL_TO: "alejandror@backbase.com"
+                      DEFAULT_TIME: "1000"
+                      MARQETA_USER_TOKEN: "CHANGE_ME"
+                      MAMBU_BASEPATH: IN
+                      MAMBU_USERNAME: CHANGE_ME
+                      MAMBU_PASSWORD: CHANGE_ME
+                      MARQETA_BASEPATH: CHANGE_ME
+                      MARQETA_PASSWORD: CHANGE_ME
+                      MARQETA_USERNAME: CHANGE_ME
+                      MAIL_HOST: CHANGE_ME
+                      MAIL_PORT: CHANGE_ME
+                      MAIL_USERNAME: CHANGE_ME
+                      MAIL_PASSWORD: CHANGE_ME
+                      MAIL_SMTP_AUTH: CHANGE_ME
+                      MAIL_PROTOCOL: CHANGE_ME
+                      REPORT_PROJECT_NAME: CHANGE_ME
+                      marqeta.password: aa
+                      marqeta.username: aa
+                      mambu.username: aa
+                      mambu.password: aa
+                    cronjob:
+                      enabled: false
+                    manualjob:
+                      enabled: true
+                    volumes:
+                      newman:
+                        configMap:
+                          name: eph-ingest
+                      newman2:
+                        configMap:
+                          name: eph-ingest
+                    volumeMounts:
+                      newman:
+                        readOnly: true
+                        subPath: eph-ingest.json
+                        mountPath: /etc/newman/eph-ingest.json
+                      newman2:
+                        readOnly: true
+                        subPath: eph-environment.json
+                        mountPath: /etc/newman/eph-environment.json
+                    command:
+                      - newman
+                    args:
+                      - run
+                      - eph-ingest.json
+                      - -e
+                      - eph-environment.json
+                      - -k
+                      - --env-var
+                      - "namespace=$(NAMESPACE)"
+                      - --env-var
+                      - "identityUrl=identity-backbaseidentity:8080"
+                      - --env-var
+                      - "investmentUrl=investment:8080"
+                      - -r
+                      - cli
+                      - --suppress-exit-code
+                      - -n
+                      - "1"
+                investment-statics:
+                  values:
+                    image:
+                      registries:
+                        backbaseacr: backbaseregistry.azurecr.io/
+                      registry: backbaseacr
+                      repository: docker/investment-statics
+                      tag: *investmentBETag
+                    replicaCount: 1
+                dnr-investment-passthrough-accelerator:
+                  chart: investment-passthrough-accelerator
+                  repoURL: "crrndwlt557.azurecr.io/charts"
+                  version: "2025.01.8"
+                  values:
+                    env:
+                      INVESTMENT_SERVICES_BASE_URL:
+                        value:  "http://investment:8080"
+                        dependentOn: ["NAMESPACE", "BASE_DOMAIN"]
+                      INVESTMENT_SERVICES_AUTH_CLIENT_ID: "7YcDrnPnAvrChDKzLeI8EewxEsN9ApRq1BsJIdqo"
+                      INVESTMENT_SERVICES_AUTH_CLIENT_SECRET: "Yt262Ebt2LH7O7wdKEqU0UDyQSqiqp6RAUcBdSI0jYLZtXAXzNm4CMOsMSXMoyBji4KUpaXEoRF33K8WfYmSNbc2Z5YXESmUcF33cPH7YOiZlcQuiRyFbmQ8tEMFNgVM"
+                    image:
+                      registries:
+                        bbregistry: "backbaseregistry.azurecr.io/"
+                        harbordev: "harbor.backbase.eu/development"
+                      registry: bbregistry
+                      repository: investment-passthrough-accelerator
+                      tag: "PT-ACCELERATOR-01-07-25-SNAPSHOT"
+                      pullPolicy: IfNotPresent
+                    replicaCount: 1
+                    service:
+                      type: ClusterIP
+                      port: 8080
+                      labels:
+                        app.backbase.com/public: "true"
+                investment: 
+                    values:
+                      env:
+                        DJANGO_DEBUG: "true"
+                      image:
+                        registries:
+                          backbaseacr: "backbaseregistry.azurecr.io/"
+                        registry: "backbaseacr"
+                        repository: docker/investment
+                        tag: *investmentBETag
+                      additionalFiles:
+                        investment_custom_settings.yaml: |
+                          ---
+                          PASSTHROUGH_ENABLED: true
+                          OUTBOUND_APIS:
+                            activities: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/activities/"
+                            intraday_prices: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/assets/{asset_external_id}/intraday-prices/"
+                            close_prices: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/assets/{asset_external_id}/prices/"
+                            bulk_latest_intraday_prices: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/assets/intraday-prices/latest/"
+                            order_creation: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/order/created/"
+                            order_cancel: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/broker/orders/{order_external_id}/cancel/"
+                            end_day_allocations: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/portfolios/{portfolio_external_id}/allocations/end-day/"
+                            current_allocation: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/portfolios/{portfolio_external_id}/allocations/intraday/latest/"
+                            allocation_intraday_latest_aggregated: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/portfolios/allocations/intraday/latest/aggregated/"
+                            list_intraday_latest: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/portfolios/allocations/intraday/latest/"
+                            performance_positions: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/portfolios/{portfolio_external_id}/performance/positions/"
+                            performance_mwrr: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/portfolios/{portfolio_external_id}/performance/mwrr/"
+                            performance_twrr: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/portfolios/{portfolio_external_id}/twrr/"
+                            intraday_distribution: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/portfolios/intraday/latest/distribution/"
+                            portfolios_aum: "http://dnr-investment-passthrough-accelerator:8080/service-api/v1/portfolios/aum/"
+                          LOGGING_HEADERS:
+                            x_azure_ref: "X-Azure-Ref"
+                            x_rxequest_id: "X-Request-Id"
+                          ORDER_VALIDATOR_CLASSES:
+                            - "broker.validators.PlatformOrderValidator"
+                          SELF_TRADING_ALLOWED: true
+                          ADVISOR_OPERATE_FRACTIONAL_SHARES: true
+                      investmentCommonConfiguration:
+                        initContainers:
+                          create-pubkey:
+                            image:
+                              registries:
+                                backbaseacr1: "backbaseregistry.azurecr.io/docker/"
+                              registry: "backbaseacr1"
+                              repository: investment-pubkey
+                              tag: 1.0.0
+
+                      workloads:
+                        generate-mock-data:
+                          args: ["-c", "import subprocess; subprocess.run(['python', 'manage.py', 'generate_mock_data',
+                            'eur_xetr_risk_based','--backbase-data-prefix=rndwlt-eph-', '--backbase-user-external-ids',
+                            'alex','naomi', '--backbase-arrangement-external-ids', '4b06de7d-abdc-42a5-b15b-b2f1353b64a2',
+                             '4b06dcc2-fbd3-4b8d-848a-cc0248354137','--client-dataset=minimal', '--risk-dataset=v2'], check=True)"]
+
+  syncPolicy:
+    automated:
+      allowEmpty: false
+      prune: true
+      selfHeal: true
+    retry:
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 45s
+      limit: 3
+    syncOptions:
+      - ServerSideApply=true
+      - ApplyOutOfSyncOnly=true

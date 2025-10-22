@@ -1,0 +1,8 @@
+export KUBECONFIG=~/.kube/rndwlt/eph
+export http_proxy=http://webproxy.infra.backbase.cloud:8888
+export https_proxy=http://webproxy.infra.backbase.cloud:8888
+
+kubectl port-forward service/token-converter 8080:8080 -n ep-romank-investment
+kubectl port-forward service/access-control 8030:8080 -n ep-romank-investment
+kubectl port-forward service/user-manager 8050:8080 -n ep-romank-investment
+kubectl port-forward service/arrangement-manager 8040:8080 -n ep-romank-investment

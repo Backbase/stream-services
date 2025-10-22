@@ -1,0 +1,80 @@
+logging:
+  level:
+    root: info
+    com.backbase: debug
+#    // trace ClientCredentialsReactiveOAuth2AuthorizedClientProvider
+#    org.springframework.web.reactive: TRACE
+#    org.springframework.http: DEBUG
+#    reactor.netty: DEBUG
+eureka:
+  client:
+    enabled: false
+
+server:
+  shutdown: graceful
+
+spring:
+  application:
+    name: portfolio-bootstrap-task
+  cloud:
+    kubernetes:
+      enabled: true
+    loadbalancer:
+      enabled: false
+    config:
+      enabled: false
+  zipkin:
+    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          bb:
+            authorization-grant-type: client_credentials
+            client-id: bb-client
+            client-secret: bb-secret
+            scope: api:service
+            client-authentication-method: client_secret_post
+
+---
+eph:
+  environment: romnak
+
+
+spring:
+  config:
+    activate:
+      on-profile: eph
+  security:
+    oauth2:
+      client:
+        provider:
+          bb:
+#            token-uri: https://edge-${eph.environment}.secure-shared.backbase.eu/api/token-converter/oauth/token
+#            token-uri: https://token-converter-ep-romank-investment.eph.rndwlt.azure.backbaseservices.com/oauth/token
+            token-uri: http://localhost:8080/oauth/token
+
+backbase:
+  communication:
+    services:
+      investment:
+#        directUri: http://investment-${eph.environment}.secure-shared.backbase.eu
+#        directUri: https://investment-${eph.environment}.eph.rndwlt.azure.backbaseservices.com
+        directUri: http://localhost:8090
+      identity:
+        integration:
+          directUri: http://identityintegration-${eph.environment}.secure-shared.backbase.eu
+      usermanager:
+        directUri: http://user-manager-${eph.environment}.secure-shared.backbase.eu
+      access-control:
+        directUri: http://accesscontrol-${eph.environment}.secure-shared.backbase.eu
+      arrangement:
+        manager:
+          directUri: http://arrangement-${eph.environment}.secure-shared.backbase.eu
+  stream:
+    bootstrap:
+#      legal-entity-location: ${portfolio-legal-entity-config.base-path}/legal-entity-hierarchy-beck.json
+    legalentity:
+      sink:
+        useIdentityIntegration: true
+        userProfileEnabled: false
