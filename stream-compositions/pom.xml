@@ -7,13 +7,13 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-starter</artifactId>
-        <version>7.8.0</version>
+        <version>7.10.0</version>
         <relativePath>../stream-sdk/stream-starter</relativePath>
     </parent>
 
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-compositions</artifactId>
-    <version>7.8.0</version>
+    <version>7.10.0</version>
 
     <packaging>pom</packaging>
     <name>Stream :: Compositions</name>
@@ -34,7 +34,7 @@
         <skip.integration.tests>false</skip.integration.tests>
         <sonar.test.exclusions>**/test/**/*</sonar.test.exclusions>
         <spring-cloud.version>2024.0.1</spring-cloud.version>
-        <ssdk.version>19.1.1</ssdk.version>
+        <ssdk.version>20.0.0-rc.2</ssdk.version>
         <jakarta-validation.version>3.0.2</jakarta-validation.version>
         <jib.container.volumes>/tmp</jib.container.volumes>
         <archuint.skip>true</archuint.skip>

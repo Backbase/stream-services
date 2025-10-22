@@ -10,7 +10,7 @@
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-starter</artifactId>
     <name>Stream :: SDK :: stream-starter</name>
-    <version>7.8.0</version>
+    <version>7.10.0</version>
     <packaging>pom</packaging>
 
     <organization>
@@ -248,7 +248,7 @@
                     <version>${arch-unit-maven-plugin.version}</version>
                 </plugin>
                 <!-- Load the properties from app metadata json as maven property -->
-                <plugin>
+                <!--<plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>properties-maven-plugin</artifactId>
                     <version>${properties-maven-plugin.version}</version>
@@ -266,7 +266,7 @@
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
+                </plugin>-->
                 <!-- Generate SCDF app metadata from 'ConfigurationProperties' classes -->
                 <plugin>
                     <groupId>org.springframework.cloud</groupId>

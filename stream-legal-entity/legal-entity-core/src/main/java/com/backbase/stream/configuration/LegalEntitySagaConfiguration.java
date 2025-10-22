@@ -37,7 +37,8 @@ import org.springframework.context.annotation.Import;
     LoansServiceConfiguration.class,
     AudiencesSegmentationConfiguration.class,
     PlanServiceConfiguration.class,
-    CustomerProfileConfiguration.class
+    CustomerProfileConfiguration.class//,
+//    InvestmentSagaConfigurationProperties.class
 })
 @EnableConfigurationProperties(
     {LegalEntitySagaConfigurationProperties.class}
@@ -80,7 +81,8 @@ public class LegalEntitySagaConfiguration {
         CustomerAccessGroupSaga customerAccessGroupSaga,
         LegalEntitySagaConfigurationProperties sinkConfigurationProperties,
         UserKindSegmentationSaga userKindSegmentationSaga,
-        CustomerProfileService customerProfileService
+        CustomerProfileService customerProfileService//,
+//        InvestmentSaga investmentSaga
     ) {
         return new LegalEntitySagaV2(
             legalEntityService,
@@ -92,7 +94,8 @@ public class LegalEntitySagaConfiguration {
             customerAccessGroupSaga,
             sinkConfigurationProperties,
             userKindSegmentationSaga,
-            customerProfileService
+            customerProfileService//,
+//            investmentSaga
         );
     }
 
