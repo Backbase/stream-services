@@ -3,7 +3,7 @@ logging:
     root: info
     com.backbase: debug
 #    // trace ClientCredentialsReactiveOAuth2AuthorizedClientProvider
-#    org.springframework.web.reactive: TRACE
+    org.springframework.web.reactive: TRACE
 #    org.springframework.http: DEBUG
 #    reactor.netty: DEBUG
 eureka:

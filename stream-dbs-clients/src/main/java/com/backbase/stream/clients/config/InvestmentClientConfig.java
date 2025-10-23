@@ -2,13 +2,19 @@ package com.backbase.stream.clients.config;
 
 import com.backbase.investment.api.service.ApiClient;
 import com.backbase.investment.api.service.v1.ClientApi;
+import com.backbase.investment.api.service.v1.model.PatchedOASClientUpdateRequest;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.text.DateFormat;
-import org.openapitools.jackson.nullable.JsonNullableModule;
+import java.time.LocalDate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Configuration for Investment service REST client (ClientApi).
@@ -26,8 +32,7 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
     @Bean
     @ConditionalOnMissingBean
     public ApiClient investmentApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
-        JsonNullableModule jnm = new JsonNullableModule();
-        objectMapper.registerModule(jnm);
+        objectMapper.setSerializationInclusion(Include.NON_EMPTY);
         return new ApiClient(getWebClient(), objectMapper, dateFormat)
             .setBasePath(createBasePath());
     }
@@ -38,4 +43,3 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
         return new ClientApi(investmentApiClient);
     }
 }
-

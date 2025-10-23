@@ -30,7 +30,6 @@ kubectl -n $1 port-forward service/access-control 8030:8080 &
 kubectl -n $1 port-forward service/user-manager 8050:8080 &
 kubectl -n $1 port-forward service/arrangement-manager 8040:8080 &
 kubectl -n $1 port-forward service/investment 8090:8080 &
-kubectl -n $1 port-forward investment-investment-7b86b55db9-dlhrz 8090:8080 &
 kubectl -n $1 port-forward dbportforward 1433:1433 &
 
 #kubectl -n $1 port-forward service/mssql-server 1433:1433 &

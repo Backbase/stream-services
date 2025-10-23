@@ -262,6 +262,7 @@
                                 <enumNameMapping>Etc/GMT-12=ETC_GMT_1222</enumNameMapping>
                             </enumNameMappings>
                             <configOptions>
+                                <openApiNullable>false</openApiNullable>
                                 <useBeanValidation>false</useBeanValidation>
                             </configOptions>
                         </configuration>
