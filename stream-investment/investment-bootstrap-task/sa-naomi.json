@@ -1,0 +1,70 @@
+{
+  "saName": "Naomi",
+  "saExternalId": "rndwlt-eph-sa_naomi",
+  "clientUsers": [
+    {
+      "internalUserId": "1f80e140-72fa-4c5d-bbcb-f2f163f488c8",
+      "externalUserId": "rndwlt-eph-naomi",
+      "legalEntityExternalId": "rndwlt-eph-naomi"
+    }
+  ],
+  "investmentArrangements": [
+    {
+      "name": "College Portfolio",
+      "internalId": "b0d416a9-dc73-4056-8063-22ce63dcea05",
+      "externalUserId": "rndwlt-eph-641531316",
+      "productTypeExternalId": "investment-account",
+      "currency": "USD",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-naomi",
+        "rndwlt-eph-james"
+      ]
+    },
+    {
+      "name": "Retirement Portfolio",
+      "internalId": "a073e5d2-a82b-4550-a19d-2baaf88ff0b7",
+      "externalUserId": "rndwlt-eph-371362585",
+      "productTypeExternalId": "investment-account",
+      "currency": "USD",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-naomi",
+        "rndwlt-eph-james"
+      ]
+    },
+    {
+      "name": "My Stock Trading Portfolio",
+      "internalId": "3ed5c4b8-5d1d-4ec5-9933-950c0a88d941",
+      "externalUserId": "rndwlt-eph-4b06d8c1-55e2-4a3b-9f8c-d7e6f5a4b3c2",
+      "productTypeExternalId": "self-trading",
+      "currency": "EUR",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-naomi"
+      ]
+    },
+    {
+      "name": "My safety net",
+      "internalId": "3cc4c897-eaa9-4498-a4a8-bef28c03bcc0",
+      "externalUserId": "rndwlt-eph-4b06d3e9-b0a1-4f2d-8e4b-c5d6e7f8a9b0",
+      "productTypeExternalId": "robo-advisor",
+      "currency": "EUR",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-naomi"
+      ]
+    },
+    {
+      "name": "My Savings Plan Portfolio",
+      "internalId": "fc9472fe-dd13-49ee-bb8a-38ce1aebd183",
+      "externalUserId": "rndwlt-eph-4b06dfa7-c8b9-4d0e-8a1b-2c3d4e5f6a7b",
+      "productTypeExternalId": "savings-plan",
+      "currency": "EUR",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-naomi"
+      ]
+    }
+  ],
+  "clientsByLeExternalId": {
+    "rndwlt-eph-naomi": [
+      null
+    ]
+  }
+}

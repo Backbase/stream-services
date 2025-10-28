@@ -91,7 +91,6 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
     private final LegalEntitySagaConfigurationProperties legalEntitySagaConfigurationProperties;
     private final UserKindSegmentationSaga userKindSegmentationSaga;
     private final CustomerProfileService customerProfileService;
-//    private final InvestmentSaga investmentSaga;
 
     private static final ExternalContactMapper externalContactMapper = ExternalContactMapper.INSTANCE;
 
@@ -132,20 +131,8 @@ public class LegalEntitySagaV2 extends HelperProcessor implements StreamTaskExec
             .flatMap(this::postLegalEntityContacts)
             .flatMap(this::processSubsidiaries)
             .flatMap(this::processCustomerAccessGroups)
-//            .flatMap(this::setupInvestment)
             ;
     }
-
-   /* private Mono<LegalEntityTaskV2> setupInvestment(LegalEntityTaskV2 streamTask) {
-        if (!investmentSaga.isEnabled()) {
-            log.info("Skipping investment set up - feature is disabled.");
-            return Mono.just(streamTask);
-        }
-        return investmentSaga.executeTask(
-                createInvestmentTask(streamTask, null, streamTask.getData().getInternalId()))
-            .flatMap(investmentTask -> requireNonNull(Mono.just(streamTask)))
-            .then(Mono.just(streamTask));
-    }*/
 
     private Mono<LegalEntityTaskV2> processCustomerAccessGroups(LegalEntityTaskV2 streamTask) {
         if (!customerAccessGroupSaga.isEnabled()) {

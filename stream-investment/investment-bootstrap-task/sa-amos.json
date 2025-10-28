@@ -1,0 +1,28 @@
+{
+  "saName": "Amos",
+  "saExternalId": "rndwlt-eph-sa_amos",
+  "clientUsers": [
+    {
+      "internalUserId": "5eff62fb-5331-480e-92e5-e38c262b4405",
+      "externalUserId": "rndwlt-eph-amos",
+      "legalEntityExternalId": "rndwlt-eph-amos"
+    }
+  ],
+  "investmentArrangements": [
+    {
+      "name": "Trading Portfolio",
+      "internalId": "0acefe9a-e9b0-420a-8485-5a4a10bb8b56",
+      "externalUserId": "rndwlt-eph-027105943",
+      "productTypeExternalId": "investment-account",
+      "currency": "USD",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-amos"
+      ]
+    }
+  ],
+  "clientsByLeExternalId": {
+    "rndwlt-eph-amos": [
+      null
+    ]
+  }
+}

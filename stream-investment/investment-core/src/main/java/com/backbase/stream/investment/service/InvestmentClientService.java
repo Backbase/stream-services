@@ -16,7 +16,6 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -35,17 +34,17 @@ import reactor.core.publisher.Mono;
 public class InvestmentClientService {
 
     private final ClientApi clientApi;
-    private final InvestmentMapper mapper = Mappers.getMapper(InvestmentMapper.class);
 
     /**
      * Create a new investment client via Investment Service API. Caller is responsible for ensuring idempotency (e.g.
      * by external UUID management) – this method does not attempt an existence check to avoid an extra round trip
      * unless requested.
      *
-     * @param request request body (must not be null)
+     * @param request               request body (must not be null)
+     * @param legalEntityExternalId
      * @return Mono emitting created client representation
      */
-    public Mono<ClientUser> upsertClient(@NotNull ClientCreateRequest request) {
+    public Mono<ClientUser> upsertClient(@NotNull ClientCreateRequest request, String legalEntityExternalId) {
         Objects.requireNonNull(request, "ClientCreateRequest must not be null");
         log.info("Creating investment client (internalUserId={})", safeInternalUserId(request));
 
@@ -71,26 +70,22 @@ public class InvestmentClientService {
                         return Mono.just(client); // fallback original
                     })
                     .map(updatedOrOriginal -> ClientUser.builder()
-                        .investmentUserId(updatedOrOriginal.getUuid())
+                        .investmentClientId(updatedOrOriginal.getUuid())
                         .externalUserId((String) updatedOrOriginal.getExtraData().get("user_external_id"))
                         .internalUserId(updatedOrOriginal.getInternalUserId())
                         .build());
             })
             .switchIfEmpty(clientApi.createClient(request)
                 .flatMap(created -> Mono.just(ClientUser.builder()
-                    .investmentUserId(created.getUuid())
+                    .investmentClientId(created.getUuid())
                     .externalUserId((String) request.getExtraData().get("user_external_id"))
                     .internalUserId(safeInternalUserId(request))
                     .build())))
             .doOnSuccess(response -> {
+                response.setLegalEntityExternalId(legalEntityExternalId);
                 log.debug("List clients response: body={}", response);
             })
             .doOnError(throwable -> log.error("List clients failed", throwable));
-//        return clientApi.createClient(request)
-//            .doOnSuccess(created -> log.info("Created investment client uuid={} status={}",
-//                created != null ? created.getUuid() : null,
-//                created != null ? created.getStatus() : null))
-//            .doOnError(this::logCreateError);
     }
 
     /**

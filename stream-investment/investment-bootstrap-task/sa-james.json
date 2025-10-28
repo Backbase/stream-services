@@ -1,0 +1,40 @@
+{
+  "saName": "James",
+  "saExternalId": "rndwlt-eph-sa_james",
+  "clientUsers": [
+    {
+      "internalUserId": "4e84ade1-1233-42c1-a155-13e3e0dc6dae",
+      "externalUserId": "rndwlt-eph-james",
+      "legalEntityExternalId": "rndwlt-eph-james"
+    }
+  ],
+  "investmentArrangements": [
+    {
+      "name": "College Portfolio",
+      "internalId": "b0d416a9-dc73-4056-8063-22ce63dcea05",
+      "externalUserId": "rndwlt-eph-641531316",
+      "productTypeExternalId": "investment-account",
+      "currency": "USD",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-naomi",
+        "rndwlt-eph-james"
+      ]
+    },
+    {
+      "name": "Retirement Portfolio",
+      "internalId": "a073e5d2-a82b-4550-a19d-2baaf88ff0b7",
+      "externalUserId": "rndwlt-eph-371362585",
+      "productTypeExternalId": "investment-account",
+      "currency": "USD",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-naomi",
+        "rndwlt-eph-james"
+      ]
+    }
+  ],
+  "clientsByLeExternalId": {
+    "rndwlt-eph-james": [
+      null
+    ]
+  }
+}

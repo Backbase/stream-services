@@ -10,9 +10,10 @@ import lombok.Data;
 @Builder
 public class ClientUser {
 
-    private UUID investmentUserId;
+    private UUID investmentClientId;
     private String internalUserId;
     private String externalUserId;
+    private String legalEntityExternalId;
 
 
 }

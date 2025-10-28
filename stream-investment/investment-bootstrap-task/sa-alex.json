@@ -1,0 +1,68 @@
+{
+  "saName": "Alex",
+  "saExternalId": "rndwlt-eph-sa_alex",
+  "clientUsers": [
+    {
+      "internalUserId": "865342ac-6852-4e75-847b-73b8a5764aeb",
+      "externalUserId": "rndwlt-eph-alex",
+      "legalEntityExternalId": "rndwlt-eph-alex"
+    }
+  ],
+  "investmentArrangements": [
+    {
+      "name": "Investment Portfolio",
+      "internalId": "0a8ea6e1-3ce4-4f4d-8df3-38e2dddda192",
+      "externalUserId": "rndwlt-eph-495696898",
+      "productTypeExternalId": "investment-account",
+      "currency": "USD",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-alex"
+      ]
+    },
+    {
+      "name": "Investment Portfolio",
+      "internalId": "34dd93a5-4c4f-4550-9c51-af5dd2e4d49c",
+      "externalUserId": "rndwlt-eph-764204256",
+      "productTypeExternalId": "investment-account",
+      "currency": "USD",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-alex"
+      ]
+    },
+    {
+      "name": "My Stock Trading Portfolio",
+      "internalId": "85adb373-6c7b-4591-b88d-080fbba9a791",
+      "externalUserId": "rndwlt-eph-4b06d1a2-f3b4-4c5d-8e6f-7a8b9c0d1e2f",
+      "productTypeExternalId": "self-trading",
+      "currency": "EUR",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-alex"
+      ]
+    },
+    {
+      "name": "My Robo Portfolio",
+      "internalId": "a4d017e8-ff91-4f89-abfa-f9ea1a7de5f9",
+      "externalUserId": "rndwlt-eph-4b06da3b-c4d5-4e6f-8a7b-8c9d0e1f2a3b",
+      "productTypeExternalId": "robo-advisor",
+      "currency": "EUR",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-alex"
+      ]
+    },
+    {
+      "name": "My Savings Plan Portfolio",
+      "internalId": "28cd0b30-6746-4ddd-b2a0-5dbfad00d510",
+      "externalUserId": "rndwlt-eph-4b06d9f1-e2a3-4b4c-8d5e-9f0a1b2c3d4e",
+      "productTypeExternalId": "savings-plan",
+      "currency": "EUR",
+      "legalEntityExternalIds": [
+        "rndwlt-eph-alex"
+      ]
+    }
+  ],
+  "clientsByLeExternalId": {
+    "rndwlt-eph-alex": [
+      null
+    ]
+  }
+}

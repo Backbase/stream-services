@@ -1,0 +1,1633 @@
+{
+  "internalId": null,
+  "externalId": "rndwlt-eph-sa_naomi",
+  "name": "Naomi",
+  "description": "Master Service Agreement for Naomi",
+  "purpose": null,
+  "jobProfileUsers": [
+    {
+      "user": {
+        "internalId": "ae871fa1-4c51-41f2-a85a-0febd72758df",
+        "externalId": "rndwlt-eph-naomi",
+        "legalEntityId": null,
+        "emailAddress": {
+          "key": null,
+          "type": null,
+          "primary": null,
+          "address": "naomin@modelbank.backbase.com"
+        },
+        "mobileNumber": {
+          "key": null,
+          "type": null,
+          "primary": null,
+          "number": "1234567890"
+        },
+        "fullName": "Naomi Live",
+        "supportsLimit": null,
+        "limit": null,
+        "additions": {},
+        "attributes": {},
+        "identityLinkStrategy": "CREATE_IN_IDENTITY",
+        "userProfile": {
+          "userId": null,
+          "externalId": null,
+          "userName": null,
+          "name": null,
+          "displayName": null,
+          "nickName": null,
+          "profileUrl": null,
+          "personalInformation": {
+            "gender": "female",
+            "dateOfBirth": "1995-12-30",
+            "countryOfBirth": "US",
+            "countryOfResidence": null,
+            "nationalities": [],
+            "maritalStatus": null,
+            "educationLevel": null,
+            "employer": null,
+            "employmentStatus": null
+          },
+          "identificationDetails": [],
+          "title": null,
+          "userType": null,
+          "preferredLanguage": null,
+          "locale": null,
+          "timezone": null,
+          "active": null,
+          "additionalEmails": [],
+          "additionalPhoneNumbers": [],
+          "ims": [],
+          "photos": [],
+          "x509Certificates": [],
+          "addresses": [
+            {
+              "formatted": null,
+              "streetAddress": "630 Bellaire Drive",
+              "locality": "Hurst Texas 76053",
+              "region": null,
+              "postalCode": "76053",
+              "country": "USA",
+              "type": "home",
+              "primary": true
+            }
+          ],
+          "extended": null
+        },
+        "locked": null,
+        "additionalRealmRoles": [],
+        "additionalGroups": []
+      },
+      "legalEntityReference": {
+        "internalId": null,
+        "externalId": "rndwlt-eph-naomi",
+        "relation": null,
+        "additions": {}
+      },
+      "referenceJobRoleNames": [
+        "Portfolio - Investor",
+        "Wealth user"
+      ],
+      "jobRoleNameToCustomerAccessGroupNames": [],
+      "planName": null,
+      "cards": null,
+      "businessFunctionGroups": [
+        {
+          "id": "8a8481199a100025019a100334e50024",
+          "legalEntityId": null,
+          "serviceAgreementId": "8a8481199a100025019a1003100a0009",
+          "name": "Portfolio - Investor",
+          "description": "The investor owns portfolios and can trade instruments.",
+          "type": "TEMPLATE",
+          "dataGroupsAllowed": null,
+          "functions": [
+            {
+              "name": null,
+              "functionId": "1210",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1108",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "approve",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1112",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "execute",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1088",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "create",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1087",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1014",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1141",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "8a8481199a100025019a10033cea0031",
+          "legalEntityId": null,
+          "serviceAgreementId": "8a8481199a100025019a1003100a0009",
+          "name": "Wealth user",
+          "description": "Allows access to specific wealth functionality",
+          "type": "TEMPLATE",
+          "dataGroupsAllowed": null,
+          "functions": [
+            {
+              "name": null,
+              "functionId": "1207",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "execute",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1160",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "execute",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1006",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1016",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1161",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "create",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "delete",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1206",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1205",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "execute",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1210",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1108",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "approve",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1053",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "cancel",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "create",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "delete",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1112",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "execute",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1201",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "execute",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1035",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "approve",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "create",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "delete",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1209",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1204",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "cancel",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "create",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1141",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1014",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            },
+            {
+              "name": null,
+              "functionId": "1150",
+              "functionCode": null,
+              "resourceName": null,
+              "resourceCode": null,
+              "privileges": [
+                {
+                  "privilege": "view",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "edit",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "create",
+                  "supportsLimit": null,
+                  "limit": null
+                },
+                {
+                  "privilege": "delete",
+                  "supportsLimit": null,
+                  "limit": null
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "approvalStatus": null,
+      "contacts": []
+    }
+  ],
+  "participants": [
+    {
+      "internalId": null,
+      "externalId": "rndwlt-eph-naomi",
+      "sharingUsers": true,
+      "sharingAccounts": true,
+      "admins": [
+        "rndwlt-eph-naomi"
+      ],
+      "users": [],
+      "action": null,
+      "limit": null
+    }
+  ],
+  "validFromDate": null,
+  "validFromTime": null,
+  "validUntilDate": null,
+  "validUntilTime": null,
+  "status": "ENABLED",
+  "customerCategory": null,
+  "isMaster": true,
+  "regularUserAps": null,
+  "adminUserAps": null,
+  "jobRoles": [],
+  "referenceJobRoles": [],
+  "creatorLegalEntity": null,
+  "limit": null,
+  "contacts": [],
+  "productGroups": [
+    {
+      "internalId": "8a8481529a0fffd9019a10042c220056",
+      "productGroupType": "ARRANGEMENTS",
+      "name": "Naomi Portfolios",
+      "description": "Product group containing Naomi portfolio arrangements",
+      "users": [
+        {
+          "user": {
+            "internalId": "ae871fa1-4c51-41f2-a85a-0febd72758df",
+            "externalId": "rndwlt-eph-naomi",
+            "legalEntityId": null,
+            "emailAddress": {
+              "key": null,
+              "type": null,
+              "primary": null,
+              "address": "naomin@modelbank.backbase.com"
+            },
+            "mobileNumber": {
+              "key": null,
+              "type": null,
+              "primary": null,
+              "number": "1234567890"
+            },
+            "fullName": "Naomi Live",
+            "supportsLimit": null,
+            "limit": null,
+            "additions": {},
+            "attributes": {},
+            "identityLinkStrategy": "CREATE_IN_IDENTITY",
+            "userProfile": {
+              "userId": null,
+              "externalId": null,
+              "userName": null,
+              "name": null,
+              "displayName": null,
+              "nickName": null,
+              "profileUrl": null,
+              "personalInformation": {
+                "gender": "female",
+                "dateOfBirth": "1995-12-30",
+                "countryOfBirth": "US",
+                "countryOfResidence": null,
+                "nationalities": [],
+                "maritalStatus": null,
+                "educationLevel": null,
+                "employer": null,
+                "employmentStatus": null
+              },
+              "identificationDetails": [],
+              "title": null,
+              "userType": null,
+              "preferredLanguage": null,
+              "locale": null,
+              "timezone": null,
+              "active": null,
+              "additionalEmails": [],
+              "additionalPhoneNumbers": [],
+              "ims": [],
+              "photos": [],
+              "x509Certificates": [],
+              "addresses": [
+                {
+                  "formatted": null,
+                  "streetAddress": "630 Bellaire Drive",
+                  "locality": "Hurst Texas 76053",
+                  "region": null,
+                  "postalCode": "76053",
+                  "country": "USA",
+                  "type": "home",
+                  "primary": true
+                }
+              ],
+              "extended": null
+            },
+            "locked": null,
+            "additionalRealmRoles": [],
+            "additionalGroups": []
+          },
+          "legalEntityReference": {
+            "internalId": null,
+            "externalId": "rndwlt-eph-naomi",
+            "relation": null,
+            "additions": {}
+          },
+          "referenceJobRoleNames": [
+            "Portfolio - Investor",
+            "Wealth user"
+          ],
+          "jobRoleNameToCustomerAccessGroupNames": [],
+          "planName": null,
+          "cards": null,
+          "businessFunctionGroups": [
+            {
+              "id": "8a8481199a100025019a100334e50024",
+              "legalEntityId": null,
+              "serviceAgreementId": "8a8481199a100025019a1003100a0009",
+              "name": "Portfolio - Investor",
+              "description": "The investor owns portfolios and can trade instruments.",
+              "type": "TEMPLATE",
+              "dataGroupsAllowed": null,
+              "functions": [
+                {
+                  "name": null,
+                  "functionId": "1210",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1108",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "approve",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1112",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "execute",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1088",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "create",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1087",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1014",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1141",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "8a8481199a100025019a10033cea0031",
+              "legalEntityId": null,
+              "serviceAgreementId": "8a8481199a100025019a1003100a0009",
+              "name": "Wealth user",
+              "description": "Allows access to specific wealth functionality",
+              "type": "TEMPLATE",
+              "dataGroupsAllowed": null,
+              "functions": [
+                {
+                  "name": null,
+                  "functionId": "1207",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "execute",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1160",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "execute",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1006",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1016",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1161",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "create",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "delete",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1206",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1205",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "execute",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1210",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1108",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "approve",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1053",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "cancel",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "create",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "delete",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1112",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "execute",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1201",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "execute",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1035",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "approve",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "create",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "delete",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1209",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1204",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "cancel",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "create",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1141",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1014",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                },
+                {
+                  "name": null,
+                  "functionId": "1150",
+                  "functionCode": null,
+                  "resourceName": null,
+                  "resourceCode": null,
+                  "privileges": [
+                    {
+                      "privilege": "view",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "edit",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "create",
+                      "supportsLimit": null,
+                      "limit": null
+                    },
+                    {
+                      "privilege": "delete",
+                      "supportsLimit": null,
+                      "limit": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "approvalStatus": null,
+          "contacts": []
+        }
+      ],
+      "currentAccounts": [],
+      "savingAccounts": [],
+      "debitCards": [],
+      "creditCards": [],
+      "loans": [],
+      "termDeposits": [],
+      "investmentAccounts": [
+        {
+          "internalId": "70a70c32-23f0-4ede-85dd-b80d10c91ca6",
+          "externalId": "rndwlt-eph-641531316",
+          "productTypeExternalId": "investment-account",
+          "legalEntities": [
+            {
+              "internalId": null,
+              "externalId": "rndwlt-eph-naomi",
+              "relation": null,
+              "additions": {}
+            },
+            {
+              "internalId": null,
+              "externalId": "rndwlt-eph-james",
+              "relation": null,
+              "additions": {}
+            }
+          ],
+          "name": "College Portfolio",
+          "externalTransferAllowed": null,
+          "crossCurrencyAllowed": null,
+          "bankAlias": null,
+          "sourceId": null,
+          "accountOpeningDate": null,
+          "lastUpdateDate": null,
+          "externalParentId": null,
+          "state": {
+            "externalStateId": "Active",
+            "state": "Active"
+          },
+          "currency": "USD",
+          "amountInArrear": null,
+          "overdueSince": null,
+          "interestDetails": null,
+          "debitCardsItems": [],
+          "usersPreferences": [],
+          "subscriptions": [],
+          "additions": {
+            "ignoreMarketHoursForTest": "false"
+          },
+          "bookedBalance": null,
+          "availableBalance": null,
+          "currentInvestment": {
+            "amount": 10000.0,
+            "currencyCode": "USD"
+          },
+          "urgentTransferAllowed": null,
+          "panSuffix": null,
+          "productNumber": null,
+          "accountHolderNames": "James Live",
+          "accountHolderCountry": "US",
+          "BIC": "CITIUS33",
+          "BBAN": "rndwlt-eph-641531316",
+          "IBAN": null
+        },
+        {
+          "internalId": "3effeb3f-fd4e-4d5a-82b4-a9f59b6811eb",
+          "externalId": "rndwlt-eph-371362585",
+          "productTypeExternalId": "investment-account",
+          "legalEntities": [
+            {
+              "internalId": null,
+              "externalId": "rndwlt-eph-naomi",
+              "relation": null,
+              "additions": {}
+            },
+            {
+              "internalId": null,
+              "externalId": "rndwlt-eph-james",
+              "relation": null,
+              "additions": {}
+            }
+          ],
+          "name": "Retirement Portfolio",
+          "externalTransferAllowed": null,
+          "crossCurrencyAllowed": null,
+          "bankAlias": null,
+          "sourceId": null,
+          "accountOpeningDate": null,
+          "lastUpdateDate": null,
+          "externalParentId": null,
+          "state": {
+            "externalStateId": "Active",
+            "state": "Active"
+          },
+          "currency": "USD",
+          "amountInArrear": null,
+          "overdueSince": null,
+          "interestDetails": null,
+          "debitCardsItems": [],
+          "usersPreferences": [],
+          "subscriptions": [],
+          "additions": {
+            "ignoreMarketHoursForTest": "false",
+            "riskLevel": "Medium"
+          },
+          "bookedBalance": null,
+          "availableBalance": null,
+          "currentInvestment": {
+            "amount": 40000.0,
+            "currencyCode": "USD"
+          },
+          "urgentTransferAllowed": null,
+          "panSuffix": null,
+          "productNumber": null,
+          "accountHolderNames": "James Live",
+          "accountHolderCountry": "US",
+          "BIC": "CITIUS33",
+          "BBAN": "rndwlt-eph-371362585",
+          "IBAN": null
+        }
+      ],
+      "customProducts": [
+        {
+          "internalId": "a718d523-043c-433f-b9df-15cb5fd96f08",
+          "externalId": "rndwlt-eph-4b06d8c1-55e2-4a3b-9f8c-d7e6f5a4b3c2",
+          "productTypeExternalId": "self-trading",
+          "legalEntities": [
+            {
+              "internalId": null,
+              "externalId": "rndwlt-eph-naomi",
+              "relation": null,
+              "additions": {}
+            }
+          ],
+          "name": "My Stock Trading Portfolio",
+          "externalTransferAllowed": null,
+          "crossCurrencyAllowed": null,
+          "bankAlias": null,
+          "sourceId": "investment",
+          "accountOpeningDate": null,
+          "lastUpdateDate": null,
+          "externalParentId": null,
+          "state": {
+            "externalStateId": "Active",
+            "state": "Active"
+          },
+          "currency": "EUR",
+          "amountInArrear": null,
+          "overdueSince": null,
+          "interestDetails": null,
+          "debitCardsItems": [],
+          "usersPreferences": [],
+          "subscriptions": [],
+          "additions": {},
+          "bookedBalance": null,
+          "availableBalance": null,
+          "reservedAmount": null,
+          "creditLimit": null,
+          "urgentTransferAllowed": null,
+          "bankBranchCode": null,
+          "accountInterestRate": null,
+          "valueDateBalance": null,
+          "creditLimitUsage": null,
+          "creditLimitInterestRate": null,
+          "creditLimitExpiryDate": null,
+          "accruedInterest": null,
+          "accountHolderName": null,
+          "startDate": null,
+          "minimumRequiredBalance": null,
+          "accountHolderAddressLine1": null,
+          "accountHolderAddressLine2": null,
+          "accountHolderStreetName": null,
+          "town": null,
+          "postCode": null,
+          "countrySubDivision": null,
+          "creditAccount": true,
+          "debitAccount": true,
+          "accountHolderCountry": "NL",
+          "termUnit": null,
+          "termNumber": null,
+          "maturityDate": null,
+          "maturityAmount": null,
+          "autoRenewalIndicator": null,
+          "interestPaymentFrequencyUnit": null,
+          "interestPaymentFrequencyNumber": null,
+          "principalAmount": null,
+          "interestSettlementAccount": null,
+          "number": null,
+          "cardNumber": null,
+          "validThru": null,
+          "creditCardAccountNumber": null,
+          "applicableInterestRate": null,
+          "remainingCredit": null,
+          "outstandingPayment": null,
+          "minimumPayment": null,
+          "minimumPaymentDueDate": null,
+          "productNumber": null,
+          "outstandingPrincipalAmount": null,
+          "monthlyInstalmentAmount": null,
+          "BIC": "CITIUS33",
+          "BBAN": "rndwlt-eph-641532551",
+          "IBAN": null
+        },
+        {
+          "internalId": "caa6f3cc-7948-4eff-b949-2bd6023a273d",
+          "externalId": "rndwlt-eph-4b06d3e9-b0a1-4f2d-8e4b-c5d6e7f8a9b0",
+          "productTypeExternalId": "robo-advisor",
+          "legalEntities": [
+            {
+              "internalId": null,
+              "externalId": "rndwlt-eph-naomi",
+              "relation": null,
+              "additions": {}
+            }
+          ],
+          "name": "My safety net",
+          "externalTransferAllowed": null,
+          "crossCurrencyAllowed": null,
+          "bankAlias": null,
+          "sourceId": "investment",
+          "accountOpeningDate": null,
+          "lastUpdateDate": null,
+          "externalParentId": null,
+          "state": {
+            "externalStateId": "Active",
+            "state": "Active"
+          },
+          "currency": "EUR",
+          "amountInArrear": null,
+          "overdueSince": null,
+          "interestDetails": null,
+          "debitCardsItems": [],
+          "usersPreferences": [],
+          "subscriptions": [],
+          "additions": {},
+          "bookedBalance": null,
+          "availableBalance": null,
+          "reservedAmount": null,
+          "creditLimit": null,
+          "urgentTransferAllowed": null,
+          "bankBranchCode": null,
+          "accountInterestRate": null,
+          "valueDateBalance": null,
+          "creditLimitUsage": null,
+          "creditLimitInterestRate": null,
+          "creditLimitExpiryDate": null,
+          "accruedInterest": null,
+          "accountHolderName": null,
+          "startDate": null,
+          "minimumRequiredBalance": null,
+          "accountHolderAddressLine1": null,
+          "accountHolderAddressLine2": null,
+          "accountHolderStreetName": null,
+          "town": null,
+          "postCode": null,
+          "countrySubDivision": null,
+          "creditAccount": true,
+          "debitAccount": true,
+          "accountHolderCountry": "NL",
+          "termUnit": null,
+          "termNumber": null,
+          "maturityDate": null,
+          "maturityAmount": null,
+          "autoRenewalIndicator": null,
+          "interestPaymentFrequencyUnit": null,
+          "interestPaymentFrequencyNumber": null,
+          "principalAmount": null,
+          "interestSettlementAccount": null,
+          "number": null,
+          "cardNumber": null,
+          "validThru": null,
+          "creditCardAccountNumber": null,
+          "applicableInterestRate": null,
+          "remainingCredit": null,
+          "outstandingPayment": null,
+          "minimumPayment": null,
+          "minimumPaymentDueDate": null,
+          "productNumber": null,
+          "outstandingPrincipalAmount": null,
+          "monthlyInstalmentAmount": null,
+          "BIC": "CITIUS33",
+          "BBAN": "rndwlt-eph-641532561",
+          "IBAN": null
+        },
+        {
+          "internalId": "f6bd7aa1-bb74-4fa4-8320-cfbf2b4b3b38",
+          "externalId": "rndwlt-eph-4b06dfa7-c8b9-4d0e-8a1b-2c3d4e5f6a7b",
+          "productTypeExternalId": "savings-plan",
+          "legalEntities": [
+            {
+              "internalId": null,
+              "externalId": "rndwlt-eph-naomi",
+              "relation": null,
+              "additions": {}
+            }
+          ],
+          "name": "My Savings Plan Portfolio",
+          "externalTransferAllowed": null,
+          "crossCurrencyAllowed": null,
+          "bankAlias": null,
+          "sourceId": "investment",
+          "accountOpeningDate": null,
+          "lastUpdateDate": null,
+          "externalParentId": null,
+          "state": {
+            "externalStateId": "Active",
+            "state": "Active"
+          },
+          "currency": "EUR",
+          "amountInArrear": null,
+          "overdueSince": null,
+          "interestDetails": null,
+          "debitCardsItems": [],
+          "usersPreferences": [],
+          "subscriptions": [],
+          "additions": {},
+          "bookedBalance": null,
+          "availableBalance": null,
+          "reservedAmount": null,
+          "creditLimit": null,
+          "urgentTransferAllowed": null,
+          "bankBranchCode": null,
+          "accountInterestRate": null,
+          "valueDateBalance": null,
+          "creditLimitUsage": null,
+          "creditLimitInterestRate": null,
+          "creditLimitExpiryDate": null,
+          "accruedInterest": null,
+          "accountHolderName": null,
+          "startDate": null,
+          "minimumRequiredBalance": null,
+          "accountHolderAddressLine1": null,
+          "accountHolderAddressLine2": null,
+          "accountHolderStreetName": null,
+          "town": null,
+          "postCode": null,
+          "countrySubDivision": null,
+          "creditAccount": true,
+          "debitAccount": true,
+          "accountHolderCountry": "NL",
+          "termUnit": null,
+          "termNumber": null,
+          "maturityDate": null,
+          "maturityAmount": null,
+          "autoRenewalIndicator": null,
+          "interestPaymentFrequencyUnit": null,
+          "interestPaymentFrequencyNumber": null,
+          "principalAmount": null,
+          "interestSettlementAccount": null,
+          "number": null,
+          "cardNumber": null,
+          "validThru": null,
+          "creditCardAccountNumber": null,
+          "applicableInterestRate": null,
+          "remainingCredit": null,
+          "outstandingPayment": null,
+          "minimumPayment": null,
+          "minimumPaymentDueDate": null,
+          "productNumber": null,
+          "outstandingPrincipalAmount": null,
+          "monthlyInstalmentAmount": null,
+          "BIC": "CITIUS33",
+          "BBAN": "rndwlt-eph-641532571",
+          "IBAN": null
+        }
+      ],
+      "customDataGroupItems": [],
+      "serviceAgreement": {
+        "internalId": "8a8481529a0fffd9019a100427c60052",
+        "externalId": "rndwlt-eph-sa_naomi",
+        "name": "Naomi",
+        "description": "Master Service Agreement for Naomi",
+        "purpose": null,
+        "participants": [
+          {
+            "internalId": null,
+            "externalId": "rndwlt-eph-naomi",
+            "sharingUsers": true,
+            "sharingAccounts": true,
+            "admins": [
+              "rndwlt-eph-naomi"
+            ],
+            "users": [],
+            "action": null,
+            "limit": null
+          }
+        ],
+        "validFromDate": null,
+        "validFromTime": null,
+        "validUntilDate": null,
+        "validUntilTime": null,
+        "status": "ENABLED",
+        "customerCategory": null,
+        "isMaster": true,
+        "regularUserAps": null,
+        "adminUserAps": null,
+        "jobRoles": [],
+        "creatorLegalEntity": "8a8481529a0fffd9019a10030a8d0005",
+        "limit": null,
+        "contacts": [],
+        "additions": {}
+      },
+      "assignedPermissions": []
+    }
+  ],
+  "additions": {}
+}

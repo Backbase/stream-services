@@ -1,9 +1,12 @@
 package com.backbase.stream.configuration;
 
 import com.backbase.investment.api.service.v1.ClientApi;
+import com.backbase.investment.api.service.v1.InvestmentProductsApi;
+import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.investment.saga.InvestmentSaga;
 import com.backbase.stream.investment.service.InvestmentClientService;
+import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,8 +24,13 @@ import org.springframework.context.annotation.Import;
 public class InvestmentServiceConfiguration {
 
     @Bean
-    public InvestmentSaga investmentSaga(ClientApi clientApi, InvestmentSagaConfigurationProperties properties) {
-        return new InvestmentSaga(new InvestmentClientService(clientApi), properties);
+    public InvestmentSaga investmentSaga(ClientApi clientApi, PortfolioApi portfolioApi,
+        InvestmentProductsApi investmentProductsApi,
+        InvestmentSagaConfigurationProperties properties) {
+        return new InvestmentSaga(
+            new InvestmentClientService(clientApi),
+            new InvestmentPortfolioService(investmentProductsApi, portfolioApi),
+            properties);
     }
 
 }

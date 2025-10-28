@@ -1,0 +1,22 @@
+{
+  "saName": "Financial Institute Head Office",
+  "saExternalId": "rndwlt-eph-financial-institute-head-office",
+  "clientUsers": [
+    {
+      "internalUserId": "affa39c6-ee9a-45b6-80da-925a04be9c21",
+      "externalUserId": "rndwlt-eph-BIANDAHO",
+      "legalEntityExternalId": "rndwlt-eph-financial-institute-head-office"
+    },
+    {
+      "internalUserId": "459a0b12-00b3-4bda-8ff8-c9d17537c6e8",
+      "externalUserId": "rndwlt-eph-UBIANDAHO",
+      "legalEntityExternalId": "rndwlt-eph-financial-institute-head-office"
+    }
+  ],
+  "clientsByLeExternalId": {
+    "rndwlt-eph-financial-institute-head-office": [
+      null,
+      null
+    ]
+  }
+}
