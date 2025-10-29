@@ -29,8 +29,7 @@ public class InvestmentServiceConfiguration {
         InvestmentSagaConfigurationProperties properties) {
         return new InvestmentSaga(
             new InvestmentClientService(clientApi),
-            new InvestmentPortfolioService(investmentProductsApi, portfolioApi),
-            properties);
+            new InvestmentPortfolioService(investmentProductsApi, portfolioApi));
     }
 
 }
