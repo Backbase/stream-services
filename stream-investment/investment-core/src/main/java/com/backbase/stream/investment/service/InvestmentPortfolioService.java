@@ -11,6 +11,7 @@ import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdate
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
 import com.backbase.stream.investment.InvestmentArrangement;
+import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,7 @@ public class InvestmentPortfolioService {
         Objects.requireNonNull(investmentArrangement, "InvestmentArrangement must not be null");
 
         PortfolioProduct portfolioProduct = new PortfolioProduct(null, null, null, ProductTypeEnum.SELF_TRADING);
+
         log.info("Upserting investment product: productType={}, arrangementName={}",
             portfolioProduct.getProductType(), investmentArrangement.getName());
 
@@ -126,11 +128,12 @@ public class InvestmentPortfolioService {
      */
     private Mono<PortfolioList> listExistingPortfolios(String externalId) {
         return portfolioApi.listPortfolios(null, null, null,
-                null, externalId, null, null, null,
+                null, externalId, null, null, 1,
                 null, null, null, null)
             .doOnSuccess(plist -> log.debug(
                 "List portfolios query completed: externalId={}, found={} results",
                 externalId,
+                // only one
                 plist != null ? plist.getResults().size() : 0))
             .doOnError(throwable -> log.error(
                 "Failed to list existing portfolios: externalId={}", externalId, throwable))
@@ -166,8 +169,9 @@ public class InvestmentPortfolioService {
             .externalId(investmentArrangement.getExternalId())
             .name(investmentArrangement.getName())
             .clients(associatedClients)
-            .currency(DEFAULT_CURRENCY)
-            .status(StatusA3dEnum.ACTIVE);
+            .currency(Optional.ofNullable(investmentArrangement.getCurrency()).orElse(DEFAULT_CURRENCY))
+            .status(StatusA3dEnum.ACTIVE)
+            .activated(OffsetDateTime.now().minusDays(1));
 
         return portfolioApi.createPortfolio(request, null, null, null)
             .doOnSuccess(created -> log.info(
@@ -236,11 +240,14 @@ public class InvestmentPortfolioService {
      * @return Mono emitting the first matching product, or empty if no match found
      */
     private Mono<PortfolioProduct> listExistingPortfolioProducts(String productType) {
-        return productsApi.listPortfolioProducts(null, null, null, null, null, null,
-                null, null, null, null, List.of(productType))
+        //?ordering=-model_portfolio__risk_level&model_portfolio_risk_lower=25&limit=1
+        // 25 imagine a default
+        return productsApi.listPortfolioProducts(null, null, null, 1, null, null,
+                25, null, null, "-model_portfolio__risk_level", List.of(productType))
             .doOnSuccess(products -> log.debug(
                 "List portfolio products query completed: productType={}, found={} results",
                 productType,
+                // check by risk level or first
                 products != null ? products.getResults().size() : 0))
             .doOnError(throwable -> log.error(
                 "Failed to list existing portfolio products: productType={}", productType, throwable))

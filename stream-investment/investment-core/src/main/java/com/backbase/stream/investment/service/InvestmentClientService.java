@@ -93,14 +93,14 @@ public class InvestmentClientService {
      * @return Mono emitting the first matching client, or empty if no match found
      */
     private Mono<OASClient> listExistingClients(String userExternalId, String internalUserId) {
-        Map<String, Object> extraDataFilter = Map.of(EXTRA_DATA_FILTER_KEY, userExternalId);
-
         return clientApi.listClients(
-                List.of(), null, extraDataFilter, null, null,
-                internalUserId, null, null, null, null, null, List.of())
+                List.of(), null, null, null, null,
+                internalUserId, null, 1, null, null, null, null)
+            .filter(Objects::nonNull)
             .doOnSuccess(clientsResponse -> log.debug(
-                "List clients query completed: userExternalId={}, found={} results",
-                userExternalId,
+                "List clients query completed: internalUserId={}, found={} results",
+                internalUserId,
+                // only 1 has to be
                 clientsResponse != null ? clientsResponse.getResults().size() : 0))
             .doOnError(throwable -> log.error(
                 "Failed to list existing clients: userExternalId={}, internalUserId={}",
