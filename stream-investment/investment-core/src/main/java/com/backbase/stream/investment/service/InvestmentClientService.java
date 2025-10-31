@@ -7,7 +7,6 @@ import com.backbase.investment.api.service.v1.model.OASClientUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PatchedOASClientUpdateRequest;
 import com.backbase.investment.api.service.v1.model.Status836Enum;
 import com.backbase.stream.investment.ClientUser;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;

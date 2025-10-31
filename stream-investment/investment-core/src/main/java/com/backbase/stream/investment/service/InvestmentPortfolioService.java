@@ -5,6 +5,7 @@ import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.investment.api.service.v1.model.IntegrationPortfolioCreateRequest;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioProductCreateUpdateRequest;
+import com.backbase.investment.api.service.v1.model.PatchedPortfolioUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdateRequest;
@@ -95,13 +96,13 @@ public class InvestmentPortfolioService {
      * <p>The method resolves client UUIDs by mapping legal entity external IDs
      * from the arrangement to client UUIDs via the provided lookup map.
      *
-     * @param investmentArrangement    the investment arrangement containing portfolio details (must not be null)
-     * @param clientsByLeExternalId    map of legal entity external ID to client UUIDs for associations
+     * @param investmentArrangement the investment arrangement containing portfolio details (must not be null)
+     * @param clientsByLeExternalId map of legal entity external ID to client UUIDs for associations
      * @return Mono emitting the created or existing portfolio
      * @throws NullPointerException if investmentArrangement is null
      */
     public Mono<PortfolioList> upsertInvestmentPortfolios(InvestmentArrangement investmentArrangement,
-                                                          Map<String, List<UUID>> clientsByLeExternalId) {
+        Map<String, List<UUID>> clientsByLeExternalId) {
         Objects.requireNonNull(investmentArrangement, "InvestmentArrangement must not be null");
 
         String externalId = investmentArrangement.getExternalId();
@@ -110,6 +111,7 @@ public class InvestmentPortfolioService {
         log.info("Upserting investment portfolio: externalId={}, name={}", externalId, arrangementName);
 
         return listExistingPortfolios(externalId)
+            .flatMap(p -> patchPortfolio(p, investmentArrangement, clientsByLeExternalId))
             .switchIfEmpty(createNewPortfolio(investmentArrangement, clientsByLeExternalId))
             .doOnSuccess(portfolio -> log.info(
                 "Successfully upserted investment portfolio: externalId={}, name={}, portfolioUuid={}",
@@ -118,6 +120,45 @@ public class InvestmentPortfolioService {
             .doOnError(throwable -> log.error(
                 "Failed to upsert investment portfolio: externalId={}, name={}",
                 externalId, arrangementName, throwable));
+    }
+
+    private Mono<PortfolioList> patchPortfolio(
+        PortfolioList existingProduct, InvestmentArrangement investmentArrangement, Map<String, List<UUID>> clientsByLeExternalId) {
+
+        String uuid = existingProduct.getUuid().toString();
+        List<UUID> associatedClients = getClients(investmentArrangement, clientsByLeExternalId);
+
+        PatchedPortfolioUpdateRequest patchedPortfolioUpdateRequest = new PatchedPortfolioUpdateRequest()
+            .product(investmentArrangement.getInvestmentProductId())
+            .externalId(investmentArrangement.getExternalId())
+            .name(investmentArrangement.getName())
+            .clients(associatedClients)
+            .status(StatusA3dEnum.ACTIVE)
+            .activated(OffsetDateTime.now().minusDays(1));
+
+        log.debug("Attempting to patch existing portfolio: uuid={}, externalId={}",
+            uuid, investmentArrangement.getExternalId());
+
+        return portfolioApi.patchPortfolio(uuid, null, null, null, patchedPortfolioUpdateRequest)
+            .doOnSuccess(updated -> {
+                log.info("Successfully patched existing investment portfolio: uuid={}", updated.getUuid());
+                investmentArrangement.setInvestmentProductId(updated.getUuid());
+            })
+            .doOnError(throwable -> {
+                if (throwable instanceof WebClientResponseException ex) {
+                    log.warn(
+                        "PATCH portfolio failed (falling back to existing): uuid={}, status={}, body={}",
+                        uuid, ex.getStatusCode(), ex.getResponseBodyAsString());
+                } else {
+                    log.warn("PATCH portfolio failed (falling back to existing): uuid={}",
+                        uuid, throwable);
+                }
+            })
+            .onErrorResume(WebClientResponseException.class, ex -> {
+                log.info("Using existing portfolio data due to patch failure: uuid={}", uuid);
+                investmentArrangement.setInvestmentProductId(existingProduct.getUuid());
+                return Mono.just(existingProduct);
+            });
     }
 
     /**
@@ -142,6 +183,17 @@ public class InvestmentPortfolioService {
                     log.info("No existing investment portfolio found with externalId={}", externalId);
                     return Mono.empty();
                 }
+                int resultCount = plist.getResults().size();
+                if (resultCount > 1) {
+                    log.error("Data setup issue: Found {} portfolios with externalId={}, "
+                            + "expected exactly 1. Please review portfolios configuration.",
+                        resultCount, externalId);
+                    return Mono.error(new IllegalStateException(
+                        String.format("Data setup issue: Found %d portfolios with externalId=%s, "
+                                + "expected exactly 1. Please review portfolios configuration.",
+                            resultCount, externalId)));
+                }
+
                 PortfolioList existingPortfolio = plist.getResults().get(0);
                 log.info("Found existing investment portfolio: uuid={}, externalId={}",
                     existingPortfolio.getUuid(), externalId);
@@ -157,7 +209,7 @@ public class InvestmentPortfolioService {
      * @return Mono emitting the newly created portfolio
      */
     private Mono<PortfolioList> createNewPortfolio(InvestmentArrangement investmentArrangement,
-                                                   Map<String, List<UUID>> clientsByLeExternalId) {
+        Map<String, List<UUID>> clientsByLeExternalId) {
         List<UUID> associatedClients = getClients(investmentArrangement, clientsByLeExternalId);
 
         log.info("Creating new investment portfolio: externalId={}, name={}, clientCount={}",
@@ -192,7 +244,7 @@ public class InvestmentPortfolioService {
      * @return distinct list of client UUIDs associated with the arrangement's legal entities
      */
     private static List<UUID> getClients(InvestmentArrangement investmentArrangement,
-                                        Map<String, List<UUID>> clientsByLeExternalId) {
+        Map<String, List<UUID>> clientsByLeExternalId) {
         return investmentArrangement.getLegalEntityExternalIds().stream()
             .map(clientsByLeExternalId::get)
             .filter(Objects::nonNull)
@@ -218,7 +270,7 @@ public class InvestmentPortfolioService {
      * @return Mono emitting the created or updated portfolio product
      */
     private Mono<PortfolioProduct> upsertPortfolioProducts(InvestmentArrangement investmentArrangement,
-                                                           PortfolioProduct portfolioProduct) {
+        PortfolioProduct portfolioProduct) {
         String productType = portfolioProduct.getProductType().getValue();
 
         return listExistingPortfolioProducts(productType)
@@ -236,18 +288,19 @@ public class InvestmentPortfolioService {
     /**
      * Lists existing portfolio products by product type.
      *
+     * <p>This method validates that exactly zero or one product exists for the given type.
+     * If multiple products are found, it indicates a data setup issue and an exception is thrown.
+     *
      * @param productType the product type to search for
      * @return Mono emitting the first matching product, or empty if no match found
+     * @throws IllegalStateException if more than one product is found for the given type
      */
     private Mono<PortfolioProduct> listExistingPortfolioProducts(String productType) {
-        //?ordering=-model_portfolio__risk_level&model_portfolio_risk_lower=25&limit=1
-        // 25 imagine a default
-        return productsApi.listPortfolioProducts(null, null, null, 1, null, null,
+        return productsApi.listPortfolioProducts(null, null, null, 2, null, null,
                 25, null, null, "-model_portfolio__risk_level", List.of(productType))
             .doOnSuccess(products -> log.debug(
                 "List portfolio products query completed: productType={}, found={} results",
                 productType,
-                // check by risk level or first
                 products != null ? products.getResults().size() : 0))
             .doOnError(throwable -> log.error(
                 "Failed to list existing portfolio products: productType={}", productType, throwable))
@@ -256,6 +309,18 @@ public class InvestmentPortfolioService {
                     log.info("No existing investment product found with productType={}", productType);
                     return Mono.empty();
                 }
+
+                int resultCount = products.getResults().size();
+                if (resultCount > 1) {
+                    log.error("Data setup issue: Found {} portfolio products with productType={}, "
+                            + "expected exactly 1. Please review product configuration.",
+                        resultCount, productType);
+                    return Mono.error(new IllegalStateException(
+                        String.format("Data setup issue: Found %d portfolio products with productType=%s, "
+                                + "expected exactly 1. Please review product configuration.",
+                            resultCount, productType)));
+                }
+
                 PortfolioProduct existingProduct = products.getResults().get(0);
                 log.info("Found existing investment product: uuid={}, productType={}",
                     existingProduct.getUuid(), productType);
@@ -264,8 +329,8 @@ public class InvestmentPortfolioService {
     }
 
     /**
-     * Updates an existing portfolio product by patching it.
-     * Falls back to the original product if the patch operation fails.
+     * Updates an existing portfolio product by patching it. Falls back to the original product if the patch operation
+     * fails.
      *
      * @param existingProduct       the existing product to update
      * @param portfolioProduct      the template product containing desired values
@@ -273,8 +338,7 @@ public class InvestmentPortfolioService {
      * @return Mono emitting the updated product
      */
     private Mono<PortfolioProduct> updateExistingPortfolioProduct(PortfolioProduct existingProduct,
-                                                                  PortfolioProduct portfolioProduct,
-                                                                  InvestmentArrangement investmentArrangement) {
+        PortfolioProduct portfolioProduct, InvestmentArrangement investmentArrangement) {
         UUID productUuid = existingProduct.getUuid();
 
         PatchedPortfolioProductCreateUpdateRequest patch = new PatchedPortfolioProductCreateUpdateRequest()
@@ -318,7 +382,7 @@ public class InvestmentPortfolioService {
      * @return Mono emitting the newly created product
      */
     private Mono<PortfolioProduct> createNewPortfolioProduct(PortfolioProduct portfolioProduct,
-                                                             InvestmentArrangement investmentArrangement) {
+        InvestmentArrangement investmentArrangement) {
         String productType = portfolioProduct.getProductType().getValue();
 
         log.info("Creating new portfolio product: productType={}", productType);
