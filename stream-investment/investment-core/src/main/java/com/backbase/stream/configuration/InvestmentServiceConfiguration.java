@@ -1,6 +1,7 @@
 package com.backbase.stream.configuration;
 
 import com.backbase.investment.api.service.v1.ClientApi;
+import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
@@ -25,11 +26,11 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentSaga investmentSaga(ClientApi clientApi, PortfolioApi portfolioApi,
-        InvestmentProductsApi investmentProductsApi,
+        InvestmentProductsApi investmentProductsApi, FinancialAdviceApi financialAdviceApi,
         InvestmentSagaConfigurationProperties properties) {
         return new InvestmentSaga(
             new InvestmentClientService(clientApi),
-            new InvestmentPortfolioService(investmentProductsApi, portfolioApi));
+            new InvestmentPortfolioService(investmentProductsApi, portfolioApi, financialAdviceApi));
     }
 
 }

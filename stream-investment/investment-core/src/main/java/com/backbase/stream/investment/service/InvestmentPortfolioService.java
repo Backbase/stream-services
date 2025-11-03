@@ -5,6 +5,8 @@ import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.investment.api.service.v1.model.IntegrationPortfolioCreateRequest;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
+import com.backbase.investment.api.service.v1.model.OASModelPortfolioRequestDataRequest;
+import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
@@ -53,6 +55,7 @@ import reactor.core.publisher.Mono;
 public class InvestmentPortfolioService {
 
     private static final String DEFAULT_CURRENCY = "EUR";
+    private static final String MODEL_PORTFOLIO_ALLOCATION_ASSET = "model_portfolio.allocation.asset";
 
     private final InvestmentProductsApi productsApi;
     private final PortfolioApi portfolioApi;
@@ -306,7 +309,7 @@ public class InvestmentPortfolioService {
                 existingProduct, portfolioProduct, investmentArrangement))
             .switchIfEmpty(createNewPortfolioProduct(portfolioProduct, investmentArrangement))
             .doOnSuccess(product -> log.info(
-                "Successfully upserted portfolio product: uuid={}, productType={}, arrangementName={}",
+                "Successfully upserted portfolio product: arrangementName={}",
                 product.getUuid(), product.getProductType(), investmentArrangement.getName()))
             .doOnError(throwable -> log.error(
                 "Failed to upsert portfolio product: productType={}, arrangementName={}",
@@ -328,8 +331,9 @@ public class InvestmentPortfolioService {
         if (ProductTypeEnum.SELF_TRADING.getValue().equals(productType)) {
             modelPortfolioRiskLower = null;
         }
-        return productsApi.listPortfolioProducts(List.of("model_portfolio.allocation.asset"), null, null, 1, null, null,
-                modelPortfolioRiskLower, null, null, "-model_portfolio__risk_level", List.of(productType))
+        return productsApi.listPortfolioProducts(List.of(MODEL_PORTFOLIO_ALLOCATION_ASSET), null, null,
+                1, null, null, modelPortfolioRiskLower, null, null, "-model_portfolio__risk_level",
+                List.of(productType))
             .doOnSuccess(products -> log.debug(
                 "List portfolio products query completed: productType={}, found={} results",
                 productType,
@@ -384,7 +388,7 @@ public class InvestmentPortfolioService {
         log.debug("Attempting to patch existing portfolio product: uuid={}, productType={}",
             productUuid, portfolioProduct.getProductType());
 
-        return productsApi.patchPortfolioProduct(productUuid.toString(), List.of("model_portfolio.allocation.asset"),
+        return productsApi.patchPortfolioProduct(productUuid.toString(), List.of(MODEL_PORTFOLIO_ALLOCATION_ASSET),
                 null, null, patch)
             .doOnSuccess(updated -> {
                 log.info("Successfully patched existing investment product: uuid={}", updated.getUuid());
@@ -410,6 +414,12 @@ public class InvestmentPortfolioService {
     /**
      * Creates a new portfolio product.
      *
+     * <p>If the portfolio product has a model portfolio, this method will:
+     * <ol>
+     *   <li>First upsert the model portfolio via financialAdviceApi</li>
+     *   <li>Then create the portfolio product with the model portfolio UUID</li>
+     * </ol>
+     *
      * @param portfolioProduct      the portfolio product to create
      * @param investmentArrangement the arrangement to update with product UUID
      * @return Mono emitting the newly created product
@@ -417,25 +427,163 @@ public class InvestmentPortfolioService {
     private Mono<PortfolioProduct> createNewPortfolioProduct(PortfolioProduct portfolioProduct,
         InvestmentArrangement investmentArrangement) {
 
-        // add upsert for financialAdviceApi of portfolioProduct.getModelPortfolio()
+        String productType = portfolioProduct.getProductType().getValue();
+        InvestorModelPortfolio modelPortfolio = portfolioProduct.getModelPortfolio();
+
+        log.info("Creating new portfolio product: productType={}, hasModelPortfolio={}",
+            productType, modelPortfolio != null);
+
+        // If model portfolio exists, upsert it first
+        if (modelPortfolio != null) {
+            return upsertModelPortfolio(modelPortfolio)
+                .flatMap(upsertedModel -> createPortfolioProductWithModel(
+                    portfolioProduct, upsertedModel.getUuid(), investmentArrangement));
+        }
+
+        // No model portfolio - create product directly
+        return createPortfolioProductWithModel(portfolioProduct, null, investmentArrangement);
+    }
+
+    /**
+     * Upserts a model portfolio via the Financial Advice API.
+     *
+     * <p>This method implements an upsert pattern:
+     * <ol>
+     *   <li>Searches for existing model portfolios by name and risk level</li>
+     *   <li>If found, returns the existing model portfolio</li>
+     *   <li>If not found, creates a new model portfolio</li>
+     * </ol>
+     *
+     * @param modelPortfolio the model portfolio to upsert (must not be null)
+     * @return Mono emitting the created or existing model portfolio
+     * @throws NullPointerException if modelPortfolio is null
+     */
+    private Mono<OASModelPortfolioResponse> upsertModelPortfolio(InvestorModelPortfolio modelPortfolio) {
+        Objects.requireNonNull(modelPortfolio, "InvestorModelPortfolio must not be null");
+
+        String modelName = modelPortfolio.getName();
+        Integer riskLevel = modelPortfolio.getRiskLevel();
+
+        log.info("Upserting model portfolio: name={}, riskLevel={}", modelName, riskLevel);
+
+        return listExistingModelPortfolios(modelName, riskLevel)
+            .switchIfEmpty(createNewModelPortfolio(modelPortfolio))
+            .doOnSuccess(upserted -> log.info(
+                "Successfully upserted model portfolio: uuid={}, name={}, riskLevel={}",
+                upserted.getUuid(), upserted.getName(), upserted.getRiskLevel()))
+            .doOnError(throwable -> log.error(
+                "Failed to upsert model portfolio: name={}, riskLevel={}",
+                modelName, riskLevel, throwable));
+    }
+
+    /**
+     * Lists existing model portfolios by name and risk level.
+     *
+     * @param name      the model portfolio name to search for
+     * @param riskLevel the risk level to filter by
+     * @return Mono emitting the first matching model portfolio, or empty if no match found
+     */
+    private Mono<OASModelPortfolioResponse> listExistingModelPortfolios(String name, Integer riskLevel) {
+        return financialAdviceApi.listModelPortfolio(
+                List.of("allocation.asset"), null, null, 1, name, null, null, null, riskLevel, null)
+            .doOnSuccess(models -> log.debug(
+                "List model portfolios query completed: name={}, riskLevel={}, found={} results",
+                name, riskLevel, models != null ? models.getResults().size() : 0))
+            .doOnError(throwable -> log.error(
+                "Failed to list existing model portfolios: name={}, riskLevel={}",
+                name, riskLevel, throwable))
+            .flatMap(models -> {
+                if (Objects.isNull(models) || CollectionUtils.isEmpty(models.getResults())) {
+                    log.info("No existing model portfolio found with name={}, riskLevel={}", name, riskLevel);
+                    return Mono.empty();
+                }
+
+                int resultCount = models.getResults().size();
+                if (resultCount > 1) {
+                    log.warn("Found {} model portfolios with name={} and riskLevel={}, using first one",
+                        resultCount, name, riskLevel);
+                }
+
+                OASModelPortfolioResponse existingModel = models.getResults().get(0);
+                log.info("Found existing model portfolio: uuid={}, name={}, riskLevel={}",
+                    existingModel.getUuid(), name, riskLevel);
+                return Mono.just(existingModel);
+            });
+    }
+
+    /**
+     * Creates a new model portfolio via the Financial Advice API.
+     *
+     * @param modelPortfolio the model portfolio to create
+     * @return Mono emitting the newly created model portfolio
+     */
+    private Mono<OASModelPortfolioResponse> createNewModelPortfolio(InvestorModelPortfolio modelPortfolio) {
+
+        log.info("Creating new model portfolio: name={}, riskLevel={}",
+            modelPortfolio.getName(), modelPortfolio.getRiskLevel());
+
+        OASModelPortfolioRequestDataRequest data = new OASModelPortfolioRequestDataRequest();
+        data.cashWeight(modelPortfolio.getCashWeight());
+        data.description(modelPortfolio.getDescription());
+        return financialAdviceApi.createModelPortfolio(null, null, null,
+                data, null)
+            .doOnSuccess(created -> log.info(
+                "Successfully created model portfolio: uuid={}, name={}, riskLevel={}",
+                created.getUuid(), created.getName(), created.getRiskLevel()))
+            .doOnError(throwable -> logModelPortfolioCreationError(
+                modelPortfolio.getName(), modelPortfolio.getRiskLevel(), throwable));
+    }
+
+    /**
+     * Creates a portfolio product with an optional model portfolio UUID.
+     *
+     * @param portfolioProduct      the portfolio product template
+     * @param modelPortfolioUuid    the UUID of the model portfolio (can be null)
+     * @param investmentArrangement the arrangement to update with product UUID
+     * @return Mono emitting the newly created portfolio product
+     */
+    private Mono<PortfolioProduct> createPortfolioProductWithModel(PortfolioProduct portfolioProduct,
+        UUID modelPortfolioUuid, InvestmentArrangement investmentArrangement) {
 
         String productType = portfolioProduct.getProductType().getValue();
 
-        log.info("Creating new portfolio product: productType={}", productType);
+        log.info("Creating portfolio product: productType={}, modelPortfolioUuid={}",
+            productType, modelPortfolioUuid);
 
         PortfolioProductCreateUpdateRequest request = new PortfolioProductCreateUpdateRequest()
             .adviceEngine(portfolioProduct.getAdviceEngine())
-//            .modelPortfolio(portfolioProduct.getModelPortfolio())
+            .modelPortfolio(modelPortfolioUuid)
             .productType(portfolioProduct.getProductType());
 
-        return productsApi.createPortfolioProduct(request, List.of("model_portfolio.allocation.asset"), null, null)
+        return productsApi.createPortfolioProduct(request, List.of(MODEL_PORTFOLIO_ALLOCATION_ASSET), null, null)
             .doOnSuccess(created -> {
-                log.info("Successfully created new portfolio product: uuid={}, productType={}",
-                    created.getUuid(), created.getProductType());
+                log.info("Successfully created portfolio product: uuid={}, productType={}, modelPortfolio={}",
+                    created.getUuid(), created.getProductType(), modelPortfolioUuid);
                 investmentArrangement.setInvestmentProductId(created.getUuid());
             })
             .doOnError(throwable -> logPortfolioProductCreationError(productType, throwable));
     }
+
+    /**
+     * Logs model portfolio creation errors with detailed information about the failure.
+     *
+     * <p>Provides enhanced error context for WebClient exceptions including
+     * HTTP status code and response body.
+     *
+     * @param name      the name of the model portfolio being created
+     * @param riskLevel the risk level of the model portfolio being created
+     * @param throwable the exception that occurred during creation
+     */
+    private void logModelPortfolioCreationError(String name, Integer riskLevel, Throwable throwable) {
+        if (throwable instanceof WebClientResponseException ex) {
+            log.error("Failed to create model portfolio: name={}, riskLevel={}, status={}, body={}",
+                name, riskLevel, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
+        } else {
+            log.error("Failed to create model portfolio: name={}, riskLevel={}",
+                name, riskLevel, throwable);
+        }
+    }
+
 
     /**
      * Logs portfolio creation errors with detailed information about the failure.
