@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
+import com.backbase.dbs.transaction.api.service.v3.TransactionPresentationServiceApi;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.ProductCompletedEvent;
 import com.backbase.stream.compositions.paymentorder.client.PaymentOrderCompositionApi;
 import com.backbase.stream.compositions.paymentorder.client.model.PaymentOrderIngestionResponse;
