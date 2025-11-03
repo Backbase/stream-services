@@ -1,5 +1,6 @@
 package com.backbase.stream.investment.service;
 
+import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.investment.api.service.v1.model.IntegrationPortfolioCreateRequest;
@@ -13,6 +14,7 @@ import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
 import com.backbase.stream.investment.InvestmentArrangement;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +56,7 @@ public class InvestmentPortfolioService {
 
     private final InvestmentProductsApi productsApi;
     private final PortfolioApi portfolioApi;
+    private final FinancialAdviceApi financialAdviceApi;
 
     /**
      * Creates or updates an investment product (portfolio product) for the given arrangement.
@@ -74,7 +77,31 @@ public class InvestmentPortfolioService {
     public Mono<PortfolioProduct> upsertInvestmentProducts(InvestmentArrangement investmentArrangement) {
         Objects.requireNonNull(investmentArrangement, "InvestmentArrangement must not be null");
 
-        PortfolioProduct portfolioProduct = new PortfolioProduct(null, null, null, ProductTypeEnum.SELF_TRADING);
+        String productTypeExternalId = investmentArrangement.getProductTypeExternalId();
+
+        ProductTypeEnum productType = Arrays.stream(ProductTypeEnum.values())
+            .filter(pt -> productTypeExternalId.equalsIgnoreCase(pt.getValue()))
+            .findFirst().orElse(null);
+        if (productType == null) {
+            log.error("Data setup issue: Investment does not support type {}", productTypeExternalId);
+            return Mono.error(new IllegalStateException(
+                String.format("Data setup issue: Investment does not support type=%s",
+                    productTypeExternalId)));
+        }
+        InvestorModelPortfolio portfolioModel = null;
+        String adviceEngine = null;
+        if (productType != ProductTypeEnum.SELF_TRADING) {
+            adviceEngine = "model_portfolio";
+            if (ProductTypeEnum.ROBO_ADVISOR == productType) {
+                portfolioModel = new InvestorModelPortfolio(null, "test " + investmentArrangement.getName(), 0.03, 8,
+                    List.of(), null);
+            }
+            if (ProductTypeEnum.SAVINGS_PLAN == productType) {
+                portfolioModel = new InvestorModelPortfolio(null, "test " + investmentArrangement.getName(), 0.0, 8,
+                    List.of(), null);
+            }
+        }
+        PortfolioProduct portfolioProduct = new PortfolioProduct(null, adviceEngine, portfolioModel, productType);
 
         log.info("Upserting investment product: productType={}, arrangementName={}",
             portfolioProduct.getProductType(), investmentArrangement.getName());
@@ -123,7 +150,8 @@ public class InvestmentPortfolioService {
     }
 
     private Mono<PortfolioList> patchPortfolio(
-        PortfolioList existingProduct, InvestmentArrangement investmentArrangement, Map<String, List<UUID>> clientsByLeExternalId) {
+        PortfolioList existingProduct, InvestmentArrangement investmentArrangement,
+        Map<String, List<UUID>> clientsByLeExternalId) {
 
         String uuid = existingProduct.getUuid().toString();
         List<UUID> associatedClients = getClients(investmentArrangement, clientsByLeExternalId);
@@ -296,8 +324,12 @@ public class InvestmentPortfolioService {
      * @throws IllegalStateException if more than one product is found for the given type
      */
     private Mono<PortfolioProduct> listExistingPortfolioProducts(String productType) {
-        return productsApi.listPortfolioProducts(null, null, null, 2, null, null,
-                25, null, null, "-model_portfolio__risk_level", List.of(productType))
+        Integer modelPortfolioRiskLower = 25;
+        if (ProductTypeEnum.SELF_TRADING.getValue().equals(productType)) {
+            modelPortfolioRiskLower = null;
+        }
+        return productsApi.listPortfolioProducts(List.of("model_portfolio.allocation.asset"), null, null, 1, null, null,
+                modelPortfolioRiskLower, null, null, "-model_portfolio__risk_level", List.of(productType))
             .doOnSuccess(products -> log.debug(
                 "List portfolio products query completed: productType={}, found={} results",
                 productType,
@@ -352,7 +384,8 @@ public class InvestmentPortfolioService {
         log.debug("Attempting to patch existing portfolio product: uuid={}, productType={}",
             productUuid, portfolioProduct.getProductType());
 
-        return productsApi.patchPortfolioProduct(productUuid.toString(), null, null, null, patch)
+        return productsApi.patchPortfolioProduct(productUuid.toString(), List.of("model_portfolio.allocation.asset"),
+                null, null, patch)
             .doOnSuccess(updated -> {
                 log.info("Successfully patched existing investment product: uuid={}", updated.getUuid());
                 investmentArrangement.setInvestmentProductId(updated.getUuid());
@@ -383,14 +416,19 @@ public class InvestmentPortfolioService {
      */
     private Mono<PortfolioProduct> createNewPortfolioProduct(PortfolioProduct portfolioProduct,
         InvestmentArrangement investmentArrangement) {
+
+        // add upsert for financialAdviceApi of portfolioProduct.getModelPortfolio()
+
         String productType = portfolioProduct.getProductType().getValue();
 
         log.info("Creating new portfolio product: productType={}", productType);
 
         PortfolioProductCreateUpdateRequest request = new PortfolioProductCreateUpdateRequest()
+            .adviceEngine(portfolioProduct.getAdviceEngine())
+//            .modelPortfolio(portfolioProduct.getModelPortfolio())
             .productType(portfolioProduct.getProductType());
 
-        return productsApi.createPortfolioProduct(request, null, null, null)
+        return productsApi.createPortfolioProduct(request, List.of("model_portfolio.allocation.asset"), null, null)
             .doOnSuccess(created -> {
                 log.info("Successfully created new portfolio product: uuid={}, productType={}",
                     created.getUuid(), created.getProductType());
