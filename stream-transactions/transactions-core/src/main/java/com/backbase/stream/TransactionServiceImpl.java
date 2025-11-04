@@ -92,38 +92,38 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Flux<TransactionItem> getTransactions(TransactionsQuery transactionsQuery) {
         return transactionPresentationServiceApi.getTransactions(
-            transactionsQuery.getBookingDateGreaterThan(), // 1. String bookingDateGreaterThan
-            transactionsQuery.getBookingDateLessThan(),    // 2. String bookingDateLessThan
-            null,                                         // 3. String xTransactionsUserId
-            null,                                         // 4. String xTransactionsInternalUserId (NEW in v3)
-            null,                                         // 5. String xTransactionsServiceAgreementId
-            transactionsQuery.getAmountGreaterThan(),    // 6. BigDecimal amountGreaterThan
-            transactionsQuery.getAmountLessThan(),        // 7. BigDecimal amountLessThan
-            transactionsQuery.getTypes(),                  // 8. List<String> types
-            transactionsQuery.getDescription(),           // 9. String description
-            transactionsQuery.getReference(),              // 10. String reference
-            transactionsQuery.getTypeGroups(),             // 11. List<String> typeGroups
-            transactionsQuery.getCounterPartyName(),      // 12. String counterPartyName
-            transactionsQuery.getCounterPartyAccountNumber(), // 13. String counterPartyAccountNumber
-            transactionsQuery.getCreditDebitIndicator(),  // 14. String creditDebitIndicator
-            transactionsQuery.getCategories(),            // 15. List<String> categories
-            transactionsQuery.getBillingStatus(),         // 16. String billingStatus
-            transactionsQuery.getState(),                 // 17. TransactionState state
-            transactionsQuery.getCurrency(),              // 18. String currency
-            transactionsQuery.getNotes(),                 // 19. Integer notes
-            transactionsQuery.getId(),                    // 20. String id
-            transactionsQuery.getArrangementId(),         // 21. String arrangementId
-            transactionsQuery.getArrangementsIds(),      // 22. List<String> arrangementsIds
-            transactionsQuery.getFromCheckSerialNumber(), // 23. Long fromCheckSerialNumber
-            transactionsQuery.getToCheckSerialNumber(),  // 24. Long toCheckSerialNumber
-            transactionsQuery.getCheckSerialNumbers(),   // 25. List<Long> checkSerialNumbers
-            transactionsQuery.getQuery(),                 // 26. String query
-            transactionsQuery.getFrom(),                 // 27. Integer from
-            transactionsQuery.getCursor(),                // 28. String cursor
-            transactionsQuery.getSize(),                  // 29. Integer size
-            transactionsQuery.getOrderBy(),               // 30. String orderBy
-            transactionsQuery.getDirection(),            // 31. String direction
-            transactionsQuery.getSecDirection());          // 32. String secDirection
+            transactionsQuery.getBookingDateGreaterThan(),
+            transactionsQuery.getBookingDateLessThan(),
+            null,
+            null,
+            null,
+            transactionsQuery.getAmountGreaterThan(),
+            transactionsQuery.getAmountLessThan(),
+            transactionsQuery.getTypes(),
+            transactionsQuery.getDescription(),
+            transactionsQuery.getReference(),
+            transactionsQuery.getTypeGroups(),
+            transactionsQuery.getCounterPartyName(),
+            transactionsQuery.getCounterPartyAccountNumber(),
+            transactionsQuery.getCreditDebitIndicator(),
+            transactionsQuery.getCategories(),
+            transactionsQuery.getBillingStatus(),
+            transactionsQuery.getState(),
+            transactionsQuery.getCurrency(),
+            transactionsQuery.getNotes(),
+            transactionsQuery.getId(),
+            transactionsQuery.getArrangementId(),
+            transactionsQuery.getArrangementsIds(),
+            transactionsQuery.getFromCheckSerialNumber(),
+            transactionsQuery.getToCheckSerialNumber(),
+            transactionsQuery.getCheckSerialNumbers(),
+            transactionsQuery.getQuery(),
+            transactionsQuery.getFrom(),
+            transactionsQuery.getCursor(),
+            transactionsQuery.getSize(),
+            transactionsQuery.getOrderBy(),
+            transactionsQuery.getDirection(),
+            transactionsQuery.getSecDirection());
     }
 
     /**

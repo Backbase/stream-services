@@ -197,7 +197,8 @@ public class TransactionIngestionServiceImpl implements TransactionIngestionServ
      * @return Ingested transactions
      */
     private Mono<List<TransactionsPostResponseBody>> sendToDbs(Flux<TransactionsPostRequestBody> transactions) {
-        return transactionService.processTransactions(transactions)
+        return transactions
+                .publish(transactionService::processTransactions)
                 .flatMapIterable(UnitOfWork::getStreamTasks)
                 .flatMapIterable(TransactionTask::getResponse)
                 .collectList();
