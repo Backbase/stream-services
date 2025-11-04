@@ -1,8 +1,9 @@
 package com.backbase.stream.investment.saga;
 
+import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.ClientCreateRequest;
+import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.Status836Enum;
-import com.backbase.stream.configuration.InvestmentSagaConfigurationProperties;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.service.InvestmentClientService;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -51,12 +53,16 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     public static final String INVESTMENT = "investment-client";
     public static final String OP_UPSERT = "upsert";
     public static final String RESULT_CREATED = "created";
+    public static final String RESULT_FAILED = "failed";
 
     private static final String INVESTMENT_PRODUCTS = "investment-products";
     private static final String INVESTMENT_PORTFOLIOS = "investment-portfolios";
+    private static final String PROCESSING_PREFIX = "Processing ";
+    private static final String UPSERTED_PREFIX = "Upserted ";
 
     private final InvestmentClientService clientService;
     private final InvestmentPortfolioService investmentPortfolioService;
+    private final AssetUniverseApi assetUniverseApi;
 
     /**
      * Executes the complete investment ingestion saga workflow.
@@ -79,7 +85,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         log.info("Starting investment saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
 
-        return upsertClients(streamTask)
+        return upsertAssets(streamTask)
+            .flatMap(this::upsertClients)
             .flatMap(this::upsertInvestmentProducts)
             .flatMap(this::upsertInvestmentPortfolios)
             .doOnSuccess(completedTask -> log.info(
@@ -88,15 +95,12 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .doOnError(throwable -> {
                 log.error("Failed to execute investment saga: taskId={}, taskName={}",
                     streamTask.getId(), streamTask.getName(), throwable);
-                streamTask.error(INVESTMENT, OP_UPSERT, "failed",
+                streamTask.error(INVESTMENT, OP_UPSERT, RESULT_FAILED,
                     streamTask.getName(), streamTask.getId(),
                     "Investment saga failed: " + throwable.getMessage());
                 streamTask.setState(State.FAILED);
             })
-            .onErrorResume(throwable -> {
-                // Return the task with failed state for proper error tracking
-                return Mono.just(streamTask);
-            });
+            .onErrorResume(throwable -> Mono.just(streamTask));
     }
 
     /**
@@ -119,8 +123,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
      * Upserts investment portfolios for all investment arrangements.
      *
      * <p>This method creates or updates portfolios and associates them with investment clients.
-     * Client associations are resolved from legal entity external IDs using the
-     * clientsByLeExternalId map populated in earlier steps.
+     * Client associations are resolved from legal entity external IDs using the clientsByLeExternalId map populated in
+     * earlier steps.
      *
      * <p>Each portfolio is created with:
      * <ul>
@@ -141,7 +145,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             investmentTask.getId(), arrangementCount, clientsByLeExternalId.size());
 
         investmentTask.info(INVESTMENT_PORTFOLIOS, OP_UPSERT, null, investmentTask.getName(),
-            investmentTask.getId(), "Processing " + arrangementCount + " investment portfolios");
+            investmentTask.getId(), PROCESSING_PREFIX + arrangementCount + " investment portfolios");
 
         return Flux.fromIterable(investmentTask.getData().getInvestmentArrangements())
             .flatMap(arrangement -> {
@@ -160,7 +164,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .map(portfolios -> {
                 investmentTask.info(INVESTMENT_PORTFOLIOS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
-                    "Upserted " + portfolios.size() + " investment portfolios");
+                    UPSERTED_PREFIX + portfolios.size() + " investment portfolios");
                 investmentTask.setState(State.COMPLETED);
 
                 log.info("Successfully upserted all investment portfolios: taskId={}, portfolioCount={}",
@@ -171,7 +175,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .doOnError(throwable -> {
                 log.error("Failed to upsert investment portfolios: taskId={}, arrangementCount={}",
                     investmentTask.getId(), arrangementCount, throwable);
-                investmentTask.error(INVESTMENT_PORTFOLIOS, OP_UPSERT, "failed",
+                investmentTask.error(INVESTMENT_PORTFOLIOS, OP_UPSERT, RESULT_FAILED,
                     investmentTask.getName(), investmentTask.getId(),
                     "Failed to upsert investment portfolios: " + throwable.getMessage());
                 investmentTask.setState(State.FAILED);
@@ -182,8 +186,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
      * Upserts investment products for all investment arrangements.
      *
      * <p>This method creates or updates portfolio products (typically SELF_TRADING type)
-     * for each investment arrangement. The products are created in parallel and collected
-     * into a list before proceeding to the next saga step.
+     * for each investment arrangement. The products are created in parallel and collected into a list before proceeding
+     * to the next saga step.
      *
      * <p>Product UUIDs are stored in the arrangement objects for use in portfolio creation.
      *
@@ -198,7 +202,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             investmentTask.getId(), arrangementCount);
 
         investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, null, investmentTask.getName(),
-            investmentTask.getId(), "Processing " + arrangementCount + " investment products");
+            investmentTask.getId(), PROCESSING_PREFIX + arrangementCount + " investment products");
 
         return Flux.fromIterable(data.getInvestmentArrangements())
             .flatMap(arrangement -> {
@@ -207,7 +211,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
                 return investmentPortfolioService.upsertInvestmentProducts(arrangement)
                     .doOnSuccess(product -> log.debug(
-                        "Successfully upserted investment product: productUuid={}, productType={}, arrangementExternalId={}",
+                        "Successfully upserted investment product: productUuid={}, productType={}, "
+                            + "arrangementExternalId={}",
                         product.getUuid(), product.getProductType(), arrangement.getExternalId()))
                     .doOnError(throwable -> log.error(
                         "Failed to upsert investment product: arrangementExternalId={}, arrangementName={}",
@@ -217,7 +222,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .map(products -> {
                 investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
-                    "Upserted " + products.size() + " investment products");
+                    UPSERTED_PREFIX + products.size() + " investment products");
 
                 log.info("Successfully upserted all investment products: taskId={}, productCount={}",
                     investmentTask.getId(), products.size());
@@ -227,10 +232,52 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .doOnError(throwable -> {
                 log.error("Failed to upsert investment products: taskId={}, arrangementCount={}",
                     investmentTask.getId(), arrangementCount, throwable);
-                investmentTask.error(INVESTMENT_PRODUCTS, OP_UPSERT, "failed",
+                investmentTask.error(INVESTMENT_PRODUCTS, OP_UPSERT, RESULT_FAILED,
                     investmentTask.getName(), investmentTask.getId(),
                     "Failed to upsert investment products: " + throwable.getMessage());
             });
+    }
+
+    /**
+     * Upserts investment assets via the Asset Universe API.
+     *
+     * <p>This method creates test assets in the investment system. Currently creates
+     * a single test ETF asset with predefined data.
+     *
+     * <p><b>Note:</b> This is a temporary implementation for testing purposes.
+     *
+     * @param streamTask the task containing investment data
+     * @return Mono emitting the task unchanged (assets are created as side effect)
+     */
+    private Mono<InvestmentTask> upsertAssets(InvestmentTask streamTask) {
+        log.info("Starting asset upsert: taskId={}", streamTask.getId());
+//        return Mono.just(streamTask);
+        OASAssetRequestDataRequest assetRequest = new OASAssetRequestDataRequest()
+            .name("Test Asset")
+            .isin("iaC11234501")
+            .ticker("NUC")
+            .market("XETR")
+            .currency("EUR");
+
+        log.debug("Creating asset: name={}, isin={}",
+            assetRequest.getName(), assetRequest.getIsin());
+
+        return assetUniverseApi.createAsset(assetRequest, null)
+            .doOnSuccess(createdAsset -> log.info(
+                "Successfully created asset: uuid={}, name={}, isin={}",
+                createdAsset.getUuid(), createdAsset.getName(), createdAsset.getIsin()))
+            .doOnError(throwable -> {
+                if (throwable instanceof WebClientResponseException ex) {
+                    log.error("Failed to create asset: name={}, isin={}, status={}, body={}",
+                        assetRequest.getName(), assetRequest.getIsin(),
+                        ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
+                } else {
+                    log.error("Failed to create asset: name={}, isin={}",
+                        assetRequest.getName(), assetRequest.getIsin(), throwable);
+                }
+            })
+            .then(Mono.just(streamTask))
+            .onErrorResume(a -> Mono.just(streamTask));
     }
 
     /**
@@ -263,7 +310,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         log.info("Starting client upsert: taskId={}, clientCount={}", streamTask.getId(), clientCount);
 
         streamTask.info(INVESTMENT, OP_UPSERT, null, streamTask.getName(), streamTask.getId(),
-            "Processing " + clientCount + " investment clients");
+            PROCESSING_PREFIX + clientCount + " investment clients");
         streamTask.setState(State.IN_PROGRESS);
 
         return Flux.fromIterable(investmentData.getClientUsers())
@@ -291,7 +338,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .map(clients -> {
                 streamTask.data(clients);
                 streamTask.info(INVESTMENT, OP_UPSERT, RESULT_CREATED, streamTask.getName(), streamTask.getId(),
-                    "Upserted " + clients.size() + " investment clients");
+                    UPSERTED_PREFIX + clients.size() + " investment clients");
                 streamTask.setState(State.COMPLETED);
 
                 log.info("Successfully upserted all clients: taskId={}, clientCount={}, successCount={}",
@@ -302,7 +349,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .doOnError(throwable -> {
                 log.error("Failed to upsert clients: taskId={}, clientCount={}",
                     streamTask.getId(), clientCount, throwable);
-                streamTask.error(INVESTMENT, OP_UPSERT, "failed",
+                streamTask.error(INVESTMENT, OP_UPSERT, RESULT_FAILED,
                     streamTask.getName(), streamTask.getId(),
                     "Failed to upsert investment clients: " + throwable.getMessage());
                 streamTask.setState(State.FAILED);
