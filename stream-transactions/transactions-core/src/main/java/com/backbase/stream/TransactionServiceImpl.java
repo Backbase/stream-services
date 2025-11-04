@@ -94,9 +94,9 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionPresentationServiceApi.getTransactions(
             transactionsQuery.getBookingDateGreaterThan(),
             transactionsQuery.getBookingDateLessThan(),
-            null,
-            null,
-            null,
+            null, // xTransactionsUserId
+            null, // xTransactionsInternalUserId
+            null, // xTransactionsServiceAgreementId
             transactionsQuery.getAmountGreaterThan(),
             transactionsQuery.getAmountLessThan(),
             transactionsQuery.getTypes(),
