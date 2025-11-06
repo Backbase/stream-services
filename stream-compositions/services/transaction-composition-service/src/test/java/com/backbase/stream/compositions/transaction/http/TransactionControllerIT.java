@@ -6,7 +6,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody;
 import com.backbase.stream.TransactionService;
 import com.backbase.stream.compositions.transaction.api.model.TransactionPullIngestionRequest;
 import com.backbase.stream.compositions.transaction.api.model.TransactionPushIngestionRequest;
@@ -88,7 +88,7 @@ class TransactionControllerIT extends IntegrationTest {
         integrationServerClient.when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/service-api/v2/transactions"))
+                                .withPath("/service-api/v3/transactions"))
                 .respond(
                         response()
                                 .withStatusCode(200)

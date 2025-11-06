@@ -1,6 +1,6 @@
 package com.backbase.stream.configuration;
 
-import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
+import com.backbase.dbs.transaction.api.service.v3.TransactionPresentationServiceApi;
 import com.backbase.stream.TransactionService;
 import com.backbase.stream.TransactionServiceImpl;
 import com.backbase.stream.transaction.TransactionTask;

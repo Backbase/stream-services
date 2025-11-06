@@ -1,6 +1,6 @@
 package com.backbase.stream.transaction;
 
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionState;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionState;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.AllArgsConstructor;

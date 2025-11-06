@@ -36,7 +36,7 @@ public interface TransactionMapper {
      * @param transaction Integration transaction
      * @return DBS transaction
      */
-    com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody mapIntegrationToStream(
+    com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostRequestBody mapIntegrationToStream(
             com.backbase.stream.compositions.transaction.integration.client.model.TransactionsPostRequestBody transaction);
 
     /**
@@ -54,7 +54,7 @@ public interface TransactionMapper {
      * @param transaction Composition transaction
      * @return DBS transaction
      */
-    com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody mapCompositionToStream(
+    com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostRequestBody mapCompositionToStream(
             com.backbase.stream.compositions.transaction.api.model.TransactionsPostRequestBody transaction);
 
     /**
@@ -64,7 +64,7 @@ public interface TransactionMapper {
      * @return Composition transaction
      */
     com.backbase.stream.compositions.transaction.api.model.TransactionsPostResponseBody mapStreamToComposition(
-            com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody transaction);
+            com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody transaction);
 
     /**
      * Maps event Transactions to dbs TransactionsPostRequestBody model.
@@ -72,7 +72,7 @@ public interface TransactionMapper {
      * @param transaction Event transaction
      * @return Stream transaction
      */
-    com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody mapPushEventToStream(
+    com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostRequestBody mapPushEventToStream(
             TransactionsPostRequestBody transaction);
 
     /**

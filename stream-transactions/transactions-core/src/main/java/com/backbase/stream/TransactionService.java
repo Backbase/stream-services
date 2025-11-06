@@ -1,6 +1,6 @@
 package com.backbase.stream;
 
-import com.backbase.dbs.transaction.api.service.v2.model.*;
+import com.backbase.dbs.transaction.api.service.v3.model.*;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionsQuery;
 import com.backbase.stream.worker.model.UnitOfWork;
@@ -20,7 +20,7 @@ public interface TransactionService {
         return Flux.fromStream(transactionIdsStream);
     }
 
-    Flux<TransactionItem> getLatestTransactions(String arrangementId, int size);
+    Flux<TransactionItem> getLatestTransactions(String arrangementId, int size, String bookingDateGreaterThan, String bookingDateLessThan);
 
     @SuppressWarnings("WeakerAccess")
     Mono<Void> deleteTransactions(Flux<TransactionsDeleteRequestBody> transactionItemDelete);
