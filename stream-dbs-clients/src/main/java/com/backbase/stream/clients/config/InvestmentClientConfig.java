@@ -27,6 +27,13 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
         super(INVESTMENT_SERVICE_ID);
     }
 
+    /**
+     * Creates the Investment Service API client bean.
+     *
+     * @param objectMapper the Jackson ObjectMapper for JSON serialization/deserialization
+     * @param dateFormat the DateFormat for date serialization
+     * @return configured ApiClient instance for Investment Service
+     */
     @Bean
     @ConditionalOnMissingBean
     public ApiClient investmentApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
