@@ -1,7 +1,6 @@
 package com.backbase.stream.portfolio.config;
 
-import com.backbase.investment.api.service.v1.model.PortfolioProduct;
-import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
+import com.backbase.investment.api.service.v1.model.*;
 import com.backbase.stream.configuration.InvestmentSagaConfigurationProperties;
 import com.backbase.stream.configuration.InvestmentServiceConfiguration;
 import com.backbase.stream.investment.ClientUser;
@@ -10,6 +9,7 @@ import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.saga.InvestmentSaga;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,6 +66,8 @@ public class SetupPortfolioHierarchyConfiguration {
 //                ClientUser.builder().externalUserId("rnd-eph-ddd").internalUserId("ea02c250-87db-4dfc-a6b7-1c0a615a6d89").build(),
 //                ClientUser.builder().externalUserId("rnd-eph-bbbbb").internalUserId("ea02c250-87db-4dfc-a6b7-1c0a615a6d90").build()
         ));
+        data.setMarkets(getMarkets());
+        data.setAssets(getAssets());
         saga.executeTask(new InvestmentTask(
             UUID.randomUUID().toString(),
             data
@@ -73,4 +75,20 @@ public class SetupPortfolioHierarchyConfiguration {
         log.info("Finished bootstrapping Wealth Bundles Structure");
     }
 
+    private List<Asset> getAssets() {
+        return List.of(
+                new Asset().name("Nucoro Inc.").isin("NUC012345678").ticker("NUC").status(StatusA10Enum.ACTIVE)
+                        .market("XLON").currency("CHF").extraData(Map.of("founded_year", "2008")),
+                new Asset().name("Backbase Corp.").isin("BAC987654325").ticker("BAC").status(StatusA10Enum.ACTIVE)
+                        .market("XETR").currency("EUR").assetType(AssetTypeEnum.STOCK)
+        );
+    }
+
+    private List<Market> getMarkets() {
+        return List.of(
+                new Market().code("XETR").name("Xetra").timeZone(TimeZoneEnum.EUROPE_BERLIN).sessionStart("09:00:00").sessionEnd("18:00:00"),
+                new Market().code("XSWX").name("SIX").timeZone(TimeZoneEnum.UTC).sessionStart("09:30:00").sessionEnd("17:00:00"),
+                new Market().code("XLON").name("LSE").timeZone(TimeZoneEnum.UTC).sessionStart("09:00:00").sessionEnd("17:30:00")
+        );
+    }
 }
