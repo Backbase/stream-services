@@ -1,10 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [8.2.0-rc.1](https://github.com/Backbase/stream-services/compare/8.1.0...8.2.0)
+## [8.3.0](https://github.com/Backbase/stream-services/compare/8.2.10...8.3.0)
+### Changed
+- Upgrade to SSDK 20.0.0
+
+## [8.2.0](https://github.com/Backbase/stream-services/compare/8.1.1...8.2.0)
+### Changed
+- Upgraded transaction-manager service-api from v2.11.2 to v3.0.2
+
+## [8.1.1](https://github.com/Backbase/stream-services/compare/8.0.0...8.1.1)
 ### Changed
 - RC Release: Upgrade to SSDK 20.0.0-rc.2
-- Upgraded transaction-manager service-api from v2.11.2 to v3.0.2
 
 ## [8.0.0](https://github.com/Backbase/stream-services/compare/7.8.0...8.0.0)
 ### Changed
