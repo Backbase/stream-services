@@ -5,24 +5,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.backbase.investment.api.service.ApiClient;
-import com.backbase.investment.api.service.v1.model.Asset;
-import com.backbase.investment.api.service.v1.model.ClientCreateRequest;
-import com.backbase.investment.api.service.v1.model.PortfolioList;
-import com.backbase.investment.api.service.v1.model.PortfolioProduct;
+import com.backbase.investment.api.service.v1.model.*;
 import com.backbase.stream.investment.ClientUser;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
+import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.worker.model.StreamTask.State;
+
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,13 +58,16 @@ class InvestmentSagaIT {
     @Mock
     private ApiClient apiClient;
 
+    @Mock
+    private InvestmentAssetUniverseService assetUniverseService;
+
     private InvestmentSaga saga;
     private InvestmentTask testTask;
     private UUID clientId;
 
     @BeforeEach
     void setUp() {
-        saga = new InvestmentSaga(clientService, portfolioService, apiClient);
+        saga = new InvestmentSaga(clientService, portfolioService, apiClient, assetUniverseService);
 
         // Initialize UUIDs
         clientId = UUID.randomUUID();
@@ -82,6 +80,7 @@ class InvestmentSagaIT {
     @DisplayName("Should successfully execute complete saga workflow")
     void executeTask_success_completesAllSteps() {
         // Given: Mock successful responses for all steps
+        mockSuccessfulMarketCreation();
         mockSuccessfulAssetCreation();
         mockSuccessfulClientUpsert();
         mockSuccessfulProductUpsert();
@@ -106,6 +105,7 @@ class InvestmentSagaIT {
     @DisplayName("Should continue saga when asset creation fails")
     void executeTask_assetCreationFails_continuesSaga() {
         // Given: Asset creation fails but other steps succeed
+        mockSuccessfulMarketCreation();
         mockSuccessfulAssetCreation();
         mockSuccessfulClientUpsert();
         mockSuccessfulProductUpsert();
@@ -245,19 +245,19 @@ class InvestmentSagaIT {
 //            headerParams, cookieParams, formParams, localVarAccept, localVarContentType, localVarAuthNames,
 //            localVarReturnType)
         ResponseSpec mock = mock(ResponseSpec.class);
-        when(mock.bodyToMono(any(ParameterizedTypeReference.class)))
+        lenient().when(mock.bodyToMono(any(ParameterizedTypeReference.class)))
             .thenAnswer(invocation -> {
                 Asset asset = new Asset();
                 return Mono.just(asset);
             });
-        when(apiClient.invokeAPI(eq("/service-api/v2/asset/assets/"), eq(HttpMethod.POST), any(), any(),
+        lenient().when(apiClient.invokeAPI(eq("/service-api/v2/asset/assets/"), eq(HttpMethod.POST), any(), any(),
             any(), any(), any(), any(), any(), any(), any(), any()))
             .thenReturn(mock);
 //            .thenAnswer(invocation -> Mono.empty());
     }
 
     private void mockSuccessfulClientUpsert() {
-        when(clientService.upsertClient(any(ClientCreateRequest.class), anyString()))
+        lenient().when(clientService.upsertClient(any(ClientCreateRequest.class), anyString()))
             .thenAnswer(invocation -> {
                 String leId = invocation.getArgument(1);
                 return Mono.just(createClientUser("user-" + leId, leId));
@@ -278,6 +278,20 @@ class InvestmentSagaIT {
 
         when(portfolioService.upsertInvestmentPortfolios(any(InvestmentArrangement.class), anyMap()))
             .thenReturn(Mono.just(portfolio));
+    }
+
+    private List<Market> getMarkets() {
+        return List.of(
+                new Market().code("XETR").name("Xetra").timeZone(TimeZoneEnum.EUROPE_BERLIN).sessionStart("09:00:00").sessionEnd("18:00:00"),
+                new Market().code("XSWX").name("SIX").timeZone(TimeZoneEnum.UTC).sessionStart("09:30:00").sessionEnd("17:00:00"),
+                new Market().code("XLON").name("LSE").timeZone(TimeZoneEnum.UTC).sessionStart("09:00:00").sessionEnd("17:30:00")
+        );
+    }
+
+    private void mockSuccessfulMarketCreation() {
+        List<Market> markets = getMarkets();
+        lenient().when(assetUniverseService.getOrCreateMarket(any(MarketRequest.class)))
+                .thenReturn(Mono.just(markets.getFirst()));
     }
 }
 

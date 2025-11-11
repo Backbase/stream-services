@@ -1,5 +1,7 @@
 package com.backbase.stream.investment;
 
+import com.backbase.investment.api.service.v1.model.Asset;
+import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +22,8 @@ public class InvestmentData {
     private List<ClientUser> clientUsers;
     private List<InvestmentArrangement> investmentArrangements;
     private List<InvestorModelPortfolio> portfolioModels;
+    private List<Market> markets;
+    private List<Asset> assets;
 
     public Map<String, List<UUID>> getClientsByLeExternalId() {
         Map<String, List<UUID>> clientsByLeExternalId = new HashMap<>();
