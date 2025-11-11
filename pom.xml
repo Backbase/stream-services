@@ -21,6 +21,7 @@
         <module>stream-sdk</module>
         <module>stream-models</module>
         <module>stream-product</module>
+        <module>stream-investment</module>
         <module>stream-access-control</module>
         <module>stream-transactions</module>
         <module>stream-cursor</module>
