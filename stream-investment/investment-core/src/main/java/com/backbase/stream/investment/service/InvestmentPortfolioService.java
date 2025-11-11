@@ -14,6 +14,7 @@ import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
+import com.backbase.stream.configuration.InvestmentServiceConfiguration;
 import com.backbase.stream.investment.InvestmentArrangement;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -52,6 +54,7 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ConditionalOnBean(InvestmentServiceConfiguration.class)
 public class InvestmentPortfolioService {
 
     private static final String DEFAULT_CURRENCY = "EUR";
