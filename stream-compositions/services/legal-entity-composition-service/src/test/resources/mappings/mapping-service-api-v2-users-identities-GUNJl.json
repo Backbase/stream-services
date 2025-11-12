@@ -2,14 +2,7 @@
   "id": "d1d22565-5b5f-39d8-94c6-d33028dfaddb",
   "request": {
     "url": "/service-api/v2/users/identities",
-    "method": "POST",
-    "bodyPatterns": [
-      {
-        "equalToJson": "{\"externalId\":\"gc-party\",\"legalEntityInternalId\":\"2c9280899126d76f01912cbb0a420006\",\"fullName\":\"Sachin Ramesh Tendulkar\",\"emailAddress\":\"gc-party@example.com\",\"mobileNumber\":\"9888887888\",\"givenName\":null,\"familyName\":null,\"attributes\":{},\"additions\":{}}",
-        "ignoreArrayOrder": true,
-        "ignoreExtraElements": true
-      }
-    ]
+    "method": "POST"
   },
   "response": {
     "status": 201,

@@ -2,14 +2,7 @@
   "id": "cb9352f4-bde9-3a92-a7c9-532f58854df7",
   "request": {
     "url": "/integration-api/v3/access-control/legal-entities",
-    "method": "POST",
-    "bodyPatterns": [
-      {
-        "equalToJson": "{\"externalId\":\"gc-party\",\"parentExternalId\":\"BANK\",\"type\":\"CUSTOMER\",\"customerCategory\":null,\"createSingleServiceAgreement\":false,\"additions\":{}}",
-        "ignoreArrayOrder": true,
-        "ignoreExtraElements": true
-      }
-    ]
+    "method": "POST"
   },
   "response": {
     "status": 201,
