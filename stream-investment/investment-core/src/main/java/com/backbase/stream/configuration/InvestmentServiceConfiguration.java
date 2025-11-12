@@ -37,7 +37,7 @@ public class InvestmentServiceConfiguration {
         return new InvestmentSaga(
             new InvestmentClientService(clientApi),
             new InvestmentPortfolioService(investmentProductsApi, portfolioApi, financialAdviceApi),
-            assetUniverseApi, new InvestmentAssetUniverseService(assetUniverseApi, apiClient));
+            new InvestmentAssetUniverseService(assetUniverseApi, apiClient));
     }
 
 }

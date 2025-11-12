@@ -1,7 +1,10 @@
 package com.backbase.stream.investment.saga;
 
-import com.backbase.investment.api.service.v1.AssetUniverseApi;
-import com.backbase.investment.api.service.v1.model.*;
+import com.backbase.investment.api.service.v1.model.AssetCategory;
+import com.backbase.investment.api.service.v1.model.ClientCreateRequest;
+import com.backbase.investment.api.service.v1.model.MarketRequest;
+import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
+import com.backbase.investment.api.service.v1.model.Status836Enum;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
@@ -10,14 +13,12 @@ import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.StreamTask.State;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -64,7 +65,6 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
     private final InvestmentClientService clientService;
     private final InvestmentPortfolioService investmentPortfolioService;
-    private final AssetUniverseApi assetUniverseApi;
     private final InvestmentAssetUniverseService assetUniverseService;
 
     /**
@@ -322,10 +322,10 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         final InvestmentData investmentData = investmentTask.getData();
         int marketCount = investmentData.getMarkets() != null ? investmentData.getMarkets().size() : 0;
         log.info("Starting investment market creation: taskId={}, marketCount={}",
-                investmentTask.getId(), marketCount);
+            investmentTask.getId(), marketCount);
         // Log the start of market creation and set task state to IN_PROGRESS
         investmentTask.info(INVESTMENT, OP_CREATE, null, investmentTask.getName(), investmentTask.getId(),
-                PROCESSING_PREFIX + marketCount + " investment markets");
+            PROCESSING_PREFIX + marketCount + " investment markets");
         investmentTask.setState(State.IN_PROGRESS);
 
         if (marketCount == 0) {
@@ -336,37 +336,39 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
         // Process each market: create or get from asset universe service
         return Flux.fromIterable(investmentData.getMarkets())
-                .flatMap(market -> assetUniverseService.getOrCreateMarket(
-                        new MarketRequest()
-                                .code(market.getCode())
-                                .name(market.getName())
-                                .sessionStart(market.getSessionStart())
-                                .sessionEnd(market.getSessionEnd())
-                                .timeZone(market.getTimeZone())
-                ))
-                .collectList() // Collect all created/retrieved markets into a list
-                .map(markets -> {
-                    // Update the task with the created markets
-                    investmentTask.setMarkets(markets);
-                    // Log completion and set task state to COMPLETED
-                    investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(), investmentTask.getId(),
-                            RESULT_CREATED + " " + markets.size() + " Investment Markets");
-                    investmentTask.setState(State.COMPLETED);
-                    log.info("Successfully created all markets: taskId={}, marketCount={}",
-                            investmentTask.getId(), markets.size());
-                    return investmentTask;
-                })
-                .doOnError(throwable -> {
-                    log.error("Failed to create/upsert investment markets: taskId={}, marketCount={}",
-                            investmentTask.getId(), marketCount, throwable);
-                    investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(), investmentTask.getId(),
-                            "Failed to create investment markets: " + throwable.getMessage());
-                });
+            .flatMap(market -> assetUniverseService.getOrCreateMarket(
+                new MarketRequest()
+                    .code(market.getCode())
+                    .name(market.getName())
+                    .sessionStart(market.getSessionStart())
+                    .sessionEnd(market.getSessionEnd())
+                    .timeZone(market.getTimeZone())
+            ))
+            .collectList() // Collect all created/retrieved markets into a list
+            .map(markets -> {
+                // Update the task with the created markets
+                investmentTask.setMarkets(markets);
+                // Log completion and set task state to COMPLETED
+                investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
+                    investmentTask.getId(),
+                    RESULT_CREATED + " " + markets.size() + " Investment Markets");
+                investmentTask.setState(State.COMPLETED);
+                log.info("Successfully created all markets: taskId={}, marketCount={}",
+                    investmentTask.getId(), markets.size());
+                return investmentTask;
+            })
+            .doOnError(throwable -> {
+                log.error("Failed to create/upsert investment markets: taskId={}, marketCount={}",
+                    investmentTask.getId(), marketCount, throwable);
+                investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(),
+                    investmentTask.getId(),
+                    "Failed to create investment markets: " + throwable.getMessage());
+            });
     }
 
     /**
-     * Creates investment assets by invoking the asset universe service for each asset in the task data.
-     * Updates the task state and logs progress for observability.
+     * Creates investment assets by invoking the asset universe service for each asset in the task data. Updates the
+     * task state and logs progress for observability.
      *
      * @param investmentTask the investment task containing asset data
      * @return Mono<InvestmentTask> with updated assets and state
@@ -376,11 +378,11 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         int assetCount = investmentData.getAssets() != null ? investmentData.getAssets().size() : 0;
 
         log.info("Starting investment asset creation: taskId={}, assetCount={}",
-                investmentTask.getId(), assetCount);
+            investmentTask.getId(), assetCount);
 
         // Log the start of asset creation and set task state to IN_PROGRESS
         investmentTask.info(INVESTMENT, OP_CREATE, null, investmentTask.getName(), investmentTask.getId(),
-                "Create Investment Assets");
+            "Create Investment Assets");
         investmentTask.setState(State.IN_PROGRESS);
 
         if (assetCount == 0) {
@@ -391,47 +393,51 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
         // Process each asset: create or get from asset universe service
         return Flux.fromIterable(investmentData.getAssets())
-                .flatMap(asset -> {
-                    try {
-                        // Build asset request and invoke service
-                        return assetUniverseService.getOrCreateAsset(
-                                new OASAssetRequestDataRequest()
-                                        .name(asset.getName())
-                                        .isin(asset.getIsin())
-                                        .ticker(asset.getTicker())
-                                        .market(asset.getMarket())
-                                        .currency(asset.getCurrency())
-                                        .status(asset.getStatus())
-                                        .extraData(asset.getExtraData())
-                                        .assetType(asset.getAssetType())
-                                        .categories(asset.getCategories() == null
-                                                ? List.of()
-                                                : asset.getCategories().stream().map(AssetCategory::getUuid).toList())
-                                        .externalId(asset.getExternalId())
-                        );
-                    } catch (IOException e) {
-                        final String assetIdentifier = asset.getIsin() + "_" + asset.getMarket() + "_" + asset.getCurrency();
-                        log.error("Failed to create asset with asset identifier {} : {}", assetIdentifier, e.getMessage(), e);
-                        return Mono.error(e);
-                    }
-                })
-                .collectList() // Collect all created/retrieved assets into a list
-                .map(assets -> {
-                    investmentTask.setAssets(assets);
-                    // Log completion and set task state to COMPLETED
-                    investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(), investmentTask.getId(),
-                            RESULT_CREATED + " " + assets.size() + " Investment Assets");
-                    investmentTask.setState(State.COMPLETED);
-                    log.info("Successfully created all assets: taskId={}, assetCount={}",
-                            investmentTask.getId(), assets.size());
-                    return investmentTask;
-                })
-                .doOnError(throwable -> {
-                    log.error("Failed to create investment assets: taskId={}, assetCount={}",
-                            investmentTask.getId(), assetCount, throwable);
-                    investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(), investmentTask.getId(),
-                            "Failed to create investment assets: " + throwable.getMessage());
-                });
+            .flatMap(asset -> {
+                try {
+                    // Build asset request and invoke service
+                    return assetUniverseService.getOrCreateAsset(
+                        new OASAssetRequestDataRequest()
+                            .name(asset.getName())
+                            .isin(asset.getIsin())
+                            .ticker(asset.getTicker())
+                            .market(asset.getMarket())
+                            .currency(asset.getCurrency())
+                            .status(asset.getStatus())
+                            .extraData(asset.getExtraData())
+                            .assetType(asset.getAssetType())
+                            .categories(asset.getCategories() == null
+                                ? List.of()
+                                : asset.getCategories().stream().map(AssetCategory::getUuid).toList())
+                            .externalId(asset.getExternalId())
+                    );
+                } catch (IOException e) {
+                    final String assetIdentifier =
+                        asset.getIsin() + "_" + asset.getMarket() + "_" + asset.getCurrency();
+                    log.error("Failed to create asset with asset identifier {} : {}", assetIdentifier, e.getMessage(),
+                        e);
+                    return Mono.error(e);
+                }
+            })
+            .collectList() // Collect all created/retrieved assets into a list
+            .map(assets -> {
+                investmentTask.setAssets(assets);
+                // Log completion and set task state to COMPLETED
+                investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
+                    investmentTask.getId(),
+                    RESULT_CREATED + " " + assets.size() + " Investment Assets");
+                investmentTask.setState(State.COMPLETED);
+                log.info("Successfully created all assets: taskId={}, assetCount={}",
+                    investmentTask.getId(), assets.size());
+                return investmentTask;
+            })
+            .doOnError(throwable -> {
+                log.error("Failed to create investment assets: taskId={}, assetCount={}",
+                    investmentTask.getId(), assetCount, throwable);
+                investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(),
+                    investmentTask.getId(),
+                    "Failed to create investment assets: " + throwable.getMessage());
+            });
     }
 
 }
