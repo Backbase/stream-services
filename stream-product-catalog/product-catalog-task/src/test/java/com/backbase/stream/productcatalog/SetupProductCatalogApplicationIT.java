@@ -23,6 +23,7 @@ public class SetupProductCatalogApplicationIT {
     @RegisterExtension
     static WireMockExtension wiremock = WireMockExtension.newInstance()
         .options(wireMockConfig().dynamicPort())
+        .configureStaticDsl(true)
         .build();
 
     @DynamicPropertySource

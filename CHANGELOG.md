@@ -1,8 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-## [8.3.1](https://github.com/Backbase/stream-services/compare/8.3.0...8.3.1)
+## [8.4.1](https://github.com/Backbase/stream-services/compare/8.4.0...8.4.1)
 ### Changed
 - added logger for LegalEntitySaga and AccessGroupService to debug
+## [8.4.0](https://github.com/Backbase/stream-services/compare/8.3.0...8.4.0)
+### Added
+- add the investment service integration; part1
+  - clients
+  - portfolios
+  - portfolio products
+  - assets
+
 ## [8.3.0](https://github.com/Backbase/stream-services/compare/8.2.10...8.3.0)
 ### Changed
 - Upgrade to SSDK 20.0.0
