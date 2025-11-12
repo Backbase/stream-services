@@ -577,6 +577,7 @@ public class AccessGroupService {
                         .setFunctionGroupId(bfg.getId())
                         .setFunctionGroupName(bfg.getName())
                         .setServiceAgreementId(bfg.getServiceAgreementId())
+                        .setServiceAgreementExternalId(task.getData().getServiceAgreement().getExternalId())
                         .setDataGroups(usersPermissions.get(user).get(bfg).stream()
                             .map(baseProductGroup -> new UserAssignedDataGroup()
                                 .setDataGroupId(baseProductGroup.getInternalId())
@@ -587,6 +588,8 @@ public class AccessGroupService {
                             .collect(Collectors.toList())))
                     .collect(Collectors.toList())))
             .collect(Collectors.toList());
+        log.info("Assigned permissions request: {}",  request);
+        System.out.println("Assigned permissions request: " + request);
 
         return Mono.just(request)
             .flatMap(userPermissionsRequest -> {
@@ -613,6 +616,7 @@ public class AccessGroupService {
                     "Assigning permissions: %s",
                     userPermissionsList.stream().map(this::prettyPrintUserAssignedPermissions)
                         .collect(Collectors.joining(",")));
+                log.info("Assigned permissions request: {}",  userPermissionsList);
                 return assignPermissionsIntegrationApi.batchUpdateUserPermissions(map(userPermissionsList))
                     .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Permissions Update",
                         r.getStatus().toString(), r.getResourceId(), r.getErrors()))
@@ -1106,7 +1110,8 @@ public class AccessGroupService {
      */
     public Mono<List<BusinessFunctionGroup>> setupFunctionGroups(StreamTask streamTask,
         ServiceAgreement serviceAgreement, List<BusinessFunctionGroup> businessFunctionGroups) {
-
+        log.info("Setup Function Groups for Service Agreement: {}", serviceAgreement.getExternalId());
+        log.info("Setup Function Groups for businessFunctionGroups: {}", businessFunctionGroups);
         streamTask.info(FUNCTION_GROUP, SETUP_FUNCTION_GROUP, "", serviceAgreement.getExternalId(),
             serviceAgreement.getInternalId(), "Setting up %s Business Functions for Service Agreement: %s",
             businessFunctionGroups.size(), serviceAgreement.getName());
@@ -1125,6 +1130,7 @@ public class AccessGroupService {
                             List<BusinessFunctionGroup> existingBusinessGroups =
                                 getExistingBusinessGroups(businessFunctionGroups, functionGroups);
                             log.debug("existingBusinessGroups: {}", existingBusinessGroups);
+                            log.info("existingBusinessGroups: {}", existingBusinessGroups);
                             return updateBatchBusinessFunctionGroup(streamTask, serviceAgreement, existingBusinessGroups)
                                 .flatMap(updated -> {
                                     bfg.addAll(existingBusinessGroups);
@@ -1675,7 +1681,8 @@ public class AccessGroupService {
 
     private Mono<List<com.backbase.accesscontrol.functiongroup.api.integration.v1.model.BatchResponseItemExtended>> updateBatchBusinessFunctionGroup(
         StreamTask streamTask, ServiceAgreement serviceAgreement, List<BusinessFunctionGroup> existingBusinessGroups) {
-
+        log.info("Assigning {} Business Function Groups to Job Profile User: {}", existingBusinessGroups,
+                existingBusinessGroups);
         log.info("Start Job Role updating: {}",
             existingBusinessGroups.stream().map(BusinessFunctionGroup::getName).collect(Collectors.toList()));
 
