@@ -566,7 +566,9 @@ public class AccessGroupService {
 
     public Mono<BatchProductGroupTask> assignPermissionsBatch(BatchProductGroupTask task,
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> usersPermissions) {
-
+        log.info("Assigning permissions batch for task: {}, usersPermissions: {}",
+            task, usersPermissions);
+        System.out.println("Assigning permissions batch for task: " + task + ", usersPermissions: " + usersPermissions);
         List<UserWithPermissions> request = usersPermissions.keySet().stream()
             .map(user -> new UserWithPermissions(
                 user, task.getData().getServiceAgreement(),
