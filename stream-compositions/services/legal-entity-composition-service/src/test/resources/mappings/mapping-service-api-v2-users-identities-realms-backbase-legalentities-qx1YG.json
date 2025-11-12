@@ -5,7 +5,7 @@
     "method": "POST",
     "bodyPatterns": [
       {
-        "equalToJson": "{\"legalEntityId\":\"2c9280899126d76f01912cbb0a420006\",\"additions\":{}}",
+        "equalToJson": "{\"legalEntityId\":\"2c9280899126d76f01912cbb0a420006\"}",
         "ignoreArrayOrder": true,
         "ignoreExtraElements": true
       }

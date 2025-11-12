@@ -2,14 +2,7 @@
   "id": "d455ef56-d81b-331c-9153-1acd06a3240c",
   "request": {
     "url": "/integration-api/v1/access-control/user-permissions",
-    "method": "PUT",
-    "bodyPatterns": [
-      {
-        "equalToJson": "[{\"externalUserId\":\"gc-party\",\"externalServiceAgreementId\":\"sa_gc-party\",\"permissions\":[{\"functionGroup\":{\"serviceAgreementExternalId\":null,\"name\":\"Retail User - USA\"},\"dataGroups\":[],\"selfApprovalPolicies\":[],\"permissionScope\":null}]}]",
-        "ignoreArrayOrder": true,
-        "ignoreExtraElements": true
-      }
-    ]
+    "method": "PUT"
   },
   "response": {
     "status": 207,

@@ -1,6 +1,22 @@
 {
   "mappings": [
     {
+      "request": {
+        "method": "POST",
+        "urlPath": "/service-api/v3/products"
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "id": "test-product-id",
+          "externalId": "test-external-id"
+        }
+      }
+    },
+    {
       "id": "ec55d9b3-ff28-4aec-9310-a57b8120d615",
       "name": "service-api_v3_products",
       "request": {
