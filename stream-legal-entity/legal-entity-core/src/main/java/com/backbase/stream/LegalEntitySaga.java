@@ -743,6 +743,8 @@ public class LegalEntitySaga extends HelperProcessor implements StreamTaskExecut
 
     public Mono<LegalEntityTask> setupAdministratorPermissions(LegalEntityTask legalEntityTask) {
         // Assign permissions for the user for all business function groups.
+        log.info("Administrator Permissions {}", legalEntityTask);
+        System.out.println("Administrator Permissions " + legalEntityTask);
         LegalEntity legalEntity = legalEntityTask.getData();
         Map<User, Map<BusinessFunctionGroup, List<BaseProductGroup>>> request = nullableCollectionToStream(
             legalEntity.getUsers())
@@ -758,7 +760,11 @@ public class LegalEntitySaga extends HelperProcessor implements StreamTaskExecut
                         ));
                 }
             ));
-
+        log.info("Permissions {}", request);
+        System.out.println("Permissions " + request);
+        ServiceAgreement serviceAgg = retrieveServiceAgreement(legalEntity);
+        log.info("Service Agreement {}", serviceAgg);
+        System.out.println("Service Agreement " + serviceAgg);
         if (request.isEmpty()) {
             log.info("Skipping setup of permissions since no declarative business functions were found.");
             return Mono.just(legalEntityTask);

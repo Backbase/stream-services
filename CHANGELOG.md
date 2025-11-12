@@ -1,6 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
-
+## [8.4.1](https://github.com/Backbase/stream-services/compare/8.4.0...8.4.1)
+### Changed
+- added logger for LegalEntitySaga and AccessGroupService to debug
 ## [8.4.0](https://github.com/Backbase/stream-services/compare/8.3.0...8.4.0)
 ### Added
 - add the investment service integration; part1
