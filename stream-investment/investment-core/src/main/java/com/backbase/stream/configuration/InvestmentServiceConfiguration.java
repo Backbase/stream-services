@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
 })
 @RequiredArgsConstructor
 @Configuration
-@ConditionalOnProperty(name = "backbase.bootstrap.ingestions.wealth.enabled")
+@ConditionalOnProperty(name = "backbase.bootstrap.ingestions.investment.enabled")
 public class InvestmentServiceConfiguration {
 
     @Bean
