@@ -4,7 +4,6 @@ All notable changes to this project will be documented in this file.
 ## [8.3.0](https://github.com/Backbase/stream-services/compare/8.2.0...8.3.0)
 ### Changed
 - Release: Upgrade to SSDK 20.0.0
-- Update bb-bom 2025.10
 
 ## [8.2.0-rc.1](https://github.com/Backbase/stream-services/compare/8.1.0...8.2.0)
 ### Changed
