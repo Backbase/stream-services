@@ -7,7 +7,6 @@ import com.backbase.investment.api.service.v1.model.OASClient;
 import com.backbase.investment.api.service.v1.model.OASClientUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PatchedOASClientUpdateRequest;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

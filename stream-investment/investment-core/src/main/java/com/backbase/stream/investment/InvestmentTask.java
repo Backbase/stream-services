@@ -1,10 +1,11 @@
 package com.backbase.stream.investment;
 
+import com.backbase.investment.api.service.v1.model.Asset;
+import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.List;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import reactor.core.publisher.Mono;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -30,4 +31,8 @@ public class InvestmentTask extends StreamTask {
     public void data(List<ClientUser> clients) {
         data.setClientUsers(clients);
     }
+
+    public void setMarkets(List<Market> markets) { data.setMarkets(markets); }
+
+    public void setAssets(List<Asset> assets) { data.setAssets(assets); }
 }

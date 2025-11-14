@@ -1,11 +1,14 @@
 package com.backbase.stream.investment;
 
+import com.backbase.investment.api.service.v1.model.Asset;
+import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,6 +23,8 @@ public class InvestmentData {
     private List<ClientUser> clientUsers;
     private List<InvestmentArrangement> investmentArrangements;
     private List<InvestorModelPortfolio> portfolioModels;
+    private List<Market> markets;
+    private List<Asset> assets;
 
     public Map<String, List<UUID>> getClientsByLeExternalId() {
         Map<String, List<UUID>> clientsByLeExternalId = new HashMap<>();

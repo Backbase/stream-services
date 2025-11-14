@@ -27,6 +27,9 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
         super(INVESTMENT_SERVICE_ID);
     }
 
+    /**
+     * Configuration for Investment service REST client (ClientApi).
+     */
     @Bean
     @ConditionalOnMissingBean
     public ApiClient investmentApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
