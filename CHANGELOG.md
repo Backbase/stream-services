@@ -3,8 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [7.9.0](https://github.com/Backbase/stream-services/compare/7.8.0...7.9.0)
 ### Changed
-- Add new logic for create for ingesting Investment data;
-- Create clients and portfolios based on LE & arrangements
+- Investment integration
+  - Import from latest(8.5.0) master
+  - Add new logic for create for ingesting Investment data;
+  - Create clients and portfolios based on LE & arrangements
 
 ## [7.8.0](https://github.com/Backbase/stream-services/compare/7.7.0...7.8.0)
 ### Changed
