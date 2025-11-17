@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [8.5.1](https://github.com/Backbase/stream-services/compare/8.3.0...8.4.0)
+### Changed
+  - added Contact Type field to ExternalContact model in API
+
 ## [8.5.0](https://github.com/Backbase/stream-services/compare/8.4.0...8.5.0)
 ### Changed
 - fix investment enable property: `backbase.bootstrap.ingestions.investment.enabled`
