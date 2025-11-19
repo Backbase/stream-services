@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Ingest Legal Entity API
   description: Ingestion Saga for Legal Entities and their products
-  version: 3.0.0
+  version: 3.1.0
   x-logo:
     url: "http://www.backbase.com/wp-content/uploads/2017/04/backbase-logo-png.png"
     backgroundColor: "#FFFFFF"
@@ -2439,6 +2439,11 @@ components:
           minLength: 2
           type: string
           description: ISO Country Code
+        type:
+          maxLength: 30
+          minLength: 1
+          type: string
+          description: Contact type
         activeStatus:
           $ref: '#/components/schemas/ActiveContactStatus'
         additions:
