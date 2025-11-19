@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [8.6.0](https://github.com/Backbase/stream-services/compare/8.3.0...8.6.0)
+## [8.6.0](https://github.com/Backbase/stream-services/compare/8.5.0...8.6.0)
 ### Changed
   - added ContactType (type) field to ExternalContact model in API
 
