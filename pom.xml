@@ -16,6 +16,19 @@
     <packaging>pom</packaging>
     <name>Stream :: Services</name>
 
+    <distributionManagement>
+        <repository>
+            <id>backbase</id>
+            <name>repo.backbase.com-builds</name>
+            <url>https://repo.backbase.com/backbase-mvn-milestone/</url>
+        </repository>
+        <snapshotRepository>
+            <id>backbase</id>
+            <name>repo.backbase.com-builds</name>
+            <url>https://repo.backbase.com/backbase-mvn-snapshot/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <modules>
         <module>stream-dbs-clients</module>
         <module>stream-sdk</module>
