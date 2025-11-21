@@ -1,37 +1,22 @@
 package com.backbase.stream.investment.service;
 
-import com.backbase.investment.api.service.ApiClient;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.Asset;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
-import com.backbase.stream.configuration.InvestmentServiceConfiguration;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 @Slf4j
-@Service
-@ConditionalOnBean(InvestmentServiceConfiguration.class)
 @RequiredArgsConstructor
 public class InvestmentAssetUniverseService {
 
     private final AssetUniverseApi assetUniverseApi;
-    private final ApiClient apiClient;
+    private final CustomIntegrationApiService customIntegrationApiService;
 
     /**
      * Gets an existing market by code, or creates it if not found (404). Handles 404 NOT_FOUND from getMarket by
@@ -98,7 +83,7 @@ public class InvestmentAssetUniverseService {
             })
             // If Mono is empty (asset not found), create the asset
             .switchIfEmpty(
-                createAsset(assetRequest)
+                customIntegrationApiService.createAsset(assetRequest)
                     .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
                     .doOnError(error -> {
                         if (error instanceof WebClientResponseException) {
@@ -111,42 +96,6 @@ public class InvestmentAssetUniverseService {
                         }
                     })
             );
-    }
-
-    /**
-     * Creates a new asset by sending a POST request to the asset API.
-     *
-     * @param assetRequest the asset request payload
-     * @return Mono<Asset> representing the created asset
-     * @throws WebClientResponseException if the API call fails
-     */
-    public Mono<Asset> createAsset(OASAssetRequestDataRequest assetRequest) throws WebClientResponseException {
-        // create path and map variables
-        final Map<String, Object> pathParams = new HashMap<String, Object>();
-
-        final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
-        final HttpHeaders headerParams = new HttpHeaders();
-        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
-        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<String, Object>();
-
-        final String[] localVarAccepts = {
-            "application/json"
-        };
-        final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
-        final String[] localVarContentTypes = {
-            "application/json"
-        };
-        final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
-
-        String[] localVarAuthNames = new String[]{};
-
-        ParameterizedTypeReference<Asset> localVarReturnType = new ParameterizedTypeReference<Asset>() {
-        };
-        return apiClient.invokeAPI("/service-api/v2/asset/assets/", HttpMethod.POST, pathParams, queryParams,
-                assetRequest,
-                headerParams, cookieParams, formParams, localVarAccept, localVarContentType, localVarAuthNames,
-                localVarReturnType)
-            .bodyToMono(localVarReturnType);
     }
 
 }
