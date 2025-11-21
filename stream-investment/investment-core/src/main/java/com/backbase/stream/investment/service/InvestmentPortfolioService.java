@@ -14,7 +14,6 @@ import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
-import com.backbase.stream.configuration.InvestmentServiceConfiguration;
 import com.backbase.stream.investment.InvestmentArrangement;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -26,8 +25,6 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -52,9 +49,7 @@ import reactor.core.publisher.Mono;
  * </ul>
  */
 @Slf4j
-@Service
 @RequiredArgsConstructor
-@ConditionalOnBean(InvestmentServiceConfiguration.class)
 public class InvestmentPortfolioService {
 
     private static final String DEFAULT_CURRENCY = "EUR";
@@ -63,6 +58,7 @@ public class InvestmentPortfolioService {
     private final InvestmentProductsApi productsApi;
     private final PortfolioApi portfolioApi;
     private final FinancialAdviceApi financialAdviceApi;
+    private final CustomIntegrationApiService customIntegrationApiService;
 
     /**
      * Creates or updates an investment product (portfolio product) for the given arrangement.
@@ -99,11 +95,11 @@ public class InvestmentPortfolioService {
         if (productType != ProductTypeEnum.SELF_TRADING) {
             adviceEngine = "model_portfolio";
             if (ProductTypeEnum.ROBO_ADVISOR == productType) {
-                portfolioModel = new InvestorModelPortfolio(null, "test " + investmentArrangement.getName(), 0.03, 8,
+                portfolioModel = new InvestorModelPortfolio(null, investmentArrangement.getName(), 1d, 5,
                     List.of(), null);
             }
             if (ProductTypeEnum.SAVINGS_PLAN == productType) {
-                portfolioModel = new InvestorModelPortfolio(null, "test " + investmentArrangement.getName(), 0.0, 8,
+                portfolioModel = new InvestorModelPortfolio(null, investmentArrangement.getName(), 1d, 5,
                     List.of(), null);
             }
         }
@@ -526,9 +522,12 @@ public class InvestmentPortfolioService {
             modelPortfolio.getName(), modelPortfolio.getRiskLevel());
 
         OASModelPortfolioRequestDataRequest data = new OASModelPortfolioRequestDataRequest();
+        data.setName(modelPortfolio.getName());
         data.cashWeight(modelPortfolio.getCashWeight());
+        data.allocation(List.of());
+        data.riskLevel(modelPortfolio.getRiskLevel());
         data.description(modelPortfolio.getDescription());
-        return financialAdviceApi.createModelPortfolio(null, null, null,
+        return customIntegrationApiService.createModelPortfolioRequestCreation(null, null, null,
                 data, null)
             .doOnSuccess(created -> log.info(
                 "Successfully created model portfolio: uuid={}, name={}, riskLevel={}",

@@ -6,7 +6,6 @@ import com.backbase.investment.api.service.v1.model.OASClient;
 import com.backbase.investment.api.service.v1.model.OASClientUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PatchedOASClientUpdateRequest;
 import com.backbase.investment.api.service.v1.model.Status836Enum;
-import com.backbase.stream.configuration.InvestmentServiceConfiguration;
 import com.backbase.stream.investment.ClientUser;
 import jakarta.validation.constraints.NotNull;
 import java.util.Collections;
@@ -16,8 +15,6 @@ import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
@@ -35,9 +32,7 @@ import reactor.core.publisher.Mono;
  * </ul>
  */
 @Slf4j
-@Service
 @RequiredArgsConstructor
-@ConditionalOnBean(InvestmentServiceConfiguration.class)
 public class InvestmentClientService {
 
     private static final String USER_EXTERNAL_ID_KEY = "user_external_id";

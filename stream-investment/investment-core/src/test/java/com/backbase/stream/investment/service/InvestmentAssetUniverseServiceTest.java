@@ -22,17 +22,22 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * This is a custom implementations to avoid issues with Reactive and multipart requests
+ */
 class InvestmentAssetUniverseServiceTest {
 
     InvestmentAssetUniverseService service;
     AssetUniverseApi assetUniverseApi;
     ApiClient apiClient;
+    CustomIntegrationApiService customIntegrationApiService;
 
     @BeforeEach
     void setUp() {
         assetUniverseApi = Mockito.mock(AssetUniverseApi.class);
         apiClient = Mockito.mock(ApiClient.class);
-        service = new InvestmentAssetUniverseService(assetUniverseApi, apiClient);
+        customIntegrationApiService = Mockito.spy(new CustomIntegrationApiService(apiClient));
+        service = new InvestmentAssetUniverseService(assetUniverseApi, customIntegrationApiService);
     }
 
     @Test
