@@ -7,7 +7,10 @@ import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.text.DateFormat;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -33,8 +36,12 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
     @Bean
     @ConditionalOnMissingBean
     public ApiClient investmentApiClient(ObjectMapper objectMapper, DateFormat dateFormat) {
+        ObjectMapper mapper = objectMapper.copy();
         objectMapper.setSerializationInclusion(Include.NON_EMPTY);
-        return new ApiClient(getWebClient(), objectMapper, dateFormat)
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return new ApiClient(getWebClient(), mapper, dateFormat)
             .setBasePath(createBasePath());
     }
 

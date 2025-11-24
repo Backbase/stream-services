@@ -1,7 +1,6 @@
 package com.backbase.stream.configuration;
 
 import com.backbase.investment.api.service.ApiClient;
-import com.backbase.investment.api.service.RFC3339DateFormat;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.ClientApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
@@ -13,11 +12,6 @@ import com.backbase.stream.investment.service.CustomIntegrationApiService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import java.text.DateFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -35,15 +29,6 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @ConditionalOnProperty(name = "backbase.bootstrap.ingestions.investment.enabled")
 public class InvestmentServiceConfiguration {
-
-    @Bean
-    public ApiClient apiClient(ObjectMapper mapper, DateFormat dateFormat) {
-        ObjectMapper copy = mapper.copy();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        return new ApiClient(copy, dateFormat);
-    }
 
     @Bean
     public InvestmentClientService investmentClientService(ClientApi clientApi) {
