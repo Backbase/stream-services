@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [8.7.0](https://github.com/Backbase/stream-services/compare/8.6.0...8.7.0)
+### Changed
+- Investment service configuration
+  - fix for investment stream ingestion
+  - fix api configuration datetime
+
 ## [8.6.0](https://github.com/Backbase/stream-services/compare/8.5.0...8.6.0)
 ### Changed
   - added ContactType (type) field to ExternalContact model in API

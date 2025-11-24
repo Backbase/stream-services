@@ -8,6 +8,7 @@ import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.investment.saga.InvestmentSaga;
+import com.backbase.stream.investment.service.CustomIntegrationApiService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
@@ -30,14 +31,34 @@ import org.springframework.context.annotation.Import;
 public class InvestmentServiceConfiguration {
 
     @Bean
-    public InvestmentSaga investmentSaga(ClientApi clientApi, PortfolioApi portfolioApi,
+    public InvestmentClientService investmentClientService(ClientApi clientApi) {
+        return new InvestmentClientService(clientApi);
+    }
+
+    @Bean
+    public CustomIntegrationApiService customIntegrationApiService(ApiClient apiClient) {
+        return new CustomIntegrationApiService(apiClient);
+    }
+
+    @Bean
+    public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi,
         InvestmentProductsApi investmentProductsApi, FinancialAdviceApi financialAdviceApi,
-        AssetUniverseApi assetUniverseApi, InvestmentSagaConfigurationProperties properties,
-        ApiClient apiClient) {
-        return new InvestmentSaga(
-            new InvestmentClientService(clientApi),
-            new InvestmentPortfolioService(investmentProductsApi, portfolioApi, financialAdviceApi),
-            new InvestmentAssetUniverseService(assetUniverseApi, apiClient));
+        CustomIntegrationApiService customIntegrationApiService) {
+        return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, financialAdviceApi,
+            customIntegrationApiService);
+    }
+
+    @Bean
+    public InvestmentAssetUniverseService investmentAssetUniverseService(AssetUniverseApi assetUniverseApi,
+        CustomIntegrationApiService customIntegrationApiService) {
+        return new InvestmentAssetUniverseService(assetUniverseApi, customIntegrationApiService);
+    }
+
+    @Bean
+    public InvestmentSaga investmentSaga(InvestmentClientService investmentClientService,
+        InvestmentPortfolioService investmentPortfolioService,
+        InvestmentAssetUniverseService investmentAssetUniverseService) {
+        return new InvestmentSaga(investmentClientService, investmentPortfolioService, investmentAssetUniverseService);
     }
 
 }
