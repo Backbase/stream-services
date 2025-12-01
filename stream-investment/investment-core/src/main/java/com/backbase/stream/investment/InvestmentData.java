@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,6 +25,7 @@ public class InvestmentData {
     private List<InvestmentArrangement> investmentArrangements;
     private List<InvestorModelPortfolio> portfolioModels;
     private List<Market> markets;
+    private List<MarketSpecialDay> marketSpecialDays;
     private List<Asset> assets;
 
     public Map<String, List<UUID>> getClientsByLeExternalId() {

@@ -3,6 +3,7 @@ package com.backbase.stream.investment.saga;
 import com.backbase.investment.api.service.v1.model.AssetCategory;
 import com.backbase.investment.api.service.v1.model.ClientCreateRequest;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
+import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.Status836Enum;
 import com.backbase.stream.investment.InvestmentData;
@@ -89,6 +90,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             streamTask.getId(), streamTask.getName());
 
         return createMarkets(streamTask)
+            .flatMap(this::createMarketSpecialDays)
             .flatMap(this::createAssets)
             .flatMap(this::upsertClients)
             .flatMap(this::upsertInvestmentProducts)
@@ -364,6 +366,63 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                     investmentTask.getId(),
                     "Failed to create investment markets: " + throwable.getMessage());
             });
+    }
+
+    /**
+     * Creates or upserts market special days for the investment task.
+     *
+     * <p>This method processes each market special day in the task data by invoking
+     * the asset universe service. It updates the task state and logs progress for observability.
+     *
+     * @param investmentTask the investment task containing market special day data
+     * @return Mono emitting the updated investment task with market special days set
+     */
+    public Mono<InvestmentTask> createMarketSpecialDays(final InvestmentTask investmentTask) {
+        final InvestmentData investmentData = investmentTask.getData();
+        int marketSpecialDayCount = investmentData.getMarketSpecialDays() != null ? investmentData.getMarketSpecialDays().size() : 0;
+        log.info("Starting investment market special days creation: taskId={}, marketSpecialDayCount={}",
+                investmentTask.getId(), marketSpecialDayCount);
+        // Log the start of market special days creation and set task state to IN_PROGRESS
+        investmentTask.info(INVESTMENT, OP_CREATE, null, investmentTask.getName(), investmentTask.getId(),
+                PROCESSING_PREFIX + marketSpecialDayCount + " investment markets special day");
+        investmentTask.setState(State.IN_PROGRESS);
+
+        if (marketSpecialDayCount == 0) {
+            log.warn("No market special days to create for taskId={}", investmentTask.getId());
+            investmentTask.setState(State.COMPLETED);
+            return Mono.just(investmentTask);
+        }
+
+        // Process each market  special day: create or get from asset universe service
+        return Flux.fromIterable(investmentData.getMarketSpecialDays())
+                .flatMap(marketSpecialDay -> assetUniverseService.getOrCreateMarketSpecialDay(
+                        new MarketSpecialDayRequest()
+                                .date(marketSpecialDay.getDate())
+                                .market(marketSpecialDay.getMarket())
+                                .sessionStart(marketSpecialDay.getSessionStart())
+                                .sessionEnd(marketSpecialDay.getSessionEnd())
+                                .description(marketSpecialDay.getDescription())
+                ))
+                .collectList() // Collect all created/retrieved market special days into a list
+                .map(marketSpecialDays -> {
+                    // Update the task with the created market special days
+                    investmentTask.setMarketSpecialDays(marketSpecialDays);
+                    // Log completion and set task state to COMPLETED
+                    investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
+                            investmentTask.getId(),
+                            RESULT_CREATED + " " + marketSpecialDays.size() + " Investment Markets Special Days");
+                    investmentTask.setState(State.COMPLETED);
+                    log.info("Successfully created all market special days: taskId={}, marketSpecialDayCount={}",
+                            investmentTask.getId(), marketSpecialDays.size());
+                    return investmentTask;
+                })
+                .doOnError(throwable -> {
+                    log.error("Failed to create/upsert investment market special days: taskId={}, marketSpecialDayCount={}",
+                            investmentTask.getId(), marketSpecialDayCount, throwable);
+                    investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(),
+                            investmentTask.getId(),
+                            "Failed to create investment market special days: " + throwable.getMessage());
+                });
     }
 
     /**

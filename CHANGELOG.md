@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [8.8.0](https://github.com/Backbase/stream-services/compare/8.7.0...8.8.0)
+### Changed
+- Investment service
+  - support market special days
+
 ## [8.7.0](https://github.com/Backbase/stream-services/compare/8.6.0...8.7.0)
 ### Changed
 - Investment service configuration
