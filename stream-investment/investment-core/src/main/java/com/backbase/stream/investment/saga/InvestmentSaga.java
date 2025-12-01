@@ -9,6 +9,7 @@ import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
+import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
@@ -59,12 +60,14 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     public static final String RESULT_FAILED = "failed";
 
     private static final String INVESTMENT_PRODUCTS = "investment-products";
+    private static final String INVESTMENT_PORTFOLIO_MODELS = "investment-portfolio-models";
     private static final String INVESTMENT_PORTFOLIOS = "investment-portfolios";
     private static final String PROCESSING_PREFIX = "Processing ";
     private static final String UPSERTED_PREFIX = "Upserted ";
 
     private final InvestmentClientService clientService;
     private final InvestmentPortfolioService investmentPortfolioService;
+    private final InvestmentModelPortfolioService investmentModelPortfolioService;
     private final InvestmentAssetUniverseService assetUniverseService;
 
     /**
@@ -90,6 +93,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
         return createMarkets(streamTask)
             .flatMap(this::createAssets)
+            .flatMap(this::upsertInvestmentPortfolioModels)
             .flatMap(this::upsertClients)
             .flatMap(this::upsertInvestmentProducts)
             .flatMap(this::upsertInvestmentPortfolios)
@@ -186,6 +190,37 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             });
     }
 
+    private Mono<InvestmentTask> upsertInvestmentPortfolioModels(InvestmentTask investmentTask) {
+        InvestmentData data = investmentTask.getData();
+        int arrangementCount = data.getInvestmentArrangements().size();
+
+        log.info("Starting investment portfolio models upsert: taskId={}, arrangementCount={}",
+            investmentTask.getId(), arrangementCount);
+
+        investmentTask.info(INVESTMENT_PORTFOLIO_MODELS, OP_UPSERT, null, investmentTask.getName(),
+            investmentTask.getId(), PROCESSING_PREFIX + arrangementCount + " investment portfolio models");
+
+        return investmentModelPortfolioService.upsertModels(data)
+            .collectList()
+            .map(modelPortfolio -> {
+                investmentTask.info(INVESTMENT_PORTFOLIO_MODELS, OP_UPSERT, RESULT_CREATED,
+                    investmentTask.getName(), investmentTask.getId(),
+                    UPSERTED_PREFIX + modelPortfolio.size() + " investment portfolio models");
+
+                log.info("Successfully upserted all investment portfolio models: taskId={}, productCount={}",
+                    investmentTask.getId(), modelPortfolio.size());
+
+                return investmentTask;
+            })
+            .doOnError(throwable -> {
+                log.error("Failed to upsert investment portfolio models: taskId={}, arrangementCount={}",
+                    investmentTask.getId(), arrangementCount, throwable);
+                investmentTask.error(INVESTMENT_PORTFOLIO_MODELS, OP_UPSERT, RESULT_FAILED,
+                    investmentTask.getName(), investmentTask.getId(),
+                    "Failed to upsert investment portfolio models: " + throwable.getMessage());
+            });
+    }
+
     /**
      * Upserts investment products for all investment arrangements.
      *
@@ -212,8 +247,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .flatMap(arrangement -> {
                 log.debug("Upserting investment product for arrangement: externalId={}, name={}",
                     arrangement.getExternalId(), arrangement.getName());
-
-                return investmentPortfolioService.upsertInvestmentProducts(arrangement)
+                return investmentPortfolioService.upsertInvestmentProducts(data, arrangement)
                     .doOnSuccess(product -> log.debug(
                         "Successfully upserted investment product: productUuid={}, productType={}, "
                             + "arrangementExternalId={}",

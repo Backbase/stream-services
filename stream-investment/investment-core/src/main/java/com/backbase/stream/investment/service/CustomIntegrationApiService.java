@@ -16,6 +16,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -62,6 +63,57 @@ public class CustomIntegrationApiService {
                 assetRequest,
                 headerParams, cookieParams, formParams, localVarAccept, localVarContentType, localVarAuthNames,
                 localVarReturnType)
+            .bodyToMono(localVarReturnType);
+    }
+
+    public Mono<OASModelPortfolioResponse> patchModelPortfolioRequestCreation(String uuid, List<String> expand,
+        String fields, String omit, OASModelPortfolioRequestDataRequest data, File image)
+        throws WebClientResponseException {
+        // verify the required parameter 'uuid' is set
+        if (uuid == null) {
+            throw new WebClientResponseException(
+                "Missing the required parameter 'uuid' when calling patchModelPortfolio",
+                HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(), null, null, null);
+        }
+        // create path and map variables
+        final Map<String, Object> pathParams = new HashMap<String, Object>();
+
+        pathParams.put("uuid", uuid);
+
+        final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+        final HttpHeaders headerParams = new HttpHeaders();
+        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
+        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<String, Object>();
+
+        queryParams.putAll(
+            apiClient.parameterToMultiValueMap(ApiClient.CollectionFormat.valueOf("multi".toUpperCase(Locale.ROOT)),
+                "expand", expand));
+        queryParams.putAll(apiClient.parameterToMultiValueMap(null, "fields", fields));
+        queryParams.putAll(apiClient.parameterToMultiValueMap(null, "omit", omit));
+
+        if (data != null) {
+            formParams.add("data", data);
+        }
+        if (image != null) {
+            formParams.add("image", new FileSystemResource(image));
+        }
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        final String[] localVarContentTypes = {
+            "application/json"
+        };
+        final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+
+        String[] localVarAuthNames = new String[]{};
+
+        ParameterizedTypeReference<OASModelPortfolioResponse> localVarReturnType = new ParameterizedTypeReference<OASModelPortfolioResponse>() {
+        };
+        return apiClient.invokeAPI("/integration-api/v2/advice-engines/model-portfolio/model_portfolios/{uuid}/",
+                HttpMethod.PATCH, pathParams, queryParams, data, headerParams, cookieParams, formParams, localVarAccept,
+                localVarContentType, localVarAuthNames, localVarReturnType)
             .bodyToMono(localVarReturnType);
     }
 

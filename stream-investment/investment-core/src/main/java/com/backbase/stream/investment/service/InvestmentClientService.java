@@ -37,7 +37,6 @@ public class InvestmentClientService {
 
     private static final String USER_EXTERNAL_ID_KEY = "user_external_id";
     private static final String CLIENT_UUID_NULL_MESSAGE = "Client uuid must not be null";
-    private static final String EXTRA_DATA_FILTER_KEY = "extra_data__user_external_id";
 
     private final ClientApi clientApi;
 
