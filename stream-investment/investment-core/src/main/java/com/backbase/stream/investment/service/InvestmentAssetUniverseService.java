@@ -49,10 +49,9 @@ public class InvestmentAssetUniverseService {
                     return Mono.just(existingMarket);
                 })
                 // If Mono is empty (market not found), create the market
-                .switchIfEmpty(
-                        assetUniverseApi.createMarket(marketRequest)
-                                .doOnSuccess(createdMarket -> log.info("Created market: {}", createdMarket))
-                                .doOnError(error -> log.error("Error creating market: {}", error.getMessage(), error))
+                .switchIfEmpty(assetUniverseApi.createMarket(marketRequest)
+                        .doOnSuccess(createdMarket -> log.info("Created market: {}", createdMarket))
+                        .doOnError(error -> log.error("Error creating market: {}", error.getMessage(), error))
                 );
     }
 
@@ -88,19 +87,18 @@ public class InvestmentAssetUniverseService {
                     return Mono.just(existingAsset);
                 })
                 // If Mono is empty (asset not found), create the asset
-                .switchIfEmpty(
-                        customIntegrationApiService.createAsset(assetRequest)
-                                .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
-                                .doOnError(error -> {
-                                    if (error instanceof WebClientResponseException) {
-                                        WebClientResponseException w = (WebClientResponseException) error;
-                                        log.error("Error creating asset with assetIdentifier: {} : HTTP {} -> {}", assetIdentifier,
-                                                w.getStatusCode(), w.getResponseBodyAsString());
-                                    } else {
-                                        log.error("Error creating asset with assetIdentifier: {} : {}", assetIdentifier,
-                                                error.getMessage(), error);
-                                    }
-                                })
+                .switchIfEmpty(customIntegrationApiService.createAsset(assetRequest)
+                        .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
+                        .doOnError(error -> {
+                            if (error instanceof WebClientResponseException) {
+                                WebClientResponseException w = (WebClientResponseException) error;
+                                log.error("Error creating asset with assetIdentifier: {} : HTTP {} -> {}", assetIdentifier,
+                                        w.getStatusCode(), w.getResponseBodyAsString());
+                            } else {
+                                log.error("Error creating asset with assetIdentifier: {} : {}", assetIdentifier,
+                                        error.getMessage(), error);
+                            }
+                        })
                 );
     }
 
@@ -140,19 +138,18 @@ public class InvestmentAssetUniverseService {
                     }
                 })
                 // If Mono is empty (market special day not found), create the market special day
-                .switchIfEmpty(
-                        assetUniverseApi.createMarketSpecialDay(marketSpecialDayRequest)
-                                .doOnSuccess(createdMarketSpecialDay -> log.info("Created market special day: {}", createdMarketSpecialDay))
-                                .doOnError(error -> {
-                                    if (error instanceof WebClientResponseException) {
-                                        WebClientResponseException w = (WebClientResponseException) error;
-                                        log.error("Error creating market special day : {} : HTTP {} -> {}", marketSpecialDayRequest,
-                                                w.getStatusCode(), w.getResponseBodyAsString());
-                                    } else {
-                                        log.error("Error creating market special day {} : {}", marketSpecialDayRequest, error.getMessage(), error);
-                                    }
+                .switchIfEmpty(assetUniverseApi.createMarketSpecialDay(marketSpecialDayRequest)
+                        .doOnSuccess(createdMarketSpecialDay -> log.info("Created market special day: {}", createdMarketSpecialDay))
+                        .doOnError(error -> {
+                            if (error instanceof WebClientResponseException) {
+                                WebClientResponseException w = (WebClientResponseException) error;
+                                log.error("Error creating market special day : {} : HTTP {} -> {}", marketSpecialDayRequest,
+                                        w.getStatusCode(), w.getResponseBodyAsString());
+                            } else {
+                                log.error("Error creating market special day {} : {}", marketSpecialDayRequest, error.getMessage(), error);
+                            }
 
-                                })
+                        })
                 );
     }
 }
