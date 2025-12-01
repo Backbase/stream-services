@@ -3,6 +3,7 @@ package com.backbase.stream.investment;
 import com.backbase.investment.api.service.v1.model.Asset;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.Market;
+import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ public class InvestmentData {
     private List<InvestorModelPortfolio> portfolioModels;
     private List<ModelPortfolioTemplate> modelPortfolioTemplates;
     private List<Market> markets;
+    private List<MarketSpecialDay> marketSpecialDays;
     private List<Asset> assets;
 
     public Map<String, List<UUID>> getClientsByLeExternalId() {
