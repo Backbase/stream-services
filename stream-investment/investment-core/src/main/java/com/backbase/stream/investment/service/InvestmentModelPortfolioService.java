@@ -8,6 +8,7 @@ import com.backbase.investment.api.service.v1.model.OASAssetModelPortfolioReques
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
 import com.backbase.stream.investment.InvestmentData;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,7 @@ public class InvestmentModelPortfolioService {
     private final CustomIntegrationApiService customIntegrationApiService;
 
     public Flux<OASModelPortfolioResponse> upsertModels(InvestmentData investmentData) {
-        return Flux.fromIterable(investmentData.getModelPortfolioTemplates())
+        return Flux.fromIterable(Objects.requireNonNullElse(investmentData.getModelPortfolioTemplates(), List.of()))
             .flatMap(modelPortfolioTemplate -> {
                 log.debug("Upserting investment portfolio model: name={}, riskLevel={}",
                     modelPortfolioTemplate.getName(), modelPortfolioTemplate.getRiskLevel());
