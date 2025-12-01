@@ -39,7 +39,8 @@ public class InvestmentAssetUniverseService {
             })
             // If market exists, return it
             .flatMap(existingMarket -> {
-                log.info("Market already exists: {}", existingMarket);
+                log.info("Market already exists: {}", existingMarket.getCode());
+                log.debug("Market already exists: {}", existingMarket);
                 return Mono.just(existingMarket);
             })
             // If Mono is empty (market not found), create the market
