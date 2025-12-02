@@ -14,7 +14,7 @@ import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
-import com.backbase.stream.investment.ModelPortfolioTemplate;
+import com.backbase.stream.investment.ModelPortfolio;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collection;
@@ -94,7 +94,7 @@ public class InvestmentPortfolioService {
         if (productType != ProductTypeEnum.SELF_TRADING) {
             adviceEngine = "model_portfolio";
             String externalId = investmentArrangement.getExternalId();
-            List<ModelPortfolioTemplate> modelUuid = findModelUuid(investmentData, externalId, productType);
+            List<ModelPortfolio> modelUuid = findModelUuid(investmentData, externalId, productType);
             if (modelUuid.isEmpty()) {
                 log.error("Data setup issue: Investment portfolio model is not defined for arrangement externalId={}",
                     externalId);
@@ -103,9 +103,9 @@ public class InvestmentPortfolioService {
                         "Data setup issue: Investment does have portfolio model for arrangement externalId=%s",
                         externalId)));
             }
-            ModelPortfolioTemplate modelPortfolioTemplate = modelUuid.get(0);
-            portfolioModel = new InvestorModelPortfolio(modelPortfolioTemplate.getUuid(), null, null,
-                modelPortfolioTemplate.getRiskLevel(), null, null);
+            ModelPortfolio modelPortfolio = modelUuid.get(0);
+            portfolioModel = new InvestorModelPortfolio(modelPortfolio.getUuid(), null, null,
+                modelPortfolio.getRiskLevel(), null, null);
         }
         PortfolioProduct portfolioProduct = new PortfolioProduct(null, adviceEngine, portfolioModel, productType);
 
@@ -115,13 +115,13 @@ public class InvestmentPortfolioService {
         return upsertPortfolioProducts(investmentArrangement, portfolioProduct);
     }
 
-    private static List<ModelPortfolioTemplate> findModelUuid(InvestmentData investmentData, String externalId,
+    private static List<ModelPortfolio> findModelUuid(InvestmentData investmentData, String externalId,
         ProductTypeEnum productType) {
 //        Map<String, List<UUID>> modelsByArrangementExternalId = investmentData.getModelsByArrangementExternalId();
 //        Optional<List<UUID>> modelUuid = modelsByArrangementExternalId.keySet().stream()
 //            .filter(a -> a.endsWith(externalId)).findAny()
 //            .map(modelsByArrangementExternalId::get);
-        return investmentData.getModelPortfolioTemplates().stream()
+        return investmentData.getModelPortfolios().stream()
             .filter(p -> p.getProductTypeEnum() == productType)
             .toList();
     }

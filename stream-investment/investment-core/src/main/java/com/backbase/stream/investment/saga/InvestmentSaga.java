@@ -94,6 +94,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
         return createMarkets(streamTask)
             .flatMap(this::createMarketSpecialDays)
+//            .flatMap(this::upsertAssetCategory)
             .flatMap(this::createAssets)
             .flatMap(this::upsertInvestmentPortfolioModels)
             .flatMap(this::upsertClients)
@@ -127,6 +128,10 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         log.warn("Rollback requested for investment saga but not implemented: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
         return Mono.empty();
+    }
+
+    private Mono<InvestmentTask> upsertAssetCategory(InvestmentTask investmentTask) {
+        return null;
     }
 
     /**
@@ -413,12 +418,13 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
      */
     public Mono<InvestmentTask> createMarketSpecialDays(InvestmentTask investmentTask) {
         final InvestmentData investmentData = investmentTask.getData();
-        int marketSpecialDayCount = investmentData.getMarketSpecialDays() != null ? investmentData.getMarketSpecialDays().size() : 0;
+        int marketSpecialDayCount =
+            investmentData.getMarketSpecialDays() != null ? investmentData.getMarketSpecialDays().size() : 0;
         log.info("Starting investment market special days creation: taskId={}, marketSpecialDayCount={}",
-                investmentTask.getId(), marketSpecialDayCount);
+            investmentTask.getId(), marketSpecialDayCount);
         // Log the start of market special days creation and set task state to IN_PROGRESS
         investmentTask.info(INVESTMENT, OP_CREATE, null, investmentTask.getName(), investmentTask.getId(),
-                PROCESSING_PREFIX + marketSpecialDayCount + " investment markets special day");
+            PROCESSING_PREFIX + marketSpecialDayCount + " investment markets special day");
         investmentTask.setState(State.IN_PROGRESS);
 
         if (marketSpecialDayCount == 0) {
@@ -429,34 +435,34 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
         // Process each market  special day: create or get from asset universe service
         return Flux.fromIterable(investmentData.getMarketSpecialDays())
-                .flatMap(marketSpecialDay -> assetUniverseService.getOrCreateMarketSpecialDay(
-                        new MarketSpecialDayRequest()
-                                .date(marketSpecialDay.getDate())
-                                .market(marketSpecialDay.getMarket())
-                                .sessionStart(marketSpecialDay.getSessionStart())
-                                .sessionEnd(marketSpecialDay.getSessionEnd())
-                                .description(marketSpecialDay.getDescription())
-                ))
-                .collectList() // Collect all created/retrieved market special days into a list
-                .map(marketSpecialDays -> {
-                    // Update the task with the created market special days
-                    investmentTask.setMarketSpecialDays(marketSpecialDays);
-                    // Log completion and set task state to COMPLETED
-                    investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
-                            investmentTask.getId(),
-                            RESULT_CREATED + " " + marketSpecialDays.size() + " Investment Markets Special Days");
-                    investmentTask.setState(State.COMPLETED);
-                    log.info("Successfully created all market special days: taskId={}, marketSpecialDayCount={}",
-                            investmentTask.getId(), marketSpecialDays.size());
-                    return investmentTask;
-                })
-                .doOnError(throwable -> {
-                    log.error("Failed to create/upsert investment market special days: taskId={}, marketSpecialDayCount={}",
-                            investmentTask.getId(), marketSpecialDayCount, throwable);
-                    investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(),
-                            investmentTask.getId(),
-                            "Failed to create investment market special days: " + throwable.getMessage());
-                });
+            .flatMap(marketSpecialDay -> assetUniverseService.getOrCreateMarketSpecialDay(
+                new MarketSpecialDayRequest()
+                    .date(marketSpecialDay.getDate())
+                    .market(marketSpecialDay.getMarket())
+                    .sessionStart(marketSpecialDay.getSessionStart())
+                    .sessionEnd(marketSpecialDay.getSessionEnd())
+                    .description(marketSpecialDay.getDescription())
+            ))
+            .collectList() // Collect all created/retrieved market special days into a list
+            .map(marketSpecialDays -> {
+                // Update the task with the created market special days
+                investmentTask.setMarketSpecialDays(marketSpecialDays);
+                // Log completion and set task state to COMPLETED
+                investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
+                    investmentTask.getId(),
+                    RESULT_CREATED + " " + marketSpecialDays.size() + " Investment Markets Special Days");
+                investmentTask.setState(State.COMPLETED);
+                log.info("Successfully created all market special days: taskId={}, marketSpecialDayCount={}",
+                    investmentTask.getId(), marketSpecialDays.size());
+                return investmentTask;
+            })
+            .doOnError(throwable -> {
+                log.error("Failed to create/upsert investment market special days: taskId={}, marketSpecialDayCount={}",
+                    investmentTask.getId(), marketSpecialDayCount, throwable);
+                investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(),
+                    investmentTask.getId(),
+                    "Failed to create investment market special days: " + throwable.getMessage());
+            });
     }
 
     /**
@@ -497,6 +503,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                             .market(asset.getMarket())
                             .currency(asset.getCurrency())
                             .status(asset.getStatus())
+                            .description(asset.getDescription())
                             .extraData(asset.getExtraData())
                             .assetType(asset.getAssetType())
                             .categories(asset.getCategories() == null

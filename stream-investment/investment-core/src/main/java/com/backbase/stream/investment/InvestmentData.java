@@ -23,7 +23,7 @@ public class InvestmentData {
     private List<ClientUser> clientUsers;
     private List<InvestmentArrangement> investmentArrangements;
     private List<InvestorModelPortfolio> portfolioModels;
-    private List<ModelPortfolioTemplate> modelPortfolioTemplates;
+    private List<ModelPortfolio> modelPortfolios;
     private List<Market> markets;
     private List<MarketSpecialDay> marketSpecialDays;
     private List<Asset> assets;

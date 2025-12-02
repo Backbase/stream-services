@@ -38,11 +38,11 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
      */
     @Bean
     @ConditionalOnMissingBean
-    public ApiClient investmentApiClient(WebClient webClient, ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient investmentApiClient(WebClient interServiceWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
         ObjectMapper mapper = objectMapper.copy();
         mapper.setSerializationInclusion(Include.NON_EMPTY);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        Builder mutate = webClient.mutate();
+        Builder mutate = interServiceWebClient.mutate();
         mutate.codecs(clientCodecConfigurer -> {
             Jackson2JsonEncoder encoder = new Jackson2JsonEncoder(mapper, MediaType.APPLICATION_JSON);
             Jackson2JsonDecoder decoder = new Jackson2JsonDecoder(mapper, MediaType.APPLICATION_JSON);

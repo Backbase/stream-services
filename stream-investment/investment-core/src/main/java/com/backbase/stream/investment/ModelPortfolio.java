@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Builder
 @Data
-public class ModelPortfolioTemplate {
+public class ModelPortfolio {
 
     private UUID uuid;
     private String arrangementExternalId;

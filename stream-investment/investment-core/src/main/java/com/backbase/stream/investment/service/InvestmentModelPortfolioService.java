@@ -45,7 +45,7 @@ public class InvestmentModelPortfolioService {
     private final CustomIntegrationApiService customIntegrationApiService;
 
     public Flux<OASModelPortfolioResponse> upsertModels(InvestmentData investmentData) {
-        return Flux.fromIterable(Objects.requireNonNullElse(investmentData.getModelPortfolioTemplates(), List.of()))
+        return Flux.fromIterable(Objects.requireNonNullElse(investmentData.getModelPortfolios(), List.of()))
             .flatMap(modelPortfolioTemplate -> {
                 log.debug("Upserting investment portfolio model: name={}, riskLevel={}",
                     modelPortfolioTemplate.getName(), modelPortfolioTemplate.getRiskLevel());
