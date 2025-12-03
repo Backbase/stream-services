@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.backbase.stream</groupId>
         <artifactId>stream-legal-entity</artifactId>
-        <version>8.8.0</version>
+        <version>8.9.0</version>
     </parent>
 
     <artifactId>legal-entity-core</artifactId>
