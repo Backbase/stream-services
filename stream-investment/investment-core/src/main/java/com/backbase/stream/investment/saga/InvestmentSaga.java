@@ -1,10 +1,8 @@
 package com.backbase.stream.investment.saga;
 
-import com.backbase.investment.api.service.v1.model.AssetCategory;
 import com.backbase.investment.api.service.v1.model.ClientCreateRequest;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
-import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.Status836Enum;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
@@ -15,7 +13,6 @@ import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.StreamTask.State;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -489,47 +486,18 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             investmentTask.setState(State.COMPLETED);
             return Mono.just(investmentTask);
         }
-
         // Process each asset: create or get from asset universe service
-        return Flux.fromIterable(investmentData.getAssets())
-            .flatMap(asset -> {
-                try {
-                    // Build asset request and invoke service
-                    return assetUniverseService.getOrCreateAsset(
-                        new OASAssetRequestDataRequest()
-                            .name(asset.getName())
-                            .isin(asset.getIsin())
-                            .ticker(asset.getTicker())
-                            .market(asset.getMarket())
-                            .currency(asset.getCurrency())
-                            .status(asset.getStatus())
-                            .description(asset.getDescription())
-                            .extraData(asset.getExtraData())
-                            .assetType(asset.getAssetType())
-                            .categories(asset.getCategories() == null
-                                ? List.of()
-                                : asset.getCategories().stream().map(AssetCategory::getUuid).toList())
-                            .externalId(asset.getExternalId())
-                    );
-                } catch (IOException e) {
-                    final String assetIdentifier =
-                        asset.getIsin() + "_" + asset.getMarket() + "_" + asset.getCurrency();
-                    log.error("Failed to create asset with asset identifier {} : {}", assetIdentifier, e.getMessage(),
-                        e);
-                    return Mono.error(e);
-                }
-            })
-            .collectList() // Collect all created/retrieved assets into a list
-            .map(assets -> {
+        return assetUniverseService.createAssets(investmentData.getAssets())
+            .collectList()
+            .doOnSuccess(assets -> {
                 investmentTask.setAssets(assets);
-                // Log completion and set task state to COMPLETED
                 investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
                     investmentTask.getId(),
                     RESULT_CREATED + " " + assets.size() + " Investment Assets");
                 investmentTask.setState(State.COMPLETED);
                 log.info("Successfully created all assets: taskId={}, assetCount={}",
                     investmentTask.getId(), assets.size());
-                return investmentTask;
+
             })
             .doOnError(throwable -> {
                 log.error("Failed to create investment assets: taskId={}, assetCount={}",
@@ -537,7 +505,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(),
                     investmentTask.getId(),
                     "Failed to create investment assets: " + throwable.getMessage());
-            });
+            })
+            .map(a -> investmentTask);
     }
 
 }

@@ -2,20 +2,28 @@ package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.Asset;
+import com.backbase.investment.api.service.v1.model.AssetCategory;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
-
+import com.backbase.investment.api.service.v1.model.PaginatedAssetCategoryList;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,6 +31,7 @@ public class InvestmentAssetUniverseService {
 
     private final AssetUniverseApi assetUniverseApi;
     private final CustomIntegrationApiService customIntegrationApiService;
+    private final AssetMapper assetMapper = Mappers.getMapper(AssetMapper.class);
 
     /**
      * Gets an existing market by code, or creates it if not found (404). Handles 404 NOT_FOUND from getMarket by
@@ -64,7 +73,7 @@ public class InvestmentAssetUniverseService {
      * @return Mono<Asset> representing the existing or newly created asset
      * @throws IOException if an I/O error occurs
      */
-    public Mono<Asset> getOrCreateAsset(final OASAssetRequestDataRequest assetRequest) throws IOException {
+    public Mono<Asset> getOrCreateAsset(final OASAssetRequestDataRequest assetRequest) {
         log.debug("Creating asset: {}", assetRequest);
 
         // Build a unique asset identifier using ISIN, market, and currency
@@ -155,4 +164,44 @@ public class InvestmentAssetUniverseService {
                 })
             );
     }
+
+    public Flux<com.backbase.stream.investment.Asset> createAssets(List<com.backbase.stream.investment.Asset> assets) {
+        if (CollectionUtils.isEmpty(assets)) {
+            return Flux.empty();
+        }
+        return assetUniverseApi.listAssetCategories(null,
+                null, null, null, null, null)
+            .filter(Objects::nonNull)
+            .map(PaginatedAssetCategoryList::getResults)
+            .filter(Objects::nonNull)
+            .flatMapMany(categories -> {
+                Map<String, UUID> categoryIdByCode = categories.stream()
+                    .collect(Collectors.toMap(AssetCategory::getCode, AssetCategory::getUuid));
+
+                return Flux.fromIterable(assets)
+                    .flatMap(asset -> {
+                        OASAssetRequestDataRequest assetRequest = assetMapper.map(asset, categoryIdByCode);
+                        return this.getOrCreateAsset(assetRequest)
+                            .doOnSuccess(
+                                createdMarketSpecialDay -> log.info("Created market special day: {}",
+                                    createdMarketSpecialDay))
+                            .doOnError(error -> {
+                                String assetIdentifier = "1";
+//                                asset.getIsin() + "_" + asset.getMarket() + "_" + asset.getCurrency();
+                                if (error instanceof WebClientResponseException) {
+                                    WebClientResponseException w = (WebClientResponseException) error;
+                                    log.error("Error creating market special day : {} : HTTP {} -> {}",
+                                        assetRequest, w.getStatusCode(), w.getResponseBodyAsString());
+                                } else {
+                                    log.error("Failed to create asset with asset identifier {} : {}", 1,
+                                        error.getMessage(),
+                                        error);
+                                }
+
+                            })
+                            .map(assetMapper::map);
+                    });
+            });
+    }
+
 }
