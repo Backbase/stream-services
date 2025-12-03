@@ -1,8 +1,8 @@
 package com.backbase.stream.transaction;
 
-import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
+import com.backbase.dbs.transaction.api.service.v3.TransactionPresentationServiceApi;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostRequestBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.exception.StreamTaskException;
 import lombok.extern.slf4j.Slf4j;

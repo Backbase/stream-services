@@ -1,16 +1,15 @@
 package com.backbase.stream;
 
-import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
-import com.backbase.dbs.transaction.api.service.v2.model.ArrangementItem;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionItem;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsDeleteRequestBody;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPatchRequestBody;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody;
+import com.backbase.dbs.transaction.api.service.v3.TransactionPresentationServiceApi;
+import com.backbase.dbs.transaction.api.service.v3.model.ArrangementItem;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionItem;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsDeleteRequestBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPatchRequestBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostRequestBody;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionUnitOfWorkExecutor;
 import com.backbase.stream.transaction.TransactionsQuery;
 import com.backbase.stream.worker.model.UnitOfWork;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
@@ -89,13 +88,13 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Flux<TransactionItem> getTransactions(TransactionsQuery transactionsQuery) {
         return transactionPresentationServiceApi.getTransactions(
-            null, // xTransactionsUserId
-            null, // xTransactionsServiceAgreementId
-            null, // xTransactionsArrangementId
-            transactionsQuery.getAmountGreaterThan(),
-            transactionsQuery.getAmountLessThan(),
             transactionsQuery.getBookingDateGreaterThan(),
             transactionsQuery.getBookingDateLessThan(),
+            null, // xTransactionsUserId
+            null, // xTransactionsInternalUserId
+            null, // xTransactionsServiceAgreementId
+            transactionsQuery.getAmountGreaterThan(),
+            transactionsQuery.getAmountLessThan(),
             transactionsQuery.getTypes(),
             transactionsQuery.getDescription(),
             transactionsQuery.getReference(),

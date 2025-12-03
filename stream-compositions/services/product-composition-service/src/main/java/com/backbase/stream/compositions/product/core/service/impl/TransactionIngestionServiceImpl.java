@@ -2,8 +2,8 @@ package com.backbase.stream.compositions.product.core.service.impl;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
-import com.backbase.dbs.transaction.api.service.v2.model.ArrangementItem;
+import com.backbase.dbs.transaction.api.service.v3.TransactionPresentationServiceApi;
+import com.backbase.dbs.transaction.api.service.v3.model.ArrangementItem;
 import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsPullEvent;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.product.core.mapper.EventRequestsMapper;

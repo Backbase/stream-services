@@ -5,7 +5,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody;
 import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsPushEvent;
 import com.backbase.stream.compositions.transaction.core.mapper.TransactionMapper;
 import com.backbase.stream.compositions.transaction.core.model.TransactionIngestResponse;

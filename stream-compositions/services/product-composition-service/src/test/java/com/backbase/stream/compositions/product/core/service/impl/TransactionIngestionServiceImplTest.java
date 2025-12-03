@@ -6,7 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
+import com.backbase.dbs.transaction.api.service.v3.TransactionPresentationServiceApi;
 import com.backbase.stream.compositions.product.core.config.ProductConfigurationProperties;
 import com.backbase.stream.compositions.transaction.client.model.TransactionPullIngestionRequest;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.backbase.stream.compositions.transaction.core.service;
 
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody;
 import reactor.core.publisher.Mono;
 
 import java.util.List;

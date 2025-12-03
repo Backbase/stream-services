@@ -1,7 +1,7 @@
 package com.backbase.stream.transaction;
 
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostRequestBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.List;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package com.backbase.stream.clients.config;
 
 import com.backbase.dbs.transaction.api.service.ApiClient;
-import com.backbase.dbs.transaction.api.service.v2.TransactionPresentationServiceApi;
+import com.backbase.dbs.transaction.api.service.v3.TransactionPresentationServiceApi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
