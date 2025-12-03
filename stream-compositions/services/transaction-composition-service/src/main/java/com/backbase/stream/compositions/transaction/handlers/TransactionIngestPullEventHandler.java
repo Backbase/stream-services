@@ -3,7 +3,7 @@ package com.backbase.stream.compositions.transaction.handlers;
 import com.backbase.buildingblocks.backend.communication.event.EnvelopedEvent;
 import com.backbase.buildingblocks.backend.communication.event.handler.EventHandler;
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.TransactionsCompletedEvent;
 import com.backbase.stream.compositions.events.egress.event.spec.v1.TransactionsFailedEvent;
 import com.backbase.stream.compositions.events.ingress.event.spec.v1.TransactionsPullEvent;

@@ -1,6 +1,6 @@
 package com.backbase.stream;
 
-import com.backbase.dbs.transaction.api.service.v2.model.*;
+import com.backbase.dbs.transaction.api.service.v3.model.*;
 import com.backbase.stream.transaction.TransactionTask;
 import com.backbase.stream.transaction.TransactionsQuery;
 import com.backbase.stream.worker.model.UnitOfWork;

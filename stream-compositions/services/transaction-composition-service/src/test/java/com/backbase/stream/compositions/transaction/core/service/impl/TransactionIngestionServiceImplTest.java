@@ -1,7 +1,7 @@
 package com.backbase.stream.compositions.transaction.core.service.impl;
 
 import com.backbase.buildingblocks.backend.communication.event.proxy.EventBus;
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody;
 import com.backbase.stream.TransactionService;
 import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties;
 import com.backbase.stream.compositions.transaction.core.config.TransactionConfigurationProperties.Cursor;
@@ -245,7 +245,7 @@ class TransactionIngestionServiceImplTest {
         TransactionIngestPushRequest request = TransactionIngestPushRequest.builder()
                 .arrangementId("id1")
                 .transactions(Collections.singletonList(
-                        new com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostRequestBody()
+                        new com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostRequestBody()
                                 .arrangementId("id1")
                                 .externalArrangementId("extId1")
                                 .description("Transaction Desc")))

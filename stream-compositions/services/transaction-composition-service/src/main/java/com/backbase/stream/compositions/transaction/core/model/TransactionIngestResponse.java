@@ -1,6 +1,6 @@
 package com.backbase.stream.compositions.transaction.core.model;
 
-import com.backbase.dbs.transaction.api.service.v2.model.TransactionsPostResponseBody;
+import com.backbase.dbs.transaction.api.service.v3.model.TransactionsPostResponseBody;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
