@@ -2,13 +2,27 @@ package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.Asset;
+import com.backbase.investment.api.service.v1.model.AssetCategory;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
+import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
+import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
+import com.backbase.investment.api.service.v1.model.PaginatedAssetCategoryList;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -17,6 +31,7 @@ public class InvestmentAssetUniverseService {
 
     private final AssetUniverseApi assetUniverseApi;
     private final CustomIntegrationApiService customIntegrationApiService;
+    private final AssetMapper assetMapper = Mappers.getMapper(AssetMapper.class);
 
     /**
      * Gets an existing market by code, or creates it if not found (404). Handles 404 NOT_FOUND from getMarket by
@@ -39,14 +54,14 @@ public class InvestmentAssetUniverseService {
             })
             // If market exists, return it
             .flatMap(existingMarket -> {
-                log.info("Market already exists: {}", existingMarket);
+                log.info("Market already exists: {}", existingMarket.getCode());
+                log.debug("Market already exists: {}", existingMarket);
                 return Mono.just(existingMarket);
             })
             // If Mono is empty (market not found), create the market
-            .switchIfEmpty(
-                assetUniverseApi.createMarket(marketRequest)
-                    .doOnSuccess(createdMarket -> log.info("Created market: {}", createdMarket))
-                    .doOnError(error -> log.error("Error creating market: {}", error.getMessage(), error))
+            .switchIfEmpty(assetUniverseApi.createMarket(marketRequest)
+                .doOnSuccess(createdMarket -> log.info("Created market: {}", createdMarket))
+                .doOnError(error -> log.error("Error creating market: {}", error.getMessage(), error))
             );
     }
 
@@ -58,7 +73,7 @@ public class InvestmentAssetUniverseService {
      * @return Mono<Asset> representing the existing or newly created asset
      * @throws IOException if an I/O error occurs
      */
-    public Mono<Asset> getOrCreateAsset(final OASAssetRequestDataRequest assetRequest) throws IOException {
+    public Mono<Asset> getOrCreateAsset(final OASAssetRequestDataRequest assetRequest) {
         log.debug("Creating asset: {}", assetRequest);
 
         // Build a unique asset identifier using ISIN, market, and currency
@@ -82,20 +97,111 @@ public class InvestmentAssetUniverseService {
                 return Mono.just(existingAsset);
             })
             // If Mono is empty (asset not found), create the asset
-            .switchIfEmpty(
-                customIntegrationApiService.createAsset(assetRequest)
-                    .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
-                    .doOnError(error -> {
-                        if (error instanceof WebClientResponseException) {
-                            WebClientResponseException w = (WebClientResponseException) error;
-                            log.error("Error creating asset with assetIdentifier: {} : HTTP {} -> {}", assetIdentifier,
-                                w.getStatusCode(), w.getResponseBodyAsString());
-                        } else {
-                            log.error("Error creating asset with assetIdentifier: {} : {}", assetIdentifier,
-                                error.getMessage(), error);
-                        }
-                    })
+            .switchIfEmpty(customIntegrationApiService.createAsset(assetRequest)
+                .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
+                .doOnError(error -> {
+                    if (error instanceof WebClientResponseException) {
+                        WebClientResponseException w = (WebClientResponseException) error;
+                        log.error("Error creating asset with assetIdentifier: {} : HTTP {} -> {}", assetIdentifier,
+                            w.getStatusCode(), w.getResponseBodyAsString());
+                    } else {
+                        log.error("Error creating asset with assetIdentifier: {} : {}", assetIdentifier,
+                            error.getMessage(), error);
+                    }
+                })
             );
+    }
+
+    /**
+     * Gets an existing market special day by date and market, or creates it if not found. Handles 404 or empty results
+     * by creating the market special day.
+     *
+     * @param marketSpecialDayRequest the request containing market and date details
+     * @return Mono\<MarketSpecialDay\> representing the existing or newly created market special day
+     */
+    public Mono<MarketSpecialDay> getOrCreateMarketSpecialDay(MarketSpecialDayRequest marketSpecialDayRequest) {
+        log.debug("Creating market special day: {}", marketSpecialDayRequest);
+        LocalDate date = marketSpecialDayRequest.getDate();
+
+        // Fetch market special days for the given date
+        return assetUniverseApi.listMarketSpecialDay(date, date, 100, 0)
+            .flatMap(paginatedMarketSpecialDayList -> {
+                List<MarketSpecialDay> marketSpecialDayList = paginatedMarketSpecialDayList.getResults();
+
+                // If no special days exist, return empty to trigger creation
+                if (marketSpecialDayList.isEmpty()) {
+                    log.debug("No market special day exists for day: {}", marketSpecialDayRequest);
+                    return Mono.empty();
+                } else {
+                    // Find a matching special day for the requested market
+                    Optional<MarketSpecialDay> matchingSpecialDay = marketSpecialDayList.stream()
+                        .filter(msd -> marketSpecialDayRequest.getMarket().equals(msd.getMarket()))
+                        .findFirst();
+                    if (matchingSpecialDay.isPresent()) {
+                        log.info("Market special day already exists for day: {}", marketSpecialDayRequest);
+                        return Mono.just(matchingSpecialDay.get());
+                    } else {
+                        log.debug("No market special day exists for day: {}", marketSpecialDayRequest);
+                        return Mono.empty();
+                    }
+
+                }
+            })
+            // If Mono is empty (market special day not found), create the market special day
+            .switchIfEmpty(assetUniverseApi.createMarketSpecialDay(marketSpecialDayRequest)
+                .doOnSuccess(
+                    createdMarketSpecialDay -> log.info("Created market special day: {}", createdMarketSpecialDay))
+                .doOnError(error -> {
+                    if (error instanceof WebClientResponseException) {
+                        WebClientResponseException w = (WebClientResponseException) error;
+                        log.error("Error creating market special day : {} : HTTP {} -> {}", marketSpecialDayRequest,
+                            w.getStatusCode(), w.getResponseBodyAsString());
+                    } else {
+                        log.error("Error creating market special day {} : {}", marketSpecialDayRequest,
+                            error.getMessage(), error);
+                    }
+
+                })
+            );
+    }
+
+    public Flux<com.backbase.stream.investment.Asset> createAssets(List<com.backbase.stream.investment.Asset> assets) {
+        if (CollectionUtils.isEmpty(assets)) {
+            return Flux.empty();
+        }
+        return assetUniverseApi.listAssetCategories(null,
+                null, null, null, null, null)
+            .filter(Objects::nonNull)
+            .map(PaginatedAssetCategoryList::getResults)
+            .filter(Objects::nonNull)
+            .flatMapMany(categories -> {
+                Map<String, UUID> categoryIdByCode = categories.stream()
+                    .collect(Collectors.toMap(AssetCategory::getCode, AssetCategory::getUuid));
+
+                return Flux.fromIterable(assets)
+                    .flatMap(asset -> {
+                        OASAssetRequestDataRequest assetRequest = assetMapper.map(asset, categoryIdByCode);
+                        return this.getOrCreateAsset(assetRequest)
+                            .doOnSuccess(
+                                createdMarketSpecialDay -> log.info("Created market special day: {}",
+                                    createdMarketSpecialDay))
+                            .doOnError(error -> {
+                                String assetIdentifier = "1";
+//                                asset.getIsin() + "_" + asset.getMarket() + "_" + asset.getCurrency();
+                                if (error instanceof WebClientResponseException) {
+                                    WebClientResponseException w = (WebClientResponseException) error;
+                                    log.error("Error creating market special day : {} : HTTP {} -> {}",
+                                        assetRequest, w.getStatusCode(), w.getResponseBodyAsString());
+                                } else {
+                                    log.error("Failed to create asset with asset identifier {} : {}", 1,
+                                        error.getMessage(),
+                                        error);
+                                }
+
+                            })
+                            .map(assetMapper::map);
+                    });
+            });
     }
 
 }

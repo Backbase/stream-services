@@ -1,7 +1,7 @@
 package com.backbase.stream.investment;
 
-import com.backbase.investment.api.service.v1.model.Asset;
 import com.backbase.investment.api.service.v1.model.Market;
+import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
 import com.backbase.stream.worker.model.StreamTask;
 import java.util.List;
 import lombok.Data;
@@ -23,16 +23,19 @@ public class InvestmentTask extends StreamTask {
         return "investment";
     }
 
-    public InvestmentTask data(ClientUser clientUser) {
-
-        return null;
-    }
-
     public void data(List<ClientUser> clients) {
         data.setClientUsers(clients);
     }
 
-    public void setMarkets(List<Market> markets) { data.setMarkets(markets); }
+    public void setMarkets(List<Market> markets) {
+        data.setMarkets(markets);
+    }
 
-    public void setAssets(List<Asset> assets) { data.setAssets(assets); }
+    public void setMarketSpecialDays(List<MarketSpecialDay> marketSpecialDays) {
+        data.setMarketSpecialDays(marketSpecialDays);
+    }
+
+    public void setAssets(List<Asset> assets) {
+        data.setAssets(assets);
+    }
 }

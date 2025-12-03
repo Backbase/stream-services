@@ -11,6 +11,7 @@ import com.backbase.stream.investment.saga.InvestmentSaga;
 import com.backbase.stream.investment.service.CustomIntegrationApiService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
+import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -42,10 +43,8 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi,
-        InvestmentProductsApi investmentProductsApi, FinancialAdviceApi financialAdviceApi,
-        CustomIntegrationApiService customIntegrationApiService) {
-        return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, financialAdviceApi,
-            customIntegrationApiService);
+        InvestmentProductsApi investmentProductsApi) {
+        return new InvestmentPortfolioService(investmentProductsApi, portfolioApi);
     }
 
     @Bean
@@ -55,10 +54,18 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    public InvestmentModelPortfolioService investmentModelPortfolioService(FinancialAdviceApi financialAdviceApi,
+        CustomIntegrationApiService customIntegrationApiService) {
+        return new InvestmentModelPortfolioService(financialAdviceApi, customIntegrationApiService);
+    }
+
+    @Bean
     public InvestmentSaga investmentSaga(InvestmentClientService investmentClientService,
         InvestmentPortfolioService investmentPortfolioService,
+        InvestmentModelPortfolioService investmentModelPortfolioService,
         InvestmentAssetUniverseService investmentAssetUniverseService) {
-        return new InvestmentSaga(investmentClientService, investmentPortfolioService, investmentAssetUniverseService);
+        return new InvestmentSaga(investmentClientService, investmentPortfolioService, investmentModelPortfolioService,
+            investmentAssetUniverseService);
     }
 
 }
