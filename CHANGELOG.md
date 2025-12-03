@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [8.1.2](https://github.com/Backbase/stream-services/compare/7.8.0...8.0.0)
+### Changed
+- Update Transaction API to version 3 and adjust related models
+
 ## [8.0.0](https://github.com/Backbase/stream-services/compare/7.8.0...8.0.0)
 ### Changed
 - Remove usages of deprecated access-control service-api/v3
