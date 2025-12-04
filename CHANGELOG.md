@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - Upgraded to bb bom 2025.10.2
 
+## [8.8.0](https://github.com/Backbase/stream-services/compare/8.7.0...8.8.0)
+### Changed
+- Investment service
+  - support market special days
+  - fix webclient setup for investment service api's
+  - add a templates for portfolio product models 
+
 ## [8.7.0](https://github.com/Backbase/stream-services/compare/8.6.0...8.7.0)
 ### Changed
 - Investment service configuration
