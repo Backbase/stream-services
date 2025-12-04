@@ -1,5 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
+## [8.9.0](https://github.com/Backbase/stream-services/compare/8.6.0...8.7.0)
+### Changed
+- Updated to Backbase BOM 2025.10.2
+
 
 ## [8.7.0](https://github.com/Backbase/stream-services/compare/8.6.0...8.7.0)
 ### Changed
