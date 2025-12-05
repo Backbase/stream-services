@@ -30,7 +30,22 @@ public record Asset(
     URI logo,
     String externalId,
     String description
-) {
+) implements AssetKey {
+
+    @Override
+    public String getIsin() {
+        return isin;
+    }
+
+    @Override
+    public String getMarket() {
+        return market;
+    }
+
+    @Override
+    public String getCurrency() {
+        return currency;
+    }
 
     /**
      * Creates a record from the generated API model.

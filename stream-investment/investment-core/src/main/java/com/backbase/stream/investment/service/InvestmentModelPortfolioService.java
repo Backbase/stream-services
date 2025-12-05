@@ -55,7 +55,7 @@ public class InvestmentModelPortfolioService {
                     .riskLevel(modelPortfolioTemplate.getRiskLevel())
                     .allocation(modelPortfolioTemplate.getAllocations().stream()
                         .map(m -> new OASAssetModelPortfolioRequestRequest()
-                            .asset(m.asset().getMap())
+                            .asset(m.asset().getAssetMap())
                             .weight(m.weight()))
                         .toList())
                     .cashWeight(modelPortfolioTemplate.getCashWeight());

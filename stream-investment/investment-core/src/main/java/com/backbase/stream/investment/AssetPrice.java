@@ -1,6 +1,6 @@
 package com.backbase.stream.investment;
 
-public record ModelAsset(String isin, String market, String currency) implements AssetKey {
+public record AssetPrice(String isin, String market, String currency, double price) implements AssetKey {
 
     @Override
     public String getIsin() {
