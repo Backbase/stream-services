@@ -9,6 +9,7 @@ import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.investment.saga.InvestmentSaga;
 import com.backbase.stream.investment.service.CustomIntegrationApiService;
+import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
@@ -60,12 +61,18 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    public InvestmentAssetPriceService investmentAssetPriceService(AssetUniverseApi assetUniverseApi) {
+        return new InvestmentAssetPriceService(assetUniverseApi);
+    }
+
+    @Bean
     public InvestmentSaga investmentSaga(InvestmentClientService investmentClientService,
         InvestmentPortfolioService investmentPortfolioService,
         InvestmentModelPortfolioService investmentModelPortfolioService,
-        InvestmentAssetUniverseService investmentAssetUniverseService) {
+        InvestmentAssetUniverseService investmentAssetUniverseService,
+        InvestmentAssetPriceService investmentAssetPriceService) {
         return new InvestmentSaga(investmentClientService, investmentPortfolioService, investmentModelPortfolioService,
-            investmentAssetUniverseService);
+            investmentAssetUniverseService, investmentAssetPriceService);
     }
 
 }

@@ -73,7 +73,7 @@ public class InvestmentAssetUniverseService {
      * @return Mono<Asset> representing the existing or newly created asset
      * @throws IOException if an I/O error occurs
      */
-    public Mono<Asset> getOrCreateAsset(final OASAssetRequestDataRequest assetRequest) {
+    public Mono<Asset> getOrCreateAsset(OASAssetRequestDataRequest assetRequest) {
         log.debug("Creating asset: {}", assetRequest);
 
         // Build a unique asset identifier using ISIN, market, and currency
@@ -100,8 +100,7 @@ public class InvestmentAssetUniverseService {
             .switchIfEmpty(customIntegrationApiService.createAsset(assetRequest)
                 .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
                 .doOnError(error -> {
-                    if (error instanceof WebClientResponseException) {
-                        WebClientResponseException w = (WebClientResponseException) error;
+                    if (error instanceof WebClientResponseException w) {
                         log.error("Error creating asset with assetIdentifier: {} : HTTP {} -> {}", assetIdentifier,
                             w.getStatusCode(), w.getResponseBodyAsString());
                     } else {
@@ -181,25 +180,7 @@ public class InvestmentAssetUniverseService {
                 return Flux.fromIterable(assets)
                     .flatMap(asset -> {
                         OASAssetRequestDataRequest assetRequest = assetMapper.map(asset, categoryIdByCode);
-                        return this.getOrCreateAsset(assetRequest)
-                            .doOnSuccess(
-                                createdMarketSpecialDay -> log.info("Created market special day: {}",
-                                    createdMarketSpecialDay))
-                            .doOnError(error -> {
-                                String assetIdentifier = "1";
-//                                asset.getIsin() + "_" + asset.getMarket() + "_" + asset.getCurrency();
-                                if (error instanceof WebClientResponseException) {
-                                    WebClientResponseException w = (WebClientResponseException) error;
-                                    log.error("Error creating market special day : {} : HTTP {} -> {}",
-                                        assetRequest, w.getStatusCode(), w.getResponseBodyAsString());
-                                } else {
-                                    log.error("Failed to create asset with asset identifier {} : {}", 1,
-                                        error.getMessage(),
-                                        error);
-                                }
-
-                            })
-                            .map(assetMapper::map);
+                        return this.getOrCreateAsset(assetRequest).map(assetMapper::map);
                     });
             });
     }

@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,6 +28,7 @@ public class InvestmentData {
     private List<Market> markets;
     private List<MarketSpecialDay> marketSpecialDays;
     private List<Asset> assets;
+    private List<AssetPrice> assetPrices;
 
     public Map<String, List<UUID>> getClientsByLeExternalId() {
         Map<String, List<UUID>> clientsByLeExternalId = new HashMap<>();
@@ -33,6 +36,11 @@ public class InvestmentData {
             c -> clientsByLeExternalId.computeIfAbsent(c.getLegalEntityExternalId(), l -> new ArrayList<>())
                 .add(c.getInvestmentClientId()));
         return clientsByLeExternalId;
+    }
+
+    public Map<String, Double> getPriceByAsset() {
+        return Objects.requireNonNullElse(assetPrices, List.<AssetPrice>of()).stream()
+            .collect(Collectors.toMap(AssetKey::getKeyString, AssetPrice::price));
     }
 
 }

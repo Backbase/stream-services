@@ -6,6 +6,7 @@ import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.investment.api.service.v1.model.Status836Enum;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
+import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
@@ -67,6 +68,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     private final InvestmentPortfolioService investmentPortfolioService;
     private final InvestmentModelPortfolioService investmentModelPortfolioService;
     private final InvestmentAssetUniverseService assetUniverseService;
+    private final InvestmentAssetPriceService investmentAssetPriceService;
 
     /**
      * Executes the complete investment ingestion saga workflow.
@@ -88,27 +90,33 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     public Mono<InvestmentTask> executeTask(InvestmentTask streamTask) {
         log.info("Starting investment saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
+        return
+            createMarkets(streamTask)
+                .flatMap(this::createMarketSpecialDays)
+                .flatMap(this::createAssets)
+                .flatMap(this::upsertPrices)
+                .flatMap(this::upsertInvestmentPortfolioModels)
+                .flatMap(this::upsertClients)
+                .flatMap(this::upsertInvestmentProducts)
+                .flatMap(this::upsertInvestmentPortfolios)
+                .doOnSuccess(completedTask -> log.info(
+                    "Successfully completed investment saga: taskId={}, taskName={}, state={}",
+                    completedTask.getId(), completedTask.getName(), completedTask.getState()))
+                .doOnError(throwable -> {
+                    log.error("Failed to execute investment saga: taskId={}, taskName={}",
+                        streamTask.getId(), streamTask.getName(), throwable);
+                    streamTask.error(INVESTMENT, OP_UPSERT, RESULT_FAILED,
+                        streamTask.getName(), streamTask.getId(),
+                        "Investment saga failed: " + throwable.getMessage());
+                    streamTask.setState(State.FAILED);
+                })
+                .onErrorResume(throwable -> Mono.just(streamTask));
+    }
 
-        return createMarkets(streamTask)
-            .flatMap(this::createMarketSpecialDays)
-//            .flatMap(this::upsertAssetCategory)
-            .flatMap(this::createAssets)
-            .flatMap(this::upsertInvestmentPortfolioModels)
-            .flatMap(this::upsertClients)
-            .flatMap(this::upsertInvestmentProducts)
-            .flatMap(this::upsertInvestmentPortfolios)
-            .doOnSuccess(completedTask -> log.info(
-                "Successfully completed investment saga: taskId={}, taskName={}, state={}",
-                completedTask.getId(), completedTask.getName(), completedTask.getState()))
-            .doOnError(throwable -> {
-                log.error("Failed to execute investment saga: taskId={}, taskName={}",
-                    streamTask.getId(), streamTask.getName(), throwable);
-                streamTask.error(INVESTMENT, OP_UPSERT, RESULT_FAILED,
-                    streamTask.getName(), streamTask.getId(),
-                    "Investment saga failed: " + throwable.getMessage());
-                streamTask.setState(State.FAILED);
-            })
-            .onErrorResume(throwable -> Mono.just(streamTask));
+    private Mono<InvestmentTask> upsertPrices(InvestmentTask investmentTask) {
+        return investmentAssetPriceService.ingestPrices(investmentTask.getData().getAssets(), investmentTask.getData()
+                .getPriceByAsset())
+            .map(o -> investmentTask);
     }
 
     /**
@@ -356,8 +364,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             });
     }
 
-    public Mono<InvestmentTask> createMarkets(final InvestmentTask investmentTask) {
-        final InvestmentData investmentData = investmentTask.getData();
+    public Mono<InvestmentTask> createMarkets(InvestmentTask investmentTask) {
+        InvestmentData investmentData = investmentTask.getData();
         int marketCount = investmentData.getMarkets() != null ? investmentData.getMarkets().size() : 0;
         log.info("Starting investment market creation: taskId={}, marketCount={}",
             investmentTask.getId(), marketCount);
@@ -414,7 +422,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
      * @return Mono emitting the updated investment task with market special days set
      */
     public Mono<InvestmentTask> createMarketSpecialDays(InvestmentTask investmentTask) {
-        final InvestmentData investmentData = investmentTask.getData();
+        InvestmentData investmentData = investmentTask.getData();
         int marketSpecialDayCount =
             investmentData.getMarketSpecialDays() != null ? investmentData.getMarketSpecialDays().size() : 0;
         log.info("Starting investment market special days creation: taskId={}, marketSpecialDayCount={}",
@@ -469,8 +477,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
      * @param investmentTask the investment task containing asset data
      * @return Mono<InvestmentTask> with updated assets and state
      */
-    public Mono<InvestmentTask> createAssets(final InvestmentTask investmentTask) {
-        final InvestmentData investmentData = investmentTask.getData();
+    public Mono<InvestmentTask> createAssets(InvestmentTask investmentTask) {
+        InvestmentData investmentData = investmentTask.getData();
         int assetCount = investmentData.getAssets() != null ? investmentData.getAssets().size() : 0;
 
         log.info("Starting investment asset creation: taskId={}, assetCount={}",
