@@ -2,9 +2,12 @@ package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.OASCreatePriceRequest;
+import com.backbase.investment.api.service.v1.model.OASPrice;
 import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.TypeEnum;
 import com.backbase.stream.investment.Asset;
+import com.backbase.stream.investment.AssetPrice;
+import com.backbase.stream.investment.RandomParam;
 import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,7 +16,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,45 +30,51 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentAssetPriceService {
 
-    private final AssetUniverseApi assetUniverseApi;
+    public static final double DEFAULT_START_PRICE = 100d;
+    public static final RandomParam defaultRandomParam = new RandomParam(0.99156, 1.011);
     private final SecureRandom random = new SecureRandom();
 
-    public Mono<List<Asset>> ingestPrices(List<Asset> assets, Map<String, Double> priceByAsset) {
+    private final AssetUniverseApi assetUniverseApi;
+
+    public Mono<List<Asset>> ingestPrices(List<Asset> assets, Map<String, AssetPrice> priceByAsset) {
         return Flux.fromIterable(Objects.requireNonNullElse(assets, List.of()))
-            .flatMap(a -> {
-                LocalDate to = LocalDate.now();
+            .flatMap(asset -> {
+                LocalDate yesterday = LocalDate.now().minusDays(1);
                 LocalDate from = LocalDate.now().minusYears(1);
                 // we get only last days price
-                return assetUniverseApi.listAssetClosePrices(a.currency(), to.minusDays(1), to, null, null, null, null,
-                        a.isin(), 2, a.market(), null, null)
+                return assetUniverseApi.listAssetClosePrices(asset.currency(), yesterday.minusDays(1), yesterday, null,
+                        null, null, null,
+                        asset.isin(), 2, asset.market(), null, null)
                     .filter(Objects::nonNull)
                     .map(PaginatedOASPriceList::getResults)
                     .filter(Objects::nonNull)
                     .flatMap(prices -> {
-                        Double lastPrice = prices.isEmpty() ? findPrice(priceByAsset, a)
-                            : prices.getLast().getAmount();
+                        RandomPriceParam priceParam = findPrice(priceByAsset, asset, getLastPrice(prices));
                         LocalDate lastDate =
                             prices.isEmpty() ? from : prices.getLast().getDatetime().toLocalDate().plusDays(1);
-
+                        lastDate = from;
                         List<LocalDate> daysToCreate = Stream.iterate(lastDate,
-                                offsetDate -> offsetDate.isBefore(to),
+                                offsetDate -> offsetDate.isBefore(yesterday),
                                 offsetDateTime -> offsetDateTime.plusDays(1))
                             .sorted(Comparator.reverseOrder())
                             .toList();
                         List<OASCreatePriceRequest> oaSCreatePriceRequest = generateHistoryPrices(daysToCreate,
-                            lastPrice, a);
+                            priceParam, asset);
                         return assetUniverseApi.bulkCreateAssetClosePrice(
                                 oaSCreatePriceRequest,
                                 null, null, null)
                             .collectList()
                             .doOnSuccess(created -> log.info(
-                                "Successfully create prices: count={}", created.size()))
+                                "Successfully create prices: count={} for asset ({})", created.size(),
+                                asset.getKeyString()))
                             .doOnError(throwable -> {
                                 if (throwable instanceof WebClientResponseException ex) {
-                                    log.error("Failed to create asset price: status={}, body={}", ex.getStatusCode(),
+                                    log.error("Failed to create asset({}) price: status={}, body={}",
+                                        asset.getKeyString(),
+                                        ex.getStatusCode(),
                                         ex.getResponseBodyAsString(), ex);
                                 } else {
-                                    log.error("Failed because {}", throwable, throwable);
+                                    log.error("Failed prices creation for asset({})", asset.getKeyString(), throwable);
                                 }
                             });
                         /*return Flux.fromIterable(oaSCreatePriceRequest)
@@ -80,21 +91,38 @@ public class InvestmentAssetPriceService {
                                 }
                             });*/
                     })
-                    .map(o -> a);
+                    .map(o -> asset);
             })
             .collectList();
     }
 
-    private static Double findPrice(Map<String, Double> priceByAsset, Asset a) {
-        return priceByAsset.getOrDefault(a.getKeyString(), 100d);
+    private static Double getLastPrice(List<OASPrice> prices) {
+        return Optional.ofNullable(prices)
+            .filter(Predicate.not(List::isEmpty))
+            .map(List::getLast)
+            .map(OASPrice::getAmount)
+            .orElse(null);
     }
 
-    private List<OASCreatePriceRequest> generateHistoryPrices(List<LocalDate> daysToCreate, double price, Asset asset) {
-        AtomicReference<Double> startValuation = new AtomicReference<>(price);
+    private static RandomPriceParam findPrice(Map<String, AssetPrice> priceByAsset, Asset a, Double lastPrice) {
+        AssetPrice configAssetPrice = priceByAsset.get(a.getKeyString());
+        RandomParam randomParam = Optional.ofNullable(configAssetPrice)
+            .map(AssetPrice::randomParam)
+            .orElse(defaultRandomParam);
+        double price = Optional.ofNullable(lastPrice)
+            .or(() -> Optional.ofNullable(configAssetPrice).map(AssetPrice::price)
+                .or(() -> Optional.of(a).map(Asset::defaultPrice)))
+            .orElse(DEFAULT_START_PRICE);
+        return new RandomPriceParam(price, randomParam);
+    }
 
+    private List<OASCreatePriceRequest> generateHistoryPrices(List<LocalDate> daysToCreate,
+        RandomPriceParam priceParam, Asset asset) {
+        RandomParam randomParam = priceParam.randomParam();
+        AtomicReference<Double> startValuation = new AtomicReference<>(priceParam.price());
         return daysToCreate.stream()
             .map(d -> {
-                double rnd = random.nextDouble(0.99156, 1.011);
+                double rnd = random.nextDouble(randomParam.origin(), randomParam.bound());
                 double prev = startValuation.get();
                 double newValue = prev / rnd;
                 startValuation.set(newValue);
@@ -107,6 +135,10 @@ public class InvestmentAssetPriceService {
                     .type(TypeEnum.CLOSE);
             })
             .toList();
+    }
+
+    private record RandomPriceParam(double price, RandomParam randomParam) {
+
     }
 
 }

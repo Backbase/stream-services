@@ -1,6 +1,7 @@
 package com.backbase.stream.investment;
 
-public record AssetPrice(String isin, String market, String currency, double price) implements AssetKey {
+public record AssetPrice(String isin, String market, String currency, double price,
+                         RandomParam randomParam) implements AssetKey {
 
     @Override
     public String getIsin() {

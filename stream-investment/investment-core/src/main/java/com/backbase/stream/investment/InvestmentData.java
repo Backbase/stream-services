@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Data;
@@ -38,9 +39,9 @@ public class InvestmentData {
         return clientsByLeExternalId;
     }
 
-    public Map<String, Double> getPriceByAsset() {
+    public Map<String, AssetPrice> getPriceByAsset() {
         return Objects.requireNonNullElse(assetPrices, List.<AssetPrice>of()).stream()
-            .collect(Collectors.toMap(AssetKey::getKeyString, AssetPrice::price));
+            .collect(Collectors.toMap(AssetKey::getKeyString, Function.identity()));
     }
 
 }
