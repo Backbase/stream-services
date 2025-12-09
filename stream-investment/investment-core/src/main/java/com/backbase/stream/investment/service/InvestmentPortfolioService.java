@@ -268,7 +268,8 @@ public class InvestmentPortfolioService {
             .clients(associatedClients)
             .currency(Optional.ofNullable(investmentArrangement.getCurrency()).orElse(DEFAULT_CURRENCY))
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusDays(1));
+            .activated(OffsetDateTime.now().minusDays(1))
+            ;
 
         return portfolioApi.createPortfolio(request, null, null, null)
             .doOnSuccess(created -> log.info(

@@ -52,7 +52,7 @@ public class InvestmentAssetPriceService {
                         RandomPriceParam priceParam = findPrice(priceByAsset, asset, getLastPrice(prices));
                         LocalDate lastDate =
                             prices.isEmpty() ? from : prices.getLast().getDatetime().toLocalDate().plusDays(1);
-                        lastDate = from;
+
                         List<LocalDate> daysToCreate = Stream.iterate(lastDate,
                                 offsetDate -> offsetDate.isBefore(yesterday),
                                 offsetDateTime -> offsetDateTime.plusDays(1))

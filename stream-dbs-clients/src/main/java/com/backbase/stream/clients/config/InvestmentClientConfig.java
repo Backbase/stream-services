@@ -1,6 +1,7 @@
 package com.backbase.stream.clients.config;
 
 import com.backbase.investment.api.service.ApiClient;
+import com.backbase.investment.api.service.v1.AllocationsApi;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.ClientApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
@@ -81,6 +82,12 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public AssetUniverseApi assetUniverseApi(ApiClient investmentApiClient) {
         return new AssetUniverseApi(investmentApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AllocationsApi allocationsApi(ApiClient investmentApiClient) {
+        return new AllocationsApi(investmentApiClient);
     }
 
 }
