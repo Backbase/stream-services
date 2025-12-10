@@ -208,7 +208,7 @@ public class CustomIntegrationApiService {
 
         ParameterizedTypeReference<OASPortfolioAllocation> localVarReturnType = new ParameterizedTypeReference<OASPortfolioAllocation>() {
         };
-        return apiClient.invokeAPI("/service-api/v2/portfolios/{portfolio_uuid}/allocations/", HttpMethod.POST,
+        return apiClient.invokeAPI("/integration-api/v2/portfolios/{portfolio_uuid}/allocations/", HttpMethod.POST,
                 pathParams, queryParams, postBody, headerParams, cookieParams, formParams, localVarAccept,
                 localVarContentType, localVarAuthNames, localVarReturnType)
             .bodyToMono(localVarReturnType);

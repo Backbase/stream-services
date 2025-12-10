@@ -119,10 +119,9 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         List<ModelPortfolio> modelPortfolios = data.getModelPortfolios();
         List<PortfolioList> portfolios = data.getPortfolios();
         return Flux.fromIterable(Objects.requireNonNullElse(portfolios, List.of()))
-//            .filter(p -> p.getName().contains("Saving"))
-//            .flatMap(
-//                p -> investmentPortfolioAllocationService.generateAllocations(p, investmentTask.getData().getInvestmentAssetData()
-//                    .getAssets()))
+            .flatMap(
+                p -> investmentPortfolioAllocationService.generateAllocations(p, modelPortfolios,
+                    investmentTask.getData().getInvestmentAssetData()))
             .collectList()
             .map(o -> investmentTask);
     }

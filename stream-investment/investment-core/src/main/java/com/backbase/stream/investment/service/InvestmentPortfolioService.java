@@ -12,6 +12,7 @@ import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
+import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
@@ -57,6 +58,7 @@ public class InvestmentPortfolioService {
 
     private final InvestmentProductsApi productsApi;
     private final PortfolioApi portfolioApi;
+    private final InvestmentIngestionConfigurationProperties config;
 
     /**
      * Creates or updates an investment product (portfolio product) for the given arrangement.
@@ -179,7 +181,7 @@ public class InvestmentPortfolioService {
             .name(investmentArrangement.getName())
             .clients(associatedClients)
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusDays(1));
+            .activated(OffsetDateTime.now().minusYears(config.getPortfolioActivationYearPast()));
 
         log.debug("Attempting to patch existing portfolio: uuid={}, externalId={}",
             uuid, investmentArrangement.getExternalId());
