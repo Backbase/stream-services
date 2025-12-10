@@ -116,11 +116,10 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
     private Mono<InvestmentTask> upsertPortfoliosAllocations(InvestmentTask investmentTask) {
         InvestmentData data = investmentTask.getData();
-        List<ModelPortfolio> modelPortfolios = data.getModelPortfolios();
-        List<PortfolioList> portfolios = data.getPortfolios();
-        return Flux.fromIterable(Objects.requireNonNullElse(portfolios, List.of()))
+        return Flux.fromIterable(Objects.requireNonNullElse(data.getPortfolios(), List.of()))
             .flatMap(
-                p -> investmentPortfolioAllocationService.generateAllocations(p, modelPortfolios,
+                p -> investmentPortfolioAllocationService.generateAllocations(p,
+                    data.getModelPortfolios(), data.getPortfolioProducts(),
                     investmentTask.getData().getInvestmentAssetData()))
             .collectList()
             .map(o -> investmentTask);
@@ -261,7 +260,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
                     UPSERTED_PREFIX + products.size() + " investment products");
-
+                data.setPortfoliosProducts(products);
                 log.info("Successfully upserted all investment products: taskId={}, productCount={}",
                     investmentTask.getId(), products.size());
 

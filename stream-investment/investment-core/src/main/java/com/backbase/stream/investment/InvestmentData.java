@@ -1,6 +1,7 @@
 package com.backbase.stream.investment;
 
 import com.backbase.investment.api.service.v1.model.PortfolioList;
+import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ public class InvestmentData {
     private List<ClientUser> clientUsers;
     private List<InvestmentArrangement> investmentArrangements;
     private List<ModelPortfolio> modelPortfolios;
+    private List<PortfolioProduct> portfolioProducts;
     private InvestmentAssetData investmentAssetData;
     private List<PortfolioList> portfolios;
 
@@ -29,6 +31,10 @@ public class InvestmentData {
             c -> clientsByLeExternalId.computeIfAbsent(c.getLegalEntityExternalId(), l -> new ArrayList<>())
                 .add(c.getInvestmentClientId()));
         return clientsByLeExternalId;
+    }
+
+    public void setPortfoliosProducts(List<PortfolioProduct> products) {
+        this.portfolioProducts = products;
     }
 
 }
