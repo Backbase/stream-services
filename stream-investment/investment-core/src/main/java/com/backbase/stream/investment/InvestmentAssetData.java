@@ -5,6 +5,7 @@ import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.Builder;
@@ -24,6 +25,12 @@ public class InvestmentAssetData {
     public Map<String, AssetPrice> getPriceByAsset() {
         return Objects.requireNonNullElse(assetPrices, List.<AssetPrice>of()).stream()
             .collect(Collectors.toMap(AssetKey::getKeyString, Function.identity()));
+    }
+
+    public Map<UUID, Asset> getAssetByUuid() {
+        return Objects.requireNonNullElse(assets, List.<Asset>of()).stream()
+            .collect(Collectors.toMap(Asset::uuid, Function.identity()));
+
     }
 
 }
