@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [8.10.0](https://github.com/Backbase/stream-services/compare/8.8.0...8.10.0)
+### Changed
+- Upgraded to bb bom 2025.10.2
+
 ## [8.8.0](https://github.com/Backbase/stream-services/compare/8.7.0...8.8.0)
 ### Changed
 - Investment service
