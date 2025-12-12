@@ -3,6 +3,7 @@ package com.backbase.stream.configuration;
 import com.backbase.investment.api.service.ApiClient;
 import com.backbase.investment.api.service.v1.AllocationsApi;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
+import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
 import com.backbase.investment.api.service.v1.ClientApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
@@ -18,7 +19,6 @@ import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -66,8 +66,9 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
-    public InvestmentAssetPriceService investmentAssetPriceService(AssetUniverseApi assetUniverseApi) {
-        return new InvestmentAssetPriceService(assetUniverseApi);
+    public InvestmentAssetPriceService investmentAssetPriceService(AssetUniverseApi assetUniverseApi,
+        AsyncBulkGroupsApi asyncBulkGroupsApi) {
+        return new InvestmentAssetPriceService(assetUniverseApi, asyncBulkGroupsApi);
     }
 
     @Bean

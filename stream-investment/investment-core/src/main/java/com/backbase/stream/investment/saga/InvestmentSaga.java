@@ -1,12 +1,10 @@
 package com.backbase.stream.investment.saga;
 
 import com.backbase.investment.api.service.v1.model.ClientCreateRequest;
-import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.Status836Enum;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
-import com.backbase.stream.investment.ModelPortfolio;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
@@ -119,7 +117,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         return Flux.fromIterable(Objects.requireNonNullElse(data.getPortfolios(), List.of()))
             .flatMap(
                 p -> investmentPortfolioAllocationService.generateAllocations(p,
-                    data.getModelPortfolios(), data.getPortfolioProducts(),
+                    data.getPortfolioProducts(),
                     investmentTask.getData().getInvestmentAssetData()))
             .collectList()
             .map(o -> investmentTask);

@@ -3,6 +3,7 @@ package com.backbase.stream.clients.config;
 import com.backbase.investment.api.service.ApiClient;
 import com.backbase.investment.api.service.v1.AllocationsApi;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
+import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
 import com.backbase.investment.api.service.v1.ClientApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
@@ -88,6 +89,12 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public AllocationsApi allocationsApi(ApiClient investmentApiClient) {
         return new AllocationsApi(investmentApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AsyncBulkGroupsApi asyncBulkGroupsApi(ApiClient investmentApiClient) {
+        return new AsyncBulkGroupsApi(investmentApiClient);
     }
 
 }

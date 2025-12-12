@@ -58,17 +58,13 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class InvestmentPortfolioAllocationService {
 
-    private final SecureRandom random = new SecureRandom();
-
     private final AllocationsApi allocationsApi;
     private final AssetUniverseApi assetUniverseApi;
     private final CustomIntegrationApiService customIntegrationApiService;
 
-
     public Mono<List<OASPortfolioAllocation>> generateAllocations(PortfolioList portfolio,
-        List<ModelPortfolio> modelPortfolios, List<PortfolioProduct> portfolioProducts,
-        InvestmentAssetData investmentAssetData) {
-        return getPortfolioModel(portfolio, portfolioProducts, modelPortfolios, investmentAssetData.getAssetByUuid())
+        List<PortfolioProduct> portfolioProducts, InvestmentAssetData investmentAssetData) {
+        return getPortfolioModel(portfolio, portfolioProducts, investmentAssetData.getAssetByUuid())
             .flatMap(m -> {
                 LocalDate endDat = LocalDate.now();
                 LocalDate startAllocation = Optional.ofNullable(portfolio.getActivated())
@@ -77,7 +73,7 @@ public class InvestmentPortfolioAllocationService {
 
                 List<LocalDate> days = Stream.iterate(startAllocation,
                         offsetDate -> offsetDate.isBefore(endDat),
-                        offsetDateTime -> offsetDateTime.plusDays(10))
+                        offsetDateTime -> offsetDateTime.plusDays(1))
                     .toList();
                 return getPriceDayByAssetKey(m, startAllocation, endDat)
                     .flatMap(priceDayByAssetKey -> generateAllocations2(portfolio.getUuid(),
@@ -111,7 +107,7 @@ public class InvestmentPortfolioAllocationService {
                         .invested(roundPrice(initialCash))
                         .tradeTotal(roundPrice(totalTrade))
                         .balance(roundPrice(newBalance))
-                        .earnings(roundPrice(balance.get() - newBalance))
+                        .earnings(roundPrice(newBalance - balance.get()))
                         .cashActive(roundPrice(cash))
                         .valuationDate(d)
                         .positions(portfolioPositions.stream()
@@ -154,7 +150,8 @@ public class InvestmentPortfolioAllocationService {
         LocalDate startAllocation) {
         Map<LocalDate, Double> priceByDay = priceDayByAssetKey.get(assetKey);
         return Optional.ofNullable(priceByDay).map(m -> m.get(startAllocation))
-            .orElse(random.nextDouble(10, 120));
+//            .orElse(random.nextDouble(10, 120));
+            .orElse(0.01d);
     }
 
     private Mono<Map<String, Map<LocalDate, Double>>> getPriceDayByAssetKey(ModelPortfolio model,
@@ -180,11 +177,7 @@ public class InvestmentPortfolioAllocationService {
     }
 
     private Mono<ModelPortfolio> getPortfolioModel(PortfolioList portfolio, List<PortfolioProduct> portfolioProducts,
-        List<ModelPortfolio> modelPortfolios,
         Map<UUID, Asset> assetByUuid) {
-        List<Allocation> defaultAssets = assetByUuid.values().stream().limit(2)
-            .map(a -> new Allocation(new ModelAsset(a.getIsin(), a.getMarket(), a.currency()), 0.2))
-            .toList();
 
         return Mono.just(portfolioProducts.stream()
             .filter(m -> m.getUuid().equals(portfolio.getProduct()))
@@ -200,7 +193,9 @@ public class InvestmentPortfolioAllocationService {
                 .build())
             .orElse(ModelPortfolio.builder()
                 .cashWeight(0.6)
-                .allocations(defaultAssets)
+                .allocations(assetByUuid.values().stream().limit(2)
+                    .map(a -> new Allocation(new ModelAsset(a.getIsin(), a.getMarket(), a.currency()), 0.2))
+                    .toList())
                 .build()));
     }
 

@@ -3,8 +3,8 @@ package com.backbase.stream.investment.saga;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
-import com.backbase.stream.investment.InvestmentAssetsTask;
 import com.backbase.stream.investment.InvestmentAssetData;
+import com.backbase.stream.investment.InvestmentAssetsTask;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
@@ -55,7 +55,6 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
     public static final String RESULT_FAILED = "failed";
 
     private static final String PROCESSING_PREFIX = "Processing ";
-    private static final String UPSERTED_PREFIX = "Upserted ";
 
     private final InvestmentAssetUniverseService assetUniverseService;
     private final InvestmentAssetPriceService investmentAssetPriceService;
@@ -91,7 +90,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
     private Mono<InvestmentAssetsTask> upsertPrices(InvestmentAssetsTask investmentTask) {
         return investmentAssetPriceService.ingestPrices(investmentTask.getData().getAssets(), investmentTask.getData()
                 .getPriceByAsset())
-            .map(o -> investmentTask);
+            .map(r -> investmentTask);
     }
 
     /**

@@ -181,7 +181,7 @@ public class InvestmentPortfolioService {
             .name(investmentArrangement.getName())
             .clients(associatedClients)
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusYears(config.getPortfolioActivationYearPast()));
+            .activated(OffsetDateTime.now().minusMonths(config.getPortfolioActivationPastMonths()));
 
         log.debug("Attempting to patch existing portfolio: uuid={}, externalId={}",
             uuid, investmentArrangement.getExternalId());

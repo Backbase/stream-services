@@ -1,6 +1,8 @@
 package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
+import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
+import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.OASCreatePriceRequest;
 import com.backbase.investment.api.service.v1.model.OASPrice;
 import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
@@ -12,14 +14,17 @@ import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -35,8 +40,34 @@ public class InvestmentAssetPriceService {
     private final SecureRandom random = new SecureRandom();
 
     private final AssetUniverseApi assetUniverseApi;
+    private final AsyncBulkGroupsApi asyncBulkGroupsApi;
 
-    public Mono<List<Asset>> ingestPrices(List<Asset> assets, Map<String, AssetPrice> priceByAsset) {
+    public Mono<List<GroupResult>> ingestPrices(List<Asset> assets, Map<String, AssetPrice> priceByAsset) {
+        return generatePrices(assets, priceByAsset)
+            .flatMap(result -> {
+                List<GroupResult> list = result.stream().flatMap(Collection::stream).toList();
+                log.info("Start checking for price ingest processing. Async tasks: {}", list.size());
+                return Flux.interval(java.time.Duration.ofSeconds(2))
+                    // Poll the status of all tasks
+                    .flatMap(
+                        tick -> Flux.fromIterable(list)
+                            .flatMap(gr -> this.groupResultStatus(gr.getUuid()))
+                            .collectList()
+                    )
+                    .filter(results -> results.stream().noneMatch(gr -> "PENDING".equalsIgnoreCase(gr.getStatus())))
+                    .next()
+                    .timeout(java.time.Duration.ofMinutes(5))
+                    .doOnSuccess(tasks -> log.info("Prices successfully added"))
+                    .onErrorResume(throwable -> {
+                        log.error("Timeout or error waiting for GroupResult tasks: taskIds={}",
+                            list.stream().map(GroupResult::getUuid).toList(), throwable);
+                        return Mono.just(list);
+                    });
+            });
+    }
+
+    @Nonnull
+    private Mono<List<List<GroupResult>>> generatePrices(List<Asset> assets, Map<String, AssetPrice> priceByAsset) {
         return Flux.fromIterable(Objects.requireNonNullElse(assets, List.of()))
             .flatMap(asset -> {
                 LocalDate yesterday = LocalDate.now().minusDays(1);
@@ -77,21 +108,7 @@ public class InvestmentAssetPriceService {
                                     log.error("Failed prices creation for asset({})", asset.getKeyString(), throwable);
                                 }
                             });
-                        /*return Flux.fromIterable(oaSCreatePriceRequest)
-                            .flatMap(p -> assetUniverseApi.createAssetClosePrices(p, null, null, null))
-                            .collectList()
-                            .doOnSuccess(created -> log.info(
-                                "Successfully create prices: count={}", created.size()))
-                            .doOnError(throwable -> {
-                                if (throwable instanceof WebClientResponseException ex) {
-                                    log.error("Failed to {} create asset price: status={}, body={}", ex.getStatusCode(),
-                                        ex.getResponseBodyAsString(), ex);
-                                } else {
-                                    log.error("Failed to {}}", throwable);
-                                }
-                            });*/
-                    })
-                    .map(o -> asset);
+                    });
             })
             .collectList();
     }
@@ -135,6 +152,10 @@ public class InvestmentAssetPriceService {
                     .type(TypeEnum.CLOSE);
             })
             .toList();
+    }
+
+    public Mono<GroupResult> groupResultStatus(UUID uuid) {
+        return asyncBulkGroupsApi.getBulkGroup(uuid.toString());
     }
 
     private record RandomPriceParam(double price, RandomParam randomParam) {

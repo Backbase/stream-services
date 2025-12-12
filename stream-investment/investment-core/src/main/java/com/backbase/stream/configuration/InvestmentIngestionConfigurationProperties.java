@@ -13,7 +13,7 @@ public class InvestmentIngestionConfigurationProperties {
 
     private boolean assetUniversEnabled = true;
     private boolean wealthEnabled = true;
-    private int portfolioActivationYearPast = 1;
+    private int portfolioActivationPastMonths = 1;
 
 
 }
