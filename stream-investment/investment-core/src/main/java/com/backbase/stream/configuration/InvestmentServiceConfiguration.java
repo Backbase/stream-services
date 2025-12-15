@@ -6,7 +6,9 @@ import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
 import com.backbase.investment.api.service.v1.ClientApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
+import com.backbase.investment.api.service.v1.InvestmentApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
+import com.backbase.investment.api.service.v1.PaymentsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.investment.saga.InvestmentAssetUniversSaga;
@@ -48,9 +50,9 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi,
-        InvestmentProductsApi investmentProductsApi,
+        InvestmentProductsApi investmentProductsApi, PaymentsApi paymentsApi,
         InvestmentIngestionConfigurationProperties configurationProperties) {
-        return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, configurationProperties);
+        return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, paymentsApi, configurationProperties);
     }
 
     @Bean
@@ -73,8 +75,8 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentPortfolioAllocationService investmentPortfolioAllocationService(AllocationsApi allocationsApi,
-        AssetUniverseApi assetUniverseApi, CustomIntegrationApiService customIntegrationApiService) {
-        return new InvestmentPortfolioAllocationService(allocationsApi, assetUniverseApi,
+        AssetUniverseApi assetUniverseApi, InvestmentApi investmentApi, CustomIntegrationApiService customIntegrationApiService) {
+        return new InvestmentPortfolioAllocationService(allocationsApi, assetUniverseApi, investmentApi,
             customIntegrationApiService);
     }
 

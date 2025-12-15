@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -47,7 +48,7 @@ public class InvestmentAssetPriceService {
             .flatMap(result -> {
                 List<GroupResult> list = result.stream().flatMap(Collection::stream).toList();
                 log.info("Start checking for price ingest processing. Async tasks: {}", list.size());
-                return Flux.interval(java.time.Duration.ofSeconds(2))
+                return Flux.interval(java.time.Duration.ofSeconds(10))
                     // Poll the status of all tasks
                     .flatMap(
                         tick -> Flux.fromIterable(list)
@@ -70,10 +71,11 @@ public class InvestmentAssetPriceService {
     private Mono<List<List<GroupResult>>> generatePrices(List<Asset> assets, Map<String, AssetPrice> priceByAsset) {
         return Flux.fromIterable(Objects.requireNonNullElse(assets, List.of()))
             .flatMap(asset -> {
-                LocalDate yesterday = LocalDate.now().minusDays(1);
-                LocalDate from = LocalDate.now().minusYears(1);
+                LocalDate now = LocalDate.now();
+                LocalDate yesterday = now.minusDays(1);
+                LocalDate from = now.minusYears(1);
                 // we get only last days price
-                return assetUniverseApi.listAssetClosePrices(asset.currency(), yesterday.minusDays(1), yesterday, null,
+                return assetUniverseApi.listAssetClosePrices(asset.currency(), yesterday.minusDays(10), yesterday, null,
                         null, null, null,
                         asset.isin(), 2, asset.market(), null, null)
                     .filter(Objects::nonNull)
@@ -85,12 +87,15 @@ public class InvestmentAssetPriceService {
                             prices.isEmpty() ? from : prices.getLast().getDatetime().toLocalDate().plusDays(1);
 
                         List<LocalDate> daysToCreate = Stream.iterate(lastDate,
-                                offsetDate -> offsetDate.isBefore(yesterday),
+                                offsetDate -> offsetDate.isBefore(now),
                                 offsetDateTime -> offsetDateTime.plusDays(1))
                             .sorted(Comparator.reverseOrder())
                             .toList();
                         List<OASCreatePriceRequest> oaSCreatePriceRequest = generateHistoryPrices(daysToCreate,
                             priceParam, asset);
+                        if (oaSCreatePriceRequest.isEmpty()) {
+                            return Mono.empty();
+                        }
                         return assetUniverseApi.bulkCreateAssetClosePrice(
                                 oaSCreatePriceRequest,
                                 null, null, null)
@@ -108,7 +113,8 @@ public class InvestmentAssetPriceService {
                                     log.error("Failed prices creation for asset({})", asset.getKeyString(), throwable);
                                 }
                             });
-                    });
+                    })
+                    .filter(Predicate.not(CollectionUtils::isEmpty));
             })
             .collectList();
     }

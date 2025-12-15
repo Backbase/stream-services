@@ -1,9 +1,14 @@
 package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
+import com.backbase.investment.api.service.v1.PaymentsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
+import com.backbase.investment.api.service.v1.model.Deposit;
+import com.backbase.investment.api.service.v1.model.DepositRequest;
+import com.backbase.investment.api.service.v1.model.DepositTypeEnum;
 import com.backbase.investment.api.service.v1.model.IntegrationPortfolioCreateRequest;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
+import com.backbase.investment.api.service.v1.model.PaginatedDepositList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioProductList;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioUpdateRequest;
@@ -11,6 +16,7 @@ import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
+import com.backbase.investment.api.service.v1.model.Status08fEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
@@ -24,6 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
@@ -58,6 +65,7 @@ public class InvestmentPortfolioService {
 
     private final InvestmentProductsApi productsApi;
     private final PortfolioApi portfolioApi;
+    private final PaymentsApi paymentsApi;
     private final InvestmentIngestionConfigurationProperties config;
 
     /**
@@ -270,8 +278,8 @@ public class InvestmentPortfolioService {
             .clients(associatedClients)
             .currency(Optional.ofNullable(investmentArrangement.getCurrency()).orElse(DEFAULT_CURRENCY))
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusDays(1))
-            ;
+            // TODO: fix activation date
+            .activated(OffsetDateTime.now().minusDays(1));
 
         return portfolioApi.createPortfolio(request, null, null, null)
             .doOnSuccess(created -> log.info(
@@ -451,12 +459,47 @@ public class InvestmentPortfolioService {
             .productType(portfolioProduct.getProductType());
 
         return productsApi.createPortfolioProduct(request, List.of(MODEL_PORTFOLIO_ALLOCATION_ASSET), null, null)
+            .retry(2)
+            .retryWhen(reactor.util.retry.Retry.fixedDelay(1, java.time.Duration.ofSeconds(1)))
             .doOnSuccess(created -> {
                 log.info("Successfully created portfolio product: uuid={}, productType={}, modelPortfolio={}",
                     created.getUuid(), created.getProductType(), modelPortfolioUuid);
                 investmentArrangement.setInvestmentProductId(created.getUuid());
             })
             .doOnError(throwable -> logPortfolioProductCreationError(productType, throwable));
+    }
+
+    public Mono<Deposit> createDeposits(PortfolioList portfolio) {
+        // TODO: fix creation deposit
+        return paymentsApi.listDeposits(null, null, null, null, null,
+                null, portfolio.getUuid(), null, null, null)
+            .filter(Objects::nonNull)
+            .map(PaginatedDepositList::getResults)
+            .filter(Objects::nonNull)
+            .filter(Predicate.not(CollectionUtils::isEmpty))
+            .map(List::getLast)
+            .switchIfEmpty(paymentsApi.createDeposit(new DepositRequest()
+                    .portfolio(portfolio.getUuid())
+                    .provider("mock")
+                    .reason(UUID.randomUUID().toString())
+                    .status(Status08fEnum.COMPLETED)
+                    .transactedAt(portfolio.getActivated().plusHours(10))
+                    .completedAt(portfolio.getActivated().plusHours(10))
+                    .amount(10_000d)
+                    .depositType(DepositTypeEnum.TRANSFER))
+                .doOnSuccess(deposit -> log.info("Created deposit {} for portfolio {}",
+                    deposit.getUuid(), portfolio.getUuid()))
+                .doOnError(throwable -> {
+                    if (throwable instanceof WebClientResponseException ex) {
+                        log.warn(
+                            "Portfolio deposit create failed: uuid={}, status={}, body={}",
+                            portfolio.getUuid(), ex.getStatusCode(), ex.getResponseBodyAsString());
+                    } else {
+                        log.warn("Portfolio deposit create failed: uuid={}",
+                            portfolio.getUuid(), throwable);
+                    }
+                })
+            );
     }
 
     /**
@@ -517,4 +560,5 @@ public class InvestmentPortfolioService {
             log.error("Failed to create portfolio product: productType={}", productType, throwable);
         }
     }
+
 }

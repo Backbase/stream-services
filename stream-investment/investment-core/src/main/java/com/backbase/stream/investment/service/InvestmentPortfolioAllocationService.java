@@ -2,24 +2,30 @@ package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.AllocationsApi;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
+import com.backbase.investment.api.service.v1.InvestmentApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
+import com.backbase.investment.api.service.v1.model.Method570Enum;
 import com.backbase.investment.api.service.v1.model.OASAllocationCreateRequest;
 import com.backbase.investment.api.service.v1.model.OASAllocationPositionCreateRequest;
+import com.backbase.investment.api.service.v1.model.OASCreateOrderRequest;
 import com.backbase.investment.api.service.v1.model.OASPortfolioAllocation;
 import com.backbase.investment.api.service.v1.model.OASPrice;
+import com.backbase.investment.api.service.v1.model.OrderTypeEnum;
 import com.backbase.investment.api.service.v1.model.PaginatedOASPortfolioAllocationList;
 import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
+import com.backbase.investment.api.service.v1.model.StatusA7dEnum;
 import com.backbase.stream.investment.Allocation;
 import com.backbase.stream.investment.Asset;
 import com.backbase.stream.investment.InvestmentAssetData;
 import com.backbase.stream.investment.ModelAsset;
 import com.backbase.stream.investment.ModelPortfolio;
-import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +66,7 @@ public class InvestmentPortfolioAllocationService {
 
     private final AllocationsApi allocationsApi;
     private final AssetUniverseApi assetUniverseApi;
+    private final InvestmentApi investmentApi;
     private final CustomIntegrationApiService customIntegrationApiService;
 
     public Mono<List<OASPortfolioAllocation>> generateAllocations(PortfolioList portfolio,
@@ -76,12 +83,12 @@ public class InvestmentPortfolioAllocationService {
                         offsetDateTime -> offsetDateTime.plusDays(1))
                     .toList();
                 return getPriceDayByAssetKey(m, startAllocation, endDat)
-                    .flatMap(priceDayByAssetKey -> generateAllocations2(portfolio.getUuid(),
+                    .flatMap(priceDayByAssetKey -> upsertAllocations(portfolio.getUuid(),
                         startAllocation, m, days, priceDayByAssetKey));
             });
     }
 
-    public Mono<List<OASPortfolioAllocation>> generateAllocations2(UUID portfolioId, LocalDate startDay,
+    public Mono<List<OASPortfolioAllocation>> upsertAllocations(UUID portfolioId, LocalDate startDay,
         ModelPortfolio model, List<LocalDate> days, Map<String, Map<LocalDate, Double>> priceDayByAssetKey) {
 
         double initialCash = 10_000d;
@@ -123,7 +130,8 @@ public class InvestmentPortfolioAllocationService {
                 }
             ).toList();
 
-        return allocationsApi.listPortfolioAllocations(portfolioId.toString(), null, null, null, null, null,
+        Mono<List<OASPortfolioAllocation>> upsertInvestmentPortfolioAllocation = allocationsApi.listPortfolioAllocations(
+                portfolioId.toString(), null, null, null, null, null,
                 null, null)
             .flatMapIterable(PaginatedOASPortfolioAllocationList::getResults)
             .flatMap(
@@ -144,13 +152,41 @@ public class InvestmentPortfolioAllocationService {
                     log.error("Failed to upsert investment portfolio allocation", throwable);
                 }
             });
+
+        return Flux.fromIterable(portfolioPositions)
+            .flatMap(p -> {
+                // TODO: fix orders creation
+                return investmentApi.createOrder(new OASCreateOrderRequest()
+                            .asset(p.getAsset())
+                            .orderType(OrderTypeEnum.BUY)
+                            .portfolio(portfolioId)
+                            .status(StatusA7dEnum.COMPLETED)
+                            .method(Method570Enum.MARKET)
+                            .completed(startDay.atTime(LocalTime.MIDNIGHT).atOffset(ZoneOffset.UTC))
+                            .currency(currency(p.getAsset()))
+                            .shares(p.getShares())
+                            .priceAvg(p.getPrice())
+                        , null, null, null)
+                    .doOnSuccess(created -> log.info(
+                        "Successfully upserted investment portfolio allocation"))
+                    .doOnError(throwable -> {
+                        if (throwable instanceof WebClientResponseException ex) {
+                            log.error("Failed to upsert investment portfolio allocation: status={}, body={}",
+                                ex.getStatusCode(),
+                                ex.getResponseBodyAsString(), ex);
+                        } else {
+                            log.error("Failed to upsert investment portfolio allocation", throwable);
+                        }
+                    });
+            })
+            .then(upsertInvestmentPortfolioAllocation);
     }
 
     private Double getPrice(String assetKey, Map<String, Map<LocalDate, Double>> priceDayByAssetKey,
         LocalDate startAllocation) {
         Map<LocalDate, Double> priceByDay = priceDayByAssetKey.get(assetKey);
         return Optional.ofNullable(priceByDay).map(m -> m.get(startAllocation))
-//            .orElse(random.nextDouble(10, 120));
+            // TODO: fix find day price
             .orElse(0.01d);
     }
 
@@ -176,7 +212,8 @@ public class InvestmentPortfolioAllocationService {
             });
     }
 
-    private Mono<ModelPortfolio> getPortfolioModel(PortfolioList portfolio, List<PortfolioProduct> portfolioProducts,
+    private Mono<ModelPortfolio> getPortfolioModel(PortfolioList
+            portfolio, List<PortfolioProduct> portfolioProducts,
         Map<UUID, Asset> assetByUuid) {
 
         return Mono.just(portfolioProducts.stream()
@@ -187,7 +224,8 @@ public class InvestmentPortfolioAllocationService {
                 .cashWeight(m.getCashWeight())
                 .allocations(m.getAllocation().stream()
                     .map(a -> new Allocation(
-                        new ModelAsset(a.getAsset().getIsin(), a.getAsset().getMarket(), a.getAsset().getCurrency()),
+                        new ModelAsset(a.getAsset().getIsin(), a.getAsset().getMarket(),
+                            a.getAsset().getCurrency()),
                         a.getWeight()))
                     .toList())
                 .build())
