@@ -5,6 +5,7 @@ import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.InvestmentApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
+import com.backbase.investment.api.service.v1.model.Deposit;
 import com.backbase.investment.api.service.v1.model.Method570Enum;
 import com.backbase.investment.api.service.v1.model.OASAllocationCreateRequest;
 import com.backbase.investment.api.service.v1.model.OASAllocationPositionCreateRequest;
@@ -73,6 +74,18 @@ public class InvestmentPortfolioAllocationService {
     private final InvestmentApi investmentApi;
     private final CustomIntegrationApiService customIntegrationApiService;
 
+    public Mono<Void> removeAllocations(PortfolioList portfolio) {
+        String portfolioUuid = portfolio.getUuid().toString();
+        return allocationsApi.listPortfolioAllocations(
+                portfolioUuid, null, null, null, null, null,
+                null, null)
+            .flatMapIterable(PaginatedOASPortfolioAllocationList::getResults)
+            .flatMap(
+                a -> allocationsApi.deletePortfolioAllocation(portfolioUuid, a.getValuationDate()))
+            .collectList()
+            .flatMap(v -> Mono.empty());
+    }
+
     public Mono<List<OASPortfolioAllocation>> generateAllocations(PortfolioList portfolio,
         List<PortfolioProduct> portfolioProducts, InvestmentAssetData investmentAssetData) {
         return getPortfolioModel(portfolio, portfolioProducts, investmentAssetData.getAssetByUuid())
@@ -80,7 +93,8 @@ public class InvestmentPortfolioAllocationService {
                 LocalDate endDay = LocalDate.now();
                 LocalDate startDay = Optional.ofNullable(portfolio.getActivated())
                     .map(OffsetDateTime::toLocalDate)
-                    .orElse(endDay).plusDays(1);
+                    .map(d -> d.plusDays(2))
+                    .orElse(endDay);
 
                 return getPriceDayByAssetKey(m, startDay, endDay)
                     .flatMap(priceDayByAssetKey -> allocationsApi.listPortfolioAllocations(
@@ -130,7 +144,7 @@ public class InvestmentPortfolioAllocationService {
 
         List<OASAllocationPositionCreateRequest> portfolioPositions = List.copyOf(dayPositions.getSecond());
 
-        double totalTrade = calculateBalance(portfolioPositions);
+        double totalTrade = calculateTrades(portfolioPositions);
         double initialCash = 10_000d;
         double cash = initialCash - totalTrade;
         return Mono.just(generateAllocations(priceDayByAssetKey, dayPositions, initialCash, cash, totalTrade));
@@ -161,16 +175,16 @@ public class InvestmentPortfolioAllocationService {
         double totalTrade) {
         List<OASAllocationPositionCreateRequest> portfolioPositions = List.copyOf(dayPositions.getSecond());
 
-        AtomicReference<Double> balance = new AtomicReference<>(totalTrade);
+        AtomicReference<Double> trades = new AtomicReference<>(totalTrade);
 
         return dayPositions.getFirst().stream()
             .map(d -> {
-                    double newBalance = calculateBalance(portfolioPositions);
+                    double newTrades = calculateTrades(portfolioPositions);
                     OASAllocationCreateRequest allocationDataRequest = new OASAllocationCreateRequest()
                         .invested(roundPrice(initialCash))
                         .tradeTotal(roundPrice(totalTrade))
-                        .balance(roundPrice(newBalance))
-                        .earnings(roundPrice(newBalance - balance.get()))
+                        .balance(roundPrice(newTrades + cash))
+                        .earnings(roundPrice(cash + newTrades - trades.get()))
                         .cashActive(roundPrice(cash))
                         .valuationDate(d)
                         .positions(portfolioPositions.stream()
@@ -179,10 +193,15 @@ public class InvestmentPortfolioAllocationService {
                                 .shares(roundPrice(p.getShares()))
                                 .price(roundPrice(p.getPrice())))
                             .toList());
-                    balance.set(newBalance);
+                    trades.set(newTrades);
                     portfolioPositions.forEach(
-                        p -> getPrice(assetKey(p.getAsset()), priceDayByAssetKey, d)
-                            .ifPresent(p::setPrice));
+                        p -> {
+                            Optional<Double> price = getPrice(assetKey(p.getAsset()), priceDayByAssetKey, d);
+                            price.ifPresent(p::setPrice);
+                            if (price.isEmpty()) {
+                                log.warn("No price found for asset {} on day {}", p.getAsset(), d);
+                            }
+                        });
                     return allocationDataRequest;
                 }
             )
@@ -322,9 +341,17 @@ public class InvestmentPortfolioAllocationService {
         return Math.round(value * 1000000.0) / 1000000.0;
     }
 
-    private static Double calculateBalance(List<OASAllocationPositionCreateRequest> portfolioPositions) {
+    private static Double calculateTrades(List<OASAllocationPositionCreateRequest> portfolioPositions) {
         return portfolioPositions.stream()
             .map(a -> a.getPrice() * a.getShares()).reduce(0.0, Double::sum);
+    }
+
+    public Mono<Deposit> createDepositAllocation(Deposit deposit) {
+        return upsertAllocations(deposit.getPortfolio().toString(), List.of(new OASAllocationCreateRequest()
+            .cashActive(deposit.getAmount())
+            .valuationDate(
+                Optional.ofNullable(deposit.getCompletedAt()).map(OffsetDateTime::toLocalDate).orElse(LocalDate.now()))
+        )).map(a -> deposit);
     }
 
 }

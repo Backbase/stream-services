@@ -197,43 +197,4 @@ public class InvestmentModelPortfolioService {
         }
     }
 
-
-    /**
-     * Logs portfolio creation errors with detailed information about the failure.
-     *
-     * <p>Provides enhanced error context for WebClient exceptions including
-     * HTTP status code and response body.
-     *
-     * @param externalId the external ID of the portfolio being created
-     * @param name       the name of the portfolio being created
-     * @param throwable  the exception that occurred during creation
-     */
-    private void logPortfolioCreationError(String externalId, String name, Throwable throwable) {
-        if (throwable instanceof WebClientResponseException ex) {
-            log.error("Failed to create investment portfolio: externalId={}, name={}, status={}, body={}",
-                externalId, name, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
-        } else {
-            log.error("Failed to create investment portfolio: externalId={}, name={}",
-                externalId, name, throwable);
-        }
-    }
-
-    /**
-     * Logs portfolio product creation errors with detailed information about the failure.
-     *
-     * <p>Provides enhanced error context for WebClient exceptions including
-     * HTTP status code and response body.
-     *
-     * @param productType the product type being created
-     * @param throwable   the exception that occurred during creation
-     */
-    private void logPortfolioProductCreationError(String productType, Throwable throwable) {
-        if (throwable instanceof WebClientResponseException ex) {
-            log.error("Failed to create portfolio product: productType={}, status={}, body={}",
-                productType, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
-        } else {
-            log.error("Failed to create portfolio product: productType={}", productType, throwable);
-        }
-    }
-
 }

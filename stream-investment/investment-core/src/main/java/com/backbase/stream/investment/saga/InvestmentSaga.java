@@ -79,7 +79,6 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             streamTask.getId(), streamTask.getName());
         return this.upsertInvestmentPortfolioModels(streamTask)
             .flatMap(this::upsertClients)
-            // TODO: fix investment product creation
             .flatMap(this::upsertInvestmentProducts)
             .flatMap(this::upsertInvestmentPortfolios)
             .flatMap(this::upsertInvestmentPortfolioDeposits)
@@ -106,6 +105,15 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 return Mono.empty();
             })
             .collectList()
+            .flatMap(deposits -> Flux.fromIterable(
+                    Objects.requireNonNullElse(investmentTask.getData().getPortfolios(), List.of()))
+                .flatMap(investmentPortfolioAllocationService::removeAllocations)
+                .collectList()
+                .flatMap(a -> Flux.fromIterable(deposits)
+                    .flatMap(investmentPortfolioAllocationService::createDepositAllocation)
+                    .collectList()
+                )
+            )
             .map(o -> investmentTask);
     }
 
@@ -254,18 +262,14 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             investmentTask.getId(), PROCESSING_PREFIX + arrangementCount + " investment products");
 
         return Flux.fromIterable(data.getInvestmentArrangements())
-            .flatMap(arrangement -> {
-                log.debug("Upserting investment product for arrangement: externalId={}, name={}",
-                    arrangement.getExternalId(), arrangement.getName());
-                return investmentPortfolioService.upsertInvestmentProducts(data, arrangement)
-                    .doOnSuccess(product -> log.debug(
-                        "Successfully upserted investment product: productUuid={}, productType={}, "
-                            + "arrangementExternalId={}",
-                        product.getUuid(), product.getProductType(), arrangement.getExternalId()))
-                    .doOnError(throwable -> log.error(
-                        "Failed to upsert investment product: arrangementExternalId={}, arrangementName={}",
-                        arrangement.getExternalId(), arrangement.getName(), throwable));
-            })
+            .flatMap(arrangement -> investmentPortfolioService.upsertInvestmentProducts(data, arrangement)
+                .doOnSuccess(product -> log.debug(
+                    "Successfully upserted investment product: productUuid={}, productType={}, "
+                        + "arrangementExternalId={}",
+                    product.getUuid(), product.getProductType(), arrangement.getExternalId()))
+                .doOnError(throwable -> log.error(
+                    "Failed to upsert investment product: arrangementExternalId={}, arrangementName={}",
+                    arrangement.getExternalId(), arrangement.getName(), throwable)))
             .collectList()
             .map(products -> {
                 investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, RESULT_CREATED,
