@@ -12,6 +12,7 @@ import com.backbase.investment.api.service.v1.model.OASCreateOrderRequest;
 import com.backbase.investment.api.service.v1.model.OASPortfolioAllocation;
 import com.backbase.investment.api.service.v1.model.OASPrice;
 import com.backbase.investment.api.service.v1.model.OrderTypeEnum;
+import com.backbase.investment.api.service.v1.model.PaginatedOASOrderList;
 import com.backbase.investment.api.service.v1.model.PaginatedOASPortfolioAllocationList;
 import com.backbase.investment.api.service.v1.model.PaginatedOASPriceList;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
@@ -35,8 +36,10 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.util.Pair;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -83,31 +86,27 @@ public class InvestmentPortfolioAllocationService {
                         offsetDateTime -> offsetDateTime.plusDays(1))
                     .toList();
                 return getPriceDayByAssetKey(m, startAllocation, endDat)
-                    .flatMap(priceDayByAssetKey -> upsertAllocations(portfolio.getUuid(),
-                        startAllocation, m, days, priceDayByAssetKey));
+                    .flatMap(priceDayByAssetKey -> {
+                        double initialCash = 10_000d;
+                        return orderPositions(portfolio.getUuid(), days, m, priceDayByAssetKey, initialCash)
+                            .flatMap(orderPositions -> this.upsertAllocations(portfolio.getUuid(),
+                                priceDayByAssetKey, orderPositions, initialCash));
+                    });
             });
     }
 
-    public Mono<List<OASPortfolioAllocation>> upsertAllocations(UUID portfolioId, LocalDate startDay,
-        ModelPortfolio model, List<LocalDate> days, Map<String, Map<LocalDate, Double>> priceDayByAssetKey) {
+    public Mono<List<OASPortfolioAllocation>> upsertAllocations(UUID portfolioId,
+        Map<String, Map<LocalDate, Double>> priceDayByAssetKey,
+        Pair<List<LocalDate>, List<OASAllocationPositionCreateRequest>> dayPositions,
+        double initialCash) {
 
-        double initialCash = 10_000d;
+        List<OASAllocationPositionCreateRequest> portfolioPositions = List.copyOf(dayPositions.getSecond());
 
-        List<OASAllocationPositionCreateRequest> portfolioPositions = model.getAllocations().stream()
-            .map(a -> {
-                    Double price = getPrice(a.asset().getKeyString(), priceDayByAssetKey, startDay);
-                    return new OASAllocationPositionCreateRequest()
-                        .asset(a.asset().getAssetMap())
-                        .shares((initialCash * a.weight()) / price)
-                        .price(price);
-                }
-            )
-            .toList();
         double totalTrade = calculateBalance(portfolioPositions);
         double cash = initialCash - totalTrade;
         AtomicReference<Double> balance = new AtomicReference<>(totalTrade);
 
-        List<OASAllocationCreateRequest> allocations = days.stream()
+        List<OASAllocationCreateRequest> allocations = dayPositions.getFirst().stream()
             .map(d -> {
                     double newBalance = calculateBalance(portfolioPositions);
                     OASAllocationCreateRequest allocationDataRequest = new OASAllocationCreateRequest()
@@ -125,15 +124,19 @@ public class InvestmentPortfolioAllocationService {
                             .toList());
                     balance.set(newBalance);
                     portfolioPositions.forEach(
-                        p -> p.setPrice(getPrice(assetKey(p.getAsset()), priceDayByAssetKey, d)));
+                        p -> getPrice(assetKey(p.getAsset()), priceDayByAssetKey, d)
+                            .ifPresent(p::setPrice));
                     return allocationDataRequest;
                 }
-            ).toList();
+            )
+            .filter(Objects::nonNull)
+            .toList();
 
-        Mono<List<OASPortfolioAllocation>> upsertInvestmentPortfolioAllocation = allocationsApi.listPortfolioAllocations(
+        return allocationsApi.listPortfolioAllocations(
                 portfolioId.toString(), null, null, null, null, null,
                 null, null)
             .flatMapIterable(PaginatedOASPortfolioAllocationList::getResults)
+            // TODO: create for missing dates
             .flatMap(
                 a -> allocationsApi.deletePortfolioAllocation(portfolioId.toString(), a.getValuationDate()))
             .collectList()
@@ -152,42 +155,71 @@ public class InvestmentPortfolioAllocationService {
                     log.error("Failed to upsert investment portfolio allocation", throwable);
                 }
             });
-
-        return Flux.fromIterable(portfolioPositions)
-            .flatMap(p -> {
-                // TODO: fix orders creation
-                return investmentApi.createOrder(new OASCreateOrderRequest()
-                            .asset(p.getAsset())
-                            .orderType(OrderTypeEnum.BUY)
-                            .portfolio(portfolioId)
-                            .status(StatusA7dEnum.COMPLETED)
-                            .method(Method570Enum.MARKET)
-                            .completed(startDay.atTime(LocalTime.MIDNIGHT).atOffset(ZoneOffset.UTC))
-                            .currency(currency(p.getAsset()))
-                            .shares(p.getShares())
-                            .priceAvg(p.getPrice())
-                        , null, null, null)
-                    .doOnSuccess(created -> log.info(
-                        "Successfully upserted investment portfolio allocation"))
-                    .doOnError(throwable -> {
-                        if (throwable instanceof WebClientResponseException ex) {
-                            log.error("Failed to upsert investment portfolio allocation: status={}, body={}",
-                                ex.getStatusCode(),
-                                ex.getResponseBodyAsString(), ex);
-                        } else {
-                            log.error("Failed to upsert investment portfolio allocation", throwable);
-                        }
-                    });
-            })
-            .then(upsertInvestmentPortfolioAllocation);
     }
 
-    private Double getPrice(String assetKey, Map<String, Map<LocalDate, Double>> priceDayByAssetKey,
+    @Nonnull
+    private Mono<Pair<List<LocalDate>, List<OASAllocationPositionCreateRequest>>> orderPositions(UUID portfolioId,
+        List<LocalDate> days, ModelPortfolio model, Map<String, Map<LocalDate, Double>> priceDayByAssetKey,
+        double initialCash) {
+        return days.stream()
+            .map(day -> Pair.of(day, model.getAllocations().stream()
+                .map(a -> getPrice(a.asset().getKeyString(), priceDayByAssetKey, day)
+                    .map(price -> new OASAllocationPositionCreateRequest()
+                        .asset(a.asset().getAssetMap())
+                        .shares((initialCash * a.weight()) / price)
+                        .price(price))
+                ).toList()))
+            .filter(al -> al.getSecond().stream().allMatch(Optional::isPresent))
+            .map(al -> Pair.of(al.getFirst(), al.getSecond().stream().map(Optional::get).toList()))
+            .findFirst()
+            .map(portfolioPositionsOfDay -> {
+                LocalDate startDay = portfolioPositionsOfDay.getFirst();
+                List<OASAllocationPositionCreateRequest> positions = portfolioPositionsOfDay.getSecond();
+                return Flux.fromIterable(positions)
+                    .flatMap(p -> investmentApi.listOrders(null,
+                            assetKey(p.getAsset()), null, null, null, null,
+                            null, null, null, null, null, portfolioId.toString(), null)
+                        .filter(Objects::nonNull)
+                        .map(PaginatedOASOrderList::getResults)
+                        .filter(Objects::nonNull)
+                        .flatMap(r -> r.isEmpty() ? Mono.empty() : Mono.just(r.getFirst()))
+                        .switchIfEmpty(investmentApi.createOrder(new OASCreateOrderRequest()
+                                    .asset(p.getAsset())
+                                    .orderType(OrderTypeEnum.BUY)
+                                    .portfolio(portfolioId)
+                                    .status(StatusA7dEnum.COMPLETED)
+                                    .method(Method570Enum.MARKET)
+                                    .completed(startDay
+                                        .atTime(LocalTime.MIDNIGHT).atOffset(ZoneOffset.UTC))
+                                    .currency(currency(p.getAsset()))
+                                    .shares(roundPrice(p.getShares()))
+                                    .priceAvg(roundPrice(p.getPrice())),
+                                null, null, null)
+                            .doOnSuccess(created -> log.info(
+                                "Successfully upserted investment portfolio allocation"))
+                            .doOnError(throwable -> {
+                                if (throwable instanceof WebClientResponseException ex) {
+                                    log.error("Failed to upsert investment portfolio allocation: status={}, body={}",
+                                        ex.getStatusCode(),
+                                        ex.getResponseBodyAsString(), ex);
+                                } else {
+                                    log.error("Failed to upsert investment portfolio allocation", throwable);
+                                }
+                            })
+                        ))
+                    .collectList()
+                    .flatMap(o -> Mono.just(Pair
+                        .of(days.stream().filter(d -> d.isAfter(startDay) || d.equals(startDay)).toList(),
+                            positions)));
+            })
+            .orElse(Mono.empty());
+    }
+
+    private Optional<Double> getPrice(String assetKey, Map<String, Map<LocalDate, Double>> priceDayByAssetKey,
         LocalDate startAllocation) {
         Map<LocalDate, Double> priceByDay = priceDayByAssetKey.get(assetKey);
-        return Optional.ofNullable(priceByDay).map(m -> m.get(startAllocation))
-            // TODO: fix find day price
-            .orElse(0.01d);
+        return Optional.ofNullable(priceByDay)
+            .map(m -> m.get(startAllocation));
     }
 
     private Mono<Map<String, Map<LocalDate, Double>>> getPriceDayByAssetKey(ModelPortfolio model,
@@ -238,7 +270,7 @@ public class InvestmentPortfolioAllocationService {
     }
 
     private String assetKey(Map<String, Object> params) {
-        return isin(params) + "-" + market(params) + "-" + currency(params);
+        return isin(params) + "_" + market(params) + "_" + currency(params);
     }
 
     private String isin(Map<String, Object> params) {

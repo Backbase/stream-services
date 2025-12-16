@@ -15,7 +15,7 @@ public interface AssetKey {
     }
 
     default String getKeyString() {
-        return getIsin() + "-" + getMarket() + "-" + getCurrency();
+        return getIsin() + "_" + getMarket() + "_" + getCurrency();
     }
 
 }

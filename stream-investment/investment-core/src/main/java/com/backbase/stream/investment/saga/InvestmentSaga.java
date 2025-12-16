@@ -79,6 +79,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             streamTask.getId(), streamTask.getName());
         return this.upsertInvestmentPortfolioModels(streamTask)
             .flatMap(this::upsertClients)
+            // TODO: fix investment product creation
             .flatMap(this::upsertInvestmentProducts)
             .flatMap(this::upsertInvestmentPortfolios)
             .flatMap(this::upsertInvestmentPortfolioDeposits)
@@ -99,7 +100,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
 
     private Mono<InvestmentTask> upsertInvestmentPortfolioDeposits(InvestmentTask investmentTask) {
         return Flux.fromIterable(Objects.requireNonNullElse(investmentTask.getData().getPortfolios(), List.of()))
-            .flatMap(investmentPortfolioService::createDeposits)
+            .flatMap(investmentPortfolioService::upsertDeposits)
             .onErrorResume(throwable -> {
                 log.warn("Failed to create deposit for portfolio", throwable);
                 return Mono.empty();
