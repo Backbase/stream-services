@@ -58,7 +58,11 @@ public class InvestmentAssetPriceService {
                     .filter(results -> results.stream().noneMatch(gr -> "PENDING".equalsIgnoreCase(gr.getStatus())))
                     .next()
                     .timeout(java.time.Duration.ofMinutes(5))
-                    .doOnSuccess(tasks -> log.info("Prices successfully added"))
+                    .doOnSuccess(tasks -> {
+                        log.info("Prices tasks finished added");
+                        log.debug("Price async tasks failure: {}",
+                            tasks.stream().filter(gr -> "FAILURE".equalsIgnoreCase(gr.getStatus())).toList());
+                    })
                     .onErrorResume(throwable -> {
                         log.error("Timeout or error waiting for GroupResult tasks: taskIds={}",
                             list.stream().map(GroupResult::getUuid).toList(), throwable);
@@ -72,12 +76,12 @@ public class InvestmentAssetPriceService {
         return Flux.fromIterable(Objects.requireNonNullElse(assets, List.of()))
             .flatMap(asset -> {
                 LocalDate now = LocalDate.now();
-                LocalDate yesterday = now.minusDays(1);
                 LocalDate from = now.minusYears(1);
                 // we get only last days price
-                return assetUniverseApi.listAssetClosePrices(asset.currency(), yesterday.minusDays(10), yesterday, null,
+                int daysOfPrices = 10;
+                return assetUniverseApi.listAssetClosePrices(asset.currency(), now.minusDays(daysOfPrices), now, null,
                         null, null, null,
-                        asset.isin(), 2, asset.market(), null, null)
+                        asset.isin(), daysOfPrices + 1, asset.market(), null, null)
                     .filter(Objects::nonNull)
                     .map(PaginatedOASPriceList::getResults)
                     .filter(Objects::nonNull)
@@ -96,13 +100,17 @@ public class InvestmentAssetPriceService {
                         if (oaSCreatePriceRequest.isEmpty()) {
                             return Mono.empty();
                         }
-                        return assetUniverseApi.bulkCreateAssetClosePrice(
-                                oaSCreatePriceRequest,
+                        log.debug("Generated prices for asset ({}) [{}]", asset.getKeyString(), oaSCreatePriceRequest);
+                        return assetUniverseApi.bulkCreateAssetClosePrice(oaSCreatePriceRequest,
                                 null, null, null)
                             .collectList()
-                            .doOnSuccess(created -> log.info(
-                                "Successfully create prices: count={} for asset ({})", created.size(),
-                                asset.getKeyString()))
+                            .doOnSuccess(created -> {
+                                log.info(
+                                    "Successfully create prices: count={} for asset ({})", created.size(),
+                                    asset.getKeyString());
+                                log.debug("Async tasks to create prices: for asset ({}) [{}]", asset.getKeyString(),
+                                    created);
+                            })
                             .doOnError(throwable -> {
                                 if (throwable instanceof WebClientResponseException ex) {
                                     log.error("Failed to create asset({}) price: status={}, body={}",

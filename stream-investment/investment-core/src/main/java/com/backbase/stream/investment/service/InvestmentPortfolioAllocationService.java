@@ -34,6 +34,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
@@ -76,37 +77,93 @@ public class InvestmentPortfolioAllocationService {
         List<PortfolioProduct> portfolioProducts, InvestmentAssetData investmentAssetData) {
         return getPortfolioModel(portfolio, portfolioProducts, investmentAssetData.getAssetByUuid())
             .flatMap(m -> {
-                LocalDate endDat = LocalDate.now();
-                LocalDate startAllocation = Optional.ofNullable(portfolio.getActivated())
+                LocalDate endDay = LocalDate.now();
+                LocalDate startDay = Optional.ofNullable(portfolio.getActivated())
                     .map(OffsetDateTime::toLocalDate)
-                    .orElse(endDat).plusDays(1);
+                    .orElse(endDay).plusDays(1);
 
-                List<LocalDate> days = Stream.iterate(startAllocation,
-                        offsetDate -> offsetDate.isBefore(endDat),
-                        offsetDateTime -> offsetDateTime.plusDays(1))
-                    .toList();
-                return getPriceDayByAssetKey(m, startAllocation, endDat)
-                    .flatMap(priceDayByAssetKey -> {
-                        double initialCash = 10_000d;
-                        return orderPositions(portfolio.getUuid(), days, m, priceDayByAssetKey, initialCash)
-                            .flatMap(orderPositions -> this.upsertAllocations(portfolio.getUuid(),
-                                priceDayByAssetKey, orderPositions, initialCash));
-                    });
+                return getPriceDayByAssetKey(m, startDay, endDay)
+                    .flatMap(priceDayByAssetKey -> allocationsApi.listPortfolioAllocations(
+                            portfolio.getUuid().toString(), null, null, 1, null, null,
+                            startDay, endDay)
+                        .map(PaginatedOASPortfolioAllocationList::getResults)
+                        .filter(Objects::nonNull)
+                        .filter(Predicate.not(List::isEmpty))
+                        .map(portfolioAllocations -> {
+                            OASPortfolioAllocation lastValuation = portfolioAllocations.getFirst();
+                            LocalDate nextValuationDate = lastValuation.getValuationDate().plusDays(1);
+                            List<LocalDate> days = allocationDays(nextValuationDate, endDay);
+                            if (days.isEmpty()) {
+                                return List.<OASAllocationCreateRequest>of();
+                            }
+                            Map<UUID, Asset> assetByUuid = investmentAssetData.getAssetByUuid();
+                            List<OASAllocationPositionCreateRequest> list = lastValuation.getPositions().stream()
+                                .map(p -> new OASAllocationPositionCreateRequest()
+                                    .asset(assetByUuid.get(p.getAsset()).getAssetMap())
+                                    .shares(p.getShares())
+                                    .price(getPrice(assetKey(assetByUuid.get(p.getAsset()).getAssetMap()),
+                                        priceDayByAssetKey, nextValuationDate).orElse(p.getPrice())
+                                    )).toList();
+                            return generateAllocations(priceDayByAssetKey, Pair.of(days, list),
+                                lastValuation.getInvested(), lastValuation.getCashActive(),
+                                lastValuation.getTradeTotal());
+                        })
+                        .switchIfEmpty(orderPositions(portfolio.getUuid(), allocationDays(startDay, endDay), m,
+                            priceDayByAssetKey, 10_000d)
+                            .flatMap(dp -> generateAllocations(priceDayByAssetKey, dp))
+                        )
+                        .flatMap(allocations -> this.upsertAllocations(portfolio.getUuid().toString(), allocations)));
             });
     }
 
-    public Mono<List<OASPortfolioAllocation>> upsertAllocations(UUID portfolioId,
+    @Nonnull
+    private static List<LocalDate> allocationDays(LocalDate startDay, LocalDate endDay) {
+        return Stream.iterate(startDay,
+                offsetDate -> offsetDate.isBefore(endDay),
+                offsetDateTime -> offsetDateTime.plusDays(1))
+            .toList();
+    }
+
+    public Mono<List<OASAllocationCreateRequest>> generateAllocations(
         Map<String, Map<LocalDate, Double>> priceDayByAssetKey,
-        Pair<List<LocalDate>, List<OASAllocationPositionCreateRequest>> dayPositions,
-        double initialCash) {
+        Pair<List<LocalDate>, List<OASAllocationPositionCreateRequest>> dayPositions) {
 
         List<OASAllocationPositionCreateRequest> portfolioPositions = List.copyOf(dayPositions.getSecond());
 
         double totalTrade = calculateBalance(portfolioPositions);
+        double initialCash = 10_000d;
         double cash = initialCash - totalTrade;
+        return Mono.just(generateAllocations(priceDayByAssetKey, dayPositions, initialCash, cash, totalTrade));
+    }
+
+    public Mono<List<OASPortfolioAllocation>> upsertAllocations(String portfolioId,
+        List<OASAllocationCreateRequest> allocations) {
+        return Flux.fromIterable(allocations)
+            .flatMap(a -> customIntegrationApiService.createPortfolioAllocation(
+                portfolioId, a, null, null, null))
+            .collectList()
+            .doOnSuccess(created -> log.info(
+                "Successfully upserted investment portfolio allocation"))
+            .doOnError(throwable -> {
+                if (throwable instanceof WebClientResponseException ex) {
+                    log.error("Failed to upsert investment portfolio allocation: status={}, body={}",
+                        ex.getStatusCode(),
+                        ex.getResponseBodyAsString(), ex);
+                } else {
+                    log.error("Failed to upsert investment portfolio allocation", throwable);
+                }
+            });
+    }
+
+    private List<OASAllocationCreateRequest> generateAllocations(
+        Map<String, Map<LocalDate, Double>> priceDayByAssetKey,
+        Pair<List<LocalDate>, List<OASAllocationPositionCreateRequest>> dayPositions, double initialCash, double cash,
+        double totalTrade) {
+        List<OASAllocationPositionCreateRequest> portfolioPositions = List.copyOf(dayPositions.getSecond());
+
         AtomicReference<Double> balance = new AtomicReference<>(totalTrade);
 
-        List<OASAllocationCreateRequest> allocations = dayPositions.getFirst().stream()
+        return dayPositions.getFirst().stream()
             .map(d -> {
                     double newBalance = calculateBalance(portfolioPositions);
                     OASAllocationCreateRequest allocationDataRequest = new OASAllocationCreateRequest()
@@ -131,30 +188,6 @@ public class InvestmentPortfolioAllocationService {
             )
             .filter(Objects::nonNull)
             .toList();
-
-        return allocationsApi.listPortfolioAllocations(
-                portfolioId.toString(), null, null, null, null, null,
-                null, null)
-            .flatMapIterable(PaginatedOASPortfolioAllocationList::getResults)
-            // TODO: create for missing dates
-            .flatMap(
-                a -> allocationsApi.deletePortfolioAllocation(portfolioId.toString(), a.getValuationDate()))
-            .collectList()
-            .flatMapIterable(a -> allocations)
-            .flatMap(a -> customIntegrationApiService.createPortfolioAllocation(
-                portfolioId.toString(), a, null, null, null))
-            .collectList()
-            .doOnSuccess(created -> log.info(
-                "Successfully upserted investment portfolio allocation"))
-            .doOnError(throwable -> {
-                if (throwable instanceof WebClientResponseException ex) {
-                    log.error("Failed to upsert investment portfolio allocation: status={}, body={}",
-                        ex.getStatusCode(),
-                        ex.getResponseBodyAsString(), ex);
-                } else {
-                    log.error("Failed to upsert investment portfolio allocation", throwable);
-                }
-            });
     }
 
     @Nonnull
