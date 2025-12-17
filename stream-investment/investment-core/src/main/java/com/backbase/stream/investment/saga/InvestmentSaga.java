@@ -104,20 +104,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 log.warn("Failed to create deposit for portfolio", throwable);
                 return Mono.empty();
             })
+            .flatMap(investmentPortfolioAllocationService::createDepositAllocation)
             .collectList()
-            .flatMap(deposits -> Flux.fromIterable(
-                    Objects.requireNonNullElse(investmentTask.getData().getPortfolios(), List.of()))
-                .flatMap(investmentPortfolioAllocationService::removeAllocations)
-                .collectList()
-                .flatMap(a -> Flux.fromIterable(deposits)
-                    .flatMap(investmentPortfolioAllocationService::createDepositAllocation)
-                    .collectList()
-                    .onErrorResume(ex -> {
-                        log.warn("Failed to create deposit allocation", ex);
-                        return Mono.empty();
-                    })
-                )
-            )
             .map(o -> investmentTask);
     }
 
@@ -265,16 +253,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, null, investmentTask.getName(),
             investmentTask.getId(), PROCESSING_PREFIX + arrangementCount + " investment products");
 
-        return Flux.fromIterable(data.getInvestmentArrangements())
-            .flatMap(arrangement -> investmentPortfolioService.upsertInvestmentProducts(data, arrangement)
-                .doOnSuccess(product -> log.debug(
-                    "Successfully upserted investment product: productUuid={}, productType={}, "
-                        + "arrangementExternalId={}",
-                    product.getUuid(), product.getProductType(), arrangement.getExternalId()))
-                .doOnError(throwable -> log.error(
-                    "Failed to upsert investment product: arrangementExternalId={}, arrangementName={}",
-                    arrangement.getExternalId(), arrangement.getName(), throwable)))
-            .collectList()
+        return Mono.just(data.getInvestmentArrangements())
+            .flatMap(arrangements -> investmentPortfolioService.upsertInvestmentProducts(data, arrangements))
             .map(products -> {
                 investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),

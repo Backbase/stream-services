@@ -43,6 +43,7 @@ import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.util.Pair;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -91,8 +92,7 @@ public class InvestmentPortfolioAllocationService {
                 LocalDate startDay = nextWorkDay(portfolio.getActivated(), endDay, 4);
 
                 return getPriceDayByAssetKey(m, startDay, endDay).flatMap(
-                    priceDayByAssetKey -> allocationsApi.listPortfolioAllocations(portfolio.getUuid().toString(), null,
-                            null, 1, null, null, startDay, endDay).map(PaginatedOASPortfolioAllocationList::getResults)
+                    priceDayByAssetKey -> getAllocations(portfolio.getUuid().toString(), startDay, endDay)
                         .filter(Objects::nonNull)
                         .map(a -> a.stream().filter(Predicate.not(aa -> aa.getPositions().isEmpty())).toList())
                         .filter(Predicate.not(List::isEmpty))
@@ -119,6 +119,20 @@ public class InvestmentPortfolioAllocationService {
                         .flatMap(allocations -> this.upsertAllocations(portfolio.getUuid().toString(), allocations)));
             })
             .onErrorResume(ex -> Mono.empty());
+    }
+
+    private Mono<List<OASPortfolioAllocation>> getAllocations(String portfolioId,
+        LocalDate startDay, LocalDate endDay) {
+        return getAllocations(portfolioId, startDay, endDay, 1);
+    }
+
+    private Mono<List<OASPortfolioAllocation>> getAllocations(String portfolioId,
+        LocalDate startDay, LocalDate endDay, Integer limit) {
+        return allocationsApi.listPortfolioAllocations(portfolioId, null,
+                null, limit, null, null, startDay, endDay)
+            .filter(Objects::nonNull)
+            .map(PaginatedOASPortfolioAllocationList::getResults)
+            .filter(Objects::nonNull);
     }
 
     public Mono<List<OASAllocationCreateRequest>> generateAllocations(
@@ -275,10 +289,23 @@ public class InvestmentPortfolioAllocationService {
     }
 
     public Mono<Deposit> createDepositAllocation(Deposit deposit) {
-        return upsertAllocations(deposit.getPortfolio().toString(), List.of(
-            new OASAllocationCreateRequest().cashActive(deposit.getAmount()).valuationDate(
-                Optional.ofNullable(deposit.getCompletedAt()).map(OffsetDateTime::toLocalDate)
-                    .orElse(LocalDate.now())))).onErrorResume(ex -> Mono.empty()).map(a -> deposit);
+        String portfolioId = deposit.getPortfolio().toString();
+        LocalDate valuationDate = Optional.ofNullable(deposit.getCompletedAt()).map(OffsetDateTime::toLocalDate)
+            .orElse(LocalDate.now());
+        return getAllocations(portfolioId, valuationDate.minusDays(4), valuationDate.plusDays(5), 10)
+            .filter(Predicate.not(l -> l.stream().filter(a -> CollectionUtils.isEmpty(a.getPositions()))
+                .toList().isEmpty()))
+            .switchIfEmpty(upsertAllocations(portfolioId, List.of(
+                new OASAllocationCreateRequest()
+                    .cashActive(deposit.getAmount())
+                    .valuationDate(valuationDate)))
+                .onErrorResume(ex -> Mono.empty())
+            )
+            .onErrorResume(ex -> {
+                log.warn("Failed to create deposit allocation", ex);
+                return Mono.empty();
+            })
+            .map(l -> deposit);
     }
 
 }
