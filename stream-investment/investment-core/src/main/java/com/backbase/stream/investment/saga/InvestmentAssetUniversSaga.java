@@ -93,7 +93,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
     private Mono<InvestmentAssetsTask> upsertPrices(InvestmentAssetsTask investmentTask) {
         return investmentAssetPriceService.ingestPrices(investmentTask.getData().getAssets(), investmentTask.getData()
                 .getPriceByAsset())
-            .map(r -> investmentTask);
+            .map(investmentTask::setPriceTasks);
     }
 
     /**

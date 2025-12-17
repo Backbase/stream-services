@@ -2,6 +2,7 @@ package com.backbase.stream.investment;
 
 import com.backbase.investment.api.service.v1.model.AssetCategory;
 import com.backbase.investment.api.service.v1.model.AssetCategoryType;
+import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
 import java.util.List;
@@ -25,6 +26,7 @@ public class InvestmentAssetData {
     private List<AssetCategory> assetCategories;
     private List<Asset> assets;
     private List<AssetPrice> assetPrices;
+    private List<GroupResult> priceAsyncTasks;
 
     public Map<String, AssetPrice> getPriceByAsset() {
         return Objects.requireNonNullElse(assetPrices, List.<AssetPrice>of()).stream()

@@ -1,5 +1,14 @@
 package com.backbase.stream.investment.saga;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.backbase.investment.api.service.v1.model.AssetTypeEnum;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.StatusA10Enum;
@@ -11,6 +20,10 @@ import com.backbase.stream.investment.InvestmentAssetsTask;
 import com.backbase.stream.investment.RandomParam;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -19,16 +32,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.Duration;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 /**
- * Test suite for {@link InvestmentAssetUniversSaga}, focusing on the asynchronous
- * price ingestion workflow with polling and timeout behavior.
+ * Test suite for {@link InvestmentAssetUniversSaga}, focusing on the asynchronous price ingestion workflow with polling
+ * and timeout behavior.
  *
  * <p>These tests verify:
  * <ul>
@@ -99,20 +105,6 @@ class InvestmentAssetUniversSagaTest {
         when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
             .thenReturn(Mono.just(groupResults));
 
-        // Mock: Status polling returns COMPLETED immediately
-        GroupResult completed1 = mock(GroupResult.class);
-        when(completed1.getUuid()).thenReturn(groupResultUuid1);
-        when(completed1.getStatus()).thenReturn("COMPLETED");
-
-        GroupResult completed2 = mock(GroupResult.class);
-        when(completed2.getUuid()).thenReturn(groupResultUuid2);
-        when(completed2.getStatus()).thenReturn("COMPLETED");
-
-        when(investmentAssetPriceService.groupResultStatus(groupResultUuid1))
-            .thenReturn(Mono.just(completed1));
-        when(investmentAssetPriceService.groupResultStatus(groupResultUuid2))
-            .thenReturn(Mono.just(completed2));
-
         // When: Execute upsertPrices
         Mono<InvestmentAssetsTask> result = saga.executeTask(task);
 
@@ -128,9 +120,6 @@ class InvestmentAssetUniversSagaTest {
         verify(investmentAssetPriceService, times(1))
             .ingestPrices(task.getData().getAssets(), task.getData().getPriceByAsset());
 
-        // Verify: Status polling was called for each GroupResult
-        verify(investmentAssetPriceService, atLeastOnce()).groupResultStatus(groupResultUuid1);
-        verify(investmentAssetPriceService, atLeastOnce()).groupResultStatus(groupResultUuid2);
     }
 
 
@@ -163,26 +152,6 @@ class InvestmentAssetUniversSagaTest {
         when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
             .thenReturn(Mono.just(groupResults));
 
-        // Mock: Status polling returns PENDING first, then COMPLETED
-        GroupResult pending1 = mock(GroupResult.class);
-        when(pending1.getUuid()).thenReturn(groupResultUuid);
-        when(pending1.getStatus()).thenReturn("PENDING");
-
-        GroupResult pending2 = mock(GroupResult.class);
-        when(pending2.getUuid()).thenReturn(groupResultUuid);
-        when(pending2.getStatus()).thenReturn("PENDING");
-
-        GroupResult completed = mock(GroupResult.class);
-        when(completed.getUuid()).thenReturn(groupResultUuid);
-        when(completed.getStatus()).thenReturn("COMPLETED");
-
-        when(investmentAssetPriceService.groupResultStatus(groupResultUuid))
-            .thenReturn(
-                Mono.just(pending1),
-                Mono.just(pending2),
-                Mono.just(completed)
-            );
-
         // When: Execute upsertPrices
         Mono<InvestmentAssetsTask> result = saga.executeTask(task);
 
@@ -197,9 +166,6 @@ class InvestmentAssetUniversSagaTest {
         // Verify: Price ingestion was called once
         verify(investmentAssetPriceService, times(1))
             .ingestPrices(task.getData().getAssets(), task.getData().getPriceByAsset());
-
-        // Verify: Status was polled multiple times (at least 3 times)
-        verify(investmentAssetPriceService, atLeast(3)).groupResultStatus(groupResultUuid);
     }
 
     /**
@@ -235,9 +201,6 @@ class InvestmentAssetUniversSagaTest {
         GroupResult pending = mock(GroupResult.class);
         when(pending.getUuid()).thenReturn(groupResultUuid);
         when(pending.getStatus()).thenReturn("PENDING");
-
-        when(investmentAssetPriceService.groupResultStatus(groupResultUuid))
-            .thenReturn(Mono.just(pending).delayElement(Duration.ofMillis(100)));
 
         // When: Execute upsertPrices with virtual time for testing
         Mono<InvestmentAssetsTask> result = saga.executeTask(task);
@@ -296,9 +259,6 @@ class InvestmentAssetUniversSagaTest {
         // Verify: Price ingestion was attempted
         verify(investmentAssetPriceService, times(1))
             .ingestPrices(task.getData().getAssets(), task.getData().getPriceByAsset());
-
-        // Verify: Status polling was never called due to early failure
-        verify(investmentAssetPriceService, never()).groupResultStatus(any());
     }
 
     /**
@@ -380,44 +340,6 @@ class InvestmentAssetUniversSagaTest {
         when(investmentAssetPriceService.ingestPrices(anyList(), anyMap()))
             .thenReturn(Mono.just(groupResults));
 
-        // Mock: Different statuses for different tasks
-        // Task 1: Immediate completion
-        GroupResult completed1 = mock(GroupResult.class);
-        when(completed1.getUuid()).thenReturn(groupResultUuid1);
-        when(completed1.getStatus()).thenReturn("COMPLETED");
-        when(investmentAssetPriceService.groupResultStatus(groupResultUuid1))
-            .thenReturn(Mono.just(completed1));
-
-        // Task 2: Fails after first poll
-        GroupResult pending2 = mock(GroupResult.class);
-        when(pending2.getUuid()).thenReturn(groupResultUuid2);
-        when(pending2.getStatus()).thenReturn("PENDING");
-
-        GroupResult failed2 = mock(GroupResult.class);
-        when(failed2.getUuid()).thenReturn(groupResultUuid2);
-        when(failed2.getStatus()).thenReturn("FAILED");
-
-        when(investmentAssetPriceService.groupResultStatus(groupResultUuid2))
-            .thenReturn(
-                Mono.just(pending2),
-                Mono.just(failed2)
-            );
-
-        // Task 3: Completes after two polls
-        GroupResult pending3 = mock(GroupResult.class);
-        when(pending3.getUuid()).thenReturn(groupResultUuid3);
-        when(pending3.getStatus()).thenReturn("PENDING");
-
-        GroupResult completed3 = mock(GroupResult.class);
-        when(completed3.getUuid()).thenReturn(groupResultUuid3);
-        when(completed3.getStatus()).thenReturn("COMPLETED");
-
-        when(investmentAssetPriceService.groupResultStatus(groupResultUuid3))
-            .thenReturn(
-                Mono.just(pending3),
-                Mono.just(completed3)
-            );
-
         // When: Execute upsertPrices
         Mono<InvestmentAssetsTask> result = saga.executeTask(task);
 
@@ -432,11 +354,6 @@ class InvestmentAssetUniversSagaTest {
         // Verify: Price ingestion was called
         verify(investmentAssetPriceService, times(1))
             .ingestPrices(task.getData().getAssets(), task.getData().getPriceByAsset());
-
-        // Verify: Status polling was called for each task
-        verify(investmentAssetPriceService, atLeastOnce()).groupResultStatus(groupResultUuid1);
-        verify(investmentAssetPriceService, atLeastOnce()).groupResultStatus(groupResultUuid2);
-        verify(investmentAssetPriceService, atLeastOnce()).groupResultStatus(groupResultUuid3);
     }
 
     // Helper methods

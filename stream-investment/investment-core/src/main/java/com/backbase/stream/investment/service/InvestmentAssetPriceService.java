@@ -3,7 +3,6 @@ package com.backbase.stream.investment.service;
 import static com.backbase.stream.investment.service.WorkDayService.workDays;
 
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
-import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
 import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.OASCreatePriceRequest;
 import com.backbase.investment.api.service.v1.model.OASPrice;
@@ -22,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
@@ -42,34 +40,10 @@ public class InvestmentAssetPriceService {
     private final SecureRandom random = new SecureRandom();
 
     private final AssetUniverseApi assetUniverseApi;
-    private final AsyncBulkGroupsApi asyncBulkGroupsApi;
 
     public Mono<List<GroupResult>> ingestPrices(List<Asset> assets, Map<String, AssetPrice> priceByAsset) {
         return generatePrices(assets, priceByAsset)
-            .flatMap(result -> {
-                List<GroupResult> list = result.stream().flatMap(Collection::stream).toList();
-                log.info("Start checking for price ingest processing. Async tasks: {}", list.size());
-                return Flux.interval(java.time.Duration.ofSeconds(10))
-                    // Poll the status of all tasks
-                    .flatMap(
-                        tick -> Flux.fromIterable(list)
-                            .flatMap(gr -> this.groupResultStatus(gr.getUuid()))
-                            .collectList()
-                    )
-                    .filter(results -> results.stream().noneMatch(gr -> "PENDING".equalsIgnoreCase(gr.getStatus())))
-                    .next()
-                    .timeout(java.time.Duration.ofMinutes(5))
-                    .doOnSuccess(tasks -> {
-                        log.info("Prices tasks finished added");
-                        log.debug("Price async tasks failure: {}",
-                            tasks.stream().filter(gr -> "FAILURE".equalsIgnoreCase(gr.getStatus())).toList());
-                    })
-                    .onErrorResume(throwable -> {
-                        log.error("Timeout or error waiting for GroupResult tasks: taskIds={}",
-                            list.stream().map(GroupResult::getUuid).toList(), throwable);
-                        return Mono.just(list);
-                    });
-            });
+            .map(asyncTasks -> asyncTasks.stream().flatMap(Collection::stream).toList());
     }
 
     @Nonnull
@@ -164,10 +138,6 @@ public class InvestmentAssetPriceService {
                     .type(TypeEnum.CLOSE);
             })
             .toList();
-    }
-
-    public Mono<GroupResult> groupResultStatus(UUID uuid) {
-        return asyncBulkGroupsApi.getBulkGroup(uuid.toString());
     }
 
     private record RandomPriceParam(double price, RandomParam randomParam) {

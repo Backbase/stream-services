@@ -3,7 +3,6 @@ package com.backbase.stream.configuration;
 import com.backbase.investment.api.service.ApiClient;
 import com.backbase.investment.api.service.v1.AllocationsApi;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
-import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
 import com.backbase.investment.api.service.v1.ClientApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
 import com.backbase.investment.api.service.v1.InvestmentApi;
@@ -13,6 +12,7 @@ import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
 import com.backbase.stream.investment.saga.InvestmentAssetUniversSaga;
 import com.backbase.stream.investment.saga.InvestmentSaga;
+import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.CustomIntegrationApiService;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
@@ -52,7 +52,8 @@ public class InvestmentServiceConfiguration {
     public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi,
         InvestmentProductsApi investmentProductsApi, PaymentsApi paymentsApi,
         InvestmentIngestionConfigurationProperties configurationProperties) {
-        return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, paymentsApi, configurationProperties);
+        return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, paymentsApi,
+            configurationProperties);
     }
 
     @Bean
@@ -68,14 +69,14 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
-    public InvestmentAssetPriceService investmentAssetPriceService(AssetUniverseApi assetUniverseApi,
-        AsyncBulkGroupsApi asyncBulkGroupsApi) {
-        return new InvestmentAssetPriceService(assetUniverseApi, asyncBulkGroupsApi);
+    public InvestmentAssetPriceService investmentAssetPriceService(AssetUniverseApi assetUniverseApi) {
+        return new InvestmentAssetPriceService(assetUniverseApi);
     }
 
     @Bean
     public InvestmentPortfolioAllocationService investmentPortfolioAllocationService(AllocationsApi allocationsApi,
-        AssetUniverseApi assetUniverseApi, InvestmentApi investmentApi, CustomIntegrationApiService customIntegrationApiService) {
+        AssetUniverseApi assetUniverseApi, InvestmentApi investmentApi,
+        CustomIntegrationApiService customIntegrationApiService) {
         return new InvestmentPortfolioAllocationService(allocationsApi, assetUniverseApi, investmentApi,
             customIntegrationApiService);
     }
@@ -84,10 +85,11 @@ public class InvestmentServiceConfiguration {
     public InvestmentSaga investmentSaga(InvestmentClientService investmentClientService,
         InvestmentPortfolioService investmentPortfolioService,
         InvestmentModelPortfolioService investmentModelPortfolioService,
-        InvestmentPortfolioAllocationService investmentPortfolioAllocationService,
+        InvestmentPortfolioAllocationService investmentPortfolioAllocationService, AsyncTaskService asyncTaskService,
         InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
         return new InvestmentSaga(investmentClientService, investmentPortfolioService,
-            investmentPortfolioAllocationService, investmentModelPortfolioService, coreConfigurationProperties);
+            investmentPortfolioAllocationService, investmentModelPortfolioService, asyncTaskService,
+            coreConfigurationProperties);
     }
 
     @Bean

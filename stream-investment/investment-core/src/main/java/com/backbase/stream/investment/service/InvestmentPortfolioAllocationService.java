@@ -135,7 +135,7 @@ public class InvestmentPortfolioAllocationService {
             .filter(Objects::nonNull);
     }
 
-    public Mono<List<OASAllocationCreateRequest>> generateAllocations(
+    private Mono<List<OASAllocationCreateRequest>> generateAllocations(
         Map<String, Map<LocalDate, Double>> priceDayByAssetKey,
         Pair<List<LocalDate>, List<OASAllocationPositionCreateRequest>> dayPositions) {
 
@@ -147,7 +147,7 @@ public class InvestmentPortfolioAllocationService {
         return Mono.just(generateAllocations(priceDayByAssetKey, dayPositions, initialCash, cash, totalTrade));
     }
 
-    public Mono<List<OASPortfolioAllocation>> upsertAllocations(String portfolioId,
+    private Mono<List<OASPortfolioAllocation>> upsertAllocations(String portfolioId,
         List<OASAllocationCreateRequest> allocations) {
         return Flux.fromIterable(allocations)
             .flatMap(a -> customIntegrationApiService.createPortfolioAllocation(portfolioId, a, null, null, null))

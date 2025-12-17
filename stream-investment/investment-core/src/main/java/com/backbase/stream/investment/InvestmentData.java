@@ -1,5 +1,6 @@
 package com.backbase.stream.investment;
 
+import com.backbase.investment.api.service.v1.model.GroupResult;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
@@ -58,4 +59,7 @@ public class InvestmentData {
                 .findAny());
     }
 
+    public List<GroupResult> getPriceAsyncTasks() {
+        return Optional.ofNullable(investmentAssetData).map(InvestmentAssetData::getPriceAsyncTasks).orElse(List.of());
+    }
 }
