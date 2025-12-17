@@ -1,11 +1,14 @@
 package com.backbase.stream.investment;
 
+import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
 import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
+import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Data;
@@ -35,6 +38,24 @@ public class InvestmentData {
 
     public void setPortfoliosProducts(List<PortfolioProduct> products) {
         this.portfolioProducts = products;
+    }
+
+    public void addPortfolioProducts(PortfolioProduct portfolioProduct) {
+        if (portfolioProducts == null) {
+            portfolioProducts = new ArrayList<>();
+        }
+        if (portfolioProducts.stream().noneMatch(p -> p.getUuid().equals(portfolioProduct.getUuid()))) {
+            portfolioProducts.add(portfolioProduct);
+        }
+    }
+
+    public Optional<PortfolioProduct> findPortfolioProduct(ProductTypeEnum productType, Integer riskLevel) {
+        return Optional.ofNullable(portfolioProducts)
+            .flatMap(ps -> ps.stream()
+                .filter(p -> p.getProductType().equals(productType)
+                    && Optional.ofNullable(p.getModelPortfolio()).map(InvestorModelPortfolio::getRiskLevel)
+                    .map(risk -> risk <= riskLevel).orElse(false))
+                .findAny());
     }
 
 }

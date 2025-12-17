@@ -112,6 +112,10 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 .flatMap(a -> Flux.fromIterable(deposits)
                     .flatMap(investmentPortfolioAllocationService::createDepositAllocation)
                     .collectList()
+                    .onErrorResume(ex -> {
+                        log.warn("Failed to create deposit allocation", ex);
+                        return Mono.empty();
+                    })
                 )
             )
             .map(o -> investmentTask);

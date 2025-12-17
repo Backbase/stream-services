@@ -1,5 +1,7 @@
 package com.backbase.stream.investment.service;
 
+import static com.backbase.stream.investment.service.WorkDayService.workDays;
+
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
 import com.backbase.investment.api.service.v1.model.GroupResult;
@@ -15,7 +17,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,7 +24,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,11 +90,7 @@ public class InvestmentAssetPriceService {
                         LocalDate lastDate =
                             prices.isEmpty() ? from : prices.getLast().getDatetime().toLocalDate().plusDays(1);
 
-                        List<LocalDate> daysToCreate = Stream.iterate(lastDate,
-                                offsetDate -> offsetDate.isBefore(now),
-                                offsetDateTime -> offsetDateTime.plusDays(1))
-                            .sorted(Comparator.reverseOrder())
-                            .toList();
+                        List<LocalDate> daysToCreate = workDays(lastDate, now);
                         List<OASCreatePriceRequest> oaSCreatePriceRequest = generateHistoryPrices(daysToCreate,
                             priceParam, asset);
                         if (oaSCreatePriceRequest.isEmpty()) {
