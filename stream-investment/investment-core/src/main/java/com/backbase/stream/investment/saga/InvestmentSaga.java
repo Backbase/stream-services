@@ -1,19 +1,18 @@
 package com.backbase.stream.investment.saga;
 
-import com.backbase.investment.api.service.v1.model.AssetCategory;
 import com.backbase.investment.api.service.v1.model.ClientCreateRequest;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
-import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
+import com.backbase.investment.api.service.v1.model.MarketSpecialDayRequest;
 import com.backbase.investment.api.service.v1.model.Status836Enum;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
+import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
 import com.backbase.stream.worker.model.StreamTask.State;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -59,12 +58,14 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     public static final String RESULT_FAILED = "failed";
 
     private static final String INVESTMENT_PRODUCTS = "investment-products";
+    private static final String INVESTMENT_PORTFOLIO_MODELS = "investment-portfolio-models";
     private static final String INVESTMENT_PORTFOLIOS = "investment-portfolios";
     private static final String PROCESSING_PREFIX = "Processing ";
     private static final String UPSERTED_PREFIX = "Upserted ";
 
     private final InvestmentClientService clientService;
     private final InvestmentPortfolioService investmentPortfolioService;
+    private final InvestmentModelPortfolioService investmentModelPortfolioService;
     private final InvestmentAssetUniverseService assetUniverseService;
 
     /**
@@ -89,7 +90,10 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             streamTask.getId(), streamTask.getName());
 
         return createMarkets(streamTask)
+            .flatMap(this::createMarketSpecialDays)
+//            .flatMap(this::upsertAssetCategory)
             .flatMap(this::createAssets)
+            .flatMap(this::upsertInvestmentPortfolioModels)
             .flatMap(this::upsertClients)
             .flatMap(this::upsertInvestmentProducts)
             .flatMap(this::upsertInvestmentPortfolios)
@@ -121,6 +125,10 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         log.warn("Rollback requested for investment saga but not implemented: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
         return Mono.empty();
+    }
+
+    private Mono<InvestmentTask> upsertAssetCategory(InvestmentTask investmentTask) {
+        return null;
     }
 
     /**
@@ -186,6 +194,37 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             });
     }
 
+    private Mono<InvestmentTask> upsertInvestmentPortfolioModels(InvestmentTask investmentTask) {
+        InvestmentData data = investmentTask.getData();
+        int arrangementCount = data.getInvestmentArrangements().size();
+
+        log.info("Starting investment portfolio models upsert: taskId={}, arrangementCount={}",
+            investmentTask.getId(), arrangementCount);
+
+        investmentTask.info(INVESTMENT_PORTFOLIO_MODELS, OP_UPSERT, null, investmentTask.getName(),
+            investmentTask.getId(), PROCESSING_PREFIX + arrangementCount + " investment portfolio models");
+
+        return investmentModelPortfolioService.upsertModels(data)
+            .collectList()
+            .map(modelPortfolio -> {
+                investmentTask.info(INVESTMENT_PORTFOLIO_MODELS, OP_UPSERT, RESULT_CREATED,
+                    investmentTask.getName(), investmentTask.getId(),
+                    UPSERTED_PREFIX + modelPortfolio.size() + " investment portfolio models");
+
+                log.info("Successfully upserted all investment portfolio models: taskId={}, productCount={}",
+                    investmentTask.getId(), modelPortfolio.size());
+
+                return investmentTask;
+            })
+            .doOnError(throwable -> {
+                log.error("Failed to upsert investment portfolio models: taskId={}, arrangementCount={}",
+                    investmentTask.getId(), arrangementCount, throwable);
+                investmentTask.error(INVESTMENT_PORTFOLIO_MODELS, OP_UPSERT, RESULT_FAILED,
+                    investmentTask.getName(), investmentTask.getId(),
+                    "Failed to upsert investment portfolio models: " + throwable.getMessage());
+            });
+    }
+
     /**
      * Upserts investment products for all investment arrangements.
      *
@@ -212,8 +251,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             .flatMap(arrangement -> {
                 log.debug("Upserting investment product for arrangement: externalId={}, name={}",
                     arrangement.getExternalId(), arrangement.getName());
-
-                return investmentPortfolioService.upsertInvestmentProducts(arrangement)
+                return investmentPortfolioService.upsertInvestmentProducts(data, arrangement)
                     .doOnSuccess(product -> log.debug(
                         "Successfully upserted investment product: productUuid={}, productType={}, "
                             + "arrangementExternalId={}",
@@ -367,6 +405,64 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
     }
 
     /**
+     * Creates or upserts market special days for the investment task.
+     *
+     * <p>This method processes each market special day in the task data by invoking
+     * the asset universe service. It updates the task state and logs progress for observability.
+     *
+     * @param investmentTask the investment task containing market special day data
+     * @return Mono emitting the updated investment task with market special days set
+     */
+    public Mono<InvestmentTask> createMarketSpecialDays(InvestmentTask investmentTask) {
+        final InvestmentData investmentData = investmentTask.getData();
+        int marketSpecialDayCount =
+            investmentData.getMarketSpecialDays() != null ? investmentData.getMarketSpecialDays().size() : 0;
+        log.info("Starting investment market special days creation: taskId={}, marketSpecialDayCount={}",
+            investmentTask.getId(), marketSpecialDayCount);
+        // Log the start of market special days creation and set task state to IN_PROGRESS
+        investmentTask.info(INVESTMENT, OP_CREATE, null, investmentTask.getName(), investmentTask.getId(),
+            PROCESSING_PREFIX + marketSpecialDayCount + " investment markets special day");
+        investmentTask.setState(State.IN_PROGRESS);
+
+        if (marketSpecialDayCount == 0) {
+            log.warn("No market special days to create for taskId={}", investmentTask.getId());
+            investmentTask.setState(State.COMPLETED);
+            return Mono.just(investmentTask);
+        }
+
+        // Process each market  special day: create or get from asset universe service
+        return Flux.fromIterable(investmentData.getMarketSpecialDays())
+            .flatMap(marketSpecialDay -> assetUniverseService.getOrCreateMarketSpecialDay(
+                new MarketSpecialDayRequest()
+                    .date(marketSpecialDay.getDate())
+                    .market(marketSpecialDay.getMarket())
+                    .sessionStart(marketSpecialDay.getSessionStart())
+                    .sessionEnd(marketSpecialDay.getSessionEnd())
+                    .description(marketSpecialDay.getDescription())
+            ))
+            .collectList() // Collect all created/retrieved market special days into a list
+            .map(marketSpecialDays -> {
+                // Update the task with the created market special days
+                investmentTask.setMarketSpecialDays(marketSpecialDays);
+                // Log completion and set task state to COMPLETED
+                investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
+                    investmentTask.getId(),
+                    RESULT_CREATED + " " + marketSpecialDays.size() + " Investment Markets Special Days");
+                investmentTask.setState(State.COMPLETED);
+                log.info("Successfully created all market special days: taskId={}, marketSpecialDayCount={}",
+                    investmentTask.getId(), marketSpecialDays.size());
+                return investmentTask;
+            })
+            .doOnError(throwable -> {
+                log.error("Failed to create/upsert investment market special days: taskId={}, marketSpecialDayCount={}",
+                    investmentTask.getId(), marketSpecialDayCount, throwable);
+                investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(),
+                    investmentTask.getId(),
+                    "Failed to create investment market special days: " + throwable.getMessage());
+            });
+    }
+
+    /**
      * Creates investment assets by invoking the asset universe service for each asset in the task data. Updates the
      * task state and logs progress for observability.
      *
@@ -390,46 +486,18 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             investmentTask.setState(State.COMPLETED);
             return Mono.just(investmentTask);
         }
-
         // Process each asset: create or get from asset universe service
-        return Flux.fromIterable(investmentData.getAssets())
-            .flatMap(asset -> {
-                try {
-                    // Build asset request and invoke service
-                    return assetUniverseService.getOrCreateAsset(
-                        new OASAssetRequestDataRequest()
-                            .name(asset.getName())
-                            .isin(asset.getIsin())
-                            .ticker(asset.getTicker())
-                            .market(asset.getMarket())
-                            .currency(asset.getCurrency())
-                            .status(asset.getStatus())
-                            .extraData(asset.getExtraData())
-                            .assetType(asset.getAssetType())
-                            .categories(asset.getCategories() == null
-                                ? List.of()
-                                : asset.getCategories().stream().map(AssetCategory::getUuid).toList())
-                            .externalId(asset.getExternalId())
-                    );
-                } catch (IOException e) {
-                    final String assetIdentifier =
-                        asset.getIsin() + "_" + asset.getMarket() + "_" + asset.getCurrency();
-                    log.error("Failed to create asset with asset identifier {} : {}", assetIdentifier, e.getMessage(),
-                        e);
-                    return Mono.error(e);
-                }
-            })
-            .collectList() // Collect all created/retrieved assets into a list
-            .map(assets -> {
+        return assetUniverseService.createAssets(investmentData.getAssets())
+            .collectList()
+            .doOnSuccess(assets -> {
                 investmentTask.setAssets(assets);
-                // Log completion and set task state to COMPLETED
                 investmentTask.info(INVESTMENT, OP_CREATE, RESULT_CREATED, investmentTask.getName(),
                     investmentTask.getId(),
                     RESULT_CREATED + " " + assets.size() + " Investment Assets");
                 investmentTask.setState(State.COMPLETED);
                 log.info("Successfully created all assets: taskId={}, assetCount={}",
                     investmentTask.getId(), assets.size());
-                return investmentTask;
+
             })
             .doOnError(throwable -> {
                 log.error("Failed to create investment assets: taskId={}, assetCount={}",
@@ -437,7 +505,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
                 investmentTask.error(INVESTMENT, OP_CREATE, RESULT_FAILED, investmentTask.getName(),
                     investmentTask.getId(),
                     "Failed to create investment assets: " + throwable.getMessage());
-            });
+            })
+            .map(a -> investmentTask);
     }
 
 }
