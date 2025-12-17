@@ -1,5 +1,7 @@
 package com.backbase.stream.investment;
 
+import com.backbase.investment.api.service.v1.model.AssetCategory;
+import com.backbase.investment.api.service.v1.model.AssetCategoryType;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
 import java.util.List;
@@ -19,6 +21,8 @@ public class InvestmentAssetData {
 
     private List<Market> markets;
     private List<MarketSpecialDay> marketSpecialDays;
+    private List<AssetCategoryType> assetCategoryTypes;
+    private List<AssetCategory> assetCategories;
     private List<Asset> assets;
     private List<AssetPrice> assetPrices;
 
