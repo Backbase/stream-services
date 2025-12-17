@@ -71,6 +71,24 @@ public class InvestmentPortfolioService {
     private final PaymentsApi paymentsApi;
     private final InvestmentIngestionConfigurationProperties config;
 
+    public Mono<List<PortfolioList>> upsertPortfolios(List<InvestmentArrangement> investmentArrangements,
+        Map<String, List<UUID>> clientsByLeExternalId) {
+        return Flux.fromIterable(investmentArrangements)
+            .flatMap(arrangement -> {
+                log.debug("Upserting investment portfolio for arrangement: externalId={}, name={}, productId={}",
+                    arrangement.getExternalId(), arrangement.getName(), arrangement.getInvestmentProductId());
+
+                return upsertInvestmentPortfolios(arrangement, clientsByLeExternalId)
+                    .doOnSuccess(portfolio -> log.debug(
+                        "Successfully upserted investment portfolio: portfolioUuid={}, externalId={}, name={}",
+                        portfolio.getUuid(), portfolio.getExternalId(), portfolio.getName()))
+                    .doOnError(throwable -> log.error(
+                        "Failed to upsert investment portfolio: arrangementExternalId={}, arrangementName={}",
+                        arrangement.getExternalId(), arrangement.getName(), throwable));
+            })
+            .collectList();
+    }
+
     /**
      * Creates or updates an investment product (portfolio product) for the given arrangement.
      *

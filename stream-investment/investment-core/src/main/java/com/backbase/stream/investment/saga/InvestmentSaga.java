@@ -1,7 +1,5 @@
 package com.backbase.stream.investment.saga;
 
-import com.backbase.investment.api.service.v1.model.ClientCreateRequest;
-import com.backbase.investment.api.service.v1.model.Status836Enum;
 import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.InvestmentTask;
@@ -164,20 +162,8 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         investmentTask.info(INVESTMENT_PORTFOLIOS, OP_UPSERT, null, investmentTask.getName(),
             investmentTask.getId(), PROCESSING_PREFIX + arrangementCount + " investment portfolios");
 
-        return Flux.fromIterable(investmentTask.getData().getInvestmentArrangements())
-            .flatMap(arrangement -> {
-                log.debug("Upserting investment portfolio for arrangement: externalId={}, name={}, productId={}",
-                    arrangement.getExternalId(), arrangement.getName(), arrangement.getInvestmentProductId());
-
-                return investmentPortfolioService.upsertInvestmentPortfolios(arrangement, clientsByLeExternalId)
-                    .doOnSuccess(portfolio -> log.debug(
-                        "Successfully upserted investment portfolio: portfolioUuid={}, externalId={}, name={}",
-                        portfolio.getUuid(), portfolio.getExternalId(), portfolio.getName()))
-                    .doOnError(throwable -> log.error(
-                        "Failed to upsert investment portfolio: arrangementExternalId={}, arrangementName={}",
-                        arrangement.getExternalId(), arrangement.getName(), throwable));
-            })
-            .collectList()
+        return investmentPortfolioService.upsertPortfolios(investmentTask.getData().getInvestmentArrangements(),
+                clientsByLeExternalId)
             .map(portfolios -> {
                 investmentTask.info(INVESTMENT_PORTFOLIOS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
@@ -253,8 +239,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
         investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, null, investmentTask.getName(),
             investmentTask.getId(), PROCESSING_PREFIX + arrangementCount + " investment products");
 
-        return Mono.just(data.getInvestmentArrangements())
-            .flatMap(arrangements -> investmentPortfolioService.upsertInvestmentProducts(data, arrangements))
+        return investmentPortfolioService.upsertInvestmentProducts(data, data.getInvestmentArrangements())
             .map(products -> {
                 investmentTask.info(INVESTMENT_PRODUCTS, OP_UPSERT, RESULT_CREATED,
                     investmentTask.getName(), investmentTask.getId(),
@@ -307,28 +292,7 @@ public class InvestmentSaga implements StreamTaskExecutor<InvestmentTask> {
             PROCESSING_PREFIX + clientCount + " investment clients");
         streamTask.setState(State.IN_PROGRESS);
 
-        return Flux.fromIterable(investmentData.getClientUsers())
-            .flatMap(clientUser -> {
-                log.debug("Upserting investment client: internalUserId={}, externalUserId={}, legalEntityExternalId={}",
-                    clientUser.getInternalUserId(), clientUser.getExternalUserId(),
-                    clientUser.getLegalEntityExternalId());
-
-                ClientCreateRequest request = new ClientCreateRequest()
-                    .internalUserId(clientUser.getInternalUserId())
-                    .status(Status836Enum.ACTIVE)
-                    .putExtraDataItem("user_external_id", clientUser.getExternalUserId())
-                    .putExtraDataItem("keycloak_username", clientUser.getExternalUserId());
-
-                return clientService.upsertClient(request, clientUser.getLegalEntityExternalId())
-                    .doOnSuccess(upsertedClient -> log.debug(
-                        "Successfully upserted client: investmentClientId={}, internalUserId={}",
-                        upsertedClient.getInvestmentClientId(), upsertedClient.getInternalUserId()))
-                    .doOnError(throwable -> log.error(
-                        "Failed to upsert client: internalUserId={}, externalUserId={}, legalEntityExternalId={}",
-                        clientUser.getInternalUserId(), clientUser.getExternalUserId(),
-                        clientUser.getLegalEntityExternalId(), throwable));
-            })
-            .collectList()
+        return clientService.upsertClients(investmentData.getClientUsers())
             .map(clients -> {
                 streamTask.data(clients);
                 streamTask.info(INVESTMENT, OP_UPSERT, RESULT_CREATED, streamTask.getName(), streamTask.getId(),
