@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
@@ -589,6 +590,34 @@ class AccessGroupServiceTest {
         verify(assignPermissionsIntegrationApi).batchUpdateUserPermissions(argumentCaptor.capture());
         assertEquals(expectedPermissions.size(), argumentCaptor.getValue().getFirst().getPermissions().size());
         assertTrue(argumentCaptor.getValue().getFirst().getPermissions().containsAll(expectedPermissions));
+    }
+
+    @Test
+    void assignPermissionsBatch_noPermissions() {
+        // Given
+        BatchProductGroupTask batchProductGroupTask = new BatchProductGroupTask().data(
+            new BatchProductGroup().serviceAgreement(
+                new ServiceAgreement().externalId("sa-external-id").internalId("sa-internal-id"))
+        );
+        batchProductGroupTask.setIngestionMode(BatchProductIngestionMode.UPSERT);
+
+        when(functionGroupServiceApi.getFunctionGroups("sa-internal-id"))
+            .thenReturn(Mono.just(new GetFunctionGroups()
+                .functionGroups(List.of(
+                    new FunctionGroupItem().id("system-group-id-1").type(TypeEnum.SYSTEM),
+                    new FunctionGroupItem().id("system-group-id-2").type(TypeEnum.REFERENCE),
+                    new FunctionGroupItem().id("system-group-id-3").type(TypeEnum.SYSTEM)
+                ))
+            ));
+
+        // When
+        BatchProductGroupTask result = subject.assignPermissionsBatch(batchProductGroupTask, Map.of())
+            .block();
+
+        // Then
+        Assertions.assertSame(batchProductGroupTask, result);
+
+        verify(assignPermissionsIntegrationApi, never()).batchUpdateUserPermissions(anyList());
     }
 
     @Test
