@@ -16,6 +16,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
@@ -882,18 +883,6 @@ class AccessGroupServiceTest {
                 .status(StatusEnum.HTTP_STATUS_OK)
                 .resourceId("test-resource-id")));
 
-        when(arrangementsApi.postSearchArrangements(any()))
-            .thenReturn(
-                Mono.just(new ArrangementSearchesListResponse()
-                    .arrangementElements(
-                        List.of(
-                            new ArrangementItem().id("template-custom-test")
-                                .externalArrangementId("template-custom-test-ext"),
-                            new ArrangementItem().id("engagement-template-custom-test")
-                                .externalArrangementId("engagement-template-custom-test-ext"),
-                            new ArrangementItem().id("engagement-template-notification-test")
-                                .externalArrangementId("engagement-template-notification-test-ext")))));
-
         // When
         subject.updateExistingDataGroupsBatch(batchProductGroupTask,
                 List.of(dataGroupItemTemplateCustom,
@@ -1196,18 +1185,6 @@ class AccessGroupServiceTest {
             "Repository Group Engagement Template Notification", BaseProductGroup.ProductGroupTypeEnum.REPOSITORIES,
             "engagement-template-notification");
 
-        when(arrangementsApi.postSearchArrangements(any()))
-            .thenReturn(
-                Mono.just(new ArrangementSearchesListResponse()
-                    .arrangementElements(
-                        List.of(
-                            new ArrangementItem().id("template-custom-test")
-                                .externalArrangementId("template-custom-test-ext"),
-                            new ArrangementItem().id("engagement-template-custom-test")
-                                .externalArrangementId("engagement-template-custom-test-ext"),
-                            new ArrangementItem().id("engagement-template-notification-test")
-                                .externalArrangementId("engagement-template-notification-test-ext")))));
-
         // When
         subject.updateExistingDataGroupsBatch(batchProductGroupTask,
                 List.of(),
@@ -1218,6 +1195,7 @@ class AccessGroupServiceTest {
 
         // Then
         verify(dataGroupIntegrationApi, times(0)).batchUpdateDataItems(any());
+        verifyNoInteractions(arrangementsApi);
     }
 
 
