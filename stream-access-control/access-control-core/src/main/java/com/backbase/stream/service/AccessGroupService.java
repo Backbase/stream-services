@@ -611,7 +611,8 @@ public class AccessGroupService {
                     "Assigning permissions: %s",
                     userPermissionsList.stream().map(this::prettyPrintUserAssignedPermissions)
                         .collect(Collectors.joining(",")));
-                return assignPermissionsIntegrationApi.batchUpdateUserPermissions(map(userPermissionsList))
+                return Flux.fromIterable(partitionList(map(userPermissionsList), 1000))
+                    .flatMap(assignPermissionsIntegrationApi::batchUpdateUserPermissions)
                     .map(r -> batchResponseUtils.checkBatchResponseItem(r, "Permissions Update",
                         r.getStatus().toString(), r.getResourceId(), r.getErrors()))
                     .doOnNext(

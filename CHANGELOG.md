@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [8.8.1](https://github.com/Backbase/stream-services/compare/8.8.0...8.8.1)
+### Changed
+  - added partitioning to a batch permission update request
 ### Changed
 ## [9.0.0](https://github.com/Backbase/stream-services/compare/8.8.0...9.0.0)
 - Upgraded to bb bom 2025.10.2
