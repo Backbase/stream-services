@@ -1,17 +1,24 @@
 package com.backbase.stream.configuration;
 
 import com.backbase.investment.api.service.ApiClient;
+import com.backbase.investment.api.service.v1.AllocationsApi;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.ClientApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
+import com.backbase.investment.api.service.v1.InvestmentApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
+import com.backbase.investment.api.service.v1.PaymentsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.backbase.stream.clients.autoconfigure.DbsApiClientsAutoConfiguration;
+import com.backbase.stream.investment.saga.InvestmentAssetUniversSaga;
 import com.backbase.stream.investment.saga.InvestmentSaga;
+import com.backbase.stream.investment.service.AsyncTaskService;
 import com.backbase.stream.investment.service.CustomIntegrationApiService;
+import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
 import com.backbase.stream.investment.service.InvestmentModelPortfolioService;
+import com.backbase.stream.investment.service.InvestmentPortfolioAllocationService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -24,7 +31,7 @@ import org.springframework.context.annotation.Import;
     DbsApiClientsAutoConfiguration.class,
 })
 @EnableConfigurationProperties({
-    InvestmentSagaConfigurationProperties.class
+    InvestmentIngestionConfigurationProperties.class
 })
 @RequiredArgsConstructor
 @Configuration
@@ -43,8 +50,10 @@ public class InvestmentServiceConfiguration {
 
     @Bean
     public InvestmentPortfolioService investmentPortfolioService(PortfolioApi portfolioApi,
-        InvestmentProductsApi investmentProductsApi) {
-        return new InvestmentPortfolioService(investmentProductsApi, portfolioApi);
+        InvestmentProductsApi investmentProductsApi, PaymentsApi paymentsApi,
+        InvestmentIngestionConfigurationProperties configurationProperties) {
+        return new InvestmentPortfolioService(investmentProductsApi, portfolioApi, paymentsApi,
+            configurationProperties);
     }
 
     @Bean
@@ -60,12 +69,36 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    public InvestmentAssetPriceService investmentAssetPriceService(AssetUniverseApi assetUniverseApi) {
+        return new InvestmentAssetPriceService(assetUniverseApi);
+    }
+
+    @Bean
+    public InvestmentPortfolioAllocationService investmentPortfolioAllocationService(AllocationsApi allocationsApi,
+        AssetUniverseApi assetUniverseApi, InvestmentApi investmentApi,
+        CustomIntegrationApiService customIntegrationApiService) {
+        return new InvestmentPortfolioAllocationService(allocationsApi, assetUniverseApi, investmentApi,
+            customIntegrationApiService);
+    }
+
+    @Bean
     public InvestmentSaga investmentSaga(InvestmentClientService investmentClientService,
         InvestmentPortfolioService investmentPortfolioService,
         InvestmentModelPortfolioService investmentModelPortfolioService,
-        InvestmentAssetUniverseService investmentAssetUniverseService) {
-        return new InvestmentSaga(investmentClientService, investmentPortfolioService, investmentModelPortfolioService,
-            investmentAssetUniverseService);
+        InvestmentPortfolioAllocationService investmentPortfolioAllocationService, AsyncTaskService asyncTaskService,
+        InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
+        return new InvestmentSaga(investmentClientService, investmentPortfolioService,
+            investmentPortfolioAllocationService, investmentModelPortfolioService, asyncTaskService,
+            coreConfigurationProperties);
+    }
+
+    @Bean
+    public InvestmentAssetUniversSaga investmentStaticDataSaga(
+        InvestmentAssetUniverseService investmentAssetUniverseService,
+        InvestmentAssetPriceService investmentAssetPriceService,
+        InvestmentIngestionConfigurationProperties coreConfigurationProperties) {
+        return new InvestmentAssetUniversSaga(investmentAssetUniverseService, investmentAssetPriceService,
+            coreConfigurationProperties);
     }
 
 }

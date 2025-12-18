@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -40,6 +41,31 @@ public class InvestmentClientService {
 
     private final ClientApi clientApi;
 
+    public Mono<List<ClientUser>> upsertClients(List<ClientUser> clientUsers) {
+        return Flux.fromIterable(clientUsers)
+            .flatMap(clientUser -> {
+                log.debug("Upserting investment client: internalUserId={}, externalUserId={}, legalEntityExternalId={}",
+                    clientUser.getInternalUserId(), clientUser.getExternalUserId(),
+                    clientUser.getLegalEntityExternalId());
+
+                ClientCreateRequest request = new ClientCreateRequest()
+                    .internalUserId(clientUser.getInternalUserId())
+                    .status(Status836Enum.ACTIVE)
+                    .putExtraDataItem("user_external_id", clientUser.getExternalUserId())
+                    .putExtraDataItem("keycloak_username", clientUser.getExternalUserId());
+
+                return upsertClient(request, clientUser.getLegalEntityExternalId())
+                    .doOnSuccess(upsertedClient -> log.debug(
+                        "Successfully upserted client: investmentClientId={}, internalUserId={}",
+                        upsertedClient.getInvestmentClientId(), upsertedClient.getInternalUserId()))
+                    .doOnError(throwable -> log.error(
+                        "Failed to upsert client: internalUserId={}, externalUserId={}, legalEntityExternalId={}",
+                        clientUser.getInternalUserId(), clientUser.getExternalUserId(),
+                        clientUser.getLegalEntityExternalId(), throwable));
+            })
+            .collectList();
+    }
+
     /**
      * Create or update an investment client via Investment Service API.
      *
@@ -59,7 +85,7 @@ public class InvestmentClientService {
      * @return Mono emitting created or updated client representation as {@link ClientUser}
      * @throws NullPointerException if request is null
      */
-    public Mono<ClientUser> upsertClient(@NotNull ClientCreateRequest request, String legalEntityExternalId) {
+    private Mono<ClientUser> upsertClient(@NotNull ClientCreateRequest request, String legalEntityExternalId) {
         Objects.requireNonNull(request, "ClientCreateRequest must not be null");
 
         Map<String, Object> extraData = request.getExtraData();
@@ -73,7 +99,7 @@ public class InvestmentClientService {
             .switchIfEmpty(createNewClient(request, legalEntityExternalId))
             .doOnSuccess(clientUser -> log.info(
                 "Successfully upserted investment client: investmentClientId={}, internalUserId={}, "
-                + "externalUserId={}, legalEntityExternalId={}",
+                    + "externalUserId={}, legalEntityExternalId={}",
                 clientUser.getInvestmentClientId(), clientUser.getInternalUserId(),
                 clientUser.getExternalUserId(), clientUser.getLegalEntityExternalId()))
             .doOnError(throwable -> log.error(
@@ -114,8 +140,8 @@ public class InvestmentClientService {
     }
 
     /**
-     * Updates an existing client by patching its status to ACTIVE.
-     * Falls back to the original client if the patch operation fails.
+     * Updates an existing client by patching its status to ACTIVE. Falls back to the original client if the patch
+     * operation fails.
      *
      * @param existingClient        the existing client to update
      * @param legalEntityExternalId the legal entity external ID to associate
@@ -198,7 +224,7 @@ public class InvestmentClientService {
      * @return constructed ClientUser instance
      */
     private ClientUser buildClientUser(UUID investmentClientId, String internalUserId,
-                                       String externalUserId, String legalEntityExternalId) {
+        String externalUserId, String legalEntityExternalId) {
         return ClientUser.builder()
             .investmentClientId(investmentClientId)
             .internalUserId(internalUserId)
@@ -247,8 +273,7 @@ public class InvestmentClientService {
      * Patches an existing investment client with partial updates.
      *
      * <p>Only the fields provided in the patch request will be updated; all other fields
-     * remain unchanged. This is useful for updating specific attributes without affecting
-     * the entire client entity.
+     * remain unchanged. This is useful for updating specific attributes without affecting the entire client entity.
      *
      * @param uuid  the client UUID (must not be null)
      * @param patch the patch request containing fields to update (must not be null)
@@ -272,8 +297,8 @@ public class InvestmentClientService {
      * Replaces an existing investment client with a complete update (PUT operation).
      *
      * <p>Unlike {@link #patchClient(UUID, PatchedOASClientUpdateRequest)}, this method
-     * requires all client fields to be provided in the update request. Any fields not
-     * specified will be set to their default values.
+     * requires all client fields to be provided in the update request. Any fields not specified will be set to their
+     * default values.
      *
      * @param uuid   the client UUID (must not be null)
      * @param update the complete update request (must not be null)

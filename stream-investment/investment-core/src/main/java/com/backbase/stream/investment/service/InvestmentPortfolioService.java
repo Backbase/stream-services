@@ -1,9 +1,14 @@
 package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
+import com.backbase.investment.api.service.v1.PaymentsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
+import com.backbase.investment.api.service.v1.model.Deposit;
+import com.backbase.investment.api.service.v1.model.DepositRequest;
+import com.backbase.investment.api.service.v1.model.DepositTypeEnum;
 import com.backbase.investment.api.service.v1.model.IntegrationPortfolioCreateRequest;
 import com.backbase.investment.api.service.v1.model.InvestorModelPortfolio;
+import com.backbase.investment.api.service.v1.model.PaginatedDepositList;
 import com.backbase.investment.api.service.v1.model.PaginatedPortfolioProductList;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.PatchedPortfolioUpdateRequest;
@@ -11,7 +16,9 @@ import com.backbase.investment.api.service.v1.model.PortfolioList;
 import com.backbase.investment.api.service.v1.model.PortfolioProduct;
 import com.backbase.investment.api.service.v1.model.PortfolioProductCreateUpdateRequest;
 import com.backbase.investment.api.service.v1.model.ProductTypeEnum;
+import com.backbase.investment.api.service.v1.model.Status08fEnum;
 import com.backbase.investment.api.service.v1.model.StatusA3dEnum;
+import com.backbase.stream.configuration.InvestmentIngestionConfigurationProperties;
 import com.backbase.stream.investment.InvestmentArrangement;
 import com.backbase.stream.investment.InvestmentData;
 import com.backbase.stream.investment.ModelPortfolio;
@@ -23,10 +30,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -57,6 +68,26 @@ public class InvestmentPortfolioService {
 
     private final InvestmentProductsApi productsApi;
     private final PortfolioApi portfolioApi;
+    private final PaymentsApi paymentsApi;
+    private final InvestmentIngestionConfigurationProperties config;
+
+    public Mono<List<PortfolioList>> upsertPortfolios(List<InvestmentArrangement> investmentArrangements,
+        Map<String, List<UUID>> clientsByLeExternalId) {
+        return Flux.fromIterable(investmentArrangements)
+            .flatMap(arrangement -> {
+                log.debug("Upserting investment portfolio for arrangement: externalId={}, name={}, productId={}",
+                    arrangement.getExternalId(), arrangement.getName(), arrangement.getInvestmentProductId());
+
+                return upsertInvestmentPortfolios(arrangement, clientsByLeExternalId)
+                    .doOnSuccess(portfolio -> log.debug(
+                        "Successfully upserted investment portfolio: portfolioUuid={}, externalId={}, name={}",
+                        portfolio.getUuid(), portfolio.getExternalId(), portfolio.getName()))
+                    .doOnError(throwable -> log.error(
+                        "Failed to upsert investment portfolio: arrangementExternalId={}, arrangementName={}",
+                        arrangement.getExternalId(), arrangement.getName(), throwable));
+            })
+            .collectList();
+    }
 
     /**
      * Creates or updates an investment product (portfolio product) for the given arrangement.
@@ -74,45 +105,93 @@ public class InvestmentPortfolioService {
      * @return Mono emitting the created or updated portfolio product
      * @throws NullPointerException if investmentArrangement is null
      */
-    public Mono<PortfolioProduct> upsertInvestmentProducts(InvestmentData investmentData,
-        InvestmentArrangement investmentArrangement) {
-        Objects.requireNonNull(investmentArrangement, "InvestmentArrangement must not be null");
+    public Mono<List<PortfolioProduct>> upsertInvestmentProducts(InvestmentData investmentData,
+        List<InvestmentArrangement> investmentArrangements) {
+        Objects.requireNonNull(investmentArrangements, "InvestmentArrangement must not be null");
 
-        String productTypeExternalId = investmentArrangement.getProductTypeExternalId();
+        return Flux.fromIterable(investmentArrangements)
+            .flatMap(investmentArrangement -> {
+                String productTypeExternalId = investmentArrangement.getProductTypeExternalId();
 
-        ProductTypeEnum productType = Arrays.stream(ProductTypeEnum.values())
-            .filter(pt -> productTypeExternalId.equalsIgnoreCase(pt.getValue()))
-            .findFirst().orElse(null);
-        if (productType == null) {
-            log.error("Data setup issue: Investment does not support type {}", productTypeExternalId);
-            return Mono.error(new IllegalStateException(
-                String.format("Data setup issue: Investment does not support type=%s",
-                    productTypeExternalId)));
-        }
-        InvestorModelPortfolio portfolioModel = null;
-        String adviceEngine = null;
-        if (productType != ProductTypeEnum.SELF_TRADING) {
-            adviceEngine = "model_portfolio";
-            String externalId = investmentArrangement.getExternalId();
-            List<ModelPortfolio> modelUuid = findModelUuid(investmentData, externalId, productType);
-            if (modelUuid.isEmpty()) {
-                log.error("Data setup issue: Investment portfolio model is not defined for arrangement externalId={}",
-                    externalId);
-                return Mono.error(new IllegalStateException(
-                    String.format(
-                        "Data setup issue: Investment does have portfolio model for arrangement externalId=%s",
-                        externalId)));
-            }
-            ModelPortfolio modelPortfolio = modelUuid.get(0);
-            portfolioModel = new InvestorModelPortfolio(modelPortfolio.getUuid(), null, null,
-                modelPortfolio.getRiskLevel(), null, null);
-        }
-        PortfolioProduct portfolioProduct = new PortfolioProduct(null, adviceEngine, portfolioModel, productType);
+                ProductTypeEnum productType = Arrays.stream(ProductTypeEnum.values())
+                    .filter(pt -> productTypeExternalId.equalsIgnoreCase(pt.getValue()))
+                    .findFirst().orElse(null);
+                if (productType == null) {
+                    log.error("Data setup issue: Investment does not support type {}", productTypeExternalId);
+                    return Mono.error(new IllegalStateException(
+                        String.format("Data setup issue: Investment does not support type=%s",
+                            productTypeExternalId)));
+                }
+                InvestorModelPortfolio portfolioModel = null;
+                String adviceEngine = null;
+                if (productType != ProductTypeEnum.SELF_TRADING) {
+                    adviceEngine = "model_portfolio";
+                    String externalId = investmentArrangement.getExternalId();
+                    List<ModelPortfolio> modelUuid = findModelUuid(investmentData, externalId, productType);
+                    if (modelUuid.isEmpty()) {
+                        log.error(
+                            "Data setup issue: Investment portfolio model is not defined for arrangement externalId={}",
+                            externalId);
+                        return Mono.error(new IllegalStateException(
+                            String.format(
+                                "Data setup issue: Investment does have portfolio model for arrangement externalId=%s",
+                                externalId)));
+                    }
+                    ModelPortfolio modelPortfolio = modelUuid.get(0);
+                    portfolioModel = new InvestorModelPortfolio(modelPortfolio.getUuid(), null, null,
+                        modelPortfolio.getRiskLevel(), null, null);
+                }
+                return Mono.just(new PortfolioProduct(null, adviceEngine, portfolioModel, productType));
+            })
+            .collectList()
+            .flatMapIterable(this::distinctProducts)
+            .flatMap(p -> listExistingPortfolioProducts(p)
+                .flatMap(
+                    existingProduct -> updateExistingPortfolioProduct(existingProduct, p,
+                        investmentData))
+                .switchIfEmpty(createPortfolioProductWithModel(p, investmentData))
+                .doOnSuccess(product -> log.info(
+                    "Successfully upserted portfolio product: engine={}, productType={}, model={}",
+                    product.getAdviceEngine(), product.getProductType(),
+                    Optional.ofNullable(product.getModelPortfolio())
+                        .map(InvestorModelPortfolio::getName).orElse("")))
+                .doOnError(throwable -> log.error("Failed to upsert portfolio product: productType={}",
+                    p.getProductType(), throwable))
+            )
+            .collectList()
+            .flatMap(products -> {
+                investmentArrangements.forEach(a -> products.stream()
+                    .filter(p -> p.getProductType().toString().equalsIgnoreCase(a.getProductTypeExternalId()))
+                    .findAny().ifPresent(p -> {
+                        log.info(
+                            "Assign portfolio product to arrangement: engine={}, productType={}, model={}, arrangementName={}",
+                            p.getAdviceEngine(), p.getProductType(),
+                            Optional.ofNullable(p.getModelPortfolio())
+                                .map(InvestorModelPortfolio::getName).orElse(""), a.getName());
+                        a.setInvestmentProductId(p.getUuid());
+                    }));
+                return Mono.just(products);
+            })
+            .doOnSuccess(products -> {
+                log.info(
+                    "Successfully upserted investment products {}", products.size());
+                log.debug("Successfully upserted investment products {}", products);
+            })
+            .doOnError(throwable -> log.error(
+                "Failed to upsert investment products for arrangements {}", investmentArrangements, throwable));
+    }
 
-        log.info("Upserting investment product: productType={}, arrangementName={}",
-            portfolioProduct.getProductType(), investmentArrangement.getName());
-
-        return upsertPortfolioProducts(investmentArrangement, portfolioProduct);
+    private Collection<PortfolioProduct> distinctProducts(List<PortfolioProduct> products) {
+        return products.stream()
+            .collect(Collectors.toMap(
+                pp -> pp.getProductType().getValue() + "_" + Optional.ofNullable(pp.getModelPortfolio())
+                    .map(InvestorModelPortfolio::getRiskLevel)
+                    .map(Object::toString)
+                    .orElse(""),
+                pp -> pp,
+                (existing, replacement) -> existing
+            ))
+            .values();
     }
 
     private static List<ModelPortfolio> findModelUuid(InvestmentData investmentData, String externalId,
@@ -179,7 +258,7 @@ public class InvestmentPortfolioService {
             .name(investmentArrangement.getName())
             .clients(associatedClients)
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusDays(1));
+            .activated(OffsetDateTime.now().minusMonths(config.getPortfolioActivationPastMonths()));
 
         log.debug("Attempting to patch existing portfolio: uuid={}, externalId={}",
             uuid, investmentArrangement.getExternalId());
@@ -268,7 +347,7 @@ public class InvestmentPortfolioService {
             .clients(associatedClients)
             .currency(Optional.ofNullable(investmentArrangement.getCurrency()).orElse(DEFAULT_CURRENCY))
             .status(StatusA3dEnum.ACTIVE)
-            .activated(OffsetDateTime.now().minusDays(1));
+            .activated(OffsetDateTime.now().minusMonths(config.getPortfolioActivationPastMonths()));
 
         return portfolioApi.createPortfolio(request, null, null, null)
             .doOnSuccess(created -> log.info(
@@ -298,56 +377,29 @@ public class InvestmentPortfolioService {
             .toList();
     }
 
-    /**
-     * Internal upsert logic for portfolio products.
-     *
-     * <p>This method implements the following workflow:
-     * <ol>
-     *   <li>Lists existing portfolio products by product type</li>
-     *   <li>If found, attempts to patch the existing product</li>
-     *   <li>If patch fails, falls back to the original product</li>
-     *   <li>If not found, creates a new portfolio product</li>
-     *   <li>Updates the arrangement with the product UUID</li>
-     * </ol>
-     *
-     * @param investmentArrangement the arrangement to update with product UUID
-     * @param portfolioProduct      the portfolio product template to create/update
-     * @return Mono emitting the created or updated portfolio product
-     */
-    private Mono<PortfolioProduct> upsertPortfolioProducts(InvestmentArrangement investmentArrangement,
-        PortfolioProduct portfolioProduct) {
-        String productType = portfolioProduct.getProductType().getValue();
-
-        return listExistingPortfolioProducts(portfolioProduct)
-            .flatMap(existingProduct -> updateExistingPortfolioProduct(
-                existingProduct, portfolioProduct, investmentArrangement))
-            .switchIfEmpty(createPortfolioProductWithModel(portfolioProduct, investmentArrangement))
-            .doOnSuccess(product -> log.info(
-                "Successfully upserted portfolio product: arrangementName={}",
-                product.getUuid(), product.getProductType(), investmentArrangement.getName()))
-            .doOnError(throwable -> log.error(
-                "Failed to upsert portfolio product: productType={}, arrangementName={}",
-                productType, investmentArrangement.getName(), throwable));
+    private Mono<PortfolioProduct> listExistingPortfolioProducts(PortfolioProduct portfolioProduct,
+        InvestmentData investmentData) {
+        Integer modelPortfolioRiskLower = null;
+        ProductTypeEnum productType = portfolioProduct.getProductType();
+        if (ProductTypeEnum.SELF_TRADING != productType) {
+            modelPortfolioRiskLower = portfolioProduct.getModelPortfolio().getRiskLevel();
+        }
+        return Mono.justOrEmpty(investmentData.findPortfolioProduct(productType, modelPortfolioRiskLower))
+            .switchIfEmpty(listExistingPortfolioProducts(productType, modelPortfolioRiskLower));
     }
 
-    /**
-     * Lists existing portfolio products by product type.
-     *
-     * <p>This method validates that exactly zero or one product exists for the given type.
-     * If multiple products are found, it indicates a data setup issue and an exception is thrown.
-     *
-     * @param productType the product type to search for
-     * @return Mono emitting the first matching product, or empty if no match found
-     * @throws IllegalStateException if more than one product is found for the given type
-     */
     private Mono<PortfolioProduct> listExistingPortfolioProducts(PortfolioProduct portfolioProduct) {
         Integer modelPortfolioRiskLower = null;
         ProductTypeEnum productType = portfolioProduct.getProductType();
         if (ProductTypeEnum.SELF_TRADING != productType) {
             modelPortfolioRiskLower = portfolioProduct.getModelPortfolio().getRiskLevel();
         }
+        return listExistingPortfolioProducts(productType, modelPortfolioRiskLower);
+    }
+
+    private Mono<PortfolioProduct> listExistingPortfolioProducts(ProductTypeEnum productType, Integer riskLevel) {
         return productsApi.listPortfolioProducts(List.of(MODEL_PORTFOLIO_ALLOCATION_ASSET), null, null,
-                1, null, null, modelPortfolioRiskLower, null, null, "-model_portfolio__risk_level",
+                1, null, null, riskLevel, null, null, "-model_portfolio__risk_level",
                 List.of(productType.getValue()))
             .doOnSuccess(products -> log.debug(
                 "List portfolio products query completed: productType={}, found={} results",
@@ -383,13 +435,14 @@ public class InvestmentPortfolioService {
      * Updates an existing portfolio product by patching it. Falls back to the original product if the patch operation
      * fails.
      *
+     * @param investmentArrangement the arrangement to update with product UUID
      * @param existingProduct       the existing product to update
      * @param portfolioProduct      the template product containing desired values
-     * @param investmentArrangement the arrangement to update with product UUID
+     * @param investmentData
      * @return Mono emitting the updated product
      */
     private Mono<PortfolioProduct> updateExistingPortfolioProduct(PortfolioProduct existingProduct,
-        PortfolioProduct portfolioProduct, InvestmentArrangement investmentArrangement) {
+        PortfolioProduct portfolioProduct, InvestmentData investmentData) {
         UUID productUuid = existingProduct.getUuid();
 
         PatchedPortfolioProductCreateUpdateRequest patch = new PatchedPortfolioProductCreateUpdateRequest()
@@ -407,7 +460,7 @@ public class InvestmentPortfolioService {
                 null, null, patch)
             .doOnSuccess(updated -> {
                 log.info("Successfully patched existing investment product: uuid={}", updated.getUuid());
-                investmentArrangement.setInvestmentProductId(updated.getUuid());
+                investmentData.addPortfolioProducts(updated);
             })
             .doOnError(throwable -> {
                 if (throwable instanceof WebClientResponseException ex) {
@@ -421,7 +474,6 @@ public class InvestmentPortfolioService {
             })
             .onErrorResume(WebClientResponseException.class, ex -> {
                 log.info("Using existing product data due to patch failure: uuid={}", productUuid);
-                investmentArrangement.setInvestmentProductId(existingProduct.getUuid());
                 return Mono.just(existingProduct);
             });
     }
@@ -429,12 +481,13 @@ public class InvestmentPortfolioService {
     /**
      * Creates a portfolio product with an optional model portfolio UUID.
      *
-     * @param portfolioProduct      the portfolio product template
      * @param investmentArrangement the arrangement to update with product UUID
+     * @param portfolioProduct      the portfolio product template
+     * @param investmentData
      * @return Mono emitting the newly created portfolio product
      */
     private Mono<PortfolioProduct> createPortfolioProductWithModel(PortfolioProduct portfolioProduct,
-        InvestmentArrangement investmentArrangement) {
+        InvestmentData investmentData) {
 
         String productType = portfolioProduct.getProductType().getValue();
         UUID modelPortfolioUuid = Optional.ofNullable(portfolioProduct.getModelPortfolio())
@@ -448,34 +501,68 @@ public class InvestmentPortfolioService {
             .productType(portfolioProduct.getProductType());
 
         return productsApi.createPortfolioProduct(request, List.of(MODEL_PORTFOLIO_ALLOCATION_ASSET), null, null)
+            .retry(2)
+            .retryWhen(reactor.util.retry.Retry.fixedDelay(1, java.time.Duration.ofSeconds(1)))
             .doOnSuccess(created -> {
-                log.info("Successfully created portfolio product: uuid={}, productType={}, modelPortfolio={}",
+                log.info(
+                    "Successfully created portfolio product: uuid={}, productType={}, modelPortfolio={}",
                     created.getUuid(), created.getProductType(), modelPortfolioUuid);
-                investmentArrangement.setInvestmentProductId(created.getUuid());
+                investmentData.addPortfolioProducts(created);
             })
             .doOnError(throwable -> logPortfolioProductCreationError(productType, throwable));
     }
 
-    /**
-     * Logs model portfolio creation errors with detailed information about the failure.
-     *
-     * <p>Provides enhanced error context for WebClient exceptions including
-     * HTTP status code and response body.
-     *
-     * @param name      the name of the model portfolio being created
-     * @param riskLevel the risk level of the model portfolio being created
-     * @param throwable the exception that occurred during creation
-     */
-    private void logModelPortfolioCreationError(String name, Integer riskLevel, Throwable throwable) {
-        if (throwable instanceof WebClientResponseException ex) {
-            log.error("Failed to create model portfolio: name={}, riskLevel={}, status={}, body={}",
-                name, riskLevel, ex.getStatusCode(), ex.getResponseBodyAsString(), ex);
-        } else {
-            log.error("Failed to create model portfolio: name={}, riskLevel={}",
-                name, riskLevel, throwable);
-        }
+    public Mono<Deposit> upsertDeposits(PortfolioList portfolio) {
+        double defaultAmount = 10_000d;
+        return paymentsApi.listDeposits(null, null, null, null, null,
+                null, portfolio.getUuid(), null, null, null)
+            .filter(Objects::nonNull)
+            .map(PaginatedDepositList::getResults)
+            .filter(Objects::nonNull)
+            .filter(Predicate.not(CollectionUtils::isEmpty))
+            .flatMap(deposits -> {
+                Double deposit = deposits.stream().map(Deposit::getAmount).reduce(0d, Double::sum);
+                double additionalDeposit = defaultAmount - deposit;
+                if (additionalDeposit > 0) {
+                    return createDeposit(portfolio, additionalDeposit);
+                }
+                return Mono.just(deposits.getLast());
+            })
+            .switchIfEmpty(createDeposit(portfolio, defaultAmount))
+            .onErrorResume(ex -> Mono.just(new Deposit()
+                    .portfolio(portfolio.getUuid())
+                    .amount(defaultAmount)
+                    .completedAt(portfolio.getActivated().plusDays(2))
+                )
+            );
     }
 
+    @Nonnull
+    private Mono<Deposit> createDeposit(PortfolioList portfolio, double defaultAmount) {
+        return paymentsApi.createDeposit(new DepositRequest()
+                .portfolio(portfolio.getUuid())
+                .provider("mock")
+                .reason(UUID.randomUUID().toString())
+                .status(Status08fEnum.COMPLETED)
+                .transactedAt(portfolio.getActivated().plusDays(1))
+                .completedAt(portfolio.getActivated().plusDays(2))
+                .amount(defaultAmount)
+                .depositType(DepositTypeEnum.TRANSFER)
+                .reason("Initial deposit")
+            )
+            .doOnSuccess(deposit -> log.info("Created deposit {} for portfolio {}",
+                deposit.getUuid(), portfolio.getUuid()))
+            .doOnError(throwable -> {
+                if (throwable instanceof WebClientResponseException ex) {
+                    log.warn(
+                        "Portfolio deposit create failed: uuid={}, status={}, body={}",
+                        portfolio.getUuid(), ex.getStatusCode(), ex.getResponseBodyAsString());
+                } else {
+                    log.warn("Portfolio deposit create failed: uuid={}",
+                        portfolio.getUuid(), throwable);
+                }
+            });
+    }
 
     /**
      * Logs portfolio creation errors with detailed information about the failure.
@@ -514,4 +601,5 @@ public class InvestmentPortfolioService {
             log.error("Failed to create portfolio product: productType={}", productType, throwable);
         }
     }
+
 }
