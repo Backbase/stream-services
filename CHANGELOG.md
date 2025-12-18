@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [8.8.1](https://github.com/Backbase/stream-services/compare/8.8.0...8.8.1)
+### Changed
+  - added partitioning to a batch permission update request
+
 ## [8.8.0](https://github.com/Backbase/stream-services/compare/8.7.0...8.8.0)
 ### Changed
 - Investment service
