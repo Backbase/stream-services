@@ -10,7 +10,7 @@
     <groupId>com.backbase.stream</groupId>
     <artifactId>stream-starter</artifactId>
     <name>Stream :: SDK :: stream-starter</name>
-    <version>8.9.0</version>
+    <version>8.10.0</version>
     <packaging>pom</packaging>
 
     <organization>
