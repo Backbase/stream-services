@@ -1,11 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [8.8.1](https://github.com/Backbase/stream-services/compare/8.8.0...8.8.1)
+## [9.1.0](https://github.com/Backbase/stream-services/compare/9.0.0...9.1.0)
 ### Changed
   - added partitioning to a batch permission update request
-### Changed
+  - fix update data group items request to access-control (use externalDataItemIds instead of internal)
+
 ## [9.0.0](https://github.com/Backbase/stream-services/compare/8.8.0...9.0.0)
+### Changed
 - Upgraded to bb bom 2025.10.2
 
 ## [8.8.0](https://github.com/Backbase/stream-services/compare/8.7.0...8.8.0)
