@@ -60,7 +60,7 @@ jobs:
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
 
       - name: Setup patch version
-        if: "(contains(github.ref, 'master') || contains(github.ref, 'support/')) && contains(github.event.head_commit.message, 'hotfix/')"
+        if: "contains(github.ref, 'master') || contains(github.ref, 'support/')"
         run: |
           NEW_VERSION="$((MAJOR)).$((MINOR)).$((PATCH+1))"
           echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_ENV
