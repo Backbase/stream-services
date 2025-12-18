@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [8.10.1](https://github.com/Backbase/stream-services/compare/8.8.0...8.9.0)
+## [8.10.1](https://github.com/Backbase/stream-services/compare/8.8.0...8.10.1)
 ### Changed
 - Investment service
   - add support for asset categories
