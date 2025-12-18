@@ -1,11 +1,20 @@
 package com.backbase.stream.investment;
 
-import java.util.Map;
+public record ModelAsset(String isin, String market, String currency) implements AssetKey {
 
-public record ModelAsset(String isin, String market, String currency) {
+    @Override
+    public String getIsin() {
+        return isin;
+    }
 
-    public Map<String, Object> getMap() {
-        return Map.of("isin", isin, "market", market, "currency", currency);
+    @Override
+    public String getMarket() {
+        return market;
+    }
+
+    @Override
+    public String getCurrency() {
+        return currency;
     }
 
 }

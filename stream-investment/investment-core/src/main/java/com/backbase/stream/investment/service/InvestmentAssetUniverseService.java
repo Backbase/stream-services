@@ -3,6 +3,9 @@ package com.backbase.stream.investment.service;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
 import com.backbase.investment.api.service.v1.model.Asset;
 import com.backbase.investment.api.service.v1.model.AssetCategory;
+import com.backbase.investment.api.service.v1.model.AssetCategoryRequest;
+import com.backbase.investment.api.service.v1.model.AssetCategoryType;
+import com.backbase.investment.api.service.v1.model.AssetCategoryTypeRequest;
 import com.backbase.investment.api.service.v1.model.Market;
 import com.backbase.investment.api.service.v1.model.MarketRequest;
 import com.backbase.investment.api.service.v1.model.MarketSpecialDay;
@@ -73,7 +76,7 @@ public class InvestmentAssetUniverseService {
      * @return Mono<Asset> representing the existing or newly created asset
      * @throws IOException if an I/O error occurs
      */
-    public Mono<Asset> getOrCreateAsset(final OASAssetRequestDataRequest assetRequest) {
+    public Mono<Asset> getOrCreateAsset(OASAssetRequestDataRequest assetRequest) {
         log.debug("Creating asset: {}", assetRequest);
 
         // Build a unique asset identifier using ISIN, market, and currency
@@ -100,8 +103,7 @@ public class InvestmentAssetUniverseService {
             .switchIfEmpty(customIntegrationApiService.createAsset(assetRequest)
                 .doOnSuccess(createdAsset -> log.info("Created asset with assetIdentifier: {}", assetIdentifier))
                 .doOnError(error -> {
-                    if (error instanceof WebClientResponseException) {
-                        WebClientResponseException w = (WebClientResponseException) error;
+                    if (error instanceof WebClientResponseException w) {
                         log.error("Error creating asset with assetIdentifier: {} : HTTP {} -> {}", assetIdentifier,
                             w.getStatusCode(), w.getResponseBodyAsString());
                     } else {
@@ -181,27 +183,102 @@ public class InvestmentAssetUniverseService {
                 return Flux.fromIterable(assets)
                     .flatMap(asset -> {
                         OASAssetRequestDataRequest assetRequest = assetMapper.map(asset, categoryIdByCode);
-                        return this.getOrCreateAsset(assetRequest)
-                            .doOnSuccess(
-                                createdMarketSpecialDay -> log.info("Created market special day: {}",
-                                    createdMarketSpecialDay))
-                            .doOnError(error -> {
-                                String assetIdentifier = "1";
-//                                asset.getIsin() + "_" + asset.getMarket() + "_" + asset.getCurrency();
-                                if (error instanceof WebClientResponseException) {
-                                    WebClientResponseException w = (WebClientResponseException) error;
-                                    log.error("Error creating market special day : {} : HTTP {} -> {}",
-                                        assetRequest, w.getStatusCode(), w.getResponseBodyAsString());
-                                } else {
-                                    log.error("Failed to create asset with asset identifier {} : {}", 1,
-                                        error.getMessage(),
-                                        error);
-                                }
-
-                            })
-                            .map(assetMapper::map);
+                        return this.getOrCreateAsset(assetRequest).map(assetMapper::map);
                     });
             });
     }
 
+    /**
+     * Gets an existing asset category by its code, or creates it if not found. Handles empty results by creating the
+     * asset category.
+     *
+     * @param assetCategoryRequest the request containing asset category details
+     * @return Mono<AssetCategory> representing the existing or newly created asset category
+     */
+    public Mono<AssetCategory> createAssetCategory(AssetCategoryRequest assetCategoryRequest) {
+        if (assetCategoryRequest == null) {
+            return Mono.empty();
+        }
+        return assetUniverseApi.listAssetCategories(assetCategoryRequest.getCode(), 100,
+                assetCategoryRequest.getName(), 0, assetCategoryRequest.getOrder(), assetCategoryRequest.getType())
+            .flatMap(paginatedAssetCategoryList -> {
+                List<AssetCategory> assetCategoryList = paginatedAssetCategoryList.getResults();
+                if (assetCategoryList == null || assetCategoryList.isEmpty()) {
+                    log.debug("No asset category exists for code: {}", assetCategoryRequest.getCode());
+                    return Mono.empty();
+                } else {
+                    Optional<AssetCategory> matchingCategory = assetCategoryList.stream()
+                        .filter(ac -> assetCategoryRequest.getCode().equals(ac.getCode()))
+                        .findFirst();
+                    if (matchingCategory.isPresent()) {
+                        log.info("Asset category already exists for code: {}", assetCategoryRequest.getCode());
+                        return Mono.just(matchingCategory.get());
+                    } else {
+                        log.debug("No asset category exists for code: {}", assetCategoryRequest.getCode());
+                        return Mono.empty();
+                    }
+                }
+            })
+            .switchIfEmpty(
+                assetUniverseApi.createAssetCategory(assetCategoryRequest)
+                    .doOnSuccess(createdCategory -> log.info("Created asset category : {}", createdCategory))
+                    .doOnError(error -> {
+                        if (error instanceof WebClientResponseException w) {
+                            log.error("Error creating asset category: {} : HTTP {} -> {}",
+                                assetCategoryRequest.getCode(),
+                                w.getStatusCode(), w.getResponseBodyAsString());
+                        } else {
+                            log.error("Error creating asset category: {} : {}", assetCategoryRequest.getCode(),
+                                error.getMessage(), error);
+                        }
+                    })
+            );
+    }
+
+    /**
+     * Gets an existing asset category type by its code, or creates it if not found. Handles 404 or empty results by
+     * creating the asset category type.
+     *
+     * @param assetCategoryTypeRequest the request containing asset category type details
+     * @return Mono<AssetCategoryType> representing the existing or newly created asset category type
+     */
+    public Mono<AssetCategoryType> createAssetCategoryType(AssetCategoryTypeRequest assetCategoryTypeRequest) {
+        if (assetCategoryTypeRequest == null) {
+            return Mono.empty();
+        }
+        return assetUniverseApi.listAssetCategoryTypes(assetCategoryTypeRequest.getCode(), 100,
+                assetCategoryTypeRequest.getName(), 0)
+            .flatMap(paginatedAssetCategoryTypeList -> {
+                List<AssetCategoryType> assetCategoryTypeList = paginatedAssetCategoryTypeList.getResults();
+                if (assetCategoryTypeList == null || assetCategoryTypeList.isEmpty()) {
+                    log.debug("No asset category type exists for code: {}", assetCategoryTypeRequest.getCode());
+                    return Mono.empty();
+                } else {
+                    Optional<AssetCategoryType> matchingType = assetCategoryTypeList.stream()
+                        .filter(act -> assetCategoryTypeRequest.getCode().equals(act.getCode()))
+                        .findFirst();
+                    if (matchingType.isPresent()) {
+                        log.info("Asset category type already exists for code: {}", assetCategoryTypeRequest.getCode());
+                        return Mono.just(matchingType.get());
+                    } else {
+                        log.debug("No asset category type exists for code: {}", assetCategoryTypeRequest.getCode());
+                        return Mono.empty();
+                    }
+                }
+            })
+            .switchIfEmpty(
+                assetUniverseApi.createAssetCategoryType(assetCategoryTypeRequest)
+                    .doOnSuccess(createdType -> log.info("Created asset category type: {}", createdType))
+                    .doOnError(error -> {
+                        if (error instanceof WebClientResponseException w) {
+                            log.error("Error creating asset category type: {} : HTTP {} -> {}",
+                                assetCategoryTypeRequest.getCode(),
+                                w.getStatusCode(), w.getResponseBodyAsString());
+                        } else {
+                            log.error("Error creating asset category type: {} : {}", assetCategoryTypeRequest.getCode(),
+                                error.getMessage(), error);
+                        }
+                    })
+            );
+    }
 }

@@ -1,10 +1,14 @@
 package com.backbase.stream.clients.config;
 
 import com.backbase.investment.api.service.ApiClient;
+import com.backbase.investment.api.service.v1.AllocationsApi;
 import com.backbase.investment.api.service.v1.AssetUniverseApi;
+import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
 import com.backbase.investment.api.service.v1.ClientApi;
 import com.backbase.investment.api.service.v1.FinancialAdviceApi;
+import com.backbase.investment.api.service.v1.InvestmentApi;
 import com.backbase.investment.api.service.v1.InvestmentProductsApi;
+import com.backbase.investment.api.service.v1.PaymentsApi;
 import com.backbase.investment.api.service.v1.PortfolioApi;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +42,8 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
      */
     @Bean
     @ConditionalOnMissingBean
-    public ApiClient investmentApiClient(WebClient interServiceWebClient, ObjectMapper objectMapper, DateFormat dateFormat) {
+    public ApiClient investmentApiClient(WebClient interServiceWebClient, ObjectMapper objectMapper,
+        DateFormat dateFormat) {
         ObjectMapper mapper = objectMapper.copy();
         mapper.setSerializationInclusion(Include.NON_EMPTY);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -81,6 +86,30 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public AssetUniverseApi assetUniverseApi(ApiClient investmentApiClient) {
         return new AssetUniverseApi(investmentApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AllocationsApi allocationsApi(ApiClient investmentApiClient) {
+        return new AllocationsApi(investmentApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public InvestmentApi investmentApi(ApiClient investmentApiClient) {
+        return new InvestmentApi(investmentApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PaymentsApi paymentsApi(ApiClient investmentApiClient) {
+        return new PaymentsApi(investmentApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public AsyncBulkGroupsApi asyncBulkGroupsApi(ApiClient investmentApiClient) {
+        return new AsyncBulkGroupsApi(investmentApiClient);
     }
 
 }
