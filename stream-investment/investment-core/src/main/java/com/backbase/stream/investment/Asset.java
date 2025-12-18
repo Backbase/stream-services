@@ -5,7 +5,6 @@ import com.backbase.investment.api.service.v1.model.AssetTypeEnum;
 import com.backbase.investment.api.service.v1.model.StatusA10Enum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -29,8 +28,24 @@ public record Asset(
     List<String> categories,
     URI logo,
     String externalId,
-    String description
-) {
+    String description,
+    Double defaultPrice
+) implements AssetKey {
+
+    @Override
+    public String getIsin() {
+        return isin;
+    }
+
+    @Override
+    public String getMarket() {
+        return market;
+    }
+
+    @Override
+    public String getCurrency() {
+        return currency;
+    }
 
     /**
      * Creates a record from the generated API model.
@@ -54,7 +69,8 @@ public record Asset(
             categories == null ? List.of() : categories.stream().map(AssetCategory::getCode).toList(),
             asset.getLogo(),
             asset.getExternalId(),
-            asset.getDescription()
+            asset.getDescription(),
+            100d
         );
     }
 

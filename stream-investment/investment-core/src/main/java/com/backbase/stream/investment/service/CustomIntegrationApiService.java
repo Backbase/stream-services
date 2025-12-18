@@ -2,9 +2,11 @@ package com.backbase.stream.investment.service;
 
 import com.backbase.investment.api.service.ApiClient;
 import com.backbase.investment.api.service.v1.model.Asset;
+import com.backbase.investment.api.service.v1.model.OASAllocationCreateRequest;
 import com.backbase.investment.api.service.v1.model.OASAssetRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioRequestDataRequest;
 import com.backbase.investment.api.service.v1.model.OASModelPortfolioResponse;
+import com.backbase.investment.api.service.v1.model.OASPortfolioAllocation;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -157,6 +159,57 @@ public class CustomIntegrationApiService {
         return apiClient.invokeAPI("/integration-api/v2/advice-engines/model-portfolio/model_portfolios/",
                 HttpMethod.POST,
                 pathParams, queryParams, data, headerParams, cookieParams, formParams, localVarAccept,
+                localVarContentType, localVarAuthNames, localVarReturnType)
+            .bodyToMono(localVarReturnType);
+    }
+
+    public Mono<OASPortfolioAllocation> createPortfolioAllocation(String portfolioUuid,
+        OASAllocationCreateRequest oaSAllocationCreateRequest, List<String> expand, String fields, String omit)
+        throws WebClientResponseException {
+        Object postBody = oaSAllocationCreateRequest;
+        // verify the required parameter 'portfolioUuid' is set
+        if (portfolioUuid == null) {
+            throw new WebClientResponseException(
+                "Missing the required parameter 'portfolioUuid' when calling createPortfolioAllocation",
+                HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(), null, null, null);
+        }
+        // verify the required parameter 'oaSAllocationCreateRequest' is set
+        if (oaSAllocationCreateRequest == null) {
+            throw new WebClientResponseException(
+                "Missing the required parameter 'oaSAllocationCreateRequest' when calling createPortfolioAllocation",
+                HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase(), null, null, null);
+        }
+        // create path and map variables
+        final Map<String, Object> pathParams = new HashMap<String, Object>();
+
+        pathParams.put("portfolio_uuid", portfolioUuid);
+
+        final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<String, String>();
+        final HttpHeaders headerParams = new HttpHeaders();
+        final MultiValueMap<String, String> cookieParams = new LinkedMultiValueMap<String, String>();
+        final MultiValueMap<String, Object> formParams = new LinkedMultiValueMap<String, Object>();
+
+        queryParams.putAll(
+            apiClient.parameterToMultiValueMap(ApiClient.CollectionFormat.valueOf("multi".toUpperCase(Locale.ROOT)),
+                "expand", expand));
+        queryParams.putAll(apiClient.parameterToMultiValueMap(null, "fields", fields));
+        queryParams.putAll(apiClient.parameterToMultiValueMap(null, "omit", omit));
+
+        final String[] localVarAccepts = {
+            "application/json"
+        };
+        final List<MediaType> localVarAccept = apiClient.selectHeaderAccept(localVarAccepts);
+        final String[] localVarContentTypes = {
+            "application/json", "application/x-www-form-urlencoded", "multipart/form-data"
+        };
+        final MediaType localVarContentType = apiClient.selectHeaderContentType(localVarContentTypes);
+
+        String[] localVarAuthNames = new String[]{};
+
+        ParameterizedTypeReference<OASPortfolioAllocation> localVarReturnType = new ParameterizedTypeReference<OASPortfolioAllocation>() {
+        };
+        return apiClient.invokeAPI("/integration-api/v2/portfolios/{portfolio_uuid}/allocations/", HttpMethod.POST,
+                pathParams, queryParams, postBody, headerParams, cookieParams, formParams, localVarAccept,
                 localVarContentType, localVarAuthNames, localVarReturnType)
             .bodyToMono(localVarReturnType);
     }
