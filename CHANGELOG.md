@@ -1,13 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [8.9.0](https://github.com/Backbase/stream-services/compare/8.8.0...8.9.0)
 ### Changed
-- Investment service
-  - add support for asset categories
-  - improve allocations setup
-  - add deposit and orders
-  - price ingest async tasks complete check 
+## [9.0.0](https://github.com/Backbase/stream-services/compare/8.8.0...9.0.0)
+- Upgraded to bb bom 2025.10.2
 
 ## [8.8.0](https://github.com/Backbase/stream-services/compare/8.7.0...8.8.0)
 ### Changed
