@@ -42,6 +42,10 @@ import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.Particip
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementParticipants;
 import com.backbase.accesscontrol.serviceagreement.api.service.v1.model.ServiceAgreementUpdateRequest;
 import com.backbase.accesscontrol.usercontext.api.service.v1.UserContextApi;
+import com.backbase.dbs.arrangement.api.service.v3.ArrangementsApi;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementItem;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementSearchesListResponse;
+import com.backbase.dbs.arrangement.api.service.v3.model.ArrangementsSearchesPostRequest;
 import com.backbase.dbs.user.api.service.v2.UserManagementApi;
 import com.backbase.dbs.user.api.service.v2.model.GetUser;
 import com.backbase.stream.configuration.AccessControlConfigurationProperties;
@@ -78,6 +82,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +130,8 @@ public class AccessGroupService {
 
     @NonNull
     private final UserManagementApi usersApi;
+    @NonNull
+    private final ArrangementsApi arrangementsApiService;
     @NonNull
     private final BatchResponseUtils batchResponseUtils;
     @NonNull
@@ -195,7 +202,6 @@ public class AccessGroupService {
     }
 
     /**
-     *
      * @param streamTask
      * @param serviceAgreement
      * @return Service Agreement
@@ -971,65 +977,105 @@ public class AccessGroupService {
     public Mono<BatchProductGroupTask> updateExistingDataGroupsBatch(BatchProductGroupTask task,
         List<DataGroup> existingDataGroups, List<BaseProductGroup> productGroups) {
         List<DataItemBatchUpdate> batchUpdateRequest = new ArrayList<>();
-        final Set<String> affectedArrangements = Stream.concat(
-                productGroups.stream().map(StreamUtils::getInternalProductIds).flatMap(List::stream),
-                productGroups.stream().map(BaseProductGroup::getCustomDataGroupItems).flatMap(List::stream)
-                    .map(CustomDataGroupItem::getInternalId))
-            .collect(Collectors.toSet());
-        if (task.getIngestionMode().isDataGroupsReplaceEnabled()) {
-            // if REPLACE mode, existing products (not sent in the request) also need to be added to the set of affected arrangements.
-            affectedArrangements.addAll(existingDataGroups.stream()
-                .map(DataGroup::getItems)
-                .flatMap(Set::stream)
-                .collect(Collectors.toSet())
-            );
-        }
+        final Map<String, String> affectedArrangementsInternalToExternalIds = Stream.concat(
+                productGroups.stream()
+                    .flatMap(StreamUtils::getAllProducts)
+                    .filter(Objects::nonNull)
+                    .map(p -> new java.util.AbstractMap.SimpleEntry<>(p.getInternalId(), p.getExternalId())),
+                productGroups.stream()
+                    .map(BaseProductGroup::getCustomDataGroupItems)
+                    .filter(Objects::nonNull)
+                    .flatMap(List::stream)
+                    .map(i -> new java.util.AbstractMap.SimpleEntry<>(i.getInternalId(), i.getExternalId())))
+            .filter(e -> e.getKey() != null && e.getValue() != null)
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a));
 
-        existingDataGroups.forEach(dbsDataGroup -> {
-            // get group matching  DBS one.
-            Optional<BaseProductGroup> pg = productGroups.stream()
-                .filter(it -> isEquals(it, dbsDataGroup))
-                .findFirst();
-            Set<String> arrangementsToAdd = new HashSet<>();
-            Set<String> arrangementsToRemove = new HashSet<>();
-            affectedArrangements.forEach(arrangement -> pg.ifPresent(p -> {
-                boolean shouldBeInGroup = StreamUtils.getInternalProductIds(pg.get()).contains(arrangement) ||
-                    pg.get().getCustomDataGroupItems().stream().map(CustomDataGroupItem::getInternalId)
-                        .anyMatch(arrangement::equals);
-                if (!dbsDataGroup.getItems().contains(arrangement) && shouldBeInGroup) {
-                    // ADD.
-                    log.debug("Arrangement item {} to be added to Data Group {}", arrangement, dbsDataGroup.getName());
-                    arrangementsToAdd.add(arrangement);
-                }
-                if (dbsDataGroup.getItems().contains(arrangement) && !shouldBeInGroup) {
-                    // remove.
-                    log.debug("Arrangement item {} to be removed from Data Group {}", arrangement,
-                        dbsDataGroup.getName());
-                    arrangementsToRemove.add(arrangement);
-                }
-            }));
-            if (!CollectionUtils.isEmpty(arrangementsToAdd)) {
-                batchUpdateRequest.add(new DataItemBatchUpdate()
-                    .dataGroupIdentifier(new DataGroupNameIdentifier()
-                        .name(dbsDataGroup.getName())
-                        .dataGroupType(dbsDataGroup.getType())
-                        .externalServiceAgreementId(task.getData().getServiceAgreement().getExternalId()))
-                    .action(Action.ADD)
-                    .dataItems(arrangementsToAdd)
-                );
+        Mono<Map<String, String>> affectedArrangementsMono =
+            // if REPLACE mode, existing products (not sent in the request) also need to be added to the set of affected arrangements.
+            task.getIngestionMode().isDataGroupsReplaceEnabled()
+                ? Mono.defer(() -> {
+                    Set<String> existingInternalIds = existingDataGroups.stream()
+                        .map(DataGroup::getItems)
+                        .filter(Objects::nonNull)
+                        .flatMap(Set::stream)
+                        .collect(Collectors.toSet());
+                    if (existingInternalIds.isEmpty()) {
+                        return Mono.just(affectedArrangementsInternalToExternalIds);
+                    }
+                    // Fetch external ids for existing arrangements (used to call access-control api to add/remove data group items).
+                    return arrangementsApiService.postSearchArrangements(
+                            new ArrangementsSearchesPostRequest()
+                                .arrangementIds(existingInternalIds)
+                                .size(existingInternalIds.size()))
+                        .map(ArrangementSearchesListResponse::getArrangementElements)
+                        .defaultIfEmpty(Collections.emptyList())
+                        .map(items -> {
+                            Map<String, String> merged = new HashMap<>(affectedArrangementsInternalToExternalIds);
+                            items.forEach(item -> {
+                                if (existingInternalIds.contains(item.getId())) {
+                                    merged.putIfAbsent(item.getId(), item.getExternalArrangementId());
+                                }
+                            });
+                            return merged;
+                        });
             }
-            if (!CollectionUtils.isEmpty(arrangementsToRemove)) {
-                batchUpdateRequest.add(new DataItemBatchUpdate()
-                    .dataGroupIdentifier(new DataGroupNameIdentifier()
-                        .name(dbsDataGroup.getName())
-                        .dataGroupType(dbsDataGroup.getType())
-                        .externalServiceAgreementId(task.getData().getServiceAgreement().getExternalId()))
-                    .action(Action.REMOVE)
-                    .dataItems(arrangementsToRemove)
-                );
+            ) : Mono.just(affectedArrangementsInternalToExternalIds);
+
+        return affectedArrangementsMono.flatMap(affectedArrangements -> {
+            existingDataGroups.forEach(dbsDataGroup -> {
+                // get group matching  DBS one.
+                Optional<BaseProductGroup> pg = productGroups.stream()
+                    .filter(it -> isEquals(it, dbsDataGroup))
+                    .findFirst();
+                // it should be external data item ids (both add and remove)
+                Set<String> arrangementsToAdd = new HashSet<>();
+                Set<String> arrangementsToRemove = new HashSet<>();
+                affectedArrangements.forEach((internalId, externalId) -> {
+                    boolean shouldBeInGroup =
+                        StreamUtils.getInternalProductIds(pg.get()).contains(internalId) ||
+                            pg.get().getCustomDataGroupItems().stream()
+                                .map(CustomDataGroupItem::getInternalId)
+                                .anyMatch(internalId::equals);
+                    if (dbsDataGroup.getItems() != null && !dbsDataGroup.getItems().contains(internalId) && shouldBeInGroup) {
+                        // ADD.
+                        log.debug("Arrangement item {} with External Id {} to be added to Data Group {}",
+                            internalId, externalId, dbsDataGroup.getName());
+                        arrangementsToAdd.add(externalId);
+                    }
+                    if (dbsDataGroup.getItems().contains(internalId) && !shouldBeInGroup) {
+                        // REMOVE.
+                        log.debug("Arrangement item {} with External Id {} to be removed from Data Group {}",
+                            internalId, externalId, dbsDataGroup.getName());
+                        arrangementsToRemove.add(externalId);
+                    }
+                });
+                if (!CollectionUtils.isEmpty(arrangementsToAdd)) {
+                    batchUpdateRequest.add(new DataItemBatchUpdate()
+                        .dataGroupIdentifier(new DataGroupNameIdentifier()
+                            .name(dbsDataGroup.getName())
+                            .dataGroupType(dbsDataGroup.getType())
+                            .externalServiceAgreementId(task.getData().getServiceAgreement().getExternalId()))
+                        .action(Action.ADD)
+                        .dataItems(arrangementsToAdd)
+                    );
+                }
+                if (!CollectionUtils.isEmpty(arrangementsToRemove)) {
+                    batchUpdateRequest.add(new DataItemBatchUpdate()
+                        .dataGroupIdentifier(new DataGroupNameIdentifier()
+                            .name(dbsDataGroup.getName())
+                            .dataGroupType(dbsDataGroup.getType())
+                            .externalServiceAgreementId(task.getData().getServiceAgreement().getExternalId()))
+                        .action(Action.REMOVE)
+                        .dataItems(arrangementsToRemove)
+                    );
+                }
+            });
+            if (CollectionUtils.isEmpty(batchUpdateRequest)) {
+                log.debug("All Product Groups are up to date.");
+                task.info(ACCESS_GROUP, "update", "SUCCESS", prettyPrintProductGroupNames(task), null,
+                    "All Product Groups are up to date.");
+                return Mono.just(task);
             }
-        });
-        if (!CollectionUtils.isEmpty(batchUpdateRequest)) {
             return updateDataGroupItems(batchUpdateRequest)
                 .doOnNext(response ->
                     task.info(ACCESS_GROUP, "update", response.getStatus().toString(), response.getResourceId(), null,
@@ -1045,12 +1091,7 @@ public class AccessGroupService {
                 })
                 .collectList()
                 .thenReturn(task);
-        } else {
-            log.debug("All Product Groups are up to date.");
-            task.info(ACCESS_GROUP, "update", "SUCCESS", prettyPrintProductGroupNames(task), null,
-                "All Product Groups are up to date.");
-            return Mono.just(task);
-        }
+        });
     }
 
     @NotNull
