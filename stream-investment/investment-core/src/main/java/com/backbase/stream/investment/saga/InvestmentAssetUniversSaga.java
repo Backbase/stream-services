@@ -10,6 +10,7 @@ import com.backbase.stream.investment.InvestmentAssetsTask;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
+import com.backbase.stream.investment.service.InvestmentNewsContentService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
@@ -59,6 +60,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
 
     private final InvestmentAssetUniverseService assetUniverseService;
     private final InvestmentAssetPriceService investmentAssetPriceService;
+    private final InvestmentNewsContentService investmentNewsContentService;
     private final InvestmentIngestionConfigurationProperties coreConfigurationProperties;
 
     @Override
@@ -71,6 +73,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
         log.info("Starting investment saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
         return createMarkets(streamTask)
+            .flatMap(this::upsertNewsContent)
             .flatMap(this::createMarketSpecialDays)
             .flatMap(this::createAssetCategoryTypes)
             .flatMap(this::createAssetCategories)
@@ -88,6 +91,11 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
                 streamTask.setState(State.FAILED);
             })
             .onErrorResume(throwable -> Mono.just(streamTask));
+    }
+
+    private Mono<InvestmentAssetsTask> upsertNewsContent(InvestmentAssetsTask investmentAssetsTask) {
+        return investmentNewsContentService.upsertContent(investmentAssetsTask.getData().getContents())
+            .map(o -> investmentAssetsTask);
     }
 
     private Mono<InvestmentAssetsTask> upsertPrices(InvestmentAssetsTask investmentTask) {

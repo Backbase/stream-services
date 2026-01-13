@@ -1,15 +1,7 @@
 package com.backbase.stream.clients.config;
 
 import com.backbase.investment.api.service.ApiClient;
-import com.backbase.investment.api.service.v1.AllocationsApi;
-import com.backbase.investment.api.service.v1.AssetUniverseApi;
-import com.backbase.investment.api.service.v1.AsyncBulkGroupsApi;
-import com.backbase.investment.api.service.v1.ClientApi;
-import com.backbase.investment.api.service.v1.FinancialAdviceApi;
-import com.backbase.investment.api.service.v1.InvestmentApi;
-import com.backbase.investment.api.service.v1.InvestmentProductsApi;
-import com.backbase.investment.api.service.v1.PaymentsApi;
-import com.backbase.investment.api.service.v1.PortfolioApi;
+import com.backbase.investment.api.service.v1.*;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -98,6 +90,12 @@ public class InvestmentClientConfig extends CompositeApiClientConfig {
     @ConditionalOnMissingBean
     public InvestmentApi investmentApi(ApiClient investmentApiClient) {
         return new InvestmentApi(investmentApiClient);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ContentApi contentApi(ApiClient investmentApiClient) {
+        return new ContentApi(investmentApiClient);
     }
 
     @Bean

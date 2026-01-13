@@ -20,6 +20,7 @@ import com.backbase.stream.investment.InvestmentAssetsTask;
 import com.backbase.stream.investment.RandomParam;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
+import com.backbase.stream.investment.service.InvestmentNewsContentService;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
@@ -53,6 +54,9 @@ class InvestmentAssetUniversSagaTest {
     private InvestmentAssetPriceService investmentAssetPriceService;
 
     @Mock
+    private InvestmentNewsContentService investmentNewsContentService;
+
+    @Mock
     private InvestmentIngestionConfigurationProperties configurationProperties;
 
     private InvestmentAssetUniversSaga saga;
@@ -63,6 +67,7 @@ class InvestmentAssetUniversSagaTest {
         saga = new InvestmentAssetUniversSaga(
             assetUniverseService,
             investmentAssetPriceService,
+            investmentNewsContentService,
             configurationProperties
         );
         // Enable asset universe by default
