@@ -74,7 +74,7 @@ public class ProductIngestionSaga {
     public static final String REMOVED = "removed";
     private static final String CREATED = "created";
 
-    protected final ProductMapper productMapper = Mappers.getMapper(ProductMapper.class);
+    protected final ProductMapper productMapper;
 
     protected final BusinessFunctionGroupMapper businessFunctionGroupMapper = Mappers.getMapper(BusinessFunctionGroupMapper.class);
 
@@ -84,12 +84,13 @@ public class ProductIngestionSaga {
     protected final ProductIngestionSagaConfigurationProperties configurationProperties;
     protected final LoansSaga loansSaga;
 
-    public ProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties, LoansSaga loansSaga) {
+    public ProductIngestionSaga(ArrangementService arrangementService, AccessGroupService accessGroupService, UserService userService, ProductIngestionSagaConfigurationProperties configurationProperties, LoansSaga loansSaga, ProductMapper productMapper) {
         this.arrangementService = arrangementService;
         this.accessGroupService = accessGroupService;
         this.userService = userService;
         this.configurationProperties = configurationProperties;
         this.loansSaga = loansSaga;
+        this.productMapper = productMapper;
     }
 
     @ContinueSpan(log = "processProducts")

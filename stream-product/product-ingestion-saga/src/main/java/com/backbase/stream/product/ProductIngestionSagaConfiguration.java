@@ -3,9 +3,11 @@ package com.backbase.stream.product;
 import com.backbase.stream.loan.LoansSaga;
 import com.backbase.stream.product.configuration.ProductConfiguration;
 import com.backbase.stream.product.configuration.ProductIngestionSagaConfigurationProperties;
+import com.backbase.stream.product.mapping.ProductMapper;
 import com.backbase.stream.product.service.ArrangementService;
 import com.backbase.stream.service.AccessGroupService;
 import com.backbase.stream.service.UserService;
+import org.mapstruct.factory.Mappers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +29,8 @@ public class ProductIngestionSagaConfiguration {
             accessGroupService,
             userService,
             configurationProperties,
-            loansSaga
+            loansSaga,
+            Mappers.getMapper(ProductMapper.class)
         );
     }
 
@@ -42,7 +45,8 @@ public class ProductIngestionSagaConfiguration {
             accessGroupService,
             userService,
             configurationProperties,
-            loansSaga
+            loansSaga,
+            Mappers.getMapper(ProductMapper.class)
         );
     }
 }
