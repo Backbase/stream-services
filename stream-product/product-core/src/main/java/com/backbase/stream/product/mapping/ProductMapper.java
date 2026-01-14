@@ -33,6 +33,7 @@ import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.TermUnit;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -98,6 +99,7 @@ public interface ProductMapper {
     @Mapping(source = "creditCard", qualifiedByName = "mapCreditCardNumber", target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = "state.externalId")
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
+    @Mapping(source = "validThru", target = "validThru", qualifiedByName = "mapValidThru")
     @InheritConfiguration
     ArrangementPost toPresentation(CreditCard creditCard);
 
@@ -479,4 +481,13 @@ public interface ProductMapper {
     InterestPaymentFrequencyUnit mapTimeUnitV3ToInterestPaymentFrequencyUnit(com.backbase.dbs.arrangement.api.service.v3.model.TimeUnit timeUnit);
 
     com.backbase.dbs.arrangement.api.service.v3.model.TimeUnit mapTimeUnitV2ToTimeUnitV3(TimeUnit timeUnit);
+
+    @Named("mapValidThru")
+    default LocalDate mapValidThru(OffsetDateTime validThru) {
+        if (validThru != null) {
+            return validThru.toLocalDate();
+        } else {
+            return null;
+        }
+    }
 }
