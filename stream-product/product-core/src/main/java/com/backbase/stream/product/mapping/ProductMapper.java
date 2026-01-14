@@ -35,6 +35,7 @@ import com.backbase.stream.legalentity.model.TermUnit;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
@@ -61,6 +62,7 @@ public interface ProductMapper {
     @Mapping(source = "state.externalStateId", target = "state.externalId")
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
+    @Mapping(source = "validThru", target = "validThru", qualifiedByName = "mapValidThru")
     ArrangementPost toPresentation(Product product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
@@ -132,11 +134,13 @@ public interface ProductMapper {
     @Mapping(source = "accountHolder.names", target = "accountHolderNames")
     @Mapping(source = "product.externalId", target = "externalProductId")
     @Mapping(source = "legalEntities", target = "legalEntityIds", qualifiedByName = "mapLegalEntitiesIdsSet")
+    @Mapping(source = "validThru", target = "validThru", qualifiedByName = "mapValidThru")
     ArrangementItem toArrangementItem(ArrangementPost arrangementItemPost);
 
     @Mapping(source = "externalId", target = "externalArrangementId")
     @Mapping(source = "state.externalId", target = "stateId")
     @Mapping(source = "accountHolder.names", target = "accountHolderNames")
+    @Mapping(source = "validThru", target = "validThru", qualifiedByName = "mapValidThru")
     ArrangementPutItem toArrangementItemPut(ArrangementPost arrangementItemPost);
 
     ArrangementItemBase toArrangementItemBase(ArrangementItemPostRequest arrangementItemPost);
@@ -488,6 +492,19 @@ public interface ProductMapper {
             return validThru.toLocalDate();
         } else {
             return null;
+        }
+    }
+
+    @Named("mapValidThru")
+    default OffsetDateTime mapValidThru(String validThru) {
+        if (isBlank(validThru)) {
+            return null;
+        }
+        try {
+            LocalDate localDate = LocalDate.parse(validThru);
+            return localDate.atTime(0,0,0,0).atOffset(OffsetDateTime.now(ZoneId.of("UTC")).getOffset());
+        } catch (java.time.format.DateTimeParseException e) {
+            return OffsetDateTime.parse(validThru, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'Z'"));
         }
     }
 }

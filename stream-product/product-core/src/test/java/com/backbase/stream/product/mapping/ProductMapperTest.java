@@ -100,7 +100,8 @@ class ProductMapperTest {
             .autoRenewalIndicator(true)
             .interestSettlementAccount("ISA")
             .outstandingPrincipalAmount(new BigDecimal("101"))
-            .monthlyInstalmentAmount(new BigDecimal("250"));
+            .monthlyInstalmentAmount(new BigDecimal("250"))
+            .validThru(OffsetDateTime.parse("2050-12-23T11:20:30.000001Z"));
     }
 
     private SavingsAccount buildSavingsAccount() {
