@@ -49,6 +49,11 @@ public class InvestmentServiceConfiguration {
     }
 
     @Bean
+    public AsyncTaskService asyncTaskService(AsyncBulkGroupsApi asyncBulkGroupsApi) {
+        return new AsyncTaskService(asyncBulkGroupsApi);
+    }
+
+    @Bean
     public InvestmentModelPortfolioService investmentModelPortfolioService(FinancialAdviceApi financialAdviceApi,
         CustomIntegrationApiService customIntegrationApiService) {
         return new InvestmentModelPortfolioService(financialAdviceApi, customIntegrationApiService);
