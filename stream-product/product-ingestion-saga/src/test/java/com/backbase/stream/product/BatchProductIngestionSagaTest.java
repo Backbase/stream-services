@@ -52,6 +52,8 @@ class BatchProductIngestionSagaTest {
     LoansSaga loansSaga;
     @Mock
     LoansApi loansApi;
+    @Mock
+    ProductMapper productMapper;
 
     BatchProductGroupTask batchProductGroupTask;
 

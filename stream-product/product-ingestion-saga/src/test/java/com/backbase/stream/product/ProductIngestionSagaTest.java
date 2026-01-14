@@ -44,6 +44,8 @@ class ProductIngestionSagaTest {
   LoansSaga loansSaga;
   @Mock
   LoansApi loansApi;
+  @Mock
+  ProductMapper productMapper;
 
   ProductGroupTask productGroupTask;
 

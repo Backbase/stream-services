@@ -291,6 +291,18 @@ class ProductMapperTest {
     }
 
     @Test
+    void map_AccountArrangementItemBase_To_AccountArrangementItem_when_validThruNull() {
+        Product product = buildProduct();
+        product.setValidThru(null);
+        ArrangementPost source = productMapper.toPresentation(product);
+        ArrangementItem target = productMapper.toArrangementItem(source);
+        Assertions.assertEquals(target.getExternalArrangementId(), source.getExternalId());
+        Assertions.assertNotNull(target.getState());
+        Assertions.assertEquals(target.getState().getState(), source.getState().getExternalId());
+        Assertions.assertEquals(target.getAccountHolderNames(), source.getAccountHolder().getNames());
+    }
+
+    @Test
     void map_Product_To_AccountArrangementItem() {
         Product source = buildProduct();
         ArrangementItem target = productMapper.toPresentationWithWeirdSpellingError(source);

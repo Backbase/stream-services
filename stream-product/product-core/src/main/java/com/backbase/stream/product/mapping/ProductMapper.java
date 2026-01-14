@@ -534,21 +534,13 @@ public interface ProductMapper {
     default LocalDate mapValidThru(OffsetDateTime validThru) {
         if (validThru != null) {
             return validThru.toLocalDate();
-        } else {
-            return null;
         }
+        return null;
     }
 
     @Named("mapValidThru")
     default OffsetDateTime mapValidThru(String validThru) {
-        if (isBlank(validThru)) {
-            return null;
-        }
-        try {
             LocalDate localDate = LocalDate.parse(validThru);
             return localDate.atTime(0,0,0,0).atOffset(OffsetDateTime.now(ZoneId.of("UTC")).getOffset());
-        } catch (java.time.format.DateTimeParseException e) {
-            return OffsetDateTime.parse(validThru, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm'Z'"));
-        }
     }
 }
