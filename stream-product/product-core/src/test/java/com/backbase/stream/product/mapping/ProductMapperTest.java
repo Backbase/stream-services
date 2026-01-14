@@ -107,9 +107,8 @@ class ProductMapperTest {
             .accountHolderAddressLine2("Western Aqua")
             .postCode("500084")
             .town("Hyderabad")
-            .countrySubDivision("Telangana");
-
-
+            .countrySubDivision("Telangana")
+            .validThru(OffsetDateTime.parse("2050-12-23T11:20:30.000001Z"));
     }
 
     private SavingsAccount buildSavingsAccount() {
