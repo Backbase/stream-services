@@ -10,6 +10,7 @@ import com.backbase.loan.inbound.api.service.v2.LoansApi;
 import com.backbase.stream.legalentity.model.ProductGroup;
 import com.backbase.stream.loan.LoansSaga;
 import com.backbase.stream.product.configuration.ProductIngestionSagaConfigurationProperties;
+import com.backbase.stream.product.mapping.ProductMapper;
 import com.backbase.stream.product.service.ArrangementService;
 import com.backbase.stream.product.task.ProductGroupTask;
 import com.backbase.stream.service.AccessGroupService;
@@ -18,9 +19,11 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -41,11 +44,14 @@ class ProductIngestionSagaTest {
   LoansSaga loansSaga;
   @Mock
   LoansApi loansApi;
+  @Mock
+  ProductMapper productMapper;
 
   ProductGroupTask productGroupTask;
 
   @BeforeEach
   void setUp() {
+    ReflectionTestUtils.setField(productIngestionSaga, "productMapper", Mappers.getMapper(ProductMapper.class));
     productGroupTask = mockProductGroupTask();
     when(arrangementService.getArrangementInternalId(anyString()))
         .thenReturn(Mono.just("internal_id"));

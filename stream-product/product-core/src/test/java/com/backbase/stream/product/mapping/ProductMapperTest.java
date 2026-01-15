@@ -100,7 +100,8 @@ class ProductMapperTest {
             .autoRenewalIndicator(true)
             .interestSettlementAccount("ISA")
             .outstandingPrincipalAmount(new BigDecimal("101"))
-            .monthlyInstalmentAmount(new BigDecimal("250"));
+            .monthlyInstalmentAmount(new BigDecimal("250"))
+            .validThru(OffsetDateTime.parse("2050-12-23T11:20:30.000001Z"));
     }
 
     private SavingsAccount buildSavingsAccount() {
@@ -268,6 +269,18 @@ class ProductMapperTest {
     @Test
     void map_AccountArrangementItemBase_To_AccountArrangementItem() {
         ArrangementPost source = productMapper.toPresentation(buildProduct());
+        ArrangementItem target = productMapper.toArrangementItem(source);
+        Assertions.assertEquals(target.getExternalArrangementId(), source.getExternalId());
+        Assertions.assertNotNull(target.getState());
+        Assertions.assertEquals(target.getState().getState(), source.getState().getExternalId());
+        Assertions.assertEquals(target.getAccountHolderNames(), source.getAccountHolder().getNames());
+    }
+
+    @Test
+    void map_AccountArrangementItemBase_To_AccountArrangementItem_when_validThruNull() {
+        Product product = buildProduct();
+        product.setValidThru(null);
+        ArrangementPost source = productMapper.toPresentation(product);
         ArrangementItem target = productMapper.toArrangementItem(source);
         Assertions.assertEquals(target.getExternalArrangementId(), source.getExternalId());
         Assertions.assertNotNull(target.getState());

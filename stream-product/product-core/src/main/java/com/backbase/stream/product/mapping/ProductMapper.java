@@ -33,7 +33,9 @@ import com.backbase.stream.legalentity.model.SavingsAccount;
 import com.backbase.stream.legalentity.model.TermDeposit;
 import com.backbase.stream.legalentity.model.TermUnit;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
@@ -60,6 +62,7 @@ public interface ProductMapper {
     @Mapping(source = "state.externalStateId", target = "state.externalId")
     @Mapping(source = ProductMapperConstants.ACCOUNT_HOLDER_NAME, target = "accountHolder.names")
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
+    @Mapping(source = "validThru", target = "validThru", qualifiedByName = "mapValidThru")
     ArrangementPost toPresentation(Product product);
 
     @Mapping(source = ProductMapperConstants.EXTERNAL_ID, target = ProductMapperConstants.EXTERNAL_ARRANGEMENT_ID)
@@ -98,6 +101,7 @@ public interface ProductMapper {
     @Mapping(source = "creditCard", qualifiedByName = "mapCreditCardNumber", target = ProductMapperConstants.NUMBER)
     @Mapping(source = "state.state", target = "state.externalId")
     @Mapping(source = ProductMapperConstants.EXTERNAL_PARENT_ID, target = "parentExternalId")
+    @Mapping(source = "validThru", target = "validThru", qualifiedByName = "mapValidThru")
     @InheritConfiguration
     ArrangementPost toPresentation(CreditCard creditCard);
 
@@ -130,11 +134,13 @@ public interface ProductMapper {
     @Mapping(source = "accountHolder.names", target = "accountHolderNames")
     @Mapping(source = "product.externalId", target = "externalProductId")
     @Mapping(source = "legalEntities", target = "legalEntityIds", qualifiedByName = "mapLegalEntitiesIdsSet")
+    @Mapping(source = "validThru", target = "validThru", qualifiedByName = "mapValidThru")
     ArrangementItem toArrangementItem(ArrangementPost arrangementItemPost);
 
     @Mapping(source = "externalId", target = "externalArrangementId")
     @Mapping(source = "state.externalId", target = "stateId")
     @Mapping(source = "accountHolder.names", target = "accountHolderNames")
+    @Mapping(source = "validThru", target = "validThru", qualifiedByName = "mapValidThru")
     ArrangementPutItem toArrangementItemPut(ArrangementPost arrangementItemPost);
 
     ArrangementItemBase toArrangementItemBase(ArrangementItemPostRequest arrangementItemPost);
@@ -479,4 +485,18 @@ public interface ProductMapper {
     InterestPaymentFrequencyUnit mapTimeUnitV3ToInterestPaymentFrequencyUnit(com.backbase.dbs.arrangement.api.service.v3.model.TimeUnit timeUnit);
 
     com.backbase.dbs.arrangement.api.service.v3.model.TimeUnit mapTimeUnitV2ToTimeUnitV3(TimeUnit timeUnit);
+
+    @Named("mapValidThru")
+    default LocalDate mapValidThru(OffsetDateTime validThru) {
+        if (validThru != null) {
+            return validThru.toLocalDate();
+        }
+        return null;
+    }
+
+    @Named("mapValidThru")
+    default OffsetDateTime mapValidThru(String validThru) {
+            LocalDate localDate = LocalDate.parse(validThru);
+            return localDate.atTime(0,0,0,0).atOffset(OffsetDateTime.now(ZoneId.of("UTC")).getOffset());
+    }
 }
