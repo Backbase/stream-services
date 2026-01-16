@@ -1030,7 +1030,7 @@ public class AccessGroupService {
                 // it should be external data item ids (both add and remove)
                 Set<String> arrangementsToAdd = new HashSet<>();
                 Set<String> arrangementsToRemove = new HashSet<>();
-                affectedArrangements.forEach((internalId, externalId) -> {
+                affectedArrangements.forEach((internalId, externalId) -> pg.ifPresent(p -> {
                     boolean shouldBeInGroup =
                         StreamUtils.getInternalProductIds(pg.get()).contains(internalId) ||
                             pg.get().getCustomDataGroupItems().stream()
@@ -1048,7 +1048,7 @@ public class AccessGroupService {
                             internalId, externalId, dbsDataGroup.getName());
                         arrangementsToRemove.add(externalId);
                     }
-                });
+                }));
                 if (!CollectionUtils.isEmpty(arrangementsToAdd)) {
                     batchUpdateRequest.add(new DataItemBatchUpdate()
                         .dataGroupIdentifier(new DataGroupNameIdentifier()

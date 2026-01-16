@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [9.3.0](https://github.com/Backbase/stream-services/compare/9.2.0...9.3.0)
+### Changed
+  - fix for NoSuchElementException (No value present) thrown while update data groups
+
 ## [9.1.0](https://github.com/Backbase/stream-services/compare/9.0.0...9.1.0)
 ### Changed
   - added partitioning to a batch permission update request
