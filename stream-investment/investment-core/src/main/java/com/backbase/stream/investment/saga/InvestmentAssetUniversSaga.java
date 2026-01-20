@@ -10,6 +10,7 @@ import com.backbase.stream.investment.InvestmentAssetsTask;
 import com.backbase.stream.investment.service.InvestmentAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentAssetUniverseService;
 import com.backbase.stream.investment.service.InvestmentClientService;
+import com.backbase.stream.investment.service.InvestmentIntradayAssetPriceService;
 import com.backbase.stream.investment.service.InvestmentPortfolioService;
 import com.backbase.stream.worker.StreamTaskExecutor;
 import com.backbase.stream.worker.model.StreamTask;
@@ -59,32 +60,34 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
 
     private final InvestmentAssetUniverseService assetUniverseService;
     private final InvestmentAssetPriceService investmentAssetPriceService;
+    private final InvestmentIntradayAssetPriceService investmentIntradayAssetPriceService;
     private final InvestmentIngestionConfigurationProperties coreConfigurationProperties;
 
     @Override
     public Mono<InvestmentAssetsTask> executeTask(InvestmentAssetsTask streamTask) {
         if (!coreConfigurationProperties.isAssetUniversEnabled()) {
-            log.warn("Skip investment asset univers saga execution: taskId={}, taskName={}",
+            log.warn("Skip investment asset universe saga execution: taskId={}, taskName={}",
                 streamTask.getId(), streamTask.getName());
             return Mono.just(streamTask);
         }
-        log.info("Starting investment saga execution: taskId={}, taskName={}",
+        log.info("Starting investment asset universe saga execution: taskId={}, taskName={}",
             streamTask.getId(), streamTask.getName());
-        return createMarkets(streamTask)
-            .flatMap(this::createMarketSpecialDays)
-            .flatMap(this::createAssetCategoryTypes)
-            .flatMap(this::createAssetCategories)
+        return upsertMarkets(streamTask)
+            .flatMap(this::upsertMarketSpecialDays)
+            .flatMap(this::upsertAssetCategoryTypes)
+            .flatMap(this::upsertAssetCategories)
             .flatMap(this::createAssets)
             .flatMap(this::upsertPrices)
+            .flatMap(this::upsertIntradayPrices)
             .doOnSuccess(completedTask -> log.info(
-                "Successfully completed investment saga: taskId={}, taskName={}, state={}",
+                "Successfully completed investment asset universe saga: taskId={}, taskName={}, state={}",
                 completedTask.getId(), completedTask.getName(), completedTask.getState()))
             .doOnError(throwable -> {
-                log.error("Failed to execute investment saga: taskId={}, taskName={}",
+                log.error("Failed to execute investment asset universe saga: taskId={}, taskName={}",
                     streamTask.getId(), streamTask.getName(), throwable);
                 streamTask.error(INVESTMENT, OP_UPSERT, RESULT_FAILED,
                     streamTask.getName(), streamTask.getId(),
-                    "Investment saga failed: " + throwable.getMessage());
+                    "Investment asset universe saga failed: " + throwable.getMessage());
                 streamTask.setState(State.FAILED);
             })
             .onErrorResume(throwable -> Mono.just(streamTask));
@@ -94,6 +97,11 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
         return investmentAssetPriceService.ingestPrices(investmentTask.getData().getAssets(), investmentTask.getData()
                 .getPriceByAsset())
             .map(investmentTask::setPriceTasks);
+    }
+
+    private Mono<InvestmentAssetsTask> upsertIntradayPrices(InvestmentAssetsTask investmentTask) {
+        return investmentIntradayAssetPriceService.ingestIntradayPrices()
+            .map(investmentTask::setIntradayPriceTasks);
     }
 
     /**
@@ -112,7 +120,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
         return Mono.empty();
     }
 
-    public Mono<InvestmentAssetsTask> createMarkets(InvestmentAssetsTask investmentTask) {
+    public Mono<InvestmentAssetsTask> upsertMarkets(InvestmentAssetsTask investmentTask) {
         InvestmentAssetData investmentData = investmentTask.getData();
         int marketCount = investmentData.getMarkets() != null ? investmentData.getMarkets().size() : 0;
         log.info("Starting investment market creation: taskId={}, marketCount={}",
@@ -161,7 +169,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
     }
 
     /**
-     * Creates or upserts market special days for the investment task.
+     * Upserts market special days for the investment task.
      *
      * <p>This method processes each market special day in the task data by invoking
      * the asset universe service. It updates the task state and logs progress for observability.
@@ -169,7 +177,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
      * @param investmentTask the investment task containing market special day data
      * @return Mono emitting the updated investment task with market special days set
      */
-    public Mono<InvestmentAssetsTask> createMarketSpecialDays(InvestmentAssetsTask investmentTask) {
+    public Mono<InvestmentAssetsTask> upsertMarketSpecialDays(InvestmentAssetsTask investmentTask) {
         InvestmentAssetData investmentData = investmentTask.getData();
         int marketSpecialDayCount =
             investmentData.getMarketSpecialDays() != null ? investmentData.getMarketSpecialDays().size() : 0;
@@ -219,7 +227,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
     }
 
     /**
-     * Creates or upserts asset categories for the investment task.
+     * Upserts asset categories for the investment task.
      *
      * <p>This method processes each asset category in the task data by invoking
      * the asset universe service. It updates the task state and logs progress for observability.
@@ -227,7 +235,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
      * @param investmentTask the investment task containing asset category data
      * @return Mono emitting the updated investment task with asset categories set
      */
-    public Mono<InvestmentAssetsTask> createAssetCategories(InvestmentAssetsTask investmentTask) {
+    public Mono<InvestmentAssetsTask> upsertAssetCategories(InvestmentAssetsTask investmentTask) {
         InvestmentAssetData investmentData = investmentTask.getData();
         int categoryCount =
             investmentData.getAssetCategories() != null ? investmentData.getAssetCategories().size() : 0;
@@ -274,7 +282,7 @@ public class InvestmentAssetUniversSaga implements StreamTaskExecutor<Investment
             });
     }
 
-    public Mono<InvestmentAssetsTask> createAssetCategoryTypes(InvestmentAssetsTask investmentTask) {
+    public Mono<InvestmentAssetsTask> upsertAssetCategoryTypes(InvestmentAssetsTask investmentTask) {
         InvestmentAssetData investmentData = investmentTask.getData();
         int typeCount =
             investmentData.getAssetCategoryTypes() != null ? investmentData.getAssetCategoryTypes().size() : 0;
