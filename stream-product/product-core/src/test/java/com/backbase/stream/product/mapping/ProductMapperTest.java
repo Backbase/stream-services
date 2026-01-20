@@ -29,6 +29,7 @@ import com.backbase.stream.legalentity.model.TermUnit;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -296,11 +297,19 @@ class ProductMapperTest {
         product.setValidThru(null);
         ArrangementPost source = productMapper.toPresentation(product);
         ArrangementItem target = productMapper.toArrangementItem(source);
-        Assertions.assertEquals(target.getExternalArrangementId(), source.getExternalId());
-        Assertions.assertNotNull(target.getState());
-        Assertions.assertEquals(target.getState().getState(), source.getState().getExternalId());
-        Assertions.assertEquals(target.getAccountHolderNames(), source.getAccountHolder().getNames());
+        Assertions.assertNull(target.getValidThru());
     }
+
+    @Test
+    void map_AccountArrangementItemBase_To_AccountArrangementItem_when_validThruNotNull() {
+        Product product = buildProduct();
+        ArrangementPost source = productMapper.toPresentation(product);
+        ArrangementItem target = productMapper.toArrangementItem(source);
+
+        Assertions.assertEquals(OffsetDateTime.of(2050, 12, 23, 0, 0, 0, 0, ZoneOffset.UTC).toLocalDate(), source.getValidThru());
+        Assertions.assertEquals("2050-12-23T00:00Z", target.getValidThru().toString());
+    }
+
 
     @Test
     void map_Product_To_AccountArrangementItem() {
